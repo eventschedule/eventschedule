@@ -106,6 +106,9 @@ class LaunchPartnerBoost implements ShouldQueue
             }
 
             $campaign->pause_pending_at = null;
+            // Running again (a resent rejected or declined boost): its spend is not final until it
+            // ends this time, and the sync's last pass after that must not be skipped.
+            $campaign->spend_final_at = null;
 
             $version = $campaign->approvedVersion();
             if (! $version) {

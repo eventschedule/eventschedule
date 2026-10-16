@@ -7111,6 +7111,7 @@ return [
     'boost_partner_stale_version' => 'Diese Anfrage wurde geändert, nachdem Sie sie geöffnet haben. Prüfen Sie die neue Version.',
     'boost_partner_wrong_state' => 'Das ist bei diesem Boost in seinem jetzigen Zustand nicht möglich.',
     'boost_partner_budget_below_spend' => 'Das Budget darf nicht niedriger sein als das, was der Boost bereits ausgegeben hat.',
+    'boost_partner_image_required' => 'Eine Anzeige braucht ein Bild, und diese Veranstaltung hat keines. Laden Sie ein Bild für die Anzeige hoch.',
     'boost_partner_payment_invalid' => 'Geben Sie die Zahlungsreferenz und den gezahlten Betrag ein.',
     'boost_partner_launch_failed_reason' => 'Facebook konnte die Anzeige nicht erstellen. Bearbeiten Sie sie und senden Sie sie erneut, oder wenden Sie sich an den Support.',
     'boost_partner_rejected_default_reason' => 'Facebook hat diese Anzeige nicht genehmigt.',

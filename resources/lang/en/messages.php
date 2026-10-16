@@ -7183,6 +7183,7 @@ return [
     'boost_partner_stale_version' => 'This request was changed after you opened it. Review the new version.',
     'boost_partner_wrong_state' => 'That cannot be done to this boost as it stands now.',
     'boost_partner_budget_below_spend' => 'The budget cannot be less than what the boost has already spent.',
+    'boost_partner_image_required' => 'An ad needs a picture, and this event has none. Upload one for the ad.',
     'boost_partner_payment_invalid' => 'Enter the payment reference and the amount paid.',
     'boost_partner_launch_failed_reason' => 'Facebook could not create the ad. Edit and send it again, or contact support.',
     'boost_partner_rejected_default_reason' => 'Facebook did not approve this ad.',

@@ -136,6 +136,8 @@ class ApiBoostController extends Controller
                 'reference' => 'required|string|max:255',
                 'amount' => 'required|numeric|min:0|max:1000000',
                 'currency' => 'nullable|string|size:3',
+                // The budget.amount the payment was taken for; refused (409) once it has changed.
+                'budget' => 'nullable|numeric|min:0',
             ]);
         } catch (ValidationException $e) {
             return $this->validationError($e);
@@ -145,6 +147,7 @@ class ApiBoostController extends Controller
             'reference' => $request->reference,
             'amount' => $request->amount,
             'currency' => $request->currency ?: $campaign->currency_code,
+            'budget' => $request->budget,
         ], auth()->user()));
     }
 
@@ -271,7 +274,13 @@ class ApiBoostController extends Controller
         try {
             $campaign = $action();
         } catch (BoostPartnerException $e) {
-            return response()->json(['error' => $e->errorCode === 'stale_version' ? 'Version is not the current one' : 'Not allowed in the boost\'s current state', 'code' => $e->errorCode], $e->status);
+            $error = match ($e->errorCode) {
+                'stale_version' => 'Version is not the current one',
+                'stale_budget' => 'Budget is not the current one',
+                default => 'Not allowed in the boost\'s current state',
+            };
+
+            return response()->json(['error' => $error, 'code' => $e->errorCode], $e->status);
         }
 
         return $this->boost($campaign->fresh(['event', 'role', 'versions']));

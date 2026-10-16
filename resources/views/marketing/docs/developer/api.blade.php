@@ -2288,7 +2288,7 @@
                             <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
                             <code class="doc-inline-code">/api/boosts/{id}/confirm-payment</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Record that the business paid you for this budget: your own <code class="doc-inline-code">reference</code> and <code class="doc-inline-code">amount</code> (and optionally <code class="doc-inline-code">currency</code>), returned on the boost and on the statement. The amount is not compared with the budget. A changed budget clears the confirmation.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Record that the business paid you for this budget: your own <code class="doc-inline-code">reference</code> and <code class="doc-inline-code">amount</code> (and optionally <code class="doc-inline-code">currency</code>), returned on the boost and on the statement. The amount is not compared with the budget. Send the <code class="doc-inline-code">budget.amount</code> you charged for as <code class="doc-inline-code">budget</code>: if the business has changed the budget since, the confirmation is refused with a 409 (<code class="doc-inline-code">stale_budget</code>) rather than launching the new budget on this payment. A changed budget clears the confirmation.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">DELETE /api/boosts/{id}/confirm-payment</code> withdraws the confirmation before the boost launches, for a refund or a dispute.</p>
                     </div>
                     <div class="api-endpoint-code">
@@ -2297,7 +2297,7 @@
                             <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/boosts/b8Kq2Zx/confirm-payment"</span> \
      -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
      -H <span class="code-string">"Content-Type: application/json"</span> \
-     -d <span class="code-string">'{"reference": "pi_3Qx", "amount": "60.00", "currency": "USD"}'</span></code></pre>
+     -d <span class="code-string">'{"reference": "pi_3Qx", "amount": "60.00", "currency": "USD", "budget": "50.00"}'</span></code></pre>
                         </div>
                     </div>
                 </div>

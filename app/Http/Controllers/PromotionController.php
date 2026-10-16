@@ -487,25 +487,13 @@ class PromotionController extends Controller
      */
     protected function abandonIntent(Request $request): void
     {
-        if (! $request->payment_intent_id || ! config('app.hosted') || config('app.is_testing')) {
-            return;
-        }
-
-        try {
-            $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));
-            $intent = $stripe->paymentIntents->retrieve($request->payment_intent_id);
-
-            if ($intent->status === 'succeeded') {
-                $stripe->refunds->create(
-                    ['payment_intent' => $intent->id, 'metadata' => ['reason' => 'promotion_not_created']],
-                    ['idempotency_key' => 'promo_abandon_'.$intent->id],
-                );
-            } elseif (in_array($intent->status, ['requires_payment_method', 'requires_confirmation', 'requires_action', 'processing'])) {
-                $stripe->paymentIntents->cancel($intent->id);
-            }
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        app(\App\Services\BoostBillingService::class)->abandonPaymentIntent(
+            $request->payment_intent_id,
+            'promotion_not_created',
+            'promo_abandon_',
+            ($eventId = UrlUtils::decodeId($request->event_id)) ? (int) $eventId : null,
+            'promo',
+        );
     }
 
     /**

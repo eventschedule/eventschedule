@@ -7116,6 +7116,7 @@ return [
     'boost_partner_stale_version' => 'Cette demande a été modifiée après son ouverture. Vérifiez la nouvelle version.',
     'boost_partner_wrong_state' => 'Cette action n\'est pas possible sur ce boost dans son état actuel.',
     'boost_partner_budget_below_spend' => 'Le budget ne peut pas être inférieur à ce que le boost a déjà dépensé.',
+    'boost_partner_image_required' => 'Une publicité a besoin d\'une image, et cet événement n\'en a pas. Ajoutez-en une pour la publicité.',
     'boost_partner_payment_invalid' => 'Saisissez la référence du paiement et le montant payé.',
     'boost_partner_launch_failed_reason' => 'Facebook n\'a pas pu créer la publicité. Modifiez-la et envoyez-la à nouveau, ou contactez le support.',
     'boost_partner_rejected_default_reason' => 'Facebook n\'a pas approuvé cette publicité.',

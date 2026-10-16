@@ -51,7 +51,8 @@ class BoostPartnerLifecycleTest extends TestCase
         $this->role = $this->createRole($this->partnerUser, 'venue');
         $this->business = User::factory()->create();
         $this->role->users()->attach($this->business->id, ['level' => 'admin']);
-        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        // A flyer: an ad with no picture is refused when it is asked for (Meta would refuse it at launch).
+        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'flyer_image_url' => 'demo_flyer_dj.jpg']);
 
         $this->partner = $this->makePartner($this->partnerUser);
     }
@@ -421,7 +422,7 @@ class BoostPartnerLifecycleTest extends TestCase
         $live = $this->launch($this->pay($this->approve($this->submit())));
         $this->partner->forceFill(['needs_attention_at' => now()])->save();
 
-        $otherEvent = $this->createEvent($this->role, ['starts_at' => now()->addDays(12)->format('Y-m-d H:i:s')]);
+        $otherEvent = $this->createEvent($this->role, ['starts_at' => now()->addDays(12)->format('Y-m-d H:i:s'), 'flyer_image_url' => 'demo_flyer_dj.jpg']);
         $this->event = $otherEvent;
         $waiting = $this->pay($this->approve($this->submit()));
         $this->assertSame('ready', $waiting->status);
@@ -436,7 +437,7 @@ class BoostPartnerLifecycleTest extends TestCase
     public function test_one_campaigns_success_does_not_clear_anothers_access_error(): void
     {
         $this->launch($this->pay($this->approve($this->submit())));
-        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(12)->format('Y-m-d H:i:s')]);
+        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(12)->format('Y-m-d H:i:s'), 'flyer_image_url' => 'demo_flyer_dj.jpg']);
         $this->launch($this->pay($this->approve($this->submit())));
 
         // The first campaign's first call fails; the second's calls all answer.
@@ -574,7 +575,7 @@ class BoostPartnerLifecycleTest extends TestCase
     public function test_disconnect_stops_running_boosts_and_keeps_waiting_requests(): void
     {
         $live = $this->launch($this->pay($this->approve($this->submit())));
-        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(12)->format('Y-m-d H:i:s')]);
+        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(12)->format('Y-m-d H:i:s'), 'flyer_image_url' => 'demo_flyer_dj.jpg']);
         $waiting = $this->submit();
 
         $this->actingAs($this->partnerUser)->post(route('boost.partner.settings.disconnect'))->assertRedirect();
@@ -582,5 +583,151 @@ class BoostPartnerLifecycleTest extends TestCase
         $this->assertSame('stopped', $live->fresh()->status);
         $this->assertSame('pending_approval', $waiting->fresh()->status);
         $this->assertNull($this->partner->fresh()->ad_account_id);
+    }
+
+    // ------------------------------------------------------- what the week's review found
+
+    public function test_a_payment_for_a_budget_changed_since_is_refused(): void
+    {
+        $c = $this->approve($this->submit());
+
+        // The partner charged for the 50 it read; the Business asked for 500 a minute later.
+        app(BoostPartnerService::class)->edit($c, $this->business, ['budget' => 500]);
+
+        try {
+            app(BoostPartnerService::class)->confirmPayment($c, ['reference' => 'pi_1', 'amount' => '60.00', 'currency' => 'USD', 'budget' => '50.00'], $this->partnerUser);
+            $this->fail('a payment taken for 50 was recorded against 500');
+        } catch (BoostPartnerException $e) {
+            $this->assertSame('stale_budget', $e->errorCode);
+        }
+
+        $this->assertFalse($c->fresh()->isPaidCurrent());
+        Queue::assertNotPushed(LaunchPartnerBoost::class);
+
+        // Paid for the budget as it stands, it goes.
+        app(BoostPartnerService::class)->confirmPayment($c, ['reference' => 'pi_2', 'amount' => '600.00', 'currency' => 'USD', 'budget' => '500.00'], $this->partnerUser);
+        Queue::assertPushed(LaunchPartnerBoost::class, 1);
+    }
+
+    public function test_approving_with_a_payment_for_a_changed_budget_does_neither(): void
+    {
+        $c = $this->submit();
+        // A budget edit does not raise the version, so the approval alone cannot see it.
+        app(BoostPartnerService::class)->edit($c, $this->business, ['budget' => 500]);
+        $this->assertSame(1, (int) $c->fresh()->version);
+
+        try {
+            app(BoostPartnerService::class)->approve($c, 1, null, $this->partnerUser, ['reference' => 'pi_1', 'amount' => '60.00', 'currency' => 'USD', 'budget' => '50.00']);
+            $this->fail('approved and paid against a budget that was not the one paid for');
+        } catch (BoostPartnerException $e) {
+            $this->assertSame('stale_budget', $e->errorCode);
+        }
+
+        $this->assertNull($c->fresh()->approved_version);
+        $this->assertFalse($c->fresh()->isPaidCurrent());
+    }
+
+    public function test_a_boost_paused_for_an_edit_cannot_go_below_what_it_spent(): void
+    {
+        $c = $this->launch($this->pay($this->approve($this->submit())));
+        $c->forceFill(['actual_spend' => 30])->save();
+
+        app(BoostPartnerService::class)->edit($c, $this->business, ['headline' => 'Saturday Jazz']);
+        $this->assertSame('pending_approval', $c->fresh()->status);
+
+        // Resumed, Meta would refuse a lifetime budget under what was spent, after approval and payment.
+        $this->expectException(BoostPartnerException::class);
+        $this->expectExceptionMessage(__('messages.boost_partner_budget_below_spend'));
+        app(BoostPartnerService::class)->edit($c->fresh(), $this->business, ['budget' => 20]);
+    }
+
+    public function test_a_boost_declined_after_it_ran_is_still_read_to_its_end(): void
+    {
+        $c = $this->launch($this->pay($this->approve($this->submit())));
+        app(BoostPartnerService::class)->edit($c, $this->business, ['headline' => 'Saturday Jazz']);
+        app(BoostPartnerService::class)->decline($c, 'Not this one', $this->partnerUser);
+        $this->assertSame('declined', $c->fresh()->status);
+
+        MetaAdsServiceFake::$dailySpend = [now('America/New_York')->format('Y-m-d') => 7.25];
+        app(BoostPartnerSync::class)->run();
+
+        $this->assertSame(1, $c->fresh()->spendDays()->count(), 'what it spent before it was paused is on the statement');
+        $this->assertSame(7.25, (float) $c->fresh()->actual_spend);
+    }
+
+    public function test_a_boost_paused_for_an_edit_has_its_spend_read_and_is_never_final(): void
+    {
+        $c = $this->launch($this->pay($this->approve($this->submit())));
+        app(BoostPartnerService::class)->edit($c, $this->business, ['headline' => 'Saturday Jazz']);
+        $this->assertSame('pending_approval', $c->fresh()->status);
+
+        MetaAdsServiceFake::$dailySpend = [now('America/New_York')->format('Y-m-d') => 9.5];
+        app(BoostPartnerSync::class)->run();
+
+        // What it spent before the pause is what the list and the spend floor read.
+        $this->assertSame(9.5, (float) $c->fresh()->actual_spend);
+
+        // Waiting on approval past its end date and with its spend settled: an ended boost would
+        // be final now, and this one may still be given a new end and run again.
+        $c->fresh()->forceFill(['scheduled_end' => now()->subDays(30)])->saveQuietly();
+        app(BoostPartnerSync::class)->run();
+        $this->assertNull($c->fresh()->spend_final_at, 'it may run again');
+    }
+
+    public function test_a_resent_boost_is_not_final_until_it_ends_again(): void
+    {
+        $c = $this->launch($this->pay($this->approve($this->submit())));
+        $c->forceFill(['status' => 'rejected', 'spend_final_at' => now()])->save();
+
+        app(BoostPartnerService::class)->edit($c, $this->business, ['primary_text' => 'Live trio tonight']);
+        $this->approve($c);
+        $c = $this->launch($c);
+
+        $this->assertNotNull($c->meta_campaign_id);
+        $this->assertNull($c->spend_final_at, 'its last read after it stops again must not be skipped');
+    }
+
+    public function test_a_request_with_no_picture_is_refused_when_it_is_made(): void
+    {
+        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(12)->format('Y-m-d H:i:s')]);
+
+        try {
+            $this->submit();
+            $this->fail('a request Meta would refuse at launch was taken');
+        } catch (BoostPartnerException $e) {
+            $this->assertSame(__('messages.boost_partner_image_required'), $e->getMessage());
+        }
+
+        $this->assertSame(0, BoostCampaign::where('event_id', $this->event->id)->count());
+    }
+
+    public function test_an_edit_to_a_missing_picture_is_refused_before_meta_is_asked(): void
+    {
+        $c = $this->launch($this->pay($this->approve($this->submit())));
+        $c->forceFill(['status' => 'active'])->save();
+        Event::whereKey($this->event->id)->update(['flyer_image_url' => null]);
+        MetaAdsServiceFake::$calls = [];
+
+        try {
+            app(BoostPartnerService::class)->edit($c, $this->business, ['use_event_image' => true]);
+            $this->fail('an ad with no picture was sent back for approval');
+        } catch (BoostPartnerException) {
+        }
+
+        $this->assertSame([], MetaAdsServiceFake::$calls, 'the running ad was not paused for an edit that was refused');
+        $this->assertSame('active', $c->fresh()->status);
+    }
+
+    public function test_a_boost_stopped_days_ago_is_not_read_over_a_backwards_range(): void
+    {
+        $c = $this->launch($this->pay($this->approve($this->submit())));
+        $c->forceFill(['status' => 'stopped', 'launched_at' => now()->subDays(12), 'stopped_at' => now()->subDays(8)])->save();
+        MetaAdsServiceFake::$calls = [];
+
+        app(BoostPartnerSync::class)->run();
+
+        // The last three days begin after the two the read covers past its stop: Meta refuses that.
+        $this->assertNotContains('dailySpend', collect(MetaAdsServiceFake::$calls)->pluck('method')->all());
+        $this->assertNotNull($c->fresh()->meta_synced_at, 'its totals are still written');
     }
 }

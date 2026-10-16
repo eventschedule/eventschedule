@@ -203,15 +203,18 @@ class AppointmentService
         $start = Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $slotUtc, 'UTC');
         // Read before the transaction, so nothing is read between its locks.
         $hostId = $type->host_user_id ? (int) $type->host_user_id : null;
+        // The person whose time this is: the host, or for a type with none the schedule's owner,
+        // who may also host on another schedule (busyIntervals()).
+        $personId = $hostId ?: ((int) $role->user_id ?: null);
 
-        return DB::transaction(function () use ($type, $role, $data, $user, $slotUtc, $tz, $start, $hostId) {
-            // A host's time spans schedules, so two schedules booking the same person must queue
+        return DB::transaction(function () use ($type, $role, $data, $user, $slotUtc, $tz, $start, $hostId, $personId) {
+            // A person's time spans schedules, so two schedules booking the same person must queue
             // on that person as well. The user row is taken FIRST and the schedule second: the
             // order User::claimRolesByPhone() takes them in (users, then roles; see User.php and
             // ScheduleTransferService), so a booking and a claim never wait on each other in a
             // cycle. reschedule() takes them in the same order.
-            if ($hostId) {
-                User::whereKey($hostId)->lockForUpdate()->first();
+            if ($personId) {
+                User::whereKey($personId)->lockForUpdate()->first();
             }
 
             // Serialize every booking on this schedule: overlap conflicts span types, so no unique
@@ -392,8 +395,13 @@ class AppointmentService
             // reschedule mutates it, and every transition that races us locks the Sale (guest
             // cancel, the Stripe webhook, ReleaseTickets, the reminder claim). User -> Role -> Sale
             // follows the codebase's users-before-roles order, and nothing takes Sale -> Role.
-            if ($stampedHostId) {
-                User::whereKey($stampedHostId)->lockForUpdate()->first();
+            // The owner too: a move checked against the schedule's own time (no host, or one who
+            // has left) reads the owner's bookings elsewhere. In id order, so two moves never wait
+            // on each other in a cycle.
+            $people = array_values(array_unique(array_filter([$stampedHostId, (int) $role->user_id ?: null])));
+            sort($people);
+            foreach ($people as $personId) {
+                User::whereKey($personId)->lockForUpdate()->first();
             }
             Role::whereKey($role->id)->lockForUpdate()->first();
             $lockedSale = Sale::whereKey($sale->id)->lockForUpdate()->first();
@@ -705,7 +713,8 @@ class AppointmentService
      * and cancelled ones not) and their days away on this schedule (role_user.dates_unavailable,
      * whole days in the schedule's zone). The schedule's own events and anything synced in from a
      * calendar do not block a host's time: they are the schedule's, not the host's. The one
-     * exception is a host who owns this schedule, whose unhosted bookings here are theirs too.
+     * exception is a host who owns schedules, here or anywhere: what those schedules book as
+     * their own time (with nobody, or with a host who has since left) is the owner's too.
      *
      * @return array<int,array{0:Carbon,1:Carbon}>
      */
@@ -714,53 +723,36 @@ class AppointmentService
         $padStart = $startDay->copy()->setTimezone('UTC')->subDay();
         $padEnd = $endDay->copy()->endOfDay()->setTimezone('UTC')->addDay();
 
-        $hostOwnsThisSchedule = (int) $role->user_id === $hostId;
+        // The schedules the host owns: this one by the rule the rest of this class uses, and every
+        // other by Role::scopeOwned(), so an owner who hosts on somebody else's schedule is not
+        // booked there over a booking on their own (busyIntervals() is the other direction).
+        $ownedIds = Role::query()->owned()->where('roles.user_id', $hostId)->pluck('roles.id')
+            ->map(fn ($id) => (int) $id)
+            ->when((int) $role->user_id === $hostId, fn ($ids) => $ids->push((int) $role->id))
+            ->unique()->values()->all();
 
-        $bookings = Event::query()
-            ->whereNotNull('appointment_type_id')
-            ->where('is_cancelled', false)
-            ->where(function ($q) use ($hostId, $hostOwnsThisSchedule, $role) {
-                // The host's own bookings, on every schedule they STILL run. A booking left on a
-                // schedule they have left is that schedule's to move (releaseHost()), not their
-                // time any more.
-                $q->where(fn ($mine) => $mine->where('appointment_host_user_id', $hostId)
-                    ->whereExists(fn ($member) => $member->selectRaw('1')
-                        ->from('role_user')
-                        ->whereColumn('role_user.role_id', 'events.creator_role_id')
-                        ->where('role_user.user_id', $hostId)
-                        ->whereIn('role_user.level', AppointmentHostService::LEVELS)));
+        $intervals = $this->bookingIntervals(function ($q) use ($hostId, $ownedIds) {
+            // The host's own bookings, on every schedule they STILL run. A booking left on a
+            // schedule they have left is that schedule's to move (releaseHost()), not their time
+            // any more.
+            $q->where(fn ($mine) => $mine->where('appointment_host_user_id', $hostId)
+                ->whereExists(fn ($member) => $member->selectRaw('1')
+                    ->from('role_user')
+                    ->whereColumn('role_user.role_id', 'events.creator_role_id')
+                    ->where('role_user.user_id', $hostId)
+                    ->whereIn('role_user.level', AppointmentHostService::LEVELS)));
 
-                // A host who owns this schedule: its bookings made with nobody are theirs too, so
-                // the owner is not booked twice at once (busyIntervals() is the other direction).
-                if ($hostOwnsThisSchedule) {
-                    $q->orWhere(fn ($own) => $own->whereNull('appointment_host_user_id')
-                        ->where('creator_role_id', $role->id));
-                }
-            })
-            // Live on the schedule that owns it: accepted or still waiting for an answer.
-            ->whereExists(fn ($q) => $q->selectRaw('1')
-                ->from('event_role')
-                ->whereColumn('event_role.event_id', 'events.id')
-                ->whereColumn('event_role.role_id', 'events.creator_role_id')
-                ->where(fn ($q2) => $q2->whereNull('event_role.is_accepted')->orWhere('event_role.is_accepted', true)))
-            ->when($excludeEventId, fn ($q) => $q->where('events.id', '!=', $excludeEventId))
-            ->whereNotNull('starts_at')
-            ->where('starts_at', '<=', $padEnd->format('Y-m-d H:i:s'))
-            ->whereRaw('DATE_ADD(starts_at, INTERVAL GREATEST(COALESCE(duration, 0), 2) HOUR) >= ?', [$padStart->format('Y-m-d H:i:s')])
-            ->with('appointmentType')
-            ->get();
-
-        $intervals = [];
-
-        foreach ($bookings as $e) {
-            if (strlen((string) $e->starts_at) === 10) {
-                continue;
+            // A host who owns schedules: what each books as its own time is theirs too, as
+            // busyIntervals() counts it there (made with nobody, or with a host who has left).
+            if ($ownedIds) {
+                $q->orWhere(fn ($own) => $own->whereIn('creator_role_id', $ownedIds)
+                    ->where(fn ($theirs) => $theirs->whereNull('appointment_host_user_id')
+                        ->orWhereNotExists(fn ($still) => $still->selectRaw('1')->from('role_user')
+                            ->whereColumn('role_user.role_id', 'events.creator_role_id')
+                            ->whereColumn('role_user.user_id', 'events.appointment_host_user_id')
+                            ->whereIn('role_user.level', AppointmentHostService::LEVELS))));
             }
-            $s = Carbon::createFromFormat('Y-m-d H:i:s', $e->starts_at, 'UTC');
-            $len = $e->duration > 0 ? $e->durationInMinutes() : self::DEFAULT_BUSY_MINUTES;
-            [$b0, $b1] = $this->eventBuffers($e);
-            $intervals[] = [$s->copy()->subMinutes($b0), $s->copy()->addMinutes($len + $b1)];
-        }
+        }, $padStart, $padEnd, $excludeEventId);
 
         // Days away, set by the host on this schedule's Availability tab. A JSON list of Y-m-d.
         $away = \App\Models\RoleUser::where('role_id', $role->id)
@@ -791,6 +783,48 @@ class AppointmentService
     }
 
     /**
+     * The intervals of the live bookings $whose picks, across the padded UTC window: not
+     * cancelled, and on the schedule that owns each accepted or still waiting for an answer. Each
+     * is padded by its own type's buffers.
+     *
+     * @param  \Closure(\Illuminate\Database\Eloquent\Builder): void  $whose
+     * @return array<int,array{0:Carbon,1:Carbon}>
+     */
+    protected function bookingIntervals(\Closure $whose, Carbon $padStart, Carbon $padEnd, ?int $excludeEventId): array
+    {
+        $bookings = Event::query()
+            ->whereNotNull('appointment_type_id')
+            ->where('is_cancelled', false)
+            ->where($whose)
+            // Live on the schedule that owns it: accepted or still waiting for an answer.
+            ->whereExists(fn ($q) => $q->selectRaw('1')
+                ->from('event_role')
+                ->whereColumn('event_role.event_id', 'events.id')
+                ->whereColumn('event_role.role_id', 'events.creator_role_id')
+                ->where(fn ($q2) => $q2->whereNull('event_role.is_accepted')->orWhere('event_role.is_accepted', true)))
+            ->when($excludeEventId, fn ($q) => $q->where('events.id', '!=', $excludeEventId))
+            ->whereNotNull('starts_at')
+            ->where('starts_at', '<=', $padEnd->format('Y-m-d H:i:s'))
+            ->whereRaw('DATE_ADD(starts_at, INTERVAL GREATEST(COALESCE(duration, 0), 2) HOUR) >= ?', [$padStart->format('Y-m-d H:i:s')])
+            ->with('appointmentType')
+            ->get();
+
+        $intervals = [];
+
+        foreach ($bookings as $e) {
+            if (strlen((string) $e->starts_at) === 10) {
+                continue;
+            }
+            $s = Carbon::createFromFormat('Y-m-d H:i:s', $e->starts_at, 'UTC');
+            $len = $e->duration > 0 ? $e->durationInMinutes() : self::DEFAULT_BUSY_MINUTES;
+            [$b0, $b1] = $this->eventBuffers($e);
+            $intervals[] = [$s->copy()->subMinutes($b0), $s->copy()->addMinutes($len + $b1)];
+        }
+
+        return $intervals;
+    }
+
+    /**
      * Busy intervals (as [startUtc, endUtc] pairs) held by the schedule's events across the window.
      * Busy = pivot is_accepted TRUE or NULL (pending holds time; declined does not) and not
      * cancelled. Inbound-synced external events are ordinary events, so they are covered here too.
@@ -798,7 +832,8 @@ class AppointmentService
      * A booking made with a team member is left out: it is that person's time, not the schedule's
      * (hostBusyIntervals()), so an unhosted type on the same schedule may book beside it. Except
      * one made with the schedule's OWNER, whose hosted bookings here and unhosted ones are the
-     * same person's time.
+     * same person's time; and so are the bookings made with the owner as the host of a type on
+     * another schedule.
      *
      * @return array<int,array{0:Carbon,1:Carbon}>
      */
@@ -867,6 +902,20 @@ class AppointmentService
                     $intervals[] = [$s->copy()->subMinutes($b0), $s->copy()->addMinutes($len + $b1)];
                 }
             }
+        }
+
+        // The owner hosting a type on another schedule they still run: those bookings are with the
+        // same person as this schedule's own (hostBusyIntervals() is the other direction).
+        if ($ownerId = (int) $role->user_id) {
+            array_push($intervals, ...$this->bookingIntervals(fn ($q) => $q
+                ->where('appointment_host_user_id', $ownerId)
+                ->where('creator_role_id', '!=', $role->id)
+                ->whereExists(fn ($member) => $member->selectRaw('1')
+                    ->from('role_user')
+                    ->whereColumn('role_user.role_id', 'events.creator_role_id')
+                    ->where('role_user.user_id', $ownerId)
+                    ->whereIn('role_user.level', AppointmentHostService::LEVELS)),
+                $padStart, $padEnd, $excludeEventId));
         }
 
         return $intervals;

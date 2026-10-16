@@ -12,6 +12,64 @@ use Illuminate\Support\Facades\Log;
 class BoostBillingService
 {
     /**
+     * Give back a payment made for a campaign that is not going to be created: refunded when the
+     * card was charged, cancelled while it is still on its way. The boost and promotion forms
+     * confirm the card in the browser before the request that creates the campaign, so every
+     * refusal after that comes through here, or the money is kept for nothing. Hosted only and
+     * never in tests (no Stripe); a failure is reported, never thrown, because the refusal it goes
+     * with still has to reach the advertiser.
+     *
+     * The id comes from the request, so it proves nothing about whose payment it is: only an
+     * intent made by that form ($type) for that event (intentIsFor()) and held by no campaign is
+     * touched. Anything else on the platform account (another advertiser's paid boost, a boost
+     * partner's monthly fee) would otherwise be refunded by naming its id in a refused request.
+     */
+    public function abandonPaymentIntent(?string $intentId, string $reason, string $keyPrefix, ?int $eventId, string $type): void
+    {
+        if (! $intentId || ! $eventId || ! config('app.hosted') || config('app.is_testing')) {
+            return;
+        }
+
+        if (BoostCampaign::where('stripe_payment_intent_id', $intentId)->exists()) {
+            return;
+        }
+
+        try {
+            $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));
+            $intent = $stripe->paymentIntents->retrieve($intentId);
+
+            if (! self::intentIsFor((array) ($intent->metadata?->toArray() ?? []), $type, $eventId)) {
+                return;
+            }
+
+            if ($intent->status === 'succeeded') {
+                $stripe->refunds->create(
+                    ['payment_intent' => $intent->id, 'metadata' => ['reason' => $reason]],
+                    ['idempotency_key' => $keyPrefix.$intent->id],
+                );
+            } elseif (in_array($intent->status, ['requires_payment_method', 'requires_confirmation', 'requires_action', 'processing'])) {
+                $stripe->paymentIntents->cancel($intent->id);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Whether a PaymentIntent's metadata says the boost form ('boost') or the promotion form
+     * ('promo') made it for this event. Both forms write type and event_id; an intent without
+     * them was made by something else and is never given back from a form's refusal.
+     *
+     * @param  array<string, mixed>  $metadata
+     */
+    public static function intentIsFor(array $metadata, string $type, int $eventId): bool
+    {
+        return ($metadata['type'] ?? null) === $type
+            && isset($metadata['event_id'])
+            && (string) $metadata['event_id'] === (string) $eventId;
+    }
+
+    /**
      * Issue the right refund when a campaign is cancelled or its event/schedule is deleted.
      *
      * This exists because the choice between a full and a partial refund was written out by

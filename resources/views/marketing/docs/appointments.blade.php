@@ -163,7 +163,7 @@
             <li>The <a href="#weekly-hours" class="doc-link">weekly hours</a> become the host's hours, and the card's heading says so ("Sam's hours").</li>
             <li>The host's other bookings block these times, on this schedule and on any other schedule where they host a type. Their days away block whole days: each team member marks those on the schedule's <a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> tab.</li>
             <li>This schedule's own events, and events synced in from a calendar, do not block a host's times. They still block the types that have no host. A booking on a schedule the host has since left no longer counts as their time.</li>
-            <li>When the host is the schedule's owner, the bookings of its types with no host are the owner's time too, and the other way round, so the owner is never booked twice at once.</li>
+            <li>The bookings of a schedule's types with no host are its owner's time. When the owner hosts a type, on that schedule or on someone else's, those bookings block it, and the bookings made with the owner block the schedule's types with no host.</li>
             <li>A type with no host is unchanged, except that bookings made with a host no longer block it, so two people on the same schedule can be booked at the same time.</li>
             <li>The host gets the booking emails, as well as everyone whose <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">notification settings</a> ask for them.</li>
             <li>Guests see the name: "with Sam" on the booking page, the confirmation, the emails and the calendar invite. Never the host's email address.</li>

@@ -7110,6 +7110,7 @@ return [
     'boost_partner_stale_version' => 'הבקשה הזו השתנתה אחרי שפתחת אותה. כדאי לעבור על הגרסה החדשה.',
     'boost_partner_wrong_state' => 'אי אפשר לעשות את זה בקידום הזה במצב הנוכחי שלו.',
     'boost_partner_budget_below_spend' => 'התקציב לא יכול להיות נמוך ממה שהקידום כבר הוציא.',
+    'boost_partner_image_required' => 'מודעה צריכה תמונה, ולאירוע הזה אין. העלו תמונה עבור המודעה.',
     'boost_partner_payment_invalid' => 'יש להזין את אסמכתת התשלום ואת הסכום ששולם.',
     'boost_partner_launch_failed_reason' => 'Facebook לא הצליח ליצור את המודעה. ערכו ושלחו אותה שוב, או פנו לתמיכה.',
     'boost_partner_rejected_default_reason' => 'Facebook לא אישר את המודעה הזו.',

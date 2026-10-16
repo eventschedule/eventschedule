@@ -116,6 +116,12 @@ class BoostPartnerService
             $destination = $this->destinationUrl($event, $campaign);
             $imagePath = $this->storeImage($campaign, 1, $data['image'] ?? null, $event);
 
+            // Meta refuses an ad with no picture, and that refusal would come only at launch,
+            // after the partner approved the request and the Business paid for it.
+            if (! $imagePath) {
+                throw BoostPartnerException::invalid(__('messages.boost_partner_image_required'));
+            }
+
             $version = BoostAdVersion::create([
                 'boost_campaign_id' => $campaign->id,
                 'version' => 1,
@@ -182,7 +188,10 @@ class BoostPartnerService
         $isLive = in_array($campaign->status, BoostCampaign::PARTNER_LIVE_STATUSES, true) && $campaign->meta_campaign_id;
 
         $newBudget = isset($data['budget']) ? round((float) $data['budget'], 2) : (float) $campaign->user_budget;
-        if ($isLive && $newBudget < round((float) $campaign->actual_spend, 2)) {
+        // Whenever the ad has been at Meta, not only while it runs: one paused by an earlier edit
+        // resumes with this budget as its lifetime budget, which Meta refuses below what was
+        // spent, and the boost would then be refused after it was approved and paid for.
+        if ($campaign->meta_campaign_id && $newBudget < round((float) $campaign->actual_spend, 2)) {
             throw BoostPartnerException::invalid(__('messages.boost_partner_budget_below_spend'));
         }
 
@@ -217,6 +226,17 @@ class BoostPartnerService
         $needsApproval = $creativeChanged || $resend;
         $needsPayment = $budgetChanged;
 
+        // The picture is stored, or found missing, before Meta is asked to pause anything: refused
+        // after the pause, a running ad would stay paused while it reads active. And an ad with no
+        // picture is refused by Meta only after approval and payment, as on submit. (The version
+        // only names the file.)
+        if ($newImage instanceof UploadedFile || $useEventImage) {
+            $proposed['image_path'] = $this->storeImage($campaign, $needsApproval ? (int) $campaign->version + 1 : (int) $campaign->version, $newImage, $useEventImage ? $campaign->event : null);
+        }
+        if (! $proposed['image_path']) {
+            throw BoostPartnerException::invalid(__('messages.boost_partner_image_required'));
+        }
+
         // Meta first: a running ad is paused (or its ad set changed) before anything here is
         // saved, so a refusal from Meta leaves this request exactly as it was.
         if ($isLive && ($needsApproval || $needsPayment)) {
@@ -227,7 +247,7 @@ class BoostPartnerService
 
         $launch = false;
 
-        $result = DB::transaction(function () use ($campaign, $user, $proposed, $newImage, $useEventImage, $needsApproval, $needsPayment, $newBudget, $newEnd, $newTargeting, $current, $isLive, &$launch) {
+        $result = DB::transaction(function () use ($campaign, $user, $proposed, $needsApproval, $needsPayment, $newBudget, $newEnd, $newTargeting, $current, $isLive, &$launch) {
             $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
 
             // A Stop that landed while Meta was being asked to pause wins: an edit never reopens a
@@ -237,10 +257,6 @@ class BoostPartnerService
             }
 
             $nextVersion = $needsApproval ? $campaign->version + 1 : $campaign->version;
-
-            if ($newImage instanceof UploadedFile || $useEventImage) {
-                $proposed['image_path'] = $this->storeImage($campaign, $nextVersion, $newImage, $useEventImage ? $campaign->event : null);
-            }
 
             $versionData = $proposed + [
                 'budget' => $newBudget,
@@ -349,6 +365,7 @@ class BoostPartnerService
             ]);
 
             if ($payment) {
+                $this->assertPaidForCurrentBudget($campaign, $payment);
                 $this->recordPayment($campaign, $payment, $by);
             }
 
@@ -402,7 +419,8 @@ class BoostPartnerService
 
     /**
      * Record that the Business paid the partner for this budget. The amount is the partner's
-     * own price and is not compared with the budget.
+     * own price and is not compared with the budget; the budget it was paid for, when given,
+     * is (assertPaidForCurrentBudget()).
      */
     public function confirmPayment(BoostCampaign $campaign, array $payment, User $by): BoostCampaign
     {
@@ -410,6 +428,8 @@ class BoostPartnerService
 
         $campaign = DB::transaction(function () use ($campaign, $payment, $by, &$launch) {
             $campaign = BoostCampaign::lockForUpdate()->findOrFail($campaign->id);
+
+            $this->assertPaidForCurrentBudget($campaign, $payment);
 
             if ($campaign->isPaidCurrent()) {
                 if ((string) $campaign->payment_reference === (string) $payment['reference']
@@ -671,6 +691,22 @@ class BoostPartnerService
     // -------------------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------------------
+
+    /**
+     * A payment says which budget it was for ($payment['budget'], the figure the partner read
+     * and charged for), and is refused when the Business has changed the budget since: a budget
+     * edit does not raise the version, so without this a payment taken for 100 was recorded
+     * against the 1000 asked for a minute later and launched at 1000 on the partner's account.
+     * Optional, so an integration written before it existed keeps working.
+     */
+    protected function assertPaidForCurrentBudget(BoostCampaign $campaign, array $payment): void
+    {
+        $budget = $payment['budget'] ?? null;
+
+        if ($budget !== null && $budget !== '' && round((float) $budget, 2) !== round((float) $campaign->user_budget, 2)) {
+            throw BoostPartnerException::staleBudget();
+        }
+    }
 
     protected function recordPayment(BoostCampaign $campaign, array $payment, User $by): void
     {

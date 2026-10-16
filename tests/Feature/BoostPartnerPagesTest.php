@@ -13,6 +13,7 @@ use App\Services\BoostPartnerService;
 use App\Services\MetaAdsServiceFake;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -70,6 +71,7 @@ class BoostPartnerPagesTest extends TestCase
             'name' => 'Friday Jazz Night',
             'starts_at' => now()->addDays(10)->setTime(12, 0)->format('Y-m-d H:i:s'),
             'creator_role_id' => $this->role->id,
+            'flyer_image_url' => 'demo_flyer_dj.jpg',
         ]);
 
         $this->partner = $this->makePartner($this->partnerUser);
@@ -252,7 +254,7 @@ class BoostPartnerPagesTest extends TestCase
     public function test_the_partner_answers_requests_oldest_first_and_sees_what_changed(): void
     {
         $first = $this->submit();
-        $later = $this->createEvent($this->role, ['name' => 'Saturday Brunch', 'creator_role_id' => $this->role->id, 'starts_at' => now()->addDays(12)->setTime(12, 0)->format('Y-m-d H:i:s')]);
+        $later = $this->createEvent($this->role, ['name' => 'Saturday Brunch', 'creator_role_id' => $this->role->id, 'starts_at' => now()->addDays(12)->setTime(12, 0)->format('Y-m-d H:i:s'), 'flyer_image_url' => 'demo_flyer_dj.jpg']);
         $this->travel(5)->minutes();
         $second = $this->submit($later, ['headline' => 'Brunch by the sea']);
 
@@ -490,5 +492,148 @@ class BoostPartnerPagesTest extends TestCase
         $this->assertStringContainsString('"partner":true', $html);
         // This site's own Meta account is not set up here, and the partner's Page still is.
         $this->assertStringContainsString('v-if="selectedEvent && selectedEvent.partner"', $html);
+    }
+
+    // ------------------------------------------------------- what the week's review found
+
+    public function test_a_boost_declined_after_it_ran_stays_in_campaigns(): void
+    {
+        $ran = $this->submit();
+        $ran->forceFill(['status' => 'declined', 'launched_at' => now()->subDays(3), 'meta_campaign_id' => 'm1', 'actual_spend' => 46])->save();
+
+        $later = $this->createEvent($this->role, ['name' => 'Saturday Brunch', 'creator_role_id' => $this->role->id, 'starts_at' => now()->addDays(12)->setTime(12, 0)->format('Y-m-d H:i:s'), 'flyer_image_url' => 'demo_flyer_dj.jpg']);
+        $neverRan = $this->submit($later, ['headline' => 'Brunch by the sea']);
+        $neverRan->forceFill(['status' => 'declined'])->save();
+
+        $html = $this->actingAs($this->partnerUser)->get(route('boost.partner.campaigns'))->assertOk()->getContent();
+
+        // It spent the partner's money and is on its statement.
+        $this->assertStringContainsString('href="'.route('boost.show', ['hash' => $ran->hashedId()]).'"', $html);
+        // A request that was never at Meta is not a campaign.
+        $this->assertStringNotContainsString('href="'.route('boost.show', ['hash' => $neverRan->hashedId()]).'"', $html);
+    }
+
+    public function test_check_again_without_a_token_is_a_failed_check_not_an_error_page(): void
+    {
+        // Meta's deauthorize webhook clears a login partner's token.
+        $this->partner->forceFill(['connection_method' => BoostPartner::METHOD_LOGIN, 'meta_token' => null])->save();
+
+        $this->actingAs($this->partnerUser)->post(route('boost.partner.settings.check'))
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.boost_partner_check_failed'));
+
+        $this->assertNotNull($this->partner->fresh()->connection_error);
+    }
+
+    /** What Meta answers a login: these Pages and ad accounts, and the two the partner uses. */
+    private function fakeMetaLogin(array $pageIds, array $accountIds): void
+    {
+        config(['services.meta.app_id' => '1234', 'services.meta.app_secret' => 'app-secret-xyz']);
+
+        Http::fake(function ($request) use ($pageIds, $accountIds) {
+            $url = $request->url();
+
+            return match (true) {
+                str_contains($url, '/oauth/access_token') => Http::response(['access_token' => 'FRESH_TOKEN', 'expires_in' => 5184000]),
+                str_contains($url, '/me/accounts') => Http::response(['data' => array_map(fn ($id) => ['id' => $id, 'name' => 'Page '.$id], $pageIds)]),
+                str_contains($url, '/me/adaccounts') => Http::response(['data' => array_map(fn ($id) => ['id' => 'act_'.$id, 'name' => 'Ads '.$id, 'currency' => 'USD'], $accountIds)]),
+                (bool) preg_match('#/me(\?|$)#', $url) => Http::response(['id' => '424242']),
+                str_contains($url, '/act_999888777') => Http::response(['name' => 'Network Ads', 'currency' => 'USD', 'timezone_name' => 'America/New_York', 'account_status' => 1]),
+                str_contains($url, '/111222333') => Http::response(['name' => 'Harbor Events Page']),
+                default => Http::response(['error' => ['message' => 'unexpected '.$url]], 400),
+            };
+        });
+    }
+
+    private function loginAgain()
+    {
+        return $this->actingAs($this->partnerUser)
+            ->withSession(['boost_partner_oauth_state' => 'st8'])
+            ->get(route('boost.partner.settings.callback', ['state' => 'st8', 'code' => 'c0de']));
+    }
+
+    private function runningLoginBoost(): BoostCampaign
+    {
+        $this->partner->forceFill(['connection_method' => BoostPartner::METHOD_LOGIN, 'meta_token' => 'OLD_TOKEN'])->save();
+        $live = $this->submit();
+        $live->forceFill(['status' => 'active', 'launched_at' => now(), 'meta_campaign_id' => 'm1'])->save();
+
+        return $live;
+    }
+
+    public function test_logging_in_again_keeps_the_account_and_the_boosts_running_on_it(): void
+    {
+        $live = $this->runningLoginBoost();
+        $this->fakeMetaLogin(['111222333', '555000555'], ['999888777', '666000666']);
+
+        $this->loginAgain()->assertRedirect()
+            ->assertSessionHas('message', __('messages.boost_partner_checks_passed'))
+            ->assertSessionHas('boost_partner_assets');
+
+        $partner = $this->partner->fresh();
+        $this->assertSame('999888777', (string) $partner->ad_account_id);
+        $this->assertSame('111222333', (string) $partner->page_id);
+        $this->assertSame('FRESH_TOKEN', $partner->accessToken());
+        $this->assertNotNull($partner->confirmed_at);
+        $this->assertSame('active', $live->fresh()->status);
+
+        // Another pair is still offered, and taken only once nothing runs on the current one.
+        $this->actingAs($this->partnerUser)
+            ->post(route('boost.partner.settings.select'), ['page_id' => '555000555', 'ad_account_id' => '666000666'])
+            ->assertRedirect()->assertSessionHas('error', __('messages.boost_partner_disconnect_blocked'));
+        $this->assertSame('999888777', (string) $this->partner->fresh()->ad_account_id);
+    }
+
+    public function test_logging_in_again_to_other_assets_waits_while_a_boost_runs(): void
+    {
+        $this->runningLoginBoost();
+        $this->fakeMetaLogin(['555000555'], ['666000666']);
+
+        $this->loginAgain()->assertRedirect()->assertSessionHas('error', __('messages.boost_partner_disconnect_blocked'));
+
+        // Cleared, the running boost would be read and paused with a token that cannot reach it.
+        $partner = $this->partner->fresh();
+        $this->assertSame('999888777', (string) $partner->ad_account_id);
+        $this->assertSame('OLD_TOKEN', $partner->accessToken());
+    }
+
+    public function test_a_login_that_times_out_never_reports_the_app_secret(): void
+    {
+        Exceptions::fake();
+        config(['services.meta.app_id' => '1234', 'services.meta.app_secret' => 'app-secret-xyz']);
+        Http::fake(['*' => Http::failedConnection('cURL error 28: Operation timed out for https://graph.facebook.com/v21.0/oauth/access_token?client_id=1234&client_secret=app-secret-xyz&code=c0de')]);
+
+        $this->loginAgain()->assertRedirect()->assertSessionHas('error', __('messages.boost_partner_login_failed'));
+
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'could not be reached'));
+        Exceptions::assertNotReported(fn (\Throwable $e) => str_contains($e->getMessage(), 'app-secret-xyz'));
+    }
+
+    public function test_the_boost_forms_card_step_charges_nothing_for_a_partners_event(): void
+    {
+        $this->actingAs($this->business)
+            ->postJson(route('boost.payment_intent'), ['event_id' => UrlUtils::encodeId($this->event->id), 'budget' => 50])
+            ->assertStatus(422)
+            ->assertJson(['error' => __('messages.boost_partner_promotion_refused', ['page' => $this->partner->displayName()])]);
+    }
+
+    public function test_a_boost_sent_after_the_partner_was_switched_on_gives_its_card_payment_back(): void
+    {
+        // The form was opened before the partner was, and its card was confirmed for this site.
+        $this->mock(\App\Services\BoostBillingService::class)
+            ->shouldReceive('abandonPaymentIntent')->once()
+            ->with('pi_3QxCharged', 'boost_partner_request', 'boost_abandon_', $this->event->id, 'boost');
+
+        $this->actingAs($this->business)->post(route('boost.store'), [
+            'event_id' => UrlUtils::encodeId($this->event->id),
+            'role_id' => UrlUtils::encodeId($this->role->id),
+            'budget' => 50,
+            'budget_type' => 'lifetime',
+            'payment_intent_id' => 'pi_3QxCharged',
+            'headline' => 'Friday Jazz',
+            'primary_text' => 'Live trio from 7 PM',
+        ])->assertRedirect();
+
+        $this->assertSame(1, BoostCampaign::where('event_id', $this->event->id)->whereNotNull('boost_partner_id')->count(), 'a request to the partner');
     }
 }

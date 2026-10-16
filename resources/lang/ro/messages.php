@@ -7131,6 +7131,7 @@ return [
     'boost_partner_stale_version' => 'Această cerere a fost modificată după ce ați deschis-o. Verificați noua versiune.',
     'boost_partner_wrong_state' => 'Acest lucru nu se poate face cu această promovare în starea ei actuală.',
     'boost_partner_budget_below_spend' => 'Bugetul nu poate fi mai mic decât suma pe care promovarea a cheltuit-o deja.',
+    'boost_partner_image_required' => 'O reclamă are nevoie de o imagine, iar acest eveniment nu are niciuna. Încărcați una pentru reclamă.',
     'boost_partner_payment_invalid' => 'Introduceți referința plății și suma plătită.',
     'boost_partner_launch_failed_reason' => 'Facebook nu a putut crea reclama. Editați-o și trimiteți-o din nou sau contactați asistența.',
     'boost_partner_rejected_default_reason' => 'Facebook nu a aprobat această reclamă.',

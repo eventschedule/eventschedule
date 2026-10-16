@@ -37,8 +37,14 @@ class BoostPartnerSync
             ->whereNotNull('meta_campaign_id')
             ->where(function ($q) {
                 $q->whereIn('status', BoostCampaign::PARTNER_LIVE_STATUSES)
+                    // Paused at Meta for an edit and waiting on approval or payment: what it spent
+                    // to the pause, which the Campaigns list and the spend floor of a budget edit
+                    // read, is still coming in.
+                    ->orWhereIn('status', ['pending_approval', 'awaiting_payment', 'ready'])
                     ->orWhere(function ($q) {
-                        $q->whereIn('status', ['completed', 'stopped', 'rejected'])->whereNull('spend_final_at');
+                        // Declined too: a boost that ran and was then declined (an edit sent back,
+                        // its end passed while paused) has spend still to be read to its end.
+                        $q->whereIn('status', ['completed', 'stopped', 'rejected', 'declined'])->whereNull('spend_final_at');
                     });
             })
             ->with(['ads', 'partner.user', 'user'])
@@ -124,7 +130,8 @@ class BoostPartnerSync
 
         if (in_array($campaign->status, BoostCampaign::PARTNER_LIVE_STATUSES, true)) {
             $this->syncState($campaign, $meta, $figures);
-        } else {
+        } elseif (in_array($campaign->status, ['completed', 'stopped', 'rejected', 'declined'], true)) {
+            // Only a boost that has ended is ever final: one paused for an edit may run again.
             $endedAt = $campaign->stopped_at ?? $campaign->scheduled_end ?? $campaign->updated_at;
             $unchanged = round((float) $campaign->actual_spend, 2) === $before;
             if ($endedAt && $endedAt->lte(now()->subDays(self::FINAL_AFTER_DAYS)) && $unchanged) {
@@ -229,6 +236,13 @@ class BoostPartnerSync
         $until = Carbon::now($tz);
         if ($campaign->stopped_at) {
             $until = $campaign->stopped_at->copy()->setTimezone($tz)->addDays(2)->min($until);
+        }
+
+        // A boost stopped well before the last few days has nothing in them: the short read would
+        // ask Meta for a range that ends before it starts, which it refuses, and the totals read
+        // with it would never be written. The daily full read covers it.
+        if ($since->gt($until)) {
+            return;
         }
 
         $days = $meta->dailySpend($campaign, $since, $until);

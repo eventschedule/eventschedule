@@ -60,6 +60,13 @@ class RazorpayGateway extends PaymentGatewayDriver
      */
     private const SHORTEST_LINK_MINUTES = 16;
 
+    /**
+     * How long a sale's link is remembered (openLinkFor()): a day, the longest booking hold, and
+     * well past the link's own expiry, because a link paid and never returned to must still be
+     * found when the guest comes back to pay.
+     */
+    private const REMEMBER_LINK_HOURS = 24;
+
     private const PAYMENT_ID_PATTERN = '/^pay_[A-Za-z0-9]{14}$/';
 
     /** The webhook events this driver acts on. Anything else is acknowledged and ignored. */
@@ -436,8 +443,25 @@ class RazorpayGateway extends PaymentGatewayDriver
         // step can be pressed again (the guest backs out and comes back), and a second link would
         // leave two that can each be paid - and, late in the hold, one still open after the booking
         // was released for want of time.
-        if ($open = $this->openLinkFor($sale, $client, $amountMinor)) {
-            return redirect($open);
+        $found = $this->openLinkFor($sale, $client, $amountMinor);
+
+        // Paid already: the guest paid and never came back through the return (a UPI app took
+        // over the phone), and no webhook told us. Settled now from Razorpay's own answer, never
+        // charged again and never released.
+        if ($found['state'] === 'paid') {
+            return $this->redirectToPurchaseLanding($sale, $sale->event, $context->isEmbed);
+        }
+
+        // A link of this sale's may still be payable and Razorpay could not be asked. Neither a
+        // second link nor a release: the booking keeps its hold and the guest tries again.
+        if ($found['state'] === 'unknown') {
+            Log::warning('Razorpay checkout refused: the sale\'s link could not be read', ['sale_id' => $sale->id]);
+
+            return $this->refuseCheckout($sale, 'razorpay_link_unreadable', __('messages.razorpay_link_failed'));
+        }
+
+        if ($found['state'] === 'open') {
+            return redirect($found['url']);
         }
 
         $expireBy = $this->linkExpiresAt($sale);
@@ -504,9 +528,9 @@ class RazorpayGateway extends PaymentGatewayDriver
     }
 
     /**
-     * Remember the link made for this sale until it expires, so a second press of the pay step goes
-     * back to it (openLinkFor()). Only the id and the amount: the link itself is re-read from
-     * Razorpay, which is the only answer to whether it can still be paid.
+     * Remember the link made for this sale, so a second press of the pay step goes back to it, or
+     * settles it when it was paid (openLinkFor()). Only the id and the amount: the link itself is
+     * re-read from Razorpay, which is the only answer to whether it can still be paid.
      */
     private function rememberLink(Sale $sale, string $linkId, int $amountMinor, int $expireBy): void
     {
@@ -515,7 +539,7 @@ class RazorpayGateway extends PaymentGatewayDriver
         }
 
         try {
-            Cache::put($this->linkCacheKey($sale), ['id' => $linkId, 'amount' => $amountMinor], Carbon::createFromTimestamp($expireBy));
+            Cache::put($this->linkCacheKey($sale), ['id' => $linkId, 'amount' => $amountMinor], Carbon::createFromTimestamp($expireBy)->addHours(self::REMEMBER_LINK_HOURS));
         } catch (\Throwable $e) {
             // Without it the next press makes a new link, which is how it worked before.
             report($e);
@@ -523,35 +547,61 @@ class RazorpayGateway extends PaymentGatewayDriver
     }
 
     /**
-     * The short URL of this sale's link while Razorpay still says it can be paid ("created", not
-     * yet past its expiry) for the amount now owed, or null. Asked before any new link is made, and
-     * so before a booking is released for having too little time left: with a link still open, the
-     * guest is sent to it, and nothing is released that the guest could still pay.
+     * What became of the link this sale was last sent to, asked before any new link is made, and
+     * so before a booking is released for having too little time left:
+     *  - open: Razorpay still says it can be paid ("created", not yet past its expiry) for the
+     *    amount now owed, and 'url' is where the guest goes;
+     *  - paid: it was paid, and is settled here from Razorpay's answer (the guest paid and never
+     *    came back through the return, and no webhook said so);
+     *  - unknown: there may be one, and it could not be read (Razorpay timing out, the cache
+     *    failing), so nothing may be made or released on the strength of "none";
+     *  - none: there is no link of this sale's that can still be paid.
+     *
+     * A ticket checkout always makes a fresh sale, so only a booking can have a link to find.
+     *
+     * @return array{state: 'open'|'paid'|'unknown'|'none', url?: string}
      */
-    private function openLinkFor(Sale $sale, RazorpayClient $client, int $amountMinor): ?string
+    private function openLinkFor(Sale $sale, RazorpayClient $client, int $amountMinor): array
     {
         try {
             $remembered = Cache::get($this->linkCacheKey($sale));
         } catch (\Throwable $e) {
             report($e);
 
-            return null;
+            return ['state' => $sale->event?->appointment_type_id ? 'unknown' : 'none'];
         }
 
-        if (! is_array($remembered) || ($remembered['amount'] ?? null) !== $amountMinor || empty($remembered['id'])) {
-            return null;
+        if (! is_array($remembered) || empty($remembered['id'])) {
+            return ['state' => 'none'];
         }
 
-        $link = $client->getPaymentLink((string) $remembered['id']);
+        try {
+            $link = $client->findPaymentLink((string) $remembered['id']);
+        } catch (\Throwable $e) {
+            Log::warning('Razorpay link could not be read', ['sale_id' => $sale->id, 'error' => $e->getMessage()]);
 
-        if (! $link || ($link['status'] ?? null) !== 'created' || ! $this->linkBelongsTo($sale, $link)
+            return ['state' => 'unknown'];
+        }
+
+        if (! $link || ! $this->linkBelongsTo($sale, $link)) {
+            return ['state' => 'none'];
+        }
+
+        // Whatever the amount it was made for: money taken is never asked for twice.
+        if (($link['status'] ?? null) === 'paid') {
+            $this->settleLink($sale, $link, '');
+
+            return ['state' => 'paid'];
+        }
+
+        if (($link['status'] ?? null) !== 'created' || ($remembered['amount'] ?? null) !== $amountMinor
             || (int) ($link['expire_by'] ?? 0) <= Carbon::now()->getTimestamp()) {
-            return null;
+            return ['state' => 'none'];
         }
 
         $url = (string) ($link['short_url'] ?? '');
 
-        return $url !== '' ? $url : null;
+        return $url !== '' ? ['state' => 'open', 'url' => $url] : ['state' => 'none'];
     }
 
     /**

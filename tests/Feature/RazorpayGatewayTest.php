@@ -47,6 +47,9 @@ class RazorpayGatewayTest extends TestCase
     /** @var array<string, mixed>|null what GET /payment_links/{id} answers; null = 404 */
     private ?array $link = null;
 
+    /** Whether GET /payment_links/{id} answers 503, as Razorpay does when it is struggling. */
+    private bool $linkReadFails = false;
+
     /** @var list<array<string, mixed>> */
     private array $existingRefunds = [];
 
@@ -86,6 +89,10 @@ class RazorpayGatewayTest extends TestCase
             }
 
             if ($request->method() === 'GET' && str_contains($url, '/v1/payment_links/')) {
+                if ($this->linkReadFails) {
+                    return Http::response(['error' => ['description' => 'Service unavailable']], 503);
+                }
+
                 return $this->link ? Http::response($this->link) : Http::response(['error' => []], 404);
             }
 
@@ -737,6 +744,62 @@ class RazorpayGatewayTest extends TestCase
         $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::OPEN_URL);
 
         $this->assertSame('unpaid', $sale->fresh()->status);
+        $this->assertSame(1, $this->linkCreations());
+    }
+
+    public function test_a_link_paid_without_a_return_is_settled_when_pay_is_pressed_again(): void
+    {
+        $sale = $this->bookPaidType();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::SHORT_URL);
+
+        // Paid in a UPI app that never brought the guest back, on an account with no webhook.
+        $this->link = $this->paidLink($sale, ['amount' => 50000, 'amount_paid' => 50000]);
+
+        // A second link here could be paid as well.
+        $this->travel(5)->minutes();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))
+            ->assertRedirect(route('appointments.manage', $this->bookingParams($sale)).'?new=1');
+
+        $this->assertSame(1, $this->linkCreations());
+        $this->assertSame('paid', $sale->fresh()->status);
+        $this->assertSame(self::PAYMENT_ID, $sale->fresh()->transaction_reference);
+    }
+
+    public function test_a_link_paid_past_its_expiry_is_settled_late_in_the_hold_not_released(): void
+    {
+        $sale = $this->bookPaidType();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::SHORT_URL);
+        $this->link = $this->paidLink($sale, ['amount' => 50000, 'amount_paid' => 50000]);
+
+        // Past the link's own 30 minutes and under the 16 a new one needs: released here, the
+        // booking would be gone with its money taken.
+        $this->travel(50)->minutes();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))
+            ->assertRedirect(route('appointments.manage', $this->bookingParams($sale)).'?new=1');
+
+        $this->assertSame('paid', $sale->fresh()->status);
+        $this->assertSame(1, $this->linkCreations());
+    }
+
+    public function test_a_link_that_cannot_be_read_keeps_the_booking_and_makes_no_other(): void
+    {
+        $sale = $this->bookPaidType();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::SHORT_URL);
+        $this->linkReadFails = true;
+
+        // Late in the hold: "no link" would release the booking while its link may still be paid.
+        $this->travel(50)->minutes();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))
+            ->assertRedirect(route('appointments.manage', $this->bookingParams($sale)))
+            ->assertSessionHas('error', __('messages.razorpay_link_failed'));
+
+        $this->assertSame('unpaid', $sale->fresh()->status);
+        $this->assertSame(1, $this->linkCreations());
+
+        // Early in the hold, "no link" would make a second one that could be paid as well.
+        $this->travel(-45)->minutes();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))
+            ->assertRedirect(route('appointments.manage', $this->bookingParams($sale)));
         $this->assertSame(1, $this->linkCreations());
     }
 

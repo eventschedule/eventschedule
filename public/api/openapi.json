@@ -3352,7 +3352,7 @@
         "operationId": "confirm_boost_payment",
         "tags": ["Boosts"],
         "summary": "Confirm payment",
-        "description": "Record that the business paid you for this budget: your own reference and amount, which are stored and returned on the boost and the statement. The amount is not compared with the budget. A changed budget clears the confirmation.",
+        "description": "Record that the business paid you for this budget: your own reference and amount, which are stored and returned on the boost and the statement. The amount is not compared with the budget. Send the budget.amount you charged for as budget: if the business has changed the budget since, the confirmation is refused (409, code stale_budget) instead of launching the new budget on this payment. A changed budget clears the confirmation.",
         "parameters": [
           {
             "name": "id",
@@ -3384,6 +3384,11 @@
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 3
+                  },
+                  "budget": {
+                    "type": "string",
+                    "description": "The boost's budget.amount this payment was for",
+                    "example": "50.00"
                   }
                 }
               }

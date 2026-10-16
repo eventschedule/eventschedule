@@ -22,6 +22,12 @@ class BoostPartnerException extends \RuntimeException
         return new self(__('messages.boost_partner_stale_version'), 409, 'stale_version');
     }
 
+    /** A payment for a budget the Business has changed since the partner charged for it. */
+    public static function staleBudget(): self
+    {
+        return new self(__('messages.boost_partner_stale_version'), 409, 'stale_budget');
+    }
+
     public static function state(): self
     {
         return new self(__('messages.boost_partner_wrong_state'), 409, 'invalid_state');

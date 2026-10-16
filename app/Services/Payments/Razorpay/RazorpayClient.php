@@ -86,6 +86,28 @@ class RazorpayClient
     }
 
     /**
+     * The link, or null when Razorpay answers that there is none (a 4xx other than 429). Throws
+     * when Razorpay could not be asked (a timeout, a 5xx, a 429), because a caller deciding whether
+     * a link can still be paid must not read "could not ask" as "there is none".
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findPaymentLink(string $id): ?array
+    {
+        $response = $this->http()->get(self::BASE_URL.'/payment_links/'.rawurlencode($id));
+
+        if ($response->successful()) {
+            return (array) $response->json();
+        }
+
+        if ($response->clientError() && $response->status() !== 429) {
+            return null;
+        }
+
+        throw new \Illuminate\Http\Client\RequestException($response);
+    }
+
+    /**
      * Refunds already issued against a payment. Throws, like refund(), because a caller using this
      * to avoid a duplicate must not mistake "could not ask" for "there are none".
      *

@@ -1653,7 +1653,7 @@ For a boost partner: a network whose schedules boost under its own Facebook Page
 - `GET /api/boosts/{id}`: one boost: `ad` (headline, text, description, call_to_action, image_url, destination_url), `version`, `audience.summary`, `budget`, `approval` (approved_version, decided_at, note, decline_reason), `payment` (confirmed, reference, amount, currency, confirmed_at), `spend` (amount, currency, as_of, final), `meta_review`, `stopped_at`, `stop_reason`, `stop_code`.
 - `POST /api/boosts/{id}/approve` with `{"version": 2, "note": "..."}`. A version that is not the current one answers 409 (`code: stale_version`).
 - `POST /api/boosts/{id}/decline` with `{"note": "..."}` (required).
-- `POST /api/boosts/{id}/confirm-payment` with `{"reference": "pi_...", "amount": "60.00", "currency": "USD"}`; `DELETE` the same path to withdraw it before launch.
+- `POST /api/boosts/{id}/confirm-payment` with `{"reference": "pi_...", "amount": "60.00", "currency": "USD", "budget": "50.00"}`, where `budget` is the `budget.amount` you charged for (a 409 `stale_budget` if the business has changed it since); `DELETE` the same path to withdraw it before launch.
 - `POST /api/boosts/{id}/stop` with an optional `{"reason": "..."}`. Pauses the campaign at Meta and ends it.
 - `GET /api/boost-statements`, `GET /api/boost-statements/{yyyy-mm}` (`?currency=` when a month has two): the monthly fee of 20% on actual spend, line by line.
 

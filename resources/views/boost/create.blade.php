@@ -347,8 +347,10 @@
                 }),
             });
 
-            if (!response.ok) throw new Error('Request failed');
-            const data = await response.json();
+            // A refusal (over the limit, an event whose boosts go to a partner) answers 422 with
+            // the sentence to show; anything else without one is a failure.
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok && !data.error) throw new Error('Request failed');
             if (data.error) {
                 document.getElementById('payment-errors').textContent = data.error;
                 document.getElementById('payment-errors').classList.remove('hidden');

@@ -48,7 +48,7 @@ class ApiBoostTest extends TestCase
         $this->role = $this->createRole($this->partnerUser, 'venue');
         $this->business = User::factory()->create();
         $this->role->users()->attach($this->business->id, ['level' => 'admin']);
-        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->event = $this->createEvent($this->role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'flyer_image_url' => 'demo_flyer_dj.jpg']);
 
         $this->partner = new BoostPartner;
         $this->partner->forceFill([
@@ -131,6 +131,20 @@ class ApiBoostTest extends TestCase
 
         // A different payment on a paid budget is refused.
         $this->postJson('/api/boosts/'.$c->hashedId().'/confirm-payment', ['reference' => 'pi_other', 'amount' => '10.00'], ['X-API-Key' => $key])->assertStatus(409);
+    }
+
+    public function test_a_payment_naming_a_budget_that_changed_since_is_a_409(): void
+    {
+        $c = $this->request();
+        $key = $this->apiKey($this->partnerUser);
+        $budget = $this->getJson('/api/boosts/'.$c->hashedId(), ['X-API-Key' => $key])->json('data.budget.amount');
+
+        // Charged for that figure; the Business asks for ten times it before the webhook lands.
+        app(BoostPartnerService::class)->edit($c, $this->business, ['budget' => (float) $budget * 10]);
+
+        $this->postJson('/api/boosts/'.$c->hashedId().'/confirm-payment', ['reference' => 'pi_3Qx', 'amount' => '60.00', 'budget' => $budget], ['X-API-Key' => $key])
+            ->assertStatus(409)->assertJsonPath('code', 'stale_budget');
+        $this->assertFalse($c->fresh()->isPaidCurrent());
     }
 
     public function test_an_approval_naming_an_old_version_is_a_409(): void

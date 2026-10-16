@@ -7112,6 +7112,7 @@ return [
     'boost_partner_stale_version' => 'Esta solicitação foi alterada depois que você a abriu. Revise a nova versão.',
     'boost_partner_wrong_state' => 'Isso não pode ser feito com este boost no estado em que ele está agora.',
     'boost_partner_budget_below_spend' => 'O orçamento não pode ser menor do que o boost já gastou.',
+    'boost_partner_image_required' => 'Um anúncio precisa de uma imagem, e este evento não tem nenhuma. Envie uma para o anúncio.',
     'boost_partner_payment_invalid' => 'Informe a referência do pagamento e o valor pago.',
     'boost_partner_launch_failed_reason' => 'O Facebook não conseguiu criar o anúncio. Edite-o e envie novamente, ou fale com o suporte.',
     'boost_partner_rejected_default_reason' => 'O Facebook não aprovou este anúncio.',

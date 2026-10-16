@@ -7111,6 +7111,7 @@ return [
     'boost_partner_stale_version' => 'تم تغيير هذا الطلب بعد أن فتحته. راجع النسخة الجديدة.',
     'boost_partner_wrong_state' => 'لا يمكن تنفيذ ذلك على هذا التعزيز في حالته الحالية.',
     'boost_partner_budget_below_spend' => 'لا يمكن أن تكون الميزانية أقل مما أنفقه التعزيز بالفعل.',
+    'boost_partner_image_required' => 'يحتاج الإعلان إلى صورة، وهذا الحدث لا يحتوي على صورة. ارفع صورة للإعلان.',
     'boost_partner_payment_invalid' => 'أدخل مرجع الدفع والمبلغ المدفوع.',
     'boost_partner_launch_failed_reason' => 'لم يتمكن Facebook من إنشاء الإعلان. عدّله وأرسله مرة أخرى، أو تواصل مع الدعم.',
     'boost_partner_rejected_default_reason' => 'لم يوافق Facebook على هذا الإعلان.',

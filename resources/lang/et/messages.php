@@ -7112,6 +7112,7 @@ return [
     'boost_partner_stale_version' => 'Seda taotlust muudeti pärast seda, kui te selle avasite. Vaadake uus versioon üle.',
     'boost_partner_wrong_state' => 'Seda ei saa selle edendusega selle praeguses olekus teha.',
     'boost_partner_budget_below_spend' => 'Eelarve ei saa olla väiksem summast, mille edendus on juba kulutanud.',
+    'boost_partner_image_required' => 'Reklaam vajab pilti, aga sellel sündmusel pole ühtegi. Laadige reklaami jaoks pilt üles.',
     'boost_partner_payment_invalid' => 'Sisestage makse viide ja makstud summa.',
     'boost_partner_launch_failed_reason' => 'Facebook ei saanud reklaami luua. Muutke seda ja saatke uuesti või võtke ühendust toega.',
     'boost_partner_rejected_default_reason' => 'Facebook ei kiitnud seda reklaami heaks.',

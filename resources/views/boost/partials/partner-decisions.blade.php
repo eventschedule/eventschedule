@@ -12,6 +12,9 @@
     $bpDecZone = $bpCampaign->role?->timezone ?: config('app.timezone');
     $bpDecName = $bpCampaign->event?->translatedName() ?? $bpCampaign->event_name;
     $bpDecBudget = \App\Utils\MoneyUtils::format($bpCampaign->user_budget, $bpCampaign->currency_code);
+    // The budget as drawn, posted with a payment: one recorded after the Business changed it is
+    // refused rather than taken for the new figure (BoostPartnerService::assertPaidForCurrentBudget()).
+    $bpDecBudgetAmount = number_format((float) $bpCampaign->user_budget, 2, '.', '');
     $bpDecApproved = $bpCampaign->isApprovedCurrent();
     $bpDecPaid = $bpCampaign->isPaidCurrent();
     $bpDecPaidAmount = $bpCampaign->payment_amount !== null
@@ -57,7 +60,7 @@
             @endif
             @if ($bpDecCanApprove)
             <x-brand-button data-bp-open="approve" :data-action="route('boost.partner.approve', ['hash' => $bpCampaign->hashedId()])" :data-name="$bpDecName"
-                :data-version="$bpCampaign->version" :data-version-label="__('messages.boost_partner_version', ['version' => $bpCampaign->version])" :data-budget="$bpDecBudget" :data-currency="$bpCampaign->currency_code"
+                :data-version="$bpCampaign->version" :data-version-label="__('messages.boost_partner_version', ['version' => $bpCampaign->version])" :data-budget="$bpDecBudget" :data-budget-amount="$bpDecBudgetAmount" :data-currency="$bpCampaign->currency_code"
                 :data-paid="$bpDecPaid ? '1' : '0'">
                 {{ __('messages.boost_partner_approve_version', ['version' => $bpCampaign->version]) }}
             </x-brand-button>
@@ -97,7 +100,7 @@
             @endif
             @if ($bpDecCanPay)
             <x-brand-button data-bp-open="payment" :data-action="route('boost.partner.payment', ['hash' => $bpCampaign->hashedId()])" :data-name="$bpDecName"
-                :data-budget="$bpDecBudget" :data-currency="$bpCampaign->currency_code">
+                :data-budget="$bpDecBudget" :data-budget-amount="$bpDecBudgetAmount" :data-currency="$bpCampaign->currency_code">
                 {{ __('messages.boost_partner_payment_received') }}
             </x-brand-button>
             @endif

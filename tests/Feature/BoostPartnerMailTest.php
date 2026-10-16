@@ -32,7 +32,7 @@ class BoostPartnerMailTest extends TestCase
         $role = $this->createRole($owner, 'venue', ['name' => 'Harbor Cafe']);
         $business = User::factory()->create();
         $role->users()->attach($business->id, ['level' => 'admin']);
-        $event = $this->createEvent($role, ['name' => 'Friday Jazz', 'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $event = $this->createEvent($role, ['name' => 'Friday Jazz', 'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'flyer_image_url' => 'demo_flyer_dj.jpg']);
 
         $partner = new BoostPartner;
         $partner->forceFill([

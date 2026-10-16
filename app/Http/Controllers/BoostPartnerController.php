@@ -87,7 +87,11 @@ class BoostPartnerController extends Controller
             $data['targeting'] = array_merge($defaults['targeting'] ?? [], $data['ages']);
         }
 
-        $campaign = $this->service->submit($partner, $event, $role, auth()->user(), $data, $defaults);
+        try {
+            $campaign = $this->service->submit($partner, $event, $role, auth()->user(), $data, $defaults);
+        } catch (BoostPartnerException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
 
         return redirect()->route('boost.show', ['hash' => $campaign->hashedId()])
             ->with('success', __('messages.boost_partner_sent', ['page' => $partner->displayName()]));
@@ -349,10 +353,12 @@ class BoostPartnerController extends Controller
             'with_payment' => 'nullable|boolean',
             'reference' => 'required_if:with_payment,1|nullable|string|max:255',
             'amount' => 'required_if:with_payment,1|nullable|numeric|min:0|max:1000000',
+            // The budget on screen when the dialog was opened: a payment is for that budget.
+            'budget' => 'nullable|numeric|min:0',
         ]);
 
         $payment = $request->boolean('with_payment')
-            ? ['reference' => $request->reference, 'amount' => $request->amount, 'currency' => $campaign->currency_code]
+            ? ['reference' => $request->reference, 'amount' => $request->amount, 'currency' => $campaign->currency_code, 'budget' => $request->budget]
             : null;
 
         return $this->act($campaign, fn () => $this->service->approve($campaign, (int) $request->version, $request->note, auth()->user(), $payment), 'messages.boost_partner_approved');
@@ -372,12 +378,14 @@ class BoostPartnerController extends Controller
         $request->validate([
             'reference' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0|max:1000000',
+            'budget' => 'nullable|numeric|min:0',
         ]);
 
         return $this->act($campaign, fn () => $this->service->confirmPayment($campaign, [
             'reference' => $request->reference,
             'amount' => $request->amount,
             'currency' => $campaign->currency_code,
+            'budget' => $request->budget,
         ], auth()->user()), 'messages.boost_partner_payment_recorded');
     }
 
@@ -423,7 +431,7 @@ class BoostPartnerController extends Controller
         try {
             $step();
         } catch (BoostPartnerException $e) {
-            $message = $e->errorCode === 'stale_version' || $e->status === 409
+            $message = in_array($e->errorCode, ['stale_version', 'stale_budget'], true) || $e->status === 409
                 ? __('messages.boost_partner_changed_while_reviewing')
                 : $e->getMessage();
 
@@ -555,8 +563,12 @@ class BoostPartnerController extends Controller
 
     protected function campaignQuery(BoostPartner $partner, Request $request)
     {
+        // A request is a campaign once it has been at Meta: one paused for an edit, or declined
+        // after it ran, spent the partner's money and is on its statement, so it stays listed here
+        // and in the export.
         $query = BoostCampaign::where('boost_partner_id', $partner->id)
-            ->whereNotIn('status', ['pending_approval', 'awaiting_payment', 'ready', 'declined']);
+            ->where(fn ($q) => $q->whereNotIn('status', ['pending_approval', 'awaiting_payment', 'ready', 'declined'])
+                ->orWhereNotNull('meta_campaign_id'));
 
         if ($request->filled('status') && in_array($request->status, BoostCampaign::PARTNER_STATUSES, true)) {
             $query->where('status', $request->status);

@@ -238,6 +238,11 @@ class BoostController extends Controller
 
         $partnerEvent = $request->event_id ? Event::find(UrlUtils::decodeId($request->event_id)) : null;
         if ($partnerEvent && ($partner = BoostPartner::forEvent($partnerEvent))) {
+            // The partner was switched on while this form was open, and the card may already have
+            // been charged for the platform's own boost. The boost is a request to the partner,
+            // who is paid separately, so that payment goes back.
+            app(BoostBillingService::class)->abandonPaymentIntent($request->payment_intent_id, 'boost_partner_request', 'boost_abandon_', (int) $partnerEvent->id, 'boost');
+
             return app(BoostPartnerController::class)->store($request, $partnerEvent, $partner);
         }
 
@@ -890,6 +895,12 @@ class BoostController extends Controller
 
         if ($event->is_draft) {
             abort(403);
+        }
+
+        // A boost of this event is a request to its partner, paid to the partner: nothing is
+        // charged here (a form opened before the partner was switched on asks anyway).
+        if ($partner = BoostPartner::forEvent($event)) {
+            return response()->json(['error' => __('messages.boost_partner_promotion_refused', ['page' => $partner->displayName()])], 422);
         }
 
         $budget = (float) $request->budget;

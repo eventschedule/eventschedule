@@ -215,6 +215,41 @@ class AppointmentHostTest extends TestCase
         $this->assertNotContains($slots[2], $this->tomorrowSlots($unhosted));
     }
 
+    /** An owner who hosts a type on somebody else's schedule is the same person on their own. */
+    public function test_an_owner_who_hosts_elsewhere_is_not_booked_twice_across_schedules(): void
+    {
+        $alice = $this->createOwner();
+        $roleA = $this->createRole($alice, 'talent', ['timezone' => self::TZ]);
+        $consult = $this->createAppointmentType($roleA, ['name' => 'Consult', 'weekly_windows' => $this->everyDay()]);
+
+        $roleB = $this->createRole($this->createOwner(), 'talent', ['timezone' => self::TZ]);
+        $roleB->users()->attach($alice->id, ['level' => 'admin']);
+        $demo = $this->createAppointmentType($roleB, ['name' => 'Demo', 'weekly_windows' => $this->everyDay(), 'host_user_id' => $alice->id]);
+        $slots = $this->tomorrowSlots($consult);
+
+        // A booking on her own schedule, with nobody named, is Alice's time on B ...
+        $this->book($consult, $slots[0]);
+        $this->assertNotContains($slots[0], $this->tomorrowSlots($demo));
+
+        // ... and a booking with her on B is her time on her own schedule.
+        $this->book($demo, $slots[2], 'other@gmail.com');
+        $this->assertNotContains($slots[2], $this->tomorrowSlots($consult));
+    }
+
+    public function test_an_owner_hosted_type_is_blocked_by_what_a_departed_host_left(): void
+    {
+        [$owner, $role, $sam, $samsType] = $this->scheduleWithHost();
+        $ownersType = $this->createAppointmentType($role, ['name' => 'With the owner', 'weekly_windows' => $this->everyDay(), 'host_user_id' => $owner->id]);
+
+        $slot = $this->tomorrowSlots($samsType)[0];
+        $this->book($samsType, $slot);
+        $this->assertContains($slot, $this->tomorrowSlots($ownersType), "Sam's booking is Sam's time");
+
+        // Sam leaves: the booking stays, it is the schedule's time now, and so the owner's.
+        $role->users()->detach($sam->id);
+        $this->assertNotContains($slot, $this->tomorrowSlots($ownersType));
+    }
+
     public function test_a_blocked_account_cannot_host(): void
     {
         [$owner, $role, $sam, $type] = $this->scheduleWithHost();
@@ -303,26 +338,30 @@ class AppointmentHostTest extends TestCase
 
         $sql = $this->statementsInside(fn () => app(AppointmentService::class)->reschedule($sale, $slots[3], 'owner', null, null, true));
 
+        // The host and the owner (a move against the schedule's own time reads the owner's
+        // bookings elsewhere), then the schedule, and no plain read before them.
         $this->assertMatchesRegularExpression('/^select .* from `users` .* for update$/i', $sql[0], 'no plain read comes before the user lock');
-        $this->assertMatchesRegularExpression('/^select .* from `roles` .* for update$/i', $sql[1]);
+        $this->assertMatchesRegularExpression('/^select .* from `users` .* for update$/i', $sql[1]);
+        $this->assertMatchesRegularExpression('/^select .* from `roles` .* for update$/i', $sql[2]);
         $this->assertSame($slots[3], Carbon::parse($sale->event->fresh()->starts_at, 'UTC')->format('Y-m-d\TH:i:s\Z'));
     }
 
-    public function test_an_unhosted_booking_locks_no_user(): void
+    /**
+     * A type with no host is the owner's time, which a type the owner hosts on another schedule
+     * also reads (busyIntervals()), so the two queue on the owner as a hosted booking queues on
+     * its host.
+     */
+    public function test_an_unhosted_booking_locks_the_owner_first_then_the_schedule(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent', ['timezone' => self::TZ]);
         $type = $this->createAppointmentType($role, ['weekly_windows' => $this->everyDay()]);
+        $slot = $this->tomorrowSlots($type)[0];
 
-        $locks = [];
-        DB::listen(function ($query) use (&$locks) {
-            if (stripos($query->sql, 'for update') !== false && str_contains($query->sql, '`users`')) {
-                $locks[] = $query->sql;
-            }
-        });
+        $sql = $this->statementsInside(fn () => $this->book($type, $slot));
 
-        $this->book($type, $this->tomorrowSlots($type)[0]);
-        $this->assertSame([], $locks);
+        $this->assertMatchesRegularExpression('/^select .* from `users` .* for update$/i', $sql[0], 'the first statement locks the owner');
+        $this->assertMatchesRegularExpression('/^select .* from `roles` .* for update$/i', $sql[1], 'then the schedule');
     }
 
     // ---------------------------------------------------------------- who may host
@@ -476,6 +515,44 @@ class AppointmentHostTest extends TestCase
 
         $this->assertFalse((bool) $type->fresh()->is_active);
         $this->assertCount(1, $this->hostReleasedMails());
+    }
+
+    /**
+     * A member added by phone is a stub account until somebody verifies that number, and then its
+     * places move to that account (User::claimRolesByPhone()). What it hosted moves with them.
+     */
+    public function test_claiming_a_hosts_phone_moves_the_types_and_bookings_it_hosted(): void
+    {
+        $stub = $this->createOwner();
+        $stub->forceFill(['password' => null, 'phone' => '+15555550142'])->saveQuietly();
+        [, $role, , $type] = $this->scheduleWithHost($stub);
+        $sale = $this->book($type, $this->tomorrowSlots($type)[0]);
+
+        $person = $this->createOwner();
+        $this->assertTrue($person->claimRolesByPhone('+15555550142'));
+
+        $this->assertSame($person->id, (int) $type->fresh()->host_user_id);
+        $this->assertSame($person->id, (int) $sale->event->fresh()->appointment_host_user_id);
+        $this->assertTrue(\App\Services\AppointmentHostService::isEligible($role->id, $person->id));
+        $this->assertTrue($type->fresh()->isBookable(), 'still on the booking page, with the same person');
+    }
+
+    public function test_claiming_a_hosts_phone_as_a_viewer_releases_the_types_it_hosted(): void
+    {
+        Queue::fake();
+        $stub = $this->createOwner();
+        $stub->forceFill(['password' => null, 'phone' => '+15555550143'])->saveQuietly();
+        [$owner, $role, , $type] = $this->scheduleWithHost($stub);
+
+        // The person who verifies the number is already on the schedule, as a viewer, who cannot host.
+        $person = $this->createOwner();
+        $role->users()->attach($person->id, ['level' => 'viewer']);
+        $person->claimRolesByPhone('+15555550143');
+
+        $this->assertNotSame($person->id, (int) $type->fresh()->host_user_id);
+        $this->assertFalse((bool) $type->fresh()->is_active);
+        $this->assertNotNull($type->fresh()->host_released_at);
+        $this->assertSame($owner->email, $this->hostReleasedMails()[0][0], 'the owner is told, as when a host leaves');
     }
 
     public function test_deleting_the_hosts_account_releases_them(): void

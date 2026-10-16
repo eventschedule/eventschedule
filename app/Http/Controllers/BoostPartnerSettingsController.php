@@ -158,13 +158,47 @@ class BoostPartnerSettingsController extends Controller
 
             $assets = (new MetaAdsService($token, '', ''))->listOwnAssets();
             $metaUserId = (string) Http::timeout(30)->get('https://graph.facebook.com/'.config('services.meta.api_version', 'v21.0').'/me', ['access_token' => $token, 'fields' => 'id'])->json('id');
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            // Its message ends with the address asked, which carries the app secret, the code
+            // or the token in its query string: never reported as it is.
+            report(new \RuntimeException('Boost partner login: Meta could not be reached'));
+
+            return $this->back()->with('error', __('messages.boost_partner_login_failed'));
         } catch (\Exception $e) {
             report($e);
 
             return $this->back()->with('error', __('messages.boost_partner_login_failed'));
         }
 
-        if ($partner->connection_method !== BoostPartner::METHOD_LOGIN && $this->hasLiveWork($partner)) {
+        // What the token reaches, offered to pick from (selectAssets()) once the login is taken.
+        $offered = [
+            'pages' => collect($assets['pages'])->map(fn ($p) => ['id' => (string) $p['id'], 'name' => (string) ($p['name'] ?? $p['id'])])->values()->all(),
+            'ad_accounts' => collect($assets['ad_accounts'])->map(fn ($a) => ['id' => MetaAdsService::bareAccountId((string) $a['id']), 'name' => (string) ($a['name'] ?? $a['id']), 'currency' => $a['currency'] ?? null])->values()->all(),
+        ];
+
+        // Logging in again over a login (a token near its expiry, or one Meta revoked) is a new
+        // token for the same connection while it still reaches the Page and ad account in use: the
+        // boosts on them keep running. Another pair can still be picked from the list above.
+        $reachableAccounts = collect($assets['ad_accounts'])->map(fn ($a) => MetaAdsService::bareAccountId((string) $a['id']));
+        $reachablePages = collect($assets['pages'])->map(fn ($p) => (string) $p['id']);
+        if ($partner->connection_method === BoostPartner::METHOD_LOGIN && $partner->ad_account_id && $partner->page_id
+            && $reachableAccounts->contains((string) $partner->ad_account_id) && $reachablePages->contains((string) $partner->page_id)) {
+            $partner->forceFill([
+                'meta_token' => $token,
+                'meta_user_id' => $metaUserId ?: $partner->meta_user_id,
+                'meta_token_expires_at' => $response->json('expires_in') ? now()->addSeconds((int) $response->json('expires_in')) : null,
+            ])->save();
+            $request->session()->put('boost_partner_assets', $offered);
+
+            AuditService::log(AuditService::BOOST_PARTNER_CONNECT, auth()->id(), 'BoostPartner', $partner->id, null, ['method' => 'login', 'refreshed' => true]);
+
+            return $this->verify($partner);
+        }
+
+        // Anything else is a new connection, which clears the Page and ad account: never while a
+        // boost runs on the old ones, which would then be read and paused with a token that
+        // cannot reach them (and, once another account is picked, abandoned while still running).
+        if ($this->hasLiveWork($partner)) {
             return $this->back()->with('error', __('messages.boost_partner_disconnect_blocked'));
         }
 
@@ -182,10 +216,7 @@ class BoostPartnerSettingsController extends Controller
             'confirmed_at' => null,
         ])->save();
 
-        $request->session()->put('boost_partner_assets', [
-            'pages' => collect($assets['pages'])->map(fn ($p) => ['id' => (string) $p['id'], 'name' => (string) ($p['name'] ?? $p['id'])])->values()->all(),
-            'ad_accounts' => collect($assets['ad_accounts'])->map(fn ($a) => ['id' => MetaAdsService::bareAccountId((string) $a['id']), 'name' => (string) ($a['name'] ?? $a['id']), 'currency' => $a['currency'] ?? null])->values()->all(),
-        ]);
+        $request->session()->put('boost_partner_assets', $offered);
 
         AuditService::log(AuditService::BOOST_PARTNER_CONNECT, auth()->id(), 'BoostPartner', $partner->id, null, ['method' => 'login']);
 
@@ -208,6 +239,14 @@ class BoostPartnerSettingsController extends Controller
 
         if ($refusal = $this->refuseChange($partner, BoostPartner::METHOD_LOGIN, $request->ad_account_id, $request->page_id)) {
             return $refusal;
+        }
+
+        // Another Page or ad account while a boost runs on the current ones: the sync would read
+        // it with an account it no longer uses and, once another is in place, abandon it while it
+        // still runs at Meta.
+        $moves = (string) $request->ad_account_id !== (string) $partner->ad_account_id || (string) $request->page_id !== (string) $partner->page_id;
+        if ($moves && $partner->ad_account_id && $this->hasLiveWork($partner)) {
+            return $this->back()->with('error', __('messages.boost_partner_disconnect_blocked'));
         }
 
         $partner->forceFill(['page_id' => $request->page_id, 'ad_account_id' => $request->ad_account_id])->save();
@@ -360,9 +399,12 @@ class BoostPartnerSettingsController extends Controller
     {
         $checks = [];
         $error = null;
-        $meta = MetaAdsService::forPartner($partner);
 
         try {
+            // Inside the try: a login whose token Meta withdrew (the deauthorize webhook clears
+            // it) throws here, and is a failed check like any other, not an error page.
+            $meta = MetaAdsService::forPartner($partner);
+
             if ($partner->connection_method === BoostPartner::METHOD_PARTNER_SHARE) {
                 $business = (string) config('services.meta.business_id');
                 $systemUser = (string) config('services.meta.system_user_id');

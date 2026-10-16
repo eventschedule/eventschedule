@@ -7113,6 +7113,7 @@ return [
     'boost_partner_stale_version' => 'Dit verzoek is gewijzigd nadat je het opende. Bekijk de nieuwe versie.',
     'boost_partner_wrong_state' => 'Dat kan niet met deze boost zoals hij er nu voor staat.',
     'boost_partner_budget_below_spend' => 'Het budget kan niet lager zijn dan wat de boost al heeft uitgegeven.',
+    'boost_partner_image_required' => 'Een advertentie heeft een afbeelding nodig, en dit evenement heeft er geen. Upload er een voor de advertentie.',
     'boost_partner_payment_invalid' => 'Vul de betalingsreferentie en het betaalde bedrag in.',
     'boost_partner_launch_failed_reason' => 'Facebook kon de advertentie niet maken. Bewerk hem en stuur hem opnieuw, of neem contact op met support.',
     'boost_partner_rejected_default_reason' => 'Facebook heeft deze advertentie niet goedgekeurd.',

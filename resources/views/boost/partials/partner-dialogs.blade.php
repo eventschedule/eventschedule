@@ -22,6 +22,8 @@
         <div data-bp-payment-wrap>
             <x-toggle name="with_payment" id="bp-approve-with-payment" :label="__('messages.boost_partner_payment_already_received')" data-bp-payment-toggle />
             <div class="bp-dialog-part mt-3" data-bp-payment-part hidden>
+                {{-- The budget this payment is for, sent with it only while the part is on. --}}
+                <input type="hidden" name="budget" value="" data-bp-value="budget-amount">
                 <p class="bp-dialog-text">{{ __('messages.ad_budget') }}: <span data-bp-fill="budget"></span></p>
                 <div>
                     <x-input-label for="bp-approve-reference" :value="__('messages.boost_partner_your_reference')" />
@@ -60,6 +62,7 @@
 <dialog id="bp-dialog-payment" class="bp-dialog" aria-labelledby="bp-dialog-payment-title">
     <form method="POST" action="">
         @csrf
+        <input type="hidden" name="budget" value="" data-bp-value="budget-amount">
         <h2 id="bp-dialog-payment-title" class="bp-dialog-title">{{ __('messages.boost_partner_payment_received') }}</h2>
         <p class="bp-dialog-lead"><bdi data-bp-fill="name"></bdi></p>
         <p class="bp-dialog-text">{{ __('messages.boost_partner_payment_text') }} {{ __('messages.ad_budget') }}: <span data-bp-fill="budget"></span></p>
