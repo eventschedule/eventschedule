@@ -58,10 +58,17 @@ class CalendarCrawlableLinksTest extends TestCase
         $calendar = $this->source('role/partials/calendar.blade.php');
 
         // commaBreak() escapes the name before inserting its line breaks, so v-html is safe here.
+        // The link is the v-else of the list wording: a worded title is drawn part by part.
         $this->assertSame(
             2,
-            substr_count($calendar, '<a '.self::LINK_ATTRIBUTES.' v-html="commaBreak(event.name)"></a>'),
+            substr_count($calendar, '<a v-else '.self::LINK_ATTRIBUTES.' v-html="commaBreak(event.name)"></a>'),
             'The flyer layout and the stacked layout each link the title'
+        );
+        // And the worded title's name is the same link.
+        $this->assertStringContainsString(
+            '<a v-if="part.k === \'name\'" '.self::LINK_ATTRIBUTES,
+            $this->source('role/partials/wording-part.blade.php'),
+            'A title in the list wording links the name, as the standard title does'
         );
         $this->assertStringNotContainsString('<span v-html="commaBreak(event.name)"></span>', $calendar);
         $this->assertMatchesRegularExpression('/commaBreak\(text\) \{\s*if \(!text\) return \'\';\s*const div = document\.createElement\(\'div\'\);\s*div\.textContent = text;/', $calendar);

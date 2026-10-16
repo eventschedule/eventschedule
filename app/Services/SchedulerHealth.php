@@ -53,6 +53,7 @@ class SchedulerHealth
         'app-send-activation-nudges' => 'hosted',
         'app-send-owner-digests' => 'hosted',
         'app-process-referral-credits' => 'hosted',
+        'boost-charge-statements' => 'hosted',
         'app-generate-sub-audience-blog' => 'nexus',
         'app-generate-daily-blog-post' => 'nexus',
         'app-import-curator-events' => 'not_hosted',

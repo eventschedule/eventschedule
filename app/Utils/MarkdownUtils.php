@@ -33,7 +33,7 @@ class MarkdownUtils
         'calendar-pop-up-menu', 'calendar-card-dropdown',
         'calendar-mobile-sheet', 'calendar-mobile-overlay', 'mobile-calendar-cta',
 
-        'backup-app', 'booking-app', 'boost-modal-app', 'calendar-app', 'cancel-subscription-app',
+        'backup-app', 'booking-app', 'boost-modal-app', 'bp-card-element', 'calendar-app', 'cancel-subscription-app',
         'card-element', 'carpool-app', 'create-segment-app', 'dashboard-customize', 'es-cart-app',
         'es-lightbox-app', 'event-import-app', 'event-picker-app', 'event-submit-app',
         'eventbrite-app', 'follow-consent-modal-app', 'graphic-app', 'import-attendees-app',

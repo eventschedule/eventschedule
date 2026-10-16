@@ -58,8 +58,10 @@ class GuestKitTest extends TestCase
         foreach ($rules[1] as $selectorList) {
             foreach (explode(',', $selectorList) as $selector) {
                 $selector = trim($selector);
-                // The style tag itself, the two token blocks, and the print and motion queries' own lines.
-                if ($selector === 'body' || $selector === ':where(.dark) body' || $selector === '.dark .gk-panel' || ! str_starts_with($selector, '.')) {
+                // The style tag itself, the two token blocks, the print block's .dark twins (a dark
+                // utility left on a panel or a row would outrank the single class and print dark),
+                // and the print and motion queries' own lines.
+                if ($selector === 'body' || $selector === ':where(.dark) body' || $selector === '.dark .gk-panel' || $selector === '.dark .gk-row-item' || ! str_starts_with($selector, '.')) {
                     continue;
                 }
                 $this->assertSame(1, preg_match_all('/\.[a-z]/', $selector), 'one class in: '.$selector);

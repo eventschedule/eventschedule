@@ -132,9 +132,10 @@ class GrowthExportTest extends TestCase
         // it counts the guest pages, 17 since events made by a feed are a source of their own
         // (imported_feed, which arrives with nobody at the keyboard), 18 since the blog section
         // (which posts are read, crawlers left out), 19 since an owner's gateways can include
-        // razorpay. Bumping this is deliberate: a reader diffing two pulls needs to know the shape
-        // (or the meaning) moved.
-        $this->assertSame(19, $data['meta']['schema_version']);
+        // razorpay, 20 since boost.partner_fees (what boost partners pay on their own spend).
+        // Bumping this is deliberate: a reader diffing two pulls needs to know the shape (or the
+        // meaning) moved.
+        $this->assertSame(20, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
