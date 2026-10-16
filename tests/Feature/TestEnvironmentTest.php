@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Utils\GitHubUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\Depends;
 use Tests\TestCase;
 
 /**
@@ -175,6 +176,39 @@ class TestEnvironmentTest extends TestCase
             '',
             (string) app(\Illuminate\Foundation\Vite::class)(['resources/js/app.js']),
             'refreshApplication() dropped the withoutVite() stub, so every @vite page 500s on CI.'
+        );
+    }
+
+    /**
+     * A time limit set while handling a request lasts for the rest of the test run.
+     *
+     * A web request gets a fresh max_execution_time each time. A test runs its requests inside the
+     * PHPUnit process, so the limit a controller sets stays in force after the test ends. It also
+     * starts a new timer. AppController::translateData() calls set_time_limit(900), and
+     * CronEndpointSecurityTest calls that route with the real secret. CI ran for 900 more
+     * seconds of CPU time with nothing resetting the limit, then died with "Maximum execution
+     * time of 900 seconds exceeded" in a test that had nothing to do with it (at the time,
+     * PaymentGatewayRegistryTest). The CLI runs with no limit, and TestCase::tearDown() goes
+     * back to that after every test.
+     *
+     * The test that follows this one is the check. This one plays the controller.
+     */
+    public function test_a_request_sets_a_time_limit(): void
+    {
+        set_time_limit(900);
+
+        $this->assertSame('900', (string) ini_get('max_execution_time'));
+    }
+
+    #[Depends('test_a_request_sets_a_time_limit')]
+    public function test_a_time_limit_a_request_set_ends_with_its_test(): void
+    {
+        $this->assertSame(
+            '0',
+            (string) ini_get('max_execution_time'),
+            'The time limit the previous test set is still in force. TestCase::tearDown() must call '
+            .'set_time_limit(0), or the suite dies a fixed number of CPU seconds after the latest test '
+            .'that reached a set_time_limit() call, in whatever test is running at that moment.'
         );
     }
 

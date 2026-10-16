@@ -45,6 +45,17 @@ abstract class TestCase extends BaseTestCase
         \App\Services\ScheduledTaskRecorder::flush();
     }
 
+    protected function tearDown(): void
+    {
+        // A controller's set_time_limit() is meant for one web request, but here it lasts as long as
+        // the PHPUnit process and starts a new timer. /translate_data sets 900 seconds, and CI died
+        // that many CPU seconds later in an unrelated test. Go back to the CLI's default of no limit.
+        // TestEnvironmentTest fails if this is removed.
+        set_time_limit(0);
+
+        parent::tearDown();
+    }
+
     /**
      * Rebuild the application, keeping the Vite stub in place.
      *
