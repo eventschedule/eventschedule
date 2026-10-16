@@ -114,6 +114,18 @@ window.sentryOnLoad = function () {
             /^iabjs:\/\//i,              // Meta in-app browser (Instagram, Facebook, Messenger, Threads)
         ],
         beforeSend: function (event) {
+            // Our markup running at an address we never served it from. Every page of ours has an
+            // http(s) address; about:blank is our HTML handed to a headless browser (Puppeteer's
+            // setContent(): EVENTSCHEDULE-JS-3B, HeadlessChrome from a cloud host, "Vue is not
+            // defined" at about:blank:2:23), and file: is a saved copy. What breaks there is the
+            // copy's, not a bug on any page of ours. Keyed on the page address and never on the
+            // browser, so the same error on a real page is still reported, headless or not; an
+            // event with no request URL says nothing about where it ran and is kept.
+            var pageUrl = event.request && event.request.url;
+            if (typeof pageUrl === 'string' && ! /^https?:\/\//i.test(pageUrl)) {
+                return null;
+            }
+
             // Terms that name the ERROR ITSELF, matched against the exception value and type (and
             // event.message, for captureMessage events) but deliberately NOT against the rest of
             // the event. Matching the whole serialized event, as this used to, discards a genuine

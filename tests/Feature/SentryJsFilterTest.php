@@ -476,6 +476,45 @@ class SentryJsFilterTest extends TestCase
         ]));
     }
 
+    /**
+     * EVENTSCHEDULE-JS-3B: our HTML run by a headless browser at about:blank.
+     *
+     * Dropped on the page address alone. The kept rows are the same error, same headless browser,
+     * on pages we do serve: a script that runs before Vue there is a real bug, so nothing here may
+     * key on the message or the browser. The last assertion is the A/B: the frozen pre-split copy
+     * has no address check, and keeps the about:blank report, so the drop comes from the check.
+     */
+    public function test_a_page_we_did_not_serve_is_dropped(): void
+    {
+        $vueMissing = fn (string $url) => [
+            'exception' => ['values' => [[
+                'type' => 'ReferenceError',
+                'value' => 'Vue is not defined',
+                'mechanism' => ['type' => 'onerror', 'handled' => false],
+                'stacktrace' => ['frames' => [[
+                    'filename' => $url,
+                    'lineno' => 2,
+                    'colno' => 23,
+                ]]],
+            ]]],
+            'contexts' => ['browser' => ['name' => 'HeadlessChrome', 'version' => '153.0.8010']],
+            'request' => ['url' => $url],
+        ];
+
+        $this->assertSame(
+            ['dropped', 'dropped', 'kept', 'kept'],
+            $this->verdicts([
+                $vueMissing('about:blank'),
+                $vueMissing('file:///Users/someone/Downloads/house-show.html'),
+                $vueMissing('https://house-show.eventschedule.com/a-very-star-shaped-back-to-school-bash'),
+                $vueMissing('http://localhost:8000/house-show'),
+            ])
+        );
+
+        $before = file_get_contents(base_path('tests/fixtures/sentry-filter-before-split.js'));
+        $this->assertSame('kept', $this->verdict($vueMissing('about:blank'), $before));
+    }
+
     /** ChunkLoadError names the exception TYPE, so the value alone would miss it. */
     public function test_an_ignored_exception_type_is_matched(): void
     {
