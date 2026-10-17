@@ -274,26 +274,24 @@ jobs:
         env:
           LARAVEL_BYPASS_ENV_CHECK: 1
 
-      # --no-reload is what makes PHP_CLI_SERVER_WORKERS take effect (ServeCommand disables
-      # workers whenever the env watcher is on), and it also stops the watcher restarting the
-      # server when `php artisan dusk` swaps .env. A single-worker server serializes every
-      # request, which is what lets one slow POST outlive the test that fired it.
-      - name: Start Laravel server in background
-        run: php artisan serve --no-reload > /dev/null 2>&1 &
-        env:
-          PHP_CLI_SERVER_WORKERS: 4
-
-      - name: Wait for server to be ready
-        run: |
-          for i in $(seq 1 30); do
-            if curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/up | grep -q '200'; then
-              echo "Server is ready"
-              break
-            fi
-            echo "Waiting for server... attempt $i"
-            sleep 1
-          done
-
+      # The app is served by plain `php -S`, never `php artisan serve`. ServeCommand parses every
+      # log line of the php -S it runs, and with PHP_CLI_SERVER_WORKERS those lines reach it from
+      # four workers over two pipes in no fixed order. On run 39056748617 a `Closing` line arrived
+      # for a port whose entry only a `URI:` line had made, the parser threw "Undefined array key 0"
+      # (ServeCommand.php:346), artisan serve died, and Symfony's Process destructor stopped the
+      # server with it: RouteLoadTest and all eight files after it failed on
+      # ERR_CONNECTION_REFUSED. start_server below is the command ServeCommand::serverCommand()
+      # builds, with no parser in front of it. It honours PHP_CLI_SERVER_WORKERS without
+      # --no-reload, has no env watcher to restart it, and reads .env on each request, which never
+      # changes here because .env.dusk.local is a copy of .env. The router reads getcwd() as the
+      # public folder, so it starts from public/. A single-worker server serializes every request,
+      # which is what lets one slow POST outlive the test that fired it.
+      #
+      # Its output goes to storage/logs/serve.log, uploaded with the error log. ensure_server
+      # checks /up before every file: a server that stopped answering is named in an ::error::
+      # line with the tail of that log and started again, so a crash costs the file it happened
+      # in, not every file after it.
+      #
       # Every file runs, and the step fails at the end with the list. The step runs under `bash -e`,
       # so a bare `php artisan dusk "$test"` aborted it on the FIRST failing file and every later
       # one silently never ran - one flaky journey hid thirteen suites. `|| failed=...` is a handled
@@ -306,13 +304,58 @@ jobs:
       - name: Run Laravel Dusk tests
         run: |
           cp .env .env.dusk.local
+
+          start_server() {
+            (cd public && PHP_CLI_SERVER_WORKERS=4 exec php -S 127.0.0.1:8000 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php) >> storage/logs/serve.log 2>&1 &
+            server_pid=$!
+          }
+
+          server_answers() {
+            [ "$(curl -s -m 10 -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/up)" = "200" ]
+          }
+
+          wait_for_server() {
+            for i in $(seq 1 30); do
+              if server_answers; then
+                echo "Server is ready"
+                return 0
+              fi
+              echo "Waiting for server... attempt $i"
+              sleep 1
+            done
+            echo "::error::The app server did not answer /up after 30 attempts."
+            tail -n 50 storage/logs/serve.log
+            exit 1
+          }
+
+          ensure_server() {
+            if server_answers; then
+              return 0
+            fi
+            echo "::error::The app server stopped answering during $1; starting it again."
+            tail -n 80 storage/logs/serve.log
+            kill "$server_pid" 2>/dev/null || true
+            pkill -f 'php -S 127.0.0.1:8000' || true
+            sleep 1
+            start_server
+            wait_for_server
+            died_during="$died_during $1"
+          }
+
+          start_server
+          wait_for_server
+
           failed=""
+          died_during=""
+          prev=""
           for test in tests/Browser/*Test.php; do
             # dusk:install scaffolds a placeholder ExampleTest.php (asserts "Laravel"); skip it.
             if [ "$(basename "$test")" = "ExampleTest.php" ]; then
               echo "Skipping scaffold $test"
               continue
             fi
+            [ -z "$prev" ] || ensure_server "$prev"
+            prev="$test"
             echo "Running $test"
             if ! php artisan dusk "$test"; then
               failed="$failed $test"
@@ -322,8 +365,14 @@ jobs:
             fi
             php artisan cache:clear
           done
+          [ -z "$prev" ] || ensure_server "$prev"
+          if [ -n "$died_during" ]; then
+            echo "The app server stopped answering during:$died_during"
+          fi
           if [ -n "$failed" ]; then
             echo "Failing Dusk files:$failed"
+          fi
+          if [ -n "$failed" ] || [ -n "$died_during" ]; then
             exit 1
           fi
         env:
@@ -350,5 +399,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: error-log
-          path: storage/logs/laravel.log
+          path: |
+            storage/logs/laravel.log
+            storage/logs/serve.log
           if-no-files-found: ignore
