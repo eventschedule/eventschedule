@@ -18,6 +18,13 @@ use Illuminate\Support\Facades\Cache;
  * between, because Setting::set() busts the whole settings map and doing that once a minute would
  * cost far more than the stamp is worth. If the cache is lost, the next tick reads the row, sees the
  * version already recorded, and only re-primes the key.
+ *
+ * The version alone could not tell deploys apart: it moves only at an "Update version" commit, so
+ * every deploy in between shipped under the same number and never showed here. Where the host says
+ * which commit it built (APP_COMMIT, see commit()), a new commit under the same version is a new
+ * entry too. A container that does not know its commit never records one: the worker and the web
+ * container run the same deploy, and one of them lacking the variable must not record the deploy
+ * over and over. At a version change it records the version with no commit.
  */
 class ReleaseHistory
 {
@@ -31,7 +38,14 @@ class ReleaseHistory
     public static function touch(): void
     {
         $version = (string) config('self-update.version_installed');
-        if ($version === '' || Cache::get(self::CACHE_KEY) === $version) {
+        if ($version === '') {
+            return;
+        }
+
+        $commit = self::commit();
+        $seen = Cache::get(self::CACHE_KEY);
+        if ($seen === self::marker($version, $commit)
+            || ($commit === null && is_string($seen) && str_starts_with($seen, $version.'|'))) {
             return;
         }
 
@@ -39,12 +53,38 @@ class ReleaseHistory
         // map cached in another container's store (CACHE_STORE=file with a worker beside the web
         // container) would be stale - appending to it would drop whatever that container wrote.
         $history = self::decode(Setting::query()->where('key', self::SETTING)->value('value'));
-        if (($history[count($history) - 1]['version'] ?? null) !== $version) {
-            $history[] = ['version' => $version, 'first_seen_at' => now()->toIso8601String()];
+        $last = $history[count($history) - 1] ?? [];
+
+        // While a deploy rolls out, the old container and the new one both tick for a few minutes,
+        // and each would read the other's entry as the last one and append its own again. A commit
+        // already recorded under this version is not a new deploy. The cost: a rollback to a commit
+        // recorded earlier under the same version is not recorded either.
+        $recorded = $commit !== null && collect(array_slice($history, -10))
+            ->contains(fn ($entry) => ($entry['version'] ?? null) === $version && ($entry['commit'] ?? null) === $commit);
+
+        if (($last['version'] ?? null) !== $version || ($commit !== null && ($last['commit'] ?? null) !== $commit && ! $recorded)) {
+            $history[] = ['version' => $version, 'commit' => $commit, 'first_seen_at' => now()->toIso8601String()];
             Setting::set(self::SETTING, json_encode(array_slice($history, -self::MAX_ENTRIES)));
         }
 
-        Cache::forever(self::CACHE_KEY, $version);
+        Cache::forever(self::CACHE_KEY, self::marker($version, $history[count($history) - 1]['commit'] ?? null));
+    }
+
+    /**
+     * The commit this container was built from, as 12 lowercase hex characters, or null when the
+     * host does not say. APP_COMMIT is an env var, so anything that is not a hash is refused rather
+     * than carried into the growth payload.
+     */
+    public static function commit(): ?string
+    {
+        $value = strtolower(trim((string) config('app.commit')));
+
+        return preg_match('/^[0-9a-f]{7,40}\z/', $value) ? substr($value, 0, 12) : null;
+    }
+
+    private static function marker(string $version, ?string $commit): string
+    {
+        return $commit === null ? $version : $version.'|'.$commit;
     }
 
     /**
@@ -52,7 +92,9 @@ class ReleaseHistory
      * worker writes this row and the web container serves the payload, and a map cached in the web
      * container's own store would never show the release. One indexed read per build.
      *
-     * @return list<array{version: string, first_seen_at: string}> oldest first
+     * Entries recorded before APP_COMMIT existed have no `commit` key.
+     *
+     * @return list<array{version: string, commit?: ?string, first_seen_at: string}> oldest first
      */
     public static function all(): array
     {

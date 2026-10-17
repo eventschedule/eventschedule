@@ -33,7 +33,20 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 20;
+    public const SCHEMA_VERSION = 21;
+
+    /** How far ahead the schedule rows look for events on sale (upcoming_*). */
+    public const UPCOMING_DAYS = 60;
+
+    /** Stripe's subscription statuses, as sub_status may report them; anything else reads "other". */
+    private const SUB_STATUSES = ['active', 'trialing', 'past_due', 'canceled', 'unpaid', 'paused'];
+
+    /**
+     * Import sources that make events with nobody at the keyboard (a feed, a calendar sync), so
+     * they say nothing about whether the organizer is still at work. The import page's own Google
+     * read is stamped google too and is left out with them.
+     */
+    private const UNATTENDED_SOURCES = [Event::IMPORT_FEED, Event::IMPORT_GOOGLE, Event::IMPORT_MICROSOFT, Event::IMPORT_CALDAV];
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -685,6 +698,21 @@ class GrowthExportService
                 .'them. Unlike every other source they arrive with nobody at the keyboard: a schedule '
                 .'with a feed can gain a hundred events in one read. Do not read imported_feed, or '
                 .'daily.events_imported from this version on, as a count of things an organizer did.',
+            'Since schema_version 21 (additive): the schedule rows say where each schedule stands now. '
+                .'Subscription: sub_status, trial_ends_in, cancel_pending (cancelled and not over yet: still '
+                .'in billing while sub_status is active or past_due, and a cancelled trial that will not '
+                .'convert while it reads trialing), period_ends_in, cancel_reason (a fixed key, never the '
+                .'comment), plan_ends_in (a paid tier no subscription pays for), '
+                .'ticket_trial_ends_in. Selling: upcoming_ticketed_events, upcoming_paid_events and '
+                .'upcoming_paid_blocked look '.self::UPCOMING_DAYS.' days ahead and count a series once; '
+                .'a series counts while it runs, so its next date can lie past the horizon; '
+                .'upcoming_orders are orders for dates still to come on those events; unpaid_orders_30d '
+                .'splits unpaid from expired, and expired includes every checkout abandoned online. '
+                .'Sync: gsync_direction and gsync_calendar (primary = no calendar chosen), and '
+                .'max_events_one_day_90d with the source of most of that day. last_event_created leaves out '
+                .'feeds and calendar syncs. Every *_in and last_event_created is a bucket of days, never a date. meta.app_commit and a commit on '
+                .'each meta.releases entry date a deploy to its commit where the host sets APP_COMMIT; '
+                .'hero_test.daily splits the headline test by day.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -714,6 +742,9 @@ class GrowthExportService
                 // When each version first ran on this install (ReleaseHistory, stamped by the
                 // scheduler heartbeat). Deploys are manual, so a git tag only bounds this from below.
                 'releases' => ReleaseHistory::all(),
+                // The commit the serving container was built from (APP_COMMIT), or null where the
+                // host does not say. Public: the repository is.
+                'app_commit' => ReleaseHistory::commit(),
                 'schema_version' => self::SCHEMA_VERSION,
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
@@ -761,7 +792,9 @@ class GrowthExportService
             // The homepage headline test, as /admin/growth shows it - and signups.hero_variant, so a
             // variant can be judged on the sellers it produced rather than on signups alone. Nexus
             // only: no other install serves the homepage the test runs on.
-            'hero_test' => config('app.is_nexus') ? HeroExperiment::report() : null,
+            'hero_test' => config('app.is_nexus') && ($hero = HeroExperiment::report()) !== null
+                ? [...$hero, 'daily' => HeroExperiment::daily()]
+                : null,
             'signups' => ['columns' => $signups['columns'], 'rows' => $signups['rows']],
             'schedules' => ['columns' => $schedules['columns'], 'rows' => $schedules['rows']],
         ];
@@ -1646,6 +1679,15 @@ class GrowthExportService
             ->selectRaw('role_id, SUM(count) as c')->groupBy('role_id')
             ->get()->keyBy('role_id');
 
+        // Schema 21: where each schedule stands NOW, so a review can tell a seller between events
+        // from one that is stuck, and tie a cancellation or a trial to the schedule it belongs to.
+        $upcoming = $this->upcomingByRole();
+        $unpaidOrders = $this->unpaidOrdersByRole();
+        $lastCreated = $this->lastEventCreatedByRole();
+        $googleSync = $this->googleSyncByRole();
+        $busiestDay = $this->busiestDayByRole();
+        $cancellations = $this->latestCancellationByRole();
+
         $rows = [];
         foreach ((clone $base)->orderByDesc('id')->limit($this->rowCap())->cursor() as $r) {
             $r->setRelation('subscriptions', $subscriptionsByRole[$r->id] ?? new EloquentCollection);
@@ -1688,6 +1730,8 @@ class GrowthExportService
             }
 
             $subAt = $firstSub[$r->id]->first_at ?? null;
+            $subscription = $this->subscriptionStateOf($r, $cancellations[$r->id] ?? null);
+            $selling = $upcoming[$r->id] ?? null;
 
             $rows[] = [
                 $this->hashId('s', $r->id),
@@ -1740,6 +1784,22 @@ class GrowthExportService
                 // Null, not an empty shape, when there are none: an empty `platforms` would encode
                 // as a JSON list here and an object everywhere it has an entry.
                 $externalTickets[$r->id] ?? null,
+                ...$subscription,
+                (int) ($selling->ticketed ?? 0),
+                (int) ($selling->paid ?? 0),
+                // Paid rows a guest cannot buy: the plan says no and the event was never
+                // grandfathered - the same two questions Event::canSellPaidTickets() asks.
+                $r->canSellPaidTickets() ? 0 : (int) ($selling->paid_open ?? 0),
+                (int) ($selling->orders ?? 0),
+                [
+                    'unpaid' => (int) ($unpaidOrders[$r->id]->unpaid ?? 0),
+                    'expired' => (int) ($unpaidOrders[$r->id]->expired ?? 0),
+                ],
+                $this->daysAgoBucket($lastCreated[$r->id] ?? null),
+                $googleSync[$r->id]['direction'] ?? null,
+                $googleSync[$r->id]['calendar'] ?? null,
+                $busiestDay[$r->id]['count'] ?? 0,
+                $busiestDay[$r->id]['source'] ?? null,
             ];
         }
 
@@ -1753,7 +1813,12 @@ class GrowthExportService
             'appointment_types',
             'photos', 'newsletter_emails_this_month', 'features', 'days_to_upgrade',
             'country', 'gateways', 'stripe_connected_month', 'dismissed_steps', 'events_by_source',
-            'external_tickets_90d'];
+            'external_tickets_90d',
+            'sub_status', 'trial_ends_in', 'cancel_pending', 'cancel_reason', 'period_ends_in',
+            'plan_ends_in', 'ticket_trial_ends_in',
+            'upcoming_ticketed_events', 'upcoming_paid_events', 'upcoming_paid_blocked', 'upcoming_orders',
+            'unpaid_orders_30d', 'last_event_created',
+            'gsync_direction', 'gsync_calendar', 'max_events_one_day_90d', 'max_day_source'];
 
         $rows = $this->suppressRarePlatforms($rows, array_search('external_tickets_90d', $columns, true));
 
@@ -1778,6 +1843,263 @@ class GrowthExportService
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('role_id');
+    }
+
+    /**
+     * The schedule's subscription as its row reports it, in column order: sub_status,
+     * trial_ends_in, cancel_pending, cancel_reason, period_ends_in, plan_ends_in,
+     * ticket_trial_ends_in.
+     *
+     * Read off the subscriptions preloaded onto $role, newest first. A declined first checkout
+     * (incomplete) is not a subscription, as everywhere else here. Dates leave only as buckets of
+     * days: an exact date beside the rest of a pseudonymous row narrows down whose it is.
+     */
+    private function subscriptionStateOf(Role $role, ?object $cancellation): array
+    {
+        $sub = $role->subscriptions->first(fn ($s) => $s->type === 'default'
+            && ! in_array($s->stripe_status, ['incomplete', 'incomplete_expired'], true));
+
+        $status = $sub ? (in_array($sub->stripe_status, self::SUB_STATUSES, true) ? $sub->stripe_status : 'other') : null;
+
+        // Cancelled and not over yet. Still in billing and MRR only while active or past due: a
+        // cancelled TRIAL keeps the status trialing with ends_at at the trial's end, pays nothing,
+        // and will not convert.
+        $pending = $sub !== null && $sub->ends_at !== null && $sub->ends_at->isFuture();
+
+        // The reason given when THIS subscription was cancelled: a row older than it belongs to an
+        // earlier one. Only the key; the comment is free text and never leaves.
+        $reason = null;
+        if ($sub !== null && $sub->ends_at !== null && $cancellation !== null
+            && Carbon::parse($cancellation->created_at)->gte($sub->created_at)) {
+            $reason = in_array($cancellation->reason, SubscriptionCancellation::REASONS, true) ? $cancellation->reason : 'none';
+        }
+
+        // A paid tier no live subscription pays for (an admin grant, a referral credit, a legacy
+        // plan_expires, a generic trial) ends on a date nobody is reminded of, and paid selling on
+        // new events stops with it.
+        // The tier lasts as long as the later of the two keeps it up.
+        $planEnds = null;
+        if (config('app.hosted') && $role->actualPlanTier() !== 'free' && ! $role->hasActiveSubscription()) {
+            $ends = array_filter([
+                $role->onGenericTrial() ? Carbon::parse($role->trial_ends_at) : null,
+                in_array($role->plan_type, ['pro', 'enterprise'], true) && $role->plan_expires
+                    && $role->plan_expires >= now()->format('Y-m-d') ? Carbon::parse($role->plan_expires)->endOfDay() : null,
+            ]);
+            $planEnds = $ends ? $this->daysAheadBucket(max($ends)) : null;
+        }
+
+        return [
+            $status,
+            $sub?->stripe_status === 'trialing' ? $this->daysAheadBucket($sub->trial_ends_at) : null,
+            $pending,
+            $reason,
+            $pending ? $this->daysAheadBucket($sub->ends_at) : null,
+            $planEnds,
+            $this->daysAheadBucket($role->ticket_trial_ends_at),
+        ];
+    }
+
+    /** The latest cancellation of each schedule that was not taken back: churn()'s own rows. */
+    private function latestCancellationByRole(): array
+    {
+        return DB::table('subscription_cancellations')
+            ->whereNotNull('role_id')
+            ->whereNull('resumed_at')
+            ->whereNotIn('source', SubscriptionCancellation::NOT_CHURN_SOURCES)
+            ->orderBy('created_at')->orderBy('id')
+            ->get(['role_id', 'reason', 'created_at'])
+            ->keyBy('role_id')
+            ->all();
+    }
+
+    /**
+     * Events on sale in the next UPCOMING_DAYS days, per seller: [role_id => {ticketed, paid,
+     * paid_open, orders}]. ticketed has tickets switched on; paid has a live priced ticket type;
+     * paid_open is the paid ones that were never grandfathered, which the row builder reports as
+     * upcoming_paid_blocked for a schedule whose plan cannot sell them; orders are the orders for
+     * dates still to come.
+     *
+     * "Upcoming" is Event::constrainToOccurrencesSince(), the sitemap's window: a series counts
+     * once while it has a date to come, so a weekly class is one event and not fifty. A series
+     * whose first date is past the horizon is not counted yet.
+     */
+    private function upcomingByRole(): array
+    {
+        $now = Carbon::now('UTC');
+        $onSale = fn ($query) => Event::constrainToOccurrencesSince($query, $now)
+            ->where('events.starts_at', '<=', $now->copy()->addDays(self::UPCOMING_DAYS)->toDateTimeString())
+            ->where('events.tickets_enabled', true)
+            ->where('events.is_draft', false)
+            ->where('events.is_cancelled', false)
+            ->whereNull('events.appointment_type_id');
+
+        $priced = 'EXISTS (SELECT 1 FROM tickets WHERE tickets.event_id = events.id AND tickets.is_deleted = 0 '
+            .'AND tickets.is_addon = 0 AND tickets.price > 0)';
+
+        $events = $this->attributeToSeller(DB::table('events'))
+            ->tap($onSale)
+            ->groupBy(DB::raw(self::SELLER))
+            ->selectRaw(self::SELLER.' as role_id, COUNT(DISTINCT events.id) as ticketed, '
+                ."COUNT(DISTINCT CASE WHEN {$priced} THEN events.id END) as paid, "
+                ."COUNT(DISTINCT CASE WHEN {$priced} AND events.tickets_grandfathered_at IS NULL THEN events.id END) as paid_open")
+            ->get()
+            ->keyBy('role_id');
+
+        $orders = $this->attributeToSeller(DB::table('sales')->join('events', 'events.id', '=', 'sales.event_id'))
+            ->tap($onSale)
+            ->where('sales.is_deleted', false)
+            ->whereIn('sales.status', ['paid', 'unpaid'])
+            ->where('sales.payment_method', '<>', 'import')
+            ->where('sales.event_date', '>=', $now->toDateString())
+            ->groupBy(DB::raw(self::SELLER))
+            ->selectRaw(self::SELLER.' as role_id, COUNT(DISTINCT sales.id) as c')
+            ->pluck('c', 'role_id');
+
+        foreach ($events as $roleId => $row) {
+            $row->orders = (int) ($orders[$roleId] ?? 0);
+        }
+
+        return $events->all();
+    }
+
+    /**
+     * Orders placed in the last 30 days that were never paid, per seller: unpaid (still waiting,
+     * as a cash or payment-link order does until the organizer marks it paid) and expired
+     * (released after its hold, which includes every checkout abandoned online). Free
+     * registrations and imports are not orders anybody could pay.
+     */
+    private function unpaidOrdersByRole(): array
+    {
+        return $this->attributeToSeller(DB::table('sales')->join('events', 'events.id', '=', 'sales.event_id'))
+            ->where('sales.is_deleted', false)
+            ->where('sales.created_at', '>=', now()->copy()->subDays(30))
+            ->whereIn('sales.status', ['unpaid', 'expired'])
+            ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
+            ->groupBy(DB::raw(self::SELLER))
+            ->selectRaw(self::SELLER." as role_id, SUM(CASE WHEN sales.status = 'unpaid' THEN 1 ELSE 0 END) as unpaid, "
+                ."SUM(CASE WHEN sales.status = 'expired' THEN 1 ELSE 0 END) as expired")
+            ->get()
+            ->keyBy('role_id')
+            ->all();
+    }
+
+    /**
+     * When each schedule last created an event by hand or through an import a person ran
+     * (credited like everything else, to the seller). Feeds and calendar syncs are left out: a
+     * schedule with a feed would read as busy every week whether anyone was there or not.
+     */
+    private function lastEventCreatedByRole(): array
+    {
+        return $this->attributeToSeller(DB::table('events'))
+            ->where(fn ($q) => $q->whereNull('events.import_source')->orWhereNotIn('events.import_source', self::UNATTENDED_SOURCES))
+            ->groupBy(DB::raw(self::SELLER))
+            ->selectRaw(self::SELLER.' as role_id, MAX(events.created_at) as last_at')
+            ->pluck('last_at', 'role_id')
+            ->all();
+    }
+
+    /**
+     * The owner's Google sync on each schedule that has one: its direction, and whether it uses a
+     * calendar the owner chose or falls back to "primary". A schedule with no calendar chosen reads
+     * whatever the token's account calls primary, which is how the scheduled sync came to read one
+     * owner's calendar with another owner's token until 2026-10 (docs/NEXUS_RELEASE.md, "A fix to
+     * the scheduled Google sync").
+     *
+     * @return array<int, array{direction: string, calendar: string}>
+     */
+    private function googleSyncByRole(): array
+    {
+        $rows = DB::table('roles')
+            ->leftJoin('role_user', fn ($join) => $join->on('role_user.role_id', '=', 'roles.id')
+                ->on('role_user.user_id', '=', 'roles.user_id'))
+            ->whereIn('roles.sync_direction', ['to', 'from', 'both'])
+            ->get(['roles.id', 'roles.sync_direction', 'role_user.google_calendar_id']);
+
+        $out = [];
+        foreach ($rows as $row) {
+            $out[$row->id] = [
+                'direction' => $row->sync_direction,
+                'calendar' => ($row->google_calendar_id ?? '') === '' ? 'primary' : 'chosen',
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Each schedule's busiest day for new events in the last 90 days, and where most of that day's
+     * events came from: an import source, or "hand". A schedule that gains hundreds of events in a
+     * day from a sync nobody is watching shows up here; daily.events_created only says it happened
+     * somewhere.
+     *
+     * @return array<int, array{count: int, source: string}>
+     */
+    private function busiestDayByRole(): array
+    {
+        $perDay = [];
+        foreach ($this->attributeToSeller(DB::table('events'))
+            ->where('events.created_at', '>=', now()->copy()->subDays(90))
+            ->groupBy(DB::raw(self::SELLER), DB::raw('DATE(events.created_at)'), 'events.import_source')
+            ->selectRaw(self::SELLER.' as role_id, DATE(events.created_at) as day, events.import_source as source, COUNT(*) as c')
+            ->get() as $row) {
+            $source = $row->source === null ? 'hand' : (in_array($row->source, Event::IMPORT_SOURCES, true) ? $row->source : 'other');
+            $perDay[$row->role_id][$row->day][$source] = ($perDay[$row->role_id][$row->day][$source] ?? 0) + (int) $row->c;
+        }
+
+        $out = [];
+        foreach ($perDay as $roleId => $days) {
+            $best = null;
+            foreach ($days as $sources) {
+                $total = array_sum($sources);
+                if ($best === null || $total > $best['count']) {
+                    arsort($sources);
+                    $best = ['count' => $total, 'source' => (string) array_key_first($sources)];
+                }
+            }
+            $out[$roleId] = $best;
+        }
+
+        return $out;
+    }
+
+    /** Days until $at as a bucket, "ended" once it has passed, or null for no date. */
+    private function daysAheadBucket($at): ?string
+    {
+        if ($at === null || $at === '') {
+            return null;
+        }
+
+        $seconds = Carbon::parse($at)->getTimestamp() - now()->getTimestamp();
+        if ($seconds < 0) {
+            return 'ended';
+        }
+
+        $days = intdiv($seconds, 86400);
+
+        return match (true) {
+            $days <= 3 => '0-3',
+            $days <= 7 => '4-7',
+            $days <= 14 => '8-14',
+            $days <= 30 => '15-30',
+            default => '31+',
+        };
+    }
+
+    /** Days since $at as a bucket, or null for no date. */
+    private function daysAgoBucket($at): ?string
+    {
+        if ($at === null || $at === '') {
+            return null;
+        }
+
+        $days = intdiv(max(0, now()->getTimestamp() - Carbon::parse($at)->getTimestamp()), 86400);
+
+        return match (true) {
+            $days <= 7 => '0-7',
+            $days <= 30 => '8-30',
+            $days <= 90 => '31-90',
+            default => '91+',
+        };
     }
 
     /**

@@ -134,6 +134,10 @@ return [
     'platform_currency' => env('PLATFORM_CURRENCY') ?: 'USD',
 
     'is_nexus' => (bool) env('IS_NEXUS', false),
+    // The git commit this deploy was built from. The hosted app spec sets APP_COMMIT to
+    // ${_self.COMMIT_HASH}; unset elsewhere. Read only through ReleaseHistory::commit(), which
+    // accepts a hex hash and nothing else, so the growth payload can date a deploy to its commit.
+    'commit' => env('APP_COMMIT'),
     // The upstream nexus app: receives shared translation suggestions AND federated
     // events. Separate from marketing_url, which operators may point at their own site -
     // anything that must reach the real upstream belongs here, not there.

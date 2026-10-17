@@ -23,8 +23,8 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
-| [Unreleased](#unreleased-boost-partners-appointment-hosts-and-the-appointment-api-2026-10-15) | not yet | Confirm the Meta token is a system user's, add `META_BUSINESS_ID` and `META_SYSTEM_USER_ID`, check the Stripe platform webhook; after: the scheduler entry, then the pilot partner's setup |
-| [v1.0.134](#v10134) | not yet (partly live since 2026-09-30) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN`; [GDPR](#gdpr-2026-10-04): 2FA on every admin first, then the policy-change notice |
+| [Unreleased](#unreleased-boost-partners-appointment-hosts-and-the-appointment-api-2026-10-15) | not yet | Confirm the Meta token is a system user's, add `META_BUSINESS_ID`, `META_SYSTEM_USER_ID` and `APP_COMMIT`, check the Stripe platform webhook; after: the scheduler entry, then the pilot partner's setup |
+| [v1.0.134](#v10134) | live by 2026-10-17 (a schema 18 pull) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN`; [GDPR](#gdpr-2026-10-04): 2FA on every admin first, then the policy-change notice |
 | [v1.0.133](#v10133) | 2026-09-25 | Four read-only queries, the image backfill, a sitemap cache key, a Cloudflare purge |
 | [v1.0.132](#v10132) | 2026-09-23 | The ticket amnesty migration by hand, a `SESSION_LIFETIME` decision, a MySQL check, the federation welcome order |
 | [v1.0.131](#v10131) | 2026-09-10 | Nothing; four optional features |
@@ -123,8 +123,10 @@ enables a boost partner, or an owner gives an appointment type a host.
 - **API rate limits.** These now count per account for a key that works, and per visitor address
   (`Blocklist::address()`, not the proxy's) for a missing or wrong key. Every client gets the same
   or more room; nothing is tighter for anyone.
-- **Growth data.** The payload is now `schema_version` 20: `boost.partner_fees` is new. Nothing
-  else changed shape.
+- **Growth data.** The payload is now `schema_version` 21. Schema 20 added
+  `boost.partner_fees`. Schema 21 (2026-10-18) adds the deploy's commit, and where each schedule
+  stands now: its subscription, trial and plan end, what it has on sale, unpaid orders, and its
+  Google sync. All of it is additive; `docs/GROWTH_DATA.md` has the fields.
 
 ### Before the deploy
 
@@ -163,7 +165,21 @@ enables a boost partner, or an owner gives an appointment type a host.
      through while our call timed out is recorded, rather than charged again the next day.
    - If the platform account has no endpoint for that address, add one with that event, and put
      its signing secret in `STRIPE_PLATFORM_WEBHOOK_SECRET`.
-5. **Production's `META_API_VERSION`.** The default is `v21.0`. Meta retires a version about two
+5. **Add `APP_COMMIT` to the web service AND the worker, as a component-level variable whose
+   value is `${_self.COMMIT_HASH}`** (an App Platform bindable variable: the commit each build was
+   made from).
+   - It is what lets the growth pull say which commit is live and since when. Without it
+     `meta.releases` only moves at an "Update version" commit, and every deploy in between is
+     invisible.
+   - Not a secret: the repository is public. Plain, not encrypted.
+   - The worker's value is the one that dates deploys: the scheduler heartbeat records each new
+     commit, and it runs on the worker. The web container's fills `meta.app_commit`.
+   - After the deploy, open each component's Console tab and run `echo $APP_COMMIT`: it must print
+     a hash. If the worker prints nothing, set its value to the web service's instead,
+     `${<web component name>.COMMIT_HASH}`, and check again; without it the pull still names the
+     live commit but cannot say since when.
+   - Check it from a dev machine: `php artisan app:pull-growth` prints "Production runs <hash>".
+6. **Production's `META_API_VERSION`.** The default is `v21.0`. Meta retires a version about two
    years after release, and a newer one wants `is_adset_budget_sharing_enabled` and
    `targeting_automation.advantage_audience` on an ad set.
    - Before the pilot's first real boost, launch one test boost through a test ad account shared
@@ -228,15 +244,18 @@ Five. None irreversible; all are new tables or nullable columns.
 
 ## v1.0.134
 
-**Partly deployed.** Everything on `main` after v1.0.133. The version was bumped on 2026-09-28;
-commits since then ship under the same number. Production has run `dcf7bd8b6` since the
-2026-09-30 deploy, so everything committed up to then is **already live**: the conversion, churn
+**Deployed.** Everything on `main` after v1.0.133. The version was bumped on 2026-09-28; commits
+since then ship under the same number. A growth pull on 2026-10-17 reported schema 18, which only
+the commits from `b9777e3d9` (2026-10-09) up to `e87e13e4f` (2026-10-15) carry: everything in this
+section is live, and so is every commit up to `b9777e3d9`. Which commit exactly is unknown
+until `APP_COMMIT` is set (see Unreleased). It went live in two steps. From the 2026-09-30 deploy
+production ran `dcf7bd8b6`, so this was **live first**: the conversion, churn
 and owner-email batch (its emails have been sending since 2026-09-28), the photo gallery, the
 homepage headline test, guest support chat, list animations on schedule pages, per-schedule custom
 field values on shared events, and 14 of this version's 32 migrations. Their "before the deploy"
 steps below are now overdue rather than ahead.
 
-Still to ship: realtime, the growth data pull, the get-started and email-design rework of
+Then, by the 2026-10-17 pull: realtime, the growth data pull, the get-started and email-design rework of
 2026-10-02, the cache pruning of 2026-10-03, and round three of the homepage headline test of
 2026-10-04 with the Reset stats button it needs, the homepage's search title and description
 going back to their own strings on 2026-10-08 (they read from the headline test from 2026-10-04,

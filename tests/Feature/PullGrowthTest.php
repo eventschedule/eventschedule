@@ -84,6 +84,38 @@ class PullGrowthTest extends TestCase
         $this->assertStringNotContainsString('Headline test', $output, 'this pull carries no test');
     }
 
+    /** Schema 21: which commit production runs, and how far this checkout is past it. */
+    public function test_the_summary_says_which_commit_production_runs(): void
+    {
+        $head = trim((string) shell_exec('git -C '.escapeshellarg(base_path()).' rev-parse HEAD'));
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{40}$/', $head, 'the test needs a git checkout');
+        $short = substr($head, 0, 12);
+
+        // One fake answers every pull, so the four answers are a sequence.
+        Http::fake(['eventschedule.com/api/internal/growth*' => Http::sequence()
+            ->push($this->payload(['schema_version' => 21, 'app_commit' => $short,
+                'releases' => [['version' => 'v1.0.140', 'commit' => $short, 'first_seen_at' => '2026-10-20T08:00:00+00:00']]]))
+            ->push($this->payload(['schema_version' => 21, 'app_commit' => null]))
+            ->push($this->payload(['schema_version' => 21, 'app_commit' => '--output=/tmp/x']))
+            ->push($this->payload())]);
+
+        [$code, $output] = $this->pullCommand();
+        $this->assertSame(0, $code, $output);
+        $this->assertStringContainsString("Production runs {$short} (first seen 2026-10-20T08:00:00+00:00): 0 commits", $output);
+
+        // A server that does not say, and one whose value is not a hash: nothing reaches git.
+        $this->assertStringContainsString('Production commit unknown', $this->pullCommand()[1]);
+
+        $output = $this->pullCommand()[1];
+        $this->assertStringContainsString('Production commit unknown', $output);
+        $this->assertStringNotContainsString('Production runs', $output);
+
+        // An older pull says nothing about it.
+        $output = $this->pullCommand()[1];
+        $this->assertStringNotContainsString('Production runs', $output);
+        $this->assertStringNotContainsString('Production commit', $output);
+    }
+
     public function test_the_summary_shows_the_headline_test_the_pull_carries(): void
     {
         $payload = $this->payload(['schema_version' => 9]);

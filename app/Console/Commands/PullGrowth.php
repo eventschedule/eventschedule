@@ -10,6 +10,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Symfony\Component\Process\Process;
 
 /**
  * Download the growth payload from a hosted install onto this machine, for analysis.
@@ -178,6 +179,10 @@ class PullGrowth extends Command
             }
         }
 
+        if (($deploy = $this->deployLine($meta)) !== null) {
+            $this->line($deploy);
+        }
+
         $this->table(['Metric', 'Now', 'Previous pull', 'Change'], GrowthSummary::compare($current, $previous));
 
         if ($hero = GrowthSummary::heroTest($current)) {
@@ -196,6 +201,39 @@ class PullGrowth extends Command
         }
 
         $this->line('Field definitions and caveats: docs/GROWTH_DATA.md');
+    }
+
+    /**
+     * Which commit production runs, since when, and how far this checkout's HEAD is past it - so a
+     * number can be put beside what was actually live, not beside what was committed. Schema 21+
+     * only; null on an older pull. The hash comes from the server, so it is checked to be one
+     * before it reaches git, and git is run without a shell.
+     */
+    private function deployLine(array $meta): ?string
+    {
+        if (! array_key_exists('app_commit', $meta)) {
+            return null;
+        }
+
+        $commit = $meta['app_commit'];
+        if (! is_string($commit) || ! preg_match('/^[0-9a-f]{7,40}\z/', $commit)) {
+            return '<comment>Production commit unknown:</comment> the server has no APP_COMMIT (see APP_COMMIT in docs/NEXUS_RELEASE.md).';
+        }
+
+        $since = null;
+        foreach ($meta['releases'] ?? [] as $release) {
+            if (($release['commit'] ?? null) === $commit) {
+                $since ??= $release['first_seen_at'] ?? null;
+            }
+        }
+
+        $count = new Process(['git', 'rev-list', '--count', $commit.'..HEAD'], base_path());
+        $count->run();
+        $behind = $count->isSuccessful()
+            ? (int) trim($count->getOutput()).' commits on this checkout\'s HEAD are not deployed'
+            : 'that commit is not in this checkout (git fetch?)';
+
+        return "Production runs {$commit}".($since ? " (first seen {$since})" : '').": {$behind}.";
     }
 
     /**

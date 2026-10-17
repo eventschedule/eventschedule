@@ -155,6 +155,11 @@ class GrowthDataEndpointTest extends TestCase
         $this->assertSame(0, $rows[HeroExperiment::DEFAULT]['visitors'], 'the counts are per variant');
         $this->assertTrue($rows[HeroExperiment::DEFAULT]['is_default']);
 
+        // By day too (schema 21), and the days add up to the totals.
+        $days = collect($payload['hero_test']['daily'])->where('variant', $variant);
+        $this->assertSame([2, 1, 1], [$days->sum('visitors'), $days->sum('clicks'), $days->sum('signups')]);
+        $this->assertSame(now()->toDateString(), $days->first()['date']);
+
         $column = array_search('hero_variant', $payload['signups']['columns'], true);
         $this->assertNotFalse($column);
         $this->assertSame([$variant], array_values(array_filter(array_column($payload['signups']['rows'], $column))));
@@ -288,6 +293,17 @@ class GrowthDataEndpointTest extends TestCase
             'created_at' => now(), 'updated_at' => now()]);
         $this->createSale($event, $role, ['status' => 'paid', 'payment_method' => 'rsvp', 'email' => 'rory.rsvp@gmail.com', 'name' => 'Rory Rsvp']);
 
+        // Schema 21 reads the subscription and why it was cancelled: the key, never the comment or
+        // Stripe's ids. And the owner's Google calendar, by whether one is chosen, never by its id.
+        $role->subscriptions()->create(['type' => 'default', 'stripe_id' => 'sub_HIDDENSUB123', 'stripe_status' => 'active',
+            'stripe_price' => 'price_HIDDENPRICE', 'quantity' => 1, 'ends_at' => now()->addDays(9)]);
+        DB::table('subscription_cancellations')->insert(['role_id' => $role->id, 'user_id' => $owner->id,
+            'stripe_subscription_id' => 'sub_HIDDENSUB123', 'source' => 'app', 'reason' => 'season_over',
+            'comment' => 'Ottoline says the loft floods every winter', 'created_at' => now()]);
+        DB::table('roles')->where('id', $role->id)->update(['sync_direction' => 'from']);
+        DB::table('role_user')->where('role_id', $role->id)->where('user_id', $owner->id)
+            ->update(['google_calendar_id' => 'marina.private.calendar@group.calendar.google.com']);
+
         $body = $this->pull()->assertOk()->getContent();
 
         // The links were read: without this the checks below would hold just as well for a
@@ -296,6 +312,8 @@ class GrowthDataEndpointTest extends TestCase
         $sid = 's:'.substr(hash_hmac('sha256', (string) $role->id, (string) config('app.key')), 0, 12);
         $row = collect($schedules['rows'])->firstWhere(array_search('sid', $schedules['columns'], true), $sid);
         $this->assertSame(3, $row[array_search('external_tickets_90d', $schedules['columns'], true)]['events'] ?? null);
+        $this->assertSame('season_over', $row[array_search('cancel_reason', $schedules['columns'], true)]);
+        $this->assertSame('chosen', $row[array_search('gsync_calendar', $schedules['columns'], true)]);
 
         foreach ([
             'Marina', 'Delacroix', 'marina.delacroix@gmail.com', 'boxoffice@gmail.com', 'buyer@gmail.com',
@@ -305,6 +323,7 @@ class GrowthDataEndpointTest extends TestCase
             'hiddeninstall', 'Hidden Install', 'Gideon', 'Rhea', 'GIFTCODE1234', 'Wanda', 'Rory',
             'marinas-hidden-loft', 'hidden-loft',
             'marinas-loft-tickets', 'PRESALE-7Q2', 'secret-show',
+            'HIDDENSUB', 'HIDDENPRICE', 'Ottoline', 'floods', 'private.calendar',
         ] as $secret) {
             $this->assertStringNotContainsStringIgnoringCase($secret, $body, "the payload leaked: {$secret}");
         }

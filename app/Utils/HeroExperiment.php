@@ -302,6 +302,56 @@ final class HeroExperiment
     }
 
     /**
+     * stats() by day, for the growth payload: a change to the page under the headline lands on a
+     * date, and the totals alone cannot be split there. The same rows and the same cut as stats(),
+     * so the days of each variant sum to its totals. Days on which a variant had nothing are left
+     * out.
+     *
+     * @return list<array{date: string, variant: string, visitors: int, clicks: int, signups: int}>
+     */
+    public static function daily(): array
+    {
+        $keys = array_keys(self::VARIANTS);
+        $since = self::resetAt();
+
+        $days = [];
+        $beacons = MarketingExperimentStat::query()
+            ->where('experiment', self::EXPERIMENT)
+            ->whereIn('variant', $keys)
+            ->when($since, fn ($query) => $query->where('date', '>=', $since->toDateString()))
+            ->groupBy('date', 'variant')
+            ->select('date', 'variant', DB::raw('SUM(visitors) AS visitors'), DB::raw('SUM(clicks) AS clicks'))
+            ->get();
+        foreach ($beacons as $row) {
+            $date = Carbon::parse($row->date)->toDateString();
+            $days[$date][$row->variant] = ['visitors' => (int) $row->visitors, 'clicks' => (int) $row->clicks, 'signups' => 0];
+        }
+
+        $signups = User::query()
+            ->whereIn('hero_variant', $keys)
+            ->when($since, fn ($query) => $query->where('created_at', '>=', $since))
+            ->groupBy(DB::raw('DATE(created_at)'), 'hero_variant')
+            ->select(DB::raw('DATE(created_at) AS day'), 'hero_variant', DB::raw('COUNT(*) AS signups'))
+            ->get();
+        foreach ($signups as $row) {
+            $days[$row->day][$row->hero_variant] ??= ['visitors' => 0, 'clicks' => 0, 'signups' => 0];
+            $days[$row->day][$row->hero_variant]['signups'] = (int) $row->signups;
+        }
+
+        ksort($days);
+        $rows = [];
+        foreach ($days as $date => $variants) {
+            foreach ($keys as $key) {
+                if (isset($variants[$key])) {
+                    $rows[] = ['date' => (string) $date, 'variant' => $key, ...$variants[$key]];
+                }
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
      * Start the test over: every variant back to zero, and any candidate or locked winner
      * cleared, so the weights return to the burn-in split.
      *
