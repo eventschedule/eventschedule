@@ -39,7 +39,7 @@ class UpdateApp extends Command
 
         $this->info('Updating app, this can take a few minutes...');
 
-        $result = $appUpdate->performUpdate($updater);
+        $result = $appUpdate->performUpdate($updater, forConsole: true);
 
         if ($result['status'] === 'up_to_date') {
             $this->info('No updates available');

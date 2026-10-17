@@ -11,6 +11,7 @@ use Codedge\Updater\UpdaterManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Mockery;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -205,37 +206,93 @@ class AdminAppUpdateTest extends TestCase
         // a folder it finds there without downloading, so a refused update must take it away.
         $downloads = $this->downloadFolder();
         mkdir($downloads.'/eventschedule/app', 0755, true);
-        $release = (new Release)->setStoragePath($downloads.'/eventschedule.zip')->setRelease('eventschedule.zip');
+        file_put_contents($downloads.'/eventschedule.zip', 'zip');
 
-        $result = app(AppUpdateService::class)->performUpdate($this->updaterThatCannotCopy($release));
+        $result = app(AppUpdateService::class)->performUpdate($this->updaterThatCannotCopy($this->fetched($downloads, 'eventschedule.zip')), forConsole: true);
 
         $this->assertSame('error', $result['status']);
         $this->assertSame(__('messages.app_update_files_not_writable'), $result['message']);
         $this->assertStringContainsString(base_path(), $result['detail']);
         $this->assertStringContainsString('as root', $result['detail']);
         $this->assertSame('v9.9.9', Cache::get(AppUpdateService::CACHE_KEY), 'the update is still waiting');
+        $this->assertFileDoesNotExist($downloads.'/eventschedule.zip');
         $this->assertDirectoryDoesNotExist($downloads.'/eventschedule');
         $this->assertDirectoryExists($downloads);
     }
 
-    public function test_a_refused_update_never_deletes_the_download_folder_itself(): void
+    /**
+     * createFolderFromFile('/tmp/') is '/tmp/': a release whose path is not its own archive must
+     * leave the download folder alone. Each case gets past every guard but the one it names.
+     */
+    public static function releasesThatAreNotTheirOwnArchive(): array
     {
-        // createFolderFromFile('/tmp') is '/tmp': a release whose path is not its own archive
-        // must leave the folder alone.
+        return [
+            'no release name' => [fn (string $downloads) => (new Release)->setStoragePath($downloads)],
+            'a name, and the path never given it' => [fn (string $downloads) => (new Release)->setStoragePath($downloads.'/')->setRelease('eventschedule.zip')],
+            'a name with no extension' => [fn (string $downloads) => (new Release)->setStoragePath($downloads.'/')->setRelease('keep')->updateStoragePath()],
+            'a name that is all extension' => [fn (string $downloads) => (new Release)->setStoragePath($downloads.'/')->setRelease('.zip')->updateStoragePath()],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('releasesThatAreNotTheirOwnArchive')]
+    public function test_a_refused_update_never_deletes_the_download_folder_itself(\Closure $release): void
+    {
         $this->selfhost();
         $downloads = $this->downloadFolder();
         mkdir($downloads.'/keep');
+        file_put_contents($downloads.'/keep/file', 'x');
 
-        app(AppUpdateService::class)->performUpdate($this->updaterThatCannotCopy((new Release)->setStoragePath($downloads)));
+        app(AppUpdateService::class)->performUpdate($this->updaterThatCannotCopy($release($downloads)));
 
-        $this->assertDirectoryExists($downloads.'/keep');
+        $this->assertFileExists($downloads.'/keep/file');
+    }
+
+    /**
+     * SELF_UPDATER_DOWNLOAD_PATH=/var/www beside an install at /var/www/eventschedule names the
+     * install as the release's folder, and fetch() reuses it because it exists. Storage stands in
+     * for the install here: a test must never be one guard away from deleting the repository.
+     */
+    public function test_a_refused_update_never_deletes_the_app_it_runs_in(): void
+    {
+        $this->selfhost();
+        $downloads = $this->downloadFolder();
+
+        foreach (['', '/storage'] as $below) {
+            $this->app->useStoragePath($downloads.'/eventschedule'.$below);
+            File::ensureDirectoryExists(storage_path());
+            file_put_contents(storage_path('upload'), 'x');
+
+            app(AppUpdateService::class)->performUpdate($this->updaterThatCannotCopy($this->fetched($downloads, 'eventschedule.zip')));
+
+            $this->assertFileExists(storage_path('upload'), $below === '' ? 'the folder is the storage folder' : 'the folder holds the storage folder');
+        }
+    }
+
+    public function test_a_refused_update_never_follows_a_link_where_its_folder_would_be(): void
+    {
+        // /tmp is shared, so anybody on the machine can put a link where the release would go.
+        $this->selfhost();
+        $downloads = $this->downloadFolder();
+        mkdir($downloads.'/elsewhere');
+        file_put_contents($downloads.'/elsewhere/upload', 'x');
+        symlink($downloads.'/elsewhere', $downloads.'/eventschedule');
+
+        app(AppUpdateService::class)->performUpdate($this->updaterThatCannotCopy($this->fetched($downloads, 'eventschedule.zip')));
+
+        $this->assertFileExists($downloads.'/elsewhere/upload');
+    }
+
+    /** A release the way the GitHub source builds it: the download folder, then the archive's name. */
+    private function fetched(string $downloads, string $name): Release
+    {
+        return (new Release)->setStoragePath($downloads.'/')->setRelease($name)->updateStoragePath();
     }
 
     private function downloadFolder(): string
     {
         $dir = sys_get_temp_dir().'/app-update-test-'.bin2hex(random_bytes(6));
         mkdir($dir);
-        $this->beforeApplicationDestroyed(fn () => \Illuminate\Support\Facades\File::deleteDirectory($dir));
+        $this->beforeApplicationDestroyed(fn () => File::deleteDirectory($dir));
 
         return $dir;
     }

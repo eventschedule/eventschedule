@@ -149,9 +149,12 @@ class AppUpdateService
      * Download and apply the latest release, run migrations, then clear the caches the
      * updater cannot reach.
      *
-     * Returns ['status' => 'updated'|'up_to_date'|'error', 'message' => string].
+     * Returns ['status' => 'updated'|'up_to_date'|'error', 'message' => string], and on an
+     * error a 'detail' for the console. Only the console asks for the file a refused update
+     * stopped at: finding it walks the app again, in a request the walk that refused it has
+     * already made long, and the web pages never show it.
      */
-    public function performUpdate(UpdaterManager $updater): array
+    public function performUpdate(UpdaterManager $updater, bool $forConsole = false): array
     {
         try {
             if (! $updater->source()->isNewVersionAvailable()) {
@@ -167,11 +170,16 @@ class AppUpdateService
             // storage, bootstrap and public was told it had updated, and was offered the same
             // update again on its next visit. The cached version is kept: it is still waiting.
             if (! $updater->source()->update($release)) {
-                $this->forgetFetchedRelease($release);
+                // A folder that will not go must not turn the message below into a generic one.
+                try {
+                    $this->forgetFetchedRelease($release);
+                } catch (\Exception $e) {
+                    report($e);
+                }
 
                 // The path goes to the console only: on a plain selfhost install any signed-in
                 // user can open Settings > App Update (can_self_update()).
-                $blocked = $this->firstUnwritableFile(base_path());
+                $blocked = $forConsole ? $this->firstUnwritableFile(base_path()) : null;
 
                 return [
                     'status' => 'error',
@@ -225,8 +233,39 @@ class AppUpdateService
             return;
         }
 
+        // A folder fetch() would reuse is not always one it made. A download path that holds the
+        // install names the install itself (SELF_UPDATER_DOWNLOAD_PATH=/var/www beside
+        // /var/www/eventschedule), and deleteDirectory() follows a link, so one planted at
+        // /tmp/eventschedule would have it empty whatever it leads to.
+        if (is_link($folder) || $this->holdsTheApp($folder)) {
+            return;
+        }
+
         File::delete($archive);
         File::deleteDirectory($folder);
+    }
+
+    /** Whether `$folder` is the app's own folder or its storage, or a folder above either. */
+    protected function holdsTheApp(string $folder): bool
+    {
+        $real = realpath($folder);
+
+        if ($real === false) {
+            return false;
+        }
+
+        // rtrim first: realpath('/') is '/', and '//' starts no path.
+        $prefix = rtrim($real, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+
+        foreach ([base_path(), storage_path()] as $path) {
+            $path = realpath($path);
+
+            if ($path !== false && str_starts_with($path.DIRECTORY_SEPARATOR, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -95,20 +95,55 @@ class HtmlPurifierCacheTest extends TestCase
     }
 
     /**
-     * Every way to reach HTMLPurifier_Config::createDefault() without the helper: the
-     * constructor and purify() both pass what they are given to HTMLPurifier_Config::create(),
-     * which builds the default for null, an array or a string.
+     * Every way to reach HTMLPurifier_Config::createDefault() without the helper. The
+     * constructor passes what it is given to HTMLPurifier_Config::create(), which builds the
+     * default for null, an array or a string. purify() and purifyArray() do the same with a
+     * config that is truthy, and use the instance's own for null or an empty array.
+     *
+     * Comments are taken out first, and PHP's class names ignore case. What this cannot see:
+     * a literal config passed through a variable, a purify() whose named arguments put the
+     * config first, and a purifier resolved from the container.
      */
     private const DEFAULT_CONFIG_PATTERNS = [
-        'a config built directly' => '/HTMLPurifier_Config::(?:create\w*|inherit)\s*\(|new\s+\\\\?HTMLPurifier_Config\b/',
-        'new HTMLPurifier without a config object' => '/new\s+\\\\?HTMLPurifier\b(?!\s*\(\s*\$)/',
-        'the shared instance' => '/HTMLPurifier::(?:getInstance|instance)\s*\(/',
-        'purify() given a literal config' => '/->purify\((?:[^(),]|\([^()]*\))*,\s*(?:\[|\'|"|array\s*\(|null\b)/i',
+        'a config built directly' => '/HTMLPurifier_Config::(?:create\w*|inherit)\s*\(|new\s+\\\\?HTMLPurifier_Config\b/i',
+        'new HTMLPurifier without a config object' => '/new\s+\\\\?HTMLPurifier\b(?!\s*\(\s*(?:config\s*:\s*)?(?:\$|\\\\?(?:App\\\\Utils\\\\)?HtmlPurifierUtils::config\s*\())/i',
+        'the shared instance' => '/HTMLPurifier::(?:getInstance|instance)\s*\(/i',
+        // The first argument may hold calls of its own: (?1) is a balanced pair of parentheses.
+        'purify() given a literal config' => '/->purify(?:Array)?\s*\((?:[^(),]++|(\((?:[^()]++|(?1))*\)))*,\s*(?:config\s*:\s*)?(?:\[(?!\s*\])|\'|"|array\s*\((?!\s*\)))/i',
     ];
 
     private function defaultConfigUses(string $code): array
     {
-        return array_keys(array_filter(self::DEFAULT_CONFIG_PATTERNS, fn ($pattern) => preg_match($pattern, $code) === 1));
+        $code = $this->withoutComments($code);
+        $uses = [];
+
+        foreach (self::DEFAULT_CONFIG_PATTERNS as $use => $pattern) {
+            $found = preg_match($pattern, $code);
+
+            // preg_match() answers false on a PCRE error, which would read as nothing found.
+            $this->assertNotFalse($found, "\"$use\" could not be matched: ".preg_last_error_msg());
+
+            if ($found === 1) {
+                $uses[] = $use;
+            }
+        }
+
+        return $uses;
+    }
+
+    private function withoutComments(string $code): string
+    {
+        $kept = '';
+
+        foreach (token_get_all(str_starts_with($code, '<?php') ? $code : '<?php '.$code) as $token) {
+            if (is_array($token) && in_array($token[0], [T_COMMENT, T_DOC_COMMENT], true)) {
+                continue;
+            }
+
+            $kept .= is_array($token) ? $token[1] : $token;
+        }
+
+        return $kept;
     }
 
     public function test_the_scan_knows_every_way_to_get_the_default_config(): void
@@ -124,14 +159,26 @@ class HtmlPurifierCacheTest extends TestCase
             'new HTMLPurifier_Config($schema);',
             '$purifier->purify($html, [\'Core.Encoding\' => \'UTF-8\']);',
             '$purifier->purify(trim($html, "x"), \'HTML.Allowed=b\');',
+            '$purifier->purify(trim(strip_tags($html)), [\'HTML.Allowed\' => \'b\']);',
+            '$purifier->purify($html, config: [\'HTML.Allowed\' => \'b\']);',
+            '$purifier->purifyArray($items, [\'HTML.Allowed\' => \'b\']);',
+            'new HTMLPurifier(null);',
+            'new htmlpurifier();',
         ];
         $allowed = [
             'new HTMLPurifier($config);',
             'new HTMLPurifier( $this->config );',
+            'new HTMLPurifier(HtmlPurifierUtils::config());',
+            'new \HTMLPurifier(\App\Utils\HtmlPurifierUtils::config($dir));',
+            'new HTMLPurifier(config: $config);',
             '$purifier->purify($html);',
             '$purifier->purify(trim($html, "x"));',
             '$purifier->purify($html, $config);',
+            '$purifier->purify(trim(strip_tags($html)), $config);',
+            '$purifier->purify($html, null);',
             '$config = HtmlPurifierUtils::config();',
+            '// one new HTMLPurifier per call, built from HTMLPurifier_Config::createDefault()',
+            '/** The shared HTMLPurifier::instance() would cache in vendor/. */',
         ];
 
         foreach ($caught as $code) {

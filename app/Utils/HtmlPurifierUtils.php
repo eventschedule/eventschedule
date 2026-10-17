@@ -30,8 +30,10 @@ class HtmlPurifierUtils
      *
      * The folder is named for the HTMLPurifier version. On every miss the Serializer
      * unlinks the files another version wrote, and two requests missing at once both
-     * unlinked the same one: the second warned that it was gone. vendor/ never held such
-     * a file, because composer replaces the package folder; storage/ keeps them.
+     * unlinked the same one: the second warned that it was gone. storage/ keeps the old
+     * version's files across an upgrade, as does a vendor/ that app:update copied a
+     * release over (it adds and replaces files and deletes none); only composer replaced
+     * the package folder outright.
      */
     public static function config(?string $cacheDir = null): HTMLPurifier_Config
     {
