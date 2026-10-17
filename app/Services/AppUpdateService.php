@@ -160,7 +160,17 @@ class AppUpdateService
 
             $release = $updater->source()->fetch($versionAvailable);
 
-            $updater->source()->update($release);
+            // The updater copies nothing unless every file of the app is writable, and says so
+            // only by returning false. Unchecked, an install that gave the web user just
+            // storage, bootstrap and public was told it had updated, and was offered the same
+            // update again on its next visit. The cached version is kept: it is still waiting.
+            if (! $updater->source()->update($release)) {
+                return [
+                    'status' => 'error',
+                    'message' => __('messages.app_update_files_not_writable'),
+                    'detail' => 'The updater needs write access to every file under '.base_path().'. Run this command as the user that owns them.',
+                ];
+            }
 
             Artisan::call('migrate', ['--force' => true]);
 

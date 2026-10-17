@@ -5,9 +5,14 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Services\AdminAlertService;
 use App\Services\AppUpdateService;
+use Codedge\Updater\Contracts\SourceRepositoryTypeContract;
+use Codedge\Updater\Models\Release;
+use Codedge\Updater\UpdaterManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Mockery;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -185,6 +190,35 @@ class AdminAppUpdateTest extends TestCase
         // fatals the first Artisan::call() of any request. Nothing in the package calls
         // postUpdateArtisanCommands() anyway.
         $this->assertSame([], config('self-update.artisan_commands.post_update'));
+    }
+
+    public function test_an_update_that_could_not_replace_the_files_is_not_reported_as_installed(): void
+    {
+        // UpdateExecutor::run() copies nothing unless every file under base_path() is writable,
+        // and says so only by returning false. An install that gave the web user storage,
+        // bootstrap and public, as the docs say, was told "App updated successfully!", had its
+        // migrations run against the old code, and was offered the same update again.
+        $this->selfhost();
+        Cache::put(AppUpdateService::CACHE_KEY, 'v9.9.9', 600);
+
+        $source = Mockery::mock(SourceRepositoryTypeContract::class);
+        $source->shouldReceive('isNewVersionAvailable')->andReturn(true);
+        $source->shouldReceive('getVersionAvailable')->andReturn('v9.9.9');
+        $source->shouldReceive('fetch')->andReturn(new Release);
+        $source->shouldReceive('update')->once()->andReturn(false);
+
+        // UpdaterManager is final, so the fake source goes where source() looks first.
+        $updater = app(UpdaterManager::class);
+        (new \ReflectionProperty(UpdaterManager::class, 'sources'))->setValue($updater, ['github' => $source]);
+
+        Artisan::shouldReceive('call')->never();
+
+        $result = app(AppUpdateService::class)->performUpdate($updater);
+
+        $this->assertSame('error', $result['status']);
+        $this->assertSame(__('messages.app_update_files_not_writable'), $result['message']);
+        $this->assertStringContainsString(base_path(), $result['detail']);
+        $this->assertSame('v9.9.9', Cache::get(AppUpdateService::CACHE_KEY), 'the update is still waiting');
     }
 
     public function test_make_admin_promotes_a_user_who_is_not_id_1(): void

@@ -1061,6 +1061,7 @@ return [
     'confirm_app_update' => 'Kas uuendada rakendus kohe? See käivitab kõik uued andmebaasi migratsioonid.',
     'up_to_date' => 'Oled viimasel versioonil!',
     'app_updated' => 'Rakenduse värskendamine õnnestus!',
+    'app_update_files_not_writable' => 'Värskendust ei paigaldatud, sest veebiserver ei saa kirjutada kõigisse rakenduse failidesse. Käivitage serveris php artisan app:update kasutajana, kellele failid kuuluvad.',
     'no_new_version_available' => 'Uut versiooni pole saadaval',
     'driver' => 'Juht',
     'mysql_host' => 'MySQL-i host',

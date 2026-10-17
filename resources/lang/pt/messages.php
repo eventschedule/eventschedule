@@ -621,6 +621,7 @@ return [
     'confirm_app_update' => 'Atualizar a aplicação agora? Serão executadas as novas migrações da base de dados.',
     'up_to_date' => 'Você está atualizado!',
     'app_updated' => 'Aplicativo atualizado com sucesso!',
+    'app_update_files_not_writable' => 'A atualização não foi instalada porque o servidor web não consegue gravar em todos os arquivos do aplicativo. Execute php artisan app:update no servidor como o usuário dono dos arquivos.',
     'no_new_version_available' => 'Nenhuma nova versão disponível',
     'driver' => 'Driver',
     'mysql_host' => 'Host MySQL',

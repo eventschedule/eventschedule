@@ -3,7 +3,6 @@
 namespace App\Utils;
 
 use HTMLPurifier;
-use HTMLPurifier_Config;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
@@ -84,7 +83,7 @@ class MarkdownUtils
         // HTMLPurifier is the security boundary: it sanitizes the HTML that
         // CommonMark passed through, stripping <script>, event handlers, iframes,
         // and javascript: URIs while keeping safe formatting and <img>.
-        $config = HTMLPurifier_Config::createDefault();
+        $config = HtmlPurifierUtils::config();
         $config->set('HTML.TargetBlank', true);
         $config->set('HTML.Nofollow', true);
         $config->set('Attr.AllowedFrameTargets', ['_blank']);
@@ -290,7 +289,7 @@ class MarkdownUtils
             return '';
         }
 
-        $config = HTMLPurifier_Config::createDefault();
+        $config = HtmlPurifierUtils::config();
         // Allow common HTML elements for blog content
         $config->set('HTML.Allowed', 'p,br,strong,b,em,i,u,a[href|target|rel],ul,ol,li,h1,h2,h3,h4,h5,h6,blockquote,pre,code,img[src|alt|width|height],table,thead,tbody,tr,th,td,div,span[style],hr');
         $config->set('HTML.TargetBlank', true);

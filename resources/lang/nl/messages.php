@@ -616,6 +616,7 @@ return [
     'confirm_app_update' => 'De app nu bijwerken? Hierbij worden nieuwe databasemigraties uitgevoerd.',
     'up_to_date' => 'Je bent up-to-date!',
     'app_updated' => 'App succesvol bijgewerkt!',
+    'app_update_files_not_writable' => 'De update is niet geïnstalleerd, omdat de webserver niet naar alle bestanden van de app kan schrijven. Voer php artisan app:update op de server uit als de gebruiker die eigenaar is van de bestanden.',
     'no_new_version_available' => 'Geen nieuwe versie beschikbaar',
     'driver' => 'Driver',
     'mysql_host' => 'MySQL-host',

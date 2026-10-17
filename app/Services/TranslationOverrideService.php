@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Models\Setting;
 use App\Models\TranslationOverride;
+use App\Utils\HtmlPurifierUtils;
 use App\Utils\UrlUtils;
 use HTMLPurifier;
-use HTMLPurifier_Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -413,7 +413,7 @@ class TranslationOverrideService
         }
 
         if ($this->purifier === null) {
-            $config = HTMLPurifier_Config::createDefault();
+            $config = HtmlPurifierUtils::config();
             $config->set('HTML.Allowed', 'b,strong,i,em,u,a[href|title|target|rel],br');
             $config->set('HTML.TargetBlank', true);
             $config->set('HTML.Nofollow', true);

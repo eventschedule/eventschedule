@@ -1120,7 +1120,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">If the page is missing, or the update times out</div>
-            <p>Everything here is also available from the command line, which is the way out if the screen itself is unreachable: <code class="doc-inline-code">php artisan app:update</code> does the same download, install and migrate. A large update can outrun PHP's <code class="doc-inline-code">max_execution_time</code>, and the command has no such limit. Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design.</p>
+            <p>Everything here is also available from the command line, which is the way out if the screen itself is unreachable: <code class="doc-inline-code">php artisan app:update</code> does the same download, install and migrate. A large update can outrun PHP's <code class="doc-inline-code">max_execution_time</code>, and the command has no such limit. It is also the way when the page says the web server cannot write to every file of the app, which is the case on an install set up as the <a href="{{ route('marketing.docs.selfhost.installation') }}#permissions" class="doc-link">file permissions</a> step describes: run it as the user that owns the files. Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design.</p>
         </div>
     </section>
 
