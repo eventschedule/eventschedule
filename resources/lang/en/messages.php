@@ -1404,7 +1404,7 @@ return [
     'confirm_app_update' => 'Update the app now? This runs any new database migrations.',
     'up_to_date' => 'You\'re up to date!',
     'app_updated' => 'App updated successfully!',
-    'app_update_files_not_writable' => 'The update was not installed because the web server cannot write to every file of the app. Run php artisan app:update on the server as the user that owns the files.',
+    'app_update_files_not_writable' => 'The update was not installed because the web server cannot write to every file of the app. Run \'php artisan app:update\' on the server as root, then set the file permissions again as the installation guide describes.',
     'no_new_version_available' => 'No new version available',
     'driver' => 'Driver',
     'mysql_host' => 'MySQL Host',

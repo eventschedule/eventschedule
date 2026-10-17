@@ -201,10 +201,51 @@ class AdminAppUpdateTest extends TestCase
         $this->selfhost();
         Cache::put(AppUpdateService::CACHE_KEY, 'v9.9.9', 600);
 
+        // fetch() has already extracted the release beside its archive. The next fetch() reuses
+        // a folder it finds there without downloading, so a refused update must take it away.
+        $downloads = $this->downloadFolder();
+        mkdir($downloads.'/eventschedule/app', 0755, true);
+        $release = (new Release)->setStoragePath($downloads.'/eventschedule.zip')->setRelease('eventschedule.zip');
+
+        $result = app(AppUpdateService::class)->performUpdate($this->updaterThatCannotCopy($release));
+
+        $this->assertSame('error', $result['status']);
+        $this->assertSame(__('messages.app_update_files_not_writable'), $result['message']);
+        $this->assertStringContainsString(base_path(), $result['detail']);
+        $this->assertStringContainsString('as root', $result['detail']);
+        $this->assertSame('v9.9.9', Cache::get(AppUpdateService::CACHE_KEY), 'the update is still waiting');
+        $this->assertDirectoryDoesNotExist($downloads.'/eventschedule');
+        $this->assertDirectoryExists($downloads);
+    }
+
+    public function test_a_refused_update_never_deletes_the_download_folder_itself(): void
+    {
+        // createFolderFromFile('/tmp') is '/tmp': a release whose path is not its own archive
+        // must leave the folder alone.
+        $this->selfhost();
+        $downloads = $this->downloadFolder();
+        mkdir($downloads.'/keep');
+
+        app(AppUpdateService::class)->performUpdate($this->updaterThatCannotCopy((new Release)->setStoragePath($downloads)));
+
+        $this->assertDirectoryExists($downloads.'/keep');
+    }
+
+    private function downloadFolder(): string
+    {
+        $dir = sys_get_temp_dir().'/app-update-test-'.bin2hex(random_bytes(6));
+        mkdir($dir);
+        $this->beforeApplicationDestroyed(fn () => \Illuminate\Support\Facades\File::deleteDirectory($dir));
+
+        return $dir;
+    }
+
+    private function updaterThatCannotCopy(Release $release): UpdaterManager
+    {
         $source = Mockery::mock(SourceRepositoryTypeContract::class);
         $source->shouldReceive('isNewVersionAvailable')->andReturn(true);
         $source->shouldReceive('getVersionAvailable')->andReturn('v9.9.9');
-        $source->shouldReceive('fetch')->andReturn(new Release);
+        $source->shouldReceive('fetch')->andReturn($release);
         $source->shouldReceive('update')->once()->andReturn(false);
 
         // UpdaterManager is final, so the fake source goes where source() looks first.
@@ -213,12 +254,7 @@ class AdminAppUpdateTest extends TestCase
 
         Artisan::shouldReceive('call')->never();
 
-        $result = app(AppUpdateService::class)->performUpdate($updater);
-
-        $this->assertSame('error', $result['status']);
-        $this->assertSame(__('messages.app_update_files_not_writable'), $result['message']);
-        $this->assertStringContainsString(base_path(), $result['detail']);
-        $this->assertSame('v9.9.9', Cache::get(AppUpdateService::CACHE_KEY), 'the update is still waiting');
+        return $updater;
     }
 
     public function test_make_admin_promotes_a_user_who_is_not_id_1(): void

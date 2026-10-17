@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use Codedge\Updater\Models\Release;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 
 /**
  * Single owner of everything the selfhost self-updater needs to know: which version is
@@ -165,10 +167,18 @@ class AppUpdateService
             // storage, bootstrap and public was told it had updated, and was offered the same
             // update again on its next visit. The cached version is kept: it is still waiting.
             if (! $updater->source()->update($release)) {
+                $this->forgetFetchedRelease($release);
+
+                // The path goes to the console only: on a plain selfhost install any signed-in
+                // user can open Settings > App Update (can_self_update()).
+                $blocked = $this->firstUnwritableFile(base_path());
+
                 return [
                     'status' => 'error',
                     'message' => __('messages.app_update_files_not_writable'),
-                    'detail' => 'The updater needs write access to every file under '.base_path().'. Run this command as the user that owns them.',
+                    'detail' => 'The updater needs write access to every file under '.base_path()
+                        .($blocked ? ', and cannot write to '.$blocked : '')
+                        .'. Run this command as root, then run the chown from the installation guide\'s file permissions step again.',
                 ];
             }
 
@@ -190,6 +200,53 @@ class AppUpdateService
             // surfacing raw exception text; 'detail' is for the console only.
             return ['status' => 'error', 'message' => __('messages.error'), 'detail' => $e->getMessage()];
         }
+    }
+
+    /**
+     * fetch() downloads and extracts the release to a folder named for the package, not the
+     * version, and the next fetch() reuses any such folder without downloading again
+     * (Release::isSourceAlreadyFetched()). Left behind by a refused update, it was installed
+     * by the next attempt, under whatever version GitHub then called the newest.
+     */
+    protected function forgetFetchedRelease(Release $release): void
+    {
+        $archive = $release->getStoragePath();
+        $name = $release->getRelease();
+
+        // Only the archive fetch() named and the folder beside it. createFolderFromFile('/tmp')
+        // is '/tmp', so a path that is not that archive must never reach deleteDirectory().
+        if (! $archive || ! $name || basename($archive) !== $name) {
+            return;
+        }
+
+        $folder = createFolderFromFile($archive);
+
+        if ($folder === '' || $folder === $archive || dirname($folder) !== dirname($archive)) {
+            return;
+        }
+
+        File::delete($archive);
+        File::deleteDirectory($folder);
+    }
+
+    /**
+     * The file checkPermissions() stopped at, walked the same way: every file, no excludes.
+     */
+    protected function firstUnwritableFile(string $directory): ?string
+    {
+        try {
+            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS));
+
+            foreach ($files as $file) {
+                if ($file->isFile() && ! $file->isWritable()) {
+                    return $file->getPathname();
+                }
+            }
+        } catch (\UnexpectedValueException $e) {
+            // A folder that cannot be read is no reason to hide the message itself.
+        }
+
+        return null;
     }
 
     /**

@@ -1014,7 +1014,7 @@ return [
     'confirm_app_update' => 'App jetzt aktualisieren? Dabei werden alle neuen Datenbankmigrationen ausgeführt.',
     'up_to_date' => 'Sie sind auf dem neuesten Stand!',
     'app_updated' => 'App erfolgreich aktualisiert!',
-    'app_update_files_not_writable' => 'Das Update wurde nicht installiert, weil der Webserver nicht in alle Dateien der App schreiben kann. Führen Sie php artisan app:update auf dem Server als der Benutzer aus, dem die Dateien gehören.',
+    'app_update_files_not_writable' => 'Das Update wurde nicht installiert, weil der Webserver nicht in alle Dateien der App schreiben kann. Führen Sie "php artisan app:update" auf dem Server als root aus und setzen Sie danach die Dateiberechtigungen erneut, wie in der Installationsanleitung beschrieben.',
     'no_new_version_available' => 'Keine neue Version verfügbar',
     'driver' => 'Treiber',
     'mysql_host' => 'MySQL-Host',

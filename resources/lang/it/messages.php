@@ -621,7 +621,7 @@ return [
     'confirm_app_update' => 'Aggiornare l\'app adesso? Verranno eseguite le nuove migrazioni del database.',
     'up_to_date' => 'Sei aggiornato!',
     'app_updated' => 'App aggiornata con successo!',
-    'app_update_files_not_writable' => 'L\'aggiornamento non è stato installato perché il server web non può scrivere in tutti i file dell\'app. Esegui php artisan app:update sul server come l\'utente proprietario dei file.',
+    'app_update_files_not_writable' => 'L\'aggiornamento non è stato installato perché il server web non può scrivere in tutti i file dell\'app. Esegui \'php artisan app:update\' sul server come root, poi reimposta i permessi dei file come descritto nella guida di installazione.',
     'no_new_version_available' => 'Nessuna nuova versione disponibile',
     'driver' => 'Driver',
     'mysql_host' => 'Host MySQL',

@@ -1070,7 +1070,7 @@ return [
     'confirm_app_update' => 'Actualizezi aplicația acum? Se vor rula noile migrări ale bazei de date.',
     'up_to_date' => 'Ești la zi!',
     'app_updated' => 'Aplicație actualizată cu succes!',
-    'app_update_files_not_writable' => 'Actualizarea nu a fost instalată, deoarece serverul web nu poate scrie în toate fișierele aplicației. Rulați php artisan app:update pe server ca utilizatorul care deține fișierele.',
+    'app_update_files_not_writable' => 'Actualizarea nu a fost instalată, deoarece serverul web nu poate scrie în toate fișierele aplicației. Rulați \'php artisan app:update\' pe server ca root, apoi setați din nou permisiunile fișierelor așa cum descrie ghidul de instalare.',
     'no_new_version_available' => 'Nicio versiune nouă disponibilă',
     'driver' => 'Driver',
     'mysql_host' => 'Gazdă MySQL',

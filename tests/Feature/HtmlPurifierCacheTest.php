@@ -41,15 +41,18 @@ class HtmlPurifierCacheTest extends TestCase
         return $this->tmp;
     }
 
-    public function test_the_definition_cache_is_kept_under_storage(): void
+    public function test_the_definition_cache_is_kept_under_storage_in_a_folder_for_its_version(): void
     {
-        $this->assertSame(
-            storage_path('framework/cache/htmlpurifier'),
-            HtmlPurifierUtils::config()->get('Cache.SerializerPath'),
-        );
+        // A fresh storage folder, so the glob below can only find what this render wrote.
+        $this->app->useStoragePath($this->tmpDir());
+        $dir = storage_path('framework/cache/htmlpurifier/'.HTMLPurifier::VERSION);
+
+        // The version is in the path because the Serializer unlinks another version's files
+        // on every miss, and two requests unlinking the same one is a warning, and a 500.
+        $this->assertSame($dir, HtmlPurifierUtils::config()->get('Cache.SerializerPath'));
 
         $this->assertSame("<p><strong>x</strong></p>\n", MarkdownUtils::convertToHtml('**x**'));
-        $this->assertNotEmpty(glob(storage_path('framework/cache/htmlpurifier/HTML/*.ser')));
+        $this->assertNotEmpty(glob($dir.'/HTML/*.ser'));
     }
 
     public function test_a_missing_cache_folder_is_made_and_filled(): void
@@ -91,6 +94,55 @@ class HtmlPurifierCacheTest extends TestCase
         $this->assertNull(HtmlPurifierUtils::config($dir)->get('Cache.DefinitionImpl'));
     }
 
+    /**
+     * Every way to reach HTMLPurifier_Config::createDefault() without the helper: the
+     * constructor and purify() both pass what they are given to HTMLPurifier_Config::create(),
+     * which builds the default for null, an array or a string.
+     */
+    private const DEFAULT_CONFIG_PATTERNS = [
+        'a config built directly' => '/HTMLPurifier_Config::(?:create\w*|inherit)\s*\(|new\s+\\\\?HTMLPurifier_Config\b/',
+        'new HTMLPurifier without a config object' => '/new\s+\\\\?HTMLPurifier\b(?!\s*\(\s*\$)/',
+        'the shared instance' => '/HTMLPurifier::(?:getInstance|instance)\s*\(/',
+        'purify() given a literal config' => '/->purify\((?:[^(),]|\([^()]*\))*,\s*(?:\[|\'|"|array\s*\(|null\b)/i',
+    ];
+
+    private function defaultConfigUses(string $code): array
+    {
+        return array_keys(array_filter(self::DEFAULT_CONFIG_PATTERNS, fn ($pattern) => preg_match($pattern, $code) === 1));
+    }
+
+    public function test_the_scan_knows_every_way_to_get_the_default_config(): void
+    {
+        $caught = [
+            'new HTMLPurifier();',
+            'new HTMLPurifier;',
+            'new \HTMLPurifier([\'HTML.Allowed\' => \'b\']);',
+            'HTMLPurifier::instance();',
+            'HTMLPurifier::getInstance();',
+            'HTMLPurifier_Config::createDefault();',
+            'HTMLPurifier_Config::inherit($config);',
+            'new HTMLPurifier_Config($schema);',
+            '$purifier->purify($html, [\'Core.Encoding\' => \'UTF-8\']);',
+            '$purifier->purify(trim($html, "x"), \'HTML.Allowed=b\');',
+        ];
+        $allowed = [
+            'new HTMLPurifier($config);',
+            'new HTMLPurifier( $this->config );',
+            '$purifier->purify($html);',
+            '$purifier->purify(trim($html, "x"));',
+            '$purifier->purify($html, $config);',
+            '$config = HtmlPurifierUtils::config();',
+        ];
+
+        foreach ($caught as $code) {
+            $this->assertNotSame([], $this->defaultConfigUses($code), $code);
+        }
+
+        foreach ($allowed as $code) {
+            $this->assertSame([], $this->defaultConfigUses($code), $code);
+        }
+    }
+
     public function test_every_purifier_is_configured_through_the_helper(): void
     {
         $offenders = [];
@@ -100,8 +152,8 @@ class HtmlPurifierCacheTest extends TestCase
                 continue;
             }
 
-            if (str_contains($file->getContents(), 'HTMLPurifier_Config::create')) {
-                $offenders[] = $file->getRelativePathname();
+            foreach ($this->defaultConfigUses($file->getContents()) as $use) {
+                $offenders[] = $file->getRelativePathname().': '.$use;
             }
         }
 

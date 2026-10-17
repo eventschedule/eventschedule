@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+use HTMLPurifier;
 use HTMLPurifier_Config;
 
 class HtmlPurifierUtils
@@ -26,11 +27,16 @@ class HtmlPurifierUtils
      * root can create one the web user cannot write to, and the next release's config
      * would be refused there. A folder the process owns is chmodded back by HTMLPurifier
      * itself; the warning only comes from one that belongs to somebody else.
+     *
+     * The folder is named for the HTMLPurifier version. On every miss the Serializer
+     * unlinks the files another version wrote, and two requests missing at once both
+     * unlinked the same one: the second warned that it was gone. vendor/ never held such
+     * a file, because composer replaces the package folder; storage/ keeps them.
      */
     public static function config(?string $cacheDir = null): HTMLPurifier_Config
     {
         $config = HTMLPurifier_Config::createDefault();
-        $dir = rtrim($cacheDir ?? storage_path('framework/cache/htmlpurifier'), '/') ?: '/';
+        $dir = rtrim($cacheDir ?? storage_path('framework/cache/htmlpurifier/'.HTMLPurifier::VERSION), '/') ?: '/';
 
         if (self::canCacheIn($dir)) {
             $config->set('Cache.SerializerPath', $dir);
