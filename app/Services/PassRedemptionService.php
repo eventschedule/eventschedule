@@ -119,17 +119,17 @@ class PassRedemptionService
 
         $data->date = $scanningEvent->localStartsAt(true, $today, false, $tz);
 
-        // Build today's occurrence window for the scanning event.
-        [$startUtc, $endUtc, $earliest] = $this->occurrenceWindow($scanningEvent, $today, $tz);
+        // Today's occurrence window for the scanning event: the same one an ordinary ticket has.
+        $window = $scanningEvent->checkInWindow($today, $tz);
 
-        if ($nowUtc->lt($earliest)) {
+        if ($nowUtc->lt($window['opens'])) {
             $data->pass_status = 'too_early';
-            $data->check_in_opens = $startUtc->copy()->setTimezone($tz)->format('g:i A');
+            $data->check_in_opens = $scanningEvent->doorClockLabel($window['opens'], $now);
 
             return $data;
         }
 
-        if ($nowUtc->gt($endUtc)) {
+        if ($nowUtc->gt($window['end'])) {
             $data->pass_status = 'event_over';
 
             return $data;
@@ -138,7 +138,7 @@ class PassRedemptionService
         // The pass_usages read-modify-write must be atomic against concurrent
         // book()/cancel()/scan, which also mutate the array. Do it under a row lock
         // and re-read the latest array (mirrors PassBookingService::book/cancel).
-        $data = DB::transaction(function () use ($passSaleTicket, $scanningEvent, $ticket, $today, $nowUtc, $tz, $data) {
+        $data = DB::transaction(function () use ($passSaleTicket, $scanningEvent, $ticket, $today, $nowUtc, $data) {
             $locked = SaleTicket::lockForUpdate()->find($passSaleTicket->id);
             $usages = $locked->pass_usages ?? [];
             $admitsPerEvent = $ticket->admitsPerEvent();
@@ -201,7 +201,7 @@ class PassRedemptionService
                 // Distinguish "all admissions spent" from "room is full", so the operator knows why an
                 // extra guest was not admitted.
                 $data->seats_full = $admitsUsed < $admitsPerEvent && ! $roomForGuest;
-                $data->checked_in_at = Carbon::createFromTimestamp($usages[$existingIndex]['at'] ?? $nowUtc->timestamp, $tz)->format('g:i A');
+                $data->checked_in_at = $scanningEvent->doorClockLabel(Carbon::createFromTimestamp($usages[$existingIndex]['at'] ?? $nowUtc->timestamp), $nowUtc);
 
                 return $data;
             }
@@ -259,23 +259,6 @@ class PassRedemptionService
         }
 
         return $data;
-    }
-
-    /**
-     * Build [startUtc, endUtc, earliest] for an event's occurrence on $date
-     * (schedule-TZ calendar date). Check-in opens 24h before start and closes
-     * at end (start + duration, min 2h).
-     *
-     * @return array{0: Carbon, 1: Carbon, 2: Carbon}
-     */
-    protected function occurrenceWindow(Event $event, string $date, string $tz): array
-    {
-        $startUtc = $event->occurrenceStartUtc($date, $tz);
-        $duration = $event->duration > 0 ? $event->duration : 2;
-        $endUtc = $startUtc->copy()->addMinutes(Event::durationHoursToMinutes($duration));
-        $earliest = $startUtc->copy()->subHours(24);
-
-        return [$startUtc, $endUtc, $earliest];
     }
 
     /**

@@ -247,7 +247,7 @@ class ApDoorPagesTest extends TestCase
         $this->assertSame(1, substr_count($html, e(__('messages.merge_venues_empty_state'))));
     }
 
-    public function test_referrals_show_four_figures_in_one_strip(): void
+    public function test_referrals_show_the_credit_the_track_and_the_history(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', ['name' => 'Credited Hall']);
@@ -262,22 +262,25 @@ class ApDoorPagesTest extends TestCase
         $html = $this->page($owner, route('referrals'));
 
         $this->assertOpensLikeThePortal($html, __('messages.referral_program'));
-        $this->assertSame(1, substr_count($html, 'id="referral-dashboard" class="ap-card rounded-xl page-stats is-auto"'));
-        $this->assertSame(4, substr_count($html, '<div class="page-stat">'));
+        // The four figures and How it works are one track: the steps, with a count at each.
+        $this->assertSame(4, substr_count($html, '<li class="referral-step'));
+        $this->assertSame(0, substr_count($html, '<div class="page-stat">'));
         // The ids the user guide's screenshots are taken by.
-        foreach (['referral-link', 'referral-dashboard', 'referral-credits', 'referral-how-it-works', 'referral-history', 'referral-url-input', 'copy-referral-link'] as $id) {
+        foreach (['referral-link', 'referral-dashboard', 'referral-credits', 'referral-history', 'referral-url-input', 'copy-referral-link'] as $id) {
             $this->assertSame(1, substr_count($html, 'id="'.$id.'"'), $id);
         }
+        // The credit waiting to be used comes first.
+        $this->assertLessThan(strpos($html, 'id="referral-link"'), strpos($html, 'id="referral-credits"'));
         // One list for every width, sorted by the kit's buttons.
         $this->assertSame(1, substr_count($html, 'data-sort="created_at"'));
         $this->assertSame(1, substr_count($html, 'data-sort="status"'));
-        $this->assertSame(1, substr_count($html, '<span class="event-status is-on">'.e(__('messages.credited')).'</span>'));
+        $this->assertSame(1, substr_count($html, '<span class="event-status is-on">'.e(__('messages.referral_status_credited')).'</span>'));
         $this->assertSame(1, substr_count($html, '<bdi>Credited Hall</bdi>'));
         // The credit waiting to be used, in the installation's currency, with the plan's name
         // in the reader's language (it was ucfirst('enterprise')).
         $this->assertSame(1, substr_count($html, 'name="referral_id" value="'));
-        $this->assertGreaterThanOrEqual(2, substr_count($html, '>'.e(__('messages.enterprise')).'</span>'));
-        $this->assertSame(3, substr_count($html, 'class="referral-step"'));
+        $this->assertSame(1, substr_count($html, e(__('messages.referral_credit_month', ['plan' => __('messages.enterprise')]))));
+        $this->assertSame(1, substr_count($html, '<span class="event-chip">'.e(__('messages.enterprise')).'</span>'));
     }
 
     /**

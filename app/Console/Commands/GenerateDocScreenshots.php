@@ -448,8 +448,8 @@ class GenerateDocScreenshots extends Command
             'referral-program' => [
                 ['id' => 'referral-link', 'route' => '/referrals'],
                 ['id' => 'referral-dashboard', 'route' => '/referrals', 'script' => "document.getElementById('referral-dashboard').scrollIntoView({block: 'start'})"],
-                ['id' => 'referral-credits', 'route' => '/referrals', 'script' => "(document.getElementById('referral-credits') || document.getElementById('referral-how-it-works')).scrollIntoView({block: 'start'})"],
-                ['id' => 'referral-history', 'route' => '/referrals', 'script' => "(document.getElementById('referral-history') || document.getElementById('referral-how-it-works')).scrollIntoView({block: 'start'})"],
+                ['id' => 'referral-credits', 'route' => '/referrals', 'script' => "(document.getElementById('referral-credits') || document.getElementById('referral-dashboard')).scrollIntoView({block: 'start'})"],
+                ['id' => 'referral-history', 'route' => '/referrals', 'script' => "(document.getElementById('referral-history') || document.getElementById('referral-dashboard')).scrollIntoView({block: 'start'})"],
             ],
             'selfhost-admin' => [
                 // ?sample=1: invented data (AdminDashboardSample). The real page lists people,

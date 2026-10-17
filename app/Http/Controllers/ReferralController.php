@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Referral;
 use App\Models\Role;
+use App\Services\ReferralCreditService;
 use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -11,23 +12,46 @@ use Illuminate\Support\Facades\DB;
 
 class ReferralController extends Controller
 {
-    public function index()
+    public function index(ReferralCreditService $credits)
     {
         $user = auth()->user();
-        $referralCode = $user->getOrCreateReferralCode();
         $referralUrl = $user->referralUrl();
 
-        $totalReferrals = $user->referrals()->count();
-        $awaitingSubscription = $user->referrals()->where('status', 'pending')->count();
-        $awaitingQualification = $user->referrals()->where('status', 'subscribed')->count();
-        $creditsEarned = $user->referrals()->where('status', 'credited')->count();
+        // Every referral counted once, at the step it is on.
+        $byStatus = $user->referrals()
+            ->selectRaw('status, count(*) as n')
+            ->groupBy('status')
+            ->pluck('n', 'status');
+        $stepCounts = [
+            (int) ($byStatus['pending'] ?? 0),
+            (int) ($byStatus['subscribed'] ?? 0),
+            (int) ($byStatus['qualified'] ?? 0),
+            (int) ($byStatus['credited'] ?? 0),
+        ];
+        $expiredCount = (int) ($byStatus['expired'] ?? 0);
+        $totalReferrals = array_sum($stepCounts) + $expiredCount;
+
+        // The first credit still on its way: statuses move once a day, so it is due "on" the day.
+        $firstSubscribed = $user->referrals()->where('status', 'subscribed')->min('subscribed_at');
+        $nextCreditAt = $firstSubscribed
+            ? \Carbon\Carbon::parse($firstSubscribed)->addDays(ReferralCreditService::DAYS)
+            : null;
 
         $qualifiedCredits = $user->referrals()
             ->where('status', 'qualified')
-            ->with('referredUser', 'referredRole')
+            ->orderBy('qualified_at')
             ->get();
 
-        $ownedRoles = $user->owner()->get();
+        // Each schedule's subscription is read once, for every credit's line.
+        $ownedRoles = $user->owner()->with('subscriptions')->get()->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
+
+        // What Apply does with each credit on each schedule, said before it is pressed.
+        $outcomes = [];
+        foreach ($qualifiedCredits as $credit) {
+            foreach ($ownedRoles as $role) {
+                $outcomes[$credit->id][$role->id] = $credits->sentence($credits->outcome($credit->plan_type, $role), $credit->plan_type, $role);
+            }
+        }
 
         $sortBy = request()->get('sort_by', 'created_at');
         $sortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
@@ -37,26 +61,28 @@ class ReferralController extends Controller
         }
 
         $referralHistory = $user->referrals()
-            ->with('referredUser', 'referredRole', 'creditedRole')
+            ->with('referredUser', 'creditedRole')
             ->orderBy($sortBy, $sortDir)
+            ->orderBy('id', $sortDir)
             ->paginate(20)
             ->withQueryString();
 
         return view('referral.index', [
             'referralUrl' => $referralUrl,
             'totalReferrals' => $totalReferrals,
-            'awaitingSubscription' => $awaitingSubscription,
-            'awaitingQualification' => $awaitingQualification,
-            'creditsEarned' => $creditsEarned,
+            'stepCounts' => $stepCounts,
+            'expiredCount' => $expiredCount,
+            'nextCreditAt' => $nextCreditAt,
             'qualifiedCredits' => $qualifiedCredits,
             'ownedRoles' => $ownedRoles,
+            'outcomes' => $outcomes,
             'referralHistory' => $referralHistory,
             'sortBy' => $sortBy,
             'sortDir' => $sortDir,
         ]);
     }
 
-    public function applyCredit(Request $request)
+    public function applyCredit(Request $request, ReferralCreditService $credits)
     {
         $request->validate([
             'referral_id' => 'required|string',
@@ -73,7 +99,7 @@ class ReferralController extends Controller
             ->firstOrFail();
 
         try {
-            DB::transaction(function () use ($referralId, $user, $role) {
+            $said = DB::transaction(function () use ($referralId, $user, $role, $credits) {
                 $referral = Referral::lockForUpdate()
                     ->where('id', $referralId)
                     ->where('referrer_user_id', $user->id)
@@ -100,14 +126,16 @@ class ReferralController extends Controller
                     config('cashier.currency', 'usd')
                 );
 
-                if ($role->hasActiveSubscription()) {
+                // The same rule the page used to say what this would do.
+                $outcome = $credits->outcome($referral->plan_type, $role);
+
+                if ($outcome['kind'] === 'invoice') {
                     $role->applyBalance($creditAmount, __('messages.referral_credit'));
                 } else {
-                    $planType = $referral->plan_type ?? 'pro';
-                    $role->plan_type = $planType;
-                    $role->plan_expires = $role->plan_expires && $role->plan_expires > now()
-                        ? \Carbon\Carbon::parse($role->plan_expires)->addDays(30)
-                        : now()->addDays(30);
+                    // Never a lower tier than the schedule is on: a Pro credit used to move a
+                    // schedule with Enterprise time left down to Pro.
+                    $role->plan_type = $outcome['plan'];
+                    $role->plan_expires = $outcome['until']->format('Y-m-d');
                     // Earned, not comped: the guest-footer credit is only for plans an admin
                     // handed out, so this must not read as one. Only claim provenance when none
                     // is recorded - the block above STACKS onto an existing plan, so overwriting
@@ -122,6 +150,8 @@ class ReferralController extends Controller
                     'credited_at' => now(),
                     'status' => 'credited',
                 ]);
+
+                return $credits->sentence($outcome, $referral->plan_type, $role);
             });
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return redirect()->route('referrals')
@@ -134,6 +164,6 @@ class ReferralController extends Controller
         }
 
         return redirect()->route('referrals')
-            ->with('message', __('messages.referral_credit_applied'));
+            ->with('message', __('messages.referral_credit_applied').' '.$said);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Mail\ReferralCreditEarned;
 use App\Models\Referral;
 use App\Services\OneSignalService;
+use App\Services\ReferralCreditService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -22,12 +23,12 @@ class ProcessReferralCredits extends Command
 
         // 1. Expire stale pendings (>90 days with no subscription)
         $expiredPending = Referral::where('status', 'pending')
-            ->where('created_at', '<=', now()->subDays(90))
+            ->where('created_at', '<=', now()->subDays(ReferralCreditService::PENDING_DAYS))
             ->update(['status' => 'expired']);
 
         // 2. Qualify subscribed referrals (30+ days since subscription, still active)
         $subscribedReferrals = Referral::where('status', 'subscribed')
-            ->where('subscribed_at', '<=', now()->subDays(30))
+            ->where('subscribed_at', '<=', now()->subDays(ReferralCreditService::DAYS))
             ->with('referredRole', 'referrer')
             ->get();
 

@@ -569,11 +569,12 @@
         // order the code checks them, and with the tone the scanner actually
         // shows. Nothing invented: each string mirrors a real messages.* key on
         // that path. WARN is deliberately not REFUSE - a second scan of a used
-        // ticket comes back as an orange warning over the holder's details
-        // (messages.warning_ticket_used), and no second admission is recorded.
+        // ticket comes back amber over the holder's details with the time of the
+        // first scan (messages.scan_already_checked_in, scan_first_scanned_at),
+        // and no second admission is recorded.
         $gateLog = [
             ['pass', 'ADMIT',  'Sarah M. - General - first scan'],
-            ['warn', 'WARN',   'This ticket has already been used'],
+            ['warn', 'WARN',   'Already checked in, first scanned at 8:12 PM'],
             ['stop', 'REFUSE', 'Not authorized to scan this ticket'],
             ['stop', 'REFUSE', 'Check-in opens 24 hours before the start'],
             ['stop', 'REFUSE', 'The check-in period has ended'],

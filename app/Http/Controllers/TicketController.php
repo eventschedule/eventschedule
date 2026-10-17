@@ -27,6 +27,7 @@ use App\Services\Payments\CheckoutContext;
 use App\Services\Payments\PaymentGatewayDriver;
 use App\Services\RoleMailerService;
 use App\Services\SaleSettlementService;
+use App\Services\TicketScanService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\UsageTrackingService;
 use App\Services\Wallet\GoogleWalletService;
@@ -34,12 +35,12 @@ use App\Services\WebhookService;
 use App\Utils\CsvUtils;
 use App\Utils\GuestFunnel;
 use App\Utils\HoneypotUtils;
-use App\Utils\MoneyUtils;
 use App\Utils\QrCodeUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -2815,13 +2816,57 @@ class TicketController extends Controller
         // Available on every plan: you cannot sell somebody a ticket and then refuse to let the
         // organizer admit them at the door. The Pro feature is the check-in DASHBOARD (live stats,
         // per-ticket breakdown), not scanning itself.
-        $events = Event::with(['creatorRole', 'roles'])
+        $base = fn () => Event::with(['creatorRole', 'roles'])
             ->scannableBy($user)
             ->whereNotNull('starts_at')
-            ->whereNull('appointment_type_id') // appointment bookings are not scannable events
-            ->orderBy('starts_at', 'desc')
-            ->limit(100)
-            ->get();
+            ->whereNull('appointment_type_id'); // appointment bookings are not scannable events
+
+        // What is on now or coming first, then the past. One list by start date, newest first, lost
+        // both ends: past a hundred future events tonight's was cut off, and a long-running series
+        // sorted under its first date, months back, and dropped out.
+        $current = $base()->hasUpcomingOccurrence(now('UTC')->subDay())->orderBy('starts_at')->limit(100)->get();
+        $past = $current->count() < 100
+            ? $base()->whereNotIn('events.id', $current->pluck('id'))->orderByDesc('starts_at')->limit(100 - $current->count())->get()
+            : collect();
+
+        // Where each one stands at the door: on today (its occurrence today, or the one in progress),
+        // coming up (its next occurrence), or over.
+        $now = now();
+        $placed = $current->concat($past)->map(function (Event $event) use ($now) {
+            $tz = $event->scheduleTimezone();
+            $today = $event->scheduleToday($now);
+
+            if ($event->days_of_week) {
+                $date = $event->doorOccurrenceDates($now)[0] ?? ($event->matchesDate($today, $tz) ? $today : null);
+                if ($date) {
+                    return ['event' => $event, 'when' => 'today', 'date' => $date, 'start' => $event->occurrenceStartUtc($date, $tz)];
+                }
+
+                $next = $event->nextOccurrenceFrom(Carbon::parse($today)->addDay(), 120);
+
+                return $next
+                    ? ['event' => $event, 'when' => 'upcoming', 'date' => $next, 'start' => $event->occurrenceStartUtc($next, $tz)]
+                    : ['event' => $event, 'when' => 'past', 'date' => null, 'start' => $event->occurrenceStartUtc((string) $event->saleEventDateFromStartsAt(), $tz)];
+            }
+
+            $start = $event->occurrenceStartUtc((string) $event->saleEventDateFromStartsAt(), $tz);
+            $when = $event->matchesDate($today, $tz) ? 'today' : ($start->gt($now) ? 'upcoming' : 'past');
+
+            return ['event' => $event, 'when' => $when, 'date' => null, 'start' => $start];
+        });
+
+        $rank = ['today' => 0, 'upcoming' => 1, 'past' => 2];
+        $placed = $placed->sort(function ($a, $b) use ($rank) {
+            if ($a['when'] !== $b['when']) {
+                return $rank[$a['when']] <=> $rank[$b['when']];
+            }
+
+            return $a['when'] === 'past'
+                ? $b['start']->timestamp <=> $a['start']->timestamp
+                : $a['start']->timestamp <=> $b['start']->timestamp;
+        })->values();
+
+        $events = $placed->pluck('event');
 
         // "Today" is each event's own calendar day at its venue, which is what
         // sales.event_date holds. Listed events may sit in different timezones, so query the
@@ -2834,22 +2879,29 @@ class TicketController extends Controller
             ->groupBy('event_id')
             ->map(fn ($rows) => $rows->pluck('event_date')->all());
 
-        $hasSalesToday = fn (Event $e) => in_array($e->scheduleToday(), $salesDatesByEvent[$e->id] ?? [], true);
-        $occursToday = fn (Event $e) => $e->matchesDate(
-            now()->setTimezone($e->scheduleTimezone())->startOfDay(),
-            $e->scheduleTimezone()
-        );
+        $hasSalesToday = fn (array $p) => in_array($p['event']->scheduleToday(), $salesDatesByEvent[$p['event']->id] ?? [], true);
+        $occursToday = fn (array $p) => $p['when'] === 'today';
+        // Within each rule, an event whose door is still open beats one that is over (the matinee
+        // ends, the evening show is the one being scanned).
+        $doorOpen = fn (array $p) => $p['when'] === 'today'
+            && $now->lte($p['event']->checkInWindow($p['date'] ?? (string) $p['event']->saleEventDateFromStartsAt())['end']);
+        $pick = fn (callable $rule) => $placed->first(fn ($p) => $rule($p) && $doorOpen($p)) ?? $placed->first($rule);
 
-        // Prefer an event with sales today, then any event occurring today, else most recent.
-        $selectedEventId = $events->first($hasSalesToday)?->id
-            ?? $events->first($occursToday)?->id
-            ?? $events->first()?->id;
+        // Prefer an event with sales today, then any event occurring today, else the first listed
+        // (the next one coming up).
+        $selectedEventId = $pick($hasSalesToday)['event']->id
+            ?? $pick($occursToday)['event']->id
+            ?? $placed->first()['event']->id
+            ?? null;
 
-        $eventsData = $events->map(fn ($event) => [
-            'id' => UrlUtils::encodeId($event->id),
-            'name' => $event->name,
-            'starts_at' => $event->starts_at ? $event->getShortDateRangeDisplay('D, M j, Y') : null,
-            'image_url' => $event->getImageUrl(),
+        // A series is labelled with the occurrence the door is on, or its next one: its first date
+        // can be months back.
+        $eventsData = $placed->map(fn (array $p) => [
+            'id' => UrlUtils::encodeId($p['event']->id),
+            'name' => $p['event']->name,
+            'starts_at' => $p['event']->getShortDateRangeDisplay('D, M j, Y', $p['date']),
+            'image_url' => $p['event']->getImageUrl(),
+            'when' => $p['when'],
         ]);
 
         return view('ticket.scan', [
@@ -2902,13 +2954,7 @@ class TicketController extends Controller
         // home event). All validation + the neutral `pass_status` contract live
         // in PassRedemptionService.
         if ($sale->isPass()) {
-            $scanningEvent = $event;
-            if ($scanEventId = request('scan_event_id')) {
-                $resolved = Event::with('creatorRole')->find(UrlUtils::decodeId($scanEventId));
-                if ($resolved) {
-                    $scanningEvent = $resolved;
-                }
-            }
+            $scanningEvent = $this->scannerEvent() ?? $event;
 
             if (! $user->canScanEvent($scanningEvent)) {
                 return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
@@ -2918,109 +2964,37 @@ class TicketController extends Controller
         }
 
         if (! $user->canScanEvent($event)) {
-            return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
+            return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket'), 'verdict' => 'error', 'reason' => 'unauthorized'], 200);
         }
 
-        if (! $event->starts_at) {
-            return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
+        // The event the scanner is set to. For an ordinary ticket it only ever STOPS a scan (a ticket
+        // for another event or another night of the series), so one this operator may not scan, or
+        // one that does not exist, is as good as none.
+        $doorEvent = $this->scannerEvent();
+        if ($doorEvent && ! $user->canScanEvent($doorEvent)) {
+            $doorEvent = null;
         }
 
-        // Build the UTC start moment from $sale->event_date (a schedule-TZ calendar date)
-        // and the schedule-TZ time-of-day implied by $event->starts_at.
-        $tz = $event->creatorRole?->timezone ?? config('app.timezone');
-        $startsAt = strlen($event->starts_at) === 10
-            ? Carbon::createFromFormat('Y-m-d', $event->starts_at, 'UTC')->startOfDay()
-            : Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC');
-        $timeOfDay = $startsAt->copy()->setTimezone($tz)->format('H:i:s');
-        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $sale->event_date.' '.$timeOfDay, $tz)
-            ->setTimezone('UTC');
-        $duration = $event->duration > 0 ? $event->duration : 2;
-        $endUtc = $startUtc->copy()->addMinutes(Event::durationHoursToMinutes($duration));
-        $earliest = $startUtc->copy()->subHours(24);
-        $nowUtc = now('UTC');
+        $overrides = collect(Arr::wrap(request()->input('overrides')))
+            ->filter(fn ($override) => is_string($override))
+            ->intersect(TicketScanService::OVERRIDES)
+            ->values()
+            ->all();
 
-        if ($nowUtc->lt($earliest)) {
-            return response()->json(['error' => __('messages.this_ticket_cannot_be_checked_in_yet')], 200);
-        }
+        return response()->json(app(TicketScanService::class)->scan($sale, $event, $doorEvent, $overrides));
+    }
 
-        if ($nowUtc->gt($endUtc)) {
-            return response()->json(['error' => __('messages.this_ticket_check_in_period_has_ended')], 200);
-        }
+    /**
+     * The event the door scanner is set to (`scan_event_id`), or null. Passes are redeemed at it;
+     * an ordinary ticket is checked against it.
+     */
+    private function scannerEvent(): ?Event
+    {
+        $id = request()->input('scan_event_id');
 
-        // Only a `paid` sale gets in. Sale::scanRefusalMessage() is the allowlist, shared with the
-        // pass scanner (PassRedemptionService), and says why every other status is turned away.
-        if ($error = $sale->scanRefusalMessage()) {
-            return response()->json(['error' => $error], 200);
-        }
-
-        // Behind on an installment plan. The sale is still `paid` - the seat is taken, the money
-        // mostly collected - so this never reaches the allowlist above.
-        //
-        // Deliberately NOT returned as `error`: the scanner paints any error red and hides the
-        // whole details block with it, so the door would see a red X, one sentence, and no
-        // attendee name or amount. This returns a distinct payment_status the scanner renders
-        // amber, with the name and the balance, and an "admit anyway" override - because turning a
-        // paying guest away over one late instalment is the organizer's call to make, not the
-        // software's.
-        if ($sale->isInstallmentDelinquent()) {
-            $plan = $sale->installmentPlan;
-
-            return response()->json([
-                'payment_status' => 'overdue',
-                'attendee' => $sale->name,
-                'event' => $event->name,
-                'amount_due' => MoneyUtils::format($plan->amountRemaining(), $plan->currency),
-                'amount_paid' => MoneyUtils::format($plan->amount_paid, $plan->currency),
-                'amount_total' => MoneyUtils::format($plan->total_amount, $plan->currency),
-            ], 200);
-        }
-
-        $data = new \stdClass;
-        $data->attendee = $sale->name;
-        $data->event = $event->name;
-        // Venue-local time, matching the pass branch: the operator is standing at the door.
-        $data->date = $event->localStartsAt(true, $sale->event_date, false, $tz);
-        $data->tickets = [];
-
-        foreach ($sale->saleTickets as $saleTicket) {
-            $data->tickets[] = [
-                'type' => $saleTicket->ticket->type,
-                // `seats` is the check-in slot map (1..n => timestamp or null), not a seat NUMBER.
-                // On an allocated event the door needs the actual seat, so send it alongside in
-                // the same order the slots run; the scanner labels each slot with it.
-                'seats' => json_decode($saleTicket->seats, true) ?? [],
-                'seat_labels' => $saleTicket->seatLabels(),
-            ];
-        }
-
-        foreach ($sale->saleTickets as $saleTicket) {
-            $seats = $saleTicket->seats;
-            if ($seats) {
-                $seats = json_decode($seats, true);
-                if (! is_array($seats)) {
-                    continue;
-                }
-                foreach ($seats as $key => $value) {
-                    if (! $value) {
-                        $seats[$key] = time();
-                    }
-                }
-                $saleTicket->seats = json_encode($seats);
-                $saleTicket->save();
-            }
-
-            // Arrival state on the MAP, so the box office console and the printed sheet can answer
-            // "is C14 here yet". Stamped per LINE rather than per slot: a scan admits the whole
-            // line, and sale_tickets.seats is a slot map that carries no location - lining the two
-            // up positionally is fine for labelling a scan and far too fragile to key state on.
-            \App\Models\SeatingSeat::where('sale_ticket_id', $saleTicket->id)
-                ->whereNull('checked_in_at')
-                ->update(['checked_in_at' => now()]);
-        }
-
-        WebhookService::dispatch('ticket.scanned', $sale);
-
-        return response()->json($data);
+        return is_string($id) && $id !== ''
+            ? Event::with(['creatorRole', 'roles'])->find(UrlUtils::decodeId($id))
+            : null;
     }
 
     public function qrCode($eventId, $secret)

@@ -2307,6 +2307,96 @@ class Event extends Model
     }
 
     /**
+     * The check-in window of the occurrence on $date, as UTC instants: the door opens a day before
+     * the start and closes when the occurrence ends (its length, or two hours when it has none).
+     * The ticket scanner and the pass scanner both read it, so the two never disagree.
+     *
+     * @return array{opens: Carbon, start: Carbon, end: Carbon}
+     */
+    public function checkInWindow(string $date, ?string $timezone = null): array
+    {
+        $start = $this->occurrenceStartUtc($date, $timezone);
+        $hours = $this->duration > 0 ? $this->duration : 2;
+
+        return [
+            'opens' => $start->copy()->subHours(24),
+            'start' => $start,
+            'end' => $start->copy()->addMinutes(self::durationHoursToMinutes($hours)),
+        ];
+    }
+
+    /**
+     * The date (or dates) of a series the door is on right now, in the schedule's zone.
+     *
+     * A ticket's own window opens a day early, so on a daily series tonight's door would also take
+     * tomorrow's ticket, and tomorrow that ticket would read "already used". This is what says which
+     * night it is: an occurrence in progress wins (every one, when a long one runs into the next);
+     * otherwise the next one whose door has opened; otherwise none. Nearest start is NOT the rule:
+     * at 23:00 a daily 10:00-24:00 market is nearer tomorrow's start than today's and still running.
+     *
+     * A one-off event answers []: each day of a festival is a valid date of its own, and there is no
+     * other occurrence a ticket could be for.
+     *
+     * @return string[]
+     */
+    public function doorOccurrenceDates(?Carbon $now = null): array
+    {
+        if (! $this->starts_at || ! $this->days_of_week) {
+            return [];
+        }
+
+        $tz = $this->scheduleTimezone();
+        $nowUtc = ($now ? $now->copy() : Carbon::now())->setTimezone('UTC');
+        $today = $nowUtc->copy()->setTimezone($tz)->startOfDay();
+        // An occurrence longer than a day is still running after the date it is keyed by.
+        $back = $this->duration > 24 ? min(7, (int) ceil($this->duration / 24)) : 1;
+
+        $inProgress = [];
+        $upcoming = null;
+
+        for ($offset = -$back; $offset <= 1; $offset++) {
+            $date = $today->copy()->addDays($offset)->format('Y-m-d');
+
+            if (! $this->matchesDate($date, $tz)) {
+                continue;
+            }
+
+            $window = $this->checkInWindow($date, $tz);
+
+            if ($nowUtc->gte($window['start']) && $nowUtc->lte($window['end'])) {
+                $inProgress[] = $date;
+            } elseif ($nowUtc->gte($window['opens']) && $nowUtc->lt($window['start'])
+                && (! $upcoming || $window['start']->lt($upcoming['start']))) {
+                $upcoming = ['date' => $date, 'start' => $window['start']];
+            }
+        }
+
+        if ($inProgress) {
+            return $inProgress;
+        }
+
+        return $upcoming ? [$upcoming['date']] : [];
+    }
+
+    /**
+     * A moment as the door reads it, on the schedule's clock: the time alone when it is today
+     * there, with the date when it is not (a ticket checked in last night). 12 or 24 hours as
+     * everywhere else: the viewer's own setting when they made one, else the schedule's.
+     */
+    public function doorClockLabel(Carbon $instant, ?Carbon $now = null): string
+    {
+        $tz = $this->scheduleTimezone();
+        $local = $instant->copy()->setTimezone($tz);
+        $today = ($now ? $now->copy() : Carbon::now())->setTimezone($tz)->format('Y-m-d');
+
+        if ($local->format('Y-m-d') === $today) {
+            return $local->format($this->getTimeFormat());
+        }
+
+        return $this->localizedInstantLabel($instant);
+    }
+
+    /**
      * The event's start as a naive Carbon holding local wall-clock time.
      *
      * Equivalent to Carbon::parse($this->localStartsAt()) when no timezone is passed, which
@@ -4549,13 +4639,16 @@ class Event extends Model
         }
     }
 
-    public function getShortDateRangeDisplay($fallbackFormat = 'M j, Y')
+    /**
+     * @param  ?string  $date  An occurrence of a series to show instead of its first date.
+     */
+    public function getShortDateRangeDisplay($fallbackFormat = 'M j, Y', ?string $date = null)
     {
         if (! $this->starts_at) {
             return '';
         }
 
-        $s = $this->getStartDateTime(null, true);
+        $s = $this->getStartDateTime($date, true);
 
         if ($this->is_multi_day) {
             $e = $s->copy()->addMinutes($this->durationInMinutes());

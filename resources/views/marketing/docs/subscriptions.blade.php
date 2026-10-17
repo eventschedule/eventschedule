@@ -292,8 +292,8 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Because a pass can be valid across many events, the scanner needs to know <em>which</em> event you're checking people into right now.</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> on your phone and tap <strong class="text-gray-900 dark:text-white">Scan Ticket</strong>, at the end of the page's title row.</li>
-            <li>At the top, check <strong class="text-gray-900 dark:text-white">Scanning at event</strong> and set it to the event happening now. It arrives pre-selected (an event with sales today, otherwise one running today, otherwise your most recent), it remembers your last choice on that device, and it shows the choice back to you as "Scanning at: &hellip;". The list holds your 100 most recent events, whether or not they sell tickets of their own.</li>
-            <li>Point the camera at the guest's QR code. A visit is recorded and the result appears.</li>
+            <li>At the top, check <strong class="text-gray-900 dark:text-white">Scanning at event</strong> and set it to the event happening now. It arrives pre-selected (an event with sales today, otherwise one running today, otherwise the next one coming up). Today's events are listed first, then the ones coming up, then past ones, up to 100 in all, whether or not they sell tickets of their own, and a recurring event shows the date the door is on rather than its first date. Your choice is remembered on that device for as long as that event is on today.</li>
+            <li>Point the camera at the guest's QR code. A visit is recorded and the result appears. A clean check-in carries on to the next guest by itself after three seconds, except while <strong class="text-gray-900 dark:text-white">Admit guest</strong> is offered; anything else waits for <strong class="text-gray-900 dark:text-white">Scan next</strong>.</li>
         </ol>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">One visit per event, per day</div>
@@ -320,7 +320,7 @@
                     <tr>
                         <td><span class="font-semibold text-green-700 dark:text-green-400">Admitted 1 of 2</span></td>
                         <td>A pass that admits more than one person let someone in and still has an admission left for this event.</td>
-                        <td>Scan the next person, or tap <strong class="text-gray-900 dark:text-white">Admit guest</strong>. No extra visit is used.</td>
+                        <td>Tap <strong class="text-gray-900 dark:text-white">Admit guest</strong>, or tap <strong class="text-gray-900 dark:text-white">Scan next</strong> and scan the same code again. No extra visit is used.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-amber-700 dark:text-amber-400">Already checked in today</span></td>
@@ -331,6 +331,11 @@
                         <td><span class="font-semibold text-amber-700 dark:text-amber-400">All 2 admissions already used today</span></td>
                         <td>Every admission on a multi-person pass has been used at this event today.</td>
                         <td>Sell a ticket for anyone else in the group.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-amber-700 dark:text-amber-400">Already checked in today</span>, with <span class="font-semibold text-gray-700 dark:text-gray-200">No seats left for another guest</span></td>
+                        <td>A multi-person pass still has an admission left, but the event is full.</td>
+                        <td>Nobody else comes in on this pass unless a seat frees up.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-700 dark:text-gray-200">Valid pass</span></td>

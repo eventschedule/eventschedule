@@ -883,7 +883,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">If the balance is still unpaid after that, the ticket goes <strong class="text-gray-900 dark:text-white">on hold</strong>: it stops scanning at the door until they pay, and paying makes it valid again immediately. A week before the event everyone with an outstanding balance gets a final notice, and you get a list of them, so nobody is surprised at the door.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Running out of retries is the common route to a hold, but not the only one. A plan also goes on hold if a bank authentication request goes unanswered for a week, or if your own Stripe connection is disconnected so nothing can be collected at all. That second one is worth knowing: the buyer has done nothing wrong and cannot fix it, so you are the one we email, and reconnecting Stripe is what restarts collection. For the ordinary routes, the buyer replacing or re-confirming their card lifts the hold and puts the remaining payments back on schedule.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">One state deliberately waits for a person: if a charge is interrupted and we cannot tell whether the money moved, we stop rather than retry, because retrying a payment that may already have succeeded is how a buyer gets charged twice. The same applies to a payment that arrives but does not match anything we can apply it to. Both show on the Installments tab as needing your attention, with the Stripe reference to check against your dashboard, and neither is resolved by the buyer changing their card.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Scanning a ticket that is on hold shows your door staff an amber <strong class="text-gray-900 dark:text-white">Overdue balance</strong> screen with the attendee's name, the amount outstanding and how much of the total has been paid, rather than a red rejection. The scan does not check them in, so taking payment or letting the guest in is your call.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Scanning a ticket that is on hold shows your door staff an amber <strong class="text-gray-900 dark:text-white">Overdue balance</strong> screen with the attendee's name, the amount outstanding and how much of the total has been paid, rather than a red rejection. They are not checked in until your door staff tap <strong class="text-gray-900 dark:text-white">Admit anyway</strong>, so taking payment or letting the guest in is your call.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding an order, cancelling the event, or deleting the schedule all stop the remaining payments immediately. A payment plan can only be refunded in full: <a href="#refunds" class="doc-link">Refund Ticket</a> returns each payment that was already collected, one at a time, and the Installments tab still lists every payment reference so you can check them against your own Stripe dashboard.</p>
 
         <div class="doc-callout doc-callout-info">
@@ -1391,12 +1391,14 @@
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> on your phone and tap <strong class="text-gray-900 dark:text-white">Scan Ticket</strong>, at the end of the title row</li>
-            <li>Allow the camera, and point it at the QR code on the ticket</li>
-            <li>The result appears with the event, its date and the attendee's name, and the ticket is checked in</li>
-            <li>Tap <strong class="text-gray-900 dark:text-white">Scan Another Ticket</strong> for the next person</li>
+            <li>Tap <strong class="text-gray-900 dark:text-white">Start camera</strong> and allow it. On that phone the camera starts by itself from then on</li>
+            <li>Point it at the QR code on the ticket. A colored band gives the answer, with the attendee's name, their tickets and, at an <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated</a> event, their seats</li>
+            <li>A green check-in carries on to the next ticket by itself after three seconds (tap the card to keep it on screen). Anything amber or red waits until you tap <strong class="text-gray-900 dark:text-white">Scan next</strong></li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Scanning at event</strong> picker at the top of the scanner matters for <a href="{{ route('marketing.docs.subscriptions') }}#redeeming" class="doc-link">passes</a>, which work at several events. An ordinary ticket is always checked against its own event. The page's title row has a <strong class="text-gray-900 dark:text-white">Sales</strong> link back and a <strong class="text-gray-900 dark:text-white">Check-in</strong> button for the dashboard.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Scanning at event</strong> picker at the top says which event the door is for. Today's events are listed first, then the ones coming up, then past ones, and a recurring event shows the date the door is on. It arrives on today's event with sales (otherwise one running today, otherwise the next one coming up), and your choice is remembered on that phone for as long as that event is on today. A <a href="{{ route('marketing.docs.subscriptions') }}#redeeming" class="doc-link">pass</a> is redeemed at the event picked. An ordinary ticket for a different event, or for another night of the same recurring event, stops in amber and is checked in only when you tap <strong class="text-gray-900 dark:text-white">Admit anyway</strong>. The page's title row has a <strong class="text-gray-900 dark:text-white">Sales</strong> link back and a <strong class="text-gray-900 dark:text-white">Check-in</strong> button for the dashboard.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The phone buzzes once for a check-in and several times for anything else, and plays a short tone (turn it off with <strong class="text-gray-900 dark:text-white">Sound</strong> under the camera). <strong class="text-gray-900 dark:text-white">Switch camera</strong> and <strong class="text-gray-900 dark:text-white">Light</strong> appear where the phone has them. The screen stays on while the camera runs. Browsers only allow the camera on a secure address, so a selfhosted install has to be opened over https to scan.</p>
 
         <h3 id="scan-results" class="doc-subheading">What the scanner shows</h3>
         <div class="doc-table-wrap">
@@ -1409,16 +1411,28 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-green-700 dark:text-green-400">Ticket Scanned Successfully!</span></td>
-                        <td>Checked in. One scan admits every ticket on the order, each shown as a green square (carrying its seat on an <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated</a> event). With <a href="#options" class="doc-link">Individual tickets</a> each attendee has their own code.</td>
+                        <td><span class="font-semibold text-green-700 dark:text-green-400">Admit 2 people</span></td>
+                        <td>Checked in. One scan admits every ticket on the order (add-ons are not counted as people). With <a href="#options" class="doc-link">Individual tickets</a> each attendee has their own code.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-amber-700 dark:text-amber-400">Warning: This ticket has already been used</span></td>
-                        <td>Shown under the result when the code was scanned before. The box turns orange, and so do the squares that were already checked in.</td>
+                        <td><span class="font-semibold text-amber-700 dark:text-amber-400">Already checked in</span></td>
+                        <td>The code was scanned before. The time of the first scan is shown on the venue's clock, with the date when it was another day. Nothing changes.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-amber-700 dark:text-amber-400">Admit 1 person</span>, with <span class="font-semibold text-gray-700 dark:text-gray-200">1 already checked in</span></td>
+                        <td>Part of the order was checked in before. The rest is checked in now.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-amber-700 dark:text-amber-400">Ticket for another event</span></td>
+                        <td>The ticket is for a different event than the one in the picker, which the screen names with its date. It is checked in only when you tap <strong class="text-gray-900 dark:text-white">Admit anyway</strong>.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-amber-700 dark:text-amber-400">Ticket for another date</span></td>
+                        <td>The ticket is for another night of the recurring event in the picker. Because check-in opens a day early, tonight's door would otherwise take tomorrow's ticket, and tomorrow it would read as used. It is checked in only when you tap <strong class="text-gray-900 dark:text-white">Admit anyway</strong>.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-amber-700 dark:text-amber-400">Overdue balance</span></td>
-                        <td>An <a href="#installments-missed" class="doc-link">installment plan</a> is on hold. The screen names the attendee, the amount outstanding and how much has been paid. The scan does not check them in.</td>
+                        <td>An <a href="#installments-missed" class="doc-link">installment plan</a> is on hold. The screen names the attendee, the amount outstanding and how much has been paid. They are checked in only when you tap <strong class="text-gray-900 dark:text-white">Admit anyway</strong>.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-red-700 dark:text-red-400">Check-in opens 24 hours before the event starts.</span></td>
@@ -1440,9 +1454,15 @@
                         <td><span class="font-semibold text-red-700 dark:text-red-400">You are not authorized to scan this ticket</span></td>
                         <td>The ticket is for an event on a schedule you are not a member of.</td>
                     </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-700 dark:text-gray-200">Could not check this ticket</span></td>
+                        <td>The phone lost its connection, or you were signed out during a long shift. Nothing was recorded: scan again, or tap <strong class="text-gray-900 dark:text-white">Reload</strong> when it asks.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">Admit anyway</strong> is offered only on an amber answer, and each use is recorded in the schedule's <a href="{{ route('marketing.docs.managing_schedules') }}#audit-log" class="doc-link">Audit Log</a>. A red answer cannot be waved through.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Any team member with access to your schedule can scan tickets, including viewers: have them log in on their own phone.</p>
 
