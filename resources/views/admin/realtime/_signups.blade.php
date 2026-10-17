@@ -8,12 +8,12 @@
     $sourceColumn = 'hidden md:block xl:hidden min-[1400px]:block';
     $sourceInline = 'md:hidden xl:block min-[1400px]:hidden';
 @endphp
-<section class="ap-card rounded-xl xl:col-span-2 flex flex-col" aria-labelledby="realtime-signups-heading">
+<section class="realtime-signups ap-card rounded-xl flex flex-col" aria-labelledby="realtime-signups-heading">
     <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-3">
         <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
             <div class="flex items-baseline gap-2 min-w-0">
                 <h2 id="realtime-signups-heading" class="text-base font-semibold text-gray-900 dark:text-white">@{{ msg.signups }}</h2>
-                <span class="text-xs text-gray-500 dark:text-gray-400">@{{ msg.last24h }}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">@{{ msg.last24h }}<template v-if="p.filtered"> · @{{ msg.notFiltered }}</template></span>
             </div>
             {{-- When they came: one bar per hour, the hour that just passed last. --}}
             <div v-if="signups.rows.length" class="w-full sm:w-56 shrink-0" role="img" :aria-label="msg.perHour">
@@ -55,16 +55,19 @@
             <span class="text-end">@{{ msg.signedUpMark }}</span>
         </div>
 
-        {{-- At xl the list scrolls inside the card, so an arrival never pushes the Visitors list
-             while the admin is pointing at it. Below xl it is five rows and a Show all. --}}
-        <ul class="divide-y divide-gray-100 dark:divide-white/[0.06] xl:max-h-[26rem] overflow-y-auto border-t border-gray-100 dark:border-white/[0.06] md:border-t-0">
+        {{-- At xl the list keeps a fixed height, so an arrival never pushes the page while the
+             admin is pointing at it; what does not fit fades out and says how much more there is
+             (it used to scroll inside the card with no sign of it, and "10 Created account" above
+             six rows read as a bug). Below xl it is five rows and a Show all. --}}
+        <div class="relative">
+        <ul ref="signupList" class="divide-y divide-gray-100 dark:divide-white/[0.06] border-t border-gray-100 dark:border-white/[0.06] md:border-t-0" :class="signupsAll ? '' : 'realtime-capped'">
             <li v-for="(row, index) in signups.rows" :key="row.key" class="{{ $signupCols }} px-4 sm:px-5 py-3 items-start"
                 :class="[index >= 5 && !signupsAll ? 'hidden xl:grid' : 'grid', fresh[row.key] ? 'realtime-fresh' : '']">
                 {{-- Who --}}
                 <div class="flex items-start gap-3 min-w-0">
                     <span class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold bg-[var(--brand-blue-a10)] text-[var(--brand-blue)]" aria-hidden="true">@{{ row.initials }}</span>
                     <div class="min-w-0">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate"><bdi>@{{ row.name }}</bdi></p>
+                        <p class="realtime-cut text-sm font-medium text-gray-900 dark:text-white truncate" dir="auto">@{{ row.name }}</p>
                         <a v-if="row.email" :href="'mailto:' + row.email" :title="row.email" class="block text-xs text-gray-500 dark:text-gray-400 truncate hover:underline"><bdi dir="ltr">@{{ row.email }}</bdi></a>
                         <p v-if="row.source" class="{{ $sourceInline }} text-xs text-gray-500 dark:text-gray-400 truncate"><bdi>@{{ row.source.primary }}</bdi><span v-if="row.source.secondary"> · <bdi dir="ltr">@{{ row.source.secondary }}</bdi></span></p>
                         <component v-if="row.on_site === 'now'" :is="canShow(row.person_id) ? 'button' : 'span'" :type="canShow(row.person_id) ? 'button' : undefined"
@@ -117,11 +120,17 @@
                 </div>
             </li>
         </ul>
+        <div v-if="hiddenBelow.signups && !signupsAll" class="realtime-fade hidden xl:block" aria-hidden="true"></div>
+        </div>
 
         <div v-if="signups.rows.length > 5 || signups.more_text" class="px-5 py-3 text-center border-t border-gray-100 dark:border-white/[0.06]"
-             :class="signups.more_text ? '' : 'xl:hidden'">
+             :class="signups.more_text || signupsAll || hiddenBelow.signups ? '' : 'xl:hidden'">
             <button v-if="signups.rows.length > 5" type="button" @click="signupsAll = !signupsAll"
-                    class="xl:hidden text-sm font-medium text-[var(--brand-blue)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] rounded">@{{ signupsAll ? msg.showLess : msg.showAll }}</button>
+                    class="text-sm font-medium text-[var(--brand-blue)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] rounded"
+                    :class="signupsAll || hiddenBelow.signups ? '' : 'xl:hidden'">
+                <span class="xl:hidden">@{{ signupsAll ? msg.showLess : msg.showAll }}</span>
+                <span class="hidden xl:inline">@{{ signupsAll ? msg.showLess : nMore(hiddenBelow.signups) }}</span>
+            </button>
             <p v-if="signups.more_text" class="text-xs text-gray-500 dark:text-gray-400">@{{ signups.more_text }}</p>
         </div>
     </template>

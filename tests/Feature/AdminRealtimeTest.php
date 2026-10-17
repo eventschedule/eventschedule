@@ -2,17 +2,23 @@
 
 namespace Tests\Feature;
 
+use App\Models\BoostCampaign;
 use App\Models\RealtimeHit;
+use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\RealtimeDashboard;
+use App\Services\ScheduleDeletionService;
+use App\Utils\MoneyUtils;
 use App\Utils\RealtimeTracker;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -178,6 +184,55 @@ class AdminRealtimeTest extends TestCase
         $this->assertSame('2 page views', $payload['overview']['phrases']['not_accepted']);
         $this->assertSame(3, array_sum(array_map(fn ($m) => $m['consented'] + $m['unidentified'], $payload['minutes'])));
         $this->assertSame(2, collect($payload['breakdowns']['pages'])->firstWhere('key', 'p:wp:/pricing')['views']);
+
+        // Beside the headline, which counts the one visitor: what it leaves out.
+        $this->assertSame('3 page views in the last 30 minutes · 67% from visitors who have not accepted cookies, not counted above', $payload['overview']['phrases']['declined']);
+        $this->assertSame('1 not signed in', explode(' · ', $payload['overview']['phrases']['split'])[1]);
+    }
+
+    /**
+     * The Surfaces card is gone: it repeated the board and Trends, and its always-present zero rows
+     * drew four empty cards with nobody on the site. The embedded calendars it alone counted are a
+     * line on the Now card.
+     * Mutation: drop 'embed_views' or the embed phrase from the overview.
+     */
+    public function test_embedded_calendars_are_counted_on_the_now_card_and_no_card_lists_zeros(): void
+    {
+        $quiet = (new RealtimeDashboard)->payload();
+        $this->assertSame(['pages', 'sources', 'countries'], array_keys($quiet['breakdowns']));
+        $this->assertSame([[], [], []], array_values($quiet['breakdowns']), 'with nobody here, nothing to list');
+        $this->assertNull($quiet['overview']['phrases']['embed']);
+        $this->assertNull($quiet['overview']['phrases']['declined']);
+
+        $this->hit(['visitor_key' => 'eeeeeeeeeeeeeeee', 'path' => '/pricing']);
+        $this->hit(['consented' => false, 'visitor_key' => null, 'surface' => 'embed', 'path' => '/']);
+
+        $overview = (new RealtimeDashboard)->payload()['overview'];
+        $this->assertSame(1, $overview['embed_views']);
+        $this->assertSame('Embedded on other websites: 1 page view in the last 30 minutes', $overview['phrases']['embed']);
+        $this->assertSame('1 page view in the last 30 minutes', $overview['phrases']['declined'], 'everyone else accepted');
+    }
+
+    /**
+     * Mutation: give the page the Refresh button again, or put Trends back above Activity.
+     */
+    public function test_the_page_runs_now_today_history_then_the_lists_without_a_refresh_button(): void
+    {
+        $admin = $this->admin();
+        $admin->forceFill(['timezone' => 'Asia/Jerusalem'])->save();
+
+        $html = $this->actingAsAdmin($admin)->get('/admin/realtime')->assertOk()->getContent();
+
+        $at = fn (string $needle) => strpos($html, $needle);
+        $this->assertNotFalse($at('id="realtime-now"'));
+        $this->assertLessThan($at('aria-labelledby="realtime-activity-heading"'), $at('id="realtime-now"'));
+        $this->assertLessThan($at('aria-labelledby="realtime-trends-heading"'), $at('aria-labelledby="realtime-signups-heading"'));
+        $this->assertLessThan($at('id="realtime-visitors"'), $at('aria-labelledby="realtime-trends-heading"'));
+        $this->assertFalse($at('realtime-last30-heading'), 'the Last 30 minutes card is part of the Now card');
+        $this->assertFalse($at('id="admin-nav-refresh-btn"'), 'the page updates itself');
+        $this->assertStringContainsString('"timezone":"Asia\/Jerusalem"', $html, 'one clock for the page, the admin\'s own');
+
+        $this->assertStringContainsString('id="admin-nav-refresh-btn"', $this->actingAsAdmin($admin)->get('/admin/users')->assertOk()->getContent());
     }
 
     public function test_a_new_users_pre_sign_up_pages_join_their_account_but_an_admins_private_window_does_not(): void
@@ -271,6 +326,145 @@ class AdminRealtimeTest extends TestCase
             collect($activity['stats'])->pluck('count', 'type')->all(),
             'the count buttons; no Upgrades button on a day without one'
         );
+    }
+
+    /**
+     * The owner's delete in the admin portal removes the row, so the name is read from the audit
+     * row, and so is the name of the plan cancelled on the way out.
+     * Mutation: drop SCHEDULE_DELETE from ACTIONS, or the metadata fallback in roleName().
+     */
+    public function test_a_schedule_deleted_in_the_admin_portal_is_listed_under_the_name_it_had(): void
+    {
+        $owner = $this->createOwner();
+        $owner->forceFill(['name' => 'Dana Owner'])->save();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Jazz Nights']);
+        $roleId = $role->id;
+        // What cancelBillingForDeletion() writes for a paid schedule, which needs Stripe to reach.
+        AuditService::log(AuditService::SUBSCRIPTION_CANCEL, $owner->id, 'Role', $roleId, null, ['stripe_id' => 'sub_test'], 'Cancelled because the schedule is being deleted');
+
+        $this->actingAs($owner)->delete(route('role.delete', ['subdomain' => $role->subdomain]))->assertRedirect();
+        $this->assertNull(Role::find($roleId), 'the row is gone');
+
+        $activity = (new RealtimeDashboard)->payload()['activity'];
+        $deleted = collect($activity['items'])->firstWhere('type', 'schedule_deleted');
+
+        $this->assertSame('Dana Owner deleted a schedule: Jazz Nights', $deleted['text']);
+        $this->assertNull($deleted['url'], 'there is no admin page left to open');
+        $this->assertNull($deleted['public_url']);
+        $this->assertStringContainsString('Jazz Nights', collect($activity['items'])->firstWhere('type', 'cancel')['text']);
+
+        $button = collect($activity['stats'])->firstWhere('type', 'deleted');
+        $this->assertSame(1, $button['count']);
+
+        $filtered = RealtimeDashboard::fromRequest(Request::create('/', 'GET', ['feed' => 'deleted']))->payload()['activity'];
+        $this->assertSame('deleted', $filtered['feed']);
+        $this->assertSame(['schedule_deleted'], array_column($filtered['items'], 'type'));
+    }
+
+    /**
+     * Deleted through the API, the schedule keeps its row: its name, and an admin page with Restore.
+     * Releasing the name of a schedule that was already deleted is not another deletion.
+     * Mutation: drop the is_deleted check in classify().
+     */
+    public function test_an_api_delete_is_listed_and_releasing_the_name_again_is_not(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Blues Bar']);
+        $raw = 'testapikey_'.Str::random(24);
+        $owner->forceFill(['api_key' => substr(hash('sha256', $raw), 0, 8), 'api_key_hash' => Hash::make($raw)])->save();
+
+        $this->deleteJson('/api/schedules/'.$role->subdomain, [], ['X-API-Key' => $raw])->assertSuccessful();
+        app(ScheduleDeletionService::class)->markDeleted($role->fresh(), $owner->id, AuditService::SCHEDULE_DELETE);
+
+        $items = collect((new RealtimeDashboard)->payload()['activity']['items'])->where('type', 'schedule_deleted')->values();
+
+        $this->assertCount(1, $items);
+        $this->assertStringContainsString('deleted a schedule: Blues Bar', $items[0]['text']);
+        $this->assertSame(route('admin.schedules.edit', ['role' => UrlUtils::encodeId($role->id)]), $items[0]['url']);
+        $this->assertNull($items[0]['public_url'], 'a deleted schedule has no public page');
+    }
+
+    /**
+     * The account's row has lost its user by the time it is read, and says only how many
+     * schedules went with it.
+     * Mutation: drop account_deleted from the no-user rule, or the count in ProfileController.
+     */
+    public function test_a_deleted_account_is_listed_without_a_name_with_how_many_schedules_went(): void
+    {
+        $organizer = $this->createOwner();
+        $organizer->forceFill(['name' => 'Olive Organizer'])->save();
+        $this->createRole($organizer, 'venue');
+        $this->createRole($organizer, 'talent');
+        DB::table('roles')->where('id', $this->createRole($organizer, 'curator')->id)->update(['is_deleted' => true]);
+        $this->actingAs($organizer)->delete('/settings', ['password' => 'password'])->assertRedirect('/');
+
+        $follower = $this->createOwner();
+        $this->actingAs($follower)->delete('/settings', ['password' => 'password'])->assertRedirect('/');
+
+        $activity = (new RealtimeDashboard)->payload()['activity'];
+        $items = collect($activity['items'])->where('type', 'account_deleted');
+
+        $this->assertEqualsCanonicalizing(
+            ['An account was deleted · Schedules: 2', 'An account was deleted'],
+            $items->pluck('text')->all(),
+            'the live schedules only, and no name'
+        );
+        $this->assertSame([null, null], $items->pluck('url')->values()->all());
+        $this->assertSame(2, collect($activity['stats'])->firstWhere('type', 'deleted')['count']);
+        $this->assertStringNotContainsString('Olive', json_encode($activity));
+    }
+
+    /**
+     * The counts are one row of chips: upgrades and deletions follow the four on a day that has them,
+     * and none carries a layout of its own (as tiles, a lone "1 Upgrades" took a whole row).
+     * Mutation: list an optional chip with a zero count, or put one before the four.
+     */
+    public function test_upgrades_and_deletions_follow_the_four_as_chips(): void
+    {
+        $owner = $this->createOwner();
+        $this->assertSame(['signup', 'schedule', 'events', 'order'], array_column((new RealtimeDashboard)->payload()['activity']['stats'], 'type'));
+
+        AuditService::log(AuditService::SUBSCRIPTION_CREATE, $owner->id, 'Role', $this->createRole($owner)->id, null, ['plan_type' => 'pro']);
+        AuditService::log(AuditService::SCHEDULE_DELETE, $owner->id, 'Role', $this->createRole($owner)->id, null, null, 'Gone Hall');
+
+        $stats = (new RealtimeDashboard)->payload()['activity']['stats'];
+
+        $this->assertSame(['signup', 'schedule', 'events', 'order', 'upgrade', 'deleted'], array_column($stats, 'type'));
+        foreach (array_slice($stats, 4) as $stat) {
+            $this->assertSame(1, $stat['count']);
+            $this->assertSame(['type', 'label', 'count'], array_keys($stat));
+        }
+    }
+
+    /** Mutation: drop any of the four actions from ACTIONS, or its arm in classify(). */
+    public function test_a_resumed_or_switched_plan_a_claim_and_a_boost_are_listed(): void
+    {
+        $owner = $this->createOwner();
+        $owner->forceFill(['name' => 'Dana Owner'])->save();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Jazz Nights']);
+        $event = $this->createEvent($role, ['name' => 'Salsa Night']);
+        $boost = BoostCampaign::create([
+            'event_id' => $event->id, 'role_id' => $role->id, 'user_id' => $owner->id, 'channel' => 'meta',
+            'name' => 'Boost', 'status' => 'active', 'billing_status' => 'charged', 'user_budget' => 50,
+            'total_charged' => 60, 'currency_code' => 'EUR',
+        ]);
+
+        AuditService::log(AuditService::SUBSCRIPTION_RESUME, $owner->id, 'Role', $role->id, null, null, $role->subdomain);
+        AuditService::log(AuditService::SUBSCRIPTION_SWAP, $owner->id, 'Role', $role->id, null, ['plan_type' => 'enterprise', 'plan_term' => 'yearly'], $role->subdomain);
+        AuditService::log(AuditService::SCHEDULE_CLAIM, $owner->id, 'Role', $role->id);
+        AuditService::log(AuditService::BOOST_CREATE, $owner->id, 'BoostCampaign', $boost->id, null, null, 'role_id:'.$role->id);
+
+        $items = collect((new RealtimeDashboard)->payload()['activity']['items'])->keyBy('type');
+
+        $this->assertSame('Dana Owner resumed the plan on Jazz Nights', $items['resume']['text']);
+        $this->assertSame('Dana Owner switched Jazz Nights to Enterprise (Yearly)', $items['plan_change']['text']);
+        $this->assertSame('Dana Owner claimed Jazz Nights', $items['claim']['text']);
+        $this->assertSame('Dana Owner boosted Salsa Night · '.MoneyUtils::format(50, 'EUR'), $items['boost']['text']);
+
+        $admin = route('admin.schedules.edit', ['role' => UrlUtils::encodeId($role->id)]);
+        foreach (['resume', 'plan_change', 'claim', 'boost'] as $type) {
+            $this->assertSame($admin, $items[$type]['url'], $type);
+        }
     }
 
     public function test_the_sign_ups_card_lists_who_the_button_counts_and_follows_the_funnels_steps(): void

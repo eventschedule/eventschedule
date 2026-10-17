@@ -209,8 +209,11 @@ class RealtimeDashboard
                 'win_views' => $consentedViews,
                 'unidentified_views' => $unidentifiedViews,
                 'consent_share' => $allViews > 0 ? (int) round(100 * $consentedViews / $allViews) : null,
+                // Calendars embedded on other sites: no page of their own on the board or in Top
+                // pages, so the Now card gives them a line.
+                'embed_views' => $embedViews,
                 'last_seen_ago' => $nowPeople->isEmpty() ? $this->lastSeenAgo() : null,
-                'phrases' => $this->overviewPhrases($nowPeople, $counts['all'], $consentedViews, $unidentifiedViews, $allViews),
+                'phrases' => $this->overviewPhrases($nowPeople, $counts['all'], $consentedViews, $unidentifiedViews, $allViews, $embedViews),
             ],
             'minutes' => $this->minutes($matchingRows, $marks),
             'counts' => $counts,
@@ -219,7 +222,6 @@ class RealtimeDashboard
                 'pages' => $this->pagesBreakdown($matchingRows, $nowPeople),
                 'sources' => $this->sourcesBreakdown($matchingRows),
                 'countries' => $this->countriesBreakdown($matchingRows),
-                'surfaces' => $this->surfacesBreakdown($pageRows->filter(fn ($row) => $this->matches($row, ignoreSurface: true)), $embedViews),
             ],
             'activity' => $activity,
             'expanded' => $this->expanded($people),
@@ -615,9 +617,10 @@ class RealtimeDashboard
         };
     }
 
-    private function overviewPhrases(Collection $nowPeople, int $visitors, int $views, int $unidentified, int $allViews): array
+    private function overviewPhrases(Collection $nowPeople, int $visitors, int $views, int $unidentified, int $allViews, int $embedViews): array
     {
         $share = $allViews > 0 ? (int) round(100 * $views / $allViews) : null;
+        $total = trans_choice('messages.realtime_views_count', $allViews, ['count' => number_format($allViews)]);
 
         return [
             'split' => __('messages.realtime_split', [
@@ -633,6 +636,16 @@ class RealtimeDashboard
             'not_accepted' => trans_choice('messages.realtime_views_count', $unidentified, ['count' => number_format($unidentified)]),
             'consent' => $share !== null
                 ? __('messages.realtime_consent_share', ['percent' => $share])
+                : null,
+            // Beside "Visitors right now", which counts only people who accepted cookies: how much
+            // of the traffic that leaves out. Said where the number is, not three cards down.
+            'declined' => match (true) {
+                $allViews === 0 => null,
+                $unidentified === 0 => __('messages.realtime_views_last_30', ['views' => $total]),
+                default => __('messages.realtime_declined_line', ['views' => $total, 'percent' => 100 - $share]),
+            },
+            'embed' => $embedViews > 0
+                ? __('messages.realtime_embed_line', ['views' => trans_choice('messages.realtime_views_count', $embedViews, ['count' => number_format($embedViews)])])
                 : null,
         ];
     }
@@ -829,44 +842,12 @@ class RealtimeDashboard
             ->sortByDesc('views')->take(self::BREAKDOWN_LIMIT)->values()->all();
     }
 
-    private function surfacesBreakdown(Collection $rows, int $embedViews): array
-    {
-        $surfaces = config('app.is_nexus') ? ['wp', 'gp', 'ap', 'auth'] : ['gp', 'ap', 'auth'];
-        $counts = $rows->countBy('surface')->all();
-
-        $list = collect($surfaces)->map(fn ($surface) => [
-            'key' => $surface,
-            'label' => __('messages.realtime_surface_'.$surface),
-            'sub' => null,
-            'icon' => $surface,
-            'url' => null,
-            'views' => $counts[$surface] ?? 0,
-            'now' => 0,
-            'filterable' => true,
-        ])->sortByDesc('views')->values();
-
-        if ($embedViews > 0) {
-            $list->push([
-                'key' => 'embed',
-                'label' => __('messages.realtime_surface_embed'),
-                'sub' => null,
-                'icon' => 'embed',
-                'url' => null,
-                'views' => $embedViews,
-                'now' => 0,
-                'filterable' => false,
-            ]);
-        }
-
-        return $list->all();
-    }
-
     /**
      * Where the people on the site right now are: one entry per area, in a fixed order, for the
      * buttons beside "Visitors right now". An area is where a person's CURRENT page is.
      *
      * The other filters apply; the surface filter does not, so pressing one area leaves the counts
-     * of the rest in place (surfacesBreakdown() makes the same exception). The marketing site
+     * of the rest in place. The marketing site
      * exists on the nexus only, and "Sign up & log in" is a doorway rather than a place to be, so
      * it is listed only while someone is on it or it is the filter.
      *

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Utils\RealtimeTracker;
+use App\Utils\TimezoneUtils;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +25,14 @@ use Illuminate\Support\Facades\DB;
  *    account and blocked accounts are left out, with what happened on a blocked account's
  *    schedules and events (BlockedAccounts), as in the rail.
  *
- * The 24-hour range is the current hour and the 23 before it, by the clock, because an hour is the
- * finest grain realtime_hourly has. The day ranges are calendar days in the app's timezone, today
- * included.
+ * Everything is told in the viewer's own timezone (viewerZone()), which the page's clocks use too:
+ * in the app's zone, UTC by default, the hour under way read "2 PM" beside a sign-up at "4:24 PM".
+ *
+ * The 24-hour range draws the current hour and the 23 before it as bars, by the UTC hour
+ * realtime_hourly is kept in, so a half-hour zone reads "7:30 PM", which is what each bar covers.
+ * Its four activity figures are the rolling 24 hours, as the Activity rail counts them, against the
+ * 24 hours before those: by the clock they came out a sign-up short of the rail beside them. The day
+ * ranges are calendar days in the viewer's zone, today included.
  *
  * Nothing here names anybody, so the answer is cached for a minute: unlike the live payload
  * (RealtimeDashboard's class docblock), it leaves nothing on disk that the hour must take away.
@@ -43,9 +49,18 @@ class RealtimeTrends
 
     private CarbonImmutable $now;
 
-    public function __construct(public readonly string $range = '24h', ?CarbonImmutable $now = null)
+    private string $zone;
+
+    public function __construct(public readonly string $range = '24h', ?CarbonImmutable $now = null, ?string $timezone = null)
     {
-        $this->now = ($now ?? now()->toImmutable())->setTimezone(config('app.timezone'));
+        $this->zone = self::viewerZone($timezone);
+        $this->now = ($now ?? now()->toImmutable())->setTimezone($this->zone);
+    }
+
+    /** The zone a viewer's page is told in: their own, or the app's when they have none. */
+    public static function viewerZone(?string $timezone): string
+    {
+        return TimezoneUtils::canonicalize($timezone) ?? config('app.timezone');
     }
 
     public static function range(?string $range): string
@@ -57,7 +72,7 @@ class RealtimeTrends
     {
         $use24 = (bool) auth()->user()?->use_24_hour_time;
 
-        return Cache::remember('realtime_trends:'.$this->range.':'.app()->getLocale().':'.(int) $use24, self::CACHE_SECONDS, fn () => $this->build());
+        return Cache::remember('realtime_trends:'.$this->range.':'.app()->getLocale().':'.(int) $use24.':'.$this->zone, self::CACHE_SECONDS, fn () => $this->build());
     }
 
     public function build(): array
@@ -69,16 +84,19 @@ class RealtimeTrends
         };
         // Hours by the hour, days by the calendar: a day is 23 or 25 hours when the clocks change.
         $back = fn (CarbonImmutable $at, int $n) => $unit === 'hour' ? $at->subHours($n) : $at->subDays($n);
-        $start = $back($unit === 'hour' ? $this->now->startOfHour() : $this->now->startOfDay(), $count - 1);
+        $start = $back($unit === 'hour' ? $this->now->utc()->startOfHour() : $this->now->startOfDay(), $count - 1);
         $previousStart = $back($start, $count);
         $previousEnd = $back($this->now, $count);
 
         $use24 = (bool) auth()->user()?->use_24_hour_time;
         $buckets = [];
         for ($i = 0, $at = $start; $i < $count; $i++, $at = $unit === 'hour' ? $at->addHour() : $at->addDay()) {
+            $local = $at->setTimezone($this->zone);
+            // Isolated, so a right-to-left page keeps "1 PM" in its order (Chart.js drew "PM 1").
+            $clock = "\u{2066}".$local->format($local->minute ? ($use24 ? 'H:i' : 'g:i A') : ($use24 ? 'H:00' : 'g A'))."\u{2069}";
             $buckets[$this->key($at, $unit)] = [
-                'label' => $unit === 'hour' ? $at->format($use24 ? 'H:00' : 'g A') : $at->translatedFormat('M j'),
-                'title' => $unit === 'hour' ? $at->translatedFormat('D').' '.$at->format($use24 ? 'H:00' : 'g A') : $at->translatedFormat('D, M j'),
+                'label' => $unit === 'hour' ? $clock : $local->translatedFormat('M j'),
+                'title' => $unit === 'hour' ? $local->translatedFormat('D').' '.$clock : $local->translatedFormat('D, M j'),
                 'current' => $i === $count - 1,
                 'start' => $at,
                 'views' => null,
@@ -90,11 +108,14 @@ class RealtimeTrends
         $previous = array_fill_keys(self::METRICS, 0);
 
         $since = RealtimeRollup::since();
-        $sinceAt = $since ? CarbonImmutable::parse($since, 'UTC')->setTimezone(config('app.timezone')) : null;
+        $sinceAt = $since ? CarbonImmutable::parse($since, 'UTC')->setTimezone($this->zone) : null;
         $surfaces = config('app.is_nexus') ? RealtimeRollup::SURFACES : array_values(array_diff(RealtimeRollup::SURFACES, ['wp']));
 
         $this->addTraffic($buckets, $totals, $previous, $start, $previousStart, $previousEnd, $sinceAt, $unit, $surfaces);
-        $this->addActivity($buckets, $totals, $previous, $start, $previousStart, $previousEnd, $unit);
+        // What the rail counts is counted over the rail's own 24 hours (the class docblock).
+        $unit === 'hour'
+            ? $this->addActivity($buckets, $totals, $previous, $this->now->subDay(), $this->now->subDays(2), $this->now->subDay(), $unit)
+            : $this->addActivity($buckets, $totals, $previous, $start, $previousStart, $previousEnd, $unit);
 
         // Traffic the rollup had not begun counting: an empty bar is not a quiet hour.
         if (! $sinceAt) {
@@ -132,9 +153,10 @@ class RealtimeTrends
         ];
     }
 
+    /** An hour is the UTC hour realtime_hourly keeps; a day is the viewer's calendar day. */
     private function key(CarbonImmutable $at, string $unit): string
     {
-        return $unit === 'hour' ? $at->format('Y-m-d H') : $at->format('Y-m-d');
+        return $unit === 'hour' ? $at->utc()->format('Y-m-d H') : $at->setTimezone($this->zone)->format('Y-m-d');
     }
 
     private function addTraffic(array &$buckets, array &$totals, array &$previous, CarbonImmutable $start, CarbonImmutable $previousStart, CarbonImmutable $previousEnd, ?CarbonImmutable $since, string $unit, array $surfaces): void
@@ -160,7 +182,7 @@ class RealtimeTrends
             ->get(['hour', 'surface', 'page_views', 'visits']);
 
         foreach ($rows as $row) {
-            $hour = CarbonImmutable::parse($row->hour, 'UTC')->setTimezone(config('app.timezone'));
+            $hour = CarbonImmutable::parse($row->hour, 'UTC');
 
             if ($hour->gte($start)) {
                 $key = $this->key($hour, $unit);
@@ -186,7 +208,8 @@ class RealtimeTrends
             ->get(['hour', 'kind', DB::raw('COUNT(*) as total')]);
 
         foreach ($current as $row) {
-            $key = $unit === 'hour' ? $row->hour : substr((string) $row->hour, 0, 10);
+            // The hour the row was written in, in the app's zone as audit_logs keeps it.
+            $key = $this->key(CarbonImmutable::createFromFormat('Y-m-d H', (string) $row->hour, config('app.timezone'))->startOfHour(), $unit);
             if (isset($buckets[$key])) {
                 $buckets[$key][$row->kind] += (int) $row->total;
             }
@@ -214,16 +237,18 @@ class RealtimeTrends
         $excluded = User::where('email', DemoService::DEMO_EMAIL)->orWhere('is_admin', true)->pluck('id')
             ->merge($blocked->userIds())->unique()->values()->all();
 
+        // audit_logs is written in the app's zone, whatever zone the window was worked out in.
+        $appZone = config('app.timezone');
         $query = DB::table('audit_logs')
             ->whereIn('action', [
                 AuditService::AUTH_REGISTER, AuditService::API_REGISTER, AuditService::AUTH_GOOGLE_LOGIN,
                 AuditService::AUTH_FACEBOOK_LOGIN, AuditService::SCHEDULE_CREATE, AuditService::EVENT_CREATE,
                 AuditService::SALE_PAID,
             ])
-            ->where('created_at', '>=', $from->format('Y-m-d H:i:s'))
+            ->where('created_at', '>=', $from->setTimezone($appZone)->format('Y-m-d H:i:s'))
             // Up to and including this second for the current span; the span before ends where
             // the same clock time fell then.
-            ->where('created_at', $toNow ? '<=' : '<', $to->format('Y-m-d H:i:s'))
+            ->where('created_at', $toNow ? '<=' : '<', $to->setTimezone($appZone)->format('Y-m-d H:i:s'))
             // A sale may have no user (a guest's checkout); everything else must have one.
             ->where(fn ($q) => $q->whereNotNull('user_id')->orWhere('action', AuditService::SALE_PAID))
             ->when($excluded, fn ($q) => $q->where(fn ($inner) => $inner->whereNull('user_id')->orWhereNotIn('user_id', $excluded)))

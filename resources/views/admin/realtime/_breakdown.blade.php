@@ -1,11 +1,14 @@
-{{-- The four breakdown cards share one anatomy, so they are one template over `cards`. Every row is a
+{{-- The three breakdown cards share one anatomy, so they are one template over `cards`; the unit in
+     each header names the window, since nothing else on a card said "30 minutes". Surfaces was a
+     fourth: it repeated the board and Trends, and the count of embedded calendars it held moved to
+     the Now card. Every row is a
      filter toggle; the only other way to filter is removing a chip. A top page that has an address
      carries the arrow that opens it beside the toggle, never inside it (a link in a button is not
      a link), and a page without one keeps the space, so the bars of one card share a scale. --}}
 <section v-for="card in cards" :key="card.id" class="ap-card rounded-xl flex flex-col" :aria-labelledby="'realtime-card-' + card.id">
     <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-2 flex items-baseline justify-between gap-2">
-        <h2 :id="'realtime-card-' + card.id" class="text-base font-semibold text-gray-900 dark:text-white">@{{ card.title }}</h2>
-        <span class="text-xs text-gray-500 dark:text-gray-400">@{{ card.unit }}</span>
+        <h2 :id="'realtime-card-' + card.id" class="shrink-0 text-base font-semibold text-gray-900 dark:text-white">@{{ card.title }}</h2>
+        <span class="min-w-0 text-end text-xs text-gray-500 dark:text-gray-400">@{{ card.unit }}</span>
     </div>
 
     <p v-if="!card.rows.length" class="px-5 pb-5 text-sm text-gray-500 dark:text-gray-400">@{{ msg.nothingYet }}</p>
@@ -26,14 +29,17 @@
                 <span class="relative flex items-center gap-2 min-w-0 flex-1">
                     <span v-if="card.id === 'countries'" class="iti__flag shrink-0" :class="'iti__' + row.key.toLowerCase()" aria-hidden="true"></span>
                     <svg v-else-if="row.icon && icons[row.icon]" class="w-4 h-4 shrink-0"
-                         :class="card.id === 'pages' || card.id === 'surfaces' ? surfaceTone(row.icon).text : 'text-gray-500 dark:text-gray-400'" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                         :class="card.id === 'pages' ? surfaceTone(row.icon).text : 'text-gray-500 dark:text-gray-400'" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" :d="icons[row.icon]" />
                     </svg>
-                    <span class="truncate" :class="isActive(card.filter, row.key) ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-900 dark:text-gray-100'"><bdi>@{{ rowLabel(card, row) }}</bdi></span>
-                    <span v-if="row.sub" class="hidden sm:inline truncate text-xs text-gray-500 dark:text-gray-400">@{{ row.sub }}</span>
+                    <span class="realtime-cut truncate" dir="auto" :class="isActive(card.filter, row.key) ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-900 dark:text-gray-100'">@{{ rowLabel(card, row) }}</span>
+                    {{-- A top page's area is its icon's colour already: in the narrow card of three, the
+                         name gets the room. --}}
+                    <span v-if="row.sub" class="hidden sm:inline truncate text-xs text-gray-500 dark:text-gray-400" :class="card.id === 'pages' ? 'xl:hidden' : ''">@{{ row.sub }}</span>
                 </span>
 
-                <span v-if="row.now > 0" class="relative inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                {{-- On its own small ground, so it reads where the bar behind it ends. --}}
+                <span v-if="row.now > 0" class="realtime-now-pill relative inline-flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
                     <span class="w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden="true"></span>@{{ msg.nNow.replace(':count', fmt(row.now)) }}
                 </span>
                 <span class="relative tabular-nums text-end text-gray-700 dark:text-gray-300">@{{ fmt(row.views) }}</span>

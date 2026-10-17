@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Setting;
@@ -193,9 +194,22 @@ class BlockedAccountsHiddenTest extends TestCase
         ]);
         AuditService::log(AuditService::GIFT_CARD_PAID, null, 'GiftCard', $card, ['status' => 'unpaid'], ['status' => 'active']);
 
+        // More of the team member's doings there: the plan resumed and switched, the schedule
+        // claimed and taken down, an event boosted.
+        AuditService::log(AuditService::SUBSCRIPTION_RESUME, $this->member->id, 'Role', $this->spamSchedule->id);
+        AuditService::log(AuditService::SUBSCRIPTION_SWAP, $this->member->id, 'Role', $this->spamSchedule->id, null, ['plan_type' => 'enterprise', 'plan_term' => 'monthly']);
+        AuditService::log(AuditService::SCHEDULE_CLAIM, $this->member->id, 'Role', $this->spamSchedule->id);
+        AuditService::log(AuditService::SCHEDULE_TAKEDOWN, $this->member->id, Role::class, $this->spamSchedule->id, ['is_deleted' => false], ['is_deleted' => true]);
+        $boost = BoostCampaign::create([
+            'event_id' => $this->spamEvent->id, 'role_id' => $this->spamSchedule->id, 'user_id' => $this->member->id,
+            'channel' => 'meta', 'name' => 'Boost', 'status' => 'active', 'billing_status' => 'charged',
+            'user_budget' => 20, 'total_charged' => 24,
+        ]);
+        AuditService::log(AuditService::BOOST_CREATE, $this->member->id, 'BoostCampaign', $boost->id);
+
         $before = (new RealtimeDashboard)->payload()['activity'];
-        $this->assertSame(['signup' => 2, 'schedule' => 1, 'events' => 2, 'order' => 2, 'upgrade' => 1], collect($before['stats'])->pluck('count', 'type')->all());
-        foreach (['trial', 'upgrade', 'cancel', 'gift_card'] as $type) {
+        $this->assertSame(['signup' => 2, 'schedule' => 1, 'events' => 2, 'order' => 2, 'upgrade' => 1, 'deleted' => 1], collect($before['stats'])->pluck('count', 'type')->all());
+        foreach (['trial', 'upgrade', 'cancel', 'gift_card', 'resume', 'plan_change', 'claim', 'schedule_deleted', 'boost'] as $type) {
             $this->assertContains($type, array_column($before['items'], 'type'));
         }
 
@@ -208,7 +222,7 @@ class BlockedAccountsHiddenTest extends TestCase
             collect($activity['stats'])->pluck('count', 'type')->all(),
         );
         $this->assertEqualsCanonicalizing(['signup', 'order'], array_column($activity['items'], 'type'),
-            'the honest sign-up and order; not the team member\'s event, trial or plan, nor the gift card, on the spammer\'s schedule');
+            'the honest sign-up and order; not the team member\'s event, trial, plan, claim, takedown or boost, nor the gift card, on the spammer\'s schedule');
         $this->assertStringContainsString('Jazz Night', collect($activity['items'])->firstWhere('type', 'order')['text']);
         $this->assertSame(['Hana Honest'], array_column($activity['signups']['rows'], 'name'));
         $this->assertSame(1, $activity['signups']['total']);

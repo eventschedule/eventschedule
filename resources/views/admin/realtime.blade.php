@@ -4,7 +4,8 @@
 
     {{-- Ahead of the stack, not inside it (see admin/dashboard): inside, the tabs stood 16px
          lower here than on the other admin pages. --}}
-    @include('admin.partials._navigation', ['active' => 'realtime'])
+    {{-- No Refresh button: the page updates itself every ten seconds. --}}
+    @include('admin.partials._navigation', ['active' => 'realtime', 'refresh' => false])
 
     <div class="space-y-4">
 
@@ -31,7 +32,9 @@
                 'filterCountry' => __('messages.realtime_filter_country'),
                 'visitorsRightNow' => __('messages.realtime_visitors_right_now'),
                 'ofTotal' => __('messages.realtime_of_total'),
-                'last30' => __('messages.realtime_last_30_minutes'),
+                'last30Short' => __('messages.realtime_last_30_min'),
+                'notFiltered' => __('messages.realtime_not_filtered'),
+                'nMore' => __('messages.realtime_n_more'),
                 'viewsPerMinute' => __('messages.realtime_views_per_minute'),
                 'acceptedCookies' => __('messages.realtime_accepted_cookies'),
                 'notAccepted' => __('messages.realtime_not_accepted'),
@@ -90,10 +93,11 @@
                 'topPages' => __('messages.realtime_top_pages'),
                 'sources' => __('messages.realtime_sources'),
                 'countries' => __('messages.realtime_countries'),
-                'surfaces' => __('messages.realtime_surfaces'),
                 'geoCredit' => __('messages.realtime_geo_credit'),
                 'views' => __('messages.realtime_views'),
                 'visits' => __('messages.realtime_visits'),
+                'unitViews30' => __('messages.realtime_unit_views_30'),
+                'unitVisits30' => __('messages.realtime_unit_visits_30'),
                 'nNow' => __('messages.realtime_n_now'),
                 'showOnly' => __('messages.realtime_show_only'),
                 'trackingOffTitle' => __('messages.realtime_tracking_off_title'),
@@ -125,6 +129,9 @@
                 'legalUrl' => Route::has('admin.legal') ? route('admin.legal') : null,
                 'isNexus' => (bool) config('app.is_nexus'),
                 'locale' => app()->getLocale(),
+                // The one clock for the whole page: Trends buckets its hours and days in it, and
+                // every time the script prints is told in it too.
+                'timezone' => \App\Services\RealtimeTrends::viewerZone(auth()->user()->timezone),
                 'rtl' => is_rtl(),
                 'icons' => \App\Utils\RealtimeIcons::PATHS,
             ];
@@ -136,23 +143,25 @@
             <template v-if="p.state !== 'off'">
                 @include('admin.realtime._toolbar')
 
-                {{-- Who is here and where first, then how the last day, week or month went. --}}
+                {{-- Now, then today, then how the day, week or month went, then the lists. Trends
+                     stood second, which put Activity and Sign-ups (what just happened) a scroll
+                     below the first screen at 1718x950. --}}
                 @include('admin.realtime._now')
-                @include('admin.realtime._trends')
 
-                <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
-                    {{-- In this order for the single column below xl: the day's numbers come
-                         before the list of people. At xl the activity card is the rail. --}}
-                    @include('admin.realtime._overview')
+                {{-- Activity first in the single column below xl; at xl Sign-ups takes two columns
+                     and Activity is the rail beside it (realtime-today in _script). --}}
+                <div class="realtime-today grid grid-cols-1 gap-4" :class="activityAll ? 'is-open' : ''">
                     @include('admin.realtime._activity')
                     @include('admin.realtime._signups')
                 </div>
 
-                @include('admin.realtime._visitors')
+                @include('admin.realtime._trends')
 
-                <div v-if="hasAnyone" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div v-if="hasAnyone" class="realtime-breakdowns grid gap-4">
                     @include('admin.realtime._breakdown')
                 </div>
+
+                @include('admin.realtime._visitors')
             </template>
         </div>
     </div>

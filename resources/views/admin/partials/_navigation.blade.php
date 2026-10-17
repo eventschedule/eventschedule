@@ -1,16 +1,19 @@
 {{-- The platform admin's navigation: five tabs, and under them every page of the group you are in.
 
-     The three groups (Insights, Manage, System) used to be menus hanging from their tab: on any
-     page inside one, nothing on screen said WHICH page it was (only "System" was lit), and a
-     sibling was two presses away behind a menu. Now a group's tab leads to its first page and the
-     second row names them all, the current one pressed in. A phone gets the whole section as one
-     dropdown, grouped, because five tabs and nine pages do not fit across it.
+     The three groups (Insights, Manage, System) used to be menus hanging from their tab and
+     nothing else: on any page inside one, nothing on screen said WHICH page it was (only "System"
+     was lit). So a group's tab leads to its first page and the second row names them all, the
+     current one pressed in. The menu is back beside that as a shortcut, never instead of it:
+     pointing at a group's tab (or ArrowDown on it) lists its pages, so any page is one press from
+     any other. A phone gets the whole section as one dropdown, grouped, because five tabs and
+     nine pages do not fit across it.
 
-     ONE list ($adminNav) feeds the strip, the second row and the dropdown: a page added to one
-     alone is missing for half the visitors. It also carries the page's h1, which no admin page
-     has of its own. Plain DOM script: the menus were the last Alpine on these pages.
+     ONE list ($adminNav) feeds the strip, the menus, the second row and the dropdown: a page added
+     to one alone is missing for half the visitors. It also carries the page's h1, which no admin
+     page has of its own. Plain DOM script: the old menus were the last Alpine on these pages.
 
-     $active is the page's key, passed by each page as before. --}}
+     $active is the page's key, passed by each page as before. A page that updates itself (Realtime)
+     passes 'refresh' => false, and the Refresh button is left out there. --}}
 @props(['active' => 'dashboard'])
 
 @php
@@ -101,20 +104,43 @@
         <nav class="ap-tabs" id="admin-nav" aria-label="{{ __('messages.admin') }}">
             @foreach ($adminNav as $groupKey => $group)
             <a href="{{ $group['href'] ?? reset($group['pages'])['href'] }}" class="ap-tab" data-admin-group="{{ $groupKey }}"
-                @if ($activeGroup === $groupKey) aria-current="{{ isset($group['pages']) ? 'true' : 'page' }}" @endif>
+                @if ($activeGroup === $groupKey) aria-current="{{ isset($group['pages']) ? 'true' : 'page' }}" @endif
+                @if (isset($group['pages'])) aria-controls="admin-nav-menu-{{ $groupKey }}" aria-expanded="false" @endif>
                 {{ $group['label'] }}
                 <x-nav-badge :badge="$navBadges[$groupKey] ?? null" />
+                @if (isset($group['pages']))
+                <svg class="admin-nav-chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+                @endif
             </a>
             @endforeach
         </nav>
     </div>
 
+    {{-- Outside the strip, which scrolls sideways and so would cut off anything hanging below
+         it; the script places each one under its own tab. --}}
+    @foreach ($adminNav as $groupKey => $group)
+    @if (isset($group['pages']))
+    <div class="admin-nav-menu ap-dropdown" id="admin-nav-menu-{{ $groupKey }}" data-admin-menu="{{ $groupKey }}" hidden>
+        @foreach ($group['pages'] as $pageKey => $page)
+        <a href="{{ $page['href'] }}" class="admin-nav-menu-link" @if ($active === $pageKey) aria-current="page" @endif>
+            <span>{{ $page['label'] }}</span>
+            <x-nav-badge :badge="$tabBadges[$pageKey] ?? null" />
+        </a>
+        @endforeach
+    </div>
+    @endif
+    @endforeach
+
+    @if ($refresh ?? true)
     <button type="button" id="admin-nav-refresh-btn" class="page-tool admin-nav-refresh">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
         <span>{{ __('messages.refresh') }}</span>
     </button>
+    @endif
 </div>
 
 @if ($subPages)
@@ -157,6 +183,60 @@
       flex: none;
       margin-bottom: 1.5rem;
     }
+    .admin-nav-chevron {
+      width: 0.875rem;
+      height: 0.875rem;
+      margin-inline-start: -0.125rem;
+      opacity: 0.6;
+      transition: transform 0.2s;
+    }
+    .admin-nav .ap-tab[aria-expanded="true"] .admin-nav-chevron {
+      transform: rotate(180deg);
+    }
+    /* A group's pages, under its tab. Above the page's cards and below the sticky top bar
+       (z-40 in layouts/app-admin), so a page scrolled up never has it over the header. The
+       script sets top and the start edge. */
+    .admin-nav .admin-nav-menu {
+      position: absolute;
+      z-index: 30;
+      top: 0;
+      inset-inline-start: 0;
+      min-width: 12rem;
+      padding: 0.25rem 0;
+      border: 1px solid rgb(0 0 0 / 0.08);
+      border-radius: 0.5rem;
+    }
+    .dark .admin-nav .admin-nav-menu {
+      border-color: rgb(255 255 255 / 0.1);
+    }
+    .admin-nav .admin-nav-menu[hidden] {
+      display: none;
+    }
+    .admin-nav-menu-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      white-space: nowrap;
+      color: rgb(var(--ap-ink-2));
+      transition: background-color 0.15s, color 0.15s;
+    }
+    .admin-nav-menu-link:hover,
+    .admin-nav-menu-link:focus-visible {
+      background: var(--ap-tint-2);
+      color: rgb(var(--ap-ink));
+    }
+    .admin-nav-menu-link:focus-visible {
+      outline: 2px solid var(--brand-blue);
+      outline-offset: -2px;
+    }
+    .admin-nav-menu-link[aria-current="page"] {
+      background: var(--brand-blue-a10);
+      color: var(--brand-blue);
+    }
     @media (max-width: 767.98px) {
       /* Refresh is as tall as the dropdown beside it. */
       .admin-nav {
@@ -164,7 +244,8 @@
       }
       /* The dropdown above already lists every page, grouped. Said here and not with a utility
          class: the kit's own display rule for the row comes later in the page and would win. */
-      .admin-nav-pages {
+      .admin-nav-pages,
+      .admin-nav .admin-nav-menu {
         display: none;
       }
       .admin-nav-refresh {
@@ -182,9 +263,12 @@
 </style>
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('admin-nav-refresh-btn').addEventListener('click', function() {
-        window.location.reload();
-    });
+    var refresh = document.getElementById('admin-nav-refresh-btn');
+    if (refresh) {
+        refresh.addEventListener('click', function() {
+            window.location.reload();
+        });
+    }
 
     // Bring the tab you are on into view, and say when there are more to either side.
     var wrap = document.getElementById('admin-nav-wrap');
@@ -221,6 +305,135 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('pageshow', function() {
             select.value = here;
         });
+    }
+
+    // A group's pages, in a menu under its tab: opened by pointing at the tab with a mouse (a
+    // finger on a tablet just follows the tab's link, to the group's first page) or by ArrowDown.
+    var row = document.querySelector('.admin-nav');
+    var groupTabs = tabs ? tabs.querySelectorAll('[aria-controls^="admin-nav-menu-"]') : [];
+    var openTab = null;
+    var openMenu = null;
+    var openTimer = null;
+    var closeTimer = null;
+    var menuOf = function(tab) {
+        return document.getElementById(tab.getAttribute('aria-controls'));
+    };
+    var place = function(tab, menu) {
+        var box = row.getBoundingClientRect();
+        var at = tab.getBoundingClientRect();
+        var start = getComputedStyle(row).direction === 'rtl' ? box.right - at.right : at.left - box.left;
+        // Pulled back where it would run past the end of the row.
+        start = Math.max(0, Math.min(start, box.width - menu.offsetWidth));
+        menu.style.top = (at.bottom - box.top) + 'px';
+        menu.style.insetInlineStart = start + 'px';
+    };
+    var close = function() {
+        clearTimeout(openTimer);
+        clearTimeout(closeTimer);
+        if (openMenu) {
+            openMenu.hidden = true;
+            openTab.setAttribute('aria-expanded', 'false');
+            openTab = openMenu = null;
+        }
+    };
+    var open = function(tab) {
+        var menu = menuOf(tab);
+        if (menu === openMenu) {
+            clearTimeout(closeTimer);
+            return;
+        }
+        close();
+        menu.hidden = false;
+        place(tab, menu);
+        tab.setAttribute('aria-expanded', 'true');
+        openTab = tab;
+        openMenu = menu;
+    };
+    // The way from a tab down into its menu leaves the tab first, so leaving waits a moment.
+    var closeSoon = function() {
+        clearTimeout(openTimer);
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(close, 200);
+    };
+    // Focus that went somewhere else closes the menu. Asked a tick later, and never while the
+    // pointer is on it: Safari does not focus a link that is clicked, so the menu would close
+    // under the click.
+    var closeIfLeft = function(tab, menu) {
+        setTimeout(function() {
+            var focused = document.activeElement;
+            if (menu === openMenu && ! tab.contains(focused) && ! menu.contains(focused)
+                && ! tab.matches(':hover') && ! menu.matches(':hover')) {
+                close();
+            }
+        }, 0);
+    };
+
+    Array.prototype.forEach.call(groupTabs, function(tab) {
+        var menu = menuOf(tab);
+        if (! menu) {
+            return;
+        }
+        tab.addEventListener('pointerenter', function(e) {
+            if (e.pointerType !== 'mouse') {
+                return;
+            }
+            clearTimeout(openTimer);
+            clearTimeout(closeTimer);
+            // Straight across once a menu is open. Otherwise a short wait, so a pointer only
+            // passing over the strip opens nothing.
+            if (openMenu) {
+                open(tab);
+            } else {
+                openTimer = setTimeout(function() {
+                    open(tab);
+                }, 80);
+            }
+        });
+        menu.addEventListener('pointerenter', function(e) {
+            if (e.pointerType === 'mouse') {
+                clearTimeout(closeTimer);
+            }
+        });
+        [tab, menu].forEach(function(el) {
+            el.addEventListener('pointerleave', function(e) {
+                if (e.pointerType === 'mouse') {
+                    closeSoon();
+                }
+            });
+            el.addEventListener('focusout', function() {
+                closeIfLeft(tab, menu);
+            });
+        });
+
+        tab.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                open(tab);
+                menu.querySelector('a').focus();
+            }
+        });
+        menu.addEventListener('keydown', function(e) {
+            var links = Array.prototype.slice.call(menu.querySelectorAll('a'));
+            var at = links.indexOf(document.activeElement);
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                links[(at + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length].focus();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                close();
+                tab.focus();
+            }
+        });
+    });
+
+    if (groupTabs.length) {
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                close();
+            }
+        });
+        tabs.addEventListener('scroll', close, { passive: true });
+        window.addEventListener('resize', close);
     }
 });
 </script>

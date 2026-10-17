@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\GiftCard;
 use App\Models\Role;
@@ -20,8 +21,9 @@ use Illuminate\Support\Facades\Route;
 
 /**
  * The Activity and Sign-ups cards on /admin/realtime: what happened in the last 24 hours that a
- * founder cares about (sign-ups, new schedules and events, orders, plan changes, support chats),
- * and how far each person who signed up has got since.
+ * founder cares about (sign-ups, new schedules and events, orders, plan changes, claimed schedules,
+ * boosts, deleted schedules and accounts, support chats), and how far each person who signed up
+ * has got since.
  *
  * It reads audit_logs, which the app keeps for security and operations whether or not anyone
  * accepted cookies, so it does not depend on the realtime beacon at all and ignores the page's
@@ -36,6 +38,17 @@ use Illuminate\Support\Facades\Route;
  *    user agent. Inbound calendar sync never audits.
  *  - sale.paid is also written for amount_mismatch, and gift_card.paid likewise, so the new status
  *    decides. Manually marked-paid sales are not audited, so the count says "orders", not revenue.
+ *  - A schedule is deleted by four doors with three actions. The owner's delete in the admin
+ *    portal (RoleController::delete) writes schedule.delete with model_type 'Role' and the NAME in
+ *    metadata, then removes the row, so that metadata is the only place the name survives. The
+ *    API's delete, a "not me" takedown and an admin's Mark deleted all go through
+ *    ScheduleDeletionService::markDeleted(), which keeps the row; called on a row that was already
+ *    deleted it only releases the name, and says so with old_values.is_deleted = true, which is not
+ *    a deletion.
+ *  - profile.delete is written just before the account goes, and audit_logs.user_id is
+ *    nullOnDelete, so the row has no user by the time it is read: it is the one item besides a sale
+ *    that needs none, and it names nobody. The account's schedules go by a database cascade that
+ *    audits nothing, which is why the row carries how many there were.
  *  - audit_logs.created_at is written with now() in APP_TIMEZONE, so this class compares in the
  *    app's zone, not UTC like the realtime table.
  *  - A blocked account is left out with everything that is its (BlockedAccounts): what it did,
@@ -56,12 +69,26 @@ class RealtimeActivity
         AuditService::SUBSCRIPTION_CANCEL,
         AuditService::TICKET_TRIAL_START,
         AuditService::GIFT_CARD_PAID,
+        AuditService::SCHEDULE_DELETE,
+        AuditService::SCHEDULE_TAKEDOWN,
+        AuditService::ADMIN_SCHEDULE_DELETE,
+        AuditService::PROFILE_DELETE,
+        AuditService::SUBSCRIPTION_RESUME,
+        AuditService::SUBSCRIPTION_SWAP,
+        AuditService::SCHEDULE_CLAIM,
+        AuditService::BOOST_CREATE,
     ];
 
     private const LIMIT = 20;
 
     /** The kinds a count button can filter the feed to. */
-    public const FEEDS = ['signup', 'schedule', 'events', 'order', 'upgrade'];
+    public const FEEDS = ['signup', 'schedule', 'events', 'order', 'upgrade', 'deleted'];
+
+    /** The item types a feed lists, where that is not just the type of the same name. */
+    private const FEED_TYPES = ['deleted' => ['schedule_deleted', 'account_deleted']];
+
+    /** The item types whose audit row's model_id is a schedule. */
+    private const SCHEDULE_TYPES = ['schedule', 'upgrade', 'cancel', 'trial', 'schedule_deleted', 'resume', 'plan_change', 'claim'];
 
     /** The Sign-ups card lists this many people; its count, steps and hourly strip cover everyone. */
     private const SIGNUP_ROWS = 50;
@@ -73,6 +100,9 @@ class RealtimeActivity
     private const SCHEDULE_COLUMNS = ['id', 'user_id', 'name', 'subdomain', 'is_deleted', 'email_verified_at', 'phone_verified_at'];
 
     private BlockedAccounts $blocked;
+
+    /** @var array<int, string> schedule id => name, for a schedule deleted in the window whose row is gone (deletedNames()) */
+    private array $deletedNames = [];
 
     public function __construct(?BlockedAccounts $blocked = null)
     {
@@ -108,7 +138,7 @@ class RealtimeActivity
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->limit(2000)
-            ->get(['id', 'user_id', 'action', 'model_type', 'model_id', 'new_values', 'user_agent', 'metadata', 'created_at']);
+            ->get(['id', 'user_id', 'action', 'model_type', 'model_id', 'old_values', 'new_values', 'user_agent', 'metadata', 'created_at']);
 
         $excludedUsers = User::where('email', DemoService::DEMO_EMAIL)->pluck('id')->merge($this->blocked->userIds());
         if (! $showAdmins) {
@@ -128,8 +158,9 @@ class RealtimeActivity
                 continue;
             }
 
-            // The no-user rule: a sale may have none (guest checkout), everything else must.
-            if (! $row->user_id && ! in_array($type, ['order', 'gift_card'], true)) {
+            // The no-user rule: a sale may have none (guest checkout), and a deleted account has
+            // none by the time it is read; everything else must.
+            if (! $row->user_id && ! in_array($type, ['order', 'gift_card', 'account_deleted'], true)) {
                 continue;
             }
 
@@ -145,12 +176,12 @@ class RealtimeActivity
 
         // Filtered before the cap, so a count button always lists everything it counted (an order
         // from this morning sits well outside the newest 20 items by the evening).
-        $listed = $this->collapseEventBursts($feed ? $items->where('type', $feed)->values() : $items);
+        $listed = $this->collapseEventBursts($feed ? $items->whereIn('type', self::FEED_TYPES[$feed] ?? [$feed])->values() : $items);
 
         return [
             'stats' => $this->stats($counts, $feed),
             'feed' => $feed,
-            'items' => $this->render($listed->take(self::LIMIT), $onSite),
+            'items' => $this->render($listed->take(self::LIMIT), $onSite, $this->deletedNames($items)),
             'signups' => $this->signups($items->where('type', 'signup')->values(), $onSite, $excludedUsers),
             'cursor' => $items->isNotEmpty() ? $items->first()['at']->getTimestamp() : null,
         ];
@@ -159,6 +190,7 @@ class RealtimeActivity
     private function classify(object $row): ?string
     {
         $newValues = json_decode((string) $row->new_values, true) ?: [];
+        $oldValues = json_decode((string) $row->old_values, true) ?: [];
 
         return match ($row->action) {
             AuditService::AUTH_REGISTER, AuditService::API_REGISTER => $row->model_type === 'User' ? 'signup' : null,
@@ -170,6 +202,13 @@ class RealtimeActivity
             AuditService::SUBSCRIPTION_CANCEL => $row->model_type === 'Role' ? 'cancel' : null,
             AuditService::TICKET_TRIAL_START => 'trial',
             AuditService::GIFT_CARD_PAID => ($newValues['status'] ?? null) === 'active' ? 'gift_card' : null,
+            // A schedule that was already deleted only had its name released.
+            AuditService::SCHEDULE_DELETE, AuditService::SCHEDULE_TAKEDOWN, AuditService::ADMIN_SCHEDULE_DELETE => ($oldValues['is_deleted'] ?? false) ? null : 'schedule_deleted',
+            AuditService::PROFILE_DELETE => $row->model_type === 'User' ? 'account_deleted' : null,
+            AuditService::SUBSCRIPTION_RESUME => $row->model_type === 'Role' ? 'resume' : null,
+            AuditService::SUBSCRIPTION_SWAP => $row->model_type === 'Role' ? 'plan_change' : null,
+            AuditService::SCHEDULE_CLAIM => 'claim',
+            AuditService::BOOST_CREATE => 'boost',
             default => null,
         };
     }
@@ -192,16 +231,18 @@ class RealtimeActivity
         $schedules = array_flip($this->blocked->scheduleIds());
         $saleEvents = ($saleIds = $ids('order')) ? DB::table('sales')->whereIn('id', $saleIds)->pluck('event_id', 'id') : collect();
         $cardSchedules = ($cardIds = $ids('gift_card')) ? DB::table('gift_cards')->whereIn('id', $cardIds)->pluck('role_id', 'id') : collect();
+        $boostSchedules = ($boostIds = $ids('boost')) ? DB::table('boost_campaigns')->whereIn('id', $boostIds)->pluck('role_id', 'id') : collect();
         $events = $this->blocked->eventsAmong(array_merge($ids('events'), $saleEvents->values()->all()));
 
-        return $items->reject(function ($item) use ($schedules, $events, $saleEvents, $cardSchedules) {
+        return $items->reject(function ($item) use ($schedules, $events, $saleEvents, $cardSchedules, $boostSchedules) {
             $id = (int) $item['row']->model_id;
 
-            return match ($item['type']) {
-                'schedule', 'upgrade', 'cancel', 'trial' => isset($schedules[$id]),
-                'events' => isset($events[$id]),
-                'order' => isset($events[(int) ($saleEvents[$id] ?? 0)]),
-                'gift_card' => isset($schedules[(int) ($cardSchedules[$id] ?? 0)]),
+            return match (true) {
+                in_array($item['type'], self::SCHEDULE_TYPES, true) => isset($schedules[$id]),
+                $item['type'] === 'events' => isset($events[$id]),
+                $item['type'] === 'order' => isset($events[(int) ($saleEvents[$id] ?? 0)]),
+                $item['type'] === 'gift_card' => isset($schedules[(int) ($cardSchedules[$id] ?? 0)]),
+                $item['type'] === 'boost' => isset($schedules[(int) ($boostSchedules[$id] ?? 0)]),
                 default => false,
             };
         })->values();
@@ -232,12 +273,14 @@ class RealtimeActivity
             'events' => $counts['events'] ?? 0,
             'orders' => $counts['order'] ?? 0,
             'upgrades' => $counts['upgrade'] ?? 0,
+            'deletions' => ($counts['schedule_deleted'] ?? 0) + ($counts['account_deleted'] ?? 0),
         ];
     }
 
     /**
-     * The count buttons. Upgrades are rare enough that a permanent zero would be noise, so that
-     * button appears with the first one (or while the feed is filtered to it).
+     * The count chips that filter the feed. Upgrades and deletions are rare enough that a permanent
+     * zero would be noise, so each of those appears with the first one (or while the feed is
+     * filtered to it).
      */
     private function stats(array $counts, ?string $feed): array
     {
@@ -249,7 +292,11 @@ class RealtimeActivity
         ];
 
         if ($counts['upgrades'] > 0 || $feed === 'upgrade') {
-            $stats[] = ['type' => 'upgrade', 'label' => __('messages.realtime_upgrades'), 'count' => $counts['upgrades'], 'wide' => true];
+            $stats[] = ['type' => 'upgrade', 'label' => __('messages.realtime_upgrades'), 'count' => $counts['upgrades']];
+        }
+
+        if ($counts['deletions'] > 0 || $feed === 'deleted') {
+            $stats[] = ['type' => 'deleted', 'label' => __('messages.realtime_deletions'), 'count' => $counts['deletions']];
         }
 
         return $stats;
@@ -456,15 +503,35 @@ class RealtimeActivity
         return $collapsed;
     }
 
-    private function render(Collection $items, array $onSite): array
+    /**
+     * The names of the schedules deleted in the window whose row is gone: the owner's delete in the
+     * admin portal writes the name into the audit row's metadata and then removes the schedule. Any
+     * item about such a schedule (the plan cancelled as it went, the schedule made the same day)
+     * names it from here. A schedule deleted any other way keeps its row and its name.
+     *
+     * @param  Collection<int, array>  $items  every classified item of the window
+     * @return array<int, string> schedule id => name
+     */
+    private function deletedNames(Collection $items): array
+    {
+        return $items->where('type', 'schedule_deleted')
+            ->filter(fn ($item) => $item['row']->action === AuditService::SCHEDULE_DELETE
+                && $item['row']->model_type === 'Role'
+                && $item['row']->model_id
+                && $item['row']->metadata)
+            ->mapWithKeys(fn ($item) => [(int) $item['row']->model_id => (string) $item['row']->metadata])
+            ->all();
+    }
+
+    private function render(Collection $items, array $onSite, array $deletedNames = []): array
     {
         $rows = $items->pluck('row');
         $userIds = $rows->pluck('user_id')->filter()->unique();
         $users = User::whereIn('id', $userIds)->get(['id', 'name', 'email'])->keyBy('id');
 
-        $roleIds = $items->map(fn ($item) => match ($item['type']) {
-            'schedule', 'upgrade', 'cancel', 'trial' => $item['row']->model_id,
-            'events' => $item['role_id'] ?? null,
+        $roleIds = $items->map(fn ($item) => match (true) {
+            in_array($item['type'], self::SCHEDULE_TYPES, true) => $item['row']->model_id,
+            $item['type'] === 'events' => $item['role_id'] ?? null,
             default => null,
         })->filter();
 
@@ -473,10 +540,13 @@ class RealtimeActivity
             ->get()->keyBy('id');
         $giftCards = GiftCard::whereIn('id', $items->where('type', 'gift_card')->map(fn ($item) => $item['row']->model_id)->filter())
             ->get(['id', 'role_id', 'amount', 'currency_code'])->keyBy('id');
+        $boosts = BoostCampaign::whereIn('id', $items->where('type', 'boost')->map(fn ($item) => $item['row']->model_id)->filter())
+            ->get(['id', 'role_id', 'event_id', 'user_budget', 'currency_code'])->keyBy('id');
 
         $roleIds = $roleIds
             ->merge($sales->map(fn ($sale) => $sale->event?->creator_role_id))
             ->merge($giftCards->pluck('role_id'))
+            ->merge($boosts->pluck('role_id'))
             ->filter()->unique();
         $roles = Role::whereIn('id', $roleIds)->get(self::SCHEDULE_COLUMNS)->keyBy('id');
 
@@ -489,21 +559,24 @@ class RealtimeActivity
             ->keyBy('user_id');
 
         // The events an item opens on the guest portal: the one event added (a burst opens its
-        // schedule), and the event an order was for. Whole, with their schedules, which is what
-        // PublicPageUrl::event() reads.
+        // schedule), the event an order was for and the event a boost promotes. Whole, with their
+        // schedules, which is what PublicPageUrl::event() reads.
         $publicEventIds = $items->filter(fn ($item) => $item['type'] === 'events' && ($item['count'] ?? 1) === 1)
             ->map(fn ($item) => $item['row']->model_id)
             ->merge($sales->pluck('event_id'))
+            ->merge($boosts->pluck('event_id'))
             ->filter()->unique()->values();
         $events = $publicEventIds->isEmpty() ? collect() : Event::with('roles')->whereIn('id', $publicEventIds)->get()->keyBy('id');
 
         $nowTs = now()->getTimestamp();
+        $this->deletedNames = $deletedNames;
 
-        return $items->map(function ($item) use ($users, $roles, $sales, $giftCards, $firstSchedules, $events, $onSite, $nowTs) {
+        return $items->map(function ($item) use ($users, $roles, $sales, $giftCards, $boosts, $firstSchedules, $events, $onSite, $nowTs) {
             $row = $item['row'];
             $user = $row->user_id ? $users->get($row->user_id) : null;
             $name = $user?->name ?: __('messages.realtime_someone');
             $roleId = null;
+            $newValues = json_decode((string) $row->new_values, true) ?: [];
 
             $text = match ($item['type']) {
                 'signup' => $this->signupText($row, $name),
@@ -519,6 +592,22 @@ class RealtimeActivity
                 'cancel' => __('messages.realtime_activity_canceled', ['name' => $name, 'schedule' => $this->roleName($roles, $roleId = $row->model_id)]),
                 'trial' => __('messages.realtime_activity_trial', ['name' => $name, 'schedule' => $this->roleName($roles, $roleId = $row->model_id)]),
                 'gift_card' => $this->giftCardText($giftCards->get($row->model_id), $roles, $roleId),
+                'schedule_deleted' => __(match ($row->action) {
+                    AuditService::SCHEDULE_TAKEDOWN => 'messages.realtime_activity_schedule_not_theirs',
+                    AuditService::ADMIN_SCHEDULE_DELETE => 'messages.realtime_activity_schedule_taken_down',
+                    default => 'messages.realtime_activity_schedule_deleted',
+                }, ['name' => $name, 'schedule' => $this->roleName($roles, $roleId = $row->model_id)]),
+                'account_deleted' => (int) ($newValues['schedules'] ?? 0) > 0
+                    ? __('messages.realtime_activity_account_deleted_schedules', ['count' => number_format((int) $newValues['schedules'])])
+                    : __('messages.realtime_activity_account_deleted'),
+                'resume' => __('messages.realtime_activity_resumed', ['name' => $name, 'schedule' => $this->roleName($roles, $roleId = $row->model_id)]),
+                'plan_change' => __('messages.realtime_activity_switched', [
+                    'name' => $name, 'schedule' => $this->roleName($roles, $roleId = $row->model_id),
+                    'plan' => ucfirst((string) ($newValues['plan_type'] ?? 'pro')),
+                    'term' => ($newValues['plan_term'] ?? null) === 'yearly' ? __('messages.yearly') : __('messages.monthly'),
+                ]),
+                'claim' => __('messages.realtime_activity_claimed', ['name' => $name, 'schedule' => $this->roleName($roles, $roleId = $row->model_id)]),
+                'boost' => $this->boostText($boosts->get($row->model_id), $events, $roles, $name, $roleId),
                 'support' => $row->user_id
                     ? __('messages.realtime_activity_support_user', ['name' => $name])
                     : __('messages.realtime_activity_support'),
@@ -544,11 +633,12 @@ class RealtimeActivity
             $event = match ($item['type']) {
                 'events' => ($item['count'] ?? 1) === 1 ? $events->get($row->model_id) : null,
                 'order' => $events->get($sales->get($row->model_id)?->event_id),
+                'boost' => $events->get($boosts->get($row->model_id)?->event_id),
                 default => null,
             };
             $schedule = match ($item['type']) {
                 'signup' => $firstSchedules->get($row->user_id),
-                'support', 'order' => null,
+                'support', 'order', 'account_deleted' => null,
                 default => $roleId ? $roles->get($roleId) : null,
             };
             $publicUrl = PublicPageUrl::event($event);
@@ -629,8 +719,20 @@ class RealtimeActivity
         ]);
     }
 
+    private function boostText(?BoostCampaign $boost, Collection $events, Collection $roles, string $name, ?int &$roleId): string
+    {
+        $roleId = $boost?->role_id;
+
+        return __('messages.realtime_activity_boost', [
+            'name' => $name,
+            'event' => $events->get($boost?->event_id)?->name ?: $this->roleName($roles, $roleId),
+            'amount' => $boost ? MoneyUtils::format((float) $boost->user_budget, $boost->currency_code) : '',
+        ]);
+    }
+
     private function roleName(Collection $roles, ?int $roleId): string
     {
-        return ($roleId ? $roles->get($roleId)?->name : null) ?: __('messages.realtime_deleted_schedule');
+        return ($roleId ? ($roles->get($roleId)?->name ?: ($this->deletedNames[$roleId] ?? null)) : null)
+            ?: __('messages.realtime_deleted_schedule');
     }
 }

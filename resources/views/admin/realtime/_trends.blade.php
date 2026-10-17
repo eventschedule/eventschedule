@@ -1,7 +1,8 @@
 {{-- Trends: the last 24 hours, 7 days or 30 days, each figure against the same span before it. The
      tiles choose what the chart draws; page views and visits are drawn by part of the site, in the
      colours the rest of the page gives them. RealtimeTrends says where each number comes from and
-     why there is no "visitors" here. --}}
+     why there is no "visitors" here. In the 24-hour range the four activity tiles show the live
+     count the Activity chips show (trendTiles), so the page never gives two numbers for one day. --}}
 @php
     $segShell = 'inline-flex flex-wrap items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1';
     $segItem = 'rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
@@ -10,7 +11,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-baseline gap-2">
             <h2 id="realtime-trends-heading" class="text-base font-semibold text-gray-900 dark:text-white">@{{ msg.trends }}</h2>
-            <span class="text-xs text-gray-500 dark:text-gray-400">@{{ trends.unit === 'hour' ? msg.byHour : msg.byDay }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">@{{ trends.unit === 'hour' ? msg.byHour : msg.byDay }}<template v-if="p.filtered"> · @{{ msg.notFiltered }}</template></span>
         </div>
         <div class="{{ $segShell }}" role="group" :aria-label="msg.trends">
             <button v-for="option in rangeOptions" :key="option.value" type="button" @click="setRange(option.value)"

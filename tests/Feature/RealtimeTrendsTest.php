@@ -132,6 +132,58 @@ class RealtimeTrendsTest extends TestCase
         $this->assertSame([$rail['signup'], $rail['schedule'], $rail['events'], $rail['order']], [$tiles['signup'], $tiles['schedule'], $tiles['events'], $tiles['order']]);
     }
 
+    /**
+     * The 24 hours of the four activity tiles are the rail's rolling 24 hours, not this hour and the
+     * 23 before it: by the clock a sign-up from 23 hours 50 minutes ago was in the rail and not in
+     * the tile beside it.
+     * Mutation: count the 24-hour activity from the first bar, or the span before from 48 hours by
+     * the clock.
+     */
+    public function test_the_24_hour_activity_figures_are_the_rails_rolling_day(): void
+    {
+        $owner = $this->createOwner();
+        foreach ([10, 23 * 60 + 50, 24 * 60 + 10, 47 * 60 + 50, 48 * 60 + 10] as $minutesAgo) {
+            $this->audit(['user_id' => $owner->id, 'action' => AuditService::AUTH_REGISTER, 'model_type' => 'User', 'model_id' => $owner->id, 'created_at' => now()->subMinutes($minutesAgo)]);
+        }
+
+        $day = (new RealtimeTrends('24h'))->build();
+        $rail = collect((new RealtimeDashboard)->payload()['activity']['stats'])->firstWhere('type', 'signup')['count'];
+
+        $this->assertSame(2, $day['totals']['signup']);
+        $this->assertSame($rail, $day['totals']['signup'], 'the tile and the rail give one number');
+        $this->assertSame(2, $day['previous']['signup'], 'the 24 hours before those, to the minute');
+        $this->assertSame(1, array_sum(array_column($day['buckets'], 'signup')), 'the bars stay clock hours: 23h50m ago is before the first');
+    }
+
+    /**
+     * Mutation: bucket or label in the app's timezone, or key the hours by the viewer's clock.
+     */
+    public function test_the_card_is_told_in_the_viewers_own_timezone(): void
+    {
+        // 12:30 UTC: 15:30 in Jerusalem, 18:00 in Kolkata.
+        $owner = $this->createOwner();
+        $this->audit(['user_id' => $owner->id, 'action' => AuditService::AUTH_REGISTER, 'model_type' => 'User', 'model_id' => $owner->id,
+            'created_at' => now()->subDay()->setTime(22, 30)->setTimezone(config('app.timezone'))]);
+
+        $utc = (new RealtimeTrends('7d', null, 'UTC'))->build();
+        $jerusalem = (new RealtimeTrends('7d', null, 'Asia/Jerusalem'))->build();
+
+        // 22:30 UTC yesterday is 01:30 today in Jerusalem.
+        $this->assertSame([1, 0], array_slice(array_column($utc['buckets'], 'signup'), -2));
+        $this->assertSame([0, 1], array_slice(array_column($jerusalem['buckets'], 'signup'), -2));
+
+        $hours = (new RealtimeTrends('24h', null, 'Asia/Jerusalem'))->build()['buckets'];
+        $this->assertStringContainsString('3 PM', end($hours)['label'], 'the hour under way, on the viewer\'s clock');
+        $this->assertStringStartsWith("\u{2066}", end($hours)['label'], 'isolated, so a right-to-left page keeps its order');
+
+        // A half-hour zone: each bar is the UTC hour it counts, and says so.
+        $kolkata = (new RealtimeTrends('24h', null, 'Asia/Kolkata'))->build()['buckets'];
+        $this->assertStringContainsString('5:30 PM', end($kolkata)['label']);
+
+        $this->assertSame('Asia/Jerusalem', RealtimeTrends::viewerZone('Asia/Jerusalem'));
+        $this->assertSame(config('app.timezone'), RealtimeTrends::viewerZone(null));
+    }
+
     /** Mutation: compare with the span before cut at another time, or drop a bucket's day. */
     public function test_a_range_is_compared_with_the_same_span_before_it(): void
     {

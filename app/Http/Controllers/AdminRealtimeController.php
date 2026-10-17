@@ -36,7 +36,7 @@ class AdminRealtimeController extends Controller
             'payload' => RealtimeDashboard::fromRequest($request)->payload(),
             // In the page, so the card does not open empty; null while tracking is off, when the
             // page shows how to turn it on instead.
-            'trends' => RealtimeTracker::enabled() ? (new RealtimeTrends(RealtimeTrends::range($request->query('trend'))))->cached() : null,
+            'trends' => RealtimeTracker::enabled() ? (new RealtimeTrends(RealtimeTrends::range($request->query('trend')), null, $request->user()->timezone))->cached() : null,
         ]);
     }
 
@@ -57,7 +57,7 @@ class AdminRealtimeController extends Controller
     {
         abort_unless($request->user()->isAdmin(), 403);
 
-        return response()->json((new RealtimeTrends(RealtimeTrends::range($request->query('range'))))->cached());
+        return response()->json((new RealtimeTrends(RealtimeTrends::range($request->query('range')), null, $request->user()->timezone))->cached());
     }
 
     /**

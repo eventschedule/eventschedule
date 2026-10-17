@@ -1,9 +1,12 @@
 {{-- The visitors who accepted cookies, right now and earlier in the last 30 minutes. A row expands
-     in place (one at a time) to that person's last hour. Rows never filter: one tap target each. --}}
+     in place (one at a time) to that person's last hour. Rows never filter: one tap target each.
+     Last on the page, because it is the one list with no end. The columns are realtime-row's (plain
+     CSS in _script): the name took 16rem while the page took ~680px for labels of ~200, so a plan
+     badge and the "No event yet" note wrapped onto lines of their own. --}}
 @php
     $segShell = 'inline-flex flex-wrap items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1';
     $segItem = 'rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
-    $rowGrid = 'grid grid-cols-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_7rem] xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)_10rem_7rem] gap-x-4 items-start';
+    $rowGrid = 'grid realtime-row gap-x-4 items-start';
 @endphp
 {{-- scroll-mt: "On the site now" elsewhere on the page scrolls here, under a sticky header. --}}
 <section id="realtime-visitors" class="ap-card rounded-xl scroll-mt-20" aria-labelledby="realtime-visitors-heading">
@@ -12,7 +15,10 @@
             <h2 id="realtime-visitors-heading" class="text-base font-semibold text-gray-900 dark:text-white">@{{ msg.visitors }}</h2>
             <p v-if="p.overview.phrases.consent" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">@{{ p.overview.phrases.consent }}</p>
         </div>
-        <div class="{{ $segShell }}" role="group" :aria-label="msg.visitors">
+        {{-- The counts are the last 30 minutes, not "right now": said beside them. --}}
+        <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs text-gray-500 dark:text-gray-400">@{{ msg.last30Short }}</span>
+        <div class="{{ $segShell }}" role="group" :aria-label="msg.visitors + ', ' + msg.last30Short">
             <button v-for="option in whoOptions" :key="option.value" type="button" @click="setWho(option.value)"
                     :aria-pressed="who === option.value ? 'true' : 'false'"
                     class="{{ $segItem }} inline-flex items-center gap-1"
@@ -21,6 +27,7 @@
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'">
                 <span>@{{ option.label }}</span><span class="font-normal tabular-nums text-gray-500 dark:text-gray-400">@{{ fmt(option.count) }}</span>
             </button>
+        </div>
         </div>
     </div>
 
@@ -59,7 +66,7 @@
             <ul class="divide-y divide-gray-100 dark:divide-white/[0.06]">
                 <li v-for="person in visitorRows[group]" :key="person.id" :class="fresh[person.id] ? 'realtime-fresh' : ''">
                     <button type="button" @click="toggleExpand(person)" :aria-expanded="expanded === person.id ? 'true' : 'false'" :aria-controls="panelId(person)"
-                            class="{{ $rowGrid }} w-full text-start px-4 sm:px-5 py-3 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)]">
+                            class="{{ $rowGrid }} w-full text-start px-4 sm:px-5 py-2 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)]">
                         {{-- Visitor --}}
                         <span class="flex items-start gap-3 min-w-0">
                             <span v-if="person.kind === 'user'" aria-hidden="true"
@@ -70,9 +77,7 @@
                             </span>
                             <span class="min-w-0">
                                 <span class="flex flex-wrap items-center gap-1.5">
-                                    <span class="text-sm font-medium truncate" :class="person.now ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'">
-                                        <bdi>@{{ person.kind === 'user' ? (person.name || person.email) : (countryName(person.country) || msg.anonymous) }}</bdi>
-                                    </span>
+                                    <span class="realtime-cut text-sm font-medium truncate" dir="auto" :class="person.now ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'">@{{ person.kind === 'user' ? (person.name || person.email) : (countryName(person.country) || msg.anonymous) }}</span>
                                     <span v-for="badge in person.badges" :key="badge"
                                           class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
                                           :class="badge === 'new' ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">@{{ badgeLabel(badge) }}</span>
@@ -97,7 +102,7 @@
                                 <svg class="w-4 h-4 shrink-0" :class="surfaceTone(person.page.surface).text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="icons[person.page.surface] || icons.other" /></svg>
                             </span>
                             <span class="min-w-0">
-                                <span class="block text-sm truncate" :class="person.now ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'"><bdi>@{{ person.page.label }}</bdi></span>
+                                <span class="realtime-cut block text-sm truncate" dir="auto" :class="person.now ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'">@{{ person.page.label }}</span>
                                 <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">@{{ person.page.surface_label }}</span>
                             </span>
                         </span>
@@ -108,15 +113,15 @@
                             <span class="block text-xs text-gray-500 dark:text-gray-400 truncate"><bdi>@{{ person.source.campaign || (person.source.name ? person.source.channel_label : '') }}</bdi></span>
                         </span>
 
-                        {{-- Active --}}
-                        <span class="text-end">
-                            <template v-if="person.now">
-                                <span class="inline-flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden="true"></span>@{{ msg.now }}
-                                </span>
-                                <span class="block text-xs text-gray-500 dark:text-gray-400">@{{ msg.onPage.replace(':time', duration(person.on_page_secs)) }}</span>
-                            </template>
+                        {{-- Active. The group above already says Right now, so a row there says only how
+                             long, by a live dot (a green "Now" on every row repeated it 33 times). The
+                             chevron says the row opens in place. --}}
+                        <span class="flex items-start justify-end gap-2 text-end">
+                            <span v-if="person.now" class="inline-flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden="true"></span>@{{ msg.onPage.replace(':time', duration(person.on_page_secs)) }}
+                            </span>
                             <span v-else class="text-sm text-gray-500 dark:text-gray-400">@{{ msg.left.replace(':time', ago(person.left_ago, true)) }}</span>
+                            <svg class="mt-0.5 w-4 h-4 shrink-0 text-gray-400 transition-all duration-200" :class="expanded === person.id ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="icons.chevron" /></svg>
                         </span>
                     </button>
 

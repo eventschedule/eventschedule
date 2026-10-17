@@ -284,7 +284,12 @@ class ProfileController extends Controller
             ));
         }
 
-        AuditService::log(AuditService::PROFILE_DELETE, $user->id, 'User', $user->id);
+        // How many schedules go with the account, for the Activity card on /admin/realtime: they go
+        // by the roles.user_id cascade, which audits nothing. A number, never their names, which can
+        // be the name of the person being erased.
+        AuditService::log(AuditService::PROFILE_DELETE, $user->id, 'User', $user->id, null, [
+            'schedules' => Role::where('user_id', $user->id)->where('is_deleted', false)->count(),
+        ]);
 
         Auth::logout();
 
