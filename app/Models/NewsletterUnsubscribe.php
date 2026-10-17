@@ -12,6 +12,7 @@ class NewsletterUnsubscribe extends Model
         'role_id',
         'email',
         'unsubscribed_at',
+        'newsletter_id',
     ];
 
     protected $casts = [

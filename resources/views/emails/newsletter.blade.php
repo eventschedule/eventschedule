@@ -126,11 +126,18 @@ u + .nl-body a { color: inherit; }
 </tr>
 @endif
 @foreach ($blocks as $i => $block)
+{{-- The builder's preview names each block (NewsletterService::renderPreview()); a sent mail never. --}}
+@if ($markBlocks ?? false)
+<tbody data-nl-block="{{ $block['id'] ?? '' }}">
+@endif
 @include('emails.newsletter_blocks._'.$block['type'], [
     'block' => $block,
     'first' => $i === 0 && ! ($masthead && $nl->design !== 'modern'),
     'beforeBleed' => $bleeds($blocks[$i + 1] ?? null),
 ])
+@if ($markBlocks ?? false)
+</tbody>
+@endif
 @endforeach
 <tr>
 <td style="height: {{ $nl->sheeted ? 12 : 4 }}px; line-height: {{ $nl->sheeted ? 12 : 4 }}px; font-size: 0;">&nbsp;</td>

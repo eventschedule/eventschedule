@@ -348,37 +348,4 @@ class ApNewsletterPagesTest extends TestCase
         $this->assertSame(2, substr_count($form[0], 'js-segment-date"'), 'two dates');
         $this->assertSame(1, substr_count($form[0], 'value="plan_tier"'));
     }
-
-    /**
-     * The builder is a compiled Vue component, so the views dress it from outside
-     * (newsletter/partials/_builder-styles), keyed on classes its markup carries. If one of those
-     * leaves the component the rule that leaned on it silently stops applying: yellow and green
-     * buttons come back, or Save stops being last.
-     */
-    public function test_the_builders_stylesheet_still_matches_the_component(): void
-    {
-        $component = file_get_contents(resource_path('js/components/NewsletterBuilder.vue'));
-
-        foreach ([
-            'class="flex border-b',
-            'palette-item',
-            'block-item',
-            'bg-[var(--brand-button-bg)]',
-            'bg-yellow-500',
-            'bg-green-600',
-            'border-gray-300',
-            'class="mt-4 flex flex-wrap gap-3 justify-between"',
-            'class="fixed inset-0',
-        ] as $hook) {
-            $this->assertStringContainsString($hook, $component, "the builder still carries {$hook}");
-        }
-
-        // Every page that holds the builder loads the sheet.
-        foreach (['newsletter/create', 'newsletter/edit', 'newsletter/template-edit', 'admin/newsletters/create', 'admin/newsletters/edit', 'admin/newsletters/template-edit'] as $view) {
-            $source = file_get_contents(resource_path("views/{$view}.blade.php"));
-
-            $this->assertStringContainsString("@include('newsletter.partials._builder-styles')", $source, $view);
-            $this->assertStringContainsString("@include('newsletter.partials._builder')", $source, $view);
-        }
-    }
 }

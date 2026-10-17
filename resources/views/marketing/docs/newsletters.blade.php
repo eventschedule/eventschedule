@@ -134,7 +134,7 @@
             Newsletter Builder
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Click <strong class="text-gray-900 dark:text-white">Create Newsletter</strong> to open the builder. The page has a link back to <strong class="text-gray-900 dark:text-white">Newsletters</strong> above its title and the allowance meter at the end of the title row. When the schedule has saved templates, a <strong class="text-gray-900 dark:text-white">Start from a template</strong> card comes first. The editing panel is split into three tabs, with a live preview pinned beside it on wide screens.
+            Click <strong class="text-gray-900 dark:text-white">Create Newsletter</strong> to open the builder. The page has a link back to <strong class="text-gray-900 dark:text-white">Newsletters</strong> above its title and the allowance meter at the end of the title row. When the schedule has saved templates, a <strong class="text-gray-900 dark:text-white">Start from a template</strong> card comes first. The editing panel is split into three tabs, with a live preview pinned beside it on wide screens, and a bar along the foot of the page holds what saves and sends it.
         </p>
 
         <x-doc-screenshot id="newsletters--create" alt="The newsletter builder: the Content, Style and Settings tabs, the subject line and block list, and the live preview beside them" />
@@ -142,19 +142,19 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Content</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The subject line (required), the preview text and the block list. <strong class="text-gray-900 dark:text-white">Preview text</strong> is the line an inbox shows after the subject; leave it empty and it is the opening of your first text block. <strong class="text-gray-900 dark:text-white">Add Block</strong> opens the block palette; click a block to add it or drag it onto the canvas. Blocks are reordered by their drag handle, and each one can be selected to edit its fields inline, cloned, or removed.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The subject line (required), who the newsletter goes to, the preview text and the block list. The <strong class="text-gray-900 dark:text-white">To</strong> line under the subject names the audience and how many people are in it; <strong class="text-gray-900 dark:text-white">Change</strong> opens the recipients on the Settings tab. <strong class="text-gray-900 dark:text-white">Preview text</strong> is the line an inbox shows after the subject; leave it empty and it is the opening of your first text block. <strong class="text-gray-900 dark:text-white">Add Block</strong> opens the block palette, which says where a new block will go: after the block that is open, or at the end when none is. Click a block in the palette to add it, or drag it to a place in the list. Each block's line has <strong class="text-gray-900 dark:text-white">Move up</strong>, <strong class="text-gray-900 dark:text-white">Move down</strong>, duplicate and remove; a removed block can be put back with <strong class="text-gray-900 dark:text-white">Undo</strong> in the bar for a few seconds. Blocks can also be dragged by their handle.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Style</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The <a href="#templates" class="doc-link">template</a> picker plus the colour, font and button settings described under <a href="#style-customization" class="doc-link">Style Customization</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The <a href="#templates" class="doc-link">design</a> picker, the colour, font and button settings described under <a href="#style-customization" class="doc-link">Style Customization</a>, and <strong class="text-gray-900 dark:text-white">Save as Template</strong>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Settings</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Recipients (which <a href="#recipients" class="doc-link">segments</a> to send to), <a href="#ab-testing" class="doc-link">A/B testing</a> once the newsletter has been saved, and the footer text that replaces your schedule name at the bottom of the email.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Recipients (everyone, or the <a href="#recipients" class="doc-link">segments</a> you choose), <a href="#ab-testing" class="doc-link">A/B testing</a>, and the footer text that replaces your schedule name at the bottom of the email.</p>
             </div>
         </div>
 
-        <h3 class="doc-subheading">Buttons Along the Bottom</h3>
+        <h3 class="doc-subheading">The Bar Along the Foot</h3>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -166,34 +166,26 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Send a Test</span></td>
-                        <td>Emails the current draft to your schedule's contact address</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Save as Template</span></td>
-                        <td>Stores the blocks and style under a name you can reuse. It stores the newsletter as it was last saved, so press Save first if you have changed something</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Schedule</span></td>
-                        <td>Opens a dialog to pick a future date and time to send</td>
+                        <td>Emails the newsletter as it is on screen to you, or to your schedule's contact address. See <a href="#sending" class="doc-link">Sending</a></td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Save</span></td>
-                        <td>Saves the draft without sending</td>
+                        <td>Saves the draft without leaving the page: the tab you are on, the open block and the preview stay as they were</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Send Now</span></td>
-                        <td>Delivers immediately to the selected recipients</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Review and send</span></td>
+                        <td>Saves the draft and opens a last look before anything goes: the subject, who it goes to and how many, and what is left of the month's allowance, with the choice to send now or schedule it</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-4 mb-4">
-            Everything except <strong class="text-gray-900 dark:text-white">Save</strong> appears only after the newsletter has been saved once, so save your draft first. After that, <strong class="text-gray-900 dark:text-white">Send a Test</strong>, <strong class="text-gray-900 dark:text-white">Schedule</strong> and <strong class="text-gray-900 dark:text-white">Send Now</strong> each save the draft before they act, so what goes out is what is on screen.
+            The bar says when something has not been saved yet, and the browser asks before you leave the page with unsaved changes. If a save is refused (a subject left empty, say), the bar says why and the builder opens the tab to fix it.
         </p>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>The preview refreshes as you type and renders the same HTML your recipients receive, so use it to check block order and spacing. <strong class="text-gray-900 dark:text-white">Desktop</strong> and <strong class="text-gray-900 dark:text-white">Mobile</strong> above it switch the preview between a desktop width and a phone's, which is where most mail is opened. On phones the preview is a fourth tab that opens in a new window. A new newsletter starts from your most recent one's template, style settings and selected segments, so a house style only has to be set up once. Its preview text does not come along, because that line was written for one mail.</p>
+            <p>The preview refreshes as you type and renders the same HTML your recipients receive, and it keeps its place while it does. Opening a block brings it into view in the preview and outlines it; clicking a block in the preview opens it for editing. <strong class="text-gray-900 dark:text-white">Desktop</strong> and <strong class="text-gray-900 dark:text-white">Mobile</strong> above it switch between a desktop width and a phone's, which is where most mail is opened. On a phone the preview is a fourth tab that opens over the editor. A new newsletter starts from your most recent one's design, style settings and selected segments, so a house style only has to be set up once. Its preview text does not come along, because that line was written for one mail.</p>
         </div>
     </section>
 
@@ -303,7 +295,7 @@
             Templates
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Style</strong> tab opens with five built-in presets. Picking one rewrites the colour, font and button settings in a single click; your blocks, your footer text and the layout chosen on the Events block are left alone, so you can try presets on a finished draft without losing work.
+            The <strong class="text-gray-900 dark:text-white">Style</strong> tab opens with the five built-in designs, under <strong class="text-gray-900 dark:text-white">Design</strong>. Picking one rewrites the colour, font and button settings in a single click; your blocks, your footer text and the layout chosen on the Events block are left alone, so you can try designs on a finished draft without losing work. If the colours you are replacing were your own, <strong class="text-gray-900 dark:text-white">Undo</strong> beside the picker brings them back for a few seconds.
         </p>
 
         <div class="doc-table-wrap">
@@ -365,7 +357,7 @@
             Once a design works, keep it. A saved template stores the blocks, the preset and the style settings under a name of your choosing. There are two ways to make one:
         </p>
         <ul class="doc-list mb-4">
-            <li>In the builder of a saved newsletter, click <strong class="text-gray-900 dark:text-white">Save as Template</strong> and give it a name</li>
+            <li>On the <strong class="text-gray-900 dark:text-white">Style</strong> tab of the builder, click <strong class="text-gray-900 dark:text-white">Save as Template</strong> and give it a name. The newsletter is saved first, so the template holds what is on screen</li>
             <li>On the <strong class="text-gray-900 dark:text-white">Templates</strong> tab of the Newsletters section, click <strong class="text-gray-900 dark:text-white">Create Template</strong> to build one from scratch in the same builder</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -503,7 +495,7 @@
             Recipients &amp; Segments
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Recipients</strong> panel on the Settings tab lists your saved segments with a live recipient count beside each one. Tick as many as you need and the lists are merged. If you tick nothing, the newsletter goes to everyone: your followers and your <a href="#email-subscribers" class="doc-link">email subscribers</a> together.
+            The <strong class="text-gray-900 dark:text-white">Recipients</strong> panel on the Settings tab offers two choices. The first is everyone: your followers and your <a href="#email-subscribers" class="doc-link">email subscribers</a> together, which is where a new newsletter starts. The second, <strong class="text-gray-900 dark:text-white">Chosen segments</strong>, lists your saved segments with a live recipient count beside each one; tick as many as you need and the lists are merged. With none ticked the newsletter still goes to everyone, and the panel says so. Under the choices, and under the subject on the Content tab, the <strong class="text-gray-900 dark:text-white">To</strong> line names who the newsletter will reach and how many people that is.
         </p>
 
         <h3 class="doc-subheading">Three Lists, Three Kinds of Mail</h3>
@@ -603,14 +595,14 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open the <strong class="text-gray-900 dark:text-white">Segments</strong> tab</li>
             <li>Under <strong class="text-gray-900 dark:text-white">Create Segment</strong>, enter a name</li>
-            <li>Choose the type: All Followers, Email subscribers, Ticket Buyers, Manual, Waitlist or Sub-schedule (listed once the schedule has a sub-schedule)</li>
+            <li>Choose the type: All Followers, Email subscribers, Ticket Buyers, Manual, Waitlist or Sub-schedule (listed once the schedule has a sub-schedule). A line under the choice says who that type reaches</li>
             <li>Fill in whatever the type asks for next: an optional event filter for Ticket Buyers and Waitlist, the sub-schedule for Sub-schedule, or the address list for Manual (one per line, with an optional name after a comma)</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Create Segment</strong></li>
         </ol>
 
         <h3 class="doc-subheading">Editing and Deleting</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <strong class="text-gray-900 dark:text-white">Edit</strong>, or the segment's name, opens the segment's own page, with a link back to <strong class="text-gray-900 dark:text-white">Segments</strong> above its title. There you can rename it and see its type, its event where it has one, its recipient count and the day it was made. The type and the event or sub-schedule are chosen when the segment is created and have no field on this page: to change either, create a new segment.
+            <strong class="text-gray-900 dark:text-white">Edit</strong>, or the segment's name, opens the segment's own page, with a link back to <strong class="text-gray-900 dark:text-white">Segments</strong> above its title. There you can rename it and see its type, its recipient count and the day it was made. A Ticket Buyers or Waitlist segment can be narrowed to another event, or to all events, and a Sub-schedule segment pointed at another sub-schedule; the type itself is chosen when the segment is created, so to change it, create a new segment. Renaming a segment leaves its event or sub-schedule as it was.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Under that, the page lists the people in the segment. On a manual segment you can add one by name and email under <strong class="text-gray-900 dark:text-white">Add Subscriber</strong>, correct an entry in place, or delete it, and <strong class="text-gray-900 dark:text-white">Import emails in bulk</strong> opens the Import Emails tab. Every other type is worked out afresh each time, so its list is read-only and shows the first 50 recipients.
@@ -675,21 +667,21 @@
             Sending
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            You have three ways to deliver a saved newsletter:
+            <strong class="text-gray-900 dark:text-white">Review and send</strong> in the bar saves the newsletter and opens a last look before anything goes out. It names the subject and the preview text, who the newsletter goes to and how many people that is (each address counted once, after unsubscribes), and how much of the month's <a href="#allowance" class="doc-link">allowance</a> will be left. If the newsletter cannot go (the allowance is spent, nobody is in the chosen segments, or a <a href="#verification" class="doc-link">verification</a> is needed), it says so there, with a link to what fixes it, instead of after you press send.
         </p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Send Now</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Confirm the prompt and the newsletter moves to Sending. Messages go out in small batches a few seconds apart rather than all at once, so a large send takes a few minutes to finish.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The newsletter moves to Sending. Messages go out in small batches a few seconds apart rather than all at once, so a large send takes a few minutes to finish. While it is going out, its row on the Newsletters tab and its statistics say how many have been sent so far, and update themselves.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Pick a future date and time, read in your own timezone. The send fires within a minute of that time. A notice at the top of the edit page shows the scheduled time and offers <strong class="text-gray-900 dark:text-white">Cancel Schedule</strong>, which returns it to Draft.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule for later</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Pick a future date and time. The dialog names the timezone it is read in: your own, or your schedule's when your profile has none. The send fires within a minute of that time. A notice at the top of the edit page shows the scheduled time and offers <strong class="text-gray-900 dark:text-white">Cancel Schedule</strong>, which returns it to Draft.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send a Test</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Sends one copy to your schedule's contact email address, so set that address first. Test sends do not count against your monthly allowance and are excluded from the statistics, and there is a short cooling-off period between tests. Send one before every real send: images, links and dark-mode rendering are the three things that most often look different in a real inbox from the builder preview.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Saves the newsletter and sends one copy to you, or to your schedule's contact email address; the dialog lets you choose and says when it has gone. Test sends do not count against your monthly allowance and are excluded from the statistics, and there is a short cooling-off period between tests. Send one before every real send: images, links and dark-mode rendering are the three things that most often look different in a real inbox from the builder preview. <strong class="text-gray-900 dark:text-white">Send a test first</strong> in Review and send opens the same dialog.</p>
             </div>
         </div>
 
@@ -713,33 +705,31 @@
             A/B Testing
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            An A/B test pairs two versions of one newsletter, variant A and variant B, so you can compare how each one did. Open the <strong class="text-gray-900 dark:text-white">A/B Testing</strong> panel on the Settings tab of a saved newsletter.
+            An A/B test sends two versions of one newsletter, variant A and variant B, to a small sample of your audience, waits, and then sends the version that did better to everyone else. Open the <strong class="text-gray-900 dark:text-white">A/B Testing</strong> panel on the Settings tab of a newsletter.
         </p>
 
-        {{-- 2026-10: the sample send (NewsletterController::sendAbTest(), route newsletter.ab_send)
-             has no button anywhere in the interface, so this section says what the builder does
-             today. Once a button exists, three things belong back here: the sample is drawn at
-             random and split between A and B, the better variant is picked when the wait is up,
-             and it is then sent to everyone who was not in the sample. --}}
         <h3 class="doc-subheading">Setting Up a Test</h3>
         <ol class="doc-list doc-list-numbered mb-4">
             <li>Click <strong class="text-gray-900 dark:text-white">Create A/B Test</strong> to open the form</li>
             <li>Under <strong class="text-gray-900 dark:text-white">Field to Test</strong>, choose what the two versions will differ in: <strong class="text-gray-900 dark:text-white">Subject</strong> or <strong class="text-gray-900 dark:text-white">Content Above Events</strong></li>
             <li>Set <strong class="text-gray-900 dark:text-white">Sample Size (%)</strong>, from 5 to 50 (20 by default), and <strong class="text-gray-900 dark:text-white">Wait Hours</strong>, from 1 to 72 (4 by default)</li>
             <li>Under <strong class="text-gray-900 dark:text-white">Winner Criteria</strong>, choose <strong class="text-gray-900 dark:text-white">Open Rate</strong> or <strong class="text-gray-900 dark:text-white">Click Rate</strong></li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Create A/B Test</strong> under the form. Your newsletter becomes variant A and a copy is created as variant B, which opens for editing so you can make the change you want to test</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Create A/B Test</strong> under the form. Your newsletter is saved and becomes variant A, and a copy is created as variant B, which opens for editing so you can make the change you want to test</li>
         </ol>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            From then on each variant says which one it is in its A/B Testing panel, and carries an A or B chip beside its subject on the Newsletters tab. A newsletter can belong to one test only, and a test always has exactly two variants.
+            From then on each variant's A/B Testing panel says which one it is, what is being tested, and links to the other variant. On the Newsletters tab variant B is listed under variant A, each with an A or B chip. A newsletter can belong to one test only, and a test always has exactly two variants. Variant B goes to the same people as variant A, so its Settings tab has no recipients of its own: the test splits one audience.
         </p>
 
-        <h3 id="ab-sending" class="doc-subheading">Sending the Variants</h3>
+        <h3 id="ab-sending" class="doc-subheading">Sending the Test</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The builder has no button that sends a sample. <strong class="text-gray-900 dark:text-white">Send Now</strong> and <strong class="text-gray-900 dark:text-white">Schedule</strong> work on a variant as they do on any newsletter: they send that one variant to everyone its recipients resolve to. The sample size, the wait and the winner criteria are saved with the test, but nothing in the builder acts on them, so no sample is drawn and no winner is picked or sent on.
+            On a variant the bar's last button is <strong class="text-gray-900 dark:text-white">Send A/B test</strong>. It opens the same last look as any newsletter, and says what will happen: how many people get variant A and variant B now, and that after the wait the variant with the better open or click rate goes to everyone else. The sample is drawn at random from variant A's audience and split between the two. Either variant can send the test, and it goes out once.
         </p>
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Do not send both variants to the same audience</div>
-            <p>Variant B starts with the same recipients as variant A. Send both without changing them and every person receives two emails, and both sends count against your <a href="#allowance" class="doc-link">monthly allowance</a>. To compare two versions, give each variant its own segment on its Settings tab, for example two manual segments holding half of a list each, then send both.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A variant is never sent on its own, now or scheduled: that would mail the whole audience one version, and the other one again later. The whole audience counts against your allowance, as one newsletter would.
+        </p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Selfhosted: a test needs a real queue</div>
+            <p>The winner is picked by a background job that waits for the hours you set. With the <code class="doc-inline-code">sync</code> queue driver that wait cannot happen, so an A/B test is refused there, and Review and send says so. Configure a background queue driver and a worker first. See the <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-link">selfhost installation guide</a>.</p>
         </div>
 
         <h3 class="doc-subheading">Comparing the Results</h3>
@@ -757,7 +747,7 @@
             Analytics
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Once a newsletter is sending or sent, its subject on the Newsletters tab, and the <strong class="text-gray-900 dark:text-white">Stats</strong> link at the end of its row, open its statistics page. The page is titled with the newsletter's subject, says when it was sent, and has a link back to <strong class="text-gray-900 dark:text-white">Newsletters</strong> above the title. The list itself also carries sortable Recipients, Open Rate and Click Rate columns.
+            Once a newsletter is sending or sent, its subject on the Newsletters tab, and the <strong class="text-gray-900 dark:text-white">Stats</strong> link at the end of its row, open its statistics page. The page is titled with the newsletter's subject, says when it was sent, and has a link back to <strong class="text-gray-900 dark:text-white">Newsletters</strong> above the title. <strong class="text-gray-900 dark:text-white">View email</strong> beside the title shows the newsletter as it reads, drawn again from what was saved, so its events are the ones that stand today; <strong class="text-gray-900 dark:text-white">Clone</strong> starts a new draft from it. The list itself also carries sortable Recipients, Open Rate and Click Rate columns.
         </p>
 
         <div class="doc-table-wrap">
@@ -784,6 +774,10 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Failed</span></td>
                         <td>Messages the mail server rejected or could not deliver</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Unsubscribed</span></td>
+                        <td>People who unsubscribed from your schedule through this newsletter's link, and that as a percentage of sent</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Opens Over Time, Clicks Over Time</span></td>
@@ -900,20 +894,20 @@
                 },
                 {
                     "@type": "HowToStep",
-                    "name": "Choose a Template and Style",
-                    "text": "On the Style tab, pick a preset (Modern, Classic, Minimal, Bold or Compact) and adjust the colors, font and button style.",
+                    "name": "Choose a Design and Style",
+                    "text": "On the Style tab, pick a design (Modern, Classic, Minimal, Bold or Compact) and adjust the colors, font and button style.",
                     "url": "{{ url(route('marketing.docs.newsletters')) }}#templates"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Select Recipients",
-                    "text": "On the Settings tab, tick the segments to send to: all followers, email subscribers, ticket buyers, a waitlist, a sub-schedule or a manual list. Selecting none sends to all followers and email subscribers together.",
+                    "text": "On the Settings tab, keep everyone (all followers and email subscribers together) or choose segments: all followers, email subscribers, ticket buyers, a waitlist, a sub-schedule or a manual list. The To line under the subject says who it will reach and how many.",
                     "url": "{{ url(route('marketing.docs.newsletters')) }}#recipients"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Send or Schedule",
-                    "text": "Send a test to your schedule's email address first, then send the newsletter immediately or schedule it for a future date and time.",
+                    "text": "Send a test to yourself first, then press Review and send to see who it goes to and how many, and send it now or schedule it for a future date and time.",
                     "url": "{{ url(route('marketing.docs.newsletters')) }}#sending"
                 }
             ]

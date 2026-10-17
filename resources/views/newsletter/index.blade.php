@@ -45,7 +45,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($newsletters as $newsletter)
+                    @foreach ($newsletters as $listed)
+                    {{-- A test's variant B is drawn under its variant A (NewsletterController::index()). --}}
+                    @foreach (array_filter([$listed, $variantsB[$listed->id] ?? null]) as $newsletter)
                     @php
                         $hash = \App\Utils\UrlUtils::encodeId($newsletter->id);
                         $wasSent = in_array($newsletter->status, ['sent', 'sending']);
@@ -53,8 +55,9 @@
                         $clicks = $newsletter->sent_count > 0 ? round(($newsletter->click_count / $newsletter->sent_count) * 100, 1) . '%' : null;
                         // The day that goes with the status: when it went out, or when it will.
                         $statusAt = $newsletter->status === 'scheduled' ? $newsletter->scheduled_at : ($wasSent ? $newsletter->sent_at : null);
+                        $sendingNow = $progress[$newsletter->id] ?? null;
                     @endphp
-                    <tr>
+                    <tr @class(['news-variant-row' => $newsletter !== $listed])>
                         <td class="c-main c-strong">
                             <a href="{{ $wasSent ? route('newsletter.stats', ['hash' => $hash, 'role_id' => $roleParam]) : route('newsletter.edit', ['hash' => $hash, 'role_id' => $roleParam]) }}" class="event-link"><bdi>{{ $newsletter->subject }}</bdi></a>
                             @if ($newsletter->ab_variant)
@@ -63,7 +66,9 @@
                         </td>
                         <td>
                             <span class="event-status {{ $statusTones[$newsletter->status] ?? '' }}">{{ __('messages.newsletter_status_' . $newsletter->status) }}</span>
-                            @if ($statusAt)
+                            @if ($sendingNow)
+                            <span class="c-sub whitespace-nowrap">{{ __('messages.newsletter_sending_progress', ['done' => number_format($sendingNow['done']), 'total' => number_format($sendingNow['total'])]) }}</span>
+                            @elseif ($statusAt)
                             <span class="c-sub whitespace-nowrap">{{ $statusAt->copy()->timezone($readerZone)->translatedFormat($timeFormat) }}</span>
                             @endif
                         </td>
@@ -92,6 +97,7 @@
                         </td>
                     </tr>
                     @endforeach
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -115,4 +121,5 @@
     </div>
 
     @include('newsletter.partials._list-script', ['defaultSort' => 'created_at'])
+    @include('newsletter.partials._sending-refresh', ['sending' => ! empty($progress)])
 </x-app-admin-layout>

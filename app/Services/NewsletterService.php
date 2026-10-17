@@ -511,7 +511,12 @@ class NewsletterService
         return empty($allEventIds) ? null : array_unique($allEventIds);
     }
 
-    public function renderHtml(Newsletter $newsletter, ?NewsletterRecipient $recipient = null, ?array $processedBlocks = null): string
+    /**
+     * @param  bool  $markBlocks  the builder's preview only: each block is wrapped in a tbody that
+     *                            names it, so the preview can point at the block being edited and
+     *                            a click on one opens it. Never set for a mail that is sent.
+     */
+    public function renderHtml(Newsletter $newsletter, ?NewsletterRecipient $recipient = null, ?array $processedBlocks = null, bool $markBlocks = false): string
     {
         $style = array_merge(Newsletter::defaultStyleSettings(), $newsletter->style_settings ?? []);
         $blocks = $processedBlocks ?? $this->processBlocks($newsletter);
@@ -541,6 +546,7 @@ class NewsletterService
             'recipient' => $recipient,
             'showBranding' => $role ? $role->showBranding() : false,
             'isRtl' => $isRtl,
+            'markBlocks' => $markBlocks,
         ])->render());
     }
 
@@ -567,7 +573,7 @@ class NewsletterService
 
     public function renderPreview(Newsletter $newsletter): string
     {
-        $html = $this->renderHtml($newsletter, null);
+        $html = $this->renderHtml($newsletter, null, null, markBlocks: true);
 
         $style = '<style>a { pointer-events: none !important; cursor: default !important; }</style>';
         $html = str_replace('</head>', $style.'</head>', $html);

@@ -31,11 +31,36 @@
                             <x-text-input id="segment_name" name="name" type="text" class="mt-1 block w-full" :value="$segment->name" required />
                         </div>
 
+                        {{-- The one filter this type has can be changed here; a segment of the wrong
+                             event used to have to be deleted and made again. --}}
+                        @if (in_array($segment->type, ['ticket_buyers', 'waitlist'], true))
+                        @php $currentEventId = (int) ($segment->filter_criteria['event_id'] ?? 0); @endphp
+                        <div>
+                            <x-input-label for="segment_event" :value="__('messages.event')" />
+                            <select id="segment_event" name="filter_criteria[event_id]" data-searchable
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                <option value="">{{ __('messages.all_events') }}</option>
+                                @foreach ($filterEvents as $filterEvent)
+                                <option value="{{ $filterEvent['hash'] }}" @selected($filterEvent['id'] === $currentEventId)>{{ $filterEvent['name'] }}{{ $filterEvent['date'] ? ' - '.$filterEvent['date'] : '' }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('filter_criteria.event_id')" class="mt-2" />
+                        </div>
+                        @elseif ($segment->type === 'group')
+                        <div>
+                            <x-input-label for="segment_group" :value="__('messages.subschedule')" />
+                            <select id="segment_group" name="filter_criteria[group_id]"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                @foreach ($groups as $group)
+                                <option value="{{ $group->id }}" @selected((int) ($segment->filter_criteria['group_id'] ?? 0) === $group->id)>{{ $group->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('filter_criteria.group_id')" class="mt-2" />
+                        </div>
+                        @endif
+
                         <dl class="news-facts">
                             <div><dt>{{ __('messages.type') }}</dt> <dd>{{ \App\Models\NewsletterSegment::typeLabel($segment->type) }}</dd></div>
-                            @if (! empty($eventName))
-                            <div><dt>{{ __('messages.event') }}</dt> <dd><bdi>{{ $eventName }}</bdi></dd></div>
-                            @endif
                             <div><dt>{{ __('messages.recipients') }}</dt> <dd>{{ number_format($recipientCount) }}</dd></div>
                             <div><dt>{{ __('messages.created') }}</dt> <dd>{{ $segment->created_at->translatedFormat('M j, Y') }}</dd></div>
                         </dl>

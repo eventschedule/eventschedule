@@ -18,6 +18,10 @@
     $recipientTones = ['sent' => 'is-on', 'pending' => 'is-warn', 'failed' => 'is-bad'];
     $recipientWords = ['sent' => __('messages.sent'), 'pending' => __('messages.pending'), 'failed' => __('messages.failed')];
     $abTest = $abTest ?? null;
+    // How far a send has got while it is going out, and who left the list from this newsletter
+    // (a schedule's own: the platform admin's page passes neither).
+    $progress = $progress ?? null;
+    $unsubscribeCount = $unsubscribeCount ?? null;
 @endphp
 
 <div class="page-stack">
@@ -25,6 +29,9 @@
         <div class="page-stat">
             <div class="page-stat-value">{{ number_format($newsletter->sent_count) }}</div>
             <div class="page-stat-label">{{ __('messages.sent') }}</div>
+            @if ($progress)
+            <div class="page-stat-sub">{{ __('messages.newsletter_sending_progress', ['done' => number_format($progress['done']), 'total' => number_format($progress['total'])]) }}</div>
+            @endif
         </div>
         <div class="page-stat">
             <div class="page-stat-value">{{ number_format($newsletter->open_count) }}</div>
@@ -44,6 +51,15 @@
             <div class="page-stat-value {{ $failedCount > 0 ? 'is-bad' : '' }}">{{ number_format($failedCount) }}</div>
             <div class="page-stat-label">{{ __('messages.failed') }}</div>
         </div>
+        @if ($unsubscribeCount !== null)
+        <div class="page-stat">
+            <div class="page-stat-value">{{ number_format($unsubscribeCount) }}</div>
+            <div class="page-stat-label">{{ __('messages.newsletter_unsubscribes') }}</div>
+            @if ($rate($unsubscribeCount, $newsletter->sent_count) && $unsubscribeCount > 0)
+            <div class="page-stat-sub">{{ $rate($unsubscribeCount, $newsletter->sent_count) }}</div>
+            @endif
+        </div>
+        @endif
     </div>
 
     {{-- A/B test comparison --}}

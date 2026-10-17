@@ -284,4 +284,67 @@
     .page-kv.news-links dt {
       overflow-wrap: anywhere;
     }
+
+    /* Variant B of an A/B test, under its variant A: the two read as one test. From a tablet up
+       the row tucks in under A's subject; a phone's stacked rows need no more than the chip. */
+    @media (min-width: 640px) {
+      .news-variant-row > td {
+        border-top-style: dashed;
+      }
+      .news-variant-row > td.c-main {
+        padding-inline-start: 2.25rem;
+      }
+    }
+
+    /* The sent mail, shown in a dialog from its statistics. */
+    .news-mail-dialog {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .news-mail-dialog[hidden] {
+      display: none;
+    }
+    .news-mail-sheet {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 44rem;
+      height: calc(100dvh - 2rem);
+      overflow: hidden;
+      border-radius: 0.875rem;
+      background: rgb(var(--ap-surface));
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+    .news-mail-head {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid rgb(var(--ap-border));
+    }
+    .news-mail-head p {
+      flex: 1;
+      margin: 0;
+      font-size: 0.8125rem;
+      color: rgb(var(--ap-ink-3));
+    }
+    .news-mail-sheet iframe {
+      flex: 1;
+      width: 100%;
+      border: 0;
+      background: #fff;
+    }
+
+    /* What each kind of segment reaches, under the select that chooses one. */
+    .news-type-help {
+      margin: 0.375rem 0 0;
+      font-size: 0.8125rem;
+      color: rgb(var(--ap-ink-3));
+    }
 </style>

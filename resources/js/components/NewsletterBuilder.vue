@@ -1,148 +1,109 @@
 <template>
-    <div class="lg:grid lg:grid-cols-2 lg:gap-6">
+    <!-- The builder: what is written on the left, the mail as it will arrive on the right, and a
+         bar along the foot that saves it and sends it. Its look is the portal's page kit
+         (form-kit-styles: the tabs, the save bar) plus newsletter/partials/_builder-styles, which
+         styles the nb-* classes below. -->
+    <div class="nb" :class="{ 'is-template': isTemplateMode }">
+        <div class="nb-grid">
 
-        <!-- Left: Tabs + Sections + Action buttons -->
-        <div>
-            <!-- Tab bar -->
-            <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4">
-                <button type="button" @click="showSection('content')"
-                    class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
-                    :class="activeSection === 'content' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
-                    {{ t.content }}
-                </button>
-                <button type="button" @click="showSection('style')"
-                    class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
-                    :class="activeSection === 'style' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
-                    {{ t.style }}
-                </button>
-                <button v-if="!isTemplateMode" type="button" @click="showSection('settings')"
-                    class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
-                    :class="activeSection === 'settings' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
-                    {{ t.settings }}
-                </button>
-                <button type="button" @click="openPreviewInNewTab()"
-                    class="lg:hidden px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                    {{ t.preview }}
-                </button>
-            </div>
+            <!-- Left: the tabs and what each one holds -->
+            <div class="nb-edit">
+                <div class="ap-tabs-wrap nb-tabs">
+                    <div class="ap-tabs" role="tablist">
+                        <button v-for="tab in tabs" :key="tab.id" type="button" class="ap-tab" role="tab"
+                            :id="'nb-tab-' + tab.id"
+                            :aria-selected="activeSection === tab.id ? 'true' : 'false'"
+                            :aria-controls="'nb-pane-' + tab.id"
+                            @click="showSection(tab.id)">{{ tab.label }}</button>
+                        <!-- A phone has no room for the preview beside the editor: it opens over it. -->
+                        <button type="button" class="ap-tab nb-tab-preview" @click="openPhonePreview()">{{ t.preview }}</button>
+                    </div>
+                </div>
 
-            <div class="space-y-2">
-                    <div v-show="activeSection === 'content'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                <!-- CONTENT -->
+                <div v-show="activeSection === 'content'" id="nb-pane-content" role="tabpanel" aria-labelledby="nb-tab-content" class="ap-card nb-card">
 
-                        <!-- Subject -->
-                        <div v-if="!isTemplateMode">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.subject }} *</h3>
-                            <div class="px-5 pb-5">
-                                <input id="subject" name="subject" type="text"
-                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
-                                    v-model="subject" @input="onSubjectInput" required />
+                    <div v-if="!isTemplateMode" class="nb-section">
+                        <label for="subject" class="nb-label">{{ t.subject }} <span aria-hidden="true">*</span></label>
+                        <input id="subject" name="subject" type="text" maxlength="255" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                            v-model="subject" @input="onSubjectInput" required />
+                        <!-- Who it goes to, said where it is written; the choice itself is on Settings. -->
+                        <p class="nb-audience">
+                            <span class="nb-audience-to">{{ t.to }}</span>
+                            <bdi class="nb-audience-who">{{ audienceLine }}</bdi>
+                            <button v-if="!(abTest && abTest.variant === 'B')" type="button" class="event-link" @click="goToRecipients()">{{ t.change }}</button>
+                        </p>
+                    </div>
+
+                    <!-- Preview text: the line an inbox shows after the subject. Posted by the
+                         hidden style_settings[previewText] field below. -->
+                    <div v-if="!isTemplateMode" class="nb-section">
+                        <label for="newsletter_preview_text" class="nb-label">{{ t.preview_text }}</label>
+                        <input id="newsletter_preview_text" type="text" maxlength="150" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                            v-model="styleSettings.previewText" />
+                        <p class="nb-hint">{{ t.preview_text_help }}</p>
+                    </div>
+
+                    <!-- The blocks, in the order the mail has them -->
+                    <div class="nb-section is-blocks">
+                        <div class="nb-section-head">
+                            <h3 class="nb-title">{{ t.blocks }} <span class="nb-count">{{ blocks.length }}</span></h3>
+                            <button type="button" class="page-tool nb-add" :aria-expanded="showBlockPalette ? 'true' : 'false'" aria-controls="nb-palette" @click="toggleBlockPalette()">
+                                <svg v-if="!showBlockPalette" class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" /></svg>
+                                {{ showBlockPalette ? t.done : t.add_block }}
+                            </button>
+                        </div>
+
+                        <!-- What can be added. A click puts it after the open block (or at the end);
+                             it can also be dragged to a place in the list. -->
+                        <div v-show="showBlockPalette" id="nb-palette" class="nb-palette">
+                            <p class="nb-palette-where">{{ paletteWhere }}</p>
+                            <div ref="blockPalette" class="nb-palette-grid">
+                                <div v-for="bt in blockTypes" :key="bt.type" role="button" tabindex="0"
+                                    class="palette-item nb-palette-item" :data-block-type="bt.type"
+                                    @click="addBlockFromPalette(bt)"
+                                    @keydown.enter.prevent="addBlockFromPalette(bt)"
+                                    @keydown.space.prevent="addBlockFromPalette(bt)">
+                                    <svg class="nb-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="blockIconPath(bt.type)" /></svg>
+                                    <span>{{ bt.label }}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Preview text: the line an inbox shows after the subject. Posted by the
-                             hidden style_settings[previewText] field below. -->
-                        <div v-if="!isTemplateMode">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4"><label for="newsletter_preview_text">{{ t.preview_text }}</label></h3>
-                            <div class="px-5 pb-5">
-                                <input id="newsletter_preview_text" type="text" maxlength="150"
-                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
-                                    v-model="styleSettings.previewText" />
-                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ t.preview_text_help }}</p>
-                            </div>
-                        </div>
+                        <div ref="blockCanvas" class="nb-canvas">
+                            <div v-for="(block, index) in blocks" :key="block.id"
+                                class="block-item nb-block" :class="{ 'is-open': selectedBlockId === block.id }"
+                                :data-block-id="block.id">
 
-                        <!-- Blocks section -->
-                        <div>
-                            <div class="flex items-center justify-between px-5 py-4">
-                                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ t.blocks }} ({{ blocks.length }})
-                                </h3>
-                                <button type="button" @click="toggleBlockPalette()"
-                                    :class="showBlockPalette ? 'text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 font-medium' : 'text-sm px-3 py-1 bg-[var(--brand-button-bg)] text-white rounded-md hover:bg-blue-600 font-medium'">
-                                    {{ showBlockPalette ? t.done : t.add_block }}
-                                </button>
-                            </div>
-                            <div :class="showBlockPalette ? 'grid grid-cols-2 gap-4' : ''">
-                                <!-- Left: Block palette (only when visible) -->
-                                <div v-show="showBlockPalette" class="px-4 pb-4">
-                                    <div ref="blockPalette" class="grid grid-cols-2 gap-2">
-                                        <div v-for="bt in blockTypes" :key="bt.type"
-                                            class="palette-item border border-gray-200 dark:border-gray-600 rounded-lg p-2 text-center cursor-grab hover:border-[var(--brand-blue)] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors select-none"
-                                            :data-block-type="bt.type"
-                                            @click="addBlockFromPalette(bt)">
-                                            <div class="text-lg mb-1">{{ bt.icon }}</div>
-                                            <div class="text-xs text-gray-700 dark:text-gray-300">{{ bt.label }}</div>
-                                        </div>
+                                <!-- The block's line: drag handle, what it is and holds, its tools -->
+                                <div class="nb-block-head">
+                                    <span class="drag-handle nb-handle" aria-hidden="true">
+                                        <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16" /></svg>
+                                    </span>
+                                    <button type="button" class="nb-block-toggle" :aria-expanded="selectedBlockId === block.id ? 'true' : 'false'" @click="selectBlock(block.id)">
+                                        <svg class="nb-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="blockIconPath(block.type)" /></svg>
+                                        <span class="nb-block-name">{{ blockLabel(block.type) }}</span>
+                                        <span v-if="selectedBlockId !== block.id && blockSnippet(block)" class="nb-block-snippet"><bdi>{{ blockSnippet(block) }}</bdi></span>
+                                        <span v-else-if="selectedBlockId !== block.id && blockWantsContent(block)" class="nb-block-snippet is-empty">{{ t.no_content }}</span>
+                                    </button>
+                                    <div class="nb-block-tools">
+                                        <button type="button" class="nb-tool" :disabled="index === 0" :title="t.move_up" :aria-label="t.move_up" @click="moveBlock(block.id, -1)">
+                                            <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+                                        </button>
+                                        <button type="button" class="nb-tool" :disabled="index === blocks.length - 1" :title="t.move_down" :aria-label="t.move_down" @click="moveBlock(block.id, 1)">
+                                            <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                        </button>
+                                        <button type="button" class="nb-tool" :title="t.clone_block" :aria-label="t.clone_block" @click="cloneBlock(block.id)">
+                                            <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                        </button>
+                                        <button type="button" class="nb-tool is-danger" :title="t.remove_block" :aria-label="t.remove_block" @click="removeBlock(block.id)">
+                                            <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        </button>
                                     </div>
                                 </div>
-                                <!-- Right: Block canvas (always visible) -->
-                            <div ref="blockCanvas" class="px-4 pb-4 min-h-[100px] space-y-2">
-                                <div v-for="block in blocks" :key="block.id"
-                                    class="block-item group relative border rounded-lg transition-colors"
-                                    :data-block-id="block.id"
-                                    :class="selectedBlockId === block.id ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20 ring-2 ring-[var(--brand-blue)]' : 'border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400'">
 
-                                    <!-- Block header: drag handle + label + actions -->
-                                    <div class="flex items-center justify-between px-3 py-2 cursor-pointer" @click="!showBlockPalette && selectBlock(block.id)">
-                                        <div class="flex items-center gap-2">
-                                            <span class="cursor-grab text-gray-400 drag-handle">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
-                                            </span>
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ blockIcon(block.type) }} {{ blockLabel(block.type) }}</span>
-                                        </div>
-                                        <div v-show="!showBlockPalette" class="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                                            <button type="button" @click.stop="cloneBlock(block.id)" class="p-1 text-gray-400 hover:text-[var(--brand-blue)]" :title="t.clone_block">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                            </button>
-                                            <button type="button" @click.stop="removeBlock(block.id)" class="p-1 text-gray-400 hover:text-red-500" :title="t.remove_block">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Compact snippet: shown when NOT selected -->
-                                    <div v-show="selectedBlockId !== block.id && !showBlockPalette" class="px-3 pb-2 text-sm text-gray-600 dark:text-gray-300 truncate cursor-pointer" @click="selectBlock(block.id)">
-                                        <span v-if="block.type === 'heading'">
-                                            <template v-if="block.data.text">{{ block.data.text }}</template>
-                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
-                                        </span>
-                                        <span v-else-if="block.type === 'text'">
-                                            <template v-if="block.data.content">{{ block.data.content.substring(0, 80) }}</template>
-                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
-                                        </span>
-                                        <span v-else-if="block.type === 'events'">{{ block.data.useAllEvents ? t.all_upcoming_events : (block.data.eventIds ? block.data.eventIds.length + ' ' + t.events : t.events) }}</span>
-                                        <span v-else-if="block.type === 'button'">
-                                            <template v-if="block.data.text">{{ block.data.text }}</template>
-                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
-                                        </span>
-                                        <span v-else-if="block.type === 'image'">
-                                            <template v-if="block.data.images && block.data.images.length > 1">{{ block.data.images.filter(img => img.url).length }} {{ t.images }}</template>
-                                            <template v-else-if="block.data.images && block.data.images[0]">{{ block.data.images[0].caption || block.data.images[0].alt || (block.data.images[0].url ? block.data.images[0].url.substring(0, 50) : t.image_url + '...') }}</template>
-                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.image_url }}...</span>
-                                        </span>
-                                        <span v-else-if="block.type === 'social_links'">{{ (block.data.links || []).length + ' ' + t.links }}</span>
-                                        <span v-else-if="block.type === 'divider'" class="text-gray-400">---</span>
-                                        <span v-else-if="block.type === 'spacer'" class="text-gray-400">{{ (block.data.height || 20) + 'px' }}</span>
-                                        <span v-else-if="block.type === 'offer'">
-                                            <template v-if="block.data.title">{{ block.data.title }}<template v-if="block.data.salePrice"> - {{ block.data.salePrice }}</template></template>
-                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
-                                        </span>
-                                        <span v-else-if="block.type === 'video'">
-                                            <template v-if="block.data.url">{{ block.data.url.substring(0, 50) }}</template>
-                                            <span v-else class="italic text-gray-400 dark:text-gray-500">YouTube URL...</span>
-                                        </span>
-                                        <span v-else-if="block.type === 'quote'">
-                                            <template v-if="block.data.text">{{ block.data.text.substring(0, 80) }}</template>
-                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
-                                        </span>
-                                        <span v-else-if="block.type === 'sponsors'" class="text-gray-400">{{ block.data.source === 'first_event' ? t.sponsor_source_first_event : t.sponsor_source_schedule }}</span>
-                                        <span v-else-if="block.type === 'poll'" class="text-gray-400">{{ t.block_poll }}</span>
-                                        <span v-else-if="block.type === 'profile_image'" class="text-gray-400">{{ t.profile_image }}</span>
-                                        <span v-else-if="block.type === 'header_banner'" class="text-gray-400">{{ t.header_image }}</span>
-                                    </div>
-
-                                    <!-- Inline settings: shown when selected -->
-                                    <div v-show="selectedBlockId === block.id && !showBlockPalette" class="px-3 pb-3 border-t border-gray-100 dark:border-gray-700 mt-1 pt-3">
+                                <!-- What the open block holds -->
+                                <div v-show="selectedBlockId === block.id" class="nb-block-body">
 
                                         <!-- Heading block settings -->
                                         <div v-if="block.type === 'heading'" class="space-y-3">
@@ -151,6 +112,7 @@
                                                 <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.text"
                                                     @input="onHeadingInput(block.id, $event.target.value)" />
+                                                <p v-if="!isTemplateMode && subjectSyncActive && isFirstHeading(block.id)" class="nb-hint">{{ t.newsletter_heading_follows_subject }}</p>
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.heading_level }}</label>
@@ -543,34 +505,27 @@
                                         <div v-if="block.type === 'profile_image' || block.type === 'header_banner'">
                                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ t.auto_populated_from_schedule }}</p>
                                         </div>
-                                    </div>
                                 </div>
+                            </div>
 
-                                <div v-show="blocks.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">
-                                    <p class="text-sm">{{ t.drag_blocks_here }}</p>
-                                </div>
-                            </div>
-                            </div>
+                            <div v-show="blocks.length === 0" class="nb-empty">{{ t.drag_blocks_here }}</div>
                         </div>
-
                     </div>
+                </div>
 
-                    <!-- STYLE SECTION -->
-                    <div v-show="activeSection === 'style'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                <!-- STYLE -->
+                <div v-show="activeSection === 'style'" id="nb-pane-style" role="tabpanel" aria-labelledby="nb-tab-style" class="ap-card nb-card">
 
-                        <!-- Template -->
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.template }}</h3>
-                            <div class="px-5 pb-5">
-                                <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                                    <label v-for="tmpl in templateNames" :key="tmpl" class="cursor-pointer"
-                                        :class="template === tmpl ? 'ring-2 ring-[var(--brand-blue)] rounded-lg' : ''">
-                                        <input type="radio" name="template_selector" :value="tmpl" v-model="template" @change="onTemplateChange(tmpl)" class="sr-only" />
-                                        <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center hover:border-[var(--brand-blue)] transition-colors"
-                                            :class="template === tmpl ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20' : ''">
-                                            <!-- Each preset drawn as the design it is (the sheet, the title, an event entry), in the
-                                                 colours it arrives with. The email's own colours, so they do not follow the app's theme. -->
-                                            <div class="mb-2 rounded overflow-hidden border border-gray-200 dark:border-gray-600" style="aspect-ratio: 3 / 2;">
+                    <!-- The design: one of the five presets. "Design", because the section's
+                         Templates tab is something else (saved newsletters to start from). -->
+                    <div class="nb-section">
+                        <h3 class="nb-title">{{ t.design }}</h3>
+                        <div class="nb-designs" role="radiogroup" :aria-label="t.design">
+                            <label v-for="tmpl in templateNames" :key="tmpl" class="nb-design" :class="{ 'is-on': template === tmpl }">
+                                <input type="radio" name="template_selector" :value="tmpl" :checked="template === tmpl" @change="chooseDesign(tmpl)" class="sr-only" />
+                                <!-- Each preset drawn as the design it is (the sheet, the title, an event entry), in the
+                                     colours it arrives with. The email's own colours, so they do not follow the app's theme. -->
+                                <span class="nb-design-thumb">
                                                 <svg v-if="tmpl === 'modern'" viewBox="0 0 96 64" class="block w-full h-full" aria-hidden="true">
                                                     <rect width="96" height="64" fill="#f1f2f4" /><rect x="20" y="6" width="56" height="58" rx="5" fill="#fff" stroke="#e3e5e8" />
                                                     <path d="M20 11a5 5 0 0 1 5-5h46a5 5 0 0 1 5 5v11H20z" :fill="presetAccent(tmpl)" /><rect x="34" y="12.5" width="28" height="3.5" rx="1.75" fill="#fff" />
@@ -610,18 +565,19 @@
                                                         <rect x="33.5" :y="y + 1.9" width="20" height="1.6" rx=".8" fill="#202124" /><rect x="33.5" :y="y + 4.4" width="13" height="1.2" rx=".6" fill="#9aa0a6" />
                                                     </g>
                                                 </svg>
-                                            </div>
-                                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300 capitalize">{{ tmpl }}</span>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
+                                </span>
+                                <span class="nb-design-name">{{ designName(tmpl) }}</span>
+                            </label>
                         </div>
+                        <p v-if="designUndo" class="nb-note" role="status">
+                            <span>{{ t.newsletter_design_reset.replace(':design', designName(template)) }}</span>
+                            <button type="button" class="event-link" @click="undoDesign()">{{ t.undo }}</button>
+                        </p>
+                    </div>
 
-                        <!-- Style Settings -->
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.style_settings }}</h3>
-                            <div class="px-5 pb-5">
+                    <!-- Colours, type and buttons -->
+                    <div class="nb-section">
+                        <h3 class="nb-title">{{ t.style_settings }}</h3>
                                 <div class="space-y-4">
                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div>
@@ -673,207 +629,280 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
                     </div>
 
-                    <!-- SETTINGS SECTION -->
-                    <div v-if="!isTemplateMode" v-show="activeSection === 'settings'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
-
-                        <!-- Recipients -->
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.recipients }}</h3>
-                            <div class="px-5 pb-5">
-                                <div v-if="segments.length" class="space-y-3">
-                                    <label v-for="segment in segments" :key="segment.id"
-                                        class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-[var(--brand-blue)] transition-colors"
-                                        :class="selectedSegmentIds.includes(segment.id) ? 'bg-blue-50 dark:bg-blue-900/20 border-[var(--brand-blue)]' : ''">
-                                        <div class="flex items-center gap-3">
-                                            <input type="checkbox"
-                                                :checked="selectedSegmentIds.includes(segment.id)"
-                                                @change="toggleSegment(segment.id)"
-                                                class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)]" />
-                                            <div>
-                                                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ segment.name }}</span>
-                                                <span class="text-xs text-gray-500 dark:text-gray-400 ms-2">({{ segment.type_label }})</span>
-                                            </div>
-                                        </div>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ segment.count }}</span>
-                                    </label>
-                                </div>
-                                <div v-else>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ t.no_segments }}</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ t.default_all_followers }}</p>
-                                </div>
-                                <div class="mt-3">
-                                    <a :href="routes.manage_segments" class="text-sm text-[var(--brand-blue)] hover:text-blue-700">{{ t.manage_segments }}</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- A/B Testing -->
-                        <div v-if="newsletter && newsletter.exists">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.ab_testing }}</h3>
-                            <div class="px-5 pb-5" v-html="abTestHtml"></div>
-                        </div>
-
-                        <!-- Footer -->
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.footer_text }}</h3>
-                            <div class="px-5 pb-5">
-                                <textarea v-model="styleSettings.footerText" rows="2"
-                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
-                                    :placeholder="roleName"></textarea>
-                            </div>
-                        </div>
-
+                    <!-- Kept for the next newsletter: the design and the blocks, under a name. -->
+                    <div v-if="!isTemplateMode" class="nb-section">
+                        <h3 class="nb-title">{{ t.templates }}</h3>
+                        <p class="nb-hint is-lead">{{ t.newsletter_save_as_template_lead }}</p>
+                        <button type="button" class="page-tool" @click="openSaveAsTemplate()">{{ t.save_as_template }}</button>
                     </div>
-
-            </div>
-
-            <!-- Hidden fields -->
-            <input type="hidden" name="blocks" :value="JSON.stringify(blocks)" />
-            <input type="hidden" name="template" :value="template" />
-            <input type="hidden" name="style_settings[backgroundColor]" :value="styleSettings.backgroundColor" />
-            <input type="hidden" name="style_settings[accentColor]" :value="styleSettings.accentColor" />
-            <input type="hidden" name="style_settings[textColor]" :value="styleSettings.textColor" />
-            <input type="hidden" name="style_settings[fontFamily]" :value="styleSettings.fontFamily" />
-            <input type="hidden" name="style_settings[buttonRadius]" :value="styleSettings.buttonRadius" />
-            <input type="hidden" name="style_settings[eventLayout]" :value="styleSettings.eventLayout" />
-            <input type="hidden" name="style_settings[footerText]" :value="styleSettings.footerText" />
-            <input type="hidden" name="style_settings[previewText]" :value="styleSettings.previewText" />
-            <input type="hidden" v-for="segmentId in selectedSegmentIds" :key="'seg_' + segmentId" name="segment_ids[]" :value="segmentId" />
-
-            <!-- Action Buttons -->
-            <div class="mt-4 flex flex-wrap gap-3 justify-between">
-                <div class="flex flex-wrap gap-3">
-                    <button v-if="!isTemplateMode && newsletter && newsletter.exists" type="button" @click="showTestSend = true" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        {{ t.send_a_test }}
-                    </button>
-                    <button v-if="!isTemplateMode && newsletter && newsletter.exists && routes.save_as_template" type="button" @click="showSaveAsTemplate = true" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        {{ t.save_as_template }}
-                    </button>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button v-if="!isTemplateMode && newsletter && newsletter.exists" type="button" @click="showSchedule = true" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-yellow-600">
-                        {{ t.schedule_newsletter }}
-                    </button>
 
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
-                        {{ t.save }}
-                    </button>
+                <!-- SETTINGS -->
+                <div v-if="!isTemplateMode" v-show="activeSection === 'settings'" id="nb-pane-settings" role="tabpanel" aria-labelledby="nb-tab-settings" class="ap-card nb-card">
 
-                    <button v-if="!isTemplateMode && newsletter && newsletter.exists && newsletter.canSend" type="button" @click="confirmSend()" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-700">
-                        {{ t.send_now }}
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right: Always-visible live preview -->
-        <div class="hidden lg:block">
-            <div class="lg:sticky lg:top-20">
-                <div class="ap-card sm:rounded-lg overflow-hidden">
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ t.preview }}</h3>
-                        <!-- Most mail is opened on a phone: the same preview at 390px. The house
-                             segmented control: a sunken group, the chosen side pressed in. -->
-                        <div class="inline-flex rounded-xl p-0.5" role="group" :aria-label="t.preview"
-                             style="background: rgb(var(--ap-surface-sunken)); border: 1px solid rgb(var(--ap-border));">
-                            <button v-for="width in ['desktop', 'mobile']" :key="width" type="button" @click="previewWidth = width" :aria-pressed="previewWidth === width"
-                                class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]"
-                                :class="previewWidth === width ? '' : 'hover:text-gray-700 dark:hover:text-gray-200'"
-                                :style="previewWidth === width
-                                    ? { background: 'rgb(var(--ap-surface))', color: 'rgb(var(--ap-ink))', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.08)' }
-                                    : { color: 'rgb(var(--ap-ink-3))' }">{{ t[width] }}</button>
-                        </div>
-                    </div>
-                    <!--
-                        Deliberately a banner and not a reload: the builder holds an unsaved draft,
-                        so bouncing to the confirm-password page would throw the work away. Say what
-                        happened and let them re-confirm in another tab.
-                    -->
-                    <div v-if="previewNeedsReauth" class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700 p-3">
-                        <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <span>{{ t.preview_session_expired }}</span>
+                    <!-- Recipients: everyone is a choice of its own, so it is always said who that is. -->
+                    <div id="nb-recipients" class="nb-section">
+                        <h3 class="nb-title">{{ t.recipients }}</h3>
+                        <p v-if="abTest && abTest.variant === 'B'" class="nb-hint is-lead">{{ t.ab_follows_variant_a }}</p>
+                        <template v-else>
+                            <div class="nb-choices">
+                                <label class="nb-choice">
+                                    <input type="radio" name="nb_audience" value="everyone" :checked="audienceMode === 'everyone'" @change="useEveryone()" />
+                                    <span><bdi>{{ everyoneLabel }}</bdi></span>
+                                </label>
+                                <label v-if="segments.length" class="nb-choice">
+                                    <input type="radio" name="nb_audience" value="segments" :checked="audienceMode === 'segments'" @change="audienceMode = 'segments'" />
+                                    <span>{{ t.newsletter_audience_chosen }}</span>
+                                </label>
+                            </div>
+                            <div v-if="segments.length" v-show="audienceMode === 'segments'" class="nb-choice-body">
+                                <label v-for="segment in segments" :key="segment.id" class="nb-segment" :class="{ 'is-on': selectedSegmentIds.includes(segment.id) }">
+                                    <input type="checkbox" :checked="selectedSegmentIds.includes(segment.id)" @change="toggleSegment(segment.id)" />
+                                    <span class="nb-segment-name"><bdi>{{ segment.name }}</bdi> <span class="nb-segment-type">{{ segment.type_label }}</span></span>
+                                    <span class="nb-segment-count">{{ segment.count }}</span>
+                                </label>
+                                <p v-if="!selectedSegmentIds.length" class="nb-hint is-warn">{{ t.newsletter_audience_none_ticked }}</p>
+                            </div>
+                            <p v-if="!segments.length" class="nb-hint">{{ t.no_segments }}</p>
+                            <a :href="routes.manage_segments" class="event-link nb-manage">{{ t.manage_segments }}</a>
+                        </template>
+                        <p v-if="audience" class="nb-audience is-total">
+                            <span class="nb-audience-to">{{ t.to }}</span>
+                            <bdi class="nb-audience-who">{{ audienceLine }}</bdi>
                         </p>
                     </div>
-                    <!-- The mail is laid out at a real width and scaled to this column
-                         (previewFrameStyle): the column is 456px at a 1280 window, under the
-                         mail's 620px breakpoint, so "Desktop" used to show the phone layout. -->
-                    <div ref="previewPane" class="relative overflow-hidden" :class="previewWidth === 'mobile' ? 'bg-gray-100 dark:bg-gray-900' : ''"
-                         style="height: calc(100vh - 14rem); min-height: 400px;">
-                        <div v-show="previewLoading" class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-10">
-                            <div class="flex flex-col items-center gap-2">
-                                <svg class="animate-spin h-6 w-6 text-[var(--brand-blue)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+
+                    <!-- A/B test: two versions, a sample of each, and the better one to everyone else. -->
+                    <div v-if="!isAdmin" class="nb-section">
+                        <h3 class="nb-title">{{ t.ab_testing }}</h3>
+                        <template v-if="abTest">
+                            <dl class="nb-kv">
+                                <div><dt>{{ t.variant }}</dt><dd><span class="event-chip">{{ abTest.variant }}</span></dd></div>
+                                <div><dt>{{ t.test_field }}</dt><dd>{{ abTest.field }}</dd></div>
+                                <div><dt>{{ t.sample_percentage }}</dt><dd>{{ abTest.sample }}%</dd></div>
+                                <div><dt>{{ t.wait_hours }}</dt><dd>{{ abTest.hours }}</dd></div>
+                                <div><dt>{{ t.winner_criteria }}</dt><dd>{{ abTest.criteria }}</dd></div>
+                                <div v-if="abTest.winner"><dt>{{ t.winner }}</dt><dd>{{ abTest.winner }}</dd></div>
+                            </dl>
+                            <p v-if="abTest.pending" class="nb-hint">{{ t.ab_test_pending_note }}</p>
+                            <a v-if="abTest.other_url" :href="abTest.other_url" class="event-link">{{ t.ab_test_edit_other.replace(':variant', abTest.other_variant) }}</a>
+                        </template>
+                        <template v-else>
+                            <p class="nb-hint is-lead">{{ t.ab_test_description }}</p>
+                            <button v-if="!abFormOpen" type="button" class="page-tool" @click="abFormOpen = true">{{ t.create_ab_test }}</button>
+                            <div v-else class="nb-ab-form" @keydown.enter="onDialogEnter($event)">
+                                <div class="nb-field">
+                                    <label for="nb-ab-field" class="nb-label">{{ t.test_field }}</label>
+                                    <select id="nb-ab-field" v-model="abForm.test_field" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
+                                        <option value="subject">{{ t.subject }}</option>
+                                        <option value="blocks">{{ t.content_above_events }}</option>
+                                    </select>
+                                </div>
+                                <div class="nb-field-row">
+                                    <div class="nb-field">
+                                        <label for="nb-ab-sample" class="nb-label">{{ t.sample_percentage }}</label>
+                                        <input id="nb-ab-sample" type="number" min="5" max="50" v-model.number="abForm.sample_percentage" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" />
+                                    </div>
+                                    <div class="nb-field">
+                                        <label for="nb-ab-hours" class="nb-label">{{ t.wait_hours }}</label>
+                                        <input id="nb-ab-hours" type="number" min="1" max="72" v-model.number="abForm.winner_wait_hours" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" />
+                                    </div>
+                                </div>
+                                <div class="nb-field">
+                                    <label for="nb-ab-criteria" class="nb-label">{{ t.winner_criteria }}</label>
+                                    <select id="nb-ab-criteria" v-model="abForm.winner_criteria" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
+                                        <option value="open_rate">{{ t.open_rate }}</option>
+                                        <option value="click_rate">{{ t.click_rate }}</option>
+                                    </select>
+                                </div>
+                                <p class="nb-hint">{{ t.ab_test_create_note }}</p>
+                                <div class="nb-actions">
+                                    <button type="button" class="nb-btn" @click="abFormOpen = false">{{ t.cancel }}</button>
+                                    <button type="button" :class="brandClasses" :disabled="busy" @click="createAbTest()">{{ t.create_ab_test }}</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="nb-section">
+                        <label for="nb-footer-text" class="nb-title nb-label-title">{{ t.footer_text }}</label>
+                        <textarea id="nb-footer-text" v-model="styleSettings.footerText" rows="2" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" :placeholder="roleName"></textarea>
+                    </div>
+                </div>
+
+                <!-- Hidden fields -->
+                <input type="hidden" name="blocks" :value="JSON.stringify(blocks)" />
+                <input type="hidden" name="template" :value="template" />
+                <input type="hidden" name="style_settings[backgroundColor]" :value="styleSettings.backgroundColor" />
+                <input type="hidden" name="style_settings[accentColor]" :value="styleSettings.accentColor" />
+                <input type="hidden" name="style_settings[textColor]" :value="styleSettings.textColor" />
+                <input type="hidden" name="style_settings[fontFamily]" :value="styleSettings.fontFamily" />
+                <input type="hidden" name="style_settings[buttonRadius]" :value="styleSettings.buttonRadius" />
+                <input type="hidden" name="style_settings[eventLayout]" :value="styleSettings.eventLayout" />
+                <input type="hidden" name="style_settings[footerText]" :value="styleSettings.footerText" />
+                <input type="hidden" name="style_settings[previewText]" :value="styleSettings.previewText" />
+                <input type="hidden" v-for="segmentId in selectedSegmentIds" :key="'seg_' + segmentId" name="segment_ids[]" :value="segmentId" />
+            </div>
+
+            <!-- Right: the mail as it will arrive. On a phone it opens over the editor. -->
+            <div class="nb-preview-col" :class="{ 'is-sheet': phonePreviewOpen }">
+                <div class="nb-preview-stick">
+                    <div class="ap-card nb-preview" role="region" :aria-label="t.preview">
+                        <div class="nb-preview-head">
+                            <h3 class="nb-title">{{ t.preview }}</h3>
+                            <span v-if="previewReady && previewLoading" class="nb-updating" role="status">{{ t.preview_updating }}</span>
+                            <!-- Most mail is opened on a phone: the same preview at 390px. The house
+                                 segmented control: a sunken group, the chosen side pressed in. -->
+                            <div class="nb-seg" role="group" :aria-label="t.preview">
+                                <button v-for="width in ['desktop', 'mobile']" :key="width" type="button" @click="previewWidth = width"
+                                    :aria-pressed="previewWidth === width ? 'true' : 'false'" class="nb-seg-btn">{{ t[width] }}</button>
+                            </div>
+                            <button v-if="phonePreviewOpen" type="button" class="nb-tool nb-sheet-close" :aria-label="t.close" :title="t.close" @click="closePhonePreview()">
+                                <svg class="nb-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <!--
+                            Deliberately a banner and not a reload: the builder holds an unsaved draft,
+                            so bouncing to the confirm-password page would throw the work away. Say what
+                            happened and let them re-confirm in another tab.
+                        -->
+                        <div v-if="previewNeedsReauth" class="nb-warn is-flush">
+                            <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            <span>{{ t.preview_session_expired }}</span>
+                        </div>
+                        <!-- The mail is laid out at a real width and scaled to this column
+                             (previewFrameStyle): the column is 456px at a 1280 window, under the
+                             mail's 620px breakpoint, so "Desktop" used to show the phone layout. -->
+                        <div ref="previewPane" class="nb-pane" :class="{ 'is-phone': previewWidth === 'mobile' }" :style="{ height: 'calc(' + paneHeight + ')' }">
+                            <div v-show="!previewReady" class="nb-pane-loading">
+                                <svg class="animate-spin nb-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                             </div>
+                            <!-- Same origin and no scripts: nothing in the mail can run, and the page can
+                                 keep the frame's place across a refresh and point at the open block. -->
+                            <iframe ref="livePreviewFrame" class="nb-frame" sandbox="allow-same-origin" :title="t.preview"
+                                :style="previewFrameStyle" @load="onPreviewLoad"></iframe>
                         </div>
-                        <iframe ref="livePreviewFrame" class="block border-0 bg-white" sandbox
-                                :style="previewFrameStyle"
-                                srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Loading preview...</body></html>">
-                        </iframe>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Test Send Modal -->
-        <div v-if="newsletter && newsletter.exists" v-show="showTestSend" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showTestSend = false">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ t.test_send }}</h3>
-                <form @submit.prevent="submitTestSend">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ t.test_email_sent_to.replace(':email', roleEmail) }}</p>
-                    <div class="mt-4 flex justify-end gap-3">
-                        <button type="button" @click="showTestSend = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">{{ t.send }}</button>
-                    </div>
-                </form>
+        <!-- The bar along the foot: what has happened, then Send a test, Save, and Review and send. -->
+        <div class="event-save-spacer"></div>
+        <div class="event-save-bar nb-bar">
+            <div class="event-save-bar-inner">
+                <div class="event-save-status" aria-live="polite">
+                    <span v-if="removed" class="event-save-pair">
+                        <span>{{ t.newsletter_block_removed.replace(':block', blockLabel(removed.block.type)) }}</span>
+                        <button type="button" class="event-link" @click="undoRemove()">{{ t.undo }}</button>
+                    </span>
+                    <span v-else-if="barError" class="event-save-strong nb-bar-error">{{ barError }}</span>
+                    <span v-else-if="saving">{{ t.saving }}</span>
+                    <span v-else-if="dirty" class="event-save-strong">{{ t.unsaved_changes }}</span>
+                    <span v-else-if="justSaved">{{ t.saved }}</span>
+                </div>
+                <div class="event-save-actions">
+                    <button v-if="canSend" type="button" class="event-bar-text" @click="openTest()">{{ t.send_a_test }}</button>
+                    <button type="button" :class="canSend ? 'event-bar-quiet' : ['event-bar-save', brandClasses]" :disabled="saving" @click="save()">{{ t.save }}</button>
+                    <button v-if="canSend" type="button" :class="['event-bar-save', brandClasses]" :disabled="saving || busy" @click="openReview()">{{ abPending ? t.send_ab_test : t.review_and_send }}</button>
+                </div>
             </div>
         </div>
 
-        <!-- Schedule Modal -->
-        <div v-if="newsletter && newsletter.exists" v-show="showSchedule" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showSchedule = false">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ t.schedule_newsletter }}</h3>
-                <form @submit.prevent="submitSchedule">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.send_at }}</label>
-                    <input id="scheduled_at" name="scheduled_at" type="text"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" required />
-                    <div class="mt-4 flex justify-end gap-3">
-                        <button type="button" @click="showSchedule = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-yellow-600">{{ t.schedule }}</button>
+        <!-- Review and send: what goes, to whom, and when, before anything goes. -->
+        <div v-if="showReview" class="nb-dialog-backdrop" @click.self="closeDialogs()">
+            <div class="nb-dialog" role="dialog" aria-modal="true" aria-labelledby="nb-review-title" @keydown.enter="onDialogEnter($event)">
+                <h2 id="nb-review-title" class="nb-dialog-title">{{ abPending ? t.send_ab_test : t.review_and_send }}</h2>
+
+                <div v-if="reviewFailed" class="nb-warn" role="alert">
+                    <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <p>{{ previewNeedsReauth ? t.preview_session_expired : t.something_went_wrong }}</p>
+                </div>
+                <div v-else-if="!audience" class="nb-dialog-loading">
+                    <svg class="animate-spin nb-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                </div>
+                <template v-else>
+                    <dl class="nb-kv">
+                        <div><dt>{{ t.subject }}</dt><dd><bdi>{{ subject }}</bdi></dd></div>
+                        <div v-if="styleSettings.previewText"><dt>{{ t.preview_text }}</dt><dd><bdi>{{ styleSettings.previewText }}</bdi></dd></div>
+                        <div><dt>{{ t.to }}</dt><dd><bdi>{{ audience.label }}</bdi> <span class="nb-num">({{ fmt(audience.count) }})</span></dd></div>
+                        <div v-if="audience.allowance"><dt>{{ t.newsletter_allowance }}</dt><dd>{{ allowanceText }}</dd></div>
+                    </dl>
+
+                    <div v-if="audience.refusal" class="nb-warn" role="alert">
+                        <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <div>
+                            <p>{{ audience.refusal.message }}</p>
+                            <p v-if="audience.refusal.links.length" class="nb-warn-links">
+                                <a v-for="link in audience.refusal.links" :key="link.url" :href="link.url" class="event-link">{{ link.label }}</a>
+                            </p>
+                        </div>
                     </div>
-                </form>
+                    <p v-else-if="audience.ab" class="nb-lead">{{ abExplain }}</p>
+                    <template v-else>
+                        <div class="nb-choices" role="radiogroup" :aria-label="t.review_and_send">
+                            <label class="nb-choice"><input type="radio" name="nb_when" value="now" v-model="reviewWhen" /> <span>{{ t.send_now }}</span></label>
+                            <label class="nb-choice"><input type="radio" name="nb_when" value="later" v-model="reviewWhen" /> <span>{{ t.schedule_for_later }}</span></label>
+                        </div>
+                        <div v-show="reviewWhen === 'later'" class="nb-choice-body">
+                            <label for="nb-scheduled-at" class="sr-only">{{ t.send_at }}</label>
+                            <input id="nb-scheduled-at" ref="scheduleInput" type="text" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" :placeholder="t.send_at" @change="scheduleValue = $event.target.value" />
+                            <p class="nb-hint">{{ t.newsletter_times_in.replace(':timezone', audience.timezone) }}</p>
+                        </div>
+                        <div v-if="reviewWhen === 'now' && audience.now_refusal" class="nb-warn" role="alert">
+                            <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            <p>{{ audience.now_refusal }}</p>
+                        </div>
+                    </template>
+
+                    <p class="nb-test-first"><button type="button" class="event-link" @click="fromReviewToTest()">{{ t.newsletter_send_test_first }}</button></p>
+                </template>
+
+                <div class="nb-actions">
+                    <button type="button" class="nb-btn" @click="closeDialogs()">{{ t.cancel }}</button>
+                    <button type="button" :class="brandClasses" :disabled="!reviewCanGo || busy" @click="confirmReview()">{{ reviewButtonLabel }}</button>
+                </div>
             </div>
         </div>
 
-        <!-- Save as Template Modal -->
-        <div v-if="!isTemplateMode && newsletter && newsletter.exists && routes.save_as_template" v-show="showSaveAsTemplate" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showSaveAsTemplate = false">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ t.save_as_template }}</h3>
-                <form method="POST" :action="routes.save_as_template">
-                    <input type="hidden" name="_token" :value="csrfToken" />
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.template_name }}</label>
-                        <input type="text" name="template_name" required
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
-                            :placeholder="t.template_name_placeholder" />
-                    </div>
-                    <div class="mt-4 flex justify-end gap-3">
-                        <button type="button" @click="showSaveAsTemplate = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">{{ t.save }}</button>
-                    </div>
-                </form>
+        <!-- Send a test -->
+        <div v-if="showTest" class="nb-dialog-backdrop" @click.self="closeDialogs()">
+            <div class="nb-dialog" role="dialog" aria-modal="true" aria-labelledby="nb-test-title" @keydown.enter="onDialogEnter($event)">
+                <h2 id="nb-test-title" class="nb-dialog-title">{{ t.send_a_test }}</h2>
+                <p class="nb-lead">{{ t.newsletter_test_lead }}</p>
+                <div v-if="testRecipients.length > 1" class="nb-choices" role="radiogroup" :aria-label="t.send_a_test">
+                    <label v-for="choice in testRecipients" :key="choice.value" class="nb-choice">
+                        <input type="radio" name="nb_test_to" :value="choice.value" v-model="testTo" />
+                        <span>{{ choice.label }} <bdi class="nb-quiet">{{ choice.email }}</bdi></span>
+                    </label>
+                </div>
+                <p v-else-if="testRecipients.length" class="nb-audience"><span class="nb-audience-to">{{ t.to }}</span> <bdi>{{ testRecipients[0].email }}</bdi></p>
+                <div v-if="testResult" :class="testResult.ok ? 'nb-ok' : 'nb-warn'" role="status"><p>{{ testResult.message }}</p></div>
+                <div class="nb-actions">
+                    <button type="button" class="nb-btn" @click="closeDialogs()">{{ testResult && testResult.ok ? t.close : t.cancel }}</button>
+                    <button type="button" :class="brandClasses" :disabled="busy || !testRecipients.length" @click="sendTest()">{{ busy ? t.sending : t.send }}</button>
+                </div>
             </div>
         </div>
 
+        <!-- Save as template -->
+        <div v-if="showSaveAsTemplate" class="nb-dialog-backdrop" @click.self="closeDialogs()">
+            <div class="nb-dialog" role="dialog" aria-modal="true" aria-labelledby="nb-template-title" @keydown.enter="onDialogEnter($event, saveAsTemplate)">
+                <h2 id="nb-template-title" class="nb-dialog-title">{{ t.save_as_template }}</h2>
+                <label for="nb-template-name" class="nb-label">{{ t.template_name }}</label>
+                <input id="nb-template-name" ref="templateNameInput" type="text" maxlength="255" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" v-model="templateName" :placeholder="t.template_name_placeholder" />
+                <div class="nb-actions">
+                    <button type="button" class="nb-btn" @click="closeDialogs()">{{ t.cancel }}</button>
+                    <button type="button" :class="brandClasses" :disabled="busy || !templateName.trim()" @click="saveAsTemplate()">{{ t.save }}</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -900,21 +929,33 @@ const props = defineProps({
     templateDefaults: { type: Object, default: () => ({}) },
     events: { type: Array, default: () => [] },
     segments: { type: Array, default: () => [] },
-    previewUrl: { type: String, default: '' },
     csrfToken: { type: String, default: '' },
     translations: { type: Object, default: () => ({}) },
+    // { exists, canSend, hash } of the newsletter being edited; null on the create page.
     newsletter: { type: Object, default: null },
+    // NewsletterBuilderRoutes::for(): the addresses this builder works with.
     routes: { type: Object, default: () => ({}) },
-    roleEmail: { type: String, default: '' },
-    abTestHtml: { type: String, default: '' },
+    // The addresses a test may go to: [{ value, label, email }].
+    testRecipients: { type: Array, default: () => [] },
+    // Who "everyone" is, by name: the schedule's followers, or the platform's users.
+    everyoneLabel: { type: String, default: '' },
+    // This newsletter's A/B test, when it is one of the two variants.
+    abTest: { type: Object, default: null },
+    // A scheduled newsletter's time, in the clock it was typed in ('Y-m-d H:i').
+    scheduledAt: { type: String, default: '' },
+    use24Hour: { type: Boolean, default: false },
     roleSocialLinks: { type: Array, default: () => [] },
     roleName: { type: String, default: '' },
     availableBlockTypes: { type: Array, default: null },
     isTemplateMode: { type: Boolean, default: false },
+    isAdmin: { type: Boolean, default: false },
     canUploadImages: { type: Boolean, default: false },
 });
 
 const t = props.translations;
+
+// The house brand button (components/brand-button), for the buttons a Vue template draws.
+const brandClasses = 'inline-flex items-center justify-center px-4 py-3 text-base bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50';
 
 function newImageItem(url, alt, caption, link) {
     return { _id: generateId(), url: url || '', alt: alt || '', caption: caption || '', link: link || '' };
@@ -941,91 +982,610 @@ const subject = ref(props.initialSubject);
 const styleSettings = reactive({ ...props.initialStyleSettings });
 const selectedSegmentIds = ref([...props.initialSegmentIds]);
 const showBlockPalette = ref(false);
-const showTestSend = ref(false);
-const showSchedule = ref(false);
-const showSaveAsTemplate = ref(false);
-const previewLoading = ref(false);
-const previewNeedsReauth = ref(false);
-// 'desktop' or 'mobile': the width the live preview is shown at.
-const previewWidth = ref('desktop');
-// The widths the mail is LAID OUT at, whatever room the column has. Desktop is past the mail's
-// 620px breakpoint with a little ground either side; a wider column is simply used.
-const PREVIEW_LAYOUT = { desktop: 680, mobile: 390 };
-const previewPane = ref(null);
-const previewPaneWidth = ref(0);
-let previewPaneObserver = null;
-const previewFrameStyle = computed(() => {
-    const pane = previewPaneWidth.value || PREVIEW_LAYOUT.desktop;
-    const layout = previewWidth.value === 'desktop' ? Math.max(PREVIEW_LAYOUT.desktop, pane) : PREVIEW_LAYOUT.mobile;
-    const scale = Math.min(1, pane / layout);
+const imageUploading = ref({});
 
-    return {
-        width: layout + 'px',
-        // The frame is scaled down, so it is that much taller before the scale.
-        height: `calc((100vh - 14rem) / ${scale})`,
-        minHeight: (400 / scale) + 'px',
-        transform: `scale(${scale})`,
-        transformOrigin: 'top left',
-        marginLeft: Math.max(0, (pane - layout * scale) / 2) + 'px',
-    };
+// The newsletter as the server knows it, and the addresses that go with it. Both change when a
+// new newsletter is saved for the first time, without leaving the page.
+const newsletterState = reactive({
+    exists: !!(props.newsletter && props.newsletter.exists),
+    canSend: props.newsletter ? props.newsletter.canSend !== false : true,
+    hash: (props.newsletter && props.newsletter.hash) || '',
 });
+const routes = reactive({ ...props.routes });
+
+const canSend = computed(() => !props.isTemplateMode && newsletterState.canSend);
+const abPending = computed(() => !!(props.abTest && props.abTest.pending));
+
+// ── Saving ────────────────────────────────────────────────────────────
+
+const saving = ref(false);
+const justSaved = ref(false);
+const barError = ref('');
+const busy = ref(false);
+let leaving = false;
+let justSavedTimer = null;
+
+// What was last saved, to tell whether anything has changed since.
+function snapshot() {
+    return JSON.stringify([subject.value, blocks.value, template.value, styleSettings, selectedSegmentIds.value]);
+}
+const savedSnapshot = ref('');
+const dirty = computed(() => savedSnapshot.value !== '' && snapshot() !== savedSnapshot.value);
+
+function formEl() {
+    return document.querySelector('#newsletter-builder')?.closest('form') || null;
+}
+
+function firstError(data) {
+    if (data && data.errors) {
+        const first = Object.values(data.errors)[0];
+        if (Array.isArray(first) && first.length) return first[0];
+    }
+    return (data && data.message) || t.something_went_wrong;
+}
+
+/**
+ * Saves without leaving the page: the tab, the open block and the preview stay where they are.
+ * A new newsletter becomes a saved one, and the builder carries on with its addresses.
+ */
+async function save() {
+    const form = formEl();
+    if (!form) return false;
+
+    // A template is kept by its own form, which goes back to the list of templates. Asked
+    // through requestSubmit(), so the browser checks the template's name first.
+    if (props.isTemplateMode) {
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+        } else {
+            leaving = true;
+            form.submit();
+        }
+        return true;
+    }
+
+    saving.value = true;
+    barError.value = '';
+    clearTimeout(justSavedTimer);
+    justSaved.value = false;
+
+    const formData = new FormData(form);
+    if (newsletterState.exists) {
+        formData.set('_method', 'PUT');
+    } else {
+        formData.delete('_method');
+    }
+    const sentSnapshot = snapshot();
+
+    try {
+        const response = await fetch(newsletterState.exists ? routes.update : routes.store, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-Save-Before-Action': '1',
+            },
+        });
+        if (response.status === 423) {
+            previewNeedsReauth.value = true;
+            barError.value = t.preview_session_expired;
+            return false;
+        }
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.saved !== true) {
+            barError.value = firstError(data);
+            if (data.errors && data.errors.subject) showSection('content');
+            return false;
+        }
+
+        if (data.routes) {
+            Object.assign(routes, data.routes);
+            newsletterState.exists = true;
+            newsletterState.canSend = true;
+            newsletterState.hash = data.hash || '';
+            if (routes.update) form.action = routes.update;
+            if (routes.edit) history.replaceState(null, '', routes.edit + window.location.hash);
+        }
+
+        savedSnapshot.value = sentSnapshot;
+        justSaved.value = true;
+        justSavedTimer = setTimeout(() => { justSaved.value = false; }, 4000);
+        return true;
+    } catch {
+        barError.value = t.something_went_wrong;
+        return false;
+    } finally {
+        saving.value = false;
+    }
+}
+
+async function ensureSaved() {
+    if (newsletterState.exists && !dirty.value) return true;
+    return save();
+}
+
+function onFormSubmit(e) {
+    if (props.isTemplateMode) {
+        leaving = true;
+        return;
+    }
+    // Enter in a field, or anything else that submits the form: save in place.
+    e.preventDefault();
+    save();
+}
+
+function onBeforeUnload(e) {
+    if (!leaving && dirty.value) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+}
+
+function submitFormTo(action, extraFields = {}) {
+    leaving = true;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = action;
+    const fields = { _token: props.csrfToken, ...extraFields };
+    for (const [name, value] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// ── Who it goes to ────────────────────────────────────────────────────
+
+const audience = ref(null);
+const audienceMode = ref(selectedSegmentIds.value.length ? 'segments' : 'everyone');
+let audienceSeq = 0;
+let audienceTimer = null;
+
+async function loadAudience() {
+    if (props.isTemplateMode || !routes.audience) return null;
+
+    const params = new URLSearchParams();
+    selectedSegmentIds.value.forEach(id => params.append('segment_ids[]', id));
+    if (newsletterState.hash) params.set('newsletter', newsletterState.hash);
+    const url = routes.audience + (routes.audience.includes('?') ? '&' : '?') + params.toString();
+    const seq = ++audienceSeq;
+
+    try {
+        const response = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+        if (response.status === 423) {
+            previewNeedsReauth.value = true;
+            return null;
+        }
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (seq === audienceSeq) audience.value = data;
+        return data;
+    } catch {
+        return null;
+    }
+}
+
+function fmt(n) {
+    try {
+        return new Intl.NumberFormat(document.documentElement.lang || undefined).format(n);
+    } catch {
+        return String(n);
+    }
+}
+
+const audienceLine = computed(() => {
+    if (audience.value) {
+        return audience.value.label + ' (' + fmt(audience.value.count) + ')';
+    }
+    if (selectedSegmentIds.value.length) {
+        return props.segments.filter(s => selectedSegmentIds.value.includes(s.id)).map(s => s.name).join(', ');
+    }
+    return props.everyoneLabel;
+});
+
+const allowanceText = computed(() => {
+    const allowance = audience.value && audience.value.allowance;
+    if (!allowance) return '';
+    return t.newsletter_allowance_after
+        .replace(':left', fmt(allowance.after))
+        .replace(':limit', fmt(allowance.limit));
+});
+
+function useEveryone() {
+    audienceMode.value = 'everyone';
+    selectedSegmentIds.value = [];
+}
+
+function toggleSegment(segmentId) {
+    const idx = selectedSegmentIds.value.indexOf(segmentId);
+    if (idx > -1) {
+        selectedSegmentIds.value.splice(idx, 1);
+    } else {
+        selectedSegmentIds.value.push(segmentId);
+    }
+}
+
+function goToRecipients() {
+    showSection('settings');
+    nextTick(() => document.getElementById('nb-recipients')?.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+}
+
+watch(selectedSegmentIds, () => {
+    clearTimeout(audienceTimer);
+    audienceTimer = setTimeout(loadAudience, 400);
+}, { deep: true });
+
+// ── Review and send ───────────────────────────────────────────────────
+
+const showReview = ref(false);
+const showTest = ref(false);
+const showSaveAsTemplate = ref(false);
+const reviewWhen = ref(props.scheduledAt ? 'later' : 'now');
+const scheduleInput = ref(null);
+const scheduleValue = ref(props.scheduledAt || '');
+let scheduleFlatpickr = null;
+
+const reviewFailed = ref(false);
+
+async function openReview() {
+    if (busy.value) return;
+    busy.value = true;
+    try {
+        if (!(await ensureSaved())) return;
+        audience.value = null;
+        reviewFailed.value = false;
+        showReview.value = true;
+        reviewFailed.value = !(await loadAudience());
+    } finally {
+        busy.value = false;
+    }
+}
+
+watch([showReview, reviewWhen, audience], () => {
+    if (!showReview.value || reviewWhen.value !== 'later') return;
+    nextTick(() => {
+        const el = scheduleInput.value;
+        if (!el || el._flatpickr || typeof window.flatpickr === 'undefined') return;
+        const fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
+        scheduleFlatpickr = window.flatpickr(el, Object.assign({
+            enableTime: true,
+            dateFormat: 'Y-m-d H:i',
+            altInput: true,
+            altFormat: props.use24Hour ? 'M j, Y H:i' : 'M j, Y h:i K',
+            time_24hr: props.use24Hour,
+            allowInput: true,
+            minDate: 'today',
+            defaultDate: scheduleValue.value || null,
+            onChange: (dates, str) => { scheduleValue.value = str; },
+        }, fpLocale ? { locale: fpLocale } : {}));
+    });
+});
+
+const abExplain = computed(() => {
+    const ab = audience.value && audience.value.ab;
+    if (!ab) return '';
+    return t.ab_test_review_explain
+        .replace(':a', fmt(ab.sample_a))
+        .replace(':b', fmt(ab.sample_b))
+        .replace(':hours', fmt(ab.hours))
+        .replace(':criteria', ab.criteria)
+        .replace(':rest', fmt(ab.rest));
+});
+
+const reviewButtonLabel = computed(() => {
+    if (abPending.value) return t.send_ab_test;
+    return reviewWhen.value === 'later' ? t.schedule : t.send_now;
+});
+
+const reviewCanGo = computed(() => {
+    const a = audience.value;
+    if (!a || a.refusal) return false;
+    if (a.ab) return true;
+    if (reviewWhen.value === 'later') return !!scheduleValue.value;
+    return !a.now_refusal;
+});
+
+function confirmReview() {
+    if (!reviewCanGo.value || busy.value) return;
+    busy.value = true;
+    if (audience.value.ab) {
+        submitFormTo(routes.ab_send);
+    } else if (reviewWhen.value === 'later') {
+        submitFormTo(routes.schedule, { scheduled_at: scheduleValue.value });
+    } else {
+        submitFormTo(routes.send);
+    }
+}
+
+// ── Send a test ───────────────────────────────────────────────────────
+
+const testTo = ref(props.testRecipients.length ? props.testRecipients[0].value : 'me');
+const testResult = ref(null);
+
+function openTest() {
+    testResult.value = null;
+    showTest.value = true;
+}
+
+function fromReviewToTest() {
+    showReview.value = false;
+    openTest();
+}
+
+async function sendTest() {
+    if (busy.value) return;
+    busy.value = true;
+    testResult.value = null;
+    try {
+        if (!(await ensureSaved())) {
+            testResult.value = { ok: false, message: barError.value || t.something_went_wrong };
+            return;
+        }
+        const body = new FormData();
+        body.append('_token', props.csrfToken);
+        body.append('to', testTo.value);
+        const response = await fetch(routes.test_send, {
+            method: 'POST',
+            body,
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const data = await response.json().catch(() => ({}));
+        testResult.value = { ok: response.ok, message: data.message || t.something_went_wrong };
+    } catch {
+        testResult.value = { ok: false, message: t.something_went_wrong };
+    } finally {
+        busy.value = false;
+    }
+}
+
+// ── Save as template ──────────────────────────────────────────────────
+
+const templateName = ref('');
+const templateNameInput = ref(null);
+
+function openSaveAsTemplate() {
+    templateName.value = '';
+    showSaveAsTemplate.value = true;
+    nextTick(() => templateNameInput.value?.focus());
+}
+
+async function saveAsTemplate() {
+    if (busy.value || !templateName.value.trim()) return;
+    busy.value = true;
+    // The server keeps what is saved, so the newsletter is saved first.
+    if (!(await ensureSaved()) || !routes.save_as_template) {
+        busy.value = false;
+        return;
+    }
+    submitFormTo(routes.save_as_template, { template_name: templateName.value.trim() });
+}
+
+// ── A/B test ──────────────────────────────────────────────────────────
+
+const abFormOpen = ref(false);
+const abForm = reactive({ test_field: 'subject', sample_percentage: 20, winner_wait_hours: 4, winner_criteria: 'open_rate' });
+
+async function createAbTest() {
+    if (busy.value) return;
+    busy.value = true;
+    if (!(await ensureSaved()) || !routes.ab_test) {
+        busy.value = false;
+        return;
+    }
+    submitFormTo(routes.ab_test, { ...abForm });
+}
+
+// Enter in a field of a dialog must not submit the page's form (which saves); on a button it
+// still presses the button. A dialog with one field can name what Enter there does.
+function onDialogEnter(e, action = null) {
+    if (e.target && e.target.tagName === 'INPUT') {
+        e.preventDefault();
+        if (action) action();
+    }
+}
+
+function closeDialogs() {
+    if (busy.value && showReview.value) return;
+    if (scheduleFlatpickr) {
+        scheduleFlatpickr.destroy();
+        scheduleFlatpickr = null;
+    }
+    showReview.value = false;
+    showTest.value = false;
+    showSaveAsTemplate.value = false;
+}
+
+function onEscape(e) {
+    if (e.key !== 'Escape') return;
+    if (showReview.value || showTest.value || showSaveAsTemplate.value) {
+        closeDialogs();
+    } else if (phonePreviewOpen.value) {
+        closePhonePreview();
+    }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────
+
+const activeSection = ref('content');
+
+const tabs = computed(() => [
+    { id: 'content', label: t.content },
+    { id: 'style', label: t.style },
+    ...(props.isTemplateMode ? [] : [{ id: 'settings', label: t.settings }]),
+]);
+
+function showSection(id) {
+    activeSection.value = id;
+    history.replaceState(null, '', '#' + id);
+}
+
+function onHashChange() {
+    const hash = window.location.hash.replace('#', '');
+    if (['content', 'style', 'settings'].includes(hash)) {
+        activeSection.value = hash;
+    }
+}
+
+// ── Design ────────────────────────────────────────────────────────────
+
+const templateNames = ['modern', 'classic', 'minimal', 'bold', 'compact'];
+const LOOK_KEYS = ['backgroundColor', 'accentColor', 'textColor', 'fontFamily', 'buttonRadius'];
+const designUndo = ref(null);
+let designUndoTimer = null;
+
+function designName(tmpl) {
+    return t['design_' + tmpl] || tmpl;
+}
 
 // The accent a preset arrives with, for its thumbnail in the picker.
 function presetAccent(tmpl) {
     return (props.templateDefaults[tmpl] || {}).accentColor || '#4E81FA';
 }
 
-const activeSection = ref('content');
-const imageUploading = ref({});
+/**
+ * A preset changes the look. What the owner wrote, and the layout chosen on the Events block,
+ * stay. When the look being replaced was the owner's own (not the last preset's as it came), the
+ * change can be taken back.
+ */
+function chooseDesign(tmpl) {
+    const before = { template: template.value, settings: { ...styleSettings } };
+    template.value = tmpl;
 
-// Track whether the first heading is auto-synced from the subject field
-const subjectSyncActive = ref((() => {
-    const firstHeading = props.initialBlocks.find(b => b.type === 'heading');
-    return !firstHeading || !firstHeading.data.text || firstHeading.data.text === props.initialSubject;
-})());
+    if (props.templateDefaults[tmpl]) {
+        const preservedLayout = styleSettings.eventLayout;
+        const preservedFooterText = styleSettings.footerText;
+        const preservedPreviewText = styleSettings.previewText;
+        Object.assign(styleSettings, props.templateDefaults[tmpl]);
+        styleSettings.eventLayout = preservedLayout;
+        styleSettings.footerText = preservedFooterText;
+        styleSettings.previewText = preservedPreviewText;
+    }
 
-function showSection(id) {
-    activeSection.value = id;
-    if (id) {
-        history.replaceState(null, '', '#' + id);
-    } else {
-        history.replaceState(null, '', window.location.pathname + window.location.search);
+    const previous = props.templateDefaults[before.template] || {};
+    const hadOwnLook = LOOK_KEYS.some(k => previous[k] !== undefined && previous[k] !== before.settings[k]);
+    const changed = LOOK_KEYS.some(k => before.settings[k] !== styleSettings[k]);
+
+    clearTimeout(designUndoTimer);
+    designUndo.value = hadOwnLook && changed ? before : null;
+    if (designUndo.value) {
+        designUndoTimer = setTimeout(() => { designUndo.value = null; }, 12000);
     }
 }
 
-const templateNames = ['modern', 'classic', 'minimal', 'bold', 'compact'];
+function undoDesign() {
+    if (!designUndo.value) return;
+    template.value = designUndo.value.template;
+    Object.assign(styleSettings, designUndo.value.settings);
+    designUndo.value = null;
+}
+
+// ── Blocks ────────────────────────────────────────────────────────────
+
+// Outline icons, as everywhere else in the portal.
+const BLOCK_ICONS = {
+    heading: 'M5 5v14M13 5v14M5 12h8M17 10.5l2.5-1.5V19',
+    text: 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12',
+    events: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
+    button: 'M3 9.75A2.25 2.25 0 015.25 7.5h13.5A2.25 2.25 0 0121 9.75v4.5a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 14.25v-4.5zM8.25 12h7.5',
+    image: 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
+    divider: 'M3.75 12h16.5',
+    spacer: 'M12 4.5v15m0-15l-3 3m3-3l3 3m-3 12l-3-3m3 3l3-3',
+    social_links: 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244',
+    profile_image: 'M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z',
+    header_banner: 'M3.75 4.5h16.5v8.25H3.75zM3.75 16.5h16.5M3.75 19.5h10.5',
+    offer: 'M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3zM6 6h.008v.008H6V6z',
+    video: 'M21 12a9 9 0 11-18 0 9 9 0 0118 0zM15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z',
+    quote: 'M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z',
+    sponsors: 'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
+    poll: 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z',
+};
 
 const allBlockTypes = [
-    { type: 'heading', label: t.block_heading, icon: 'H', defaultData: { text: '', level: 'h1', align: 'center' } },
-    { type: 'text', label: t.block_text, icon: '\u00b6', defaultData: { content: '' } },
-    { type: 'events', label: t.block_events, icon: '\ud83d\udcc5', defaultData: { layout: 'cards', useAllEvents: true, eventIds: [] } },
-    { type: 'button', label: t.block_button, icon: '\u25a2', defaultData: { text: '', url: '', align: 'center' } },
-    { type: 'image', label: t.block_image, icon: '\ud83d\uddbc', defaultData: { images: [{ url: '', alt: '', caption: '', link: '' }], layout: 'column', width: '100%', align: 'center' } },
-    { type: 'divider', label: t.block_divider, icon: '\u2014', defaultData: { style: 'solid' } },
-    { type: 'spacer', label: t.block_spacer, icon: '\u2195', defaultData: { height: 20 } },
-    { type: 'social_links', label: t.block_social_links, icon: '@', defaultData: { links: props.roleSocialLinks.length ? JSON.parse(JSON.stringify(props.roleSocialLinks)) : [{ platform: 'website', url: '' }] } },
-    { type: 'profile_image', label: t.block_profile_image, icon: '\ud83d\udc64', defaultData: {} },
-    { type: 'header_banner', label: t.block_header_banner, icon: '\ud83c\udff3', defaultData: {} },
-    { type: 'offer', label: t.block_offer, icon: '\ud83c\udff7', defaultData: { title: '', description: '', originalPrice: '', salePrice: '', couponCode: '', buttonText: '', buttonUrl: '', align: 'center' } },
-    { type: 'video', label: t.block_video, icon: '▶', defaultData: { url: '' } },
-    { type: 'quote', label: t.block_quote, icon: '"', defaultData: { text: '', author: '', title: '' } },
-    { type: 'sponsors', label: t.block_sponsors, icon: '★', defaultData: { source: 'schedule' } },
-    { type: 'poll', label: t.block_poll, icon: '📊', defaultData: {} },
+    { type: 'heading', label: t.block_heading, defaultData: { text: '', level: 'h1', align: 'center' } },
+    { type: 'text', label: t.block_text, defaultData: { content: '' } },
+    { type: 'events', label: t.block_events, defaultData: { layout: 'cards', useAllEvents: true, eventIds: [] } },
+    { type: 'button', label: t.block_button, defaultData: { text: '', url: '', align: 'center' } },
+    { type: 'image', label: t.block_image, defaultData: { images: [{ url: '', alt: '', caption: '', link: '' }], layout: 'column', width: '100%', align: 'center' } },
+    { type: 'divider', label: t.block_divider, defaultData: { style: 'solid' } },
+    { type: 'spacer', label: t.block_spacer, defaultData: { height: 20 } },
+    { type: 'social_links', label: t.block_social_links, defaultData: { links: props.roleSocialLinks.length ? JSON.parse(JSON.stringify(props.roleSocialLinks)) : [{ platform: 'website', url: '' }] } },
+    { type: 'profile_image', label: t.block_profile_image, defaultData: {} },
+    { type: 'header_banner', label: t.block_header_banner, defaultData: {} },
+    { type: 'offer', label: t.block_offer, defaultData: { title: '', description: '', originalPrice: '', salePrice: '', couponCode: '', buttonText: '', buttonUrl: '', align: 'center' } },
+    { type: 'video', label: t.block_video, defaultData: { url: '' } },
+    { type: 'quote', label: t.block_quote, defaultData: { text: '', author: '', title: '' } },
+    { type: 'sponsors', label: t.block_sponsors, defaultData: { source: 'schedule' } },
+    { type: 'poll', label: t.block_poll, defaultData: {} },
 ];
 
 const blockTypes = props.availableBlockTypes
     ? allBlockTypes.filter(bt => props.availableBlockTypes.includes(bt.type))
     : allBlockTypes;
 
+function blockLabel(type) {
+    const bt = allBlockTypes.find(b => b.type === type);
+    return bt ? bt.label : type;
+}
+
+function blockIconPath(type) {
+    return BLOCK_ICONS[type] || BLOCK_ICONS.text;
+}
+
+// What a closed block holds, in a line.
+function blockSnippet(block) {
+    const d = block.data || {};
+    switch (block.type) {
+        case 'heading':
+        case 'button':
+            return d.text || '';
+        case 'text':
+            return (d.content || '').replace(/[#*_>\x60~]|\[|\]\([^)]*\)/g, '').replace(/\s+/g, ' ').trim().substring(0, 80);
+        case 'quote':
+            return (d.text || '').substring(0, 80);
+        case 'events':
+            return d.useAllEvents ? t.all_upcoming_events : ((d.eventIds || []).length + ' ' + t.events);
+        case 'image': {
+            const images = d.images || [];
+            const filled = images.filter(img => img.url);
+            if (filled.length > 1) return filled.length + ' ' + t.images;
+            const first = images[0];
+            return first ? (first.caption || first.alt || (first.url ? first.url.substring(0, 50) : '')) : '';
+        }
+        case 'social_links':
+            return (d.links || []).length + ' ' + t.links;
+        case 'spacer':
+            return (d.height || 20) + 'px';
+        case 'offer':
+            return d.title ? d.title + (d.salePrice ? ' - ' + d.salePrice : '') : '';
+        case 'video':
+            return d.url ? d.url.substring(0, 50) : '';
+        case 'sponsors':
+            return d.source === 'first_event' ? t.sponsor_source_first_event : t.sponsor_source_schedule;
+        default:
+            return '';
+    }
+}
+
+// A block that says nothing until it is filled in.
+function blockWantsContent(block) {
+    return ['heading', 'text', 'button', 'image', 'offer', 'video', 'quote'].includes(block.type);
+}
+
+const paletteWhere = computed(() => {
+    const open = blocks.value.find(b => b.id === selectedBlockId.value);
+    return open ? t.newsletter_add_after.replace(':block', blockLabel(open.type)) : t.newsletter_add_at_end;
+});
+
 const blockPalette = ref(null);
 const blockCanvas = ref(null);
-const livePreviewFrame = ref(null);
 
 const textBlockRefs = {};
 const easyMDEInstances = {};
-
-let previewDebounceTimer = null;
-let previewAbortController = null;
 
 function setTextBlockRef(blockId, el) {
     if (el) {
@@ -1042,23 +1602,23 @@ function initEasyMDE(blockId) {
     const block = blocks.value.find(b => b.id === blockId);
     if (!block) return;
 
-    const t = window.editorTranslations || {};
+    const et = window.editorTranslations || {};
     const initialDir = resolveEditorDirection(el, block.data.content || '');
     const instance = new EasyMDE({
         element: el,
         toolbar: [
-            { name: "bold", action: EasyMDE.toggleBold, className: "editor-button-text", title: t.bold || "Bold", text: "B" },
-            { name: "italic", action: EasyMDE.toggleItalic, className: "editor-button-text", title: t.italic || "Italic", text: "I" },
-            { name: "heading", action: EasyMDE.toggleHeadingSmaller, className: "editor-button-text", title: t.heading || "Heading", text: "H" },
+            { name: "bold", action: EasyMDE.toggleBold, className: "editor-button-text", title: et.bold || "Bold", text: "B" },
+            { name: "italic", action: EasyMDE.toggleItalic, className: "editor-button-text", title: et.italic || "Italic", text: "I" },
+            { name: "heading", action: EasyMDE.toggleHeadingSmaller, className: "editor-button-text", title: et.heading || "Heading", text: "H" },
             "|",
-            { name: "link", action: function(editor) { EasyMDE.drawLink(editor); }, className: "editor-button-text", title: t.link || "Link", text: "\ud83d\udd17" },
-            { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: t.quote || "Quote", text: "\"" },
-            { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: t.unorderedList || "Unordered List", text: "UL" },
-            { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: t.orderedList || "Ordered List", text: "OL" },
-            { name: "direction", action: (editor) => toggleEditorDirection(editor, el), className: "editor-button-text no-disable", title: (t.textDirection || "Text Direction") + " (Ctrl+Shift)", text: initialDir.toUpperCase() },
+            { name: "link", action: function(editor) { EasyMDE.drawLink(editor); }, className: "editor-button-text", title: et.link || "Link", text: "🔗" },
+            { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: et.quote || "Quote", text: "\"" },
+            { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: et.unorderedList || "Unordered List", text: "UL" },
+            { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: et.orderedList || "Ordered List", text: "OL" },
+            { name: "direction", action: (editor) => toggleEditorDirection(editor, el), className: "editor-button-text no-disable", title: (et.textDirection || "Text Direction") + " (Ctrl+Shift)", text: initialDir.toUpperCase() },
             "|",
-            { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: t.preview || "Toggle Preview", text: "\ud83d\udc41" },
-            { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: t.guide || "Markdown Guide", text: "?" },
+            { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: et.preview || "Toggle Preview", text: "👁" },
+            { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: et.guide || "Markdown Guide", text: "?" },
         ],
         initialValue: block.data.content || '',
         minHeight: "200px",
@@ -1098,66 +1658,75 @@ function generateId() {
     return 'b_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
 }
 
-function blockLabel(type) {
-    const bt = allBlockTypes.find(b => b.type === type);
-    return bt ? bt.label : type;
-}
-
-function blockIcon(type) {
-    const bt = allBlockTypes.find(b => b.type === type);
-    return bt ? bt.icon : '';
-}
-
-function addBlockFromPalette(bt) {
-    const newBlock = normalizeImageBlock({
+function newBlockOf(bt) {
+    return normalizeImageBlock({
         id: generateId(),
         type: bt.type,
         data: JSON.parse(JSON.stringify(bt.defaultData)),
     });
-    blocks.value.push(newBlock);
+}
+
+// After the open block, or at the end: where the owner is working is where it goes.
+function addBlockFromPalette(bt) {
+    const newBlock = newBlockOf(bt);
+    const openIndex = blocks.value.findIndex(b => b.id === selectedBlockId.value);
+    blocks.value.splice(openIndex > -1 ? openIndex + 1 : blocks.value.length, 0, newBlock);
     showBlockPalette.value = false;
-    selectBlock(newBlock.id);
+    openBlock(newBlock.id);
+    nextTick(() => document.querySelector(`[data-block-id="${newBlock.id}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
 }
 
 function toggleBlockPalette() {
     showBlockPalette.value = !showBlockPalette.value;
-    if (showBlockPalette.value) {
-        destroyAllEasyMDE();
-        selectedBlockId.value = null;
-        nextTick(() => initSortable());
-    }
 }
 
+// Opens a block, or closes it when it is the open one (the block's own line).
 function selectBlock(blockId) {
+    if (selectedBlockId.value === blockId) {
+        destroyEasyMDE(blockId);
+        selectedBlockId.value = null;
+        return;
+    }
+    openBlock(blockId);
+}
+
+function openBlock(blockId, { focus = true } = {}) {
     const prevId = selectedBlockId.value;
-    selectedBlockId.value = selectedBlockId.value === blockId ? null : blockId;
+    if (prevId === blockId) return;
+    if (prevId) destroyEasyMDE(prevId);
+    selectedBlockId.value = blockId;
 
-    // Destroy EasyMDE on previously selected block
-    if (prevId) {
-        destroyEasyMDE(prevId);
-    }
-
-    // Init EasyMDE on newly selected text block, and focus primary input
-    const newId = selectedBlockId.value;
-    if (newId) {
-        const block = blocks.value.find(b => b.id === newId);
-        if (block && block.type === 'text') {
-            nextTick(() => {
-                initEasyMDE(newId);
-                if (easyMDEInstances[newId]) {
-                    easyMDEInstances[newId].codemirror.focus();
-                }
-            });
-        } else if (block) {
-            nextTick(() => {
-                const blockEl = document.querySelector(`[data-block-id="${newId}"]`);
-                const input = blockEl?.querySelector('input[type=text], input[type=url], input[type=number]');
-                if (input) {
-                    input.focus();
-                }
-            });
+    const block = blocks.value.find(b => b.id === blockId);
+    if (!block) return;
+    nextTick(() => {
+        if (block.type === 'text') {
+            initEasyMDE(blockId);
+            if (focus) easyMDEInstances[blockId]?.codemirror.focus();
+        } else if (focus) {
+            const blockEl = document.querySelector(`[data-block-id="${blockId}"]`);
+            blockEl?.querySelector('.nb-block-body input[type=text], .nb-block-body input[type=url], .nb-block-body input[type=number]')?.focus();
         }
-    }
+    });
+}
+
+function moveBlock(blockId, delta) {
+    const from = blocks.value.findIndex(b => b.id === blockId);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= blocks.value.length) return;
+    const [moved] = blocks.value.splice(from, 1);
+    blocks.value.splice(to, 0, moved);
+    nextTick(() => easyMDEInstances[blockId]?.codemirror.refresh());
+}
+
+// Track whether the first heading is auto-synced from the subject field
+const subjectSyncActive = ref((() => {
+    const firstHeading = props.initialBlocks.find(b => b.type === 'heading');
+    return !firstHeading || !firstHeading.data.text || firstHeading.data.text === props.initialSubject;
+})());
+
+function isFirstHeading(blockId) {
+    const firstHeading = blocks.value.find(b => b.type === 'heading');
+    return !!firstHeading && firstHeading.id === blockId;
 }
 
 function onSubjectInput() {
@@ -1168,8 +1737,7 @@ function onSubjectInput() {
 }
 
 function onHeadingInput(blockId, value) {
-    const firstHeading = blocks.value.find(b => b.type === 'heading');
-    if (firstHeading && firstHeading.id === blockId) {
+    if (isFirstHeading(blockId)) {
         subjectSyncActive.value = false;
     }
     updateBlockData(blockId, 'text', value);
@@ -1252,24 +1820,25 @@ function openImagePicker(imageId) {
 function uploadImageItem(blockId, imgId, file) {
     if (!file) return;
     imageUploading.value[imgId] = true;
+    barError.value = '';
 
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch(props.routes.upload_image, {
+    fetch(routes.upload_image, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': props.csrfToken,
             // Without these a lapsed admin re-auth window 302s to the confirm-password page,
-            // fetch follows it, r.ok is true, and r.json() throws a parser error straight into
-            // the alert below: "Unexpected token '<' ... is not valid JSON".
+            // fetch follows it, r.ok is true, and r.json() throws a parser error: "Unexpected
+            // token '<' ... is not valid JSON".
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
         },
         body: formData,
     })
     .then(r => {
-        if (!r.ok) return r.json().then(d => { throw new Error(d.error || t.error_uploading_image); });
+        if (!r.ok) return r.json().catch(() => ({})).then(d => { throw new Error(d.error || t.error_uploading_image); });
         return r.json();
     })
     .then(data => {
@@ -1278,7 +1847,7 @@ function uploadImageItem(blockId, imgId, file) {
         }
     })
     .catch(e => {
-        alert(e.message || t.error_uploading_image);
+        barError.value = e.message || t.error_uploading_image;
     })
     .finally(() => {
         imageUploading.value[imgId] = false;
@@ -1298,180 +1867,33 @@ function cloneBlock(blockId) {
         copy.data.images.forEach(img => { img._id = generateId(); });
     }
     blocks.value.splice(idx + 1, 0, copy);
-    selectedBlockId.value = copy.id;
+    openBlock(copy.id, { focus: false });
 }
 
+// Removed at once, and can be put back for a few seconds from the bar.
+const removed = ref(null);
+let removedTimer = null;
+
 function removeBlock(blockId) {
+    const idx = blocks.value.findIndex(b => b.id === blockId);
+    if (idx === -1) return;
     destroyEasyMDE(blockId);
-    blocks.value = blocks.value.filter(b => b.id !== blockId);
+    const [block] = blocks.value.splice(idx, 1);
     if (selectedBlockId.value === blockId) {
         selectedBlockId.value = null;
     }
+    clearTimeout(removedTimer);
+    removed.value = { block, index: idx };
+    removedTimer = setTimeout(() => { removed.value = null; }, 8000);
 }
 
-function toggleSegment(segmentId) {
-    const idx = selectedSegmentIds.value.indexOf(segmentId);
-    if (idx > -1) {
-        selectedSegmentIds.value.splice(idx, 1);
-    } else {
-        selectedSegmentIds.value.push(segmentId);
-    }
-}
-
-function onTemplateChange(tmpl) {
-    if (props.templateDefaults[tmpl]) {
-        // A preset changes the look. What the owner wrote, and the layout chosen on the Events
-        // block, stay.
-        const preservedLayout = styleSettings.eventLayout;
-        const preservedFooterText = styleSettings.footerText;
-        const preservedPreviewText = styleSettings.previewText;
-        Object.assign(styleSettings, props.templateDefaults[tmpl]);
-        styleSettings.eventLayout = preservedLayout;
-        styleSettings.footerText = preservedFooterText;
-        styleSettings.previewText = preservedPreviewText;
-    }
-}
-
-function debouncedPreview() {
-    clearTimeout(previewDebounceTimer);
-    previewDebounceTimer = setTimeout(() => fetchPreview(), 800);
-}
-
-function fetchPreview() {
-    if (previewAbortController) previewAbortController.abort();
-    previewAbortController = new AbortController();
-
-    const form = document.querySelector('#newsletter-builder')?.closest('form');
-    if (!form) return;
-
-    previewLoading.value = true;
-
-    const formData = new FormData(form);
-    formData.delete('_method');
-
-    fetch(props.previewUrl, {
-        method: 'POST',
-        body: formData,
-        signal: previewAbortController.signal,
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
-    })
-    .then(r => {
-        // 423 is EnsureUserIsAdmin saying the re-auth window lapsed. This runs on a keystroke-rate
-        // debounce, so without the headers above it would 302 into HTML and r.json() would throw
-        // into the silent catch below - the preview silently freezing while the admin keeps typing.
-        if (r.status === 423) {
-            previewNeedsReauth.value = true;
-            throw new Error('Re-authentication required');
-        }
-        if (!r.ok) throw new Error('Preview failed');
-        previewNeedsReauth.value = false;
-        return r.json();
-    })
-    .then(data => {
-        if (livePreviewFrame.value) livePreviewFrame.value.srcdoc = data.html;
-        previewLoading.value = false;
-    })
-    .catch(e => { if (e.name !== 'AbortError') previewLoading.value = false; });
-}
-
-function openPreviewInNewTab() {
-    const form = document.querySelector('#newsletter-builder')?.closest('form');
-    if (!form) return;
-    const formData = new FormData(form);
-    formData.delete('_method');
-    formData.append('_token', props.csrfToken);
-    fetch(props.previewUrl, {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
-    })
-        .then(r => {
-            if (r.status === 423) {
-                previewNeedsReauth.value = true;
-                throw new Error('Re-authentication required');
-            }
-            if (!r.ok) throw new Error('Preview failed');
-            return r.json();
-        })
-        .then(data => {
-            const w = window.open('', '_blank');
-            if (w) { w.document.write(data.html); w.document.close(); }
-        })
-        .catch(() => {
-            alert(t.general_error || 'Something went wrong');
-        });
-}
-
-async function saveFirst() {
-    const form = document.querySelector('#newsletter-builder')?.closest('form');
-    if (!form) return false;
-
-    const formData = new FormData(form);
-    try {
-        const response = await fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Accept': 'application/json',
-                'X-Save-Before-Action': '1',
-            },
-        });
-        if (!response.ok) return false;
-        const data = await response.json();
-        return data.saved === true;
-    } catch {
-        return false;
-    }
-}
-
-function submitFormTo(action, extraFields = {}) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = action;
-    const token = document.createElement('input');
-    token.type = 'hidden';
-    token.name = '_token';
-    token.value = props.csrfToken;
-    form.appendChild(token);
-    for (const [name, value] of Object.entries(extraFields)) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value;
-        form.appendChild(input);
-    }
-    document.body.appendChild(form);
-    form.submit();
-}
-
-async function confirmSend() {
-    if (!confirm(t.newsletter_send_confirm)) return;
-    const saved = await saveFirst();
-    if (!saved) {
-        alert(t.general_error || 'Something went wrong');
-        return;
-    }
-    submitFormTo(props.routes.send);
-}
-
-async function submitTestSend() {
-    const saved = await saveFirst();
-    if (!saved) {
-        alert(t.general_error || 'Something went wrong');
-        return;
-    }
-    submitFormTo(props.routes.test_send);
-}
-
-async function submitSchedule() {
-    const input = document.getElementById('scheduled_at');
-    if (!input || !input.value) return;
-    const saved = await saveFirst();
-    if (!saved) {
-        alert(t.general_error || 'Something went wrong');
-        return;
-    }
-    submitFormTo(props.routes.schedule, { scheduled_at: input.value });
+function undoRemove() {
+    if (!removed.value) return;
+    const { block, index } = removed.value;
+    blocks.value.splice(Math.min(index, blocks.value.length), 0, block);
+    removed.value = null;
+    clearTimeout(removedTimer);
+    openBlock(block.id, { focus: false });
 }
 
 function initSortable() {
@@ -1497,15 +1919,11 @@ function initSortable() {
                 const blockType = evt.item.getAttribute('data-block-type');
                 const bt = blockTypes.find(b => b.type === blockType);
                 if (bt) {
-                    const newBlock = normalizeImageBlock({
-                        id: generateId(),
-                        type: bt.type,
-                        data: JSON.parse(JSON.stringify(bt.defaultData)),
-                    });
+                    const newBlock = newBlockOf(bt);
                     evt.item.remove();
                     blocks.value.splice(evt.newIndex, 0, newBlock);
                     showBlockPalette.value = false;
-                    selectBlock(newBlock.id);
+                    openBlock(newBlock.id);
                 }
             },
             onEnd(evt) {
@@ -1518,36 +1936,198 @@ function initSortable() {
     }
 }
 
-function onHashChange() {
-    const hash = window.location.hash.replace('#', '');
-    if (['content', 'style', 'settings'].includes(hash)) {
-        activeSection.value = hash;
+// ── Preview ───────────────────────────────────────────────────────────
+
+const livePreviewFrame = ref(null);
+const previewPane = ref(null);
+const previewPaneWidth = ref(0);
+const previewLoading = ref(false);
+const previewReady = ref(false);
+const previewNeedsReauth = ref(false);
+const phonePreviewOpen = ref(false);
+// 'desktop' or 'mobile': the width the live preview is shown at.
+const previewWidth = ref('desktop');
+// The widths the mail is LAID OUT at, whatever room the column has. Desktop is past the mail's
+// 620px breakpoint with a little ground either side; a wider column is simply used.
+const PREVIEW_LAYOUT = { desktop: 680, mobile: 390 };
+let previewPaneObserver = null;
+let previewDebounceTimer = null;
+let previewAbortController = null;
+let keepScroll = 0;
+let awaitingPreview = false;
+
+const previewUrl = computed(() => routes.preview || '');
+const paneHeight = computed(() => phonePreviewOpen.value ? '100dvh - 4rem' : '100vh - 14rem');
+
+const previewFrameStyle = computed(() => {
+    const pane = previewPaneWidth.value || PREVIEW_LAYOUT.desktop;
+    const layout = previewWidth.value === 'desktop' ? Math.max(PREVIEW_LAYOUT.desktop, pane) : PREVIEW_LAYOUT.mobile;
+    const scale = Math.min(1, pane / layout);
+
+    return {
+        width: layout + 'px',
+        // The frame is scaled down, so it is that much taller before the scale.
+        height: `calc((${paneHeight.value}) / ${scale})`,
+        minHeight: (400 / scale) + 'px',
+        transform: `scale(${scale})`,
+        transformOrigin: 'top left',
+        marginLeft: Math.max(0, (pane - layout * scale) / 2) + 'px',
+    };
+});
+
+function debouncedPreview() {
+    clearTimeout(previewDebounceTimer);
+    previewDebounceTimer = setTimeout(() => fetchPreview(), 800);
+}
+
+function fetchPreview() {
+    if (previewAbortController) previewAbortController.abort();
+    previewAbortController = new AbortController();
+
+    const form = formEl();
+    if (!form || !previewUrl.value) return;
+
+    previewLoading.value = true;
+
+    const formData = new FormData(form);
+    formData.delete('_method');
+
+    fetch(previewUrl.value, {
+        method: 'POST',
+        body: formData,
+        signal: previewAbortController.signal,
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+    })
+    .then(r => {
+        // 423 is EnsureUserIsAdmin saying the re-auth window lapsed. This runs on a keystroke-rate
+        // debounce, so without the headers above it would 302 into HTML and r.json() would throw
+        // into the silent catch below - the preview silently freezing while the admin keeps typing.
+        if (r.status === 423) {
+            previewNeedsReauth.value = true;
+            throw new Error('Re-authentication required');
+        }
+        if (!r.ok) throw new Error('Preview failed');
+        previewNeedsReauth.value = false;
+        return r.json();
+    })
+    .then(data => {
+        const frame = livePreviewFrame.value;
+        if (!frame) return;
+        // Where the reader was in the mail, so the new one opens at the same place.
+        try {
+            keepScroll = frame.contentWindow ? frame.contentWindow.scrollY : 0;
+        } catch {
+            keepScroll = 0;
+        }
+        awaitingPreview = true;
+        frame.srcdoc = data.html;
+    })
+    .catch(e => { if (e.name !== 'AbortError') previewLoading.value = false; });
+}
+
+function onPreviewLoad() {
+    if (!awaitingPreview) return;
+    awaitingPreview = false;
+    previewLoading.value = false;
+    previewReady.value = true;
+
+    const frame = livePreviewFrame.value;
+    let doc;
+    try {
+        doc = frame.contentDocument;
+    } catch {
+        return;
+    }
+    if (!doc) return;
+
+    frame.contentWindow.scrollTo(0, keepScroll);
+
+    // The block under the pointer, and the open one, outlined; a click opens it in the list.
+    const style = doc.createElement('style');
+    style.textContent = '[data-nl-block]{cursor:pointer}'
+        + '.nb-mark{position:absolute;z-index:2147483647;box-sizing:border-box;pointer-events:none;border-radius:6px;transition:top .15s,left .15s,width .15s,height .15s}'
+        + '.nb-mark.is-sel{border:2px solid #4E81FA;box-shadow:0 0 0 4px rgba(78,129,250,.18)}'
+        + '.nb-mark.is-hover{border:2px dashed rgba(78,129,250,.55)}';
+    doc.head.appendChild(style);
+
+    doc.addEventListener('click', (e) => {
+        const el = e.target && e.target.closest ? e.target.closest('[data-nl-block]') : null;
+        if (!el) return;
+        e.preventDefault();
+        openBlockFromPreview(el.getAttribute('data-nl-block'));
+    });
+    doc.addEventListener('mouseover', (e) => {
+        const el = e.target && e.target.closest ? e.target.closest('[data-nl-block]') : null;
+        markInPreview('hover', el ? el.getAttribute('data-nl-block') : null);
+    });
+    doc.addEventListener('mouseleave', () => markInPreview('hover', null));
+
+    markInPreview('sel', selectedBlockId.value);
+}
+
+function markInPreview(kind, blockId, scrollTo = false) {
+    const frame = livePreviewFrame.value;
+    let doc;
+    try {
+        doc = frame && frame.contentDocument;
+    } catch {
+        return;
+    }
+    if (!doc || !doc.body) return;
+
+    let mark = doc.querySelector('.nb-mark.is-' + kind);
+    const target = blockId ? Array.from(doc.querySelectorAll('[data-nl-block]')).find(el => el.getAttribute('data-nl-block') === blockId) : null;
+    const box = target ? target.getBoundingClientRect() : null;
+
+    if (!box || (kind === 'hover' && blockId === selectedBlockId.value) || box.height === 0) {
+        mark?.remove();
+        return;
+    }
+    if (!mark) {
+        mark = doc.createElement('div');
+        mark.className = 'nb-mark is-' + kind;
+        doc.body.appendChild(mark);
+    }
+    const win = frame.contentWindow;
+    mark.style.top = (box.top + win.scrollY) + 'px';
+    mark.style.left = (box.left + win.scrollX) + 'px';
+    mark.style.width = box.width + 'px';
+    mark.style.height = box.height + 'px';
+
+    if (scrollTo) {
+        const top = box.top + win.scrollY;
+        const visible = box.top >= 0 && box.bottom <= win.innerHeight;
+        if (!visible) win.scrollTo({ top: Math.max(0, top - 24), behavior: 'smooth' });
     }
 }
 
-// Initialize Flatpickr on schedule modal when it opens
-let scheduleFlatpickr = null;
-watch(showSchedule, (val) => {
-    if (val) {
-        nextTick(() => {
-            const el = document.getElementById('scheduled_at');
-            if (el && !scheduleFlatpickr && typeof window.flatpickr !== 'undefined') {
-                const fpLocale = window.flatpickrLocales
-                    ? window.flatpickrLocales[window.appLocale]
-                    : null;
-                const localeConfig = fpLocale ? { locale: fpLocale } : {};
-                scheduleFlatpickr = window.flatpickr(el, Object.assign({
-                    enableTime: true,
-                    dateFormat: 'Y-m-d H:i',
-                    altInput: true,
-                    altFormat: 'M j, Y h:i K',
-                    allowInput: true,
-                    minDate: 'today',
-                }, localeConfig));
-            }
-        });
-    }
+function openBlockFromPreview(blockId) {
+    if (!blocks.value.some(b => b.id === blockId)) return;
+    if (activeSection.value !== 'content') showSection('content');
+    if (phonePreviewOpen.value) closePhonePreview();
+    openBlock(blockId, { focus: false });
+    nextTick(() => document.querySelector(`[data-block-id="${blockId}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+}
+
+watch(selectedBlockId, (id) => {
+    markInPreview('sel', id, true);
+    markInPreview('hover', null);
 });
+
+function openPhonePreview() {
+    phonePreviewOpen.value = true;
+    previewWidth.value = 'mobile';
+    document.documentElement.classList.add('nb-sheet-open');
+    nextTick(() => {
+        if (previewPane.value) previewPaneWidth.value = previewPane.value.clientWidth;
+        fetchPreview();
+    });
+}
+
+function closePhonePreview() {
+    phonePreviewOpen.value = false;
+    document.documentElement.classList.remove('nb-sheet-open');
+}
 
 // Watch for changes and trigger debounced preview
 watch(
@@ -1562,10 +2142,16 @@ onMounted(() => {
     // Restore section from URL hash
     onHashChange();
     window.addEventListener('hashchange', onHashChange);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    window.addEventListener('keydown', onEscape);
+    formEl()?.addEventListener('submit', onFormSubmit);
 
     nextTick(() => {
+        // Taken after the first draw, which fills in what older blocks were saved without.
+        savedSnapshot.value = snapshot();
         initSortable();
         fetchPreview();
+        loadAudience();
     });
 
     if (previewPane.value) {
@@ -1582,8 +2168,13 @@ onMounted(() => {
 onBeforeUnmount(() => {
     destroyAllEasyMDE();
     window.removeEventListener('hashchange', onHashChange);
+    window.removeEventListener('beforeunload', onBeforeUnload);
+    window.removeEventListener('keydown', onEscape);
+    formEl()?.removeEventListener('submit', onFormSubmit);
     if (previewPaneObserver) previewPaneObserver.disconnect();
     clearTimeout(previewDebounceTimer);
+    clearTimeout(audienceTimer);
     if (previewAbortController) previewAbortController.abort();
+    if (scheduleFlatpickr) scheduleFlatpickr.destroy();
 });
 </script>

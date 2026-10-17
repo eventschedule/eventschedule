@@ -9,6 +9,7 @@ use App\Models\NewsletterSegmentUser;
 use App\Models\NewsletterTemplate;
 use App\Models\User;
 use App\Services\NewsletterService;
+use App\Utils\NewsletterBuilderRoutes;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -114,6 +115,15 @@ class AdminNewsletterController extends Controller
             'status' => 'draft',
         ]);
 
+        // The builder saves without leaving the page (NewsletterController::store()).
+        if ($request->header('X-Save-Before-Action')) {
+            return response()->json([
+                'saved' => true,
+                'hash' => UrlUtils::encodeId($newsletter->id),
+                'routes' => NewsletterBuilderRoutes::for(null, $newsletter),
+            ]);
+        }
+
         return redirect()->route('admin.newsletters.edit', [
             'hash' => UrlUtils::encodeId($newsletter->id),
         ])->with('status', __('messages.newsletter_saved'));
@@ -140,6 +150,10 @@ class AdminNewsletterController extends Controller
             ->firstOrFail();
 
         if (in_array($newsletter->status, ['sending', 'sent'])) {
+            if ($request->header('X-Save-Before-Action')) {
+                return response()->json(['message' => __('messages.newsletter_already_sent')], 409);
+            }
+
             return back()->with('error', __('messages.newsletter_already_sent'));
         }
 
@@ -232,11 +246,11 @@ class AdminNewsletterController extends Controller
             'scheduled_at' => 'required|date',
         ]);
 
-        $timezone = auth()->user()->timezone ?? 'UTC';
+        $timezone = NewsletterController::scheduleTimezone(null);
         $scheduledAtUtc = Carbon::parse($request->scheduled_at, $timezone)->setTimezone('UTC');
 
         if ($scheduledAtUtc->lte(now())) {
-            return back()->withErrors(['scheduled_at' => __('validation.after', ['attribute' => 'scheduled at', 'date' => 'now'])]);
+            return back()->withErrors(['scheduled_at' => __('messages.newsletter_schedule_in_past')]);
         }
 
         $newsletter->update([
@@ -325,20 +339,29 @@ class AdminNewsletterController extends Controller
         return response()->json(['html' => $html]);
     }
 
-    public function testSend(string $hash, NewsletterService $service)
+    public function testSend(Request $request, string $hash, NewsletterService $service)
     {
         $newsletter = Newsletter::admin()
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
 
+        // The builder asks with fetch and shows the answer in its dialog.
+        $answer = function (string $message, int $status) use ($request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], $status);
+            }
+
+            return back()->with($status === 200 ? 'status' : 'error', $message);
+        };
+
         $adminEmail = auth()->user()->email;
         if (empty($adminEmail)) {
-            return back()->with('error', __('messages.email_required'));
+            return $answer(__('messages.email_required'), 422);
         }
 
         $rateLimitKey = 'test-admin-newsletter-'.auth()->id();
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
-            return back()->with('error', __('messages.please_wait').'...');
+            return $answer(__('messages.please_wait').'...', 429);
         }
 
         $recipient = new NewsletterRecipient([
@@ -357,13 +380,37 @@ class AdminNewsletterController extends Controller
             $recipient->delete();
             RateLimiter::hit($rateLimitKey, 60);
 
-            return back()->with('error', __('messages.test_email_failed'));
+            return $answer(__('messages.test_email_failed'), 422);
         }
 
         $recipient->update(['status' => 'test']);
         RateLimiter::hit($rateLimitKey, 60);
 
-        return back()->with('status', __('messages.test_email_sent_to', ['email' => $adminEmail]));
+        return $answer(__('messages.newsletter_test_sent_to', ['email' => $adminEmail]), 200);
+    }
+
+    /**
+     * Who a platform newsletter would reach, for the builder's audience line and its Review and
+     * send. A platform newsletter has no monthly allowance and no verification step; only the
+     * sync queue holds an immediate send back, as send() does.
+     */
+    public function audience(Request $request, NewsletterService $service)
+    {
+        $segments = NewsletterSegment::whereNull('role_id')
+            ->whereIn('id', array_map('intval', (array) $request->input('segment_ids', [])))
+            ->get();
+
+        $count = $service->resolveAdminRecipients($segments->pluck('id')->all())->count();
+
+        return response()->json([
+            'count' => $count,
+            'label' => $segments->isEmpty() ? __('messages.all_platform_users') : $segments->pluck('name')->implode(', '),
+            'allowance' => null,
+            'refusal' => $count === 0 ? ['message' => __('messages.newsletter_no_recipients'), 'links' => []] : null,
+            'now_refusal' => config('queue.default') === 'sync' && $count > 50 ? __('messages.newsletter_sync_queue_limit') : null,
+            'ab' => null,
+            'timezone' => NewsletterController::scheduleTimezone(null),
+        ]);
     }
 
     public function stats(string $hash)

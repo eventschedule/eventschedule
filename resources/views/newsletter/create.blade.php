@@ -29,7 +29,7 @@
                     @include('newsletter.partials._template-swatch', ['swatchOf' => $tmpl])
                     <span>
                         <span class="news-pick-name"><bdi>{{ $tmpl->name }}</bdi></span>
-                        <span class="news-pick-meta block">{{ $tmpl->template }}</span>
+                        <span class="news-pick-meta block">{{ \App\Models\Newsletter::designLabel($tmpl->template) }}</span>
                     </span>
                 </a>
                 @endforeach

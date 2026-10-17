@@ -42,54 +42,52 @@ $segmentsData = ($segments ?? collect())->map(function ($segment) use ($segmentT
 // NewsletterService::eventChoices(): what a mail could list, under the date it would print.
 $eventsData = collect($events ?? [])->values()->all();
 
+$saved = isset($newsletter) && $newsletter->exists;
+
 $newsletterData = null;
-if (isset($newsletter) && $newsletter->exists) {
+if ($saved) {
     $newsletterData = [
         'exists' => true,
         'canSend' => in_array($newsletter->status, ['draft', 'scheduled']),
+        'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id),
     ];
 }
 
-if ($isAdmin) {
-    $routesData = [
-        'manage_segments' => route('admin.newsletters.segments'),
-        'upload_image' => route('admin.newsletters.upload_image'),
-    ];
-    if (isset($newsletter) && $newsletter->exists) {
-        $routesData['test_send'] = route('admin.newsletters.test_send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-        $routesData['schedule'] = route('admin.newsletters.schedule', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-        $routesData['send'] = route('admin.newsletters.send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-        if (!$isTemplateMode) {
-            $routesData['save_as_template'] = route('admin.newsletters.save_as_template', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-        }
-    }
+// NewsletterBuilderRoutes: the same list the first save answers with.
+$routesData = \App\Utils\NewsletterBuilderRoutes::for($isAdmin ? null : $role, $saved ? $newsletter : null, $isTemplateMode);
 
-    $previewUrl = isset($newsletter) && $newsletter->exists
-        ? route('admin.newsletters.preview', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)])
-        : route('admin.newsletters.preview_draft');
-} else {
-    $routesData = [
-        'manage_segments' => route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]),
-        'upload_image' => route('newsletter.upload_image', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]),
-    ];
-    if (isset($newsletter) && $newsletter->exists) {
-        $routesData['test_send'] = route('newsletter.test_send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-        $routesData['schedule'] = route('newsletter.schedule', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-        $routesData['send'] = route('newsletter.send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-        if (!$isTemplateMode) {
-            $routesData['save_as_template'] = route('newsletter.save_as_template', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-        }
-    }
-
-    $previewUrl = isset($newsletter) && $newsletter->exists
-        ? route('newsletter.preview', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)])
-        : route('newsletter.preview_draft', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]);
+// A test goes to an address the app already knows: the person's own, and for a schedule its
+// contact address too.
+$me = auth()->user();
+$testRecipients = [['value' => 'me', 'label' => __('messages.newsletter_test_to_me'), 'email' => $me->email ?? '']];
+if (! $isAdmin && ! empty($role->email) && strtolower($role->email) !== strtolower($me->email ?? '')) {
+    $testRecipients[] = ['value' => 'schedule', 'label' => __('messages.newsletter_test_to_schedule'), 'email' => $role->email];
 }
 
-$abTestHtml = '';
-if (!$isAdmin && isset($newsletter) && $newsletter->exists) {
-    $abTestHtml = view('newsletter.partials._ab-test-panel', ['newsletter' => $newsletter, 'role' => $role])->render();
+// One of the two variants of an A/B test: what is tested, and the way to the other one.
+$abTestData = null;
+if (! $isAdmin && $saved && $newsletter->ab_test_id && $newsletter->abTest) {
+    $abTest = $newsletter->abTest;
+    $otherVariant = $abTest->newsletters->first(fn ($variant) => $variant->id !== $newsletter->id && $variant->status !== 'cancelled');
+    $abTestData = [
+        'variant' => $newsletter->ab_variant,
+        'pending' => $abTest->status === 'pending',
+        'field' => $abTest->test_field === 'blocks' ? __('messages.content_above_events') : __('messages.subject'),
+        'sample' => (int) $abTest->sample_percentage,
+        'hours' => (int) $abTest->winner_wait_hours,
+        'criteria' => $abTest->winner_criteria === 'click_rate' ? __('messages.click_rate') : __('messages.open_rate'),
+        'winner' => $abTest->winner_variant,
+        'other_variant' => $otherVariant?->ab_variant,
+        'other_url' => $otherVariant && in_array($otherVariant->status, ['draft', 'scheduled'])
+            ? route('newsletter.edit', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($otherVariant->id)])
+            : null,
+    ];
 }
+
+// A scheduled newsletter's time, in the clock the schedule dialog reads it in.
+$scheduledAtLocal = $saved && $newsletter->status === 'scheduled' && $newsletter->scheduled_at
+    ? $newsletter->scheduled_at->copy()->timezone(\App\Http\Controllers\NewsletterController::scheduleTimezone($isAdmin ? null : $role))->format('Y-m-d H:i')
+    : '';
 
 $roleSocialLinks = $isAdmin ? [] : \App\Models\Newsletter::buildSocialLinksForRole($role);
 
@@ -104,14 +102,17 @@ $builderProps = [
     'templateDefaults' => $templateDefaults,
     'events' => $eventsData,
     'segments' => $segmentsData,
-    'previewUrl' => $previewUrl,
     'csrfToken' => csrf_token(),
     'newsletter' => $newsletterData,
     'routes' => $routesData,
-    'roleEmail' => $isAdmin ? (auth()->user()->email ?? '') : ($role->email ?? ''),
+    'testRecipients' => $testRecipients,
+    'everyoneLabel' => $isAdmin ? __('messages.all_platform_users') : __('messages.newsletter_audience_everyone', ['name' => $role->name]),
+    'abTest' => $abTestData,
+    'scheduledAt' => $scheduledAtLocal,
+    'use24Hour' => (bool) get_use_24_hour_time($isAdmin ? null : $role),
     'roleName' => $isAdmin ? config('app.name') : ($role->name ?? ''),
-    'abTestHtml' => $abTestHtml,
     'isTemplateMode' => $isTemplateMode,
+    'isAdmin' => $isAdmin,
     'canUploadImages' => $isAdmin || (isset($role) && $role->isPro()),
     'availableBlockTypes' => $isAdmin
         ? ['heading', 'text', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'offer']
@@ -120,23 +121,16 @@ $builderProps = [
         'add_block' => __('messages.add_block'),
         'blocks' => __('messages.blocks'),
         'block_settings' => __('messages.block_settings'),
-        'template' => __('messages.template'),
         'subject' => __('messages.subject'),
         'style_settings' => __('messages.style_settings'),
         'recipients' => __('messages.recipients'),
-        'ab_testing' => __('messages.ab_testing'),
         'preview' => __('messages.preview'),
         'preview_text' => __('messages.newsletter_preview_text'),
         'preview_text_help' => __('messages.newsletter_preview_text_help'),
         'desktop' => __('messages.newsletter_preview_desktop'),
         'mobile' => __('messages.newsletter_preview_mobile'),
         'system' => __('messages.newsletter_font_system'),
-        'preview_session_expired' => __('messages.admin_confirm_password'),
-        'edit_blocks' => __('messages.edit_blocks'),
-        'test_send' => __('messages.test_send'),
-        'test_email_sent_to' => __('messages.test_email_sent_to', ['email' => ':email']),
         'send_a_test' => __('messages.send_a_test'),
-        'schedule_newsletter' => __('messages.schedule_newsletter'),
         'save' => __('messages.save'),
         'send_now' => __('messages.send_now'),
         'heading_text' => __('messages.heading_text'),
@@ -192,16 +186,12 @@ $builderProps = [
         'rounded' => __('messages.rounded'),
         'square' => __('messages.square'),
         'no_segments' => __('messages.no_segments'),
-        'default_all_followers' => $isAdmin
-            ? __('messages.default_all_platform_users')
-            : __('messages.default_all_followers'),
         'manage_segments' => __('messages.manage_segments'),
         'email' => __('messages.email'),
         'cancel' => __('messages.cancel'),
         'send' => __('messages.send'),
         'send_at' => __('messages.send_at'),
         'schedule' => __('messages.schedule'),
-        'newsletter_send_confirm' => __('messages.newsletter_send_confirm'),
         'block_heading' => __('messages.block_heading'),
         'block_text' => __('messages.block_text'),
         'block_events' => __('messages.block_events'),
@@ -244,6 +234,60 @@ $builderProps = [
         'sponsor_source_first_event' => __('messages.sponsor_source_first_event'),
         'sponsor_source_help' => __('messages.sponsor_source_help'),
         'poll_auto_description' => __('messages.poll_auto_description'),
+        'preview_session_expired' => __('messages.admin_confirm_password'),
+        'something_went_wrong' => __('messages.something_went_wrong'),
+        'error_uploading_image' => __('messages.error_uploading_image'),
+        'to' => __('messages.to'),
+        'change' => __('messages.change'),
+        'close' => __('messages.close'),
+        'undo' => __('messages.undo'),
+        'saving' => __('messages.saving'),
+        'saved' => __('messages.saved'),
+        'sending' => __('messages.sending'),
+        'unsaved_changes' => __('messages.unsaved_changes'),
+        'move_up' => __('messages.move_up'),
+        'move_down' => __('messages.move_down'),
+        'design' => __('messages.design'),
+        'design_modern' => __('messages.newsletter_design_modern'),
+        'design_classic' => __('messages.newsletter_design_classic'),
+        'design_minimal' => __('messages.newsletter_design_minimal'),
+        'design_bold' => __('messages.newsletter_design_bold'),
+        'design_compact' => __('messages.newsletter_design_compact'),
+        'newsletter_design_reset' => __('messages.newsletter_design_reset', ['design' => ':design']),
+        'templates' => __('messages.templates'),
+        'newsletter_save_as_template_lead' => __('messages.newsletter_save_as_template_lead'),
+        'newsletter_heading_follows_subject' => __('messages.newsletter_heading_follows_subject'),
+        'newsletter_add_after' => __('messages.newsletter_add_after', ['block' => ':block']),
+        'newsletter_add_at_end' => __('messages.newsletter_add_at_end'),
+        'newsletter_block_removed' => __('messages.newsletter_block_removed', ['block' => ':block']),
+        'preview_updating' => __('messages.newsletter_preview_updating'),
+        'review_and_send' => __('messages.newsletter_review_and_send'),
+        'schedule_for_later' => __('messages.newsletter_schedule_for_later'),
+        'newsletter_times_in' => __('messages.newsletter_times_in', ['timezone' => ':timezone']),
+        'newsletter_send_test_first' => __('messages.newsletter_send_test_first'),
+        'newsletter_allowance' => __('messages.newsletter_allowance'),
+        'newsletter_allowance_after' => __('messages.newsletter_allowance_after', ['left' => ':left', 'limit' => ':limit']),
+        'newsletter_audience_chosen' => __('messages.newsletter_audience_chosen'),
+        'newsletter_audience_none_ticked' => __('messages.newsletter_audience_none_ticked'),
+        'newsletter_test_lead' => __('messages.newsletter_test_lead'),
+        'ab_testing' => __('messages.ab_testing'),
+        'ab_test_description' => __('messages.ab_test_description'),
+        'create_ab_test' => __('messages.create_ab_test'),
+        'test_field' => __('messages.test_field'),
+        'content_above_events' => __('messages.content_above_events'),
+        'sample_percentage' => __('messages.sample_percentage'),
+        'wait_hours' => __('messages.wait_hours'),
+        'winner_criteria' => __('messages.winner_criteria'),
+        'open_rate' => __('messages.open_rate'),
+        'click_rate' => __('messages.click_rate'),
+        'winner' => __('messages.winner'),
+        'variant' => __('messages.variant'),
+        'send_ab_test' => __('messages.newsletter_send_ab_test'),
+        'ab_test_create_note' => __('messages.ab_test_create_note'),
+        'ab_test_pending_note' => __('messages.ab_test_pending_note'),
+        'ab_test_edit_other' => __('messages.ab_test_edit_other', ['variant' => ':variant']),
+        'ab_follows_variant_a' => __('messages.ab_follows_variant_a'),
+        'ab_test_review_explain' => __('messages.ab_test_review_explain', ['a' => ':a', 'b' => ':b', 'hours' => ':hours', 'criteria' => ':criteria', 'rest' => ':rest']),
     ],
 ];
 @endphp

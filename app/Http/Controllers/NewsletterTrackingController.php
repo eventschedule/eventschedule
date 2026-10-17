@@ -195,9 +195,11 @@ class NewsletterTrackingController extends Controller
                 $unsubscribed = true;
             }
         } else {
+            // The newsletter the person left from, for its statistics. Kept from the first time:
+            // the row is the schedule's one suppression entry for that address.
             NewsletterUnsubscribe::firstOrCreate(
                 ['role_id' => $role->id, 'email' => strtolower($recipient->email)],
-                ['unsubscribed_at' => now()]
+                ['unsubscribed_at' => now(), 'newsletter_id' => $newsletter->id]
             );
             $unsubscribed = true;
         }

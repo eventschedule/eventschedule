@@ -13,7 +13,7 @@
         </a>
         <div class="news-template-text">
             <h3 class="news-template-name"><bdi>{{ $template->name }}</bdi></h3>
-            <p class="news-template-meta"><span class="capitalize">{{ $template->template }}</span> &middot; {{ $template->created_at->translatedFormat('M j, Y') }}</p>
+            <p class="news-template-meta"><span>{{ \App\Models\Newsletter::designLabel($template->template) }}</span> &middot; {{ $template->created_at->translatedFormat('M j, Y') }}</p>
         </div>
         <div class="news-template-foot">
             <a href="{{ $useUrl($template) }}" class="event-link">{{ __('messages.use') }}</a>

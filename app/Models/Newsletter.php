@@ -256,6 +256,17 @@ class Newsletter extends Model
     }
 
     /**
+     * A design's name as the owner reads it ("Modern"), in their language. The stored key is a
+     * word of the code's and was printed as it is.
+     */
+    public static function designLabel(?string $template): string
+    {
+        $template = in_array($template, ['modern', 'classic', 'minimal', 'bold', 'compact'], true) ? $template : 'modern';
+
+        return __('messages.newsletter_design_'.$template);
+    }
+
+    /**
      * The settings a preset arrives with. The designs themselves live in App\Utils\NewsletterTheme
      * and the newsletter views; a preset only chooses the colours, typeface and corners they start
      * from. System is the reader's own interface font (NewsletterTheme::FONTS).

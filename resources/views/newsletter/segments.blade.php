@@ -88,6 +88,13 @@
                                 <option value="group">{{ __('messages.subschedule') }}</option>
                                 @endif
                             </select>
+                            {{-- What the chosen kind reaches, in a line. --}}
+                            <p class="news-type-help" v-if="segmentType === 'all_followers'">{{ __('messages.segment_help_all_followers') }}</p>
+                            <p class="news-type-help" v-else-if="segmentType === 'all_subscribers'" v-cloak>{{ __('messages.segment_help_all_subscribers') }}</p>
+                            <p class="news-type-help" v-else-if="segmentType === 'ticket_buyers'" v-cloak>{{ __('messages.segment_help_ticket_buyers') }}</p>
+                            <p class="news-type-help" v-else-if="segmentType === 'manual'" v-cloak>{{ __('messages.segment_help_manual') }}</p>
+                            <p class="news-type-help" v-else-if="segmentType === 'waitlist'" v-cloak>{{ __('messages.segment_help_waitlist') }}</p>
+                            <p class="news-type-help" v-else-if="segmentType === 'group'" v-cloak>{{ __('messages.segment_help_group') }}</p>
                         </div>
 
                         <div v-if="segmentType === 'ticket_buyers' || segmentType === 'waitlist'">

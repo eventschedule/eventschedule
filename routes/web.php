@@ -657,6 +657,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/newsletters', [NewsletterController::class, 'store'])->name('newsletter.store');
     Route::post('/newsletters/preview-draft', [NewsletterController::class, 'previewDraft'])->name('newsletter.preview_draft');
     Route::get('/newsletters/events', [NewsletterController::class, 'getEvents'])->name('newsletter.events');
+    // Who a newsletter would reach and whether it may go: read by the builder before it sends.
+    Route::get('/newsletters/audience', [NewsletterController::class, 'audience'])->name('newsletter.audience');
     Route::get('/newsletters/{hash}/edit', [NewsletterController::class, 'edit'])->name('newsletter.edit');
     Route::put('/newsletters/{hash}', [NewsletterController::class, 'update'])->name('newsletter.update');
     Route::delete('/newsletters/{hash}', [NewsletterController::class, 'delete'])->name('newsletter.delete');
@@ -1234,6 +1236,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::get('/admin/newsletters/create', [AdminNewsletterController::class, 'create'])->name('admin.newsletters.create');
         Route::post('/admin/newsletters', [AdminNewsletterController::class, 'store'])->name('admin.newsletters.store');
         Route::post('/admin/newsletters/preview-draft', [AdminNewsletterController::class, 'previewDraft'])->name('admin.newsletters.preview_draft');
+        Route::get('/admin/newsletters/audience', [AdminNewsletterController::class, 'audience'])->name('admin.newsletters.audience');
         Route::get('/admin/newsletters/{hash}/edit', [AdminNewsletterController::class, 'edit'])->name('admin.newsletters.edit');
         Route::put('/admin/newsletters/{hash}', [AdminNewsletterController::class, 'update'])->name('admin.newsletters.update');
         Route::delete('/admin/newsletters/{hash}', [AdminNewsletterController::class, 'delete'])->name('admin.newsletters.delete');
