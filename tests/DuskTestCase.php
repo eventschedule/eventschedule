@@ -2,9 +2,14 @@
 
 namespace Tests;
 
+use Closure;
 use Facebook\WebDriver\Chrome\ChromeOptions;
+use Facebook\WebDriver\Exception\NoAlertOpenException;
+use Facebook\WebDriver\Exception\NoSuchAlertException;
+use Facebook\WebDriver\Exception\UnexpectedAlertOpenException;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
 use Illuminate\Support\Collection;
 use Laravel\Dusk\OperatingSystem;
 use Laravel\Dusk\TestCase as BaseTestCase;
@@ -30,6 +35,112 @@ abstract class DuskTestCase extends BaseTestCase
         parent::setUp();
 
         \App\Models\Setting::set('realtime_enabled', '0');
+    }
+
+    /**
+     * A page with none of the app on it: a box to type into and a button that marks itself pressed.
+     */
+    private const INPUT_PROBE_PAGE = 'data:text/html;charset=utf-8,'
+        .'%3Cinput%20id%3D%22p%22%3E%3Cbutton%20id%3D%22b%22%20onclick%3D%22this.dataset.hit%3D1%22%3Eb%3C%2Fbutton%3E';
+
+    /** PHPUnit makes a new instance per test method, so this is "probed in this test yet". */
+    private bool $inputProbed = false;
+
+    /**
+     * Check that WebDriver input reaches the page before a test drives it, and replace a Chrome
+     * session where it does not.
+     *
+     * On CI a Chrome session sometimes starts with its input dead: pages load, script() runs and
+     * Vue mounts, but click(), type() and the Actions API go nowhere, with no error. It is the same
+     * symptom as the one-major driver gap below, with the versions agreeing. SeatingTest lost every
+     * real-input journey to it twice (6 of 10 on 2026-10-15, 8 of 10 on 2026-10-17, run
+     * 39049248104), and each read as an app bug: a typed plan name that "never saved", seats that
+     * were "never held". The failure screenshots showed the name box focused and unchanged and
+     * nothing over the seats, and Chrome itself logged that the designer "never had a user gesture
+     * since its load" after a real WebDriver drag on it. Every other file in those runs passed, each
+     * in its own Chrome. setupTestAccount()'s repair of the sign-up fields hides it at the start of
+     * every journey, so nothing failed until the first type() with no repair behind it.
+     *
+     * The probe types and clicks on a data: page, so a failure there cannot be the app's doing and
+     * replacing the browser cannot hide an app bug. It runs on the first browse() of each test
+     * only: VenueMapJourneyTest and the event form journeys call browse() again mid-test and carry
+     * on from the page they are on. A page the last test left unsaved may ask before it lets go,
+     * which the probe answers, as the next test's own visit() would have to.
+     */
+    protected function createBrowsersFor(Closure $callback)
+    {
+        $browsers = parent::createBrowsersFor($callback);
+
+        if ($this->inputProbed) {
+            return $browsers;
+        }
+
+        $this->inputProbed = true;
+
+        if (($dead = static::deadInput($browsers)) === null) {
+            return $browsers;
+        }
+
+        fwrite(STDERR, "\nWebDriver input reached nothing on a blank page ({$dead}); replacing this Chrome session.\n");
+
+        static::closeAll();
+        $browsers = parent::createBrowsersFor($callback);
+
+        if (($dead = static::deadInput($browsers)) !== null) {
+            $this->fail(
+                "WebDriver input reached nothing on a blank page in two Chrome sessions running ({$dead}). "
+                .'This is the browser, not the app: see guardAgainstChromeDriverDrift() and createBrowsersFor() in tests/DuskTestCase.php.'
+            );
+        }
+
+        return $browsers;
+    }
+
+    /** Why the first browser of `$browsers` whose input is dead is dead, or null if none is. */
+    private static function deadInput(Collection $browsers): ?string
+    {
+        foreach ($browsers as $browser) {
+            if (($dead = static::probeInput($browser->driver)) !== null) {
+                return $dead;
+            }
+        }
+
+        return null;
+    }
+
+    private static function probeInput(RemoteWebDriver $driver): ?string
+    {
+        try {
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                try {
+                    $driver->get(self::INPUT_PROBE_PAGE);
+
+                    if (str_starts_with($driver->getCurrentURL(), 'data:')) {
+                        break;
+                    }
+                } catch (UnexpectedAlertOpenException) {
+                    // The beforeunload prompt of a page left with unsaved changes.
+                }
+
+                try {
+                    $driver->switchTo()->alert()->accept();
+                } catch (NoSuchAlertException|NoAlertOpenException) {
+                }
+            }
+
+            $driver->findElement(WebDriverBy::id('p'))->sendKeys('probe');
+            $driver->findElement(WebDriverBy::id('b'))->click();
+
+            $seen = $driver->executeScript('return { typed: document.getElementById("p").value, clicked: document.getElementById("b").dataset.hit === "1" };');
+        } catch (Throwable $e) {
+            return get_class($e).': '.strtok($e->getMessage(), "\n");
+        }
+
+        if (($seen['typed'] ?? null) === 'probe' && ($seen['clicked'] ?? false) === true) {
+            return null;
+        }
+
+        return 'typed '.json_encode($seen['typed'] ?? null).', click '.(($seen['clicked'] ?? false) ? 'arrived' : 'did not arrive');
     }
 
     /**

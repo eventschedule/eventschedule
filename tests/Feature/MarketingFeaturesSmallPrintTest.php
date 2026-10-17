@@ -84,6 +84,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Free event registration / RSVP' => [self::ABOVE, '/features/registration'],
         'Free ticket rows ($0) and free registration' => [self::ABOVE, '/features/registration'],
         'Ticket sales windows and volume discounts' => [self::ROW, 'Sales windows and group rates'],
+        'Ticket presets' => [self::LEFT_OUT, 'a setup shortcut on the Tickets tab and in the schedule\'s settings; no feature page describes it for a plan line to link'],
         'Ticket-type custom fields' => [self::LEFT_OUT, 'the free corner of custom fields, which its own page states; the banner is the Pro feature'],
         'Appointment booking (1 free appointment type)' => [self::ABOVE, '/features/appointments'],
         'QR code scanning at the door' => [self::ABOVE, '/features/check-in'],
