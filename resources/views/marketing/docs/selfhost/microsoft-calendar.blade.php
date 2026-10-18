@@ -20,7 +20,7 @@
             <x-doc-nav-link href="#teams">Teams meeting links</x-doc-nav-link>
             <x-doc-nav-link href="#inbound-events">Events from Outlook</x-doc-nav-link>
             <x-doc-nav-link href="#delete-sync">Deletions in Outlook</x-doc-nav-link>
-            <x-doc-nav-link href="#calendar-sync-tab">An event's Calendar sync tab</x-doc-nav-link>
+            <x-doc-nav-link href="#calendar-sync-tab">Calendar sync on an event</x-doc-nav-link>
             <x-doc-nav-link href="#realtime">Real-time and polling</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#usage">Usage</x-doc-nav-link>
@@ -58,7 +58,7 @@
                         <td>The schedule's owner picks the calendar, the sync direction and what a deletion in Outlook does here, and can turn on <strong>Create Teams meetings for online events</strong></td>
                     </tr>
                     <tr>
-                        <td>Event form &rarr; <strong>Calendar sync</strong> tab</td>
+                        <td>Event form &rarr; <strong>Listing</strong> &rarr; <strong>Calendar sync</strong></td>
                         <td>Shows whether this event has a copy in Outlook. <strong>Sync Now</strong> and <strong>Remove</strong> are the owner's to use</td>
                     </tr>
                 </tbody>
@@ -337,14 +337,14 @@
         <p>Only a real deletion in Outlook triggers this policy. An event that merely moves outside the sync window is left untouched. Marking an event cancelled this way does not notify anyone: the cancellation notice that <strong>Cancel event</strong> in the event editor can send to ticket buyers and to the event's interest list only goes out from there.</p>
         <p>An event that belongs to more than one schedule is only detached from this schedule, never cancelled or deleted outright, unless this schedule is the one that owns it. The other schedules keep the event as it is.</p>
 
-        <h3 id="calendar-sync-tab" class="doc-subheading">An Event's Calendar Sync Tab</h3>
-        <p>Once a schedule has a calendar selected and a direction that includes To Outlook Calendar, the form of a saved event gains a <strong>Calendar sync</strong> tab with an <strong>Outlook Calendar</strong> row:</p>
+        <h3 id="calendar-sync-tab" class="doc-subheading">Calendar Sync on an Event</h3>
+        <p>Once a schedule has a calendar selected and a direction that includes To Outlook Calendar, the <strong>Listing</strong> tab of a saved event ends with <strong>Calendar sync</strong>, which has an <strong>Outlook Calendar</strong> line:</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
                         <th>Status</th>
-                        <th>What it means, and what the row offers</th>
+                        <th>What it means, and what the line offers</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -357,7 +357,7 @@
                         <td>No copy yet. The line under it says why: "It is copied the next time you save." for a published event, and "Only an event guests can see is copied to the calendar." for a Draft or Internal one. <strong>Sync Now</strong> creates the copy at once</td>
                     </tr>
                     <tr>
-                        <td>Tab absent</td>
+                        <td>Not shown</td>
                         <td>The event has not been saved yet, the schedule has no calendar selected, or its direction does not include To Outlook Calendar</td>
                     </tr>
                 </tbody>
@@ -414,7 +414,7 @@
 
             <li class="doc-step">
                 <h4 class="doc-step-title">Sync a Single Event by Hand</h4>
-                <p>Open the event's form and choose the <strong>Calendar sync</strong> tab. In the <strong>Outlook Calendar</strong> row, click <strong>Sync Now</strong>, or <strong>Remove</strong> to delete the Outlook copy. The tab only appears once a calendar is selected and the direction includes To Outlook Calendar.</p>
+                <p>Open the event's form and choose the <strong>Listing</strong> tab; <strong>Calendar sync</strong> is at its end. On the <strong>Outlook Calendar</strong> line, click <strong>Sync Now</strong>, or <strong>Remove</strong> to delete the Outlook copy. It only appears once a calendar is selected and the direction includes To Outlook Calendar.</p>
             </li>
 
             <li class="doc-step">
@@ -585,11 +585,11 @@
                     <li>The direction must be To Outlook Calendar or Bidirectional Sync, and a calendar must be selected</li>
                     <li>Only the schedule owner's connected account is used, so check who owns the schedule</li>
                     <li>Draft and Internal events are not pushed. Publish the event</li>
-                    <li>Events created before sync was enabled are not pushed in bulk. Open each one and use <strong>Sync Now</strong> on its <strong>Calendar sync</strong> tab</li>
+                    <li>Events created before sync was enabled are not pushed in bulk. Open each one and use <strong>Sync Now</strong> under <strong>Calendar sync</strong> on its <strong>Listing</strong> tab</li>
                 </ul>
             </x-doc-faq>
 
-            <x-doc-faq question="The Calendar sync tab is missing on the event form">
+            <x-doc-faq question="Calendar sync is missing from an event's Listing tab">
                 <ul class="doc-list">
                     <li>It only appears on a saved event, when the schedule has an Outlook calendar selected and its direction includes To Outlook Calendar</li>
                     <li>Select a calendar under <strong>Edit Schedule</strong> &rarr; <strong>Integrations</strong> &rarr; <strong>Outlook Calendar</strong> and save the schedule</li>

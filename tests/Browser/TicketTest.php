@@ -121,8 +121,8 @@ class TicketTest extends DuskTestCase
                 };
             ");
 
-            // Switch to Options tab and add event-level custom fields
-            $browser->script("window.vueApp.activeTicketTab = 'options';");
+            // Open the Checkout row and add event-level custom fields
+            $browser->script("window.vueApp.activeTicketTab = 'checkout';");
             $browser->pause(300);
 
             // Add "Company" (string) and "T-Shirt Size" (dropdown, required) event custom fields

@@ -622,7 +622,8 @@ class GalleryImageTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('id="section-gallery"', $html);
+        // A row of Page content (a tab of its own until 2026-10).
+        $this->assertStringContainsString('<div id="page-tab-gallery" v-show="activePageTab === \'gallery\'"', $html);
         $this->assertStringContainsString('<gallery-editor', $html);
         $this->assertStringContainsString(UrlUtils::encodeId($image->id), $html, 'the committed photo is in the editor\'s initial state');
         $this->assertStringNotContainsString('>{{ 7*7 }} front row<', $html, 'a caption is data, never template text');
@@ -637,7 +638,7 @@ class GalleryImageTest extends TestCase
 
         $html = $this->actingAs($owner)->get(route('event.create', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
 
-        $this->assertStringContainsString('id="section-gallery"', $html);
+        $this->assertStringContainsString('id="page-tab-gallery"', $html);
         $this->assertStringNotContainsString(UrlUtils::encodeId($scheduleImage->id), $html);
         $this->assertWellFormedVueTemplate($html);
     }

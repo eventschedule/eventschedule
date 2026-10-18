@@ -208,29 +208,36 @@ class EventFormStructureTest extends TestCase
 
         $this->assertSame(1, preg_match('#// event-section-aliases:start(.*?)// event-section-aliases:end#s', $html, $block));
 
+        // [hash, query, tab, Engagement row, Page content row, element brought into view]
         $cases = [
-            ['#section-fan-content', '', 'section-engagement', 'fan_content'],
+            ['#section-fan-content', '', 'section-engagement', 'fan_content', '', ''],
             // Approving fan content from a page opened on the polls tab comes back with both.
-            ['#section-fan-content', '?engagement=polls', 'section-engagement', 'fan_content'],
-            ['#section-polls', '', 'section-engagement', 'polls'],
-            ['#section-carpool', '?engagement=feedback', 'section-engagement', 'carpool'],
-            ['#section-engagement', '?engagement=carpool', 'section-engagement', 'carpool'],
+            ['#section-fan-content', '?engagement=polls', 'section-engagement', 'fan_content', '', ''],
+            ['#section-polls', '', 'section-engagement', 'polls', '', ''],
+            ['#section-carpool', '?engagement=feedback', 'section-engagement', 'carpool', '', ''],
+            ['#section-engagement', '?engagement=carpool', 'section-engagement', 'carpool', '', ''],
             // Nothing named, or nonsense: the tab opens with every row closed.
-            ['#section-engagement', '?engagement=nonsense', 'section-engagement', ''],
-            ['#section-engagement', '', 'section-engagement', ''],
-            ['#section-tickets', '', 'section-tickets', ''],
-            ['', '', '', ''],
+            ['#section-engagement', '?engagement=nonsense', 'section-engagement', '', '', ''],
+            ['#section-engagement', '', 'section-engagement', '', '', ''],
+            ['#section-tickets', '', 'section-tickets', '', '', ''],
+            ['#section-page', '', 'section-page', '', '', ''],
+            ['', '', '', '', '', ''],
             // Tabs that were folded into others. Links to them are in sent email and in bookmarks.
-            ['#section-venue', '', 'section-details', ''],
-            ['#section-recurring', '', 'section-details', ''],
-            ['#section-schedules', '', 'section-listing', ''],
-            ['#section-google-calendar', '', 'section-calendar-sync', ''],
-            ['#section-microsoft-calendar', '?engagement=polls', 'section-calendar-sync', 'polls'],
+            ['#section-venue', '', 'section-details', '', '', ''],
+            ['#section-recurring', '', 'section-details', '', '', ''],
+            ['#section-schedules', '', 'section-listing', '', '', ''],
+            // Gallery and Sponsors are rows of Page content, and Calendar sync the end of Listing
+            // (2026-10): the row opens, or the block comes into view.
+            ['#section-gallery', '', 'section-page', '', 'gallery', ''],
+            ['#section-event-settings', '', 'section-page', '', 'sponsors', ''],
+            ['#section-calendar-sync', '', 'section-listing', '', '', 'listing-calendar-sync'],
+            ['#section-google-calendar', '', 'section-listing', '', '', 'listing-calendar-sync'],
+            ['#section-microsoft-calendar', '?engagement=polls', 'section-listing', 'polls', '', 'listing-calendar-sync'],
         ];
 
         $script = 'const window = {};'.$block[1]
             .'const cases = '.json_encode($cases).';'
-            .'console.log(JSON.stringify(cases.map(c => { const r = window.resolveEventSectionHash(c[0], c[1]); return [c[0], c[1], r.section, r.engagementTab]; })));';
+            .'console.log(JSON.stringify(cases.map(c => { const r = window.resolveEventSectionHash(c[0], c[1]); return [c[0], c[1], r.section, r.engagementTab, r.pageTab, r.focus]; })));';
 
         $process = new Process(['node', '-e', $script]);
         $process->setTimeout(30);

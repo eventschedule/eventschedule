@@ -1,5 +1,5 @@
 {{-- The Tickets tab for a team member the owner's switch binds (App\Services\TicketPresets::lockedFor()).
-     The presets, and what the event will have; no price, no mode, no Payment or Options rows. Their
+     The presets, and what the event will have; no price, no mode, no Payment, Checkout or Sales rules rows. Their
      save posts the preset and whether it was pressed, never ticket fields (EventRepo::saveEvent()
      would drop them). Inside the form's Vue mount: names reach the page through v-text, and every
      sentence that carries the owner's name is v-pre. --}}

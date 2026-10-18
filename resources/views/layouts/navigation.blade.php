@@ -478,6 +478,16 @@
                 }
             }
 
+            // The event form's other Vue rows: Page content's (Gallery, Sponsors) and the Agenda's
+            // Import. The schedule form's Page content rows are handled above by data-row-group.
+            var pageTab = e.target.closest('.page-tab, .agenda-tab');
+            if (pageTab) {
+                var tabKey = (pageTab.classList.contains('agenda-tab') ? 'agenda-tab-' : 'page-tab-') + pageTab.getAttribute('data-tab');
+                if (anchorMap[tabKey]) {
+                    updateHelpLinks(anchorMap[tabKey]);
+                }
+            }
+
             var integrationTab = e.target.closest('.integration-tab');
             if (integrationTab) {
                 var tabKey = 'integration-tab-' + integrationTab.getAttribute('data-tab');

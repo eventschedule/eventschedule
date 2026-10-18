@@ -20,7 +20,7 @@
             <x-doc-nav-link href="#inbound-events">Events from Google</x-doc-nav-link>
             <x-doc-nav-link href="#realtime">Real-time and polling</x-doc-nav-link>
             <x-doc-nav-link href="#delete-sync">Deletions in Google</x-doc-nav-link>
-            <x-doc-nav-link href="#calendar-sync-tab">An event's Calendar sync tab</x-doc-nav-link>
+            <x-doc-nav-link href="#calendar-sync-tab">Calendar sync on an event</x-doc-nav-link>
             <x-doc-nav-link href="#member-sync">Member calendars</x-doc-nav-link>
             <x-doc-nav-link href="#read-only">Read-only connections</x-doc-nav-link>
             <x-doc-nav-link href="#one-time-import">One-time import</x-doc-nav-link>
@@ -67,7 +67,7 @@
                         <td>The schedule's owner picks the calendar, the sync direction and what a deletion in Google does here, and can run <strong>Resync to Google Calendar</strong>. Other team members get <strong>Sync to My Calendar</strong> in the same row</td>
                     </tr>
                     <tr>
-                        <td>Event form &rarr; <strong>Calendar sync</strong> tab</td>
+                        <td>Event form &rarr; <strong>Listing</strong> &rarr; <strong>Calendar sync</strong></td>
                         <td>Shows whether this event has a copy on the calendar. <strong>Sync Now</strong> and <strong>Remove</strong> are the owner's to use</td>
                     </tr>
                     <tr>
@@ -362,14 +362,14 @@
         <p>Only a real deletion in Google Calendar triggers the policy, and only through the incremental sync, so the schedule needs at least one completed inbound sync first. Marking an event cancelled this way does not notify anyone: the cancellation notice that <strong>Cancel event</strong> in the event editor can send to ticket buyers and to the event's interest list only goes out from there.</p>
         <p>An event that belongs to more than one schedule is only detached from this schedule, never cancelled or deleted outright, unless this schedule is the one that owns it. The other schedules keep the event as it is.</p>
 
-        <h3 id="calendar-sync-tab" class="doc-subheading">An Event's Calendar Sync Tab</h3>
-        <p>Once a schedule has a calendar selected and a direction that includes To Google Calendar, the form of a saved event gains a <strong>Calendar sync</strong> tab with a <strong>Google Calendar</strong> row. It shows the state of this event on the calendar of the schedule you are editing it under:</p>
+        <h3 id="calendar-sync-tab" class="doc-subheading">Calendar Sync on an Event</h3>
+        <p>Once a schedule has a calendar selected and a direction that includes To Google Calendar, the <strong>Listing</strong> tab of a saved event ends with <strong>Calendar sync</strong>, which has a <strong>Google Calendar</strong> line. It shows the state of this event on the calendar of the schedule you are editing it under:</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
                         <th>Status</th>
-                        <th>What it means, and what the row offers</th>
+                        <th>What it means, and what the line offers</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -382,7 +382,7 @@
                         <td>This event has no copy on the calendar yet. The line under it says why: "It is copied the next time you save." for a published event, and "Only an event guests can see is copied to the calendar." for a Draft or Internal one. <strong>Sync Now</strong> creates the copy at once</td>
                     </tr>
                     <tr>
-                        <td>Tab absent</td>
+                        <td>Not shown</td>
                         <td>The event has not been saved yet, the schedule has no calendar selected, or its direction does not include To Google Calendar</td>
                     </tr>
                 </tbody>
@@ -451,7 +451,7 @@
 
             <li class="doc-step">
                 <h4 class="doc-step-title">Sync a Single Event</h4>
-                <p>Open the event's form and choose the <strong>Calendar sync</strong> tab. In the <strong>Google Calendar</strong> row, click <strong>Sync Now</strong>, or <strong>Remove</strong> to take the copy back off the calendar. The tab appears once the schedule has a calendar selected and pushes to Google.</p>
+                <p>Open the event's form and choose the <strong>Listing</strong> tab; <strong>Calendar sync</strong> is at its end. On the <strong>Google Calendar</strong> line, click <strong>Sync Now</strong>, or <strong>Remove</strong> to take the copy back off the calendar. It appears once the schedule has a calendar selected and pushes to Google.</p>
             </li>
 
             <li class="doc-step">
@@ -692,7 +692,7 @@
             <x-doc-faq question="Events do not appear in Google Calendar">
                 <ul class="doc-list">
                     <li>The schedule's sync direction has to be To Google Calendar or Bidirectional Sync, and the schedule has to be saved after the change</li>
-                    <li>Events that already existed when you turned sync on are not pushed in bulk. Use <strong>Sync Events</strong> from the schedule's <strong>Actions</strong> menu, <strong>Sync Now</strong> on the event's <strong>Calendar sync</strong> tab, or <strong>Resync to Google Calendar</strong></li>
+                    <li>Events that already existed when you turned sync on are not pushed in bulk. Use <strong>Sync Events</strong> from the schedule's <strong>Actions</strong> menu, <strong>Sync Now</strong> under <strong>Calendar sync</strong> on the event's <strong>Listing</strong> tab, or <strong>Resync to Google Calendar</strong></li>
                     <li>Draft and Internal events are never pushed. Publish the event first</li>
                     <li>A read-only connection pushes nothing. See <a href="#read-only" class="doc-link">read-only connections</a></li>
                     <li>Confirm the Google Calendar API is enabled on the project and that the account granted the calendar scopes</li>
@@ -700,7 +700,7 @@
                 </ul>
             </x-doc-faq>
 
-            <x-doc-faq question="The Calendar sync tab is missing on the event form">
+            <x-doc-faq question="Calendar sync is missing from an event's Listing tab">
                 <ul class="doc-list">
                     <li>It only appears on a saved event, when the schedule has a calendar selected and pushes to Google</li>
                     <li>Select a calendar under <strong>Edit Schedule</strong> &rarr; <strong>Integrations</strong> &rarr; <strong>Google Calendar</strong> and save the schedule</li>

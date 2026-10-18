@@ -174,7 +174,7 @@
         </div>
 
         <h3 id="abandoned-checkout" class="doc-subheading">An abandoned checkout gives the balance back</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-2">The balance is deducted when the order is created, so an unpaid order would otherwise hold it. If the customer walks away without paying online, that order is expired 48 hours later and the deducted amount goes back onto the card automatically. Cash orders are skipped by that cleanup, since those are settled with you in person, so cancel one yourself if the customer never turns up (or set <strong class="text-gray-900 dark:text-white">Expire unpaid tickets</strong> in the event's <a href="{{ route('marketing.docs.tickets') }}#options" class="doc-link">Options</a> row to release them on your own schedule).</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-2">The balance is deducted when the order is created, so an unpaid order would otherwise hold it. If the customer walks away without paying online, that order is expired 48 hours later and the deducted amount goes back onto the card automatically. Cash orders are skipped by that cleanup, since those are settled with you in person, so cancel one yourself if the customer never turns up (or set <strong class="text-gray-900 dark:text-white">Expire unpaid tickets</strong> in the event's <a href="{{ route('marketing.docs.tickets') }}#sales-rules" class="doc-link">Sales rules</a> row to release them on your own schedule).</p>
     </section>
 
     <!-- Managing -->

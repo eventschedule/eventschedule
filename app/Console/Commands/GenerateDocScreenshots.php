@@ -383,8 +383,9 @@ class GenerateDocScreenshots extends Command
             'creating-events' => [
                 ['id' => 'creating-events--schedule-tab', 'route' => '/simpsons/schedule'],
                 ['id' => 'creating-events--add-event', 'route' => '/simpsons/add-event'],
-                // A new event's Tickets tab: the three tiles, nothing chosen yet.
-                ['id' => 'creating-events--tickets-tab', 'route' => '/simpsons/add-event', 'section' => 'section-tickets'],
+                // A new event's Tickets tab with Sell tickets pressed, as its alt text says: the first
+                // ticket type with + Add Sales Dates, and the rows under it.
+                ['id' => 'creating-events--tickets-tab', 'route' => '/simpsons/add-event', 'section' => 'section-tickets', 'script' => "document.getElementById('ticket_choice_tickets').click();"],
                 ['id' => 'creating-events--listing', 'route' => '/simpsons/add-event', 'section' => 'section-listing'],
                 ['id' => 'creating-events--import', 'route' => '/simpsons/import/ai'],
             ],

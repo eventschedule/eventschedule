@@ -106,7 +106,7 @@ return [
     '/features/gift-cards' => '2026-10-18',
     '/features/installments' => '2026-10-08',
     '/features/integrations' => '2026-10-15',
-    '/features/lineup' => '2026-10-09',
+    '/features/lineup' => '2026-10-18',
     '/features/newsletters' => '2026-10-08',
     '/features/online-events' => '2026-10-15',
     '/features/passes' => '2026-10-15',

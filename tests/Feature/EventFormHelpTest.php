@@ -72,8 +72,8 @@ class EventFormHelpTest extends TestCase
     }
 
     /**
-     * Every key the page can ask Help for, read from the page: its tabs, the rows of the Tickets
-     * and Engagement tabs, and the three ticket tiles.
+     * Every key the page can ask Help for, read from the page: its tabs, the rows of the Tickets,
+     * Engagement and Page content tabs, the Agenda's Import row, and the three ticket tiles.
      *
      * @return string[]
      */
@@ -82,12 +82,16 @@ class EventFormHelpTest extends TestCase
         preg_match_all('/<a href="#(section-[a-z-]+)" class="section-nav-link" data-section="\1"/', $html, $tabs);
         preg_match_all('/class="event-subrow ticket-tab" data-tab="([a-z_]+)"/', $html, $ticketRows);
         preg_match_all('/class="event-subrow engagement-tab" data-tab="([a-z_]+)"/', $html, $engagementRows);
+        preg_match_all('/class="event-subrow page-tab" data-tab="([a-z_]+)"/', $html, $pageRows);
+        preg_match_all('/class="event-subrow agenda-tab" data-tab="([a-z_]+)"/', $html, $agendaRows);
         preg_match_all('/class="event-tile ticket-mode-radio" id="ticket_choice_[a-z]+" value="([a-z]+)"/', $html, $tiles);
 
         return array_values(array_unique(array_merge(
             $tabs[1],
             array_map(fn ($row) => 'ticket-tab-'.$row, $ticketRows[1]),
             array_map(fn ($row) => 'engagement-tab-'.$row, $engagementRows[1]),
+            array_map(fn ($row) => 'page-tab-'.$row, $pageRows[1]),
+            array_map(fn ($row) => 'agenda-tab-'.$row, $agendaRows[1]),
             array_map(fn ($tile) => 'ticket-mode-'.$tile, $tiles[1]),
         )));
     }
@@ -109,6 +113,9 @@ class EventFormHelpTest extends TestCase
 
     public function test_every_tab_and_row_of_the_form_has_a_place_in_the_guide(): void
     {
+        // The Agenda's Import row is drawn only where an AI key is set; phpunit.xml pins it empty.
+        config(['services.google.gemini_key' => 'test-key']);
+
         foreach ($this->pages() as $name => $url) {
             $html = $this->page($url);
             $map = $this->anchorMap($html);
@@ -116,10 +123,10 @@ class EventFormHelpTest extends TestCase
 
             // The fixture shows the whole form, so a regex that stopped matching fails here
             // rather than passing over nothing.
-            foreach (['section-details', 'section-tickets', 'section-participants', 'section-agenda', 'section-gallery', 'section-listing', 'section-engagement', 'section-event-settings'] as $tab) {
+            foreach (['section-details', 'section-tickets', 'section-participants', 'section-agenda', 'section-page', 'section-listing', 'section-engagement'] as $tab) {
                 $this->assertContains($tab, $keys, "{$tab} is a tab of the {$name} page");
             }
-            foreach (['ticket-tab-payment', 'ticket-tab-options', 'ticket-tab-promo_codes', 'ticket-tab-add_ons', 'engagement-tab-polls', 'engagement-tab-fan_content', 'engagement-tab-feedback', 'engagement-tab-carpool', 'ticket-mode-rsvp', 'ticket-mode-tickets', 'ticket-mode-external'] as $row) {
+            foreach (['ticket-tab-payment', 'ticket-tab-checkout', 'ticket-tab-sales_rules', 'ticket-tab-promo_codes', 'ticket-tab-add_ons', 'engagement-tab-polls', 'engagement-tab-fan_content', 'engagement-tab-feedback', 'engagement-tab-carpool', 'page-tab-gallery', 'page-tab-sponsors', 'agenda-tab-import', 'ticket-mode-rsvp', 'ticket-mode-tickets', 'ticket-mode-external'] as $row) {
                 $this->assertContains($row, $keys, "{$row} is on the {$name} page");
             }
 
@@ -163,6 +170,7 @@ class EventFormHelpTest extends TestCase
             "e.target.closest('.section-nav-link, .mobile-section-header')",
             "e.target.closest('.ticket-tab')",
             "e.target.closest('.engagement-tab')",
+            "e.target.closest('.page-tab, .agenda-tab')",
             "e.target.closest('.ticket-mode-radio')",
             "e.target.closest('#ticket_choice_none')",
         ] as $branch) {

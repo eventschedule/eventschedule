@@ -250,4 +250,61 @@ class EventFormGuardsTest extends DuskTestCase
             }
         });
     }
+
+    /**
+     * Gallery and Sponsors were tabs of their own, and Calendar sync too, until 2026-10. Their
+     * addresses are in sent mail and in bookmarks: each lands on the row, or the block, it moved
+     * to. The block gets the keyboard focus as well, since it sits at the foot of a tab.
+     */
+    public function test_links_to_the_old_gallery_sponsors_and_calendar_tabs_land_where_they_went(): void
+    {
+        $owner = User::factory()->create(['email_verified_at' => now()]);
+        $venue = $this->makeRole($owner, 'venue', 'oldtabsvenue', ['sync_direction' => 'to']);
+        // A calendar chosen for the schedule is all the form asks before it shows Calendar sync.
+        \App\Models\RoleUser::where('role_id', $venue->id)->where('user_id', $owner->id)->update(['google_calendar_id' => 'primary']);
+        $event = $this->makeEvent($venue);
+
+        $this->browse(function (Browser $browser) use ($owner, $venue, $event) {
+            $browser->loginAs($owner)->resize(1280, 800);
+
+            foreach (['#section-gallery' => 'gallery', '#section-event-settings' => 'sponsors'] as $suffix => $row) {
+                $browser->visit('/'.$venue->subdomain.'/schedule')
+                    ->visit($this->editPath($venue, $event).'?r='.$row.$suffix)
+                    ->waitUntil('window.vueApp !== undefined', 15)
+                    ->waitUntil('document.getElementById("section-page").style.display === "block"', 10);
+
+                $state = $browser->script('return {
+                    row: window.vueApp.activePageTab,
+                    shown: document.getElementById("page-tab-'.$row.'").offsetParent !== null,
+                    details: document.getElementById("section-details").style.display,
+                };')[0];
+
+                $this->assertSame($row, $state['row'], $suffix);
+                $this->assertTrue($state['shown'], $suffix.' opens its row');
+                $this->assertSame('none', $state['details'], $suffix.' no longer lands on the first section');
+            }
+
+            $browser->visit('/'.$venue->subdomain.'/schedule')
+                ->visit($this->editPath($venue, $event).'?r=calendar#section-calendar-sync')
+                ->waitUntil('window.vueApp !== undefined', 15)
+                ->waitUntil('document.getElementById("section-listing").style.display === "block"', 10)
+                ->pause(1200);
+
+            $state = $browser->script('
+                var block = document.getElementById("listing-calendar-sync");
+                var box = block.getBoundingClientRect();
+                return {
+                    inListing: !! block.closest("#section-listing"),
+                    inView: box.top >= 0 && box.top < window.innerHeight,
+                    focused: document.activeElement === block,
+                    sync: !! document.getElementById("sync-event-btn"),
+                };
+            ')[0];
+
+            $this->assertTrue($state['inListing'], 'Calendar sync is the end of Listing');
+            $this->assertTrue($state['inView'], 'and the old address brings it into view, after the page\'s own scroll to the top');
+            $this->assertTrue($state['focused'], 'with the focus on it');
+            $this->assertTrue($state['sync'], 'Sync Now is there');
+        });
+    }
 }

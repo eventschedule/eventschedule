@@ -188,6 +188,100 @@ class EventFormJourneyTest extends DuskTestCase
         return [$regular, $special];
     }
 
+    /**
+     * Sales dates belong to a ticket type, opened from its own line of links. Until 2026-10 one
+     * switch in the Options row showed them on every type, was never saved, and switched off
+     * emptied every type's dates on the next save without the save bar saying so.
+     */
+    public function test_a_ticket_types_sales_dates_are_its_own(): void
+    {
+        $event = $this->ticketEvent();
+        $endsFriday = now()->addDays(3)->setTime(23, 59)->format('Y-m-d H:i:s');
+        $vipFrom = now()->addDays(1)->setTime(9, 0)->format('Y-m-d H:i:s');
+        Ticket::where('event_id', $event->id)->where('type', 'General')->update(['sales_end_at' => $endsFriday]);
+        Ticket::where('event_id', $event->id)->where('type', 'VIP')->update(['sales_start_at' => $vipFrom]);
+        $lateFrom = now()->addDays(4)->format('Y-m-d');
+
+        $this->browse(function (Browser $browser) use ($event, $lateFrom) {
+            $this->openExisting($browser, $event);
+            $this->openTickets($browser);
+            $browser->pause(500);
+
+            $read = 'return window.vueApp.tickets.map(function (ticket) {
+                var box = document.querySelector("[data-sales-dates-box=\"" + ticket.uid + "\"]");
+                return { type: ticket.type, uid: ticket.uid, shown: box.offsetParent !== null, link: !! document.querySelector("[data-sales-dates-link=\"" + ticket.uid + "\"]") };
+            });';
+            $types = $browser->script($read)[0];
+            $this->assertSame([true, true], array_column($types, 'shown'), 'a type with a date shows its dates');
+            $this->assertSame([false, false], array_column($types, 'link'), 'and offers no link to add them');
+            $this->assertSame('Sales dates', $browser->script('return document.querySelector(".event-subrow[data-tab=sales_rules] .event-row-summary").innerText.trim();')[0]);
+
+            // A type added on the page starts without them, and opens its own.
+            $browser->script('window.vueApp.addTicket();');
+            $browser->pause(800);
+            $late = $browser->script($read)[0][2];
+            $this->assertFalse($late['shown']);
+            $this->assertTrue($late['link']);
+            $this->press($browser, '[data-sales-dates-link="'.$late['uid'].'"]');
+            $this->assertTrue($browser->script($read)[0][2]['shown']);
+            $this->assertSame((string) $late['uid'], $browser->script('return document.activeElement.getAttribute("data-sales-dates-box");')[0], 'the box has the focus, not the start date, whose picker opens on focus');
+            $browser->script('
+                var set = function (el, value) { el.value = value; el.dispatchEvent(new Event("input", { bubbles: true })); };
+                set(document.querySelector("[name=\"tickets[2][type]\"]"), "Late");
+                set(document.querySelector("[name=\"tickets[2][price]\"]"), "30");
+                document.querySelector(".datepicker-ticket-sales-start[data-ticket-index=\"2\"]")._flatpickr.setDate("'.$lateFrom.'", true);
+            ');
+            $browser->pause(300);
+
+            // Remove on General empties General's dates, on screen too, and gives back its link.
+            // The form lists the types in its own order, so General is found by its name.
+            $at = array_search('General', array_column($types, 'type'), true);
+            $general = $types[$at]['uid'];
+            $this->press($browser, '[data-sales-dates-box="'.$general.'"] button');
+            $after = $browser->script('return {
+                types: ('.rtrim(substr($read, 7), ';').'),
+                picker: document.querySelector(".datepicker-ticket-sales-end[data-ticket-index=\"'.$at.'\"]")._flatpickr.altInput.value,
+                focused: document.activeElement.getAttribute("data-sales-dates-link"),
+            };')[0];
+            $shown = array_column($after['types'], 'shown', 'type');
+            $this->assertSame(['VIP' => true, 'General' => false, 'Late' => true], ['VIP' => $shown['VIP'], 'General' => $shown['General'], 'Late' => $shown['Late']], 'only General lost its dates');
+            $this->assertSame('', $after['picker'], 'the removed date is not left in the picker');
+            $this->assertSame((string) $general, $after['focused'], 'the focus goes back to the link');
+
+            $this->save($browser);
+        });
+
+        $saved = Ticket::where('event_id', $event->id)->get()->keyBy('type');
+        $this->assertNull($saved['General']->sales_end_at, 'Remove emptied General');
+        $this->assertSame($vipFrom, Carbon::parse($saved['VIP']->sales_start_at)->format('Y-m-d H:i:s'), 'and nothing else');
+        $this->assertSame($lateFrom, Carbon::parse($saved['Late']->sales_start_at)->format('Y-m-d'), 'a date typed on a type added on the page is saved');
+    }
+
+    /** A preset rebuilds every type, and with them their date pickers: none is left behind. */
+    public function test_a_preset_pressed_twice_leaves_no_date_picker_behind(): void
+    {
+        [$regular, $special] = $this->makePresets();
+
+        $this->browse(function (Browser $browser) use ($regular, $special) {
+            $this->openNew($browser);
+            $this->fillBasics($browser, 'Two Presets');
+            $this->openTickets($browser);
+            $this->press($browser, '[data-preset-chip="'.$special->encodeId().'"]');
+            $browser->pause(600);
+            $this->press($browser, '[data-preset-chip="'.$regular->encodeId().'"]');
+            $browser->pause(600);
+
+            $count = $browser->script('return {
+                types: window.vueApp.tickets.length,
+                calendars: document.querySelectorAll(".flatpickr-calendar").length,
+                pickers: Array.prototype.filter.call(document.querySelectorAll("input"), function (input) { return !! input._flatpickr; }).length,
+            };')[0];
+            $this->assertSame(2, $count['types']);
+            $this->assertSame($count['pickers'], $count['calendars'], 'one calendar for every picker on the page, and none for the types that are gone');
+            $this->leave($browser);
+        });
+    }
+
     public function test_a_preset_chip_fills_the_tab_and_a_hand_edit_puts_it_out(): void
     {
         [, $special] = $this->makePresets();
@@ -339,7 +433,9 @@ class EventFormJourneyTest extends DuskTestCase
                 summary: document.querySelector("a[data-section=section-tickets] .section-nav-summary").innerText.trim(),
                 dot: getComputedStyle(document.querySelector("a[data-section=section-tickets] .section-nav-dot")).display !== "none",
                 focused: document.activeElement && document.activeElement.id,
-                moreRow: document.querySelector(".event-subrow[data-tab=options]").offsetParent !== null,
+                moreRow: document.querySelector(".event-subrow[data-tab=checkout]").offsetParent !== null,
+                moreTitle: document.querySelector(".event-subrow[data-tab=checkout] .event-row-title").innerText.trim(),
+                salesRow: document.querySelector(".event-subrow[data-tab=sales_rules]").offsetParent !== null,
                 optionsOpen: window.vueApp.activeTicketTab,
             };')[0];
 
@@ -350,6 +446,8 @@ class EventFormJourneyTest extends DuskTestCase
             $this->assertTrue($state['dot'], 'the Tickets tab shows it has an unsaved change');
             $this->assertSame('rsvp_limit', $state['focused'], 'the limit is the first thing asked, and has the caret');
             $this->assertTrue($state['moreRow'], 'the rest is one row away');
+            $this->assertSame('Registration form', $state['moreTitle'], 'named for what it is on free registration');
+            $this->assertFalse($state['salesRow'], 'how ticket sales run is not a question for free registration');
             $this->assertSame('tickets', $state['optionsOpen'], 'and closed until asked for');
 
             // Pressing the tab you are already on leaves its rows alone. It used to press the
@@ -393,7 +491,7 @@ class EventFormJourneyTest extends DuskTestCase
                 return {
                     summary: document.querySelector("a[data-section=section-tickets] .section-nav-summary").innerText.trim(),
                     strip: document.querySelectorAll("#section-tickets .ticket-tab.text-center").length,
-                    rows: ["payment", "options", "promo_codes", "add_ons"].map(function (tab) { return row(tab) !== null && row(tab).offsetParent !== null; }),
+                    rows: ["payment", "checkout", "sales_rules", "promo_codes", "add_ons"].map(function (tab) { return row(tab) !== null && row(tab).offsetParent !== null; }),
                     payment: row("payment").innerText.trim(),
                     paymentWarns: row("payment").classList.contains("is-warn"),
                     descriptionShown: description.closest(".mt-4").offsetParent !== null,
@@ -403,17 +501,17 @@ class EventFormJourneyTest extends DuskTestCase
 
             $this->assertSame('Door', $state['summary']);
             $this->assertSame(0, $state['strip'], 'no second row of tabs');
-            $this->assertSame([true, true, true, true], $state['rows']);
+            $this->assertSame([true, true, true, true, true], $state['rows']);
             $this->assertSame('Connect Stripe to get paid', $state['payment'], 'a price with no way to be paid says so without being opened');
             $this->assertTrue($state['paymentWarns']);
             $this->assertFalse($state['descriptionShown'], 'an empty description stays folded');
             $this->assertTrue($state['sameLine'], 'price and type share a line');
 
             // A row opens in place, and opening another closes it.
-            $this->press($browser, '.event-subrow[data-tab=options]');
-            $this->assertTrue($browser->script('return document.querySelector("[data-ticket-pane=options]").offsetParent !== null;')[0]);
+            $this->press($browser, '.event-subrow[data-tab=checkout]');
+            $this->assertTrue($browser->script('return document.querySelector("[data-ticket-pane=checkout]").offsetParent !== null;')[0]);
             $this->press($browser, '.event-subrow[data-tab=payment]');
-            $open = $browser->script('return [document.querySelector("[data-ticket-pane=options]").offsetParent !== null, document.querySelector("[data-ticket-pane=payment]").offsetParent !== null];')[0];
+            $open = $browser->script('return [document.querySelector("[data-ticket-pane=checkout]").offsetParent !== null, document.querySelector("[data-ticket-pane=payment]").offsetParent !== null];')[0];
             $this->assertSame([false, true], $open);
 
             // "Not needed" is the off switch, and the type typed above is still there when the
@@ -1078,25 +1176,30 @@ class EventFormJourneyTest extends DuskTestCase
         $event = $this->makeEvent(['sponsor_mode' => 'custom', 'sponsor_logos' => json_encode([['name' => 'Duff', 'logo' => 'demo_flyer_jazz.jpg', 'url' => null, 'tier' => 'gold']])]);
 
         $this->browse(function (Browser $browser) use ($event) {
+            // The tab's old address opens Page content on its Sponsors row.
             $this->openExisting($browser, $event, '#section-event-settings');
-            $browser->waitUntil('document.getElementById("section-event-settings").style.display === "block"', 10)->pause(800);
+            $browser->waitUntil('document.getElementById("section-page").style.display === "block"', 10)->pause(800);
 
             $state = $browser->script('return {
-                tiles: document.querySelectorAll("#section-event-settings .event-tile").length,
-                on: document.querySelector("#section-event-settings .event-tile.is-on .event-tile-title").innerText.trim(),
-                rows: document.querySelectorAll("#section-event-settings .sponsor-item").length,
+                open: document.getElementById("page-tab-sponsors").offsetParent !== null,
+                gallery: document.getElementById("page-tab-gallery").offsetParent !== null,
+                tiles: document.querySelectorAll("#page-tab-sponsors .event-tile").length,
+                on: document.querySelector("#page-tab-sponsors .event-tile.is-on .event-tile-title").innerText.trim(),
+                rows: document.querySelectorAll("#page-tab-sponsors .sponsor-item").length,
             };')[0];
+            $this->assertTrue($state['open'], 'the Sponsors row is open');
+            $this->assertFalse($state['gallery'], 'one row at a time');
             $this->assertSame(3, $state['tiles']);
             $this->assertStringContainsString("This event's own", $state['on']);
             $this->assertSame(1, $state['rows']);
 
             // "Same as schedule": saving would delete this event's list and its logo. Said first.
-            $browser->script('document.querySelectorAll("#section-event-settings .event-tile")[0].click();');
+            $browser->script('document.querySelectorAll("#page-tab-sponsors .event-tile")[0].click();');
             $browser->pause(300);
             $this->assertSame("Saving removes this event's sponsors.", $this->barText($browser));
-            $this->assertTrue($browser->script('return getComputedStyle(document.querySelector("a[data-section=section-event-settings] .section-nav-dot")).display !== "none";')[0]);
+            $this->assertTrue($browser->script('return getComputedStyle(document.querySelector("a[data-section=section-page] .section-nav-dot")).display !== "none";')[0]);
 
-            $browser->script('document.querySelectorAll("#section-event-settings .event-tile")[2].click();');
+            $browser->script('document.querySelectorAll("#page-tab-sponsors .event-tile")[2].click();');
             $browser->pause(300);
             $this->assertStringNotContainsString('removes', $this->barText($browser));
         });
@@ -1118,8 +1221,8 @@ class EventFormJourneyTest extends DuskTestCase
                 for (var i = 0; i < bytes.length; i++) { data[i] = bytes.charCodeAt(i); }
                 window.vueApp.galleryStore.addFiles([new File([data], "one.png", { type: "image/png" })]);
             ');
-            $browser->waitUntil('window.vueApp.sectionDirty["section-gallery"] === true', 10);
-            $this->assertSame('Unsaved: Gallery', $this->barText($browser));
+            $browser->waitUntil('window.vueApp.sectionDirty["section-page"] === true', 10);
+            $this->assertSame('Unsaved: Page content', $this->barText($browser));
             $browser->script('window._skipUnsavedWarning = true;');
         });
     }

@@ -18,18 +18,20 @@
             <x-doc-nav-link href="#claim">Pages Created for Others</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#agenda">Agenda</x-doc-nav-link>
-        <x-doc-nav-link href="#gallery">Gallery</x-doc-nav-link>
+        <x-doc-nav-group label="Page Content" href="#page-content">
+            <x-doc-nav-link href="#gallery">Gallery</x-doc-nav-link>
+            <x-doc-nav-link href="#sponsors">Sponsors</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-group label="Listing" href="#listing">
             <x-doc-nav-link href="#privacy">Internal &amp; Unlisted</x-doc-nav-link>
             <x-doc-nav-link href="#schedules">Also List On</x-doc-nav-link>
+            <x-doc-nav-link href="#google-calendar">Calendar Sync</x-doc-nav-link>
         </x-doc-nav-group>
-        <x-doc-nav-link href="#google-calendar">Calendar Sync</x-doc-nav-link>
         <x-doc-nav-group label="Engagement" href="#engagement">
             <x-doc-nav-link href="#polls">Polls</x-doc-nav-link>
             <x-doc-nav-link href="#fan-content">Fan Content</x-doc-nav-link>
             <x-doc-nav-link href="#feedback">Feedback</x-doc-nav-link>
         </x-doc-nav-group>
-        <x-doc-nav-link href="#sponsors">Sponsors</x-doc-nav-link>
         <x-doc-nav-link href="#whatsapp">Events via WhatsApp</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
@@ -102,29 +104,19 @@
                         <td>Always</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Gallery</span> <x-doc-badge plan="pro" /></td>
-                        <td>A photo gallery shown on the event page</td>
-                        <td>Always. On a free schedule it carries a Pro lock and explains the plan, and a first event's form leaves it out</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Page content</span> <x-doc-badge plan="pro" /></td>
+                        <td>What the event page shows beside its own details: a <strong>Gallery</strong> row for photos and a <strong>Sponsors</strong> row for which sponsors this one event shows</td>
+                        <td>Always, except where every row would be locked on a first event or on a request to another schedule, which leave locked rows out. On a free schedule each row carries a Pro lock and explains the plan</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Listing</span></td>
-                        <td>Visibility, the event's link, its category, and the other schedules it appears on</td>
+                        <td>Visibility, the event's link, its category, the other schedules it appears on, and <strong>Calendar sync</strong> on a saved event whose schedule sends its events to a connected Google or Outlook calendar</td>
                         <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Calendar sync</span></td>
-                        <td>Syncing this one event to a connected Google or Outlook calendar</td>
-                        <td>Saved events, on a schedule that sends its events to a connected Google or Outlook calendar</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Engagement</span></td>
                         <td>Polls, fan content, feedback, and carpool</td>
                         <td>Always (the Carpool row only when carpooling is enabled on the schedule)</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Sponsors</span></td>
-                        <td>Which sponsors this one event shows</td>
-                        <td>When the schedule you are editing in, or the one the event belongs to, is on Pro</td>
                     </tr>
                 </tbody>
             </table>
@@ -156,7 +148,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Saving removes</span> ...</td>
-                        <td>Saving would delete something, and the bar names it first: the event's ticket types and add-ons (<strong>Sell tickets</strong> no longer chosen), the times of its agenda (<strong>Show times</strong> off), or its own sponsors (another sponsor choice picked). Undo the change before saving to keep them.</td>
+                        <td>Saving would delete something, and the bar names it first: the event's ticket types and add-ons (<strong>Sell tickets</strong> no longer chosen), the times of its agenda (<strong>Show times</strong> off), or its own sponsors (another sponsor choice picked, or a save while neither the schedule you are editing in nor the event's own is on a plan with sponsors). Undo the change before saving to keep them.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Check:</span> and tab names</td>
@@ -500,13 +492,13 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Free registration</span></td>
                         <td>Guests sign up on your own event page, with no payment. See <a href="{{ route('marketing.docs.tickets') }}#registration" class="doc-link">Free registration</a>.</td>
-                        <td><strong>Registration Limit</strong> first, and the rest in a <strong>More options</strong> row</td>
+                        <td><strong>Registration Limit</strong> first, and the rest in a <strong>Registration form</strong> row</td>
                         <td>Unlimited on every plan</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Sell tickets</span></td>
                         <td>Sell tickets from your own event page, paid to your own account through the <strong>Payment Method</strong> you pick: Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a payment link, or cash. See <a href="{{ route('marketing.docs.tickets') }}#ticketing" class="doc-link">Sell tickets</a>.</td>
-                        <td>The ticket types, one line each (price, quantity, type), then a row each for <strong>Payment</strong>, <strong>Options</strong>, <strong>Promo Codes</strong> and <strong>Add-ons</strong>. A row says what it holds and opens in place.</td>
+                        <td>The ticket types, one line each (price, quantity, type), then a row each for <strong>Payment</strong>, <strong>Checkout</strong>, <strong>Sales rules</strong>, <strong>Promo Codes</strong> and <strong>Add-ons</strong>. A row says what it holds and opens in place. A type's own sales start and end are added on the type, with <strong>+ Add Sales Dates</strong>.</td>
                         <td>A ticket with a price needs <x-doc-badge plan="pro" />; a zero-price ticket sells on any plan</td>
                     </tr>
                     <tr>
@@ -638,6 +630,18 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">The row appears only where an <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">AI key</a> is configured. On eventschedule.com it needs an Enterprise schedule: below that the row carries an Enterprise lock and opens the upgrade prompt, and a first event's form leaves it out. Reads are capped per day per schedule there, and the row says when the limit is reached. To photograph an agenda with a phone's camera instead, see <a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-link">Scan Agenda</a>.</p>
     </section>
 
+    <!-- Page content -->
+    <section id="page-content" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
+            </svg>
+            Page Content
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The Page content tab holds what the event page shows beside the event's own details, as a row each: <a href="#gallery" class="doc-link">Gallery</a>, the photos shown on the page, and <a href="#sponsors" class="doc-link">Sponsors</a>, which sponsors this one event shows. Each row says what it holds and opens in place; rows start closed, and one is open at a time. The tab's summary in the sidebar says what is set, for example "12 photos &middot; Sponsors: Acme, Beta".</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a free schedule both rows carry a Pro lock and say what the plan adds, and a first event's form leaves them out. The schedule's own gallery and sponsors are set in its own <a href="{{ route('marketing.docs.creating_schedules') }}#page-content" class="doc-link">Page content</a> tab.</p>
+    </section>
+
     <!-- Gallery -->
     <section id="gallery" class="doc-section">
         <h2 class="doc-heading">
@@ -647,12 +651,12 @@
             Gallery
             <x-doc-badge plan="pro" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">An event can show one flyer, and the Gallery tab adds as many photos as you like beside it, up to {{ \App\Utils\GalleryUtils::maxImages() }}: past editions, the room, the lineup. Guests see them on the event page and can open any photo full screen. The gallery is yours to curate; photos guests send in are separate and live under <a href="#fan-content" class="doc-link">Fan content</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">An event can show one flyer, and the Gallery row of the Page content tab adds as many photos as you like beside it, up to {{ \App\Utils\GalleryUtils::maxImages() }}: past editions, the room, the lineup. Guests see them on the event page and can open any photo full screen. The gallery is yours to curate; photos guests send in are separate and live under <a href="#fan-content" class="doc-link">Fan content</a>.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Photos</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Add photos</strong>, drag photos onto the tab, or paste one. Each photo uploads as soon as you add it, so you can keep editing while they finish. Large photos are resized in your browser before they upload, and the location a phone stores in a photo is removed before it is published. JPG, PNG, WebP and GIF work; an iPhone's HEIC photos are converted when you pick them from the phone itself.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Add photos</strong>, drag photos onto the gallery, or paste one. Each photo uploads as soon as you add it, so you can keep editing while they finish. Large photos are resized in your browser before they upload, and the location a phone stores in a photo is removed before it is published. JPG, PNG, WebP and GIF work; an iPhone's HEIC photos are converted when you pick them from the phone itself.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Arranging, Captions and Credits</h4>
@@ -677,6 +681,43 @@
         </div>
     </section>
 
+    <!-- Sponsors -->
+    <section id="sponsors" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+            </svg>
+            Sponsors <x-doc-badge plan="pro" /></h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Sponsors row of the <a href="#page-content" class="doc-link">Page content</a> tab decides which sponsors this one event shows. By default an event shows the sponsors set on its schedule, unless the schedule has its sponsors hidden. The row can be used when the schedule you are editing in, or the one the event belongs to, is on Pro. Otherwise it carries a Pro lock, and saving the event clears any sponsors of its own it still has, which the save bar says first.</p>
+
+        {{-- The event-settings id stays here: the tab was called Event Settings, then Sponsors, and this is what it
+             held. Since 2026-10 it is a row of Page content. --}}
+        <h3 id="event-settings" class="doc-subheading">The Three Choices</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Press one of three choices. The row's summary says which is in force.</p>
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Same as schedule</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The event page displays the same sponsors configured on the schedule. This is the default. The choice names them on the form, says when the schedule has them hidden (the event page then shows none), or says the schedule has none.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">No sponsors</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Hide sponsors entirely on this event's page.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">This event's own</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Define sponsors for this event alone: fill in the form and click <strong class="text-gray-900 dark:text-white">Add Sponsor</strong>, then <strong class="text-gray-900 dark:text-white">+ Add Sponsor</strong> for the next. Each one needs a logo, plus an optional <strong class="text-gray-900 dark:text-white">Sponsor Name</strong>, <strong class="text-gray-900 dark:text-white">Website URL</strong>, and <strong class="text-gray-900 dark:text-white">Tier</strong> of Gold, Silver, or Bronze. Up to {{ config('app.max_sponsors') }} sponsors per event. They are shown on this event only, and the schedule's own sponsors are not changed. A sponsor you filled in and did not add is added when you save, as long as it has its logo.</p>
+            </div>
+        </div>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Leaving "This event's own" deletes the event's list</div>
+            <p>Choosing <strong>Same as schedule</strong> or <strong>No sponsors</strong> on an event that has sponsors of its own removes them when you save. The save bar reads <em>Saving removes this event's sponsors.</em> first, and choosing <strong>This event's own</strong> again before saving keeps them.</p>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Logos are uploaded when you save the event, and only 15 new ones can be queued per save: with a long list, save partway through and then carry on. To set the sponsors every event starts with, see <a href="{{ route('marketing.docs.creating_schedules') }}#sponsors" class="doc-link">Schedule Sponsors</a>.</p>
+    </section>
+
     <!-- Listing -->
     <section id="listing" class="doc-section">
         <h2 class="doc-heading">
@@ -686,7 +727,7 @@
             </svg>
             Listing
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Listing tab decides where and how the event is shown: the link it lives at, who can see it, its category, and the other schedules it appears on. Its summary in the sidebar reads, for example, "Public &middot; Concert".</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Listing tab decides where and how the event is shown: the link it lives at, who can see it, its category, the other schedules it appears on and, on a saved event, the calendars it is copied to. Its summary in the sidebar reads, for example, "Public &middot; Concert".</p>
 
         <x-doc-screenshot id="creating-events--listing" alt="The Listing tab of a new event: Visibility with Public chosen, Category, and the Also list on checkboxes" />
 
@@ -714,6 +755,10 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Also list on</span></td>
                         <td>The other schedules this event can appear on. See <a href="#schedules" class="doc-link">Also List On</a> below.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Calendar sync</span></td>
+                        <td>On a saved event whose schedule sends its events to a connected Google or Outlook calendar: whether this event is in each calendar, with <strong>Sync Now</strong> and <strong>Remove</strong>. See <a href="#google-calendar" class="doc-link">Calendar Sync</a> below.</td>
                     </tr>
                 </tbody>
             </table>
@@ -826,7 +871,7 @@
             </svg>
             Also List On
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Also list on</strong>, the last field of the <a href="#listing" class="doc-link">Listing</a> tab, lists your other schedules and then, under <strong class="text-gray-900 dark:text-white">Schedules you follow</strong>, the ones you follow that take requests. Tick as many as you like and the event shows up on each of them; a schedule that reviews what it lists is marked <strong class="text-gray-900 dark:text-white">Needs approval</strong>. The event's own venue and participants are not in the list: they are decided by the Event and <a href="#participants" class="doc-link">Participants</a> tabs, and a line above the list names them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Also list on</strong>, the last field of the <a href="#listing" class="doc-link">Listing</a> tab before Calendar sync, lists your other schedules and then, under <strong class="text-gray-900 dark:text-white">Schedules you follow</strong>, the ones you follow that take requests. Tick as many as you like and the event shows up on each of them; a schedule that reviews what it lists is marked <strong class="text-gray-900 dark:text-white">Needs approval</strong>. The event's own venue and participants are not in the list: they are decided by the Event and <a href="#participants" class="doc-link">Participants</a> tabs, and a line above the list names them.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Every schedule in the list has a verified email address or phone number, and one of these is true:</p>
         <ul class="doc-list mb-6">
@@ -849,9 +894,9 @@
             </svg>
             Calendar Sync
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A published event is copied to your connected calendar each time you save it. The <strong class="text-gray-900 dark:text-white">Calendar sync</strong> tab is where you see that for one event and step in by hand. It appears on a saved event only, and only when the schedule is connected to a calendar and set to send its events there.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A published event is copied to your connected calendar each time you save it. <strong class="text-gray-900 dark:text-white">Calendar sync</strong>, at the end of the <a href="#listing" class="doc-link">Listing</a> tab, is where you see that for one event and step in by hand. It appears on a saved event only, and only when the schedule is connected to a calendar and set to send its events there.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The tab has a row per calendar: <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, or both. Each row reads <strong class="text-gray-900 dark:text-white">Synced</strong> or <strong class="text-gray-900 dark:text-white">Not synced</strong>, with <strong class="text-gray-900 dark:text-white">Sync Now</strong> to copy the event at once or <strong class="text-gray-900 dark:text-white">Remove</strong> to take it off the calendar. Both act immediately, not with Save (with unsaved changes on the form they ask you to save first), and anything that goes wrong is said in the calendar's own row. An event that is not synced says why: a Draft or Internal event is not copied because only an event guests can see is, and any other event is copied the next time you save it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">It has a line per calendar: <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, or both. Each line reads <strong class="text-gray-900 dark:text-white">Synced</strong> or <strong class="text-gray-900 dark:text-white">Not synced</strong>, with <strong class="text-gray-900 dark:text-white">Sync Now</strong> to copy the event at once or <strong class="text-gray-900 dark:text-white">Remove</strong> to take it off the calendar. Both act immediately, not with Save (with unsaved changes on the form they ask you to save first), and anything that goes wrong is said on the calendar's own line. After either one the page comes back on Calendar sync. An event that is not synced says why: a Draft or Internal event is not copied because only an event guests can see is, and any other event is copied the next time you save it. The Listing tab's summary names a calendar the event should be in and is not, as in "Public &middot; Google: Not synced".</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">For connecting a calendar and choosing the direction of the sync, see <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-google" class="doc-link">Google Calendar</a> and <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="doc-link">Outlook Calendar</a>.</p>
 
@@ -1004,42 +1049,6 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             For more on reading and managing the responses, see <a href="{{ route('marketing.docs.tickets') }}#feedback" class="doc-link">Selling Tickets &rarr; Post-Event Feedback</a>.
         </p>
-    </section>
-
-    <!-- Sponsors -->
-    <section id="sponsors" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-            </svg>
-            Sponsors <x-doc-badge plan="pro" /></h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Sponsors tab, the last one of the event form, decides which sponsors this one event shows. By default an event shows the sponsors set on its schedule, unless the schedule has its sponsors hidden. The tab appears when the schedule you are editing in, or the one the event belongs to, is on Pro.</p>
-
-        {{-- The event-settings id stays here: the tab was called Event Settings until 2026-10, and this is what it held. --}}
-        <h3 id="event-settings" class="doc-subheading">The Three Choices</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Press one of three choices. The tab's summary in the sidebar says which is in force.</p>
-
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Same as schedule</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The event page displays the same sponsors configured on the schedule. This is the default. The choice names them on the form, says when the schedule has them hidden (the event page then shows none), or says the schedule has none.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">No sponsors</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Hide sponsors entirely on this event's page.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">This event's own</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Define sponsors for this event alone: fill in the form and click <strong class="text-gray-900 dark:text-white">Add Sponsor</strong>, then <strong class="text-gray-900 dark:text-white">+ Add Sponsor</strong> for the next. Each one needs a logo, plus an optional <strong class="text-gray-900 dark:text-white">Sponsor Name</strong>, <strong class="text-gray-900 dark:text-white">Website URL</strong>, and <strong class="text-gray-900 dark:text-white">Tier</strong> of Gold, Silver, or Bronze. Up to {{ config('app.max_sponsors') }} sponsors per event. They are shown on this event only, and the schedule's own sponsors are not changed. A sponsor you filled in and did not add is added when you save, as long as it has its logo.</p>
-            </div>
-        </div>
-
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Leaving "This event's own" deletes the event's list</div>
-            <p>Choosing <strong>Same as schedule</strong> or <strong>No sponsors</strong> on an event that has sponsors of its own removes them when you save. The save bar reads <em>Saving removes this event's sponsors.</em> first, and choosing <strong>This event's own</strong> again before saving keeps them.</p>
-        </div>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Logos are uploaded when you save the event, and only 15 new ones can be queued per save: with a long list, save partway through and then carry on. To set the sponsors every event starts with, see <a href="{{ route('marketing.docs.creating_schedules') }}#sponsors" class="doc-link">Schedule Sponsors</a>.</p>
     </section>
 
     <!-- WhatsApp -->

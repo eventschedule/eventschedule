@@ -24,7 +24,8 @@
             <x-doc-nav-link href="#razorpay">Razorpay</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#installments">Installment Payments</x-doc-nav-link>
-        <x-doc-nav-link href="#options">Options</x-doc-nav-link>
+        <x-doc-nav-link href="#checkout">Checkout</x-doc-nav-link>
+        <x-doc-nav-link href="#sales-rules">Sales Rules</x-doc-nav-link>
         <x-doc-nav-link href="#promo-codes">Promo Codes</x-doc-nav-link>
         <x-doc-nav-link href="#add-ons">Add-ons</x-doc-nav-link>
         <x-doc-nav-link href="#allocated-seating">Allocated Seating</x-doc-nav-link>
@@ -59,7 +60,7 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Ticketing is set up and run in three places:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">The Tickets tab of an event.</strong> Open an event for editing and choose <strong class="text-gray-900 dark:text-white">Tickets</strong>. It holds how people sign up, the ticket types, and the <strong class="text-gray-900 dark:text-white">Payment</strong>, <strong class="text-gray-900 dark:text-white">Options</strong>, <strong class="text-gray-900 dark:text-white">Promo Codes</strong> and <strong class="text-gray-900 dark:text-white">Add-ons</strong> rows.</li>
+            <li><strong class="text-gray-900 dark:text-white">The Tickets tab of an event.</strong> Open an event for editing and choose <strong class="text-gray-900 dark:text-white">Tickets</strong>. It holds how people sign up, the ticket types, and the <strong class="text-gray-900 dark:text-white">Payment</strong>, <strong class="text-gray-900 dark:text-white">Checkout</strong>, <strong class="text-gray-900 dark:text-white">Sales rules</strong>, <strong class="text-gray-900 dark:text-white">Promo Codes</strong> and <strong class="text-gray-900 dark:text-white">Add-ons</strong> rows.</li>
             <li><strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales.</strong> Every order and registration, with refunds, the door scanner, the check-in dashboard, and tabs for the waitlist, feedback, passes, installments and gift cards. See <a href="#managing-sales" class="doc-link">Managing Sales</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods.</strong> Where you connect Stripe, PayPal and the other payment methods, once for your account. See <a href="#payment" class="doc-link">Payment</a>.</li>
         </ul>
@@ -226,7 +227,7 @@
     <section id="ticket-presets" class="doc-section">
         <h3 class="doc-subheading">Ticket presets</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A preset is a ticket setup with a name, kept on the schedule: <em>Free event</em>, <em>Regular</em> at 5, <em>Special</em> at 20. They are set up under <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-presets" class="doc-link">Edit schedule &rarr; Tickets &rarr; Ticket presets</a>, and one of them is the default every new event starts on.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">On the Tickets tab the presets are a row of chips above the three tiles, with <strong class="text-gray-900 dark:text-white">Manage presets</strong> beside them. Pressing one fills the tab: how people sign up, the ticket types and prices, payment, options, promo codes and add-ons. The chip stays lit while the tab still matches it, and goes out when you change how people sign up, a ticket type, a price or a quantity, the currency, the payment method or its instructions, or the limit. If the preset itself changed after the event was saved, the chip stays lit and a note above the tiles offers the preset as it is now; the event keeps its own tickets until you press it. Once somebody has a ticket, or the event has a seating plan, the chips rest: a preset can no longer replace ticket types people hold.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On the Tickets tab the presets are a row of chips above the three tiles, with <strong class="text-gray-900 dark:text-white">Manage presets</strong> beside them. Pressing one fills the tab: how people sign up, the ticket types and prices, payment, checkout and sales rules, promo codes and add-ons. The chip stays lit while the tab still matches it, and goes out when you change how people sign up, a ticket type, a price or a quantity, the currency, the payment method or its instructions, or the limit. If the preset itself changed after the event was saved, the chip stays lit and a note above the tiles offers the preset as it is now; the event keeps its own tickets until you press it. Once somebody has a ticket, or the event has a seating plan, the chips rest: a preset can no longer replace ticket types people hold.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">To keep a setup as a preset, turn on <strong class="text-gray-900 dark:text-white">Save these tickets as a preset</strong> at the bottom of the tab and give it a name. The same name replaces that preset, a new name adds one, and <strong class="text-gray-900 dark:text-white">Use for new events</strong> makes it the default. The save bar says which it will do.</p>
         <h4 id="ticket-presets-team" class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">When the team picks from presets</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-4">With the owner's <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-presets-team" class="doc-link">Team members pick from these presets</a> on, a team member's Tickets tab holds the presets and nothing else: they choose one and see what the event will have, and cannot type a price. A new event starts on the default, and is on the owner's account, so its online payments go to the owner. An event set up by hand shows as <strong class="text-gray-900 dark:text-white">Custom</strong> and keeps its tickets unless another preset is chosen. When the owner changes a preset after an event was saved with it, the event keeps its tickets and its tile says the preset changed since, with <strong class="text-gray-900 dark:text-white">Use Regular as it is now</strong> (in that preset's name) to take it. Once somebody holds a ticket or a reservation (an unpaid or a refunded order counts), the event's tickets stay as they are until the owner changes them. The same rule holds for events added through the <a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API</a> and the imports; an event that comes in through calendar sync arrives with tickets off.</p>
@@ -241,17 +242,17 @@
             <li>Edit your event and open the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab</li>
             <li>Press <strong class="text-gray-900 dark:text-white">Free registration</strong></li>
             <li>Optionally set a <strong class="text-gray-900 dark:text-white">Registration Limit</strong>, the most sign-ups each date takes. Leave it blank for unlimited</li>
-            <li>Optionally open the <strong class="text-gray-900 dark:text-white">More options</strong> row under it to ask for a phone number, write <strong class="text-gray-900 dark:text-white">Registration Notes</strong> or add custom fields. See <a href="#options" class="doc-link">Options</a></li>
+            <li>Optionally open the <strong class="text-gray-900 dark:text-white">Registration form</strong> row under it to ask for a phone number, write <strong class="text-gray-900 dark:text-white">Registration notes</strong> or add custom fields. See <a href="#checkout" class="doc-link">Checkout</a></li>
             <li>Save the event</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors then see a <strong class="text-gray-900 dark:text-white">Register</strong> button on your event page. After registering they receive a confirmation email with a QR code for check-in, and the registration appears in your <a href="#managing-sales" class="doc-link">Sales</a> list, where its total reads <em>Registered</em>. Whatever you write in <strong class="text-gray-900 dark:text-white">Registration Notes</strong> (directions, parking, a dress code) goes into that email and onto their ticket.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors then see a <strong class="text-gray-900 dark:text-white">Register</strong> button on your event page. After registering they receive a confirmation email with a QR code for check-in, and the registration appears in your <a href="#managing-sales" class="doc-link">Sales</a> list, where its total reads <em>Registered</em>. Whatever you write in <strong class="text-gray-900 dark:text-white">Registration notes</strong> (directions, parking, a dress code) goes into that email and onto their ticket.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Registrants can cancel themselves from the ticket page linked in their email, which frees the spot again.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">The Registration Limit is per date.</strong> On a recurring event each occurrence keeps its own count, so a limit of 30 means 30 people per date, not 30 across the series.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Registration never asks <a href="#plan-table" class="doc-link">which plan you are on</a>: the sign-ups, the limit, the <a href="#waitlist" class="doc-link">waitlist</a> on a full date and the <a href="#embed-widget" class="doc-link">RSVP embed widget</a> are free on every plan. Two things in the <strong class="text-gray-900 dark:text-white">More options</strong> row need Pro: custom fields, and <strong class="text-gray-900 dark:text-white">Individual tickets</strong>, which the form locks below Pro.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Registration never asks <a href="#plan-table" class="doc-link">which plan you are on</a>: the sign-ups, the limit, the <a href="#waitlist" class="doc-link">waitlist</a> on a full date and the <a href="#embed-widget" class="doc-link">RSVP embed widget</a> are free on every plan. Two things in the <strong class="text-gray-900 dark:text-white">Registration form</strong> row need Pro: custom fields, and <strong class="text-gray-900 dark:text-white">Individual tickets</strong>, which the form locks below Pro.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">If you have <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhooks</x-link> configured, registrations fire <code class="doc-inline-code">sale.created</code> and cancellations fire <code class="doc-inline-code">sale.cancelled</code>.</p>
     </section>
@@ -259,7 +260,7 @@
     <!-- Ticketing -->
     <section id="ticketing" class="doc-section">
         <h3 class="doc-subheading">Sell tickets</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The middle tile, for paid events and for free ones that need more than one ticket type. The ticket types appear under the tiles, and four rows under them hold everything else. Creating ticket types and giving tickets away work on the Free plan; <a href="#plan-table" class="doc-link">charging for one</a> needs Pro.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The middle tile, for paid events and for free ones that need more than one ticket type. The ticket types appear under the tiles, and five rows under them hold everything else. Creating ticket types and giving tickets away work on the Free plan; <a href="#plan-table" class="doc-link">charging for one</a> needs Pro.</p>
 
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Setting up ticket sales</h4>
         <ol class="doc-list doc-list-numbered mb-6">
@@ -302,7 +303,7 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">A <strong class="text-gray-900 dark:text-white">Buy Tickets</strong> button then appears on your event page, or <strong class="text-gray-900 dark:text-white">Get Tickets</strong> when every type is free. Both labels can be reworded under <strong class="text-gray-900 dark:text-white">Customize &rarr; Custom Labels</strong> <x-doc-badge plan="pro" /> on the schedule's edit page.</p>
 
-        <h4 id="ticket-rows" class="text-base font-semibold text-gray-900 dark:text-white mb-4">The four rows</h4>
+        <h4 id="ticket-rows" class="text-base font-semibold text-gray-900 dark:text-white mb-4">The five rows</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Under the ticket types, each row says what it holds on one line, or <em>None</em> while it holds nothing. Press a row to open it in place; one is open at a time.</p>
 
         <div class="doc-table-wrap">
@@ -321,9 +322,14 @@
                         <td>Free; installments are Pro</td>
                     </tr>
                     <tr>
-                        <td><a href="#options" class="doc-link">Options</a></td>
-                        <td>Checkout switches, custom fields, ticket notes and a terms link.</td>
-                        <td>Free; two settings are Pro</td>
+                        <td><a href="#checkout" class="doc-link">Checkout</a></td>
+                        <td>What a buyer is asked and told: a phone number, your own questions, Individual tickets, a terms link and ticket notes. On a Free registration event it is titled <strong>Registration form</strong> and is the only row.</td>
+                        <td>Free; custom fields per order and Individual tickets are Pro</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#sales-rules" class="doc-link">Sales rules</a></td>
+                        <td>How sales run: selling after the event starts, showing sold-out types, and releasing unpaid orders. Its line starts with <em>Sales dates</em> when a ticket type has any.</td>
+                        <td>Free</td>
                     </tr>
                     <tr>
                         <td><a href="#promo-codes" class="doc-link">Promo Codes</a></td>
@@ -408,7 +414,7 @@
                     </tr>
                     <tr>
                         <td>Custom Fields (Per Ticket)</td>
-                        <td>Questions that belong to one ticket type, such as a meal choice on the dinner ticket. A buyer is asked them once when their order includes that type, or once for each guest when <a href="#options" class="doc-link">Individual tickets</a> and <strong class="text-gray-900 dark:text-white">Collect ticket fields per guest</strong> are on. Added with <strong class="text-gray-900 dark:text-white">+ Add Field</strong>, up to 10 per ticket type.</td>
+                        <td>Questions that belong to one ticket type, such as a meal choice on the dinner ticket. A buyer is asked them once when their order includes that type, or once for each guest when <a href="#checkout" class="doc-link">Individual tickets</a> and <strong class="text-gray-900 dark:text-white">Collect ticket fields per guest</strong> are on. Added with <strong class="text-gray-900 dark:text-white">+ Add Field</strong>, up to 10 per ticket type.</td>
                     </tr>
                     <tr>
                         <td><a href="#volume-discount" class="doc-link">Volume Discount</a></td>
@@ -423,16 +429,12 @@
                         <td>Text shown to buyers under the ticket type. Added with <strong class="text-gray-900 dark:text-white">+ Add Description</strong>; supports Markdown.</td>
                     </tr>
                     <tr>
+                        <td>Sales dates</td>
+                        <td>When this type is on sale: <strong class="text-gray-900 dark:text-white">Ticket sales start</strong> and <strong class="text-gray-900 dark:text-white">Ticket sales end</strong>, each one absolute date and time, so an early-bird type can close on a Friday while the general one opens on the Saturday. Added with <strong class="text-gray-900 dark:text-white">+ Add Sales Dates</strong>; <strong class="text-gray-900 dark:text-white">Remove</strong> clears this type's two dates only. A type with neither is on sale for as long as the event sells tickets (see <a href="#sales-rules" class="doc-link">Sales rules</a>).</td>
+                    </tr>
+                    <tr>
                         <td>Pass or subscription <x-doc-badge plan="pro" /></td>
                         <td>The switch <strong class="text-gray-900 dark:text-white">This is a pass or subscription (multi-use)</strong> turns the type into a multi-use pass. See <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">Subscriptions &amp; Passes</a>.</td>
-                    </tr>
-                    <tr>
-                        <td>Ticket sales start</td>
-                        <td>One absolute date and time at which this type goes on sale. Appears once <strong class="text-gray-900 dark:text-white">Set when sales start and end</strong> is on, in the <a href="#options" class="doc-link">Options</a> row.</td>
-                    </tr>
-                    <tr>
-                        <td>Ticket sales end</td>
-                        <td>One absolute date and time at which this type stops selling. Appears with the start.</td>
                     </tr>
                 </tbody>
             </table>
@@ -478,7 +480,7 @@
             <li>Save the event</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors take a free ticket through the same checkout, with nothing to pay, and the button on the event page reads <strong class="text-gray-900 dark:text-white">Get Tickets</strong>. They receive a confirmation email with a QR code, and you have a list of who is coming. Add <strong class="text-gray-900 dark:text-white">Ticket Notes</strong> (in the <a href="#options" class="doc-link">Options</a> row) to include directions or other instructions in that email. A holder of a free ticket can cancel it themselves from their ticket page, which releases the spot; paid orders are cancelled by you from the <a href="#managing-sales" class="doc-link">Sales</a> page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors take a free ticket through the same checkout, with nothing to pay, and the button on the event page reads <strong class="text-gray-900 dark:text-white">Get Tickets</strong>. They receive a confirmation email with a QR code, and you have a list of who is coming. Add <strong class="text-gray-900 dark:text-white">Ticket notes</strong> (in the <a href="#checkout" class="doc-link">Checkout</a> row) to include directions or other instructions in that email. A holder of a free ticket can cancel it themselves from their ticket page, which releases the spot; paid orders are cancelled by you from the <a href="#managing-sales" class="doc-link">Sales</a> page.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">A ticket type priced at zero sells on <a href="#plan-table" class="doc-link">every plan</a>, Free included. On a Free schedule whose event mixes a free tier with paid ones, the free tier stays on sale and only the paid rows sit out until you subscribe.</p>
 
@@ -810,7 +812,7 @@
             <li>Choose a secret, save, and enter the same secret in the row's <strong class="text-gray-900 dark:text-white">Webhook Secret</strong> field</li>
         </ol>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Test Mode and Live Mode each need their own webhook, so add it again in the mode you sell in. Changing the Key ID from test to live, or back, clears a saved webhook secret, because the webhook belongs to the other mode. While no secret is saved, the row reads <strong class="text-gray-900 dark:text-white">No webhook</strong>.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">With the webhook, a buyer who pays but never comes back still gets their ticket, and a checkout nobody finishes gives its seats back when its payment page expires, about half an hour later. Without it, those seats stay held, so turn on <a href="#options" class="doc-link">Expire unpaid tickets</a> on the event. A buyer who paid and did not come back shows as unpaid on the Sales page: find the payment in Razorpay under <strong class="text-gray-900 dark:text-white">Payment Links</strong> by the buyer's email and press <strong class="text-gray-900 dark:text-white">Mark Paid</strong>, or, if the sale has already expired, refund the payment in Razorpay.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">With the webhook, a buyer who pays but never comes back still gets their ticket, and a checkout nobody finishes gives its seats back when its payment page expires, about half an hour later. Without it, those seats stay held, so turn on <a href="#sales-rules" class="doc-link">Expire unpaid tickets</a> on the event. A buyer who paid and did not come back shows as unpaid on the Sales page: find the payment in Razorpay under <strong class="text-gray-900 dark:text-white">Payment Links</strong> by the buyer's email and press <strong class="text-gray-900 dark:text-white">Mark Paid</strong>, or, if the sale has already expired, refund the payment in Razorpay.</p>
 
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Your site may already have an account</div>
@@ -893,14 +895,16 @@
     </section>
 
     <!-- Options -->
-    <section id="options" class="doc-section">
+    {{-- The two rows below were one "Options" row until 2026-10, and links from outside still name it. --}}
+    <section id="checkout" class="doc-section">
+        <span id="options" aria-hidden="true"></span>
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
             </svg>
-            Options
+            Checkout (Registration form on free registration)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The second row of the Tickets tab holds the checkout settings that are not about money. On a <a href="#registration" class="doc-link">Free registration</a> event it is titled <strong class="text-gray-900 dark:text-white">More options</strong> and holds only the phone number, Individual tickets, the custom fields and the notes. The row reads <em>None</em> until something in it is on, then names what is. Top to bottom:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The row under <a href="#payment-row" class="doc-link">Payment</a> holds what a buyer is asked and told. On a <a href="#registration" class="doc-link">Free registration</a> event it is titled <strong class="text-gray-900 dark:text-white">Registration form</strong> and is the only row, holding the phone number, Individual tickets, the custom fields and the notes. The row reads <em>None</em> until something in it is on, then names what is. Top to bottom:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -914,8 +918,13 @@
                 <tbody>
                     <tr>
                         <td>Ask for phone number</td>
-                        <td>Adds a phone field to the checkout form. Two tick boxes appear once it is on: <strong class="text-gray-900 dark:text-white">Required</strong> and <strong class="text-gray-900 dark:text-white">Country code</strong>. The number is stored on the sale, shown in the Sales list and included in the <a href="#export" class="doc-link">CSV export</a>.</td>
+                        <td>Adds a phone field to the form. Two tick boxes appear once it is on: <strong class="text-gray-900 dark:text-white">Required</strong> and <strong class="text-gray-900 dark:text-white">Country code</strong>. The number is stored on the sale, shown in the Sales list and included in the <a href="#export" class="doc-link">CSV export</a>.</td>
                         <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#checkout-fields" class="doc-link">Custom Fields (Per Order)</a></td>
+                        <td>Your own questions, asked once for the whole order. See below. On a free schedule the row says what Pro adds in their place; questions an event was given while on Pro are still asked, and changing them needs Pro.</td>
+                        <td>Pro</td>
                     </tr>
                     <tr>
                         <td>Individual tickets</td>
@@ -923,13 +932,61 @@
                         <td>Pro</td>
                     </tr>
                     <tr>
-                        <td>Allow sales after event starts</td>
-                        <td>Keeps selling until the event ends (start time plus duration) instead of stopping at the start time.</td>
+                        <td>Terms URL</td>
+                        <td>A link to your own terms and conditions, printed on every ticket under <em>Terms &amp; Conditions</em>. Leave it blank and the ticket links the installation's own terms of service instead. Buyers are not asked to accept it at checkout.</td>
                         <td>Free</td>
                     </tr>
                     <tr>
-                        <td>Set when sales start and end</td>
-                        <td>Reveals the sales start and end fields on each ticket type, described under <a href="#ticket-settings" class="doc-link">Ticket Types</a>.</td>
+                        <td>Ticket notes</td>
+                        <td>Text included in the confirmation email and printed on the attendee's ticket (directions, parking, dress code, what to bring). Supports <a href="{{ route('marketing.docs.creating_schedules') }}#available-variables" class="doc-link">template variables</a> such as <code class="doc-inline-code">{event_name}</code> and <code class="doc-inline-code">{venue}</code>. On a Free registration event the same field is labelled <strong class="text-gray-900 dark:text-white">Registration notes</strong>.</td>
+                        <td>Free</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Terms URL belongs to ticket sales and is not on the Registration form. The form locks <strong class="text-gray-900 dark:text-white">Individual tickets</strong> below Pro, with a <strong class="text-gray-900 dark:text-white">See what Pro adds</strong> link under it.</p>
+
+        <h3 id="checkout-fields" class="doc-subheading">Custom Checkout Fields <x-doc-badge plan="pro" /></h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout: dietary requirements, a T-shirt size, a company name, an emergency contact, how they heard about the event. Fields added here, under <strong class="text-gray-900 dark:text-white">Custom Fields (Per Order)</strong>, are asked once for the whole order, and an event takes up to 10 of them.</p>
+
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Edit your event</li>
+            <li>On the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, open the <strong class="text-gray-900 dark:text-white">Checkout</strong> row (<strong class="text-gray-900 dark:text-white">Registration form</strong> on a Free registration event)</li>
+            <li>Under <strong class="text-gray-900 dark:text-white">Custom Fields (Per Order)</strong>, choose <strong class="text-gray-900 dark:text-white">+ Add Field</strong></li>
+            <li>Give it a <strong class="text-gray-900 dark:text-white">Field Name</strong> and a <strong class="text-gray-900 dark:text-white">Type</strong>: Text, Multi-line Text, Yes/No, Date, Dropdown or Multi-select. The last two take a list of <strong class="text-gray-900 dark:text-white">Options</strong></li>
+            <li>Tick <strong class="text-gray-900 dark:text-white">Required</strong> if buyers must answer, and drag the fields into the order you want them asked</li>
+            <li>Save the event</li>
+        </ol>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Responses are stored with each sale, shown when you open the sale's row on the <a href="#managing-sales" class="doc-link">Sales</a> page, and included in the <a href="#export" class="doc-link">CSV export</a> as one column per field.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">To ask something of one ticket type only, add the field on the ticket type itself: choose <strong class="text-gray-900 dark:text-white">+ Add Field</strong> under it. Those fields are asked once per order that includes the type, each ticket type takes up to 10 of them, and they work on every plan. To have every attendee answer individually (a meal choice, a name for a badge), turn on <strong class="text-gray-900 dark:text-white">Individual tickets</strong> and <strong class="text-gray-900 dark:text-white">Collect ticket fields per guest</strong> above.</p>
+    </section>
+
+    <!-- Sales rules -->
+    <section id="sales-rules" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+            Sales Rules
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The row after Checkout holds how ticket sales run. Every switch in it is off until you turn it on, and it is not shown on a Free registration event. A ticket type's own sales start and end are set on the type, with <strong class="text-gray-900 dark:text-white">+ Add Sales Dates</strong> (see <a href="#ticket-settings" class="doc-link">Ticket Types</a>); when any type has them, this row's line says so first, as in <em>Sales dates, Show unavailable tickets</em>.</p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>What it does</th>
+                        <th>Plan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Allow sales after event starts</td>
+                        <td>Keeps selling until the event ends (start time plus duration) instead of stopping at the start time.</td>
                         <td>Free</td>
                     </tr>
                     <tr>
@@ -942,42 +999,9 @@
                         <td>Releases unpaid reservations after the number of hours you enter, returning them to stock. Only appears when at least one ticket type has both a price and a limited quantity, since there is nothing to release otherwise.</td>
                         <td>Free</td>
                     </tr>
-                    <tr>
-                        <td><a href="#checkout-fields" class="doc-link">Custom Fields (Per Order)</a></td>
-                        <td>Your own questions, asked once for the whole order. See below.</td>
-                        <td>Pro</td>
-                    </tr>
-                    <tr>
-                        <td>Ticket Notes</td>
-                        <td>Text included in the confirmation email and printed on the attendee's ticket (directions, parking, dress code, what to bring). Supports <a href="{{ route('marketing.docs.creating_schedules') }}#available-variables" class="doc-link">template variables</a> such as <code class="doc-inline-code">{event_name}</code> and <code class="doc-inline-code">{venue}</code>. On a Free registration event the same field is labelled <strong class="text-gray-900 dark:text-white">Registration Notes</strong>.</td>
-                        <td>Free</td>
-                    </tr>
-                    <tr>
-                        <td>Terms URL</td>
-                        <td>A link to your own terms and conditions, printed on every ticket under <em>Terms &amp; Conditions</em>. Leave it blank and the ticket links the installation's own terms of service instead. Buyers are not asked to accept it at checkout.</td>
-                        <td>Free</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The four switches from <strong class="text-gray-900 dark:text-white">Allow sales after event starts</strong> to <strong class="text-gray-900 dark:text-white">Expire unpaid tickets</strong>, and the Terms URL, belong to ticket sales and are not shown on a Free registration event. The form locks <strong class="text-gray-900 dark:text-white">Individual tickets</strong> below Pro, with a <strong class="text-gray-900 dark:text-white">See what Pro adds</strong> link under it.</p>
-
-        <h3 id="checkout-fields" class="doc-subheading">Custom Checkout Fields <x-doc-badge plan="pro" /></h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout: dietary requirements, a T-shirt size, a company name, an emergency contact, how they heard about the event. Fields added here, under <strong class="text-gray-900 dark:text-white">Custom Fields (Per Order)</strong>, are asked once for the whole order, and an event takes up to 10 of them.</p>
-
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>Edit your event</li>
-            <li>On the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, open the <strong class="text-gray-900 dark:text-white">Options</strong> row</li>
-            <li>Under <strong class="text-gray-900 dark:text-white">Custom Fields (Per Order)</strong>, choose <strong class="text-gray-900 dark:text-white">+ Add Field</strong></li>
-            <li>Give it a <strong class="text-gray-900 dark:text-white">Field Name</strong> and a <strong class="text-gray-900 dark:text-white">Type</strong>: Text, Multi-line Text, Yes/No, Date, Dropdown or Multi-select. The last two take a list of <strong class="text-gray-900 dark:text-white">Options</strong></li>
-            <li>Tick <strong class="text-gray-900 dark:text-white">Required</strong> if buyers must answer, and drag the fields into the order you want them asked</li>
-            <li>Save the event</li>
-        </ol>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Responses are stored with each sale, shown when you open the sale's row on the <a href="#managing-sales" class="doc-link">Sales</a> page, and included in the <a href="#export" class="doc-link">CSV export</a> as one column per field.</p>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6">To ask something of one ticket type only, add the field on the ticket type itself: choose <strong class="text-gray-900 dark:text-white">+ Add Field</strong> under it. Those fields are asked once per order that includes the type, each ticket type takes up to 10 of them, and they work on every plan. To have every attendee answer individually (a meal choice, a name for a badge), turn on <strong class="text-gray-900 dark:text-white">Individual tickets</strong> and <strong class="text-gray-900 dark:text-white">Collect ticket fields per guest</strong> above.</p>
     </section>
 
     <!-- Promo Codes -->
@@ -1412,7 +1436,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-green-700 dark:text-green-400">Admit 2 people</span></td>
-                        <td>Checked in. One scan admits every ticket on the order (add-ons are not counted as people). With <a href="#options" class="doc-link">Individual tickets</a> each attendee has their own code.</td>
+                        <td>Checked in. One scan admits every ticket on the order (add-ons are not counted as people). With <a href="#checkout" class="doc-link">Individual tickets</a> each attendee has their own code.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-amber-700 dark:text-amber-400">Already checked in</span></td>

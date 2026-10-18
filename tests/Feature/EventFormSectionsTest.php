@@ -97,13 +97,14 @@ class EventFormSectionsTest extends TestCase
         $event = $this->createEvent($this->role);
 
         $this->assertSame(
-            ['section-details', 'section-tickets', 'section-participants', 'section-agenda', 'section-gallery', 'section-listing', 'section-engagement', 'section-event-settings'],
-            array_values(array_diff($this->tabs($this->page($this->editUrl($event))), ['section-calendar-sync'])),
+            ['section-details', 'section-tickets', 'section-participants', 'section-agenda', 'section-page', 'section-listing', 'section-engagement'],
+            $this->tabs($this->page($this->editUrl($event))),
         );
 
-        // The tabs that were folded into the Event tab and into Listing are not sections any more.
+        // The tabs that were folded into the Event tab, into Listing and into Page content are not
+        // sections any more.
         $html = $this->page($this->createUrl());
-        foreach (['section-venue', 'section-recurring', 'section-schedules', 'section-google-calendar', 'section-microsoft-calendar'] as $retired) {
+        foreach (['section-venue', 'section-recurring', 'section-schedules', 'section-google-calendar', 'section-microsoft-calendar', 'section-gallery', 'section-event-settings', 'section-calendar-sync'] as $retired) {
             $this->assertStringNotContainsString('id="'.$retired.'"', $html);
             $this->assertStringNotContainsString('data-section="'.$retired.'"', $html);
         }
@@ -116,7 +117,7 @@ class EventFormSectionsTest extends TestCase
         foreach (['create' => $this->createUrl(), 'edit' => $this->editUrl($event)] as $name => $url) {
             $html = $this->page($url);
             $tabs = $this->tabs($html);
-            $this->assertGreaterThanOrEqual(8, count($tabs), "sanity check: the {$name} page has its tabs");
+            $this->assertGreaterThanOrEqual(7, count($tabs), "sanity check: the {$name} page has its tabs");
 
             foreach ($tabs as $tab) {
                 $summary = '<span class="section-nav-summary" v-cloak :class="{ \'is-empty\': tabSummaries[\''.$tab.'\'].empty }"><bdi v-text="tabSummaries[\''.$tab.'\'].text"></bdi></span>';
@@ -161,7 +162,7 @@ class EventFormSectionsTest extends TestCase
             'section-participants' => ['members.0.email'],
             'section-agenda' => ['event_parts.0.name'],
             'section-listing' => ['slug', 'category_id', 'curators.0'],
-            'section-event-settings' => ['new_event_sponsor_name'],
+            'section-page' => ['new_event_sponsor_name', 'event_sponsor_logos.0'],
             // Anything that names no other tab is the Event tab's.
             'section-details' => ['name', 'venue_email', 'event_url', 'something_new'],
         ];
@@ -179,7 +180,11 @@ class EventFormSectionsTest extends TestCase
         $this->assertStringContainsString('activeTicketTab: "add_ons",', $this->pageWithErrors($url, ['addons.0.price']));
         $this->assertStringContainsString('activeTicketTab: "payment",', $this->pageWithErrors($url, ['payment_method']));
         $this->assertStringContainsString('activeTicketTab: "tickets",', $this->pageWithErrors($url, ['slug']));
-        $this->assertStringContainsString('activeTicketTab: "options",', $this->pageWithErrors($url, ['terms_url']));
+        $this->assertStringContainsString('activeTicketTab: "checkout",', $this->pageWithErrors($url, ['terms_url']));
+        $this->assertStringContainsString('activeTicketTab: "sales_rules",', $this->pageWithErrors($url, ['expire_unpaid_tickets']));
+        // And Page content opens its Sponsors row on a sponsor's error, and no row otherwise.
+        $this->assertStringContainsString('var onError = "sponsors";', $this->pageWithErrors($url, ['event_sponsor_logos.0']));
+        $this->assertStringContainsString('var onError = "";', $this->pageWithErrors($url, ['slug']));
         $this->assertStringContainsString('activeTicketTab: "payment",', $this->pageWithErrors($url, ['ticket_currency_code']));
         $this->assertStringContainsString('activeTicketTab: "tickets",', $this->pageWithErrors($url, ['seating_plan_id']));
     }
@@ -311,7 +316,9 @@ class EventFormSectionsTest extends TestCase
         $this->assertStringNotContainsString('Same as schedule (', $html, 'the first choice no longer reads as a second "Enabled"');
 
         $view = file_get_contents(resource_path('views/event/edit.blade.php'));
-        $this->assertStringContainsString("options: on.length ? { text: on.join(', '), empty: false } : { text: this.tabLabels.none, empty: true },", $view);
+        $this->assertStringContainsString("return list.length ? { text: list.join(', '), empty: false } : { text: this.tabLabels.none, empty: true };", $view);
+        $this->assertStringContainsString('checkout: line(asked),', $view);
+        $this->assertStringContainsString('sales_rules: line(rules),', $view);
         $this->assertStringNotContainsString("@json(__('messages.add_add_on')), empty: true", $view);
         $this->assertStringContainsString("return ! this.eventIsSaved && this.visibility === 'public' ? this.tabLabels.publish : this.tabLabels.save;", $view);
 
@@ -390,12 +397,20 @@ class EventFormSectionsTest extends TestCase
             $panel = $this->slice($html, '<div id="section-tickets"', 'id="section-participants"');
 
             $this->assertStringNotContainsString('class="ticket-tab text-center', $panel, 'the strip is gone');
-            foreach (['payment', 'options', 'promo_codes', 'add_ons'] as $row) {
+            $at = [];
+            foreach (['payment', 'checkout', 'sales_rules', 'promo_codes', 'add_ons'] as $row) {
                 // ticket-tab and data-tab are what the Help link reads (layouts/navigation).
                 $this->assertSame(1, preg_match_all('/<button type="button" class="event-subrow ticket-tab" data-tab="'.$row.'"[^>]*@click="toggleTicketRow\(\''.$row.'\'\)"/', $panel), "{$row} is a row");
                 $this->assertStringContainsString('v-text="ticketRows.'.$row.'.text"', $panel);
                 $this->assertStringContainsString('data-ticket-pane="'.$row.'"', $panel);
+                $at[$row] = strpos($panel, 'data-tab="'.$row.'"');
             }
+            // Payment, then what a buyer is asked and told, then how sales run (all off until turned
+            // on), then the extras.
+            $sorted = $at;
+            asort($sorted);
+            $this->assertSame(['payment', 'checkout', 'sales_rules', 'promo_codes', 'add_ons'], array_keys($sorted));
+            $this->assertStringNotContainsString('data-tab="options"', $panel, 'the two blocks once run together under one name');
             $this->assertStringContainsString('<div v-show="event.tickets_enabled" data-ticket-pane="tickets">', $panel, 'the ticket types are always showing while tickets are on');
             // Whatever the event's choice, no row is open on an ordinary load.
             $this->assertStringContainsString('activeTicketTab: "tickets",', $html);

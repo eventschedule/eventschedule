@@ -9,8 +9,8 @@
     Expects: $galleryContext ('event' | 'schedule'), $galleryMode, $galleryRole,
     $galleryCanUpgrade, $galleryImageCount. Optional: $galleryWrapperClass, the column the form's
     other tabs use (the event form's are wider than the schedule form's), and $galleryInRow, for
-    the schedule form, where the gallery is a row of Page content: the row's name is its heading,
-    and the tab's column already holds it.
+    both forms, where the gallery is a row of Page content: the row's name is its heading, and the
+    tab's column already holds it.
 --}}
 @php
     $galleryIsEvent = $galleryContext === 'event';

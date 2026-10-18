@@ -10,16 +10,16 @@
   // of the general note that events are public.
   $setupGuidePromise = $isFirstEventRun && \App\Utils\SetupGuide::surface() === 'dock';
 
-  // Participants, Agenda and Engagement fold behind "More options" on a first event: seven
-  // sections is a lot to face before anything is saved, and none of these three is needed to
-  // publish. Vue shows them again on request (showMoreSections), and showSection() opens the
-  // fold itself when something - a #hash, an invalid field - has to reach one of them.
+  // Every tab after Tickets folds behind "More options" on a first event: seven tabs is a lot to
+  // face before anything is saved, and none of those is needed to publish. Vue shows them again on
+  // request (showMoreSections), and showSection() opens the fold itself when something - a #hash,
+  // an invalid field - has to reach one of them.
   $moreSectionAttrs = $isFirstEventRun ? 'v-cloak v-show="showMoreSections"' : '';
   // The sections that carry those attributes, for the script: it opens the fold when something has
   // to reach one of them. Built here because a list with commas cannot be written inside the JSON
   // directive, which splits its argument on them.
   $foldedSectionIds = $isFirstEventRun
-      ? ['section-participants', 'section-agenda', 'section-gallery', 'section-listing', 'section-engagement', 'section-event-settings']
+      ? ['section-participants', 'section-agenda', 'section-page', 'section-listing', 'section-engagement']
       : [];
 
   // The Event tab's own gate. Its nav link, its section and the Listing tab (which holds fields that
@@ -47,7 +47,7 @@
       'section-participants' => ['members', 'member_'],
       'section-agenda' => ['event_parts', 'agenda_'],
       'section-listing' => ['slug', 'category_id', 'event_password', 'curators', 'curator_', 'is_draft', 'is_private', 'is_internal'],
-      'section-event-settings' => ['sponsor', 'event_sponsor', 'existing_event_sponsors', 'new_event_sponsor'],
+      'section-page' => ['sponsor', 'event_sponsor', 'existing_event_sponsors', 'new_event_sponsor'],
       'section-engagement' => ['fan_', 'feedback_', 'polls'],
   ];
   $errorSectionIds = [];
@@ -71,7 +71,7 @@
   foreach ([
       'promo_codes' => 'promo_codes', 'addons' => 'add_ons',
       'payment_' => 'payment', 'installment' => 'payment', 'ticket_currency_code' => 'payment',
-      'terms_url' => 'options', 'expire_unpaid' => 'options', 'custom_fields' => 'options', 'ticket_notes' => 'options',
+      'terms_url' => 'checkout', 'custom_fields' => 'checkout', 'ticket_notes' => 'checkout', 'expire_unpaid' => 'sales_rules',
       'tickets' => 'tickets', 'seating_plan' => 'tickets', 'total_tickets' => 'tickets',
   ] as $prefix => $innerTab) {
       if (collect($errors->keys())->contains(fn ($key) => str_starts_with($key, $prefix))) {
@@ -79,6 +79,9 @@
           break;
       }
   }
+
+  // Page content's rows, likewise: only the sponsors have rules of their own.
+  $pageTabOnError = collect($errors->keys())->contains(fn ($key) => (bool) preg_match('/^(sponsor|event_sponsor|existing_event_sponsors|new_event_sponsor)/', $key)) ? 'sponsors' : null;
 
   // The words the tab summaries and the save bar are built from. One array through one JSON
   // directive: translated text never goes into a Vue attribute.
@@ -88,11 +91,9 @@
           'section-tickets' => __('messages.tickets'),
           'section-participants' => __('messages.participants'),
           'section-agenda' => __('messages.agenda'),
-          'section-gallery' => __('messages.gallery'),
+          'section-page' => __('messages.page_content'),
           'section-listing' => __('messages.listing'),
-          'section-calendar-sync' => __('messages.calendar_sync'),
           'section-engagement' => __('messages.engagement'),
-          'section-event-settings' => __('messages.sponsors'),
       ],
       'visibility' => [
           'public' => __('messages.public'),
@@ -149,29 +150,38 @@
           'poll_unfinished' => __('messages.poll_needs_question_and_options'),
           'settings_on_plan' => (bool) $role->isPro(),
       ],
-      // The switches on the Tickets tab's Options row, named in its one-line summary.
-      'options' => [
+      // What the Tickets tab's Checkout and Sales rules rows have on, by each one's own label, in
+      // the order of the row.
+      'checkout' => [
           'ask_phone' => __('messages.ask_for_phone_number'),
+          'custom_fields' => __('messages.checkout_custom_fields'),
           'individual_tickets' => __('messages.individual_tickets'),
-          'sell_after_start' => __('messages.sell_after_start'),
-          'sales_dates' => __('messages.configure_sales_dates'),
-          'show_unavailable' => __('messages.show_unavailable_tickets'),
-          'custom_fields' => __('messages.custom_fields'),
+          'terms_url' => __('messages.terms_url'),
           'ticket_notes' => __('messages.ticket_notes'),
           'registration_notes' => __('messages.registration_notes'),
-          'terms_url' => __('messages.terms_url'),
-          'prompt' => __('messages.ticket_options_prompt'),
+      ],
+      'sales_rules' => [
+          'sales_dates' => __('messages.sales_dates'),
+          'sell_after_start' => __('messages.sell_after_start'),
+          'show_unavailable' => __('messages.show_unavailable_tickets'),
+          'expire_unpaid' => __('messages.expire_unpaid_tickets'),
       ],
       'no_sponsors' => __('messages.no_sponsors'),
       'sponsors' => __('messages.sponsors'),
+      'gallery' => __('messages.gallery'),
+      'gallery_hidden' => __('messages.gallery_hidden_title'),
       'copy' => __('messages.copy'),
       'copied' => __('messages.copied'),
   ];
 
-  // Sync changes reload the page, so these two are fixed for the life of it.
+  // What Listing's summary says about the calendars at the end of it: only one the event should be
+  // in and is not. A save copies a published event that is not cancelled (an Unlisted one as a
+  // private entry) and never a Draft or an Internal one, which both set is_draft, so "Not synced"
+  // on those would be on every one of them. Sync changes reload the page, so this is fixed for its life.
+  $calendarOwed = $event->exists && ! $event->is_draft && ! $event->is_cancelled;
   $calendarSummary = collect([
-      $showGoogleSync ? 'Google: '.($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain) ? __('messages.synced') : __('messages.not_synced')) : null,
-      $showMicrosoftSync ? 'Outlook: '.($event->isSyncedToMicrosoftCalendarForSubdomain(request()->subdomain) ? __('messages.synced') : __('messages.not_synced')) : null,
+      $showGoogleSync && $calendarOwed && ! $event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain) ? 'Google: '.__('messages.not_synced') : null,
+      $showMicrosoftSync && $calendarOwed && ! $event->isSyncedToMicrosoftCalendarForSubdomain(request()->subdomain) ? 'Outlook: '.__('messages.not_synced') : null,
   ])->filter()->implode(' · ');
 
   // What About says when folded: the short description, or failing that the start of the long one.
@@ -204,9 +214,27 @@
   $galleryCanUpgrade = config('app.hosted') && $user->isEditor($galleryRole->subdomain);
   $galleryState = \App\Utils\GalleryUtils::editorState($galleryRole, $event, $user);
   $galleryMode = is_demo_mode() ? 'readonly' : ($galleryUnlocked ? 'edit' : (count($galleryState['images']) ? 'downgraded' : 'locked'));
-  // A first event gets no locked upgrade controls, and nobody gets a section they cannot save.
+  // A first event, and an event being sent to another schedule as a request, get no locked upgrade
+  // controls, and nobody gets a section they cannot save.
   $galleryShown = (! $event->exists || $user->can('update', $event))
-      && ! ($isFirstEventRun && $galleryMode === 'locked');
+      && ! (($isFirstEventRun || (! $event->exists && session('pending_request'))) && $galleryMode === 'locked');
+  // Page content's Sponsors row. Unlocked where a save acts on it (EventRepo::saveEvent(),
+  // $sponsorsOnPlan): this schedule's plan has sponsors, or the event's own schedule's does. Locked,
+  // it is a plan gate about THIS schedule, because upgrading it is what unlocks the row; and like
+  // the gallery it is left off a first event and a request.
+  $sponsorsUnlocked = $role->isPro() || ($event->exists && $event->ticketingRole()?->isPro());
+  $sponsorsShown = $user->isEditor($subdomain)
+      && ! (($isFirstEventRun || (! $event->exists && session('pending_request'))) && ! $sponsorsUnlocked);
+  // The rows carry the locks, not the tab: "Page content" with a badge beside it wrapped onto two
+  // lines at 1280 in French, and a tab whose rows are all locked already says so in its summary.
+  $pageShown = $galleryShown || $sponsorsShown;
+  // What the rows' summaries need to know, for the script.
+  $pageFlags = [
+      'gallery' => $galleryShown,
+      'galleryMode' => $galleryMode,
+      'sponsors' => $sponsorsShown,
+      'sponsorsUnlocked' => $sponsorsUnlocked,
+  ];
   $galleryFanPhotos = ($approvedPhotos ?? collect())->map(fn ($photo) => [
       'id' => \App\Utils\UrlUtils::encodeId($photo->id),
       'url' => $photo->photo_url,
@@ -543,13 +571,8 @@
       })->values()->all();
   }
   // Worked out here, not inside @json(): that directive splits its argument on commas.
-  $showSalesDatesNow = collect($ticketsNow)->contains(fn ($t) => data_get($t, 'sales_start_at') || data_get($t, 'sales_end_at'));
   $agendaHasTimes = collect($eventPartsNow)->contains(fn ($part) => filled(data_get($part, 'start_time')) || filled(data_get($part, 'end_time')));
   $agendaShowTimesNow = (bool) old('agenda_show_times', $agendaHasTimes ?: ($role->agenda_show_times ?? true));
-  // The Sponsors tab shows where a save would act on it (EventRepo::saveEvent(), $sponsorsOnPlan):
-  // this schedule's plan has sponsors, or the event's own schedule's does.
-  $sponsorsShown = $user->isEditor($subdomain)
-      && ($role->isPro() || ($event->exists && $event->ticketingRole()?->isPro()));
   $paymentRowWarning = null;
   if (! $connectedGateways) {
       $paymentRowWarning = __('messages.connect_stripe_to_get_paid');
@@ -614,6 +637,15 @@
     form button {
       min-width: 100px;
       min-height: 40px;
+    }
+    /* Something the page brings into view (a row opened, Calendar sync from its old address) lands
+       below the portal's sticky top bar (4rem, layouts/app-admin), not under it. The schedule form
+       has the same rule. */
+    .event-subrow,
+    .event-subrow-body,
+    .mobile-section-header,
+    #listing-calendar-sync {
+      scroll-margin-top: 5rem;
     }
     .dark .iti {
       --iti-dropdown-bg: rgb(var(--ap-bg));
@@ -960,12 +992,28 @@
             }
         }
 
+        // Brings an element into view and gives it focus, for keyboard users. Nothing when it is
+        // not on the page (a calendar since disconnected) or not showing.
+        window.eventFocusTarget = function (id) {
+            var el = id && document.getElementById(id);
+            if (! el || ! el.offsetParent) {
+                return false;
+            }
+            el.scrollIntoView({ block: 'start' });
+            el.focus({ preventScroll: true });
+            return true;
+        };
+
         window.addEventListener('load', function() {
             fixScroll();
             requestAnimationFrame(function() {
                 fixScroll();
                 requestAnimationFrame(function() {
-                    fixScroll();
+                    // An old address that names a block (#section-calendar-sync) lands on it. Set by
+                    // the section script before it strips the hash; this runs after every script.
+                    if (userScrolled || ! window.eventFocusTarget(window.eventLoadFocus)) {
+                        fixScroll();
+                    }
                     window.removeEventListener('wheel', onUserScroll);
                     window.removeEventListener('touchmove', onUserScroll);
                 });
@@ -2268,19 +2316,16 @@
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-agenda']"></span>
                             </a>
-                            @if ($galleryShown)
-                            <a href="#section-gallery" class="section-nav-link" data-section="section-gallery" {!! $moreSectionAttrs !!}>
+                            @if ($pageShown)
+                            <a href="#section-page" class="section-nav-link" data-section="section-page" {!! $moreSectionAttrs !!}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
                                 </svg>
                                 <span class="section-nav-text">
-                                    <span>{{ __('messages.gallery') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-gallery'].empty }"><bdi v-text="tabSummaries['section-gallery'].text"></bdi></span>
+                                    <span>{{ __('messages.page_content') }}</span>
+                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-page'].empty }"><bdi v-text="tabSummaries['section-page'].text"></bdi></span>
                                 </span>
-                                <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-gallery']"></span>
-                                @if ($galleryMode === 'locked')
-                                <x-lock-badge tier="pro" />
-                                @endif
+                                <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-page']"></span>
                             </a>
                             @endif
                             @if ($detailsShown)
@@ -2295,18 +2340,6 @@
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-listing']"></span>
                             </a>
                             @endif
-                            @if ($showGoogleSync || $showMicrosoftSync)
-                            <a href="#section-calendar-sync" class="section-nav-link" data-section="section-calendar-sync">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                </svg>
-                                <span class="section-nav-text">
-                                    <span>{{ __('messages.calendar_sync') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-calendar-sync'].empty }"><bdi v-text="tabSummaries['section-calendar-sync'].text"></bdi></span>
-                                </span>
-                                <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-calendar-sync']"></span>
-                            </a>
-                            @endif
                             @php $fanContentPendingCount = $event->exists ? (($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0)) : 0; @endphp
                             <a href="#section-engagement" class="section-nav-link" data-section="section-engagement" {!! $moreSectionAttrs !!}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -2318,16 +2351,6 @@
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-engagement']"></span>
                             </a>
-                            @if ($sponsorsShown)
-                            <a href="#section-event-settings" class="section-nav-link" data-section="section-event-settings" {!! $moreSectionAttrs !!}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
-                                <span class="section-nav-text">
-                                    <span>{{ __('messages.sponsors') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-event-settings'].empty }"><bdi v-text="tabSummaries['section-event-settings'].text"></bdi></span>
-                                </span>
-                                <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-event-settings']"></span>
-                            </a>
-                            @endif
                             @if ($isFirstEventRun)
                             {{-- Not a .section-nav-link: those are collected on load and each one
                                  opens the section its data-section names, which this has none of. --}}
@@ -3509,7 +3532,10 @@
                                                 <button type="button" @click="openTicketDescription(ticket)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="! ticket.description && ! ticketDescOpen[ticket.uid]">
                                                     + {{ __('messages.add_description') }}
                                                 </button>
-                                                <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                <button type="button" @click="openTicketSalesDates(ticket)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="! ticketShowsSalesDates(ticket)" :data-sales-dates-link="ticket.uid">
+                                                    + {{ __('messages.add_sales_dates') }}
+                                                </button>
+                                                <button type="button" @click="removeTicket(index)" class="ms-auto mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
                                             </div>
@@ -3526,6 +3552,9 @@
                                             </button>
                                             <button type="button" @click="openTicketDescription(ticket)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="! ticket.description && ! ticketDescOpen[ticket.uid]">
                                                 + {{ __('messages.add_description') }}
+                                            </button>
+                                            <button type="button" @click="openTicketSalesDates(ticket)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="! ticketShowsSalesDates(ticket)" :data-sales-dates-link="ticket.uid">
+                                                + {{ __('messages.add_sales_dates') }}
                                             </button>
                                         </div>
                                         <div v-if="ticket.volume_discount" class="mt-4">
@@ -3566,6 +3595,65 @@
                                                     </button>
                                                 </div>
                                             </div>
+                                        </div>
+                                        {{-- When this type is on sale. Until 2026-10 one switch in the Options row showed
+                                             these on every type, was never saved, and switched off emptied every type's
+                                             dates on the next save without the save bar saying so. Now a type opens its own
+                                             with "+ Add Sales Dates", and Remove empties this type's two. v-show, never
+                                             v-if: the date pickers are set up once per type (addTicket(), and on load), and
+                                             the two hidden fields are always posted, an empty one meaning no date. --}}
+                                        <div class="mt-4" v-show="ticketShowsSalesDates(ticket)">
+                                            <span class="block font-medium text-sm text-gray-700 dark:text-gray-300" :id="`sales-dates-label-${ticket.uid}`">{{ __('messages.sales_dates') }}</span>
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]" role="group" tabindex="-1"
+                                                :aria-labelledby="`sales-dates-label-${ticket.uid}`" :data-sales-dates-box="ticket.uid">
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div>
+                                                        <x-input-label :value="__('messages.ticket_sales_start_at')" class="text-xs" />
+                                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                            <input type="text"
+                                                            class="datepicker-ticket-sales-start flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                            :data-ticket-index="index"
+                                                            :value="ticket.sales_start_at_date"
+                                                            autocomplete="off" />
+                                                            <div class="relative w-28">
+                                                            <input type="text"
+                                                                dir="ltr" class="ticket-sales-start-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                                :value="formatPartTime(ticket.sales_start_at_time)"
+                                                                @focus="initTicketSalesStartTimePickerOnFocus($event, index)"
+                                                                @change="onTicketSalesStartTimeChange(index, $event)"
+                                                                autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                            <div class="time-dropdown" :ref="'ticket_sales_start_time_dropdown_' + index"></div>
+                                                        </div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <x-input-label :value="__('messages.ticket_sales_end_at')" class="text-xs" />
+                                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                            <input type="text"
+                                                            class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                            :data-ticket-index="index"
+                                                            :value="ticket.sales_end_at_date"
+                                                            autocomplete="off" />
+                                                            <div class="relative w-28">
+                                                            <input type="text"
+                                                                dir="ltr" class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                                :value="formatPartTime(ticket.sales_end_at_time)"
+                                                                @focus="initTicketSalesEndTimePickerOnFocus($event, index)"
+                                                                @change="onTicketSalesEndTimeChange(index, $event)"
+                                                                autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                            <div class="time-dropdown" :ref="'ticket_sales_end_time_dropdown_' + index"></div>
+                                                        </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeTicketSalesDates(ticket, index)" :aria-describedby="`sales-dates-label-${ticket.uid}`" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" v-bind:name="`tickets[${index}][sales_start_at]`" :value="ticket.sales_start_at_date && ticket.sales_start_at_time ? ticket.sales_start_at_date + ' ' + ticket.sales_start_at_time + ':00' : (ticket.sales_start_at_date ? ticket.sales_start_at_date + ' 00:00:00' : '')" />
+                                            <input type="hidden" v-bind:name="`tickets[${index}][sales_end_at]`" :value="ticket.sales_end_at_date && ticket.sales_end_at_time ? ticket.sales_end_at_date + ' ' + ticket.sales_end_at_time + ':00' : (ticket.sales_end_at_date ? ticket.sales_end_at_date + ' 23:59:00' : '')" />
                                         </div>
                                         <!-- Pass / subscription configuration -->
                                         {{-- Pro, and locked rather than hidden for the same reason as
@@ -3791,59 +3879,6 @@
                                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
                                         </div>
 
-                                        <template v-if="showSalesDates">
-                                            <div class="mt-4">
-                                                <x-input-label :value="__('messages.ticket_sales_start_at')" />
-                                                <div class="flex items-center gap-2 mt-1">
-                                                    <input type="text"
-                                                        class="datepicker-ticket-sales-start flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                        :data-ticket-index="index"
-                                                        :value="ticket.sales_start_at_date"
-                                                        autocomplete="off" />
-                                                    <div class="relative w-28">
-                                                        <input type="text"
-                                                            class="ticket-sales-start-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                            :value="formatPartTime(ticket.sales_start_at_time)"
-                                                            @focus="initTicketSalesStartTimePickerOnFocus($event, index)"
-                                                            @change="onTicketSalesStartTimeChange(index, $event)"
-                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
-                                                        <div class="time-dropdown" :ref="'ticket_sales_start_time_dropdown_' + index"></div>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" v-bind:name="`tickets[${index}][sales_start_at]`" :value="ticket.sales_start_at_date && ticket.sales_start_at_time ? ticket.sales_start_at_date + ' ' + ticket.sales_start_at_time + ':00' : (ticket.sales_start_at_date ? ticket.sales_start_at_date + ' 00:00:00' : '')" />
-                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.ticket_sales_start_at_help') }}
-                                                </p>
-                                            </div>
-
-                                            <div class="mt-4">
-                                                <x-input-label :value="__('messages.ticket_sales_end_at')" />
-                                                <div class="flex items-center gap-2 mt-1">
-                                                    <input type="text"
-                                                        class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                        :data-ticket-index="index"
-                                                        :value="ticket.sales_end_at_date"
-                                                        autocomplete="off" />
-                                                    <div class="relative w-28">
-                                                        <input type="text"
-                                                            class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                            :value="formatPartTime(ticket.sales_end_at_time)"
-                                                            @focus="initTicketSalesEndTimePickerOnFocus($event, index)"
-                                                            @change="onTicketSalesEndTimeChange(index, $event)"
-                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
-                                                        <div class="time-dropdown" :ref="'ticket_sales_end_time_dropdown_' + index"></div>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" v-bind:name="`tickets[${index}][sales_end_at]`" :value="ticket.sales_end_at_date && ticket.sales_end_at_time ? ticket.sales_end_at_date + ' ' + ticket.sales_end_at_time + ':00' : (ticket.sales_end_at_date ? ticket.sales_end_at_date + ' 23:59:00' : '')" />
-                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.ticket_sales_end_at_help') }}
-                                                </p>
-                                            </div>
-                                        </template>
-                                        <template v-else>
-                                            <input type="hidden" :name="`tickets[${index}][sales_start_at]`" value="" />
-                                            <input type="hidden" :name="`tickets[${index}][sales_end_at]`" value="" />
-                                        </template>
                                     </div>
 
                                     <!-- Total Tickets Mode Selection -->
@@ -4124,14 +4159,16 @@
                                 </div>
                                 </div>
 
-                                <button type="button" class="event-subrow ticket-tab" data-tab="options" v-cloak v-show="event.tickets_enabled || event.rsvp_enabled" @click="toggleTicketRow('options')"
-                                    :aria-expanded="activeTicketTab === 'options' ? 'true' : 'false'">
-                                    <span class="event-row-title"><span v-if="event.rsvp_enabled">{{ __('messages.more_options') }}</span><span v-else>{{ __('messages.options') }}</span></span>
-                                    <span class="event-row-summary" :class="{ 'is-empty': ticketRows.options.empty, 'is-warn': ticketRows.options.warn }"><bdi v-text="ticketRows.options.text"></bdi></span>
+                                {{-- What a buyer is asked and told. Titled "Registration form" on free registration,
+                                     where it is the only row. It and Sales rules were one "Options" row until
+                                     2026-10, two panes run together under one name. --}}
+                                <button type="button" class="event-subrow ticket-tab" data-tab="checkout" aria-controls="ticket-pane-checkout" v-cloak v-show="event.tickets_enabled || event.rsvp_enabled" @click="toggleTicketRow('checkout')"
+                                    :aria-expanded="activeTicketTab === 'checkout' ? 'true' : 'false'">
+                                    <span class="event-row-title"><span v-if="event.rsvp_enabled">{{ __('messages.ticket_row_registration_form') }}</span><span v-else>{{ __('messages.ticket_row_checkout') }}</span></span>
+                                    <span class="event-row-summary" :class="{ 'is-empty': ticketRows.checkout.empty }"><bdi v-text="ticketRows.checkout.text"></bdi></span>
                                     <svg class="event-row-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </button>
-                                <!-- Options Tab -->
-                                <div v-show="activeTicketTab === 'options'" data-ticket-pane="options" class="event-subrow-body">
+                                <div id="ticket-pane-checkout" v-show="activeTicketTab === 'checkout'" data-ticket-pane="checkout" class="event-subrow-body">
 
                                 <!-- Phone Number -->
                                 <div class="mb-6">
@@ -4162,135 +4199,6 @@
                                     <input type="hidden" name="ask_phone" :value="event.ask_phone ? 1 : 0">
                                     <input type="hidden" name="require_phone" :value="event.require_phone ? 1 : 0">
                                     <input type="hidden" name="country_code_phone" :value="event.country_code_phone ? 1 : 0">
-                                </div>
-
-                                <!-- Individual Tickets -->
-                                {{-- Pro. The blanket non-Pro wrapper that used to freeze this whole
-                                     panel is gone (the free plan sells now), so the control carries
-                                     its own lock: disabled rather than hidden, so a free organizer
-                                     can see the feature exists instead of turning it on and watching
-                                     EventRepo::saveEvent() silently scrub it back off. --}}
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3" :class="isPro ? '' : 'opacity-60'">
-                                        <label class="relative w-11 h-6 flex-shrink-0" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
-                                            <input id="individual_tickets_checkbox" type="checkbox"
-                                                v-model="event.individual_tickets"
-                                                :disabled="!isPro"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
-                                            {{ __('messages.individual_tickets') }}
-                                        </label>
-                                        <template v-if="!isPro"><x-lock-badge tier="pro" /></template>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
-                                    <p class="text-xs mt-1 ms-14" v-if="!isPro">
-                                        <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_see_pro') }}</button>
-                                    </p>
-                                    <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
-
-                                    <!-- Individual Ticket Fields sub-toggle -->
-                                    <div v-show="event.individual_tickets" class="mt-3 ms-14">
-                                        <div class="flex items-center gap-3">
-                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                                <input id="individual_ticket_fields_checkbox" type="checkbox"
-                                                    v-model="event.individual_ticket_fields"
-                                                    class="sr-only peer">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                            </label>
-                                            <label for="individual_ticket_fields_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                {{ __('messages.individual_ticket_fields') }}
-                                            </label>
-                                        </div>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_ticket_fields_description') }}</p>
-                                        <input type="hidden" name="individual_ticket_fields" :value="event.individual_ticket_fields ? 1 : 0">
-                                    </div>
-                                </div>
-
-                                <!-- Ticket-only toggles -->
-                                <div v-show="event.tickets_enabled" class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="sell_after_start_checkbox" type="checkbox"
-                                                v-model="event.sell_after_start"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="sell_after_start_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.sell_after_start') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.sell_after_start_help') }}</p>
-                                    <input type="hidden" name="sell_after_start" :value="event.sell_after_start ? 1 : 0">
-                                </div>
-
-                                <div v-show="event.tickets_enabled" class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="show_sales_dates_checkbox" type="checkbox"
-                                                v-model="showSalesDates"
-                                                class="sr-only peer"
-                                                @change="onToggleSalesDates">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="show_sales_dates_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.configure_sales_dates') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.configure_sales_dates_help') }}</p>
-                                </div>
-
-                                <div v-show="event.tickets_enabled" class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="show_unavailable_tickets_checkbox" type="checkbox"
-                                                v-model="event.show_unavailable_tickets"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="show_unavailable_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.show_unavailable_tickets') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.show_unavailable_tickets_help') }}</p>
-                                    <input type="hidden" name="show_unavailable_tickets" :value="event.show_unavailable_tickets ? 1 : 0">
-                                </div>
-
-                                <div v-if="hasLimitedPaidTickets" v-show="event.tickets_enabled">
-                                    <div class="mb-6">
-                                        <div class="flex items-center gap-3">
-                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
-                                                    v-model="showExpireUnpaid"
-                                                    class="sr-only peer"
-                                                    @change="toggleExpireUnpaid">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                            </label>
-                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                {{ __('messages.expire_unpaid_tickets') }}
-                                            </label>
-                                        </div>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.expire_unpaid_tickets_help') }}</p>
-                                    </div>
-
-                                    <div class="mb-6" v-if="showExpireUnpaid">
-                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
-                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
-                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
-                                            v-model="event.expire_unpaid_tickets"
-                                            autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
-                                    </div>
-                                    <div v-else>
-                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
-                                    </div>
                                 </div>
 
                                 <!-- Event-level Custom Fields -->
@@ -4353,27 +4261,67 @@
                                     </button>
                                 </div>
                                 </template>
+                                @unless ($isFirstEventRun)
                                 <template v-else>
-                                <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/ticketing')" :subdomain="$subdomain" v-show="event.rsvp_enabled" class="mb-6">
+                                <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/ticketing')" :subdomain="$subdomain" class="mb-6">
                                     <x-slot:icon>
                                         <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
                                         </svg>
                                     </x-slot:icon>
-                                    {{ __('messages.custom_fields_pro_only') }}
+                                    {{-- A saved event that already has questions keeps asking them below Pro (they
+                                         are not posted, so EventRepo keeps them): say so, or the line above,
+                                         which names them, and this would disagree. --}}
+                                    <span v-if="eventExists && Object.keys(eventCustomFields || {}).length">{{ __('messages.order_fields_kept_below_pro') }}</span>
+                                    <span v-else>{{ __('messages.order_fields_pro_only') }}</span>
                                 </x-upgrade-prompt>
                                 </template>
-                                </div>
+                                @endunless
 
-                                <!-- Options Tab (continued) - shared by ticketed and registration (RSVP) events -->
-                                <div v-show="activeTicketTab === 'options'" data-ticket-pane="options" class="event-subrow-body">
+                                <!-- Individual Tickets -->
+                                {{-- Pro. The blanket non-Pro wrapper that used to freeze this whole
+                                     panel is gone (the free plan sells now), so the control carries
+                                     its own lock: disabled rather than hidden, so a free organizer
+                                     can see the feature exists instead of turning it on and watching
+                                     EventRepo::saveEvent() silently scrub it back off. --}}
                                 <div class="mb-6">
-                                    <x-input-label for="ticket_notes" v-show="event.tickets_enabled" :value="__('messages.ticket_notes')" />
-                                    <x-input-label for="ticket_notes" v-show="!event.tickets_enabled" :value="__('messages.registration_notes')" />
-                                    <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4" data-content-dir="{{ content_dir($role) }}"
-                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_notes_help') }}</p>
-                                    <x-link href="{{ marketing_url('/docs/creating-schedules#available-variables') }}" target="_blank" class="text-sm mt-1 inline-block">{{ __('messages.show_available_variables') }}</x-link>
+                                    <div class="flex items-center gap-3" :class="isPro ? '' : 'opacity-60'">
+                                        <label class="relative w-11 h-6 flex-shrink-0" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                            <input id="individual_tickets_checkbox" type="checkbox"
+                                                v-model="event.individual_tickets"
+                                                :disabled="!isPro"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                            {{ __('messages.individual_tickets') }}
+                                        </label>
+                                        <template v-if="!isPro"><x-lock-badge tier="pro" /></template>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
+                                    <p class="text-xs mt-1 ms-14" v-if="!isPro">
+                                        <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_see_pro') }}</button>
+                                    </p>
+                                    <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
+
+                                    <!-- Individual Ticket Fields sub-toggle -->
+                                    <div v-show="event.individual_tickets" class="mt-3 ms-14">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="individual_ticket_fields_checkbox" type="checkbox"
+                                                    v-model="event.individual_ticket_fields"
+                                                    class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="individual_ticket_fields_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                {{ __('messages.individual_ticket_fields') }}
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_ticket_fields_description') }}</p>
+                                        <input type="hidden" name="individual_ticket_fields" :value="event.individual_ticket_fields ? 1 : 0">
+                                    </div>
                                 </div>
 
                                 <div class="mb-6" v-show="event.tickets_enabled">
@@ -4385,6 +4333,93 @@
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('messages.terms_url_help') }}
                                     </p>
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="ticket_notes" v-show="event.tickets_enabled" :value="__('messages.ticket_notes')" />
+                                    <x-input-label for="ticket_notes" v-show="!event.tickets_enabled" :value="__('messages.registration_notes')" />
+                                    <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4" data-content-dir="{{ content_dir($role) }}"
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_notes_help') }}</p>
+                                    <x-link href="{{ marketing_url('/docs/creating-schedules#available-variables') }}" target="_blank" class="text-sm mt-1 inline-block">{{ __('messages.show_available_variables') }}</x-link>
+                                </div>
+
+                                </div>
+
+                                {{-- How sales run. Every switch here is off until somebody turns it on, so it comes
+                                     after Checkout; the dates a type is on sale are on the type itself. --}}
+                                <button type="button" class="event-subrow ticket-tab" data-tab="sales_rules" aria-controls="ticket-pane-sales_rules" v-cloak v-show="event.tickets_enabled" @click="toggleTicketRow('sales_rules')"
+                                    :aria-expanded="activeTicketTab === 'sales_rules' ? 'true' : 'false'">
+                                    <span class="event-row-title">{{ __('messages.ticket_row_sales_rules') }}</span>
+                                    <span class="event-row-summary" :class="{ 'is-empty': ticketRows.sales_rules.empty }"><bdi v-text="ticketRows.sales_rules.text"></bdi></span>
+                                    <svg class="event-row-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                                <div id="ticket-pane-sales_rules" v-show="activeTicketTab === 'sales_rules' && event.tickets_enabled" data-ticket-pane="sales_rules" class="event-subrow-body">
+                                <p class="event-hint mb-4">{{ __('messages.sales_dates_on_ticket_types', ['button' => __('messages.add_sales_dates')]) }}</p>
+
+                                <div v-show="event.tickets_enabled" class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="sell_after_start_checkbox" type="checkbox"
+                                                v-model="event.sell_after_start"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="sell_after_start_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.sell_after_start') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.sell_after_start_help') }}</p>
+                                    <input type="hidden" name="sell_after_start" :value="event.sell_after_start ? 1 : 0">
+                                </div>
+
+                                <div v-show="event.tickets_enabled" class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="show_unavailable_tickets_checkbox" type="checkbox"
+                                                v-model="event.show_unavailable_tickets"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="show_unavailable_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.show_unavailable_tickets') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.show_unavailable_tickets_help') }}</p>
+                                    <input type="hidden" name="show_unavailable_tickets" :value="event.show_unavailable_tickets ? 1 : 0">
+                                </div>
+
+                                <div v-if="hasLimitedPaidTickets" v-show="event.tickets_enabled">
+                                    <div class="mb-6">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
+                                                    v-model="showExpireUnpaid"
+                                                    class="sr-only peer"
+                                                    @change="toggleExpireUnpaid">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                {{ __('messages.expire_unpaid_tickets') }}
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.expire_unpaid_tickets_help') }}</p>
+                                    </div>
+
+                                    <div class="mb-6" v-if="showExpireUnpaid">
+                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
+                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
+                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
+                                            v-model="event.expire_unpaid_tickets"
+                                            autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
+                                    </div>
+                                    <div v-else>
+                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
+                                    </div>
                                 </div>
 
                                 </div>
@@ -5025,13 +5060,13 @@
                             @if (config('app.hosted') && ! $role->isEnterprise())
                             {{-- Not on this plan: the row says so and opens the upgrade prompt. It used to show the
                                  controls, which then failed with an alert. --}}
-                            <button type="button" class="event-subrow" aria-expanded="false" @click.prevent="openUpgrade('upgrade-ai-details')">
+                            <button type="button" class="event-subrow agenda-tab" data-tab="import" aria-expanded="false" @click.prevent="openUpgrade('upgrade-ai-details')">
                                 <span class="event-row-title">{{ __('messages.import') }}</span>
                                 <span class="event-row-summary">{{ __('messages.agenda_import_prompt') }}</span>
                                 <x-lock-badge tier="enterprise" />
                             </button>
                             @else
-                            <button type="button" class="event-subrow" :aria-expanded="(agendaImportOpen || showPartsPreview) ? 'true' : 'false'" @click="agendaImportOpen = ! agendaImportOpen">
+                            <button type="button" class="event-subrow agenda-tab" data-tab="import" :aria-expanded="(agendaImportOpen || showPartsPreview) ? 'true' : 'false'" @click="agendaImportOpen = ! agendaImportOpen">
                                 <span class="event-row-title">{{ __('messages.import') }}</span>
                                 <span class="event-row-summary">{{ __('messages.agenda_import_prompt') }}</span>
                                 <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
@@ -5108,34 +5143,228 @@
                         <input type="hidden" name="agenda_image_url" :value="agendaImageUrl" />
                     </div>
                 </div>
-                @if ($galleryShown)
-                <button type="button" class="mobile-section-header" data-section="section-gallery" {!! $moreSectionAttrs !!}>
+                @if ($pageShown)
+                <button type="button" class="mobile-section-header" data-section="section-page" {!! $moreSectionAttrs !!}>
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
                         </svg>
                         <span class="section-nav-text">
-                            <span>{{ __('messages.gallery') }}</span>
-                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-gallery'].empty }"><bdi v-text="tabSummaries['section-gallery'].text"></bdi></span>
+                            <span>{{ __('messages.page_content') }}</span>
+                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-page'].empty }"><bdi v-text="tabSummaries['section-page'].text"></bdi></span>
                         </span>
-                        <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-gallery']"></span>
-                        @if ($galleryMode === 'locked')
-                        <x-lock-badge tier="pro" />
-                        @endif
+                        <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-page']"></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-gallery" class="section-content lg:mt-0">
-                    @include('partials.gallery-section', [
-                        'galleryContext' => 'event',
-                        'galleryMode' => $galleryMode,
-                        'galleryRole' => $galleryRole,
-                        'galleryCanUpgrade' => $galleryCanUpgrade,
-                        'galleryImageCount' => count($galleryState['images']),
-                        'galleryWrapperClass' => $tabCol,
-                    ])
+                {{-- What the event's page shows beside its own details: photos and sponsors. Each was a tab
+                     of its own until 2026-10, and the old addresses (#section-gallery,
+                     #section-event-settings) open their row here. The panes are v-show, never v-if: the
+                     gallery editor holds the gallery_images input syncGallery() reads, and the sponsor
+                     logo inputs are added into their container by script. --}}
+                <div id="section-page" class="section-content lg:mt-0">
+                    <div class="{{ $tabCol }}">
+                        <h2 class="section-heading-name text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
+                            </svg>
+                            {{ __('messages.page_content') }}
+                        </h2>
+                        <div class="event-subrows">
+                        @if ($galleryShown)
+                        <button type="button" class="event-subrow page-tab" data-tab="gallery" aria-controls="page-tab-gallery" :aria-expanded="activePageTab === 'gallery' ? 'true' : 'false'"
+                            @click="togglePageRow('gallery', $event)">
+                            <span class="event-row-title">{{ __('messages.gallery') }}</span>
+                            <span class="event-row-summary" v-cloak :class="{ 'is-empty': pageRows.gallery.empty, 'is-warn': pageRows.gallery.warn }"><bdi v-text="pageRows.gallery.text"></bdi></span>
+                            @if ($galleryMode === 'locked' && $galleryCanUpgrade)<x-lock-badge tier="pro" />@endif
+                            <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                        </button>
+                        <div id="page-tab-gallery" v-show="activePageTab === 'gallery'" class="event-subrow-body" data-page-pane="gallery">
+                            @include('partials.gallery-section', [
+                                'galleryContext' => 'event',
+                                'galleryMode' => $galleryMode,
+                                'galleryRole' => $galleryRole,
+                                'galleryCanUpgrade' => $galleryCanUpgrade,
+                                'galleryImageCount' => count($galleryState['images']),
+                                'galleryInRow' => true,
+                            ])
+                        </div>
+                        @endif
+                        @if ($sponsorsShown)
+                        <button type="button" class="event-subrow page-tab" data-tab="sponsors" aria-controls="page-tab-sponsors" :aria-expanded="activePageTab === 'sponsors' ? 'true' : 'false'"
+                            @click="togglePageRow('sponsors', $event)">
+                            <span class="event-row-title">{{ __('messages.sponsors') }}</span>
+                            <span class="event-row-summary" v-cloak :class="{ 'is-empty': pageRows.sponsors.empty, 'is-warn': pageRows.sponsors.warn }"><bdi v-text="pageRows.sponsors.text"></bdi></span>
+                            @unless ($sponsorsUnlocked)<x-lock-badge tier="pro" />@endunless
+                            <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                        </button>
+                        <div id="page-tab-sponsors" v-show="activePageTab === 'sponsors'" class="event-subrow-body" data-page-pane="sponsors">
+                        @if ($sponsorsUnlocked)
+                        <div>
+                            <input type="hidden" name="sponsor_mode" :value="event.sponsor_mode">
+                            <div class="event-tiles mb-6" role="group" aria-label="{{ __('messages.sponsors') }}">
+                                <button type="button" class="event-tile" :class="{ 'is-on': event.sponsor_mode === 'default' }" :aria-pressed="event.sponsor_mode === 'default' ? 'true' : 'false'" @click="event.sponsor_mode = 'default'; markTabDirty('section-page')">
+                                    <span class="event-tile-title">{{ __('messages.same_as_schedule') }}</span>
+                                    {{-- Whose and which: the names of the schedule's sponsors, or that it has none.
+                                         v-pre: a sponsor's name is its owner's text, inside the Vue mount. --}}
+                                    @php $scheduleSponsorNames = collect($role->getSponsorLogos())->pluck('name')->filter()->implode(', '); @endphp
+                                    {{-- And when the schedule has them switched off (Page content > Sponsors), the tile says
+                                         so: an event that follows the schedule shows none then. --}}
+                                    <span class="event-tile-help" v-pre>{{ $scheduleSponsorNames ? $scheduleSponsorNames.($role->show_sponsors === false ? ' · '.__('messages.sponsors_hidden') : '') : __('messages.sponsors_same_help').': '.mb_strtolower(__('messages.none')) }}</span>
+                                </button>
+                                <button type="button" class="event-tile" :class="{ 'is-on': event.sponsor_mode === 'none' }" :aria-pressed="event.sponsor_mode === 'none' ? 'true' : 'false'" @click="event.sponsor_mode = 'none'; markTabDirty('section-page')">
+                                    <span class="event-tile-title">{{ __('messages.no_sponsors') }}</span>
+                                    <span class="event-tile-help">{{ __('messages.sponsors_none_help') }}</span>
+                                </button>
+                                <button type="button" class="event-tile" :class="{ 'is-on': event.sponsor_mode === 'custom' }" :aria-pressed="event.sponsor_mode === 'custom' ? 'true' : 'false'" @click="event.sponsor_mode = 'custom'; markTabDirty('section-page')">
+                                    <span class="event-tile-title">{{ __('messages.sponsors_own') }}</span>
+                                    <span class="event-tile-help">{{ __('messages.sponsors_own_help') }}</span>
+                                </button>
+                            </div>
+
+                            <div v-show="event.sponsor_mode === 'custom'">
+                                <input type="hidden" name="existing_event_sponsors" :value="JSON.stringify(eventSponsors.filter(s => !s.newFile))">
+                                {{-- The ones posted as uploads, without their files: for the page a refused save
+                                     comes back to, which cannot be sent the files again. A stored sponsor being
+                                     given a new logo is in this list and not the one above, and used to vanish
+                                     from the page, so that the next save deleted it. The server ignores it. --}}
+                                <input type="hidden" name="pending_event_sponsors" :value="JSON.stringify(eventSponsors.filter(s => s.newFile).map(s => ({ logo: s.logo || '', name: s.name || '', url: s.url || '', tier: s.tier || '' })))">
+                                <div id="new-event-sponsor-inputs-container"></div>
+
+                                <!-- Sponsor list -->
+                                <p class="event-hint">{{ __('messages.sponsors_own_hint') }}</p>
+                                <div id="event-sponsors-list" class="event-list mb-4">
+                                    <div v-for="(sponsor, index) in eventSponsors" :key="index"
+                                        class="sponsor-item event-list-row is-centered"
+                                        :class="{'ring-2 ring-[var(--brand-blue)]': editingSponsorIndex === index}">
+                                        <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 72px; height: 48px;">
+                                            <img v-if="sponsor.logo_url" :src="sponsor.logo_url" :alt="sponsor.name || ''" class="max-w-full max-h-full object-contain" />
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">@{{ sponsor.name || '' }}</div>
+                                            <span v-if="sponsor.tier === 'gold'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">{{ __('messages.gold') }}</span>
+                                            <span v-if="sponsor.tier === 'silver'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">{{ __('messages.silver') }}</span>
+                                            <span v-if="sponsor.tier === 'bronze'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">{{ __('messages.bronze') }}</span>
+                                            <div v-if="sponsor.url" class="text-xs text-gray-500 dark:text-gray-400 truncate">@{{ sponsor.url }}</div>
+                                        </div>
+                                        <button type="button" @click="editEventSponsor(index)" class="event-icon-btn" title="{{ __('messages.edit') }}" aria-label="{{ __('messages.edit') }}">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" @click="removeEventSponsor(index)" class="event-icon-btn" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Limit message -->
+                                <div v-if="eventSponsors.length >= maxSponsors" class="mb-4">
+                                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                        <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            </svg>
+                                            <span>{{ __('messages.max_sponsors_reached', ['count' => config('app.max_sponsors')]) }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Unsaved-uploads advisory: PHP caps files per request -->
+                                <div v-if="eventSponsors.filter(s => s.newFile).length >= maxPendingSponsorUploads" class="mb-4">
+                                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                        <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            </svg>
+                                            <span>{{ __('messages.save_sponsors_before_adding_more') }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Add/Edit sponsor form -->
+                                <div v-if="eventSponsors.length > 0 && eventSponsors.length < maxSponsors && ! sponsorFormOpen && editingSponsorIndex < 0">
+                                    <button type="button" class="event-link" @click="sponsorFormOpen = true">+ {{ __('messages.add_sponsor') }}</button>
+                                </div>
+                                <div v-if="(eventSponsors.length < maxSponsors && (sponsorFormOpen || eventSponsors.length === 0)) || editingSponsorIndex >= 0">
+                                    <div class="event-add-box">
+                                        <div v-if="sponsorFormError" role="alert" class="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">@{{ sponsorFormError }}</div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                            <div>
+                                                <x-input-label for="event_sponsor_name_input" :value="__('messages.sponsor_name')" />
+                                                <input type="text" id="event_sponsor_name_input" maxlength="100" v-model="sponsorForm.name"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
+                                            </div>
+                                            <div>
+                                                <x-input-label for="event_sponsor_url_input" :value="__('messages.sponsor_url')" />
+                                                <input type="url" id="event_sponsor_url_input" maxlength="500" v-model="sponsorForm.url"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                            <div>
+                                                <x-input-label :value="__('messages.sponsor_tier')" />
+                                                <select id="event_sponsor_tier_input" v-model="sponsorForm.tier"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
+                                                    <option value="">-</option>
+                                                    <option value="gold">{{ __('messages.gold') }}</option>
+                                                    <option value="silver">{{ __('messages.silver') }}</option>
+                                                    <option value="bronze">{{ __('messages.bronze') }}</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.logo') }} <span v-show="editingSponsorIndex < 0">*</span></label>
+                                                <input type="file" ref="eventSponsorLogoInput" accept="image/*" @change="previewEventSponsorLogo"
+                                                    class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]" />
+                                                <img v-if="sponsorLogoPreview" :src="sponsorLogoPreview" alt="Logo Preview" style="max-height:120px;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600" />
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button v-if="editingSponsorIndex >= 0" type="button" @click="cancelEditEventSponsor" class="event-link event-link-quiet">
+                                                {{ __('messages.cancel') }}
+                                            </button>
+                                            <x-brand-button size="sm" @click="addOrSaveEventSponsor">
+                                                <svg v-if="editingSponsorIndex < 0" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                <svg v-else class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span>@{{ editingSponsorIndex >= 0 ? @json(__('messages.done')) : @json(__('messages.add_sponsor')) }}</span>
+                                            </x-brand-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @else
+                            {{-- Neither this schedule nor the event's own is on a plan with sponsors
+                                 (EventRepo::saveEvent()'s $sponsorsOnPlan). Nothing here is posted, and a
+                                 save clears whatever the event stored, which the save bar says. The gate
+                                 is about THIS schedule: upgrading it is what unlocks the row. --}}
+                            <x-plan-gate
+                                tier="pro"
+                                :role="$role"
+                                :subdomain="$role->subdomain"
+                                :canUpgrade="$user->id == $role->user_id"
+                                :learnMoreUrl="marketing_url('/docs/creating-events#sponsors')"
+                                :title="__('messages.sponsors')">
+                                {{ __('messages.event_sponsors_pro_only') }}
+                            </x-plan-gate>
+                        @endif
+                        </div>
+                        @endif
+                        </div>
+                    </div>
                 </div>
                 @endif
 
@@ -5162,8 +5391,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                {{-- Where and how the event is shown: who can see it, its address, its category and
-                     the other schedules it appears on. --}}
+                {{-- Where and how the event is shown: who can see it, its address, its category, the
+                     other schedules it appears on and the calendars it is copied to. --}}
                 <div id="section-listing" class="section-content lg:mt-0">
                     <div class="{{ $tabCol }}">
                         <h2 class="section-heading-name text-lg font-semibold text-gray-900 dark:text-gray-100 mb-5 flex items-center gap-2">
@@ -5418,89 +5647,70 @@
                             @endforeach
                         </div>
                         @endif
-                    </div>
-                </div>
-                @endif
 
-                @if ($showGoogleSync || $showMicrosoftSync)
-                <button type="button" class="mobile-section-header" data-section="section-calendar-sync">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                        </svg>
-                        <span class="section-nav-text">
-                            <span>{{ __('messages.calendar_sync') }}</span>
-                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-calendar-sync'].empty }"><bdi v-text="tabSummaries['section-calendar-sync'].text"></bdi></span>
-                        </span>
-                        <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-calendar-sync']"></span>
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-calendar-sync" class="section-content lg:mt-0">
-                    <div class="{{ $tabCol }}">
-                        <div class="event-tab-title">
-                            <h2 class="section-heading-name text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg>
-                                {{ __('messages.calendar_sync') }}
-                            </h2>
-                        </div>
-                        <p class="event-empty">{{ __('messages.calendar_sync_help') }}</p>
-                        <div class="event-list">
-                            @if ($showGoogleSync)
-                            <div class="event-list-row is-centered">
-                                <div class="min-w-0 flex-1">
-                                    <div class="event-list-name">{{ __('messages.google_calendar_sync') }}</div>
-                                    @if ($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-                                    <span class="event-status is-on">{{ __('messages.synced') }}</span>
-                                    @else
-                                    <span class="event-status">{{ __('messages.not_synced') }}</span>
-                                    {{-- Why, since the line above the list says a published event is copied on every
-                                         save: members only (Draft and Internal both set is_draft), or simply not
-                                         saved since the calendar was connected. --}}
-                                    <p class="event-list-sub">{{ $event->is_draft ? __('messages.calendar_not_synced_draft') : __('messages.calendar_not_synced_next_save') }}</p>
-                                    @endif
-                                    <span id="sync-status-{{ $event->id }}" class="hidden event-list-sub ms-2">{{ __('messages.syncing') }}</span>
-                                    <p id="sync-error-{{ $event->id }}" role="alert" class="hidden mt-1 text-sm text-red-600 dark:text-red-400"></p>
+                        @if ($showGoogleSync || $showMicrosoftSync)
+                        {{-- Calendar sync: the calendars this event is copied to, where it goes after who can
+                             see it and the other schedules it is on. A tab of its own until 2026-10: the old
+                             address (#section-calendar-sync) lands here and brings this into view. The title
+                             has a field label's look, not event-group-label, which is "Schedules you follow"
+                             just above: this would read as a third group of its checkboxes. --}}
+                        <div class="mt-8">
+                            <h3 id="listing-calendar-sync" tabindex="-1" class="block font-medium text-sm text-gray-700 dark:text-gray-300 focus:outline-none">{{ __('messages.calendar_sync') }}</h3>
+                            <p class="event-hint">{{ __('messages.calendar_sync_help') }}</p>
+                            <div class="event-list">
+                                @if ($showGoogleSync)
+                                <div class="event-list-row is-centered">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="event-list-name">{{ __('messages.google_calendar_sync') }}</div>
+                                        @if ($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain))
+                                        <span class="event-status is-on">{{ __('messages.synced') }}</span>
+                                        @else
+                                        <span class="event-status">{{ __('messages.not_synced') }}</span>
+                                        {{-- Why, since the line above the list says a published event is copied on every
+                                             save: members only (Draft and Internal both set is_draft), or simply not
+                                             saved since the calendar was connected. --}}
+                                        <p class="event-list-sub">{{ $event->is_draft ? __('messages.calendar_not_synced_draft') : __('messages.calendar_not_synced_next_save') }}</p>
+                                        @endif
+                                        <span id="sync-status-{{ $event->id }}" class="hidden event-list-sub ms-2">{{ __('messages.syncing') }}</span>
+                                        <p id="sync-error-{{ $event->id }}" role="alert" class="hidden mt-1 text-sm text-red-600 dark:text-red-400"></p>
+                                    </div>
+                                    <div class="event-list-actions">
+                                        @if ($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain))
+                                        <button type="button" id="unsync-event-btn" class="event-link is-danger" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.remove') }}</button>
+                                        @else
+                                        <x-secondary-button type="button" id="sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.sync_now') }}</x-secondary-button>
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="event-list-actions">
-                                    @if ($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-                                    <button type="button" id="unsync-event-btn" class="event-link is-danger" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.remove') }}</button>
-                                    @else
-                                    <x-secondary-button type="button" id="sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.sync_now') }}</x-secondary-button>
-                                    @endif
+                                @endif
+                                @if ($showMicrosoftSync)
+                                <div class="event-list-row is-centered">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="event-list-name">{{ __('messages.microsoft_calendar_sync') }}</div>
+                                        @if ($event->isSyncedToMicrosoftCalendarForSubdomain(request()->subdomain))
+                                        <span class="event-status is-on">{{ __('messages.synced') }}</span>
+                                        @else
+                                        <span class="event-status">{{ __('messages.not_synced') }}</span>
+                                        {{-- Why, since the line above the list says a published event is copied on every
+                                             save: members only (Draft and Internal both set is_draft), or simply not
+                                             saved since the calendar was connected. --}}
+                                        <p class="event-list-sub">{{ $event->is_draft ? __('messages.calendar_not_synced_draft') : __('messages.calendar_not_synced_next_save') }}</p>
+                                        @endif
+                                        <span id="microsoft-sync-status-{{ $event->id }}" class="hidden event-list-sub ms-2">{{ __('messages.syncing') }}</span>
+                                        <p id="microsoft-sync-error-{{ $event->id }}" role="alert" class="hidden mt-1 text-sm text-red-600 dark:text-red-400"></p>
+                                    </div>
+                                    <div class="event-list-actions">
+                                        @if ($event->isSyncedToMicrosoftCalendarForSubdomain(request()->subdomain))
+                                        <button type="button" id="microsoft-unsync-event-btn" class="event-link is-danger" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.remove') }}</button>
+                                        @else
+                                        <x-secondary-button type="button" id="microsoft-sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.sync_now') }}</x-secondary-button>
+                                        @endif
+                                    </div>
                                 </div>
+                                @endif
                             </div>
-                            @endif
-                            @if ($showMicrosoftSync)
-                            <div class="event-list-row is-centered">
-                                <div class="min-w-0 flex-1">
-                                    <div class="event-list-name">{{ __('messages.microsoft_calendar_sync') }}</div>
-                                    @if ($event->isSyncedToMicrosoftCalendarForSubdomain(request()->subdomain))
-                                    <span class="event-status is-on">{{ __('messages.synced') }}</span>
-                                    @else
-                                    <span class="event-status">{{ __('messages.not_synced') }}</span>
-                                    {{-- Why, since the line above the list says a published event is copied on every
-                                         save: members only (Draft and Internal both set is_draft), or simply not
-                                         saved since the calendar was connected. --}}
-                                    <p class="event-list-sub">{{ $event->is_draft ? __('messages.calendar_not_synced_draft') : __('messages.calendar_not_synced_next_save') }}</p>
-                                    @endif
-                                    <span id="microsoft-sync-status-{{ $event->id }}" class="hidden event-list-sub ms-2">{{ __('messages.syncing') }}</span>
-                                    <p id="microsoft-sync-error-{{ $event->id }}" role="alert" class="hidden mt-1 text-sm text-red-600 dark:text-red-400"></p>
-                                </div>
-                                <div class="event-list-actions">
-                                    @if ($event->isSyncedToMicrosoftCalendarForSubdomain(request()->subdomain))
-                                    <button type="button" id="microsoft-unsync-event-btn" class="event-link is-danger" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.remove') }}</button>
-                                    @else
-                                    <x-secondary-button type="button" id="microsoft-sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.sync_now') }}</x-secondary-button>
-                                    @endif
-                                </div>
-                            </div>
-                            @endif
                         </div>
+                        @endif
                     </div>
                 </div>
                 @endif
@@ -6012,176 +6222,6 @@
                 </div>
             </div>
 
-                @if ($sponsorsShown)
-                    <button type="button" class="mobile-section-header" data-section="section-event-settings" {!! $moreSectionAttrs !!}>
-                        <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
-                            <span class="section-nav-text">
-                                <span>{{ __('messages.sponsors') }}</span>
-                                <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-event-settings'].empty }"><bdi v-text="tabSummaries['section-event-settings'].text"></bdi></span>
-                            </span>
-                            <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-event-settings']"></span>
-                        </span>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div id="section-event-settings" class="section-content lg:mt-0">
-                        <div class="{{ $tabCol }}">
-                            <h2 class="section-heading-name text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
-                                {{ __('messages.sponsors') }}
-                            </h2>
-
-                            <div>
-                                <input type="hidden" name="sponsor_mode" :value="event.sponsor_mode">
-                                <div class="event-tiles mb-6" role="group" aria-label="{{ __('messages.sponsors') }}">
-                                    <button type="button" class="event-tile" :class="{ 'is-on': event.sponsor_mode === 'default' }" :aria-pressed="event.sponsor_mode === 'default' ? 'true' : 'false'" @click="event.sponsor_mode = 'default'; markTabDirty('section-event-settings')">
-                                        <span class="event-tile-title">{{ __('messages.same_as_schedule') }}</span>
-                                        {{-- Whose and which: the names of the schedule's sponsors, or that it has none.
-                                             v-pre: a sponsor's name is its owner's text, inside the Vue mount. --}}
-                                        @php $scheduleSponsorNames = collect($role->getSponsorLogos())->pluck('name')->filter()->implode(', '); @endphp
-                                        {{-- And when the schedule has them switched off (Page content > Sponsors), the tile says
-                                             so: an event that follows the schedule shows none then. --}}
-                                        <span class="event-tile-help" v-pre>{{ $scheduleSponsorNames ? $scheduleSponsorNames.($role->show_sponsors === false ? ' · '.__('messages.sponsors_hidden') : '') : __('messages.sponsors_same_help').': '.mb_strtolower(__('messages.none')) }}</span>
-                                    </button>
-                                    <button type="button" class="event-tile" :class="{ 'is-on': event.sponsor_mode === 'none' }" :aria-pressed="event.sponsor_mode === 'none' ? 'true' : 'false'" @click="event.sponsor_mode = 'none'; markTabDirty('section-event-settings')">
-                                        <span class="event-tile-title">{{ __('messages.no_sponsors') }}</span>
-                                        <span class="event-tile-help">{{ __('messages.sponsors_none_help') }}</span>
-                                    </button>
-                                    <button type="button" class="event-tile" :class="{ 'is-on': event.sponsor_mode === 'custom' }" :aria-pressed="event.sponsor_mode === 'custom' ? 'true' : 'false'" @click="event.sponsor_mode = 'custom'; markTabDirty('section-event-settings')">
-                                        <span class="event-tile-title">{{ __('messages.sponsors_own') }}</span>
-                                        <span class="event-tile-help">{{ __('messages.sponsors_own_help') }}</span>
-                                    </button>
-                                </div>
-
-                                <div v-show="event.sponsor_mode === 'custom'">
-                                    <input type="hidden" name="existing_event_sponsors" :value="JSON.stringify(eventSponsors.filter(s => !s.newFile))">
-                                    {{-- The ones posted as uploads, without their files: for the page a refused save
-                                         comes back to, which cannot be sent the files again. A stored sponsor being
-                                         given a new logo is in this list and not the one above, and used to vanish
-                                         from the page, so that the next save deleted it. The server ignores it. --}}
-                                    <input type="hidden" name="pending_event_sponsors" :value="JSON.stringify(eventSponsors.filter(s => s.newFile).map(s => ({ logo: s.logo || '', name: s.name || '', url: s.url || '', tier: s.tier || '' })))">
-                                    <div id="new-event-sponsor-inputs-container"></div>
-
-                                    <!-- Sponsor list -->
-                                    <p class="event-hint">{{ __('messages.sponsors_own_hint') }}</p>
-                                    <div id="event-sponsors-list" class="event-list mb-4">
-                                        <div v-for="(sponsor, index) in eventSponsors" :key="index"
-                                            class="sponsor-item event-list-row is-centered"
-                                            :class="{'ring-2 ring-[var(--brand-blue)]': editingSponsorIndex === index}">
-                                            <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
-                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                                                </svg>
-                                            </div>
-                                            <div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 72px; height: 48px;">
-                                                <img v-if="sponsor.logo_url" :src="sponsor.logo_url" :alt="sponsor.name || ''" class="max-w-full max-h-full object-contain" />
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">@{{ sponsor.name || '' }}</div>
-                                                <span v-if="sponsor.tier === 'gold'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">{{ __('messages.gold') }}</span>
-                                                <span v-if="sponsor.tier === 'silver'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">{{ __('messages.silver') }}</span>
-                                                <span v-if="sponsor.tier === 'bronze'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">{{ __('messages.bronze') }}</span>
-                                                <div v-if="sponsor.url" class="text-xs text-gray-500 dark:text-gray-400 truncate">@{{ sponsor.url }}</div>
-                                            </div>
-                                            <button type="button" @click="editEventSponsor(index)" class="event-icon-btn" title="{{ __('messages.edit') }}" aria-label="{{ __('messages.edit') }}">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                </svg>
-                                            </button>
-                                            <button type="button" @click="removeEventSponsor(index)" class="event-icon-btn" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Limit message -->
-                                    <div v-if="eventSponsors.length >= maxSponsors" class="mb-4">
-                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                            <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
-                                                <span>{{ __('messages.max_sponsors_reached', ['count' => config('app.max_sponsors')]) }}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Unsaved-uploads advisory: PHP caps files per request -->
-                                    <div v-if="eventSponsors.filter(s => s.newFile).length >= maxPendingSponsorUploads" class="mb-4">
-                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                            <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
-                                                <span>{{ __('messages.save_sponsors_before_adding_more') }}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Add/Edit sponsor form -->
-                                    <div v-if="eventSponsors.length > 0 && eventSponsors.length < maxSponsors && ! sponsorFormOpen && editingSponsorIndex < 0">
-                                        <button type="button" class="event-link" @click="sponsorFormOpen = true">+ {{ __('messages.add_sponsor') }}</button>
-                                    </div>
-                                    <div v-if="(eventSponsors.length < maxSponsors && (sponsorFormOpen || eventSponsors.length === 0)) || editingSponsorIndex >= 0">
-                                        <div class="event-add-box">
-                                            <div v-if="sponsorFormError" role="alert" class="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">@{{ sponsorFormError }}</div>
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                                                <div>
-                                                    <x-input-label for="event_sponsor_name_input" :value="__('messages.sponsor_name')" />
-                                                    <input type="text" id="event_sponsor_name_input" maxlength="100" v-model="sponsorForm.name"
-                                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
-                                                </div>
-                                                <div>
-                                                    <x-input-label for="event_sponsor_url_input" :value="__('messages.sponsor_url')" />
-                                                    <input type="url" id="event_sponsor_url_input" maxlength="500" v-model="sponsorForm.url"
-                                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
-                                                </div>
-                                            </div>
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                                                <div>
-                                                    <x-input-label :value="__('messages.sponsor_tier')" />
-                                                    <select id="event_sponsor_tier_input" v-model="sponsorForm.tier"
-                                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
-                                                        <option value="">-</option>
-                                                        <option value="gold">{{ __('messages.gold') }}</option>
-                                                        <option value="silver">{{ __('messages.silver') }}</option>
-                                                        <option value="bronze">{{ __('messages.bronze') }}</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.logo') }} <span v-show="editingSponsorIndex < 0">*</span></label>
-                                                    <input type="file" ref="eventSponsorLogoInput" accept="image/*" @change="previewEventSponsorLogo"
-                                                        class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]" />
-                                                    <img v-if="sponsorLogoPreview" :src="sponsorLogoPreview" alt="Logo Preview" style="max-height:120px;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600" />
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <button v-if="editingSponsorIndex >= 0" type="button" @click="cancelEditEventSponsor" class="event-link event-link-quiet">
-                                                    {{ __('messages.cancel') }}
-                                                </button>
-                                                <x-brand-button size="sm" @click="addOrSaveEventSponsor">
-                                                    <svg v-if="editingSponsorIndex < 0" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                                    </svg>
-                                                    <svg v-else class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    <span>@{{ editingSponsorIndex >= 0 ? @json(__('messages.done')) : @json(__('messages.add_sponsor')) }}</span>
-                                                </x-brand-button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                @endif
-
                 @if ($isFirstEventRun)
                 <button type="button" v-cloak v-if="!showMoreSections" @click="showMoreSections = true"
                     class="lg:hidden flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200">
@@ -6456,8 +6496,11 @@
   // both, and it is the fan content that was just acted on.
   //
   // The second half are sections that stopped being tabs of their own: the venue and the repeat
-  // settings are on the Event tab, "Schedules" is part of Listing, and the two calendars share one
-  // tab. Links to the old ids are in sent email and in bookmarks, so they keep landing somewhere.
+  // settings are on the Event tab, "Schedules" is part of Listing, Gallery and Sponsors are rows of
+  // Page content (2026-10), and Calendar sync is the end of Listing (2026-10). Links to the old ids
+  // are in sent email and in bookmarks, so they keep landing somewhere.
+  //
+  // Each entry is [tab, Engagement row, Page content row, element to bring into view].
   window.eventSectionAliases = {
     'section-fan-content': ['section-engagement', 'fan_content'],
     'section-polls': ['section-engagement', 'polls'],
@@ -6465,8 +6508,11 @@
     'section-venue': ['section-details'],
     'section-recurring': ['section-details'],
     'section-schedules': ['section-listing'],
-    'section-google-calendar': ['section-calendar-sync'],
-    'section-microsoft-calendar': ['section-calendar-sync'],
+    'section-gallery': ['section-page', '', 'gallery'],
+    'section-event-settings': ['section-page', '', 'sponsors'],
+    'section-calendar-sync': ['section-listing', '', '', 'listing-calendar-sync'],
+    'section-google-calendar': ['section-listing', '', '', 'listing-calendar-sync'],
+    'section-microsoft-calendar': ['section-listing', '', '', 'listing-calendar-sync'],
   };
   // Sections folded behind "More options" on a first event. showSection() opens the fold when
   // something has to reach one of them.
@@ -6480,6 +6526,9 @@
       section: alias ? alias[0] : name,
       // The row of the Engagement tab to open; none unless the link names one.
       engagementTab: alias && alias[1] ? alias[1] : (tabs.includes(requested) ? requested : ''),
+      // The row of Page content to open, and what to bring into view once the page is laid out.
+      pageTab: alias && alias[2] ? alias[2] : '',
+      focus: alias && alias[3] ? alias[3] : '',
     };
   };
   // event-section-aliases:end
@@ -6514,7 +6563,7 @@
     onChange: function () {
       if (window.vueApp) {
         window.vueApp.isDirty = true;
-        window.vueApp.markTabDirty('section-gallery');
+        window.vueApp.markTabDirty('section-page');
       }
     },
   });
@@ -6768,7 +6817,8 @@
         ticketUidCounter: @json(max(1, count($ticketsNow))),
         eventCustomFields: @json($canSeeTicketData ? ($event->custom_fields ?? []) : []),
         showExpireUnpaid: @json($showExpireUnpaidNow),
-        showSalesDates: @json($showSalesDatesNow),
+        // A ticket type whose "+ Add Sales Dates" was pressed, by uid: open while it has no date yet.
+        ticketSalesDatesOpen: {},
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         // Which row of the Tickets tab is open; "tickets" means none.
         activeTicketTab: @json($ticketTabOnError ?? 'tickets'),
@@ -6779,6 +6829,14 @@
           // Read here, in data(), because the section script below strips the hash on load.
           return window.resolveEventSectionHash(window.location.hash, window.location.search).engagementTab;
         })(),
+        // Which row of Page content is open; '' means none. A refused save opens the row its
+        // message is in (or the sponsor form it brings back), and otherwise an old address names
+        // one (#section-gallery, #section-event-settings).
+        activePageTab: (function() {
+          var onError = @json($pageTabOnError ?? ($sponsorFormOpenNow ? 'sponsors' : ''));
+          return onError || window.resolveEventSectionHash(window.location.hash, window.location.search).pageTab;
+        })(),
+        pageFlags: @json($pageFlags),
         sponsorForm: @json($sponsorFormNow),
         sponsorLogoPreview: null,
         sponsorLogoFile: null,
@@ -7039,7 +7097,7 @@
           this.sponsorFormOpen = false;
         }
         this.syncEventSponsorInputs();
-        this.markTabDirty('section-event-settings');
+        this.markTabDirty('section-page');
 
         return true;
       },
@@ -7224,9 +7282,11 @@
         // always showing ("tickets" is the name for no row open).
         var pane = el.closest('[data-ticket-pane]');
         if (pane) { this.activeTicketTab = pane.getAttribute('data-ticket-pane'); }
-        // The same for a row of the Engagement tab.
+        // The same for a row of the Engagement tab, and of Page content.
         var row = el.closest('[data-engagement-pane]');
         if (row) { this.activeEngagementTab = row.getAttribute('data-engagement-pane'); }
+        var pageRow = el.closest('[data-page-pane]');
+        if (pageRow) { this.activePageTab = pageRow.getAttribute('data-page-pane'); }
       },
       copyEventLink() {
         var done = () => {
@@ -7357,6 +7417,9 @@
               field._easyMDE.toTextArea();
             }
           });
+          document.querySelectorAll('.datepicker-ticket-sales-start, .datepicker-ticket-sales-end').forEach(function (field) {
+            if (field._flatpickr) { field._flatpickr.destroy(); }
+          });
           this.tickets = [];
           (input.tickets || []).forEach(function (row) {
             self.addTicket();
@@ -7475,8 +7538,49 @@
       toggleTicketRow(tab) {
         this.activeTicketTab = this.activeTicketTab === tab ? 'tickets' : tab;
       },
+      // A row of Page content. Opening Sponsors closes the tall Gallery above it, and a browser
+      // without scroll anchoring then leaves the row that was pressed off the screen.
+      togglePageRow(tab, e) {
+        this.activePageTab = this.activePageTab === tab ? '' : tab;
+        var button = e && e.currentTarget;
+        if (this.activePageTab && button && button.scrollIntoView) {
+          this.$nextTick(() => { button.scrollIntoView({ block: 'nearest' }); });
+        }
+      },
       openTicketDescription(ticket) {
         this.ticketDescOpen[ticket.uid] = true;
+      },
+      // A type's sales dates show when it has one, or once "+ Add Sales Dates" was pressed.
+      ticketShowsSalesDates(ticket) {
+        return !! (ticket.sales_start_at_date || ticket.sales_end_at_date || this.ticketSalesDatesOpen[ticket.uid]);
+      },
+      // Focus goes to the box, not the start date: the date picker opens on focus, which would pop
+      // a calendar up for somebody who only wants an end date.
+      openTicketSalesDates(ticket) {
+        this.ticketSalesDatesOpen[ticket.uid] = true;
+        this.$nextTick(() => {
+          var box = document.querySelector('[data-sales-dates-box="' + ticket.uid + '"]');
+          if (box) { box.focus({ preventScroll: true }); }
+        });
+      },
+      // Empties this type's two dates, in the pickers too: cleared in the data alone, the old date
+      // stayed on screen while an empty one was posted. Focus goes back to the link.
+      removeTicketSalesDates(ticket, index) {
+        ['.datepicker-ticket-sales-start', '.datepicker-ticket-sales-end'].forEach(function (selector) {
+          document.querySelectorAll(selector).forEach(function (input) {
+            if (input.getAttribute('data-ticket-index') == index && input._flatpickr) { input._flatpickr.clear(); }
+          });
+        });
+        ticket.sales_start_at_date = '';
+        ticket.sales_start_at_time = '';
+        ticket.sales_end_at_date = '';
+        ticket.sales_end_at_time = '';
+        this.ticketSalesDatesOpen[ticket.uid] = false;
+        this.markTabDirty('section-tickets');
+        this.$nextTick(() => {
+          var link = document.querySelector('[data-sales-dates-link="' + ticket.uid + '"]');
+          if (link) { link.focus(); }
+        });
       },
       // tickets.sold is a JSON map of date to count.
       soldCount(ticket) {
@@ -8318,14 +8422,20 @@
           this.openGallerySection();
         }
       },
+      // The gallery is a row of Page content: open the tab and the row, and bring it into view.
       openGallerySection() {
+        this.activePageTab = 'gallery';
         if (window.showEventSection) {
-          window.showEventSection('section-gallery');
+          window.showEventSection('section-page');
         }
-        const section = document.getElementById('section-gallery');
-        if (section) {
-          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        this.$nextTick(() => {
+          // The row's own title, so the gallery is seen under its name (scroll-margin keeps it clear
+          // of the portal's top bar).
+          const row = document.querySelector('.page-tab[data-tab="gallery"]');
+          if (row) {
+            row.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
       },
       publishEvent() {
         this.event.is_draft = false;
@@ -8444,7 +8554,8 @@
             this.$nextTick(() => document.getElementById('edit-form').requestSubmit());
           } else {
             this.sponsorFormOpen = true;
-            this.goToTab('section-event-settings');
+            this.activePageTab = 'sponsors';
+            this.goToTab('section-page');
           }
           return;
         }
@@ -8491,7 +8602,7 @@
 
           if (hasInvalidEventFields || hasInvalidTicketFields) {
             event.preventDefault();
-            this.activeTicketTab = hasInvalidEventFields ? 'options' : 'tickets';
+            this.activeTicketTab = hasInvalidEventFields ? 'checkout' : 'tickets';
             this.goToTab('section-tickets');
             alert(@json(__('messages.please_fill_in_custom_field_names')));
             return;
@@ -8785,14 +8896,13 @@
             sales_end_at_date: '',
             sales_end_at_time: '',
         });
-        if (this.showSalesDates) {
+        // Every type has its date pickers, shown or not: its sales dates open in place.
+        this.$nextTick(() => {
           this.$nextTick(() => {
-            this.$nextTick(() => {
-              this.initTicketSalesStartDatePicker(newIndex);
-              this.initTicketSalesEndDatePicker(newIndex);
-            });
+            this.initTicketSalesStartDatePicker(newIndex);
+            this.initTicketSalesEndDatePicker(newIndex);
           });
-        }
+        });
       },
       removeTicket(index) {
         // Destroy flatpickr instances before removing
@@ -9348,21 +9458,6 @@
         const ticket = this.tickets[ticketIndex];
         return Object.keys(ticket.custom_fields || {}).length;
       },
-      onToggleSalesDates() {
-        if (this.showSalesDates) {
-          this.$nextTick(() => {
-            this.initAllTicketSalesStartDatePickers();
-            this.initAllTicketSalesEndDatePickers();
-          });
-        } else {
-          this.tickets.forEach(ticket => {
-            ticket.sales_start_at_date = '';
-            ticket.sales_start_at_time = '';
-            ticket.sales_end_at_date = '';
-            ticket.sales_end_at_time = '';
-          });
-        }
-      },
       toggleExpireUnpaid() {
         if (! this.event.expire_unpaid_tickets) {
           this.event.expire_unpaid_tickets = 24;
@@ -9568,22 +9663,33 @@
         } else {
           payment = { text: [this.paymentLabels[e.payment_method], e.ticket_currency_code].filter(Boolean).join(' \u00b7 '), empty: false };
         }
-        // The switches that are on, by their own labels.
-        var O = this.tabLabels.options;
-        var on = [];
-        if (e.ask_phone) { on.push(O.ask_phone); }
-        if (e.individual_tickets) { on.push(O.individual_tickets); }
-        if (e.tickets_enabled && e.sell_after_start) { on.push(O.sell_after_start); }
-        if (e.tickets_enabled && this.showSalesDates) { on.push(O.sales_dates); }
-        if (e.tickets_enabled && e.show_unavailable_tickets) { on.push(O.show_unavailable); }
-        if (this.eventCustomFields && Object.keys(this.eventCustomFields).length) { on.push(O.custom_fields); }
-        if ((e.ticket_notes || '').trim()) { on.push(e.tickets_enabled ? O.ticket_notes : O.registration_notes); }
-        if (e.tickets_enabled && (e.terms_url || '').trim()) { on.push(O.terms_url); }
+        // What is on, by each one's own label. A saved event's per-order fields count on any plan:
+        // below Pro the row holds their upsell, not their editor, but buyers are still asked them. A
+        // new event below Pro (a copy, a template) cannot post them, so its fields do not count.
+        var C = this.tabLabels.checkout;
+        var asked = [];
+        if (e.ask_phone) { asked.push(C.ask_phone); }
+        if ((this.isPro || this.eventExists) && this.eventCustomFields && Object.keys(this.eventCustomFields).length) { asked.push(C.custom_fields); }
+        if (e.individual_tickets) { asked.push(C.individual_tickets); }
+        if (e.tickets_enabled && (e.terms_url || '').trim()) { asked.push(C.terms_url); }
+        if ((e.ticket_notes || '').trim()) { asked.push(e.tickets_enabled ? C.ticket_notes : C.registration_notes); }
+        // The sales dates first: they are what this row is opened for, and the line is cut at its
+        // end. They live on the types; Expire unpaid only where the row shows it.
+        var S = this.tabLabels.sales_rules;
+        var rules = [];
+        if (this.tickets.some(function (ticket) { return ticket.sales_start_at_date || ticket.sales_end_at_date; })) { rules.push(S.sales_dates); }
+        if (e.sell_after_start) { rules.push(S.sell_after_start); }
+        if (e.show_unavailable_tickets) { rules.push(S.show_unavailable); }
+        if (this.hasLimitedPaidTickets && this.showExpireUnpaid) { rules.push(S.expire_unpaid); }
+        // A row with nothing in it says "None": naming what could be in it ("Phone number, custom
+        // fields, notes") read as though those were on.
+        var line = function (list) {
+          return list.length ? { text: list.join(', '), empty: false } : { text: this.tabLabels.none, empty: true };
+        }.bind(this);
         return {
           payment: payment,
-          // A row with nothing in it says "None": naming what could be in it ("Phone number, custom
-          // fields, notes") read as though those were on.
-          options: on.length ? { text: on.join(', '), empty: false } : { text: this.tabLabels.none, empty: true },
+          checkout: line(asked),
+          sales_rules: line(rules),
           promo_codes: names(this.promoCodes, 'code') ? { text: names(this.promoCodes, 'code'), empty: false } : { text: this.tabLabels.none, empty: true },
           add_ons: names(this.addons, 'type') ? { text: names(this.addons, 'type'), empty: false } : { text: this.tabLabels.none, empty: true },
         };
@@ -9654,6 +9760,61 @@
       anyTicketPriced() {
         return this.tickets.some(function (ticket) { return parseFloat(ticket.price) > 0; });
       },
+      // Page content: a line for each of its rows, and the tab's, from what is on screen now.
+      pageRows() {
+        var L = this.tabLabels;
+        var F = this.pageFlags;
+        var photos = this.galleryStore.state.images.length;
+        var gallery;
+        if (F.galleryMode === 'locked') {
+          // Locked: the plain state, not an invitation to add photos the plan does not allow.
+          gallery = { text: L.none, empty: true };
+        } else if (F.galleryMode === 'downgraded' && photos) {
+          gallery = { text: L.gallery_hidden, warn: true };
+        } else if (photos) {
+          gallery = { text: this.galleryStripCount, empty: false };
+        } else {
+          gallery = { text: L.gallery_prompt, empty: true };
+        }
+
+        var sponsorNames = this.eventSponsors.map(function (sponsor) { return (sponsor.name || '').trim(); }).filter(Boolean).join(', ');
+        var sponsors;
+        var sponsorsPart = '';
+        if (! F.sponsorsUnlocked) {
+          // Neither schedule's plan has sponsors: a save clears what the event stored, so the row
+          // says that, and nothing else when nothing is stored.
+          sponsors = this.savedSponsorCount > 0 ? { text: L.saving_removes_sponsors, warn: true } : { text: L.none, empty: true };
+        } else if (this.event.sponsor_mode === 'none' || (this.event.sponsor_mode === 'custom' && ! this.eventSponsors.length)) {
+          // Chosen, or its own list with nobody in it yet: the event's page shows none.
+          sponsors = { text: L.no_sponsors, empty: false };
+          sponsorsPart = L.no_sponsors;
+        } else if (this.event.sponsor_mode === 'custom') {
+          sponsors = { text: sponsorNames || L.sponsors, empty: false };
+          sponsorsPart = L.sponsors + ': ' + (sponsorNames || this.eventSponsors.length);
+        } else {
+          sponsors = { text: L.same_as_schedule, empty: true };
+        }
+
+        // The tab: what the rows hold, sponsor names said as sponsors so they do not read as
+        // people; a prompt when nothing is chosen; the rows' names when every one is locked.
+        var shown = [];
+        var locked = [];
+        if (F.gallery) { shown.push(L.gallery); if (F.galleryMode === 'locked') { locked.push(L.gallery); } }
+        if (F.sponsors) { shown.push(L.sponsors); if (! F.sponsorsUnlocked) { locked.push(L.sponsors); } }
+        var parts = [];
+        if (F.gallery && F.galleryMode !== 'locked' && photos) { parts.push(this.galleryStripCount); }
+        if (F.sponsors && sponsorsPart) { parts.push(sponsorsPart); }
+        var tab;
+        if (shown.length && locked.length === shown.length) {
+          tab = { text: shown.join(', '), empty: true };
+        } else if (parts.length) {
+          tab = { text: parts.join(' \u00b7 '), empty: false };
+        } else {
+          tab = { text: F.gallery && F.galleryMode !== 'locked' ? L.gallery_prompt : shown.join(', '), empty: true };
+        }
+
+        return { gallery: gallery, sponsors: sponsors, tab: tab };
+      },
       // One line per tab, from what is on screen now and not from what was saved.
       tabSummaries() {
         var L = this.tabLabels;
@@ -9695,25 +9856,14 @@
           tickets = { text: L.no_tickets, empty: true };
         }
 
-        var listing = [L.visibility[this.visibility], this.categoryLabel].concat(this.alsoListedOn).filter(Boolean).join(' \u00b7 ');
+        // The useful part first, as the line is cut at its end: who can see it, then a calendar the
+        // event should be in and is not, then the rest. Schedule names are the longest and lose least.
+        var listing = [L.visibility[this.visibility], this.calendarSummary, this.categoryLabel].concat(this.alsoListedOn).filter(Boolean).join(' \u00b7 ');
 
         var engagement = [];
         if (this.fanContentPending > 0) { engagement.push(L.to_review + ': ' + this.fanContentPending); }
         if (this.polls && this.polls.length) { engagement.push(L.polls + ': ' + this.polls.length); }
 
-        var sponsors;
-        if (this.event.sponsor_mode === 'none') {
-          sponsors = { text: L.no_sponsors, empty: true };
-        } else if (this.event.sponsor_mode === 'custom' && this.eventSponsors.length) {
-          sponsors = { text: names(this.eventSponsors, 'name') || L.sponsors, empty: false };
-        } else if (this.event.sponsor_mode === 'custom') {
-          // Its own list, with nobody in it yet: the event's page shows none.
-          sponsors = { text: L.no_sponsors, empty: true };
-        } else {
-          sponsors = { text: L.same_as_schedule, empty: true };
-        }
-
-        var photos = this.galleryStore.state.images.length;
 
         return {
           'section-details': { text: this.whenLabel, empty: ! this.whenLabel },
@@ -9724,11 +9874,9 @@
           'section-agenda': this.eventParts.length
             ? { text: names(this.eventParts, 'name') || L.tabs['section-agenda'], empty: false }
             : { text: L.agenda_prompt, empty: true },
-          'section-gallery': photos ? { text: this.galleryStripCount, empty: false } : { text: L.gallery_prompt, empty: true },
+          'section-page': this.pageRows.tab,
           'section-listing': { text: listing, empty: false },
-          'section-calendar-sync': { text: this.calendarSummary, empty: false },
           'section-engagement': engagement.length ? { text: engagement.join(' \u00b7 '), empty: false } : { text: L.engagement_prompt, empty: true },
-          'section-event-settings': sponsors,
         };
       },
       // What the save bar says. It answers one question: what will Save do, or what is in its way.
@@ -9765,7 +9913,9 @@
         if (! this.agendaShowTimes && this.eventParts.some(function (part) { return part.start_time || part.end_time; })) {
           removes.push(L.saving_removes_times);
         }
-        if (this.savedSponsorCount > 0 && this.event.sponsor_mode !== 'custom') {
+        // Its own sponsors go when the tiles leave them, and on any save where neither schedule's
+        // plan has sponsors (EventRepo::saveEvent() clears them then, as it always has).
+        if (this.savedSponsorCount > 0 && (! this.pageFlags.sponsorsUnlocked || this.event.sponsor_mode !== 'custom')) {
           removes.push(L.saving_removes_sponsors);
         }
         if (removes.length) {
@@ -10365,7 +10515,7 @@
       var listTabs = {
         tickets: 'section-tickets', promoCodes: 'section-tickets', addons: 'section-tickets', ticketMode: 'section-tickets',
         eventCustomFields: 'section-tickets', 'event.installments_enabled': 'section-tickets',
-        selectedMembers: 'section-participants', eventParts: 'section-agenda', eventSponsors: 'section-event-settings',
+        selectedMembers: 'section-participants', eventParts: 'section-agenda', eventSponsors: 'section-page',
         selectedVenue: 'section-details', isInPerson: 'section-details', isOnline: 'section-details', isRecurring: 'section-details',
         visibility: 'section-listing',
       };
@@ -10549,6 +10699,9 @@
         failed(result.data.error);
         return;
       }
+      // Back on the calendars at the end of Listing, not at the top of the tab: the old address
+      // of the Calendar sync tab brings that block into view.
+      history.replaceState(null, '', '#section-calendar-sync');
       location.reload();
     })
     .catch(() => failed());
@@ -10683,8 +10836,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const sectionLinks = document.querySelectorAll('.section-nav-link');
     const sections = document.querySelectorAll('.section-content');
 
-    // Save the initial hash before anti-scroll logic strips it
-    const initialHash = window.resolveEventSectionHash(window.location.hash, window.location.search).section;
+    // Save the initial hash before anti-scroll logic strips it. What an old address wants brought
+    // into view waits on window for the load-time scroll guard, which would otherwise undo it.
+    const initialTarget = window.resolveEventSectionHash(window.location.hash, window.location.search);
+    const initialHash = initialTarget.section;
+    window.eventLoadFocus = initialTarget.focus || '';
 
     // Prevent browser from scrolling to hash on page load
     if (window.location.hash) {
@@ -10828,10 +10984,17 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('hashchange', function() {
         const target = window.resolveEventSectionHash(window.location.hash, window.location.search);
         if (target.section && document.getElementById(target.section)) {
-            if ((window.eventSectionAliases[window.location.hash.replace('#', '')] || [])[1] && window.vueApp) {
+            var alias = window.eventSectionAliases[window.location.hash.replace('#', '')] || [];
+            if (alias[1] && window.vueApp) {
                 window.vueApp.activeEngagementTab = target.engagementTab;
             }
+            if (alias[2] && window.vueApp) {
+                window.vueApp.activePageTab = target.pageTab;
+            }
             showSection(target.section);
+            if (target.focus) {
+                window.eventFocusTarget(target.focus);
+            }
         }
     });
     

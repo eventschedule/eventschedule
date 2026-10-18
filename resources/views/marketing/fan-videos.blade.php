@@ -1115,7 +1115,7 @@
                             <h3 class="es-reel-ink text-xl font-bold">And a gallery that is yours</h3>
                             <span class="es-reel-plan es-reel-plan-pro">Pro</span>
                         </div>
-                        <p class="es-reel-muted">An event shows one flyer. The Gallery tab adds your own photos beside it, up to {{ \App\Utils\GalleryUtils::maxImages() }} of them: past editions, the room, the lineup. Guests swipe through them on the event page and open any one full screen.</p>
+                        <p class="es-reel-muted">An event shows one flyer. The Gallery row of its Page content tab adds your own photos beside it, up to {{ \App\Utils\GalleryUtils::maxImages() }} of them: past editions, the room, the lineup. Guests swipe through them on the event page and open any one full screen.</p>
                     </div>
                     <ul class="es-reel-muted space-y-3 text-sm">
                         <li>Drag the photos into order, and give each a caption and a photographer credit. The first one leads and is shown largest.</li>
