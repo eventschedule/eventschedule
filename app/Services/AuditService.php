@@ -237,6 +237,22 @@ class AuditService
 
     const ADMIN_SPAM_UNCLEAR = 'admin.spam_unclear';
 
+    // A schedule that looks like somebody's private calendar, published by a calendar sync
+    // (/admin/private-calendars), and the placeholder venues imports made out of meeting links.
+    const ADMIN_CALENDAR_PRIVACY_HIDE = 'admin.calendar_privacy_hide';
+
+    const ADMIN_CALENDAR_PRIVACY_PUT_BACK = 'admin.calendar_privacy_put_back';
+
+    const ADMIN_CALENDAR_PRIVACY_PAUSE = 'admin.calendar_privacy_pause';
+
+    const ADMIN_CALENDAR_PRIVACY_RESUME = 'admin.calendar_privacy_resume';
+
+    const ADMIN_CALENDAR_PRIVACY_EMAIL = 'admin.calendar_privacy_email';
+
+    const ADMIN_CALENDAR_PRIVACY_REVIEWED = 'admin.calendar_privacy_reviewed';
+
+    const ADMIN_CALENDAR_PRIVACY_VENUE_REMOVED = 'admin.calendar_privacy_venue_removed';
+
     const ADMIN_GRANT = 'admin.grant';
 
     const ADMIN_REVOKE = 'admin.revoke';

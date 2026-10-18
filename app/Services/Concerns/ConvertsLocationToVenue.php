@@ -4,6 +4,7 @@ namespace App\Services\Concerns;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Services\MeetingLinkVenues;
 use App\Utils\CalendarPrivacy;
 use App\Utils\GeminiUtils;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +44,12 @@ trait ConvertsLocationToVenue
         // is not a venue. It used to become one: a public page named after a Zoom link with the
         // meeting's password in it. What a location says beside a link ("Room 4") is kept.
         $place = CalendarPrivacy::venueFromLocation($location);
+
+        // An event already public on a venue an older import made out of a meeting link loses it
+        // here, on its next read; the placeholder itself is taken down by the sweep.
+        if ($event->exists) {
+            MeetingLinkVenues::detachFrom($event);
+        }
 
         if (! $place) {
             if (trim((string) $location) !== '' && property_exists($this, 'inboundCounts')) {
