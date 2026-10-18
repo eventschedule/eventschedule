@@ -138,7 +138,9 @@ and is guarded, so a run that stopped half way can be run again.
 - **Changed: the three syncs.** Each schedule's sync gets one full read of its window, so the
   filters reach events read in before them: at most 10 a run per provider, none started after two
   minutes, and in a `/translate_data` request one in the whole request, saving its place after 20
-  seconds. The catch-up takes a few runs on the hosted install.
+  seconds. The catch-up takes a few runs on the hosted install. Before it, the sync reads what
+  changed through its stored token as on any run; the full read only judges, creates nothing and
+  keeps no token of its own.
 
 ### What the first runs do to existing schedules
 
@@ -147,7 +149,12 @@ and is guarded, so a run that stopped half way can be run again.
 - A cancelled meeting follows the schedule's "when an event is deleted" setting; under the default
   (keep it) it is hidden, not deleted.
 - Nothing an owner edited here is rewritten by the full read: it re-judges entries, it does not
-  copy them over again.
+  copy them over again. An event the owner deleted here is not brought back.
+- **Events read in before 2026-10-04** carry no source, and a push writes the same mapping row a
+  pull does, so the full read takes them off only for what the calendar says (private, declined,
+  out of office), never for their text. Meeting details in those are for
+  `/admin/private-calendars`, whose sweep does list them: the schedule that started this is
+  likely among them, so hide its events from there rather than waiting for the sync.
 
 ### After the deploy
 
