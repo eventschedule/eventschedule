@@ -3937,6 +3937,15 @@ class RoleController extends Controller
             // No table yet.
         }
 
+        // A schedule with no events at all: the Schedule tab offers the places they can be
+        // brought in from (<x-import-options variant="empty">). The calendar loads its events by
+        // Ajax, so this asks the one question itself, the same one the calendar does (accepted
+        // onto this schedule, any date or none). Not for a viewer, who cannot add events.
+        $showImportOptions = $tab === 'schedule'
+            && ! is_demo_mode()
+            && auth()->user()->isEditor($subdomain)
+            && ! DB::table('event_role')->where('role_id', $role->id)->where('is_accepted', true)->exists();
+
         return view('role/show-admin', compact(
             'subdomain',
             'role',
@@ -3975,6 +3984,7 @@ class RoleController extends Controller
             'pendingBookingCount',
             'currencies',
             'openTransfer',
+            'showImportOptions',
         ));
     }
 

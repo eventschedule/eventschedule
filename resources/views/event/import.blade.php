@@ -60,14 +60,14 @@
     // The guest submission form shares this view. Everything about links is the editor's alone:
     // a signed-out visitor must never be able to make the server fetch an address.
     $isGuestPage = isset($isGuest) && $isGuest;
-    $hasAi = (bool) (config('services.google.gemini_key') || config('services.openai.api_key'));
+    $hasAi = \App\Utils\ImportOptions::aiAvailable();
     // An editor on an install with no AI key still gets the box: a calendar link, or a page that
     // publishes its own event data, needs no model.
     $linksOnly = ! $hasAi && ! $isGuestPage;
     // Google Calendar as a place to bring events in from. The owner's alone: a schedule's Google
-    // connection is its owner's. Absent where Google is not set up, and in the demo.
-    $googleSource = ! $isGuestPage && config('services.google.client_id')
-        && auth()->id() === $role->user_id && ! is_demo_mode();
+    // connection is its owner's. Absent where Google is not set up, and in the demo. The band on
+    // the first-event form asks the same (App\Utils\ImportOptions), so its tile always lands here.
+    $googleSource = ! $isGuestPage && \App\Utils\ImportOptions::googleAvailable($role, auth()->user());
     $googleConnectUrl = $googleSource
         ? route('google.calendar.redirect', ['from' => 'import', 'subdomain' => $role->subdomain])
         : null;

@@ -386,6 +386,12 @@ document.addEventListener('click', function (e) {
 </script>
 @endif
 
+{{-- No events at all: where they can be brought in from, and the way to add one by hand
+     (RoleController::viewAdmin(), $showImportOptions). It goes with the first event. --}}
+@if (! empty($showImportOptions))
+<x-import-options :role="$role" variant="empty" />
+@endif
+
 {{-- Below the two banners above on purpose: those warn about real problems, this is an
      optional invitation and must not outrank them. Held back on the first-event render so the
      panel above is not buried under an invitation on the one page load it exists for; both

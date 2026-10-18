@@ -15,7 +15,7 @@
                 </svg>
             </span>
             <span class="min-w-0 flex-1">
-                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.google_calendar_integration') }}</span>
+                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.import_source_google') }}</span>
                 <span class="mt-0.5 block text-sm text-gray-500 dark:text-gray-400">{{ __('messages.import_google_tile_description') }}</span>
             </span>
             <svg class="h-5 w-5 flex-shrink-0 text-gray-400 transition-transform duration-200 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">

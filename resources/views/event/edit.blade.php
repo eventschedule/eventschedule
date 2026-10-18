@@ -2171,6 +2171,12 @@
   </script>
   @endif
 
+  {{-- A first event: the places events can be brought in from, ahead of the form for adding one
+       by hand. Not after a refused save, which is somebody already filling the form in. --}}
+  @if ($isFirstEventRun && ! $errors->any())
+  <x-import-options :role="$role" />
+  @endif
+
   <form method="POST"
         @submit="validateForm"
         action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : route('event.store', ['subdomain' => $subdomain]) }}"
