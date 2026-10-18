@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Role;
 use App\Services\CalDAVService;
+use App\Services\CalendarArrival;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -71,12 +72,19 @@ class SyncCalDAVCalendars extends Command
         $totalUpdated = 0;
         $totalErrors = 0;
 
+        $this->rereadsStarted = 0;
+        $this->runStarted = microtime(true);
+
         foreach ($roles as $role) {
             $this->info("Syncing CalDAV for role: {$role->subdomain} (ID: {$role->id})");
 
             try {
+                // The one full read each sync owes its calendar, a few a run (CalendarArrival),
+                // reads even a calendar that has not changed.
+                $calDAVService->rereadAllowed = $this->mayReread($role, CalendarArrival::CALDAV);
+
                 // Check if there are changes before syncing
-                if (! $calDAVService->hasChanges($role)) {
+                if (! $calDAVService->rereadAllowed && ! $calDAVService->hasChanges($role)) {
                     $this->info('  No changes detected, skipping');
 
                     continue;
@@ -99,9 +107,33 @@ class SyncCalDAVCalendars extends Command
             }
         }
 
+        $calDAVService->rereadAllowed = false;
+
         $this->info('');
         $this->info("Sync complete. Total - Created: {$totalCreated}, Updated: {$totalUpdated}, Errors: {$totalErrors}");
 
         return $totalErrors > 0 ? Command::FAILURE : Command::SUCCESS;
+    }
+
+    private int $rereadsStarted = 0;
+
+    private float $runStarted = 0;
+
+    /**
+     * Whether this schedule gets its one full read in this run: while it still owes one, at most
+     * CalendarArrival::REREADS_PER_RUN a run, and none started once the run has gone on for
+     * REREAD_BUDGET_SECONDS, so the release that brings this in does not run either cron rail over.
+     */
+    private function mayReread(Role $role, string $provider): bool
+    {
+        if ($this->rereadsStarted >= CalendarArrival::REREADS_PER_RUN
+            || microtime(true) - $this->runStarted >= CalendarArrival::REREAD_BUDGET_SECONDS
+            || ! CalendarArrival::needsReread($role, $provider)) {
+            return false;
+        }
+
+        $this->rereadsStarted++;
+
+        return true;
     }
 }

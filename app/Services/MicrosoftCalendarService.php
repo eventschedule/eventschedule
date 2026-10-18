@@ -53,6 +53,12 @@ class MicrosoftCalendarService
     /** What creating one entry held back, by reason, for the read's counts. */
     protected array $inboundCounts = [];
 
+    /**
+     * Set by the sync command for the schedules it may give their one full read this run
+     * (CalendarArrival::needsReread()). Webhooks and "Sync now" read only what changed.
+     */
+    public bool $rereadAllowed = false;
+
     public function __construct(EventRepo $eventRepo)
     {
         $this->eventRepo = $eventRepo;
@@ -668,7 +674,10 @@ class MicrosoftCalendarService
         // Serialize inbound sync per role: the webhook job and the 15-min poll (or two
         // overlapping runs) could otherwise both import the same remote event as two local
         // events (the sync-row lookup + name/time fallback are not constraint-backed).
-        $lock = Cache::lock('microsoft-role-sync-'.$role->id, 300);
+        $rereading = $this->rereadAllowed && CalendarArrival::needsReread($role, CalendarArrival::MICROSOFT);
+
+        // A full read saves every entry in the window, which can outlast the usual five minutes.
+        $lock = Cache::lock('microsoft-role-sync-'.$role->id, $rereading ? 900 : 300);
         if (! $lock->get()) {
             // Another inbound sync for this role is running; its deltaLink advance covers
             // these changes, so skipping is safe (not a lost update).
@@ -688,7 +697,12 @@ class MicrosoftCalendarService
             $this->inboundFirstPull = ! $role->microsoft_sync_token && empty(CalendarArrival::settings($role)->microsoft_first_pull);
             CalendarArrival::bindCarriedOver($role, CalendarArrival::MICROSOFT);
 
-            $nextUrl = $role->microsoft_sync_token ?: $this->initialDeltaUrl($calendarId);
+            // The one full read (CalendarArrival::needsReread()): the whole window again, so the
+            // privacy filters reach entries read in before them, resuming where a run stopped.
+            $fullRead = $rereading || ! $role->microsoft_sync_token;
+            $nextUrl = $rereading
+                ? (CalendarArrival::rereadCursor($role, CalendarArrival::MICROSOFT) ?: $this->initialDeltaUrl($calendarId))
+                : ($role->microsoft_sync_token ?: $this->initialDeltaUrl($calendarId));
             $deltaLink = null;
             $checkpoint = null;
             $pages = 0;
@@ -780,6 +794,13 @@ class MicrosoftCalendarService
                     'microsoft_last_sync_at' => now(),
                 ]);
                 CalendarArrival::recordPull($role, CalendarArrival::MICROSOFT, $results, $this->inboundFirstPull);
+
+                if ($fullRead) {
+                    CalendarArrival::finishReread($role, CalendarArrival::MICROSOFT);
+                }
+            } elseif ($rereading && $checkpoint && $this->isGraphUrl($checkpoint)) {
+                // The full read resumes from here; the delta link it replaces keeps working meanwhile.
+                CalendarArrival::saveRereadCursor($role, CalendarArrival::MICROSOFT, $checkpoint);
             } elseif ($checkpoint && $this->isGraphUrl($checkpoint)) {
                 // Page cap hit before the deltaLink: store the mid-cycle nextLink so we resume here.
                 $role->writeOperationalColumns([

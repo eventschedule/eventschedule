@@ -365,6 +365,54 @@ class CalendarArrival
         ]);
     }
 
+    // The one full read ----------------------------------------------------------------------
+
+    /** At most this many full reads start in one run of a sync command... */
+    public const REREADS_PER_RUN = 10;
+
+    /** ...and none starts once the run has been going this long, so neither cron rail runs over. */
+    public const REREAD_BUDGET_SECONDS = 120;
+
+    /**
+     * Whether this sync still owes its calendar one full read. Incremental reads (Google's sync
+     * token, Outlook's delta link, CalDAV's etags) only ever see what changed, so the filters
+     * above would never reach an entry read in before them. A read that starts from nothing
+     * counts as the full read too.
+     */
+    public static function needsReread(Role $role, string $provider): bool
+    {
+        if (! self::tablesReady()) {
+            return false;
+        }
+
+        return CalendarSyncSetting::where('role_id', $role->id)->value("{$provider}_reread_at") === null;
+    }
+
+    /** Where an unfinished full read resumes (a page cursor), or null to start from the top. */
+    public static function rereadCursor(Role $role, string $provider): ?string
+    {
+        return self::tablesReady()
+            ? CalendarSyncSetting::where('role_id', $role->id)->value("{$provider}_reread_cursor")
+            : null;
+    }
+
+    public static function saveRereadCursor(Role $role, string $provider, ?string $cursor): void
+    {
+        if (self::tablesReady()) {
+            CalendarSyncSetting::updateOrCreate(['role_id' => $role->id], ["{$provider}_reread_cursor" => $cursor]);
+        }
+    }
+
+    public static function finishReread(Role $role, string $provider): void
+    {
+        if (self::tablesReady()) {
+            CalendarSyncSetting::updateOrCreate(['role_id' => $role->id], [
+                "{$provider}_reread_at" => now(),
+                "{$provider}_reread_cursor" => null,
+            ]);
+        }
+    }
+
     // Arrival ------------------------------------------------------------------------------
 
     /**

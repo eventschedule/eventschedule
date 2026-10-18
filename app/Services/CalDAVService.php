@@ -31,6 +31,12 @@ class CalDAVService
     /** What creating one entry held back, by reason, for the read's counts. */
     protected array $inboundCounts = [];
 
+    /**
+     * Set by the sync command for the schedules it may give their one full read this run
+     * (CalendarArrival::needsReread()): every entry is reconciled, unchanged etag or not.
+     */
+    public bool $rereadAllowed = false;
+
     public function __construct(EventRepo $eventRepo)
     {
         $this->eventRepo = $eventRepo;
@@ -351,6 +357,7 @@ class CalDAVService
 
             // The very first read of this calendar, which the owner is told about.
             $this->inboundFirstPull = ! $role->caldav_last_sync_at && empty(CalendarArrival::settings($role)->caldav_first_pull);
+            $rereading = $this->rereadAllowed && CalendarArrival::needsReread($role, CalendarArrival::CALDAV);
             CalendarArrival::bindCarriedOver($role, CalendarArrival::CALDAV);
 
             // Get events from CalDAV
@@ -407,7 +414,8 @@ class CalDAVService
                         $incomingEtag = $eventData['etag'] ?? null;
 
                         // Fast path: etag present and unchanged means nothing changed, skip.
-                        if ($incomingEtag !== null && $incomingEtag === $storedEtag) {
+                        // Not on the one full read, which is for entries read in before the filters.
+                        if (! $rereading && $incomingEtag !== null && $incomingEtag === $storedEtag) {
                             continue;
                         }
 
@@ -497,6 +505,10 @@ class CalDAVService
             // Role::writeOperationalColumns().
             $role->writeOperationalColumns(['caldav_last_sync_at' => now()]);
             CalendarArrival::recordPull($role, CalendarArrival::CALDAV, $results, $this->inboundFirstPull);
+
+            if ($rereading || $this->inboundFirstPull) {
+                CalendarArrival::finishReread($role, CalendarArrival::CALDAV);
+            }
         } catch (\Exception $e) {
             Log::error('CalDAV sync from calendar failed', [
                 'role_id' => $role->id,

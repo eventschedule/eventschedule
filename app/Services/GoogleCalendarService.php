@@ -40,6 +40,12 @@ class GoogleCalendarService
     /** What creating one entry held back, by reason, for the read's counts. */
     protected array $inboundCounts = [];
 
+    /**
+     * Set by the sync command for the schedules it may give their one full read this run
+     * (CalendarArrival::needsReread()). Webhooks and "Sync now" read only what changed.
+     */
+    public bool $rereadAllowed = false;
+
     /** What the standing sync needs: read the calendars, and write events to one of them. */
     public const FULL_SCOPES = [
         Calendar::CALENDAR_EVENTS,
@@ -877,7 +883,10 @@ class GoogleCalendarService
 
         // Serialize inbound sync per role: the webhook and the 15-min poll (or two overlapping runs)
         // could otherwise import the same event twice and race on the sync-token advance.
-        $lock = Cache::lock('google-role-sync-'.$role->id, 120);
+        $rereading = $this->rereadAllowed && CalendarArrival::needsReread($role, CalendarArrival::GOOGLE);
+
+        // A full read saves every entry in the window, which can outlast the usual two minutes.
+        $lock = Cache::lock('google-role-sync-'.$role->id, $rereading ? 900 : 120);
         if (! $lock->get()) {
             return $results;
         }
@@ -902,6 +911,18 @@ class GoogleCalendarService
             $timeMax = now()->addDays(365)->format('c');
 
             $pageToken = null;
+
+            // The one full read (CalendarArrival::needsReread()): the whole window again, so the
+            // privacy filters reach entries read in before them. One too big for a run resumes
+            // where it stopped, with the window it started with.
+            if ($rereading) {
+                $syncToken = null;
+                $cursor = json_decode((string) CalendarArrival::rereadCursor($role, CalendarArrival::GOOGLE), true);
+                if (is_array($cursor) && ! empty($cursor['page']) && ! empty($cursor['min']) && ! empty($cursor['max'])) {
+                    [$pageToken, $timeMin, $timeMax] = [$cursor['page'], $cursor['min'], $cursor['max']];
+                }
+            }
+
             $restarted = false;
             $pages = 0;
             $nextSyncToken = null;
@@ -909,6 +930,9 @@ class GoogleCalendarService
             while (true) {
                 if (++$pages > self::MAX_SYNC_PAGES) {
                     Log::warning('Google sync pagination cap hit', ['role_id' => $role->id]);
+                    if ($rereading && $pageToken) {
+                        CalendarArrival::saveRereadCursor($role, CalendarArrival::GOOGLE, json_encode(['page' => $pageToken, 'min' => $timeMin, 'max' => $timeMax]));
+                    }
                     break;
                 }
 
@@ -985,6 +1009,11 @@ class GoogleCalendarService
             if ($nextSyncToken) {
                 $this->storeGoogleSyncToken($role, $nextSyncToken);
                 CalendarArrival::recordPull($role, CalendarArrival::GOOGLE, $results, $this->inboundFirstPull);
+
+                // A read that started with no token read the whole window: it was the full read.
+                if (! $syncToken) {
+                    CalendarArrival::finishReread($role, CalendarArrival::GOOGLE);
+                }
             }
         } catch (\Exception $e) {
             Log::error('Failed to sync from Google Calendar', [

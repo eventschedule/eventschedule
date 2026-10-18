@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Role;
+use App\Services\CalendarArrival;
 use App\Services\GoogleCalendarService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -69,6 +70,9 @@ class SyncGoogleCalendars extends Command
         $totalDeleted = 0;
         $totalErrors = 0;
 
+        $this->rereadsStarted = 0;
+        $this->runStarted = microtime(true);
+
         foreach ($roles as $role) {
             $this->info("Syncing Google Calendar for role: {$role->subdomain} (ID: {$role->id})");
 
@@ -88,6 +92,9 @@ class SyncGoogleCalendars extends Command
 
                     continue;
                 }
+
+                // The one full read each sync owes its calendar, a few a run (CalendarArrival).
+                $googleCalendarService->rereadAllowed = $this->mayReread($role, CalendarArrival::GOOGLE);
 
                 // The persisted sync token makes an empty poll one cheap request, which is itself
                 // the change check - no separate hasChanges() call is needed.
@@ -109,9 +116,33 @@ class SyncGoogleCalendars extends Command
             }
         }
 
+        $googleCalendarService->rereadAllowed = false;
+
         $this->info('');
         $this->info("Sync complete. Total - Created: {$totalCreated}, Updated: {$totalUpdated}, Deleted: {$totalDeleted}, Errors: {$totalErrors}");
 
         return $totalErrors > 0 ? Command::FAILURE : Command::SUCCESS;
+    }
+
+    private int $rereadsStarted = 0;
+
+    private float $runStarted = 0;
+
+    /**
+     * Whether this schedule gets its one full read in this run: while it still owes one, at most
+     * CalendarArrival::REREADS_PER_RUN a run, and none started once the run has gone on for
+     * REREAD_BUDGET_SECONDS, so the release that brings this in does not run either cron rail over.
+     */
+    private function mayReread(Role $role, string $provider): bool
+    {
+        if ($this->rereadsStarted >= CalendarArrival::REREADS_PER_RUN
+            || microtime(true) - $this->runStarted >= CalendarArrival::REREAD_BUDGET_SECONDS
+            || ! CalendarArrival::needsReread($role, $provider)) {
+            return false;
+        }
+
+        $this->rereadsStarted++;
+
+        return true;
     }
 }
