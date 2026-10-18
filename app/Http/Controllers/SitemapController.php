@@ -659,6 +659,11 @@ class SitemapController extends Controller
     {
         return $this->scheduleQuery()
             ->where('roles.is_unlisted', false)
+            // Nor a schedule a platform admin hid from discovery, which is also why its events
+            // below must pass constrainNotOnHiddenSchedule(): see discoverableEventQuery().
+            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))
+                ->from('discovery_hidden_schedules')
+                ->whereColumn('discovery_hidden_schedules.role_id', 'roles.id'))
             ->whereExists(function ($q) {
                 $q->select(DB::raw(1))
                     ->from('event_role')
@@ -667,6 +672,7 @@ class SitemapController extends Controller
                     ->where('event_role.is_accepted', true)
                     ->where('events.is_hidden_from_discovery', false);
 
+                Event::constrainNotOnHiddenSchedule($q);
                 self::publicEventRows($q);
                 Event::constrainSitemapWindow($q, $this->now());
             });
@@ -709,11 +715,12 @@ class SitemapController extends Controller
      *
      * is_hidden_from_discovery is set on an event that its schedule has pulled out of /browse. The
      * event page stays public and indexable; it just stops being surfaced by us. Submitting it to
-     * Google anyway would be us surfacing it, which is the thing the flag turns off.
+     * Google anyway would be us surfacing it, which is the thing the flag turns off. The same goes
+     * for every event from a schedule a platform admin hid whole (Event::constrainFromSchedule()).
      */
     private function discoverableEventQuery()
     {
-        return $this->eventQuery()->where('events.is_hidden_from_discovery', false);
+        return Event::constrainNotOnHiddenSchedule($this->eventQuery()->where('events.is_hidden_from_discovery', false));
     }
 
     /**

@@ -2146,6 +2146,23 @@
         .hp-discover-band { position: relative; border-radius: 2.5rem; background: var(--hp-bg-2); box-shadow: var(--hp-card-shadow), 0 0 0 1px var(--hp-line); }
         .hp-discover-foot { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin-top: 2rem; padding-inline: 1rem; color: var(--hp-ink-3); }
         .hp-discover-foot a.hp-plain { display: inline-flex; align-items: center; min-height: 1.75rem; font-size: 0.92rem; color: var(--hp-ink-3); text-decoration: underline; text-underline-offset: 0.2em; }
+
+        {{-- A platform admin's note after a discovery pill (Hide schedule, Hide event): it sits
+             above the band, never inside .es-gallery-pin, whose panel is clipped to the window's
+             height and would lose the heading to two more lines. The schedule pill on a card is
+             light so it does not read as one control with the dark event pill beside it; like the
+             card under it, it keeps one look in both themes. --}}
+        #hp .hp-admin-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 0.9rem; max-width: 46rem; margin: 0.75rem auto 1.25rem; padding: 0.7rem 1rem; border: 1px solid var(--hp-line-2); border-radius: 0.9rem; background: var(--hp-bg-2); color: var(--hp-ink); font-size: 0.92rem; line-height: 1.45; text-align: center; box-shadow: var(--hp-card-shadow); }
+        #hp .hp-admin-note p { margin: 0; }
+        #hp .hp-admin-note form { display: contents; }
+        #hp .hp-admin-note :is(button, a) { display: inline-flex; align-items: center; min-height: 2rem; padding: 0.25rem 0.85rem; border: 1px solid var(--hp-line-2); border-radius: 999px; background: var(--hp-bg); color: var(--hp-ink); font-size: 0.82rem; font-weight: 700; text-decoration: none; cursor: pointer; transition: border-color 0.2s; }
+        #hp .hp-admin-note :is(button, a):hover { border-color: var(--hp-blue); }
+        #hp .hp-admin-note :is(button, a):focus-visible { outline: 2px solid var(--hp-blue); outline-offset: 2px; }
+        #hp .hp-admin-note.is-bad { border-color: #fca5a5; background: #fef2f2; color: #7f1d1d; }
+        .dark #hp .hp-admin-note.is-bad { border-color: rgba(248, 113, 113, 0.45); background: #3b1418; color: #fecaca; }
+        #hp .hp-pill-schedule { background-color: rgba(255, 255, 255, 0.9); color: #0a1020; }
+        #hp .hp-pill-schedule:hover { background-color: #ffffff; }
+        #hp .hp-pill-schedule:focus-visible { outline: 2px solid #4e81fa; outline-offset: 2px; }
         .es-rail-clip { overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; scrollbar-width: none; }
         .es-rail-clip::-webkit-scrollbar { display: none; }
         .es-rail { display: flex; width: max-content; will-change: transform; }
@@ -3770,6 +3787,26 @@
     <!-- ============================================================ -->
     @php $discoverPinned = $discoverEvents->count() >= 4; @endphp
     <section id="discover" class="hp-discover">
+        @if (auth()->user()?->isAdmin() && is_array(session('discovery_notice')))
+            @php $discoveryNotice = session('discovery_notice'); @endphp
+            <div @class(['hp-admin-note', 'is-bad' => ! empty($discoveryNotice['bad'])]) role="status">
+                <p>{{ $discoveryNotice['text'] }}</p>
+                @if (! empty($discoveryNotice['undo']))
+                    <form method="POST" action="{{ $discoveryNotice['undo']['action'] }}">
+                        @csrf
+                        <input type="hidden" name="hide" value="{{ $discoveryNotice['undo']['hide'] ? 1 : 0 }}">
+                        <input type="hidden" name="anchor" value="discover">
+                        <button type="submit">Undo</button>
+                    </form>
+                @endif
+                @if (! empty($discoveryNotice['list']))
+                    <a href="{{ $discoveryNotice['list'] }}">Hidden schedules</a>
+                @endif
+                @if (! empty($discoveryNotice['confirm']))
+                    <a href="{{ $discoveryNotice['confirm'] }}">Confirm password</a>
+                @endif
+            </div>
+        @endif
         <div @class([
             'hp-discover-band 2xl:mx-auto 2xl:max-w-[100rem]',
             'es-gallery' => $discoverPinned,

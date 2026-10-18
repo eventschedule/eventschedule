@@ -1350,6 +1350,7 @@ if (config('app.is_nexus')) {
         Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
         Route::get('/browse', [MarketingController::class, 'browse'])->name('marketing.browse');
         Route::post('/browse/event/{hash}/toggle-discovery', [MarketingController::class, 'toggleEventDiscovery'])->name('marketing.discovery.toggle')->middleware('auth');
+        Route::post('/browse/schedule/{hash}/toggle-discovery', [MarketingController::class, 'toggleScheduleDiscovery'])->name('marketing.discovery.schedule')->middleware('auth');
         Route::post('/browse/federated/{hash}/block', [MarketingController::class, 'toggleFederatedBlock'])->name('marketing.federation.block')->middleware('auth');
         // Beacon target for outbound clicks on a federated listing. The card link
         // itself stays a direct followable link to the origin, so this cannot be a
@@ -1631,6 +1632,7 @@ if (config('app.is_nexus')) {
             Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
             Route::get('/browse', [MarketingController::class, 'browse'])->name('marketing.browse');
             Route::post('/browse/event/{hash}/toggle-discovery', [MarketingController::class, 'toggleEventDiscovery'])->name('marketing.discovery.toggle')->middleware('auth');
+            Route::post('/browse/schedule/{hash}/toggle-discovery', [MarketingController::class, 'toggleScheduleDiscovery'])->name('marketing.discovery.schedule')->middleware('auth');
             Route::post('/browse/federated/{hash}/block', [MarketingController::class, 'toggleFederatedBlock'])->name('marketing.federation.block')->middleware('auth');
             // Beacon target for outbound clicks on a federated listing. The card link
             // itself stays a direct followable link to the origin, so this cannot be a

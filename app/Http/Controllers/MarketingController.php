@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\TrackMarketingVisit;
+use App\Models\DiscoveryHiddenSchedule;
 use App\Models\Event;
 use App\Models\PageView;
 use App\Models\Role;
@@ -17,6 +18,7 @@ use App\Utils\TicketFees;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -6900,6 +6902,8 @@ class MarketingController extends Controller
                 // guest URL, so a result card for it would link nowhere.
                 ->whereNotNull('subdomain')
                 ->whereNot(fn ($q) => $q->demoContent())
+                // A schedule a platform admin hid from discovery is not suggested here either.
+                ->whereNot(fn ($q) => $q->hiddenFromDiscovery())
                 ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
                     // strict: only schedules with a known country other than the excluded one
                     $q->whereNotNull('country_code')
@@ -6965,6 +6969,11 @@ class MarketingController extends Controller
                 ->get()
             : collect();
 
+        // And the schedules hidden whole ("Hide schedule"), newest first, each with its Unhide.
+        $hiddenSchedules = $isAdmin
+            ? DiscoveryHiddenSchedule::with('role')->latest()->latest('id')->limit(100)->get()->filter(fn ($row) => $row->role)
+            : collect();
+
         // Federated listings render as their own labelled section rather than being
         // interleaved: every discovery query here ends in a single Eloquent builder
         // with its own ordering and limit, so mixing a second corpus in would need a
@@ -7010,6 +7019,7 @@ class MarketingController extends Controller
             'hidden' => BrowseWall::build($hiddenEvents, [], $now, plain: true),
             'browseAdmin' => $isAdmin,
             'hiddenEvents' => $hiddenEvents,
+            'hiddenSchedules' => $hiddenSchedules,
             'federatedEvents' => $federatedEvents,
             'federatedTotal' => $federatedTotal,
             'federatedLimit' => $federatedLimit,
@@ -7258,16 +7268,20 @@ class MarketingController extends Controller
      * Same gate reasoning as toggleFederatedBlock above: served from the base domain, outside the
      * admin route group, so the re-confirmation window has to be checked by hand.
      */
-    public function toggleEventDiscovery(string $hash)
+    public function toggleEventDiscovery(Request $request, string $hash)
     {
         abort_unless(auth()->check() && auth()->user()->isAdmin(), 403);
 
-        if (! AdminReauthUtils::isCurrent(request()->session())) {
-            return back()->with('error', __('messages.admin_confirm_password'));
+        if (! AdminReauthUtils::isCurrent($request->session())) {
+            return $this->discoveryRefused($request);
         }
 
         $event = Event::findOrFail(UrlUtils::decodeIdOrFail($hash));
-        $event->is_hidden_from_discovery = ! $event->is_hidden_from_discovery;
+        // The pills and Undo say which state they want, so a double press cannot flip it back; a
+        // post that does not say still flips, as this action always has.
+        $event->is_hidden_from_discovery = $request->has('hide')
+            ? $request->boolean('hide')
+            : ! $event->is_hidden_from_discovery;
         $event->save();
 
         // The save() above already busts it through Event's saved hook. Repeated here because
@@ -7285,9 +7299,130 @@ class MarketingController extends Controller
             ['is_hidden_from_discovery' => $event->is_hidden_from_discovery],
         );
 
-        return back()->with('message', $event->is_hidden_from_discovery
+        $said = $event->is_hidden_from_discovery
             ? 'Event hidden from discovery'
-            : 'Event restored to discovery');
+            : 'Event restored to discovery';
+
+        return $this->backToDiscovery($request, 'message', $said, [
+            'undo' => [
+                'action' => route('marketing.discovery.toggle', $event->hashedId()),
+                'hide' => ! $event->is_hidden_from_discovery,
+            ],
+        ]);
+    }
+
+    /**
+     * Hide or unhide every event FROM a schedule (Event::constrainFromSchedule()) on the homepage,
+     * /browse, /search, /for-talent and the global sitemap, and the schedule from /search's
+     * schedule results. Its own pages are not touched.
+     *
+     * The same gate as toggleEventDiscovery() and for the same reason. Not a flip: the form says
+     * hide=1 or hide=0, so a double press, or Undo pressed twice, lands where it was meant to.
+     * The row lives in its own table, whose write fires no model hook, so the wall's cache is
+     * dropped here by hand.
+     */
+    public function toggleScheduleDiscovery(Request $request, string $hash)
+    {
+        abort_unless(auth()->check() && auth()->user()->isAdmin(), 403);
+
+        if (! AdminReauthUtils::isCurrent($request->session())) {
+            return $this->discoveryRefused($request);
+        }
+
+        $role = Role::findOrFail(UrlUtils::decodeIdOrFail($hash));
+        $hide = $request->boolean('hide');
+
+        if ($hide) {
+            DiscoveryHiddenSchedule::firstOrCreate(['role_id' => $role->id]);
+        } else {
+            DiscoveryHiddenSchedule::where('role_id', $role->id)->delete();
+        }
+
+        self::forgetWallCache();
+
+        AuditService::log(
+            AuditService::ADMIN_DISCOVERY_HIDE_SCHEDULE,
+            auth()->id(),
+            'Role',
+            $role->id,
+            null,
+            ['hidden' => $hide],
+            $hide ? 'Hid a schedule from discovery' : 'Restored a schedule to discovery',
+        );
+
+        // What the press moved: its upcoming events that discovery would otherwise list. Counted
+        // with the hidden schedules left in, so the number is the same before and after the write.
+        $count = Event::constrainFromSchedule($this->publicUpcomingEventsQuery(hiddenSchedulesToo: true), $role->id)
+            ->where('is_hidden_from_discovery', false)
+            ->count();
+        $events = $count === 1 ? '1 upcoming event' : $count.' upcoming events';
+
+        $said = match (true) {
+            $hide && $count > 0 => $events.' from '.$role->name.($count === 1 ? ' is' : ' are').' now hidden from the homepage, Browse and search.',
+            $hide => $role->name.' is now hidden from the homepage, Browse and search. It has no upcoming events listed.',
+            $count > 0 => $role->name.' is back on the homepage, Browse and search, with '.$events.'.',
+            default => $role->name.' is back on the homepage, Browse and search.',
+        };
+
+        return $this->backToDiscovery($request, 'message', $said, [
+            'undo' => [
+                'action' => route('marketing.discovery.schedule', UrlUtils::encodeId($role->id)),
+                'hide' => ! $hide,
+            ],
+            // The lasting way back: /search leaves a hidden schedule out even for an admin.
+            'list' => $hide ? route('marketing.browse').'#hidden-schedules' : null,
+        ]);
+    }
+
+    /**
+     * Where a discovery pill returns the admin to: a fixed page for each anchor the forms send,
+     * never the Referer. back() reads the Referer and then the session's last page, and the hosted
+     * session is shared with the app's subdomains, so without one it could land on the admin
+     * area. A post that names no anchor goes back() as it always has.
+     */
+    private function discoveryTarget(Request $request): ?string
+    {
+        return match ($request->input('anchor')) {
+            'discover' => route('marketing.index').'#discover',
+            'events' => route('marketing.browse').'#events',
+            'hidden-events' => route('marketing.browse').'#hidden-events',
+            'hidden-schedules' => route('marketing.browse').'#hidden-schedules',
+            default => null,
+        };
+    }
+
+    /**
+     * Back to where the pill was pressed, with the flash /browse has always printed ($key) and the
+     * notice the homepage and /browse's sections print: $said, plus Undo or a link, and the anchor
+     * it was pressed at ('at'), so the section the page lands on is the one that says it.
+     */
+    private function backToDiscovery(Request $request, string $key, string $said, array $notice): RedirectResponse
+    {
+        $target = $this->discoveryTarget($request);
+
+        return ($target ? redirect()->to($target) : back())
+            ->with($key, $said)
+            ->with('discovery_notice', $notice + ['text' => $said, 'at' => $target ? $request->input('anchor') : null]);
+    }
+
+    /**
+     * A lapsed password confirmation. The homepage printed nothing at all for this, and /browse
+     * said "to access the admin area" with no way to do it: the notice links to the confirm page,
+     * which returns through url.intended to the place the pill was pressed.
+     */
+    private function discoveryRefused(Request $request): RedirectResponse
+    {
+        $target = $this->discoveryTarget($request);
+
+        if ($target) {
+            $request->session()->put('url.intended', $target);
+        }
+
+        return $this->backToDiscovery($request, 'error', __('messages.admin_confirm_password'), [
+            'text' => 'Confirm your password to hide or restore events, then press the button again.',
+            'bad' => true,
+            'confirm' => route('admin.password.confirm.show'),
+        ]);
     }
 
     /**
@@ -7319,9 +7454,9 @@ class MarketingController extends Controller
      * longer that is still running. /browse asks a finer question (not ended, to the minute) and
      * builds on publicEventsQuery() itself.
      */
-    private function publicUpcomingEventsQuery(): Builder
+    private function publicUpcomingEventsQuery(bool $hiddenSchedulesToo = false): Builder
     {
-        return $this->publicEventsQuery()
+        return $this->publicEventsQuery($hiddenSchedulesToo)
             ->where(function ($q) {
                 $q->where('starts_at', '>=', Carbon::today())
                     ->orWhereNotNull('days_of_week')
@@ -7334,10 +7469,13 @@ class MarketingController extends Controller
 
     /**
      * Which events the platform's discovery surfaces may show at all, whenever they are on:
-     * public, accepted by a listed schedule, not demo content and not a likely test. Every
-     * caller adds its own rule about time.
+     * public, accepted by a listed schedule, not demo content, not a likely test and not from a
+     * schedule a platform admin has hidden. Every caller adds its own rule about time.
+     *
+     * $hiddenSchedulesToo keeps a hidden schedule's events, for the one caller that has to count
+     * them: the notice that says how many a "Hide schedule" took out.
      */
-    private function publicEventsQuery(): Builder
+    private function publicEventsQuery(bool $hiddenSchedulesToo = false): Builder
     {
         $excludeCountry = strtolower(trim((string) config('app.search_exclude_country', '')));
         $publicScheduleFilter = $this->publicScheduleFilter();
@@ -7386,6 +7524,10 @@ class MarketingController extends Controller
             ->whereDoesntHave('roles', fn ($r) => $r->demoContent())
             // Keep throwaway "test" events (and events under "test"-named schedules) out too.
             ->excludeLikelyTest()
+            // And every event FROM a schedule a platform admin hid with "Hide schedule": the ones
+            // it owns and the ones it is on as a talent or venue, never a curator's listings
+            // (Event::constrainFromSchedule() says why).
+            ->unless($hiddenSchedulesToo, fn ($q) => Event::constrainNotOnHiddenSchedule($q))
             ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
                 // strict: require at least one schedule with a known country, and exclude events
                 // linked to any schedule in the configured country

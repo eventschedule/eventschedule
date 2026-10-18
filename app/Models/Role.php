@@ -4441,6 +4441,24 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * A platform admin's "Hide schedule": present while this schedule's events are kept out of
+     * discovery (Event::constrainNotOnHiddenSchedule()). Not a column here; see the table's
+     * migration.
+     */
+    public function discoveryHide()
+    {
+        return $this->hasOne(DiscoveryHiddenSchedule::class);
+    }
+
+    /** Schedules a platform admin has hidden from discovery. */
+    public function scopeHiddenFromDiscovery($query)
+    {
+        return $query->whereExists(fn ($q) => $q->select(DB::raw(1))
+            ->from('discovery_hidden_schedules')
+            ->whereColumn('discovery_hidden_schedules.role_id', 'roles.id'));
+    }
+
+    /**
      * The schedule's sponsors as a guest page shows them: none while the owner has the section
      * switched off (roles.show_sponsors). The stored list is untouched, so switching it back on
      * shows them again. The schedule form, a newsletter's sponsors block and getSponsorLogos()

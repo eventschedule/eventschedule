@@ -60,6 +60,7 @@
         $networkCount = $federatedEvents->count();
         $hasNetworkSection = $networkCount > 0 || $federatedCountry || $federatedLanguage || $federatedInstance;
         $schedules = $wall['count'];
+        $discoveryNotice = $browseAdmin && is_array(session('discovery_notice')) ? session('discovery_notice') : null;
 
         // Questions a visitor actually asks, then the one an organizer asks.
         $faqs = [
@@ -155,11 +156,20 @@
         <div class="{{ $wall['count'] > 3 ? 'bw-bleed' : 'bw-col' }}">
             <h2 class="sr-only">{{ __('messages.upcoming_events') }}</h2>
 
-            @foreach (['message' => 'bw-flash', 'error' => 'bw-flash bw-flash-bad'] as $flashKey => $flashClass)
-                @if (session($flashKey))
-                    <p class="{{ $flashClass }}" role="status">{{ session($flashKey) }}</p>
+            {{-- An admin's discovery button brings its own note, printed in the section it was
+                 pressed in (here, or Hidden events / Hidden schedules below), in place of the
+                 flash: one message, where the page lands. --}}
+            @if ($discoveryNotice)
+                @if (in_array($discoveryNotice['at'] ?? null, [null, 'events'], true))
+                    @include('marketing.partials.browse-discovery-notice', ['notice' => $discoveryNotice, 'anchor' => 'events'])
                 @endif
-            @endforeach
+            @else
+                @foreach (['message' => 'bw-flash', 'error' => 'bw-flash bw-flash-bad'] as $flashKey => $flashClass)
+                    @if (session($flashKey))
+                        <p class="{{ $flashClass }}" role="status">{{ session($flashKey) }}</p>
+                    @endif
+                @endforeach
+            @endif
 
             @if (count($tiles))
                 @include('marketing.partials.browse-wall', ['tiles' => $tiles, 'rows' => $rows, 'admin' => $browseAdmin])
@@ -258,21 +268,73 @@
         </section>
     @endif
 
-    {{-- Admin-only: hidden events management --}}
-    @if($hiddenEvents->count() > 0)
-        <section class="bw-stage bw-hidden">
+    {{-- Admin-only: what is hidden, and the way back. Both sections are always drawn for an
+         admin, so an Unhide that empties one still lands on it and on its note. --}}
+    @if ($browseAdmin)
+        <section id="hidden-events" class="bw-stage bw-hidden">
             <div class="bw-col">
                 <div class="bw-head">
                     <div>
                         <h2>Hidden events</h2>
-                        <p>Only admins see this. These events are hidden from the homepage, Browse, and search.</p>
+                        <p>Only admins see this. These events are hidden from the homepage, Browse, and search. An event from a hidden schedule is listed under Hidden schedules instead.</p>
                     </div>
                     <p class="bw-head-count">{{ $hiddenEvents->count() }} hidden</p>
                 </div>
+                @if (($discoveryNotice['at'] ?? null) === 'hidden-events')
+                    @include('marketing.partials.browse-discovery-notice', ['notice' => $discoveryNotice, 'anchor' => 'hidden-events'])
+                @endif
+                @if ($hiddenEvents->isEmpty())
+                    <p class="bw-hidden-none">No events are hidden.</p>
+                @endif
             </div>
 
-            <div class="bw-bleed">
-                @include('marketing.partials.browse-wall', ['tiles' => $hidden['tiles'], 'rows' => [], 'admin' => $browseAdmin, 'grid' => true])
+            @if ($hiddenEvents->isNotEmpty())
+                <div class="bw-bleed">
+                    @include('marketing.partials.browse-wall', ['tiles' => $hidden['tiles'], 'rows' => [], 'admin' => $browseAdmin, 'grid' => true])
+                </div>
+            @endif
+        </section>
+
+        <section id="hidden-schedules" class="bw-stage bw-hidden">
+            <div class="bw-col">
+                <div class="bw-head">
+                    <div>
+                        <h2>Hidden schedules</h2>
+                        <p>Only admins see this. Every event from these schedules is hidden from the homepage, Browse, and search, and search does not suggest the schedules. Their own pages are not affected.</p>
+                    </div>
+                    <p class="bw-head-count">{{ $hiddenSchedules->count() }} hidden</p>
+                </div>
+                @if (($discoveryNotice['at'] ?? null) === 'hidden-schedules')
+                    @include('marketing.partials.browse-discovery-notice', ['notice' => $discoveryNotice, 'anchor' => 'hidden-schedules'])
+                @endif
+                @if ($hiddenSchedules->isEmpty())
+                    <p class="bw-hidden-none">No schedules are hidden.</p>
+                @else
+                    <ul class="bw-hidden-list">
+                        @foreach ($hiddenSchedules as $hiddenRow)
+                            @php
+                                $hiddenRole = $hiddenRow->role;
+                                $hiddenRoleUrl = $hiddenRole->is_deleted ? null : $hiddenRole->getGuestUrl();
+                            @endphp
+                            <li>
+                                <div class="bw-hidden-who">
+                                    @if ($hiddenRoleUrl)
+                                        <a href="{{ $hiddenRoleUrl }}" target="_blank" rel="noopener">{{ $hiddenRole->name }}</a>
+                                    @else
+                                        <strong>{{ $hiddenRole->name }}</strong>
+                                    @endif
+                                    <span>{{ ucfirst((string) $hiddenRole->type) }}@if ($hiddenRole->city) &middot; {{ $hiddenRole->city }}@endif &middot; Hidden {{ $hiddenRow->created_at?->format('M j, Y') }}</span>
+                                </div>
+                                <form method="POST" action="{{ route('marketing.discovery.schedule', \App\Utils\UrlUtils::encodeId($hiddenRole->id)) }}" class="bw-admin">
+                                    @csrf
+                                    <input type="hidden" name="hide" value="0">
+                                    <input type="hidden" name="anchor" value="hidden-schedules">
+                                    <button type="submit" class="is-restore" aria-label="Restore {{ $hiddenRole->name }} to discovery">Unhide</button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         </section>
     @endif

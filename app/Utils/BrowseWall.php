@@ -309,6 +309,9 @@ class BrowseWall
             'long' => mb_strlen($event->name) > 44 ? 2 : (mb_strlen($event->name) > 22 ? 1 : 0),
             'hash' => $event->hashedId(),
             'hidden' => (bool) $event->is_hidden_from_discovery,
+            // The admin's "Hide schedule", for the schedule the tile credits, where hiding it takes
+            // this tile away (Event::isFromSchedule()). Not on the Hidden events list ($plain).
+            'scheduleHash' => ! $plain && $role && $event->isFromSchedule($role) ? UrlUtils::encodeId($role->id) : null,
         ];
     }
 

@@ -156,13 +156,27 @@
                                 <button type="submit" aria-label="Hide this listing from discovery">Hide</button>
                             </form>
                         @else
-                            <form method="POST" action="{{ route('marketing.discovery.toggle', $tile['hash']) }}" class="bw-admin">
-                                @csrf
+                            {{-- The event's button first, where it always was; the schedule's after
+                                 it, only where hiding that schedule takes this tile away. --}}
+                            <div class="bw-admin">
                                 @if ($tile['hidden'])
                                     <span>Hidden</span>
                                 @endif
-                                <button type="submit" class="{{ $tile['hidden'] ? 'is-restore' : '' }}" aria-label="{{ $tile['hidden'] ? 'Restore event to discovery' : 'Hide event from discovery' }}">{{ $tile['hidden'] ? 'Unhide' : 'Hide' }}</button>
-                            </form>
+                                <form method="POST" action="{{ route('marketing.discovery.toggle', $tile['hash']) }}">
+                                    @csrf
+                                    <input type="hidden" name="hide" value="{{ $tile['hidden'] ? 0 : 1 }}">
+                                    <input type="hidden" name="anchor" value="{{ $tile['hidden'] ? 'hidden-events' : 'events' }}">
+                                    <button type="submit" class="{{ $tile['hidden'] ? 'is-restore' : '' }}" aria-label="{{ $tile['hidden'] ? 'Restore event to discovery' : 'Hide event from discovery' }}">{{ $tile['hidden'] ? 'Unhide' : 'Hide event' }}</button>
+                                </form>
+                                @if (! empty($tile['scheduleHash']))
+                                    <form method="POST" action="{{ route('marketing.discovery.schedule', $tile['scheduleHash']) }}">
+                                        @csrf
+                                        <input type="hidden" name="hide" value="1">
+                                        <input type="hidden" name="anchor" value="events">
+                                        <button type="submit" title="Hide {{ $tile['schedule'] }}'s events from the homepage, Browse and search" aria-label="Hide {{ $tile['schedule'] }}'s events from the homepage, Browse and search">Hide schedule</button>
+                                    </form>
+                                @endif
+                            </div>
                         @endif
                     @endif
                 </div>

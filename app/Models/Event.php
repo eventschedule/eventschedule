@@ -1391,6 +1391,90 @@ class Event extends Model
     }
 
     /**
+     * Rows FROM schedule $roleId, the events a platform admin's "Hide schedule" takes out of
+     * discovery:
+     *  - the ones it owns: events.creator_role_id, or for an event from before that column, the
+     *    schedule it was first put on (the same fallback as Role::ownEvents());
+     *  - the ones it is on as a talent or a venue and has not turned down (accepted or pending).
+     *    A venue or an act is put on an event by the event's own people, in its form.
+     *
+     * Never a curator's listing: any curator lists anybody's public event without asking, so a
+     * hidden curator counted by its listings would knock other people's events off discovery
+     * simply by listing them. isFromSchedule() is the same rule in PHP.
+     */
+    public static function constrainFromSchedule($query, int $roleId, string $table = 'events')
+    {
+        return $query->where(fn ($q) => static::fromScheduleArms(
+            $q, $table, fn ($r, string $column) => $r->where($column, $roleId)
+        ));
+    }
+
+    /**
+     * Rows from no schedule a platform admin has hidden (discovery_hidden_schedules): the
+     * negation of constrainFromSchedule() over every hidden schedule at once. Each arm is an
+     * EXISTS or an IS NULL, never a comparison with a column that can be NULL, so the NOT around
+     * them cannot turn into NULL and drop an event nobody hid.
+     */
+    public static function constrainNotOnHiddenSchedule($query, string $table = 'events')
+    {
+        return $query->whereNot(fn ($q) => static::fromScheduleArms(
+            $q, $table, fn ($r, string $column) => $r->whereExists(fn ($h) => $h->select(DB::raw(1))
+                ->from('discovery_hidden_schedules')
+                ->whereColumn('discovery_hidden_schedules.role_id', $column))
+        ));
+    }
+
+    /**
+     * The three arms of constrainFromSchedule(), OR'd. $match constrains the schedule id column
+     * it is given to the schedule(s) being asked about.
+     */
+    private static function fromScheduleArms($query, string $table, \Closure $match)
+    {
+        return $query
+            ->where(fn ($owner) => $match($owner, $table.'.creator_role_id'))
+            ->orWhere(fn ($first) => $first->whereNull($table.'.creator_role_id')
+                ->whereExists(fn ($e) => $match($e->select(DB::raw(1))
+                    ->from('event_role as first_link')
+                    ->whereColumn('first_link.event_id', $table.'.id')
+                    ->whereRaw('first_link.id = (select min(earliest.id) from event_role as earliest where earliest.event_id = first_link.event_id)'),
+                    'first_link.role_id')))
+            ->orWhereExists(fn ($e) => $match($e->select(DB::raw(1))
+                ->from('event_role as link')
+                ->join('roles as link_role', 'link_role.id', '=', 'link.role_id')
+                ->whereColumn('link.event_id', $table.'.id')
+                ->whereIn('link_role.type', ['talent', 'venue'])
+                ->where(fn ($p) => $p->whereNull('link.is_accepted')->orWhere('link.is_accepted', true)),
+                'link.role_id'));
+    }
+
+    /**
+     * constrainFromSchedule() for one loaded event, over its loaded roles and their pivots: whether
+     * a "Hide schedule" of $role would take this event out of discovery. The discovery cards offer
+     * that pill only where it would, so the card that was pressed is always one that goes.
+     */
+    public function isFromSchedule(Role $role): bool
+    {
+        if ($this->creator_role_id) {
+            if ((int) $this->creator_role_id === (int) $role->id) {
+                return true;
+            }
+        } else {
+            $first = $this->roles->sortBy(fn ($r) => (int) $r->pivot?->id)->first();
+
+            if ($first && (int) $first->id === (int) $role->id) {
+                return true;
+            }
+        }
+
+        $link = $this->roles->first(fn ($r) => (int) $r->id === (int) $role->id);
+
+        return $link
+            && in_array($link->type, ['talent', 'venue'], true)
+            && $link->pivot
+            && ($link->pivot->is_accepted === null || (bool) $link->pivot->is_accepted);
+    }
+
+    /**
      * Exclude events that look like throwaway test data from the discovery query.
      *
      * Conservative by design (it must not hide real events). An event is dropped when:

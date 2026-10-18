@@ -302,7 +302,7 @@ class MarketingEdgeCacheTest extends TestCase
      */
     public function test_marketing_post_routes_keep_csrf_protection(): void
     {
-        foreach (['marketing.discovery.toggle', 'marketing.federation.block', 'marketing.federation.click'] as $name) {
+        foreach (['marketing.discovery.toggle', 'marketing.discovery.schedule', 'marketing.federation.block', 'marketing.federation.click'] as $name) {
             $this->assertContains(
                 ValidateCsrfToken::class,
                 $this->middlewareFor($name),
