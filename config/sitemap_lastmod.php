@@ -28,7 +28,7 @@ return [
     '/allevents-alternative' => '2026-10-15',
     '/bandsintown-alternative' => '2026-10-15',
     '/brown-paper-tickets-alternative' => '2026-10-15',
-    '/browse' => '2026-10-08',
+    '/browse' => '2026-10-18',
     '/caldav' => '2026-10-18',
     '/calendly-replacement' => '2026-10-15',
     '/canva-replacement' => '2026-10-15',

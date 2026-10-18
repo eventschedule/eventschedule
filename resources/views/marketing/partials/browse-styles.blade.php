@@ -203,8 +203,6 @@
         font-size: 0.95rem;
         font-weight: 700;
     }
-    #bw .bw-eyebrow-sep { width: 1.5rem; height: 1px; background-color: var(--bw-line-2); }
-    #bw .bw-eyebrow span:last-child { color: var(--bw-ink-3); font-weight: 500; }
     #bw .bw-pulse {
         position: relative;
         width: 0.55rem;
@@ -327,7 +325,6 @@
         transition: border-color 0.2s ease, transform 0.2s ease;
     }
     #bw .bw-jump a:hover { border-color: var(--bw-blue); transform: translateY(-1px); }
-    #bw .bw-jump a span { color: var(--bw-ink-3); font-weight: 500; font-variant-numeric: tabular-nums; }
 
     /* ==============================================================
        2. The wall

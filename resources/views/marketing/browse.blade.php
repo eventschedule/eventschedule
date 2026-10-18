@@ -105,10 +105,6 @@
                         <span class="bw-pulse" aria-hidden="true"></span>
                     @endif
                     What's on
-                    @if ($schedules > 0)
-                        <span class="bw-eyebrow-sep" aria-hidden="true"></span>
-                        <span>{{ $schedules }} {{ $schedules === 1 ? 'event' : 'events' }}@if ($wall['countries'] > 1) in {{ $wall['countries'] }} countries @endif</span>
-                    @endif
                 </p>
                 {{-- Broken by hand from a tablet up, where the type is sized to its column so the
                      second line always fits; left to balance itself on a phone. --}}
@@ -133,10 +129,10 @@
                 @if (count($wall['bands']) > 1 || $hasNetworkSection)
                     <nav class="bw-jump" aria-label="Jump to">
                         @foreach ($wall['bands'] as $band)
-                            <a href="#when-{{ $band['band'] }}">{{ $band['title'] }} <span>{{ $band['count'] }}</span></a>
+                            <a href="#when-{{ $band['band'] }}">{{ $band['title'] }}</a>
                         @endforeach
                         @if ($hasNetworkSection)
-                            <a href="#network">Other sites @if ($networkCount)<span>{{ $federatedTotal }}</span>@endif</a>
+                            <a href="#network">Other sites</a>
                         @endif
                     </nav>
                 @endif

@@ -142,7 +142,7 @@ class BrowseWall
 
     /**
      * @param  array<string, bool>  $more  schedulesWithMore()
-     * @return array{tiles: array<int, array<string, mixed>>, bands: array<int, array<string, mixed>>, rows: array<string, array<string, mixed>>, count: int, countries: int}
+     * @return array{tiles: array<int, array<string, mixed>>, bands: array<int, array<string, mixed>>, rows: array<string, array<string, mixed>>, count: int}
      */
     public static function build(Collection $events, array $more = [], ?Carbon $now = null, bool $plain = false): array
     {
@@ -157,7 +157,6 @@ class BrowseWall
 
         $tiles = [];
         $bands = [];
-        $countries = [];
         $count = 0;
 
         foreach (self::BANDS as $band) {
@@ -179,10 +178,6 @@ class BrowseWall
             foreach ($posters[$band] as $poster) {
                 $tiles[] = $poster;
                 $count++;
-
-                if ($poster['country']) {
-                    $countries[$poster['country']] = true;
-                }
             }
         }
 
@@ -199,7 +194,6 @@ class BrowseWall
             // An even grid (the admin's hidden list) has no rows to work out.
             'rows' => $plain ? [] : PosterWall::layout($tiles),
             'count' => $count,
-            'countries' => count($countries),
         ];
     }
 
