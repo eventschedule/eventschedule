@@ -520,7 +520,7 @@ return [
     'sales_dates' => 'تواريخ البيع',
     'sales_dates_on_ticket_types' => 'تُحدَّد تواريخ بدء البيع وانتهائه لكل نوع تذكرة، عبر + :button.',
     'order_fields_pro_only' => 'قم بالترقية إلى Pro لطرح أسئلتك الخاصة عند الشراء أو التسجيل.',
-    'order_fields_kept_below_pro' => 'لا يزال المشترون يُسألون الأسئلة الموجودة في هذه الفعالية. يتطلب تغييرها خطة Pro.',
+    'order_fields_kept_below_pro' => 'لا تزال الأسئلة الموجودة في هذه الفعالية تُطرح. يتطلب تغييرها خطة Pro.',
     'checkout_custom_fields' => 'حقول مخصصة',
     'event_sponsors_pro_only' => 'اعرض رعاة هذه الفعالية الخاصين بها، أو لا أحد، بدلاً من رعاة الجدول.',
     'announcement_bar' => 'شريط الإعلانات',
@@ -3465,9 +3465,7 @@ return [
     'checkin_data_will_appear' => 'ستظهر بيانات تسجيل الحضور هنا بمجرد بيع التذاكر وتسجيل الحضور.',
 
     'ticket_sales_start_at' => 'بدء بيع التذاكر',
-    'ticket_sales_start_at_help' => 'ستبدأ المبيعات تلقائيًا في هذا التاريخ والوقت',
     'ticket_sales_end_at' => 'انتهاء بيع التذاكر',
-    'ticket_sales_end_at_help' => 'ستتوقف المبيعات تلقائيًا في هذا التاريخ والوقت',
     'ticket_sales_ended' => 'انتهى بيع التذاكر',
     'payment_cancelled_not_charged' => 'تم إلغاء الدفع ولم يتم خصم أي مبلغ.',
     'payment_not_completed' => 'لم يكتمل الدفع، لذلك لم يُسجَّل أي طلب.',

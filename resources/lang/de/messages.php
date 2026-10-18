@@ -523,7 +523,7 @@ return [
     'sales_dates' => 'Verkaufszeitraum',
     'sales_dates_on_ticket_types' => 'Beginn und Ende des Verkaufs werden bei jeder Ticketart festgelegt, mit + :button.',
     'order_fields_pro_only' => 'Upgrade auf Pro, um beim Kauf oder bei der Anmeldung eigene Fragen zu stellen.',
-    'order_fields_kept_below_pro' => 'Käufer werden weiterhin die Fragen gefragt, die diese Veranstaltung bereits hat. Um sie zu ändern, ist Pro erforderlich.',
+    'order_fields_kept_below_pro' => 'Es werden weiterhin die Fragen gestellt, die diese Veranstaltung bereits hat. Um sie zu ändern, ist Pro erforderlich.',
     'checkout_custom_fields' => 'Benutzerdefinierte Felder',
     'event_sponsors_pro_only' => 'Zeigen Sie die eigenen Sponsoren dieser Veranstaltung oder keine statt der des Zeitplans.',
     'announcement_bar' => 'Ankündigungsleiste',
@@ -3403,9 +3403,7 @@ return [
     'checkin_data_will_appear' => 'Check-in-Daten werden hier angezeigt, sobald Tickets verkauft und eingecheckt werden.',
 
     'ticket_sales_start_at' => 'Ticketverkauf beginnt',
-    'ticket_sales_start_at_help' => 'Der Verkauf beginnt automatisch zu diesem Datum und dieser Uhrzeit',
     'ticket_sales_end_at' => 'Ticketverkauf endet',
-    'ticket_sales_end_at_help' => 'Der Verkauf wird automatisch zu diesem Datum und dieser Uhrzeit gestoppt',
     'ticket_sales_ended' => 'Der Ticketverkauf ist beendet',
     'payment_cancelled_not_charged' => 'Die Zahlung wurde abgebrochen und es wurde nichts abgebucht.',
     'payment_not_completed' => 'Die Zahlung wurde nicht abgeschlossen, daher wurde keine Bestellung aufgegeben.',

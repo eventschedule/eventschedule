@@ -288,7 +288,8 @@ class EventFormGuardsTest extends DuskTestCase
                 ->visit($this->editPath($venue, $event).'?r=calendar#section-calendar-sync')
                 ->waitUntil('window.vueApp !== undefined', 15)
                 ->waitUntil('document.getElementById("section-listing").style.display === "block"', 10)
-                ->pause(1200);
+                // The load-time scroll guard hands over on the last of its frames after load.
+                ->waitUntil('document.activeElement && document.activeElement.id === "listing-calendar-sync"', 10);
 
             $state = $browser->script('
                 var block = document.getElementById("listing-calendar-sync");

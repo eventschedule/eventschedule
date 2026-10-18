@@ -811,7 +811,7 @@ return [
     'sales_dates' => 'תאריכי מכירה',
     'sales_dates_on_ticket_types' => 'תאריכי תחילת המכירה וסיומה נקבעים בכל סוג כרטיס, עם + :button.',
     'order_fields_pro_only' => 'שדרגו ל-Pro כדי לשאול שאלות משלכם בזמן הרכישה או ההרשמה.',
-    'order_fields_kept_below_pro' => 'הקונים עדיין נשאלים את השאלות שכבר קיימות באירוע הזה. כדי לשנות אותן נדרש Pro.',
+    'order_fields_kept_below_pro' => 'השאלות שכבר קיימות באירוע הזה עדיין נשאלות. כדי לשנות אותן נדרש Pro.',
     'checkout_custom_fields' => 'שדות מותאמים',
     'event_sponsors_pro_only' => 'הציגו את נותני החסות של האירוע הזה, או אף אחד, במקום אלה של לוח הזמנים.',
     'announcement_bar' => 'פס הודעות',
@@ -3460,9 +3460,7 @@ return [
     'checkin_data_will_appear' => 'נתוני צ\'ק-אין יופיעו כאן לאחר מכירת כרטיסים ורישום נוכחות.',
 
     'ticket_sales_start_at' => 'תחילת מכירת כרטיסים',
-    'ticket_sales_start_at_help' => 'המכירות יתחילו אוטומטית בתאריך ובשעה אלה',
     'ticket_sales_end_at' => 'סיום מכירת כרטיסים',
-    'ticket_sales_end_at_help' => 'המכירות ייפסקו אוטומטית בתאריך ובשעה אלה',
     'ticket_sales_ended' => 'מכירת הכרטיסים הסתיימה',
     'payment_cancelled_not_charged' => 'התשלום בוטל ולא בוצע חיוב.',
     'payment_not_completed' => 'התשלום לא הושלם, ולכן לא בוצעה הזמנה.',

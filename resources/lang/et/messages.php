@@ -649,7 +649,7 @@ return [
     'sales_dates' => 'Müügikuupäevad',
     'sales_dates_on_ticket_types' => 'Müügi algus- ja lõppkuupäev määratakse iga piletitüübi juures, nupuga + :button.',
     'order_fields_pro_only' => 'Uuendage Pro-le, et esitada ostu või registreerimise ajal oma küsimusi.',
-    'order_fields_kept_below_pro' => 'Ostjatelt küsitakse endiselt selle sündmuse olemasolevaid küsimusi. Nende muutmiseks on vaja Pro-paketti.',
+    'order_fields_kept_below_pro' => 'Selle sündmuse olemasolevaid küsimusi küsitakse endiselt. Nende muutmiseks on vaja Pro-paketti.',
     'checkout_custom_fields' => 'Kohandatud väljad',
     'event_sponsors_pro_only' => 'Näita ajakava sponsorite asemel selle sündmuse enda sponsoreid või mitte ühtegi.',
     'announcement_bar' => 'Teateriba',
@@ -3400,9 +3400,7 @@ return [
     'checkin_data_will_appear' => 'Registreerimisandmed ilmuvad siia, kui piletid on müüdud ja registreeritud.',
 
     'ticket_sales_start_at' => 'Piletimüük algab',
-    'ticket_sales_start_at_help' => 'Müük algab automaatselt sellel kuupäeval ja kellaajal',
     'ticket_sales_end_at' => 'Piletimüük lõpeb',
-    'ticket_sales_end_at_help' => 'Müük peatub automaatselt sellel kuupäeval ja kellaajal',
     'ticket_sales_ended' => 'Piletimüük on lõppenud',
     'payment_cancelled_not_charged' => 'Makse tühistati ja raha ei võetud.',
     'payment_not_completed' => 'Makset ei viidud lõpule, seega tellimust ei esitatud.',

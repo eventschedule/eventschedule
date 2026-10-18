@@ -1068,7 +1068,7 @@ return [
     'sales_dates' => 'Verkoopperiode',
     'sales_dates_on_ticket_types' => 'Begin- en einddatum van de verkoop stel je per tickettype in, met + :button.',
     'order_fields_pro_only' => 'Upgrade naar Pro om je eigen vragen te stellen bij het kopen of registreren.',
-    'order_fields_kept_below_pro' => 'Kopers krijgen nog steeds de vragen die dit evenement al heeft. Om ze te wijzigen heb je Pro nodig.',
+    'order_fields_kept_below_pro' => 'De vragen die dit evenement al heeft, worden nog steeds gesteld. Om ze te wijzigen heb je Pro nodig.',
     'checkout_custom_fields' => 'Aangepaste velden',
     'event_sponsors_pro_only' => 'Toon de eigen sponsors van dit evenement, of geen, in plaats van die van het schema.',
     'announcement_bar' => 'Aankondigingsbalk',
@@ -3403,9 +3403,7 @@ return [
     'checkin_data_will_appear' => 'Check-in gegevens verschijnen hier zodra tickets zijn verkocht en ingecheckt.',
 
     'ticket_sales_start_at' => 'Ticketverkoop begint',
-    'ticket_sales_start_at_help' => 'De verkoop begint automatisch op deze datum en tijd',
     'ticket_sales_end_at' => 'Ticketverkoop eindigt',
-    'ticket_sales_end_at_help' => 'De verkoop stopt automatisch op deze datum en tijd',
     'ticket_sales_ended' => 'De ticketverkoop is beëindigd',
     'payment_cancelled_not_charged' => 'De betaling is geannuleerd en er is niets afgeschreven.',
     'payment_not_completed' => 'De betaling is niet voltooid, dus er is geen bestelling geplaatst.',

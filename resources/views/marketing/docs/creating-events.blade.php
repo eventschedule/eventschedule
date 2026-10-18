@@ -498,7 +498,7 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Sell tickets</span></td>
                         <td>Sell tickets from your own event page, paid to your own account through the <strong>Payment Method</strong> you pick: Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a payment link, or cash. See <a href="{{ route('marketing.docs.tickets') }}#ticketing" class="doc-link">Sell tickets</a>.</td>
-                        <td>The ticket types, one line each (price, quantity, type), then a row each for <strong>Payment</strong>, <strong>Checkout</strong>, <strong>Sales rules</strong>, <strong>Promo Codes</strong> and <strong>Add-ons</strong>. A row says what it holds and opens in place. A type's own sales start and end are added on the type, with <strong>+ Add Sales Dates</strong>.</td>
+                        <td>The ticket types, one line each (price, quantity, type), then a row each for <strong>Payment</strong>, <strong>Checkout</strong>, <strong>Sales rules</strong>, <strong>Promo codes</strong> and <strong>Add-ons</strong>. A row says what it holds and opens in place. A type's own sales start and end are added on the type, with <strong>+ Add Sales Dates</strong>.</td>
                         <td>A ticket with a price needs <x-doc-badge plan="pro" />; a zero-price ticket sells on any plan</td>
                     </tr>
                     <tr>

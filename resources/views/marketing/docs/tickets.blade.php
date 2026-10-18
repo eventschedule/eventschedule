@@ -60,7 +60,7 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Ticketing is set up and run in three places:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">The Tickets tab of an event.</strong> Open an event for editing and choose <strong class="text-gray-900 dark:text-white">Tickets</strong>. It holds how people sign up, the ticket types, and the <strong class="text-gray-900 dark:text-white">Payment</strong>, <strong class="text-gray-900 dark:text-white">Checkout</strong>, <strong class="text-gray-900 dark:text-white">Sales rules</strong>, <strong class="text-gray-900 dark:text-white">Promo Codes</strong> and <strong class="text-gray-900 dark:text-white">Add-ons</strong> rows.</li>
+            <li><strong class="text-gray-900 dark:text-white">The Tickets tab of an event.</strong> Open an event for editing and choose <strong class="text-gray-900 dark:text-white">Tickets</strong>. It holds how people sign up, the ticket types, and the <strong class="text-gray-900 dark:text-white">Payment</strong>, <strong class="text-gray-900 dark:text-white">Checkout</strong>, <strong class="text-gray-900 dark:text-white">Sales rules</strong>, <strong class="text-gray-900 dark:text-white">Promo codes</strong> and <strong class="text-gray-900 dark:text-white">Add-ons</strong> rows.</li>
             <li><strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales.</strong> Every order and registration, with refunds, the door scanner, the check-in dashboard, and tabs for the waitlist, feedback, passes, installments and gift cards. See <a href="#managing-sales" class="doc-link">Managing Sales</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods.</strong> Where you connect Stripe, PayPal and the other payment methods, once for your account. See <a href="#payment" class="doc-link">Payment</a>.</li>
         </ul>
@@ -332,7 +332,7 @@
                         <td>Free</td>
                     </tr>
                     <tr>
-                        <td><a href="#promo-codes" class="doc-link">Promo Codes</a></td>
+                        <td><a href="#promo-codes" class="doc-link">Promo codes</a></td>
                         <td>Discount codes. The line lists the codes.</td>
                         <td>Pro</td>
                     </tr>
@@ -972,7 +972,7 @@
             </svg>
             Sales Rules
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The row after Checkout holds how ticket sales run. Every switch in it is off until you turn it on, and it is not shown on a Free registration event. A ticket type's own sales start and end are set on the type, with <strong class="text-gray-900 dark:text-white">+ Add Sales Dates</strong> (see <a href="#ticket-settings" class="doc-link">Ticket Types</a>); when any type has them, this row's line says so first, as in <em>Sales dates, Show unavailable tickets</em>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The row after Checkout holds how ticket sales run. Every switch in it is off until you turn it on, and it is not shown on a Free registration event. A ticket type's own sales start and end are set on the type, with <strong class="text-gray-900 dark:text-white">+ Add Sales Dates</strong> (see <a href="#ticket-settings" class="doc-link">Ticket settings</a>); when any type has them, this row's line says so first, as in <em>Sales dates, Show unavailable tickets</em>.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -1018,7 +1018,7 @@
         <h3 class="doc-subheading">Adding a Promo Code</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit your event</li>
-            <li>On the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, open the <strong class="text-gray-900 dark:text-white">Promo Codes</strong> row</li>
+            <li>On the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, open the <strong class="text-gray-900 dark:text-white">Promo codes</strong> row</li>
             <li>Click <strong class="text-gray-900 dark:text-white">+ Add Promo Code</strong></li>
             <li>Fill in the code, the discount type and its value (the fields are below)</li>
             <li>Save the event</li>

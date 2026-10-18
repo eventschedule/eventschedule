@@ -114,6 +114,10 @@ class EventFormPlacementTest extends TestCase
         $this->assertStringContainsString('data-tab="gallery"', $page);
         $this->assertStringContainsString('data-tab="sponsors"', $page);
         $this->assertStringContainsString(e(__('messages.event_sponsors_pro_only')), $page);
+        // The locked Sponsors box has no heading of its own: the row above names it, and a title
+        // brings a second "Sponsors" and a second lock badge with it.
+        $sponsorsPane = substr($page, strpos($page, '<div id="page-tab-sponsors"'));
+        $this->assertStringNotContainsString('rounded-full bg-gray-100 dark:bg-white/[0.06]', $sponsorsPane, 'no lock badge inside the box');
         $this->assertStringNotContainsString('name="sponsor_mode"', $html, 'a locked row posts nothing');
 
         // The rows carry the locks; the tab does not, since its name and a badge wrapped onto two
@@ -178,9 +182,19 @@ class EventFormPlacementTest extends TestCase
         $this->assertStringContainsString('"sponsorsUnlocked":false', $html);
 
         $view = file_get_contents(resource_path('views/event/edit.blade.php'));
-        // The save bar, and the row's own line.
-        $this->assertStringContainsString("if (this.savedSponsorCount > 0 && (! this.pageFlags.sponsorsUnlocked || this.event.sponsor_mode !== 'custom')) {", $view);
+        // The row's own line.
         $this->assertStringContainsString('sponsors = this.savedSponsorCount > 0 ? { text: L.saving_removes_sponsors, warn: true } : { text: L.none, empty: true };', $view);
+
+        // And the save bar, as a note that stands BESIDE what the bar says next, never in its place:
+        // in its place, the bar of a downgraded event could not say a save publishes it, nor which
+        // tabs are unsaved. Leaving "This event's own" by the tiles is a removal, as before.
+        $bar = $this->slice($view, '      barStatus() {', '      saveLabel() {');
+        $this->assertStringContainsString("if (this.savedSponsorCount > 0 && ! this.pageFlags.sponsorsUnlocked) {\n          standing = L.saving_removes_sponsors;", $bar);
+        $this->assertStringContainsString("} else if (this.savedSponsorCount > 0 && this.event.sponsor_mode !== 'custom') {\n          removes.push(L.saving_removes_sponsors);", $bar);
+        $this->assertStringContainsString("text: withStanding(this.visibility === 'public' ? L.saving_publishes : L.saving_hides)", $bar);
+        $this->assertStringContainsString('tabs: asTabs(dirty), note: standing }', $bar);
+        $this->assertStringContainsString("text: withStanding(L.unsaved_changes)", $bar);
+        $this->assertStringContainsString('<span v-if="barStatus.note" class="event-save-strong ms-2" v-text="barStatus.note"></span>', $html, 'the unsaved tabs carry it');
     }
 
     public function test_listing_ends_with_calendar_sync_and_names_a_calendar_the_event_misses(): void

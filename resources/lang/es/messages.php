@@ -628,7 +628,7 @@ return [
     'sales_dates' => 'Fechas de venta',
     'sales_dates_on_ticket_types' => 'Las fechas de inicio y fin de la venta se fijan en cada tipo de entrada, con + :button.',
     'order_fields_pro_only' => 'Actualiza a Pro para hacer tus propias preguntas cuando la gente compre o se registre.',
-    'order_fields_kept_below_pro' => 'A los compradores se les siguen haciendo las preguntas que ya tiene este evento. Para cambiarlas se necesita Pro.',
+    'order_fields_kept_below_pro' => 'Se siguen haciendo las preguntas que ya tiene este evento. Para cambiarlas se necesita Pro.',
     'checkout_custom_fields' => 'Campos personalizados',
     'event_sponsors_pro_only' => 'Muestra los patrocinadores propios de este evento, o ninguno, en lugar de los del horario.',
     'announcement_bar' => 'Barra de anuncios',
@@ -3403,9 +3403,7 @@ return [
     'checkin_data_will_appear' => 'Los datos de registro aparecerán aquí una vez que se vendan y registren las entradas.',
 
     'ticket_sales_start_at' => 'Inicio de venta de entradas',
-    'ticket_sales_start_at_help' => 'Las ventas comenzarán automáticamente en esta fecha y hora',
     'ticket_sales_end_at' => 'Fin de venta de entradas',
-    'ticket_sales_end_at_help' => 'Las ventas se detendrán automáticamente en esta fecha y hora',
     'ticket_sales_ended' => 'La venta de entradas ha finalizado',
     'payment_cancelled_not_charged' => 'El pago se canceló y no se ha cobrado nada.',
     'payment_not_completed' => 'El pago no se completó, por lo que no se realizó ningún pedido.',

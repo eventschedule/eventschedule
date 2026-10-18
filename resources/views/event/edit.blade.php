@@ -26,7 +26,7 @@
   // used to sit on it) all ask this, so the three cannot diverge.
   $detailsShown = ! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event);
 
-  // Google and Outlook sync share one tab; either is enough to show it.
+  // Google and Outlook share the Calendar sync block at the end of Listing; either is enough to show it.
   $showGoogleSync = $event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain);
   $showMicrosoftSync = $event->exists && $event->canBeSyncedToMicrosoftCalendarForSubdomain(request()->subdomain);
 
@@ -5356,8 +5356,9 @@
                                 :role="$role"
                                 :subdomain="$role->subdomain"
                                 :canUpgrade="$user->id == $role->user_id"
-                                :learnMoreUrl="marketing_url('/docs/creating-events#sponsors')"
-                                :title="__('messages.sponsors')">
+                                :learnMoreUrl="marketing_url('/docs/creating-events#sponsors')">
+                                {{-- No title: the row above names it, and a title brings a second heading and
+                                     a second lock badge. --}}
                                 {{ __('messages.event_sponsors_pro_only') }}
                             </x-plan-gate>
                         @endif
@@ -6251,6 +6252,7 @@
                             <span v-if="index > 0" aria-hidden="true">&middot;</span>
                             <button type="button" class="event-link" @click="goToTab(tab.id)" v-text="tab.label"></button>
                         </template>
+                        <span v-if="barStatus.note" class="event-save-strong ms-2" v-text="barStatus.note"></span>
                     </span>
                     <span v-cloak v-else-if="barStatus.kind === 'text'" :class="{ 'event-save-strong': barStatus.strong, 'event-save-quiet': barStatus.quiet }" v-text="barStatus.text"></span>
                     <span v-cloak v-else-if="barStatus.kind === 'new'">
@@ -9913,13 +9915,20 @@
         if (! this.agendaShowTimes && this.eventParts.some(function (part) { return part.start_time || part.end_time; })) {
           removes.push(L.saving_removes_times);
         }
-        // Its own sponsors go when the tiles leave them, and on any save where neither schedule's
-        // plan has sponsors (EventRepo::saveEvent() clears them then, as it always has).
-        if (this.savedSponsorCount > 0 && (! this.pageFlags.sponsorsUnlocked || this.event.sponsor_mode !== 'custom')) {
+        // Its own sponsors go when the tiles leave them. They also go on ANY save while neither
+        // schedule's plan has sponsors (EventRepo::saveEvent() clears them then, as it always has):
+        // that is no change of anybody's, so it is a standing note beside whatever the bar says
+        // next, never in its place, or the bar of a downgraded event could not say a save
+        // publishes it, nor which tabs are unsaved.
+        var standing = '';
+        if (this.savedSponsorCount > 0 && ! this.pageFlags.sponsorsUnlocked) {
+          standing = L.saving_removes_sponsors;
+        } else if (this.savedSponsorCount > 0 && this.event.sponsor_mode !== 'custom') {
           removes.push(L.saving_removes_sponsors);
         }
+        var withStanding = function (text) { return [text, standing].filter(Boolean).join(' '); };
         if (removes.length) {
-          return { kind: 'text', text: removes.join(' '), strong: true };
+          return { kind: 'text', text: withStanding(removes.join(' ')), strong: true };
         }
         if (! this.eventIsSaved) {
           return {
@@ -9931,16 +9940,19 @@
           };
         }
         if (this.visibility !== this.savedVisibility && (this.visibility === 'public' || this.savedVisibility === 'public')) {
-          return { kind: 'text', text: this.visibility === 'public' ? L.saving_publishes : L.saving_hides };
+          return { kind: 'text', text: withStanding(this.visibility === 'public' ? L.saving_publishes : L.saving_hides), strong: !! standing };
         }
         var dirty = Object.keys(this.sectionDirty).filter(function (id) { return self.sectionDirty[id]; });
         if (dirty.length) {
-          return { kind: 'tabs', label: L.unsaved, tabs: asTabs(dirty) };
+          return { kind: 'tabs', label: L.unsaved, tabs: asTabs(dirty), note: standing };
         }
         // Unsaved, with no tab to name (a change made by script, or to something outside the tabs):
         // still never "No unsaved changes".
         if (this.isDirty) {
-          return { kind: 'text', text: L.unsaved_changes };
+          return { kind: 'text', text: withStanding(L.unsaved_changes), strong: !! standing };
+        }
+        if (standing) {
+          return { kind: 'text', text: standing, strong: true };
         }
         return { kind: 'text', text: L.no_unsaved, quiet: true };
       },
