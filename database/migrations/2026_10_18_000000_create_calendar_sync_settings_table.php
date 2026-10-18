@@ -29,6 +29,8 @@ use Illuminate\Support\Facades\Schema;
  *  - last_pull / first_pull: what the last read and the very first read did, in counts.
  *  - stopped_reason / stopped_at / stopped_direction: reading was turned off for the owner (by
  *    the operator, or by a change of owner), when, and what it was before, for Resume.
+ *
+ * taken_off_notified_at: when the owner was mailed that a sync took public events off the page.
  */
 return new class extends Migration
 {
@@ -50,6 +52,9 @@ return new class extends Migration
                 $table->timestamp("{$p}_stopped_at")->nullable();
                 $table->string("{$p}_stopped_direction", 10)->nullable();
             }
+
+            // When the owner was told that a sync took events off their public page. Once.
+            $table->timestamp('taken_off_notified_at')->nullable();
 
             $table->timestamps();
         });

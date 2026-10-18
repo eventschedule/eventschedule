@@ -237,6 +237,12 @@ Schedule::call(function () {
     Artisan::call('google:sync');
 })->everyFifteenMinutes()->name('google-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Schedules that look like somebody's private calendar, for /admin/private-calendars, and the
+// venues calendar imports made out of meeting links. Each run reads one bounded window of ids.
+Schedule::call(function () {
+    Artisan::call('calendar:scan-exposures');
+})->everyFifteenMinutes()->name('calendar-exposure-scan')->withoutOverlapping(20)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:setup-demo');

@@ -439,6 +439,9 @@ class CalDAVService
                         if ($existing && CalendarArrival::reconsider($existing->fresh() ?? $existing, $role, CalendarArrival::CALDAV, $sourceReason)) {
                             $changed = true;
                         }
+                        if ($existing) {
+                            CalendarExposureWatch::record($existing->fresh() ?? $existing, $eventData['location'] ?? null);
+                        }
 
                         if ($changed) {
                             $results['updated']++;
@@ -481,7 +484,8 @@ class CalDAVService
 
                     // Create new event
                     $this->inboundCounts = [];
-                    $this->createEventFromCalDAV($eventData, $role);
+                    $created = $this->createEventFromCalDAV($eventData, $role);
+                    CalendarExposureWatch::record($created, $eventData['location'] ?? null);
                     $results['created']++;
                     foreach ($this->inboundCounts as $key => $n) {
                         $results[$key] = ($results[$key] ?? 0) + $n;

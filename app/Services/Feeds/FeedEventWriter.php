@@ -138,6 +138,9 @@ class FeedEventWriter
             $before ? Auth::setUser($before) : Auth::forgetUser();
         }
 
+        // What the operator's page looks for, read once as the event is made (CalendarExposureWatch).
+        \App\Services\CalendarExposureWatch::record($event);
+
         // The picture is not there yet: what the source says about it is recorded when it is.
         $this->remember($item, $event, ['flyer' => null] + $wanted, null);
         $item->forceFill([

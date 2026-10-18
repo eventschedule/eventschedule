@@ -435,7 +435,7 @@ const next = computed(() => {
   }
 
   if (current.value === 'event') {
-    return g.draft ? t.publish : (g.type === 'curator' ? t.step_first_events : t.step_event);
+    return g.draft ? (g.draft.review ? t.review_events : t.publish) : (g.type === 'curator' ? t.step_first_events : t.step_event);
   }
 
   if (current.value === 'events') {
@@ -473,6 +473,15 @@ const undoSkip = (step) => [{ label: t.undo, act: 'unskip', step, quiet: true }]
 const eventRow = () => {
   const curator = g.type === 'curator';
   const row = { key: 'event', state: 'current', title: curator ? t.step_first_events : t.step_event };
+
+  // A calendar sync's drafts wait for a look on their own page (CalendarReviewController).
+  if (g.draft && g.draft.review) {
+    row.title = g.draft.name;
+    row.body = t.calendar_waiting_body;
+    row.primary = { label: t.review_events, href: g.draft.review };
+
+    return row;
+  }
 
   if (g.draft) {
     row.title = g.draft.name;

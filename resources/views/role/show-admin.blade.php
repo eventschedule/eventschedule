@@ -507,6 +507,9 @@ function syncEventsFromDropdown() {
     .then(data => {
         if (data.error) {
             alert(@json(__("messages.sync_error")) + ': ' + data.error);
+        } else if (data.reload) {
+            // What was read in shows on this tab, with the count in the notice the reload brings.
+            window.location.reload();
         } else {
             alert(data.message);
         }

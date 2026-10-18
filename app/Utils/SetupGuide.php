@@ -462,6 +462,8 @@ class SetupGuide
             'add_another' => __('messages.add_another_event'),
             'add_tickets' => __('messages.add_tickets'),
             'publish' => __('messages.publish'),
+            'review_events' => __('messages.calendar_review_events'),
+            'calendar_waiting_body' => __('messages.calendar_guide_waiting_body'),
             'add_to_website' => __('messages.import_panel_embed'),
             'skip' => __('messages.skip_for_now'),
             'draft' => __('messages.draft'),
@@ -872,14 +874,35 @@ class SetupGuide
         return $name === null ? null : (string) $name;
     }
 
-    /** The draft a not-yet-live schedule could publish, soonest first. */
+    /**
+     * The draft a not-yet-live schedule could publish, soonest first. Not one a calendar sync is
+     * holding back (CalendarArrival): the soonest of those can be somebody's email thread or a
+     * meeting with its passcode, and the guide offered to publish it with one press. While a
+     * calendar's drafts wait, the guide sends the owner to look at them instead.
+     */
     private static function draft(Role $role): ?array
     {
+        if (\App\Services\CalendarArrival::tablesReady()) {
+            $waiting = \App\Models\CalendarImportHold::where('role_id', $role->id)
+                ->whereNull('decided_at')
+                ->whereHas('event', fn ($q) => $q->where('creator_role_id', $role->id)->where('is_draft', true))
+                ->count();
+
+            if ($waiting > 0) {
+                return [
+                    'name' => trans_choice('messages.calendar_guide_waiting', $waiting, ['count' => number_format($waiting)]),
+                    'review' => route('role.calendar_review', ['subdomain' => $role->subdomain]),
+                ];
+            }
+        }
+
         $draft = Event::query()
             ->where('creator_role_id', $role->id)
             ->where('is_draft', true)
             ->where('is_internal', false)
             ->whereNull('appointment_type_id')
+            ->when(\App\Services\CalendarArrival::tablesReady(), fn ($q) => $q->whereNotExists(fn ($held) => $held
+                ->selectRaw('1')->from('calendar_import_holds')->whereColumn('calendar_import_holds.event_id', 'events.id')))
             ->orderByRaw('starts_at IS NULL')
             ->orderBy('starts_at')
             ->first(['id', 'name', 'creator_role_id', 'starts_at']);

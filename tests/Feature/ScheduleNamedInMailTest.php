@@ -48,6 +48,7 @@ class ScheduleNamedInMailTest extends TestCase
         'appointment_host_released_subject', 'appointment_host_released_intro',
         'boost_partner_mail_request_received_subject', 'boost_partner_mail_request_received_body',
         'boost_partner_mail_request_resent_subject', 'boost_partner_mail_request_resent_body',
+        'calendar_privacy_mail_subject', 'calendar_privacy_mail_intro',
     ];
 
     public function test_a_deleted_schedule_is_named_as_a_schedule_and_not_by_its_type(): void

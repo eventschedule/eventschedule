@@ -576,7 +576,7 @@
 
         $directions = [
             ['to', 'To Google Calendar', 'Events you publish here are written to the calendar you picked. Nothing in that calendar touches your schedule.', false],
-            ['from', 'From Google Calendar', 'Entries in that calendar become events on your schedule. Useful when the calendar is already where you book.', false],
+            ['from', 'From Google Calendar', 'Entries in that calendar become events on your schedule, as drafts until you publish them or choose to publish them as they arrive. Private and declined entries stay out. Useful when the calendar is already where you book.', false],
             ['both', 'Both directions', 'The one most people pick. Save it in either place and the other one catches up.', true],
             ['off', 'No sync', 'Where a newly connected schedule sits until you choose one of the other three. Connected, but nothing moves.', false],
         ];

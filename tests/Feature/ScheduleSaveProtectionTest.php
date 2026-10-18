@@ -352,7 +352,8 @@ class ScheduleSaveProtectionTest extends TestCase
         $this->save($owner, $role, ['microsoft_sync_direction' => 'both'])->assertRedirect();
         $this->assertSame('to', $role->fresh()->microsoft_sync_direction);
 
-        $this->save($owner, $role, ['microsoft_integration_submitted' => 1, 'microsoft_sync_direction' => 'both'])->assertRedirect();
+        // Starting to read a calendar needs one the owner chose (RoleController::update()).
+        $this->save($owner, $role, ['microsoft_integration_submitted' => 1, 'microsoft_sync_direction' => 'both', 'microsoft_calendar_id' => 'cal-1'])->assertRedirect();
         $this->assertSame('both', $role->fresh()->microsoft_sync_direction, 'sanity check: with the controls it is theirs to set');
     }
 

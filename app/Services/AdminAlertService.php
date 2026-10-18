@@ -90,6 +90,11 @@ class AdminAlertService
         // schedule they own or an event they made, or in their own name once they own a schedule
         // (SpamWatch). Above the review queues of
         // our own, because a spam schedule is a public page under our name until someone looks.
+        //
+        // Just above it, amber: schedules a calendar sync made into somebody's private calendar,
+        // meeting passcodes and email threads on a public page (CalendarExposureWatch). A person's
+        // own details in public until someone looks, which is the more urgent of the two.
+        'calendar_exposures',
         'spam_suspects',
         'federation_flagged',
         'federation',
@@ -358,6 +363,20 @@ class AdminAlertService
             // Guarded because spam_clearances is new and a selfhost install may not have
             // migrated yet: the nav must not 500 in the middle of an update. Only a missing
             // table is quiet; anything else is reported, or the row would vanish for good.
+            // Guarded as spam_suspects is, for the same reason: new tables on an install that may
+            // not have migrated yet.
+            'calendar_exposures' => function () {
+                try {
+                    return \App\Services\CalendarExposureWatch::count();
+                } catch (\Illuminate\Database\QueryException $e) {
+                    if ($e->getCode() !== '42S02') {
+                        report($e);
+                    }
+
+                    return 0;
+                }
+            },
+
             'spam_suspects' => function () {
                 try {
                     return SpamWatch::count();
@@ -589,6 +608,7 @@ class AdminAlertService
             'boost_partners_waiting' => ['manage', 'boost', 'admin.boost', [], '#boost-partners', 'amber', 'Boost'],
             'boost_partner_launches_stuck' => ['manage', 'boost', 'admin.boost', [], '#boost-partners', 'red', 'Boost'],
             'boost_statements_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-partners', 'red', 'Boost'],
+            'calendar_exposures' => ['manage', 'private-calendars', 'admin.private_calendars', [], '', 'amber', __('messages.private_calendars')],
             'spam_suspects' => ['manage', 'blocked', 'admin.blocked', [], '#suspects', 'amber', __('messages.blocked')],
             // ?status=flagged, not approved: the filter behind it repeats this row's own
             // count query, so the link lands on exactly the instances it counted rather

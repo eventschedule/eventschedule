@@ -377,6 +377,7 @@ class CronRailSyncTest extends TestCase
     private const TIERS = [
         'td_5min' => '5min',
         'td_15min' => '15min',
+        'td_exposures' => '15min',
         'td_translate' => '15min',
         'td_hourly' => 'hourly',
         'td_daily' => 'daily',

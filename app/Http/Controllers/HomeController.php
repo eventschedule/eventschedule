@@ -451,6 +451,36 @@ class HomeController extends Controller
             ]);
         }
 
+        // 1a) Events a calendar sync is keeping off a schedule's public page, waiting for a look
+        // (CalendarArrival). Drains as the owner publishes them or keeps them hidden.
+        if (\App\Services\CalendarArrival::tablesReady()) {
+            $heldCounts = DB::table('calendar_import_holds')
+                ->join('events', 'events.id', '=', 'calendar_import_holds.event_id')
+                ->whereIn('calendar_import_holds.role_id', $roleIds)
+                ->whereNull('calendar_import_holds.decided_at')
+                ->whereColumn('events.creator_role_id', 'calendar_import_holds.role_id')
+                ->where('events.is_draft', true)
+                ->where('events.is_cancelled', false)
+                ->select('calendar_import_holds.role_id', DB::raw('count(*) as cnt'))
+                ->groupBy('calendar_import_holds.role_id')
+                ->pluck('cnt', 'role_id');
+
+            foreach ($heldCounts as $roleId => $cnt) {
+                $role = $rolesById->get($roleId);
+                if (! $role) {
+                    continue;
+                }
+                $items->push([
+                    'type' => 'calendar_waiting',
+                    'count' => (int) $cnt,
+                    'title' => trans_choice('messages.pending_action_calendar_waiting', $cnt, ['count' => $cnt]),
+                    'subtitle' => $role->name,
+                    'url' => route('role.calendar_review', ['subdomain' => $role->subdomain]),
+                    'color' => 'blue',
+                ]);
+            }
+        }
+
         // 1b) A free schedule has priced tickets that cannot be sold.
         //
         // The guest side is deliberately silent here (a missing buy button reads the same as sales
@@ -719,6 +749,10 @@ class HomeController extends Controller
             ->whereIn('event_role.role_id', $ids)
             ->where('events.is_draft', true)
             ->where('events.is_internal', false)
+            // Not a draft a calendar sync is holding back: "Publish your draft event" would open
+            // somebody's meeting with its passcode, or an email thread (CalendarArrival).
+            ->when(\App\Services\CalendarArrival::tablesReady(), fn ($q) => $q->whereNotExists(fn ($held) => $held
+                ->selectRaw('1')->from('calendar_import_holds')->whereColumn('calendar_import_holds.event_id', 'events.id')))
             ->where(fn ($q) => Event::constrainToOccurrencesSince($q, now('UTC'))))
             ->orderBy('events.starts_at')
             ->get(['event_role.role_id', 'events.id as event_id'])

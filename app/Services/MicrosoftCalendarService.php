@@ -922,6 +922,7 @@ class MicrosoftCalendarService
             if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::MICROSOFT, $sourceReason)) {
                 $changed = true;
             }
+            CalendarExposureWatch::record($existingEvent, $item['location']['displayName'] ?? null);
 
             // Backfill the mapping when matched via the name+time fallback.
             if (! $existingSync) {
@@ -941,7 +942,8 @@ class MicrosoftCalendarService
             return 'skipped';
         }
 
-        $this->createEventFromMicrosoft($item, $role, $calendarId);
+        $created = $this->createEventFromMicrosoft($item, $role, $calendarId);
+        CalendarExposureWatch::record($created, $item['location']['displayName'] ?? null);
 
         return 'created';
     }

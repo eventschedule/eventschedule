@@ -16,6 +16,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\CalendarArrival;
+use App\Services\CalendarExposureWatch;
 use App\Services\EventChangeNotifier;
 use App\Services\SmsService;
 use App\Services\TicketVolumeDiscount;
@@ -2700,6 +2701,13 @@ class EventRepo
         // the sync honours for the text it was made on (CalendarArrival).
         if ($wasDraftBeforeSave && ! $event->is_draft) {
             CalendarArrival::decide($event, auth()->id(), CalendarArrival::DECISION_PUBLISHED);
+        }
+
+        // An event the operator's page lists is read again when its text is saved, so taking the
+        // passcode out here takes it off that list (CalendarExposureWatch). Only one already
+        // listed: the sweep finds the rest.
+        if (CalendarExposureWatch::tablesReady() && \App\Models\CalendarExposure::where('event_id', $event->id)->exists()) {
+            CalendarExposureWatch::record($event);
         }
 
         // Skip external sync and webhooks for draft events

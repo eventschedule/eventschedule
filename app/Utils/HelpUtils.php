@@ -213,6 +213,7 @@ class HelpUtils
         '{subdomain}/seating/*/design' => '/docs/allocated-seating#build',
         '{subdomain}/seating/box-office/*' => '/docs/allocated-seating#box-office',
         '{subdomain}/requests' => '/docs/managing-schedules#requests',
+        '{subdomain}/calendar-review' => '/docs/creating-schedules#calendar-review',
         // The platform admin's list of every feed. Before the schedule's own feed pages: on a
         // page with no schedule in its address `{subdomain}/feeds` reads as `*/feeds`, which
         // is this page too, and the first match wins.
@@ -306,6 +307,7 @@ class HelpUtils
         'admin/boost*' => '/docs/selfhost/admin#manage-boost',
         'admin/schedules*' => '/docs/selfhost/admin#manage-plans',
         'admin/blocked*' => '/docs/selfhost/admin#manage-blocked',
+        'admin/private-calendars*' => '/docs/selfhost/admin#manage-private-calendars',
         // Hosted only, and the operator's own walkthrough is on the SaaS side of the guide.
         'admin/domains*' => '/docs/saas/custom-domains#admin-management',
         'admin/referrals*' => '/docs/selfhost/admin#manage-referrals',

@@ -239,8 +239,10 @@ class AppController extends Controller
             }
 
             // === EVERY 15 MINUTES ===
+            $calendarSyncsRan = false;
             if (! Cache::has('td_15min')) {
                 Cache::put('td_15min', true, now()->addMinutes(15));
+                $calendarSyncsRan = true;
 
                 try {
                     \Artisan::call('caldav:sync');
@@ -293,6 +295,21 @@ class AppController extends Controller
                         \Log::error('Scheduled command promo:sync failed: '.$e->getMessage());
                         report($e);
                     }
+                }
+            }
+
+            // === EVERY 15 MINUTES, A TIER OF ITS OWN ===
+            // The private-calendar sweep reads a window of event text. In its own tier, and it
+            // waits for the next request (the cron calls every minute) when this one already ran
+            // the three calendar syncs above, so the two never share a request's time.
+            if (! Cache::has('td_exposures') && ! $calendarSyncsRan) {
+                Cache::put('td_exposures', true, now()->addMinutes(15));
+
+                try {
+                    \Artisan::call('calendar:scan-exposures');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command calendar:scan-exposures failed: '.$e->getMessage());
+                    report($e);
                 }
             }
 

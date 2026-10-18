@@ -594,7 +594,7 @@
         // The four values of roles.caldav_sync_direction, the fourth being unset.
         $directions = [
             ['To the calendar', 'to', 'Events you publish here are written to your calendar. Nothing on your calendar is read.', false],
-            ['From the calendar', 'from', 'Events on your calendar arrive here as real events on your schedule. Nothing is written back.', false],
+            ['From the calendar', 'from', 'Events on your calendar arrive here as real events on your schedule, as drafts until you publish them or choose to publish them as they arrive. Nothing is written back.', false],
             ['Both ways', 'both', 'Push on save, and read every quarter hour. A change on either side reaches the other.', true],
             ['Off', 'unset', 'The server stays connected and the credentials stay stored. The sync simply does not run.', false],
         ];

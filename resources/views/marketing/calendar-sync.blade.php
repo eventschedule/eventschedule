@@ -584,7 +584,7 @@
             ],
             [
                 'q' => 'Is the sync two-way?',
-                'a' => 'Yes, and you choose. Out sends events to your calendar. Back brings events from your calendar onto your schedule. Both runs the round trip. Events you create, edit or delete here go out when you save, and events created or edited in your calendar app come back on the return leg. Deletions come back from Google and Outlook, where you decide what they should mean; CalDAV brings back new and changed events only. A change that arrives on the return leg is never echoed straight back out again.',
+                'a' => 'Yes, and you choose. Out sends events to your calendar. Back brings events from your calendar onto your schedule, as drafts until you publish them or choose to publish them as they arrive. Both runs the round trip. Events you create, edit or delete here go out when you save, and events created or edited in your calendar app come back on the return leg. Deletions come back from Google and Outlook, where you decide what they should mean; CalDAV brings back new and changed events only. A change that arrives on the return leg is never echoed straight back out again.',
             ],
             [
                 'q' => 'Can attendees add events to their personal calendars?',

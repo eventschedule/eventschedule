@@ -33,6 +33,7 @@ class CalendarSyncSetting extends Model
         'google_stopped_at' => 'datetime',
         'microsoft_stopped_at' => 'datetime',
         'caldav_stopped_at' => 'datetime',
+        'taken_off_notified_at' => 'datetime',
     ];
 
     public function role(): BelongsTo

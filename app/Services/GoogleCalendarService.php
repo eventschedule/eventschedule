@@ -1078,6 +1078,7 @@ class GoogleCalendarService
             if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::GOOGLE, $sourceReason)) {
                 $changed = true;
             }
+            CalendarExposureWatch::record($existingEvent, $data['location'] ?? null);
 
             // Backfill the sync mapping when the match came from the name+time fallback (no
             // CalendarSync row yet) so future syncs match reliably by google_event_id even if the
@@ -1098,7 +1099,8 @@ class GoogleCalendarService
             CalendarArrival::count($results, $sourceReason);
         } else {
             $this->inboundCounts = [];
-            $this->createEventFromGoogle($data, $role, $calendarId);
+            $created = $this->createEventFromGoogle($data, $role, $calendarId);
+            CalendarExposureWatch::record($created, $data['location'] ?? null);
             $results['created']++;
             foreach ($this->inboundCounts as $key => $n) {
                 $results[$key] = ($results[$key] ?? 0) + $n;

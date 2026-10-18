@@ -365,6 +365,101 @@ class CalendarArrival
         ]);
     }
 
+    // What the schedule's own pages say ------------------------------------------------------
+
+    /**
+     * Whether a sync reads the account's main calendar: Google's 'primary' (or no calendar chosen,
+     * which falls back to it), an id that is the account's own address rather than a calendar
+     * made for something, or Outlook's default (no calendar chosen). Where the dentist and the
+     * team meetings are.
+     */
+    public static function isMainCalendar(Role $role, string $provider): bool
+    {
+        return match ($provider) {
+            self::GOOGLE => (function () use ($role) {
+                $id = (string) $role->getGoogleCalendarId();
+
+                return $id === 'primary'
+                    || (str_contains($id, '@') && ! preg_match('~@(group|import|resource)\.calendar\.google\.com$~i', $id));
+            })(),
+            self::MICROSOFT => $role->getMicrosoftCalendarId() === null,
+            default => false,
+        };
+    }
+
+    /** The providers this schedule reads a calendar from now. */
+    public static function readingProviders(Role $role): array
+    {
+        return array_values(array_filter([
+            $role->syncsFromGoogle() ? self::GOOGLE : null,
+            $role->syncsFromMicrosoft() ? self::MICROSOFT : null,
+            $role->syncsFromCalDAV() ? self::CALDAV : null,
+        ]));
+    }
+
+    /**
+     * What the schedule's Schedule tab says about its calendar syncs, or null when there is nothing
+     * to say: entries waiting as drafts (and how many of those are held for their text), entries
+     * taken off the public page with the first few of them, the very first read's counts, and a
+     * sync carried over from before this that publishes the account's main calendar and was never
+     * confirmed by the owner (asked once).
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function notice(Role $role): ?array
+    {
+        if (! self::tablesReady()) {
+            return null;
+        }
+
+        $open = fn () => CalendarImportHold::where('calendar_import_holds.role_id', $role->id)
+            ->whereNull('calendar_import_holds.decided_at')
+            ->whereHas('event', fn ($q) => $q->where('creator_role_id', $role->id)->where('is_draft', true)->where('is_cancelled', false));
+
+        $waiting = $open()->whereNull('was_visibility')->count();
+        $held = $waiting ? $open()->whereNull('was_visibility')->whereIn('reason', [CalendarPrivacy::HOLD_MEETING_DETAILS, CalendarPrivacy::HOLD_EMAIL_THREAD])->count() : 0;
+        $taken = $open()->whereNotNull('was_visibility')->whereNull('held_by')->count();
+        $takenEvents = $taken
+            ? $open()->whereNotNull('was_visibility')->whereNull('held_by')->with('event')->orderBy('id')->limit(3)->get()->pluck('event')->filter()->values()
+            : collect();
+
+        $settings = self::settings($role);
+        $provider = collect(self::readingProviders($role))->first()
+            ?? CalendarImportHold::where('calendar_import_holds.role_id', $role->id)->join('events', 'events.id', '=', 'calendar_import_holds.event_id')->value('events.import_source')
+            ?? self::GOOGLE;
+
+        $confirm = collect(self::readingProviders($role))->first(fn ($p) => $settings->{"{$p}_publishes"}
+            && $settings->{"{$p}_publish_confirmed_at"} === null
+            && self::isMainCalendar($role, $p));
+
+        if (! $waiting && ! $taken && ! $confirm) {
+            return null;
+        }
+
+        return [
+            'provider' => $provider,
+            'waiting' => $waiting,
+            'held' => $held,
+            'review' => $waiting - $held,
+            'taken' => $taken,
+            'taken_events' => $takenEvents,
+            'first_pull' => $settings->{"{$provider}_first_pull"},
+            'main' => self::isMainCalendar($role, $provider),
+            'publishes' => self::publishes($role, $provider),
+            'confirm' => $confirm,
+        ];
+    }
+
+    /** "Google Calendar", "Outlook", "CalDAV calendar": what the owner calls where it came from. */
+    public static function providerName(?string $provider): string
+    {
+        return match ($provider) {
+            self::MICROSOFT => 'Outlook',
+            self::CALDAV => __('messages.caldav_calendar'),
+            default => 'Google Calendar',
+        };
+    }
+
     // The one full read ----------------------------------------------------------------------
 
     /** At most this many full reads start in one run of a sync command... */
@@ -582,6 +677,47 @@ class CalendarArrival
         }
 
         CalendarSyncSetting::updateOrCreate(['role_id' => $role->id], $values);
+
+        self::tellOwnerOfTakenOff($role, $provider);
+    }
+
+    /**
+     * Once per schedule: a read took events that were on the public page off it. The owner is
+     * mailed what happened (nothing deleted, where to look), at their account's address and in
+     * their language, by the platform and never through the schedule's own mail server.
+     */
+    public static function tellOwnerOfTakenOff(Role $role, string $provider): void
+    {
+        $taken = CalendarImportHold::where('calendar_import_holds.role_id', $role->id)
+            ->whereNull('decided_at')
+            ->whereNotNull('was_visibility')
+            ->whereNull('held_by')
+            ->whereHas('event', fn ($q) => $q->where('creator_role_id', $role->id)->where('is_draft', true));
+
+        $count = (clone $taken)->count();
+        $owner = $role->user;
+        if ($count === 0 || ! $owner || ! $owner->email || $owner->isBlocked()) {
+            return;
+        }
+
+        // Claimed atomically: two reads finishing together must not mail twice.
+        $claimed = CalendarSyncSetting::where('role_id', $role->id)->whereNull('taken_off_notified_at')->update(['taken_off_notified_at' => now()]);
+        if (! $claimed) {
+            return;
+        }
+
+        $names = (clone $taken)->with('event')->orderBy('id')->limit(5)->get()->pluck('event.name')->filter()->values()->all();
+
+        try {
+            \App\Jobs\SendQueuedEmail::dispatch(
+                new \App\Mail\CalendarTakenOffMail($role, $owner, $count, $names, self::providerName($provider)),
+                $owner->email,
+                null,
+                $owner->language_code ?: null,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /** Counts a skipped or held entry in a read's results, by reason. */

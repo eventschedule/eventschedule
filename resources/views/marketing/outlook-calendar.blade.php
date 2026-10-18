@@ -575,7 +575,7 @@
         // which the app labels "No sync".
         $directions = [
             ['To Outlook', 'to', 'Events from Event Schedule appear in Outlook. Nothing in Outlook is read.', false],
-            ['From Outlook', 'from', 'Events from Outlook appear in Event Schedule. Nothing is written back.', false],
+            ['From Outlook', 'from', 'Events from Outlook appear in Event Schedule, as drafts until you publish them or choose to publish them as they arrive. Nothing is written back.', false],
             ['Both ways', 'both', 'Create, edit or delete in either place and the other side follows.', true],
             ['Off', 'no sync', 'The account stays connected, the sync simply does not run. Every schedule starts here, so nothing moves until you answer.', false],
         ];

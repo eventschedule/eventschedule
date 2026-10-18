@@ -689,10 +689,19 @@ class GoogleCalendarController extends Controller
 
             AuditService::log(AuditService::GOOGLE_CALENDAR_SYNC, $user->id, 'Role', $role->id, null, null, $syncDirection);
 
+            // What was read in now waits on the Schedule tab, which the page reloads to show;
+            // the count says where to look (CalendarArrival).
+            $reload = isset($results['from']);
+            if ($reload) {
+                $created = (int) ($results['from']['created'] ?? 0);
+                session()->flash('message', trans_choice('messages.calendar_sync_now_waiting', $created, ['count' => number_format($created)]));
+            }
+
             return response()->json([
                 'message' => __('messages.events_synced'),
                 'sync_direction' => $syncDirection,
                 'results' => $results,
+                'reload' => $reload,
             ]);
 
         } catch (\Exception $e) {

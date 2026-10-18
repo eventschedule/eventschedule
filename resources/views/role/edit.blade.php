@@ -5351,6 +5351,19 @@
                                     <select id="google-calendar-select" name="google_calendar_id" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.loading_calendars') }}</option>
                                     </select>
+                                    <div class="mt-2 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20" data-main-calendar-panel="google" hidden>
+                                        <svg class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <div class="text-sm text-amber-800 dark:text-amber-200">
+                                            <p>{{ __('messages.google_main_calendar_warning') }}</p>
+                                            <p class="mt-1"><x-link href="https://support.google.com/calendar/answer/37095" target="_blank">{{ __('messages.how_to_make_a_calendar') }}</x-link></p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button" class="text-sm font-medium text-[var(--brand-blue)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] rounded" data-calendar-refresh="google">{{ __('messages.refresh_calendar_list') }}</button>
+                                    </div>
+                                    <x-input-error class="mt-2" :messages="$errors->get('google_calendar_id')" />
                                 </div>
 
                                 <!-- Sync Direction Selection -->
@@ -5428,6 +5441,8 @@
                                     </div>
                                 </div>
 
+                                @include('role.partials.calendar-publish-switch', ['provider' => 'google', 'direction' => $role->sync_direction])
+
                                 @include('role.partials.calendar-delete-action', ['provider' => 'google'])
 
                                 @if (auth()->id() === $role->user_id)
@@ -5478,6 +5493,12 @@
                                 </div>
                                 @endif
                             </div>
+                            @elseif (! auth()->user()->google_token && auth()->id() === $role->user_id)
+                            {{-- Straight to Google and back to this row, in this tab: the account page in a
+                                 new tab lost the owner between two pages. --}}
+                            <x-secondary-link href="{{ route('google.calendar.redirect', ['from' => 'settings', 'subdomain' => $role->subdomain]) }}">
+                                {{ __('messages.connect_google_calendar') }}
+                            </x-secondary-link>
                             @elseif (! auth()->user()->google_token)
                             <x-secondary-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank" rel="noopener">
                                 {{ __('messages.connect_google_calendar') }}
@@ -5520,7 +5541,7 @@
                                                 data.calendars.forEach(function(cal) {
                                                     var option = document.createElement('option');
                                                     option.value = cal.id;
-                                                    option.textContent = cal.summary + (cal.primary ? ' (Primary)' : '');
+                                                    option.textContent = cal.summary + (cal.primary ? ' ' + @json(__('messages.main_calendar_suffix'), JSON_UNESCAPED_UNICODE) : '');
                                                     if (cal.id === memberCalendarId) {
                                                         option.selected = true;
                                                     }
@@ -5590,6 +5611,18 @@
                                     <select id="microsoft-calendar-select" name="microsoft_calendar_id" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.loading_calendars') }}</option>
                                     </select>
+                                    <div class="mt-2 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20" data-main-calendar-panel="microsoft" hidden>
+                                        <svg class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <div class="text-sm text-amber-800 dark:text-amber-200">
+                                            <p>{{ __('messages.microsoft_main_calendar_warning') }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button" class="text-sm font-medium text-[var(--brand-blue)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] rounded" data-calendar-refresh="microsoft">{{ __('messages.refresh_calendar_list') }}</button>
+                                    </div>
+                                    <x-input-error class="mt-2" :messages="$errors->get('microsoft_calendar_id')" />
                                 </div>
 
                                 <!-- Sync Direction Selection -->
@@ -5642,6 +5675,8 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                @include('role.partials.calendar-publish-switch', ['provider' => 'microsoft', 'direction' => $role->microsoft_sync_direction])
 
                                 {{-- Render only when Google is NOT connected: the control is shared across
                                      providers and uses one radio name, so two visible copies would collide.
@@ -5754,6 +5789,12 @@
                                     </div>
                                 </div>
 
+                                @if ($caldavIsOwner)
+                                {{-- Marker for the switch below, which this form saves (RoleController::update()). --}}
+                                <input type="hidden" name="caldav_integration_submitted" value="1">
+                                @include('role.partials.calendar-publish-switch', ['provider' => 'caldav', 'direction' => $role->caldav_sync_direction])
+                                @endif
+
                                 <!-- Disconnect Button -->
                                 @if ($caldavIsOwner)
                                 <div>
@@ -5839,6 +5880,8 @@
                             </div>
                             @endif
                         </div>
+
+                        @include('role.partials.calendar-publish-script')
 
                         {{-- Feeds from other sites: the way in to the Feeds tab, which a schedule
                              only shows once it has a feed. Nothing here is saved with the form,
@@ -6748,6 +6791,8 @@ function loadGoogleCalendars() {
         console.warn('Google Calendar select element not found');
         return;
     }
+    // A refresh keeps what was chosen on the page and not saved yet.
+    const keep = select.value;
 
     fetch('{{ url('/google-calendar/calendars') }}')
         .then(response => {
@@ -6763,8 +6808,9 @@ function loadGoogleCalendars() {
                 data.calendars.forEach(calendar => {
                     const option = document.createElement('option');
                     option.value = calendar.id;
-                    option.textContent = calendar.summary + (calendar.primary ? ' (Primary)' : '');
-                    if (calendar.id === @json($userCalendarId ?? '')) {
+                    option.textContent = calendar.summary + (calendar.primary ? ' ' + @json(__('messages.main_calendar_suffix'), JSON_UNESCAPED_UNICODE) : '');
+                    option.dataset.primary = calendar.primary ? '1' : '0';
+                    if (calendar.id === (keep || @json($userCalendarId ?? ''))) {
                         option.selected = true;
                     }
                     select.appendChild(option);
@@ -6773,6 +6819,7 @@ function loadGoogleCalendars() {
                 select.innerHTML = '<option value="">' + @json(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) + '</option>';
             }
             window.dispatchEvent(new CustomEvent('google-calendars-loaded'));
+            window.dispatchEvent(new CustomEvent('calendar-list-loaded', { detail: { provider: 'google' } }));
         })
         .catch(error => {
             console.error('Error loading calendars:', error);
@@ -6793,6 +6840,8 @@ function loadMicrosoftCalendars() {
     if (!select) {
         return;
     }
+    // A refresh keeps what was chosen on the page and not saved yet.
+    const keep = select.value;
 
     fetch('{{ url('/microsoft-calendar/calendars') }}')
         .then(response => {
@@ -6808,8 +6857,9 @@ function loadMicrosoftCalendars() {
                 data.calendars.forEach(calendar => {
                     const option = document.createElement('option');
                     option.value = calendar.id;
-                    option.textContent = calendar.summary + (calendar.primary ? ' (Primary)' : '');
-                    if (calendar.id === @json($userMicrosoftCalendarId ?? '')) {
+                    option.textContent = calendar.summary + (calendar.primary ? ' ' + @json(__('messages.main_calendar_suffix'), JSON_UNESCAPED_UNICODE) : '');
+                    option.dataset.primary = calendar.primary ? '1' : '0';
+                    if (calendar.id === (keep || @json($userMicrosoftCalendarId ?? ''))) {
                         option.selected = true;
                     }
                     select.appendChild(option);
@@ -6818,6 +6868,7 @@ function loadMicrosoftCalendars() {
                 select.innerHTML = '<option value="">' + @json(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) + '</option>';
             }
             window.dispatchEvent(new CustomEvent('microsoft-calendars-loaded'));
+            window.dispatchEvent(new CustomEvent('calendar-list-loaded', { detail: { provider: 'microsoft' } }));
         })
         .catch(error => {
             let errorMessage = @json(__('messages.error_loading_calendars'), JSON_UNESCAPED_UNICODE);
@@ -7419,6 +7470,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // ...and a field to land on. Allow-listed rather than any id from the URL. Only recorded
     // here: the page holds its scroll at the top until shortly after load (_scrollGuard), so
     // the load handler scrolls to it once that guard is gone.
+    // ...or a row of Integrations: the mail about a calendar sync links to its row, and a
+    // fragment does not survive the sign-in page on the way.
+    const requestedIntegration = ({ outlook: 'microsoft' })[settingsParams.get('integration_tab')] || settingsParams.get('integration_tab');
+    if (requestedIntegration && /^[a-z]+$/.test(requestedIntegration) && document.getElementById('integration-tab-' + requestedIntegration)) {
+        window.FormKit.openFromHash('#integration-tab-' + requestedIntegration);
+    }
+
     const settingsFocus = settingsParams.get('focus');
     if (['federation_enabled'].includes(settingsFocus)) {
         window.__settingsFocusId = settingsFocus;

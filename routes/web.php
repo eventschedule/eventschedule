@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminBlockController;
+use App\Http\Controllers\AdminCalendarPrivacyController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminFederationController;
 use App\Http\Controllers\AdminFeedController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\BoostPartnerController;
 use App\Http\Controllers\BoostPartnerSettingsController;
 use App\Http\Controllers\BoxOfficeController;
 use App\Http\Controllers\CalDAVController;
+use App\Http\Controllers\CalendarReviewController;
 use App\Http\Controllers\CarpoolController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventbriteController;
@@ -966,6 +968,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::post('/{subdomain}/feeds/{hash}/publish-all', [EventFeedController::class, 'publishAll'])->name('role.feeds.publish_all');
         Route::post('/{subdomain}/feeds/{hash}/decide/{item}', [EventFeedController::class, 'decide'])->name('role.feeds.decide');
         Route::post('/{subdomain}/feeds/{hash}/undo', [EventFeedController::class, 'undo'])->name('role.feeds.undo');
+        // What a calendar sync is keeping off the schedule's public page (CalendarArrival), for
+        // the owner and the admins to publish or keep hidden.
+        Route::get('/{subdomain}/calendar-review', [CalendarReviewController::class, 'index'])->name('role.calendar_review');
+        Route::post('/{subdomain}/calendar-review', [CalendarReviewController::class, 'decide'])->name('role.calendar_review.decide');
+        Route::post('/{subdomain}/calendar-review/publish-all', [CalendarReviewController::class, 'publishAll'])->name('role.calendar_review.publish_all');
+        Route::post('/{subdomain}/calendar-review/keep-publishing/{provider}', [CalendarReviewController::class, 'keepPublishing'])->name('role.calendar_review.keep_publishing')->where('provider', 'google|microsoft|caldav');
     });
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImportHub'])->name('event.show_import');
@@ -1192,6 +1200,17 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::post('/admin/blocked/account/{hash}/not-spam', [AdminBlockController::class, 'notSpam'])->name('admin.blocked.not_spam');
         Route::post('/admin/blocked/account/{hash}/flag-again', [AdminBlockController::class, 'flagAgain'])->name('admin.blocked.flag_again');
         Route::post('/admin/blocked/words', [AdminBlockController::class, 'saveWords'])->name('admin.blocked.words');
+        // Schedules a calendar sync made into somebody's private calendar (CalendarExposureWatch).
+        // On every install: any install's owners can connect a calendar.
+        Route::get('/admin/private-calendars', [AdminCalendarPrivacyController::class, 'index'])->name('admin.private_calendars');
+        Route::get('/admin/private-calendars/{hash}', [AdminCalendarPrivacyController::class, 'show'])->name('admin.private_calendars.show');
+        Route::post('/admin/private-calendars/{hash}/hide', [AdminCalendarPrivacyController::class, 'hide'])->name('admin.private_calendars.hide');
+        Route::post('/admin/private-calendars/{hash}/put-back', [AdminCalendarPrivacyController::class, 'putBack'])->name('admin.private_calendars.put_back');
+        Route::post('/admin/private-calendars/{hash}/pause', [AdminCalendarPrivacyController::class, 'pause'])->name('admin.private_calendars.pause');
+        Route::post('/admin/private-calendars/{hash}/resume', [AdminCalendarPrivacyController::class, 'resume'])->name('admin.private_calendars.resume');
+        Route::get('/admin/private-calendars/{hash}/email-preview', [AdminCalendarPrivacyController::class, 'emailPreview'])->name('admin.private_calendars.email_preview');
+        Route::post('/admin/private-calendars/{hash}/email', [AdminCalendarPrivacyController::class, 'email'])->name('admin.private_calendars.email');
+        Route::post('/admin/private-calendars/{hash}/reviewed', [AdminCalendarPrivacyController::class, 'reviewed'])->name('admin.private_calendars.reviewed');
         Route::get('/admin/schedules', [AdminController::class, 'schedules'])->name('admin.schedules');
         Route::get('/admin/schedules/{role}/edit', [AdminController::class, 'editSchedule'])->name('admin.schedules.edit');
         Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');

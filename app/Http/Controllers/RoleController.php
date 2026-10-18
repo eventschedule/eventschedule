@@ -37,6 +37,7 @@ use App\Repos\EventRepo;
 use App\Services\AnalyticsService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
+use App\Services\CalendarArrival;
 use App\Services\CuratorSourceService;
 use App\Services\DemoService;
 use App\Services\DigitalOceanService;
@@ -5651,6 +5652,25 @@ class RoleController extends Controller
             ? $request->input('microsoft_calendar_id')
             : $oldMicrosoftCalendarId;
 
+        // Starting to read a calendar needs one the owner chose. With none, the sync read the
+        // account's main calendar (Google's 'primary', Outlook's default), which is how one
+        // schedule published somebody's whole work calendar. A sync already reading is left as
+        // it is; the row's main-calendar notice speaks to it.
+        $startsReading = fn ($old, $new) => in_array($new, ['from', 'both'], true) && ! in_array($old, ['from', 'both'], true);
+        if ($googleSubmitted && $startsReading($oldSyncDirection, $newSyncDirection) && ! $newCalendarId) {
+            return redirect()->back()->withInput()->withErrors(['google_calendar_id' => __('messages.calendar_sync_choose_calendar')]);
+        }
+        if ($microsoftSubmitted && $startsReading($oldMicrosoftSyncDirection, $request->input('microsoft_sync_direction')) && ! $newMicrosoftCalendarId) {
+            return redirect()->back()->withInput()->withErrors(['microsoft_calendar_id' => __('messages.calendar_sync_choose_calendar')]);
+        }
+        // Said on the Schedule tab this save lands on: where the events will turn up, as drafts.
+        $readingStarted = match (true) {
+            $googleSubmitted && $startsReading($oldSyncDirection, $newSyncDirection) => CalendarArrival::GOOGLE,
+            $microsoftSubmitted && $startsReading($oldMicrosoftSyncDirection, $request->input('microsoft_sync_direction')) => CalendarArrival::MICROSOFT,
+            $isOwner && $startsReading($role->caldav_sync_direction, $request->input('caldav_sync_direction', $role->caldav_sync_direction)) && $role->hasCalDAVSettings() => CalendarArrival::CALDAV,
+            default => null,
+        };
+
         // Capture old category state for rename detection.
         $oldEventCategories = $role->event_categories;
         $eventCategoriesSubmitted = $request->boolean('event_categories_submitted');
@@ -5717,6 +5737,12 @@ class RoleController extends Controller
             $ownerPivot?->update(['google_calendar_id' => $newCalendarId ?: null]);
         }
 
+        // Before the webhook below is made: Google's first ping pulls inside this request, and
+        // what it reads in must arrive the way this save says.
+        if ($googleSubmitted && ! is_demo_mode()) {
+            $this->savePublishOnArrival($role, CalendarArrival::GOOGLE, $newSyncDirection, $oldSyncDirection, $request->boolean('google_publish_on_arrival'));
+        }
+
         // If sync_direction or calendar changed, handle webhook management
         if (($newSyncDirection && $oldSyncDirection !== $newSyncDirection) ||
             ($oldCalendarId !== $newCalendarId)) {
@@ -5740,6 +5766,10 @@ class RoleController extends Controller
                 $ownerPivot?->update(['microsoft_calendar_id' => $newMicrosoftCalendarId ?: null]);
             }
 
+            if (! is_demo_mode()) {
+                $this->savePublishOnArrival($role, CalendarArrival::MICROSOFT, $newMicrosoftSyncDirection, $oldMicrosoftSyncDirection, $request->boolean('microsoft_publish_on_arrival'));
+            }
+
             // Handle subscription management whenever the direction (incl. to "no sync") or the
             // calendar changed. The direction condition must NOT require a truthy new value, or
             // switching to "no sync" would leave the subscription live until it auto-expires.
@@ -5747,6 +5777,12 @@ class RoleController extends Controller
                 ($oldMicrosoftCalendarId !== $newMicrosoftCalendarId)) {
                 $this->handleMicrosoftSyncAndCalendarChanges($role, $newMicrosoftSyncDirection, $oldMicrosoftSyncDirection, $newMicrosoftCalendarId, $oldMicrosoftCalendarId);
             }
+        }
+
+        // CalDAV's direction is a field of this form (its connection is made on the page by
+        // CalDAVController); the switch beside it is saved here, behind its own marker.
+        if ($isOwner && $request->has('caldav_integration_submitted') && ! is_demo_mode()) {
+            $this->savePublishOnArrival($role, CalendarArrival::CALDAV, $role->caldav_sync_direction, $role->getOriginal('caldav_sync_direction'), $request->boolean('caldav_publish_on_arrival'));
         }
 
         // Only a CHANGE is cleaned, and the outer guard is load-bearing now that cleanSubdomain()
@@ -6694,6 +6730,10 @@ class RoleController extends Controller
             if (config('queue.default') !== 'sync') {
                 \App\Jobs\PlaceScheduleVenues::dispatch($role->id);
             }
+        }
+
+        if ($readingStarted && ! is_demo_mode()) {
+            $redirect->with('calendar_reading_started', $readingStarted);
         }
 
         // The owner lands on the schedule's admin page, so that is where a map just switched on,
@@ -8906,6 +8946,27 @@ class RoleController extends Controller
      * settings page disables those two choices and says how to allow them; this is what holds
      * when a request arrives anyway.
      */
+    /**
+     * The owner's "Publish new events automatically" for one calendar (CalendarArrival). Only
+     * while the sync reads that calendar; turned on, it is bound to the calendar now chosen, so
+     * choosing another one by any path falls back to drafts. Choosing a direction also answers
+     * a pause or a change of owner that stopped the reading.
+     */
+    private function savePublishOnArrival(Role $role, string $provider, ?string $direction, ?string $oldDirection, bool $wanted): void
+    {
+        $reads = in_array($direction, ['from', 'both'], true);
+
+        if ($reads && $wanted) {
+            CalendarArrival::setPublishing($role, $provider, true);
+        } elseif (CalendarArrival::tablesReady() && CalendarArrival::settings($role)->{"{$provider}_publishes"}) {
+            CalendarArrival::setPublishing($role, $provider, false);
+        }
+
+        if ($direction !== $oldDirection) {
+            CalendarArrival::clearStopped($role, $provider);
+        }
+    }
+
     private static function googleDirectionFor($user, $direction): ?string
     {
         if (! in_array($direction, ['to', 'from', 'both'], true)) {

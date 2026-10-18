@@ -25,6 +25,11 @@ class SyncMicrosoftCalendarInbound implements ShouldQueue
 
     public function handle(MicrosoftCalendarService $microsoftCalendarService): void
     {
+        // Queued before a pause, or a change of direction, and run after it: reading stopped.
+        if (! $this->role->syncsFromMicrosoft()) {
+            return;
+        }
+
         // The subscription/calendar belong to the owner; sync with the owner's token.
         $user = $this->role->user;
 

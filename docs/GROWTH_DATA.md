@@ -598,6 +598,12 @@ created over the API or WhatsApp cannot carry a price.
   and waitlist rows 30 days after their event, and unconfirmed sign-ups after 30 days, so
   `interests_added` for past weeks and the `waitlist` used-feature flag fall between pulls as those
   rows go. Compare them only within one pull.
+- **Synced events arrive as drafts, from the release committed on 2026-10-18.** A standing
+  Google, Outlook or CalDAV sync that a schedule turns on from then on brings its events in as
+  drafts until the owner publishes them (syncs already reading keep publishing), and private,
+  declined, cancelled and out-of-office entries are no longer read in at all. Counts of public
+  events, of events made by a sync, and anything keyed on `published_at` drop for new syncs
+  across that line; compare them within one side of it.
 - **Tiny numbers.** Conversions, sellers and cancellations are small counts. At one a month, a month
   with none and a month with two are both ordinary; never read a single month's change in a small
   count as an effect.

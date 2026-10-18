@@ -22,6 +22,7 @@
             <x-doc-nav-link href="#manage-boost">Boost</x-doc-nav-link>
             <x-doc-nav-link href="#manage-plans">Schedules</x-doc-nav-link>
             <x-doc-nav-link href="#manage-blocked">Blocked</x-doc-nav-link>
+            <x-doc-nav-link href="#manage-private-calendars">Private calendars</x-doc-nav-link>
             <x-doc-nav-link href="#manage-feeds">Feeds</x-doc-nav-link>
             <x-doc-nav-link href="#manage-domains">Domains</x-doc-nav-link>
             <x-doc-nav-link href="#manage-referrals">Referrals</x-doc-nav-link>
@@ -873,6 +874,17 @@
     </section>
 
     <!-- Manage: Feeds (every install) -->
+    <section id="manage-private-calendars" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+            </svg>
+            Private calendars (Manage)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Private calendars page, at <code class="doc-inline-code">/admin/private-calendars</code>, lists schedules that look as though a calendar import is publishing somebody's private calendar: events that show a meeting's passcode or dial-in code, a join link carrying the meeting's password, or an email made into an entry. A sweep reads the events calendars bring in every 15 minutes, and the list counts toward the alerts on the admin dashboard. It only finds; nothing on the page happens until you press it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule's page shows what was found first, then four steps, each audited: <strong class="text-gray-900 dark:text-white">Hide what is public now</strong> (the flagged events become drafts, except ones people hold tickets to, and venues made out of meeting links are taken down), <strong class="text-gray-900 dark:text-white">Pause the sync</strong> (stops reading the calendar and keeps pushing to it), <strong class="text-gray-900 dark:text-white">Tell the owner</strong> (an email in the owner's language, with a preview, at most once a week) and <strong class="text-gray-900 dark:text-white">Mark reviewed</strong>, which takes the schedule off the list until something new turns up. Hiding and pausing can be put back from the same page.</p>
+    </section>
+
     <section id="manage-feeds" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
