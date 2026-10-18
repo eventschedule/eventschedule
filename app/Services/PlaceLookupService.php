@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\PlaceLookup;
 use App\Models\Role;
+use App\Utils\CalendarPrivacy;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -119,7 +120,7 @@ class PlaceLookupService
         // sent whole when the test looked only at the start, password and all. What stands beside
         // a link cannot be told from it, so the whole field goes.
         $street = $raw('address1');
-        $link = $street !== '' && preg_match('~(?:[a-z][a-z0-9+.-]*://|\bwww\.|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}/\S)~i', $street);
+        $link = $street !== '' && CalendarPrivacy::hasLink($street);
         if ($link) {
             $street = '';
         }
