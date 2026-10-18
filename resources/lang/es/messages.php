@@ -6333,8 +6333,6 @@ return [
     'import_source_flyer' => 'Un flyer, una captura de pantalla o un texto',
     'import_source_flyer_description' => 'La foto de un cartel o una lista de fechas',
     'import_band_by_hand' => 'o agrega uno a mano',
-    'schedule_empty_text' => 'Trae tus eventos desde donde ya están publicados, o agrega uno a mano.',
-    'add_an_event' => 'Agregar un evento',
     'import_google_back' => 'Usar un enlace, texto o un cartel en su lugar',
     'import_google_intro' => 'Conecta Google Calendar, elige un calendario y luego escoge cuáles de sus eventos añadir a tu horario.',
     'import_google_read_only' => 'Solo lectura. Nunca cambiamos tu calendario.',

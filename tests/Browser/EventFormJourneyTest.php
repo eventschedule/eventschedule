@@ -1177,11 +1177,17 @@ class EventFormJourneyTest extends DuskTestCase
             $dock = $browser->script('
                 var dock = document.querySelector(".sg-dock").getBoundingClientRect();
                 var form = document.getElementById("event-basics").getBoundingClientRect();
-                return { left: dock.left, right: dock.right, width: dock.width, formRight: form.right, viewport: window.innerWidth };
+                var bar = document.querySelector(".event-save-bar").getBoundingClientRect();
+                return { left: dock.left, right: dock.right, width: dock.width, bottom: dock.bottom, formRight: form.right,
+                    viewport: window.innerWidth, barTop: bar.top, band: !! document.querySelector(".import-options") };
             ')[0];
             $this->assertGreaterThan($dock['formRight'], $dock['left'], 'the card stands to the right of the fields, not over them');
             $this->assertLessThanOrEqual($dock['viewport'], $dock['right'], 'and inside the window');
             $this->assertGreaterThan(150, $dock['width']);
+            // The import band stands above a first event's form and moves the card down with it;
+            // the card still ends above the save bar, which would paint over it.
+            $this->assertTrue($dock['band'], 'sanity check: the import band is above this first event');
+            $this->assertLessThanOrEqual($dock['barTop'], $dock['bottom'], 'the card ends above the save bar');
 
             // Once a first event exists the guide is a ring in the corner.
             $event = new Event;

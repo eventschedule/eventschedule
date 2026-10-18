@@ -6334,8 +6334,6 @@ return [
     'import_source_flyer' => 'Flaier, ekraanipilt või tekst',
     'import_source_flyer_description' => 'Foto plakatist või kuupäevade loend',
     'import_band_by_hand' => 'või lisa üks käsitsi',
-    'schedule_empty_text' => 'Too oma sündmused sealt, kus need juba kirjas on, või lisa üks käsitsi.',
-    'add_an_event' => 'Lisa sündmus',
     'import_google_back' => 'Kasuta selle asemel linki, teksti või flaierit',
     'import_google_intro' => 'Ühenda Google\'i kalender, vali kalender ja seejärel sündmused, mida oma ajakavasse lisada.',
     'import_google_read_only' => 'Ainult lugemiseks. Me ei muuda kunagi sinu kalendrit.',

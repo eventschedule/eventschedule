@@ -1,6 +1,7 @@
 @props([
     'role',
-    // band: above the first-event form. empty: the Schedule tab of a schedule with no events.
+    // band: above the first-event form, with "or add one by hand" leading into it. schedule: above
+    // the calendar of a schedule with no events, whose own Add Event is the way by hand.
     'variant' => 'band',
 ])
 
@@ -8,8 +9,10 @@
     // Which sources, in which order: App\Utils\ImportOptions, which the import page asks too.
     $tiles = \App\Utils\ImportOptions::for($role, auth()->user());
 
-    // Literal class strings, so Tailwind's scanner can see every one of them.
-    $grid = [1 => 'max-w-xl', 2 => 'md:grid-cols-2', 3 => 'md:grid-cols-3'][count($tiles)] ?? 'md:grid-cols-3';
+    // Literal class strings, so Tailwind's scanner can see every one of them. Three across only
+    // from xl: between 768px and the sidebar's widths a third of the row left each tile's text a
+    // column of 80 to 115px, and two across would leave a cell of the grid empty.
+    $grid = [1 => 'max-w-xl', 2 => 'md:grid-cols-2', 3 => 'xl:grid-cols-3'][count($tiles)] ?? 'xl:grid-cols-3';
     $tints = [
         'link' => 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
         'flyer' => 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400',
@@ -23,21 +26,10 @@
 
 {{-- v-pre: the band sits inside the event form's Vue mount. It prints no user text, and links
      only, so nothing in it is Vue's to compile. --}}
-@if ($variant === 'band')
-<section class="import-options mb-2 mt-2" aria-labelledby="import-options-title" v-pre>
-    <h3 id="import-options-title" class="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.import_band_title') }}</h3>
-@else
-{{-- No card around it: the tiles are cards, as they are in the band and on the import page. --}}
-<div class="import-options mb-2" v-pre>
-    <div class="page-empty">
-        <svg class="page-empty-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-        </svg>
-        <h3>{{ __('messages.no_events_yet') }}</h3>
-        <p>{{ __('messages.schedule_empty_text') }}</p>
-@endif
+<section class="import-options {{ $variant === 'band' ? 'mb-2 mt-2' : 'mb-6' }}" aria-labelledby="import-{{ $variant }}-title" v-pre>
+    <h3 id="import-{{ $variant }}-title" class="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.import_band_title') }}</h3>
 
-    <div class="import-options-grid grid grid-cols-1 gap-4 {{ $grid }}{{ $variant === 'empty' ? ' mx-auto mt-5 max-w-5xl text-start' : '' }}">
+    <div class="import-options-grid grid grid-cols-1 gap-4 {{ $grid }}">
         @foreach ($tiles as $tile)
             {{-- The whole tile is the link, named by its title. --}}
             <a href="{{ $tile['href'] }}" data-import-source="{{ $tile['key'] }}"
@@ -58,7 +50,9 @@
                     </svg>
                     @endif
                 </span>
-                <span class="min-w-0 flex-1">
+                {{-- break-words: a long word in one language ("Veranstaltungsseite") must not run
+                     out of a narrow tile. --}}
+                <span class="min-w-0 flex-1 break-words">
                     <span id="import-{{ $variant }}-{{ $tile['key'] }}" class="block text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $tile['title'] }}</span>
                     <span id="import-{{ $variant }}-{{ $tile['key'] }}-for" class="mt-0.5 block text-sm text-gray-500 dark:text-gray-400">{{ $tile['description'] }}</span>
                 </span>
@@ -69,18 +63,12 @@
         @endforeach
     </div>
 
-@if ($variant === 'band')
+    @if ($variant === 'band')
     {{-- The other way in, which is the form below. --}}
     <div class="mt-6 flex items-center gap-3">
         <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700" aria-hidden="true"></span>
         <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.import_band_by_hand') }}</span>
         <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700" aria-hidden="true"></span>
     </div>
+    @endif
 </section>
-@else
-        <div class="page-actions">
-            <x-brand-link :href="route('event.create', ['subdomain' => $role->subdomain])">{{ __('messages.add_an_event') }}</x-brand-link>
-        </div>
-    </div>
-</div>
-@endif

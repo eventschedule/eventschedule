@@ -6332,8 +6332,6 @@ return [
     'import_source_flyer' => 'Un volantino, uno screenshot o un testo',
     'import_source_flyer_description' => 'La foto di una locandina o un elenco di date',
     'import_band_by_hand' => 'oppure aggiungine uno a mano',
-    'schedule_empty_text' => 'Porta qui i tuoi eventi da dove sono già pubblicati, oppure aggiungine uno a mano.',
-    'add_an_event' => 'Aggiungi un evento',
     'import_google_back' => 'Usa invece un link, del testo o un volantino',
     'import_google_intro' => 'Collega Google Calendar, scegli un calendario e poi quali dei suoi eventi aggiungere al tuo programma.',
     'import_google_read_only' => 'Sola lettura. Non modifichiamo mai il tuo calendario.',

@@ -150,9 +150,12 @@ class LinkImportDocsClaimTest extends TestCase
             'import_panel_undo', 'import_panel_embed', 'import_panel_view_schedule', 'import_panel_import_more',
             'import_panel_add_more',
             // Google Calendar as a source.
-            'google_calendar_integration', 'connect_google_calendar', 'import_google_read_only',
+            'import_source_google', 'connect_google_calendar', 'import_google_read_only',
             'import_google_choose_calendar', 'import_google_main_calendar', 'import_google_show_events',
             'import_google_different_account', 'google_allow_edit_access',
+            // The import band on the first-event form and an empty Schedule tab, which the guides
+            // quote by its question and its tiles.
+            'import_band_title', 'import_source_link', 'import_source_flyer',
         ];
         foreach ($labels as $key) {
             $label = trans('messages.'.$key, [], 'en');

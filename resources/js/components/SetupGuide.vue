@@ -1057,6 +1057,8 @@ const scheduleMeasure = () => {
 
 const dockStyle = computed(() => ({
   top: dock.top + 'px',
+  // Read by .sg-dock's max-height: the card ends above the save bar wherever it starts.
+  '--sg-dock-top': dock.top + 'px',
   width: dock.width + 'px',
   [rtl ? 'right' : 'left']: dock.side + 'px',
 }));
@@ -1804,7 +1806,10 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: calc(100dvh - 7rem);
+  /* From where the card starts to above the save bar, which paints over it at the same z-index.
+     A flat 100dvh - 7rem let a card that starts lower (the import band stands above a first
+     event's form) run on under the bar until the page was scrolled. */
+  max-height: calc(100dvh - var(--sg-dock-top, 7rem) - var(--sg-bar, 0px) - 1rem);
   padding: 14px;
   overflow-y: auto;
   border-radius: 16px;

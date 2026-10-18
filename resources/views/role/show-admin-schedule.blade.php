@@ -386,10 +386,11 @@ document.addEventListener('click', function (e) {
 </script>
 @endif
 
-{{-- No events at all: where they can be brought in from, and the way to add one by hand
-     (RoleController::viewAdmin(), $showImportOptions). It goes with the first event. --}}
+{{-- No events at all: the question the first-event form asks, where they can be brought in from
+     (RoleController::viewAdmin(), $showImportOptions). The calendar's own Add Event below is the
+     way by hand. It goes with the first event. --}}
 @if (! empty($showImportOptions))
-<x-import-options :role="$role" variant="empty" />
+<x-import-options :role="$role" variant="schedule" />
 @endif
 
 {{-- Below the two banners above on purpose: those warn about real problems, this is an

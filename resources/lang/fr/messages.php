@@ -6338,8 +6338,6 @@ return [
     'import_source_flyer' => 'Un flyer, une capture d\'écran ou un texte',
     'import_source_flyer_description' => 'La photo d\'une affiche, ou une liste de dates',
     'import_band_by_hand' => 'ou ajoutez-en un à la main',
-    'schedule_empty_text' => 'Importez vos événements depuis l\'endroit où ils sont déjà publiés, ou ajoutez-en un à la main.',
-    'add_an_event' => 'Ajouter un événement',
     'import_google_back' => 'Utiliser plutôt un lien, du texte ou une affiche',
     'import_google_intro' => 'Connectez Google Agenda, choisissez un agenda, puis sélectionnez les événements à ajouter à votre planning.',
     'import_google_read_only' => 'Lecture seule. Nous ne modifions jamais votre agenda.',

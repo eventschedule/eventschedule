@@ -6405,8 +6405,6 @@ return [
     'import_source_flyer' => 'A flyer, screenshot or text',
     'import_source_flyer_description' => 'A photo of a poster, or a list of dates',
     'import_band_by_hand' => 'or add one by hand',
-    'schedule_empty_text' => 'Bring your events in from where they are already listed, or add one by hand.',
-    'add_an_event' => 'Add an event',
     'import_google_back' => 'Use a link, text or a flyer instead',
     'import_google_intro' => 'Connect Google Calendar, choose a calendar, then pick which of its events to add to your schedule.',
     'import_google_read_only' => 'Read-only. We never change your calendar.',

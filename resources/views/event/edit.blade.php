@@ -2171,9 +2171,10 @@
   </script>
   @endif
 
-  {{-- A first event: the places events can be brought in from, ahead of the form for adding one
-       by hand. Not after a refused save, which is somebody already filling the form in. --}}
-  @if ($isFirstEventRun && ! $errors->any())
+  {{-- A first event on a schedule with none: the places events can be brought in from, ahead of
+       the form for adding one by hand (EventController::create(), $showImportBand). Not after a
+       refused save, which is somebody already filling the form in. --}}
+  @if (! empty($showImportBand) && ! $errors->any())
   <x-import-options :role="$role" />
   @endif
 
@@ -7173,7 +7174,10 @@
       },
       goToTab(sectionId) {
         window.showEventSection(sectionId);
-        window.scrollTo({ top: 0 });
+        // To the top of the form: on a first event the import band stands above it, and the top
+        // of the page would leave the tab below the fold on a phone.
+        const band = document.querySelector('.import-options');
+        window.scrollTo({ top: band ? band.getBoundingClientRect().bottom + window.scrollY : 0 });
       },
       // Put the caret on one of the Event tab's fields.
       focusBasics(field) {
@@ -10945,7 +10949,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 window.scrollTo(0, 0);
 var isNewEvent = {{ $event->exists ? 'false' : 'true' }};
-if (isNewEvent) {
+// Not while the import band asks its question above the form: focus there would start a keyboard
+// or a screen reader past it.
+if (isNewEvent && ! document.querySelector('.import-options')) {
     var nameField = document.getElementById('event_name');
     if (nameField) {
         nameField.focus({ preventScroll: true });

@@ -6334,8 +6334,6 @@ return [
     'import_source_flyer' => 'Um flyer, uma captura de tela ou um texto',
     'import_source_flyer_description' => 'A foto de um cartaz, ou uma lista de datas',
     'import_band_by_hand' => 'ou adicione um manualmente',
-    'schedule_empty_text' => 'Traga seus eventos de onde eles já estão publicados, ou adicione um manualmente.',
-    'add_an_event' => 'Adicionar um evento',
     'import_google_back' => 'Usar um link, texto ou um flyer em vez disso',
     'import_google_intro' => 'Conecte o Google Agenda, escolha uma agenda e depois selecione quais eventos adicionar à sua agenda de eventos.',
     'import_google_read_only' => 'Somente leitura. Nunca alteramos sua agenda.',

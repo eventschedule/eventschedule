@@ -4,11 +4,12 @@ namespace App\Utils;
 
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 /**
- * The places events can be brought in from, as the first-event form's band and the empty Schedule
- * tab offer them (`<x-import-options>`), and the one answer to which of them this install and this
- * person can use. The import page asks the same two questions, so a tile never leads to a page
+ * The places events can be brought in from, as the first-event form's band and the Schedule tab of
+ * an empty schedule offer them (`<x-import-options>`), and the one answer to which of them this
+ * install and this person can use, and when (scheduleIsEmpty()). The import page asks the same two questions, so a tile never leads to a page
  * that does not have what it promised.
  *
  * A source that cannot be used is left out, never shown locked: the band is an invitation, and a
@@ -22,10 +23,25 @@ class ImportOptions
      */
     public static function googleAvailable(Role $role, ?User $user): bool
     {
+        // Cast as GoogleCalendarController casts, so the tile and the server answer alike.
         return (bool) config('services.google.client_id')
             && $user !== null
-            && $user->id === $role->user_id
+            && (int) $user->id === (int) $role->user_id
             && ! is_demo_mode();
+    }
+
+    /**
+     * Whether the schedule has no events at all: none accepted onto it, on any date or on none,
+     * which is what its Schedule tab's calendar shows. The band and the Schedule tab are offered
+     * only then. Asking whether the PERSON has made an event is a different question: a team
+     * member's first event on a busy schedule is not an empty schedule.
+     */
+    public static function scheduleIsEmpty(Role $role): bool
+    {
+        return ! DB::table('event_role')
+            ->where('role_id', $role->id)
+            ->where('is_accepted', true)
+            ->exists();
     }
 
     /** A flyer, a screenshot or pasted text needs the model. A link does not. */

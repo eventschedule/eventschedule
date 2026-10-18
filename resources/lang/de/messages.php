@@ -6333,8 +6333,6 @@ return [
     'import_source_flyer' => 'Ein Flyer, ein Screenshot oder Text',
     'import_source_flyer_description' => 'Ein Foto eines Plakats oder eine Liste mit Terminen',
     'import_band_by_hand' => 'oder eine von Hand hinzufügen',
-    'schedule_empty_text' => 'Übernehmen Sie Ihre Veranstaltungen von dort, wo sie schon stehen, oder fügen Sie eine von Hand hinzu.',
-    'add_an_event' => 'Eine Veranstaltung hinzufügen',
     'import_google_back' => 'Stattdessen Link, Text oder Flyer verwenden',
     'import_google_intro' => 'Verbinden Sie Google Kalender, wählen Sie einen Kalender und dann die Termine, die Sie Ihrem Zeitplan hinzufügen möchten.',
     'import_google_read_only' => 'Nur Lesezugriff. Wir ändern Ihren Kalender nie.',

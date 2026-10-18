@@ -55,6 +55,7 @@ use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
+use App\Utils\ImportOptions;
 use App\Utils\ImportRun;
 use App\Utils\MoneyUtils;
 use App\Utils\SetupGuide;
@@ -693,6 +694,9 @@ class EventController extends Controller
             'subdomain' => $subdomain,
             'title' => $isFirstEventRun ? __('messages.next_step_add_first_event') : __('messages.add_event'),
             'isFirstEventRun' => $isFirstEventRun,
+            // The places events can be brought in from, above the form (<x-import-options>): on
+            // someone's first event, on a schedule that has none, and not over a copy.
+            'showImportBand' => $isFirstEventRun && ! $clonedData && ImportOptions::scheduleIsEmpty($role),
             'presetState' => TicketPresets::formState($role, $event, $user, $presetCopiedFrom ?? null),
             'selectedVenue' => $venue,
             'venues' => $venues,
