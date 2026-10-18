@@ -11,7 +11,13 @@
     $lastPull = $arrivalSettings->{"{$provider}_last_pull"};
     $stoppedReason = $arrivalSettings->{"{$provider}_stopped_reason"};
     $stoppedAt = $arrivalSettings->{"{$provider}_stopped_at"};
-    $leftOutLast = $lastPull ? (int) ($lastPull['private'] ?? 0) + (int) ($lastPull['declined'] ?? 0) + (int) ($lastPull['not_an_event'] ?? 0) + (int) ($lastPull['cancelled'] ?? 0) + (int) ($lastPull['held'] ?? 0) : 0;
+    // Held entries were read in (they are in "added"); left out is what was not read in at all.
+    $leftOutLast = $lastPull ? (int) ($lastPull['private'] ?? 0) + (int) ($lastPull['declined'] ?? 0) + (int) ($lastPull['not_an_event'] ?? 0) + (int) ($lastPull['cancelled'] ?? 0) : 0;
+    // The drafts already waiting, which turning the switch on leaves as they are.
+    $waitingNow = \App\Services\CalendarArrival::tablesReady()
+        ? \App\Models\CalendarImportHold::where('role_id', $role->id)->whereNull('decided_at')->where('was_public', false)
+            ->whereHas('event', fn ($q) => $q->where('import_source', $provider)->where('is_draft', true))->count()
+        : 0;
 @endphp
 
 @if ($stoppedReason && ! $readsNow)
@@ -22,12 +28,12 @@
     <p class="text-sm text-amber-800 dark:text-amber-200">
         {{ $stoppedReason === 'transfer'
             ? __('messages.calendar_stopped_transfer')
-            : __('messages.calendar_stopped_admin', ['date' => $stoppedAt ? $stoppedAt->copy()->setTimezone($role->captureTimezone())->translatedFormat('M j') : '']) }}
+            : __($provider === \App\Services\CalendarArrival::CALDAV ? 'messages.calendar_stopped_admin_caldav' : 'messages.calendar_stopped_admin', ['date' => $stoppedAt ? $stoppedAt->copy()->setTimezone($role->captureTimezone())->translatedFormat('M j') : '']) }}
     </p>
 </div>
 @endif
 
-<div class="space-y-3" data-calendar-publish="{{ $provider }}" @if (! $readsNow) hidden @endif>
+<div class="space-y-3" data-calendar-publish="{{ $provider }}" data-waiting="{{ $waitingNow }}" @if (! $readsNow) hidden @endif>
     <x-toggle :name="$provider.'_publish_on_arrival'" :id="$provider.'-publish-on-arrival'"
         :label="__('messages.publish_on_arrival')" :checked="$publishesNow"
         :help="__('messages.publish_on_arrival_help')"

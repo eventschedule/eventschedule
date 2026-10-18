@@ -95,6 +95,74 @@ included.
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
 
+## Unreleased: calendar syncs that published a private calendar (2026-10-18)
+
+A standing Google, Outlook or CalDAV sync put everything it read straight onto a schedule's
+public page, and one schedule published somebody's whole work calendar that way (dial-in codes,
+Zoom links with the password, an email thread about a child's doctor).
+
+**What ships:**
+- **New syncs arrive as drafts.** The owner publishes from the review page
+  (`/{schedule}/calendar-review`) or turns on "Publish new events automatically" for that
+  calendar. Starting to read a calendar needs one the owner chose (the main calendar was the
+  silent fallback).
+- **Syncs that publish today keep publishing.** The first migration backfills their consent. The
+  filters below apply to them as well.
+- **Filters.** Entries the calendar marks private or confidential, invitations the owner declined,
+  out-of-office blocks and cancelled meetings are not read in; one already public is taken off
+  when the calendar starts saying so. Meeting details (a passcode, a dial-in code, a link with the
+  meeting's password) or an email made into an entry wait for the owner even with publishing on.
+  A meeting link is never a venue. Nothing people hold tickets to is ever taken off.
+- **`/admin/private-calendars`**, with an amber alert row: schedules whose imported events look
+  like a private calendar, and four audited steps (Hide, Pause, Tell the owner, Mark reviewed).
+- **Publishing a synced draft** no longer duplicates it in the owner's calendar, and hiding or
+  deleting one no longer deletes the owner's own entry.
+
+### Migrations
+
+Four new tables, none touching `roles` or `events`. Each waits at most 10 seconds for its locks
+and is guarded, so a run that stopped half way can be run again.
+
+| Migration | What it does |
+|---|---|
+| `2026_10_18_000000_create_calendar_sync_settings_table` | Per-schedule sync settings. Backfills `{provider}_publishes = 1` for every live `from`/`both` sync, 500 schedules a batch |
+| `2026_10_18_000001_create_calendar_import_holds_table` | The events a sync is keeping off the page, and why |
+| `2026_10_18_000002_create_calendar_exposures_table` | What the private-calendar sweep found, per event |
+| `2026_10_18_000003_create_calendar_exposure_reviews_table` | What the operator did, per schedule |
+
+### Scheduled entries
+
+- **New: `calendar-exposure-scan`, every 15 minutes, both rails, every install.** It reads 2,000
+  event ids a run (a full pass of 1M ids takes about five days, so the admin page fills over the
+  first week) and takes down venue placeholders an import made out of meeting links.
+- **Changed: the three syncs.** Each schedule's sync gets one full read of its window, so the
+  filters reach events read in before them: at most 10 a run per provider, none started after two
+  minutes, and in a `/translate_data` request one in the whole request, saving its place after 20
+  seconds. The catch-up takes a few runs on the hosted install.
+
+### What the first runs do to existing schedules
+
+- An existing publishing sync whose public events now show meeting details or an email thread has
+  those events taken off its page (drafts, never deleted), and the owner gets ONE mail saying so.
+- A cancelled meeting follows the schedule's "when an event is deleted" setting; under the default
+  (keep it) it is hidden, not deleted.
+- Nothing an owner edited here is rewritten by the full read: it re-judges entries, it does not
+  copy them over again.
+
+### After the deploy
+
+1. `/admin/queue`: the Scheduler card lists `calendar-exposure-scan`.
+2. `/admin/private-calendars` opens. The schedule that started this should appear within the
+   first pass, and is dealt with through its four steps.
+3. Connect a test schedule to a Google calendar with a Zoom invite in it: the event arrives as a
+   draft, no venue is made from the link, and the Schedule tab says it is waiting.
+
+**Watch for** the `calendar_exposures` row on `/admin`, and on `/admin/logs` any "Failed to sync"
+lines that started with this release.
+
+**Undo:** a console rollback restores the code; the tables can stay. Events already hidden stay
+drafts (the review page is gone with the rollback, so publish them from their own form).
+
 ## Unreleased: boost partners, appointment hosts and the appointment API (2026-10-15)
 
 Everything on `main` from 2026-10-15 for one partner network (its name stays out of this repo),

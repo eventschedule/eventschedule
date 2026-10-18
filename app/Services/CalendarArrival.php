@@ -58,6 +58,9 @@ class CalendarArrival
 
     public const DECISION_HIDDEN = 'hidden';
 
+    /** The reason went away and the sync put the event back by itself. */
+    public const DECISION_RELEASED = 'released';
+
     private static bool $tablesReady = false;
 
     /**
@@ -174,6 +177,10 @@ class CalendarArrival
 
     public static function settings(Role $role): CalendarSyncSetting
     {
+        if (! self::tablesReady()) {
+            return new CalendarSyncSetting(['role_id' => $role->id]);
+        }
+
         return CalendarSyncSetting::where('role_id', $role->id)->first()
             ?? new CalendarSyncSetting(['role_id' => $role->id]);
     }
@@ -222,11 +229,24 @@ class CalendarArrival
             return;
         }
 
-        CalendarSyncSetting::updateOrCreate(['role_id' => $role->id], [
+        self::writeSettings($role, [
             "{$provider}_publishes" => $on,
             "{$provider}_publish_binding" => $on ? self::binding($role, $provider) : null,
             "{$provider}_publish_confirmed_at" => $on ? now() : null,
         ]);
+    }
+
+    /**
+     * Writes columns of the schedule's settings row, making the row first if there is none. Not
+     * updateOrCreate(): the Google and Outlook reads of one schedule run under different locks,
+     * and two of them making the row at once is a duplicate key, after the token was stored.
+     *
+     * @param  array<string, mixed>  $values
+     */
+    private static function writeSettings(Role $role, array $values): void
+    {
+        CalendarSyncSetting::query()->insertOrIgnore(['role_id' => $role->id, 'created_at' => now(), 'updated_at' => now()]);
+        CalendarSyncSetting::where('role_id', $role->id)->firstOrFail()->forceFill($values)->save();
     }
 
     /** Takes the consent back, for one provider or all: a pause, a disconnect, a change of owner. */
@@ -293,7 +313,7 @@ class CalendarArrival
         if ($stopped) {
             $role->writeOperationalColumns($directions);
             if (self::tablesReady()) {
-                CalendarSyncSetting::updateOrCreate(['role_id' => $role->id], $settings);
+                self::writeSettings($role, $settings);
             }
         }
 
@@ -416,12 +436,15 @@ class CalendarArrival
             ->whereNull('calendar_import_holds.decided_at')
             ->whereHas('event', fn ($q) => $q->where('creator_role_id', $role->id)->where('is_draft', true)->where('is_cancelled', false));
 
-        $waiting = $open()->whereNull('was_visibility')->count();
-        $held = $waiting ? $open()->whereNull('was_visibility')->whereIn('reason', [CalendarPrivacy::HOLD_MEETING_DETAILS, CalendarPrivacy::HOLD_EMAIL_THREAD])->count() : 0;
-        $taken = $open()->whereNotNull('was_visibility')->whereNull('held_by')->count();
+        $waiting = $open()->where('was_public', false)->count();
+        $held = $waiting ? $open()->where('was_public', false)->whereIn('reason', [CalendarPrivacy::HOLD_MEETING_DETAILS, CalendarPrivacy::HOLD_EMAIL_THREAD])->count() : 0;
+        $taken = $open()->where('was_public', true)->whereNull('held_by')->count();
         $takenEvents = $taken
-            ? $open()->whereNotNull('was_visibility')->whereNull('held_by')->with('event')->orderBy('id')->limit(3)->get()->pluck('event')->filter()->values()
+            ? $open()->where('was_public', true)->whereNull('held_by')->with('event')->orderBy('id')->limit(3)->get()->pluck('event')->filter()->values()
             : collect();
+        // Taken off by the operator (/admin/private-calendars), said apart: the sync does not put
+        // those back by itself.
+        $hiddenByAdmin = $open()->where('was_public', true)->whereNotNull('held_by')->count();
 
         $settings = self::settings($role);
         $provider = collect(self::readingProviders($role))->first()
@@ -432,7 +455,7 @@ class CalendarArrival
             && $settings->{"{$p}_publish_confirmed_at"} === null
             && self::isMainCalendar($role, $p));
 
-        if (! $waiting && ! $taken && ! $confirm) {
+        if (! $waiting && ! $taken && ! $hiddenByAdmin && ! $confirm) {
             return null;
         }
 
@@ -443,6 +466,7 @@ class CalendarArrival
             'review' => $waiting - $held,
             'taken' => $taken,
             'taken_events' => $takenEvents,
+            'hidden_by_admin' => $hiddenByAdmin,
             'first_pull' => $settings->{"{$provider}_first_pull"},
             'main' => self::isMainCalendar($role, $provider),
             'publishes' => self::publishes($role, $provider),
@@ -450,13 +474,17 @@ class CalendarArrival
         ];
     }
 
-    /** "Google Calendar", "Outlook", "CalDAV calendar": what the owner calls where it came from. */
+    /**
+     * "Google Calendar", "Outlook Calendar", "CalDAV Calendar", as the Integrations rows name them;
+     * "your calendar" for anything else (a feed, a one-time import), which is not Google's.
+     */
     public static function providerName(?string $provider): string
     {
         return match ($provider) {
-            self::MICROSOFT => 'Outlook',
+            self::GOOGLE => 'Google Calendar',
+            self::MICROSOFT => __('messages.microsoft_calendar'),
             self::CALDAV => __('messages.caldav_calendar'),
-            default => 'Google Calendar',
+            default => __('messages.calendar_fallback_name'),
         };
     }
 
@@ -467,6 +495,46 @@ class CalendarArrival
 
     /** ...and none starts once the run has been going this long, so neither cron rail runs over. */
     public const REREAD_BUDGET_SECONDS = 120;
+
+    /**
+     * Inside a web request (the /translate_data cron rail) the three syncs run one after another in
+     * the same request, which a server's request timeout can kill: there, one full read in the whole
+     * request, and a read that saves its place sooner.
+     */
+    private const WEB_REREAD_SECONDS = 20;
+
+    private static int $rereadsThisRequest = 0;
+
+    /** Whether one more full read may start in this process: always on the console rail. */
+    public static function claimReread(): bool
+    {
+        if (app()->runningInConsole()) {
+            return true;
+        }
+
+        if (self::$rereadsThisRequest >= 1) {
+            return false;
+        }
+
+        self::$rereadsThisRequest++;
+
+        return true;
+    }
+
+    /** How long the commands go on starting full reads in one run. */
+    public static function rereadBudgetSeconds(): int
+    {
+        return app()->runningInConsole() ? self::REREAD_BUDGET_SECONDS : self::WEB_REREAD_SECONDS;
+    }
+
+    /**
+     * How long one full read may run before it saves its place (rereadCursor()) and stops, to go
+     * on in the next run.
+     */
+    public static function rereadPageSeconds(): int
+    {
+        return app()->runningInConsole() ? self::REREAD_BUDGET_SECONDS : self::WEB_REREAD_SECONDS;
+    }
 
     /**
      * Whether this sync still owes its calendar one full read. Incremental reads (Google's sync
@@ -483,25 +551,39 @@ class CalendarArrival
         return CalendarSyncSetting::where('role_id', $role->id)->value("{$provider}_reread_at") === null;
     }
 
-    /** Where an unfinished full read resumes (a page cursor), or null to start from the top. */
+    /**
+     * Where an unfinished full read resumes (a page cursor), or null to start from the top. Only
+     * for the calendar and the owner it was saved for: a Graph link names the calendar it walks,
+     * and resuming one after the owner chose another calendar read the old one and went on
+     * following it.
+     */
     public static function rereadCursor(Role $role, string $provider): ?string
     {
-        return self::tablesReady()
-            ? CalendarSyncSetting::where('role_id', $role->id)->value("{$provider}_reread_cursor")
+        if (! self::tablesReady()) {
+            return null;
+        }
+
+        $saved = json_decode((string) CalendarSyncSetting::where('role_id', $role->id)->value("{$provider}_reread_cursor"), true);
+
+        return is_array($saved) && ($saved['binding'] ?? null) === self::binding($role, $provider) && is_string($saved['value'] ?? null)
+            ? $saved['value']
             : null;
     }
 
     public static function saveRereadCursor(Role $role, string $provider, ?string $cursor): void
     {
         if (self::tablesReady()) {
-            CalendarSyncSetting::updateOrCreate(['role_id' => $role->id], ["{$provider}_reread_cursor" => $cursor]);
+            self::writeSettings($role, ["{$provider}_reread_cursor" => $cursor === null ? null : json_encode([
+                'binding' => self::binding($role, $provider),
+                'value' => $cursor,
+            ])]);
         }
     }
 
     public static function finishReread(Role $role, string $provider): void
     {
         if (self::tablesReady()) {
-            CalendarSyncSetting::updateOrCreate(['role_id' => $role->id], [
+            self::writeSettings($role, [
                 "{$provider}_reread_at" => now(),
                 "{$provider}_reread_cursor" => null,
             ]);
@@ -546,7 +628,7 @@ class CalendarArrival
             return;
         }
 
-        self::writeHold($event, $role, $arrival['hold'], $arrival['would_be'], $firstPull, null);
+        self::writeHold($event, $role, $arrival['hold'], $arrival['would_be'], $firstPull, null, false);
     }
 
     /**
@@ -561,13 +643,16 @@ class CalendarArrival
             return false;
         }
 
+        $hold = CalendarImportHold::where('event_id', $event->id)->first();
+
         // An Unlisted event pushed out from here is marked private in the calendar: that is our
-        // own setting coming back, not the owner's word about the entry.
-        if ($sourceReason === self::SOURCE_PRIVATE && $event->is_private) {
+        // own setting coming back, not the owner's word about the entry. So is one that was
+        // Unlisted when it was hidden: it is a draft now, and still marked private there.
+        if ($sourceReason === self::SOURCE_PRIVATE
+            && ($event->is_private || ($hold && $hold->isOpen() && $hold->was_visibility === 'unlisted'))) {
             $sourceReason = null;
         }
 
-        $hold = CalendarImportHold::where('event_id', $event->id)->first();
         $content = CalendarPrivacy::holdReason(CalendarPrivacy::findings($event->name, $event->description, null));
         $published = $hold && $hold->decision === self::DECISION_PUBLISHED
             && $hold->decided_hash === self::decisionHash($event);
@@ -575,6 +660,16 @@ class CalendarArrival
         $reason = $sourceReason ?? ($content && ! $published ? $content : null);
 
         if ($reason !== null) {
+            // Already a draft: nothing to take off the page, but a draft that waited only for a
+            // look now waits for more, and Publish all must leave it out.
+            if ($event->is_draft) {
+                if ($hold && $hold->isOpen() && $hold->reason === self::HOLD_REVIEW) {
+                    $hold->forceFill(['reason' => $reason])->save();
+                }
+
+                return false;
+            }
+
             return self::hide($event, $role, $reason, null);
         }
 
@@ -592,10 +687,16 @@ class CalendarArrival
         }
 
         $was = $event->visibilityState();
+        $password = $event->event_password;
         $event->setVisibilityState('draft');
+        // An Unlisted event keeps its password while it is hidden: put back without it, its link
+        // would open for anybody.
+        if ($was === 'unlisted') {
+            $event->event_password = $password;
+        }
         $event->save();
 
-        self::writeHold($event, $role, $reason, $was, false, $heldBy);
+        self::writeHold($event, $role, $reason, $was, false, $heldBy, true);
         self::pushToMembers($event, 'delete');
 
         return true;
@@ -615,19 +716,27 @@ class CalendarArrival
             return false;
         }
 
-        // Arrived held, on a sync whose entries wait for the owner anyway: with the details gone
+        // Arrived held: with the reason gone it goes where it would have gone, but only while the
+        // sync still publishes that calendar. Otherwise (and on a sync whose entries wait anyway)
         // it is an ordinary draft to look at.
-        if ($hold->was_visibility === null) {
-            if ($hold->reason !== self::HOLD_REVIEW && in_array($hold->reason, [CalendarPrivacy::HOLD_MEETING_DETAILS, CalendarPrivacy::HOLD_EMAIL_THREAD], true)) {
-                $hold->forceFill(['reason' => self::HOLD_REVIEW])->save();
-            }
+        if (! $hold->was_public) {
+            $role = Role::find($hold->role_id);
+            $stillPublishes = $hold->was_visibility !== null && $role && self::publishes($role, (string) $event->import_source);
 
-            return false;
+            if (! $stillPublishes) {
+                if ($hold->reason !== self::HOLD_REVIEW) {
+                    $hold->forceFill(['reason' => self::HOLD_REVIEW])->save();
+                }
+
+                return false;
+            }
         }
 
         $event->setVisibilityState($hold->was_visibility);
         $event->save();
-        $hold->delete();
+        // The hold stays, settled, so a first read's backlog that comes back is still not news to
+        // followers (SendEventAnnouncements reads first_pull off it).
+        $hold->forceFill(['decision' => self::DECISION_RELEASED, 'decided_at' => now(), 'decided_by' => null, 'decided_hash' => null])->save();
         self::pushToMembers($event, 'create');
 
         return true;
@@ -635,7 +744,7 @@ class CalendarArrival
 
     /**
      * The owner published a held event, or chose to keep it hidden. Called by the publish paths
-     * and the review page; a hold that is not open is left as it is.
+     * and the review page.
      */
     public static function decide(Event $event, ?int $userId, string $decision): void
     {
@@ -643,15 +752,21 @@ class CalendarArrival
             return;
         }
 
-        CalendarImportHold::where('event_id', $event->id)
-            ->whereNull('decided_at')
-            ->update([
-                'decision' => $decision,
-                'decided_at' => now(),
-                'decided_by' => $userId,
-                'decided_hash' => self::decisionHash($event),
-                'updated_at' => now(),
-            ]);
+        $query = CalendarImportHold::where('event_id', $event->id);
+
+        // Publishing is the owner's last word whatever was said before (an event kept hidden and
+        // published later from its own form); keeping hidden answers only a hold still waiting.
+        if ($decision !== self::DECISION_PUBLISHED) {
+            $query->whereNull('decided_at');
+        }
+
+        $query->update([
+            'decision' => $decision,
+            'decided_at' => now(),
+            'decided_by' => $userId,
+            'decided_hash' => self::decisionHash($event),
+            'updated_at' => now(),
+        ]);
     }
 
     /**
@@ -676,7 +791,7 @@ class CalendarArrival
             $values["{$provider}_first_pull"] = $summary;
         }
 
-        CalendarSyncSetting::updateOrCreate(['role_id' => $role->id], $values);
+        self::writeSettings($role, $values);
 
         self::tellOwnerOfTakenOff($role, $provider);
     }
@@ -688,9 +803,14 @@ class CalendarArrival
      */
     public static function tellOwnerOfTakenOff(Role $role, string $provider): void
     {
+        // Every read ends here: once told, nothing to count.
+        if (CalendarSyncSetting::where('role_id', $role->id)->whereNotNull('taken_off_notified_at')->exists()) {
+            return;
+        }
+
         $taken = CalendarImportHold::where('calendar_import_holds.role_id', $role->id)
             ->whereNull('decided_at')
-            ->whereNotNull('was_visibility')
+            ->where('was_public', true)
             ->whereNull('held_by')
             ->whereHas('event', fn ($q) => $q->where('creator_role_id', $role->id)->where('is_draft', true));
 
@@ -740,7 +860,7 @@ class CalendarArrival
         return CalendarPrivacy::textHash($event->name, $event->description, null);
     }
 
-    private static function writeHold(Event $event, Role $role, string $reason, ?string $was, bool $firstPull, ?int $heldBy): void
+    private static function writeHold(Event $event, Role $role, string $reason, ?string $was, bool $firstPull, ?int $heldBy, bool $wasPublic): void
     {
         $hold = CalendarImportHold::where('event_id', $event->id)->first();
 
@@ -748,6 +868,7 @@ class CalendarArrival
         if ($hold && $hold->isOpen()) {
             $hold->forceFill([
                 'was_visibility' => $hold->was_visibility ?? $was,
+                'was_public' => $hold->was_public || $wasPublic,
                 'held_by' => $hold->held_by ?? $heldBy,
             ])->save();
 
@@ -758,7 +879,9 @@ class CalendarArrival
             'role_id' => $role->id,
             'reason' => $reason,
             'was_visibility' => $was,
-            'first_pull' => $firstPull,
+            'was_public' => $wasPublic,
+            // A first read's event stays one when it is held again later.
+            'first_pull' => $firstPull || (bool) $hold?->first_pull,
             'held_by' => $heldBy,
             'decision' => null,
             'decided_at' => null,
@@ -774,7 +897,8 @@ class CalendarArrival
      */
     private static function pushToMembers(Event $event, string $action): void
     {
-        foreach ($event->roles as $role) {
+        // Read fresh: a caller may have loaded the event with its venues alone.
+        foreach ($event->roles()->get() as $role) {
             foreach ($role->getMembersWithCalendarSync() as $member) {
                 if (! $member->google_token) {
                     continue;

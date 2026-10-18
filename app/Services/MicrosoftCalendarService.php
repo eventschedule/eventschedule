@@ -59,6 +59,9 @@ class MicrosoftCalendarService
      */
     public bool $rereadAllowed = false;
 
+    /** Whether the read under way is the one full read, which re-judges entries and rewrites none. */
+    protected bool $inboundRereading = false;
+
     public function __construct(EventRepo $eventRepo)
     {
         $this->eventRepo = $eventRepo;
@@ -675,6 +678,7 @@ class MicrosoftCalendarService
         // overlapping runs) could otherwise both import the same remote event as two local
         // events (the sync-row lookup + name/time fallback are not constraint-backed).
         $rereading = $this->rereadAllowed && CalendarArrival::needsReread($role, CalendarArrival::MICROSOFT);
+        $this->inboundRereading = $rereading;
 
         // A full read saves every entry in the window, which can outlast the usual five minutes.
         $lock = Cache::lock('microsoft-role-sync-'.$role->id, $rereading ? 900 : 300);
@@ -700,12 +704,14 @@ class MicrosoftCalendarService
             // The one full read (CalendarArrival::needsReread()): the whole window again, so the
             // privacy filters reach entries read in before them, resuming where a run stopped.
             $fullRead = $rereading || ! $role->microsoft_sync_token;
+            $resumeFrom = $rereading ? CalendarArrival::rereadCursor($role, CalendarArrival::MICROSOFT) : null;
             $nextUrl = $rereading
-                ? (CalendarArrival::rereadCursor($role, CalendarArrival::MICROSOFT) ?: $this->initialDeltaUrl($calendarId))
+                ? ($resumeFrom ?: $this->initialDeltaUrl($calendarId))
                 : ($role->microsoft_sync_token ?: $this->initialDeltaUrl($calendarId));
             $deltaLink = null;
             $checkpoint = null;
             $pages = 0;
+            $readStarted = microtime(true);
 
             while ($nextUrl) {
                 if (++$pages > self::MAX_DELTA_PAGES) {
@@ -734,13 +740,25 @@ class MicrosoftCalendarService
                         break;
                     }
                     $restarted = true;
-                    $role->writeOperationalColumns(['microsoft_sync_token' => null]);
+                    // During a full read it is the saved place that went stale, not the delta
+                    // link the sync goes back to afterwards.
+                    if ($rereading) {
+                        CalendarArrival::saveRereadCursor($role, CalendarArrival::MICROSOFT, null);
+                    } else {
+                        $role->writeOperationalColumns(['microsoft_sync_token' => null]);
+                    }
                     $nextUrl = $this->initialDeltaUrl($calendarId);
 
                     continue;
                 }
 
                 if (! $response->successful()) {
+                    // A full read's saved place that no longer answers is dropped, so the next run
+                    // starts it over instead of failing on the same link every time.
+                    if ($resumeFrom !== null && $nextUrl === $resumeFrom) {
+                        CalendarArrival::saveRereadCursor($role, CalendarArrival::MICROSOFT, null);
+                    }
+
                     Log::error('Failed to fetch Microsoft delta', [
                         'role_id' => $role->id,
                         'status' => $response->status(),
@@ -776,7 +794,13 @@ class MicrosoftCalendarService
                     }
                 }
 
-                if (! empty($body['@odata.nextLink'])) {
+                if (! empty($body['@odata.nextLink']) && $rereading && microtime(true) - $readStarted >= CalendarArrival::rereadPageSeconds()) {
+                    // A full read that has run its time saves its place and goes on in the next run.
+                    if ($this->isGraphUrl($body['@odata.nextLink'])) {
+                        CalendarArrival::saveRereadCursor($role, CalendarArrival::MICROSOFT, $body['@odata.nextLink']);
+                    }
+                    $nextUrl = null;
+                } elseif (! empty($body['@odata.nextLink'])) {
                     $nextUrl = $body['@odata.nextLink'];
                 } elseif (! empty($body['@odata.deltaLink'])) {
                     $deltaLink = $body['@odata.deltaLink'];
@@ -901,7 +925,10 @@ class MicrosoftCalendarService
 
         // A meeting cancelled in Outlook is still on the calendar, marked cancelled. It is what the
         // schedule does with a deleted one, and under "keep it" it is still not on the page.
-        if ($existingEvent && $sourceReason === CalendarArrival::SOURCE_CANCELLED && $role->calendarDeleteAction() !== 'ignore') {
+        // Only for an entry this sync is linked to: an event matched by name and time alone may be
+        // one made here, and a meeting of the same name being cancelled is not the owner's word on it.
+        if ($existingEvent && ! $existingEvent->is_cancelled && $sourceReason === CalendarArrival::SOURCE_CANCELLED && $role->calendarDeleteAction() !== 'ignore'
+            && ($existingSync || $existingEvent->cameFromCalendarSync(CalendarArrival::MICROSOFT, $role))) {
             $eventId = $existingEvent->id;
             $eventName = $existingEvent->name;
             $outcome = $existingEvent->applyInboundDeletion($role->calendarDeleteAction(), $role);
@@ -911,18 +938,21 @@ class MicrosoftCalendarService
             } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled', 'detached'], true)) {
                 AuditService::log(AuditService::EVENT_CANCEL, $role->user_id, 'Event', $eventId, null, null, $eventName);
             }
+            CalendarArrival::count($this->inboundCounts, CalendarArrival::SOURCE_CANCELLED);
 
             return 'skipped';
         }
 
         if ($existingEvent) {
-            $changed = $this->updateEventFromMicrosoft($item, $existingEvent, $role);
+            // The one full read is for the privacy rules: it does not rewrite an event from an
+            // entry nobody changed, which would undo what the owner edited here since.
+            $changed = $this->inboundRereading ? false : $this->updateEventFromMicrosoft($item, $existingEvent, $role);
 
             // The calendar may now say it is private, or its text now carry a passcode.
             if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::MICROSOFT, $sourceReason)) {
                 $changed = true;
             }
-            CalendarExposureWatch::record($existingEvent, $item['location']['displayName'] ?? null);
+            CalendarExposureWatch::record($existingEvent);
 
             // Backfill the mapping when matched via the name+time fallback.
             if (! $existingSync) {
@@ -943,7 +973,7 @@ class MicrosoftCalendarService
         }
 
         $created = $this->createEventFromMicrosoft($item, $role, $calendarId);
-        CalendarExposureWatch::record($created, $item['location']['displayName'] ?? null);
+        CalendarExposureWatch::record($created);
 
         return 'created';
     }

@@ -201,4 +201,41 @@ class CalendarReReadTest extends TestCase
         $this->assertSame(CalendarArrival::REREADS_PER_RUN, count(array_filter($allowed)));
         $this->assertFalse($service->rereadAllowed, 'not left on for a webhook in the same process');
     }
+
+    public function test_the_full_read_does_not_rewrite_what_the_owner_edited_here(): void
+    {
+        [$owner, $role, $event] = $this->publishingScheduleWithAPublicEntry(['sync_direction' => 'from', 'google_sync_token' => 'old-token']);
+        $event->forceFill(['description' => 'Doors at seven. Bring a friend.'])->save();
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'google_event_id' => 'g-1', 'google_calendar_id' => 'primary']);
+
+        // The calendar still has the old text, dial-in code and all.
+        $entry = $this->googleEntry($event);
+        $entry->setDescription('Conference call: (555)-010-0199 / Code: 583920174#');
+
+        $asked = [];
+        $service = $this->google([$entry], $asked);
+        $service->rereadAllowed = true;
+        $service->syncFromGoogleCalendar($owner, $role->fresh(), 'primary');
+
+        $this->assertSame('Doors at seven. Bring a friend.', $event->fresh()->description);
+        $this->assertFalse($event->fresh()->is_draft, 'judged on the text people actually see');
+    }
+
+    public function test_a_saved_place_from_another_calendar_is_not_resumed(): void
+    {
+        [$owner, $role] = $this->publishingScheduleWithAPublicEntry(['sync_direction' => 'from', 'google_sync_token' => 'old-token']);
+        CalendarArrival::saveRereadCursor($role, CalendarArrival::GOOGLE, json_encode(['page' => 'old-calendar-page', 'min' => now()->toIso8601String(), 'max' => now()->addYear()->toIso8601String()]));
+        $this->assertNotNull(CalendarArrival::rereadCursor($role->fresh(), CalendarArrival::GOOGLE));
+
+        // The owner points the sync at a calendar made for public events.
+        \App\Models\RoleUser::where('role_id', $role->id)->where('user_id', $owner->id)->update(['google_calendar_id' => 'public@group.calendar.google.com']);
+
+        $this->assertNull(CalendarArrival::rereadCursor($role->fresh(), CalendarArrival::GOOGLE));
+
+        $asked = [];
+        $service = $this->google([], $asked);
+        $service->rereadAllowed = true;
+        $service->syncFromGoogleCalendar($owner, $role->fresh(), 'public@group.calendar.google.com');
+        $this->assertArrayNotHasKey('pageToken', $asked[0]);
+    }
 }

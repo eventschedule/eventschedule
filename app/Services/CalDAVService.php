@@ -405,7 +405,9 @@ class CalDAVService
                         continue;
                     }
 
-                    $sourceReason = CalendarArrival::calDavReason($eventData, $settings['username'] ?? null);
+                    $sourceReason = empty($eventData['recurrence_id'])
+                        ? CalendarArrival::calDavReason($eventData, $settings['username'] ?? null)
+                        : null;
 
                     // Check if event already exists by UID using the pre-fetched etag map.
                     // Use array_key_exists (not isset) because a stored etag can be null.
@@ -423,8 +425,16 @@ class CalDAVService
 
                         // Cancelled on the server: what the schedule does with a deleted entry,
                         // and under "keep it" still not on the page (reconsider() below).
-                        if ($existing && $sourceReason === CalendarArrival::SOURCE_CANCELLED && $role->calendarDeleteAction() !== 'ignore') {
-                            $existing->applyInboundDeletion($role->calendarDeleteAction(), $role);
+                        if ($existing && ! $existing->is_cancelled && $sourceReason === CalendarArrival::SOURCE_CANCELLED && $role->calendarDeleteAction() !== 'ignore') {
+                            $eventId = $existing->id;
+                            $eventName = $existing->name;
+                            $outcome = $existing->applyInboundDeletion($role->calendarDeleteAction(), $role);
+                            if ($outcome === 'deleted') {
+                                AuditService::log(AuditService::EVENT_DELETE, $role->user_id, 'Event', $eventId, null, null, $eventName);
+                            } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled', 'detached'], true)) {
+                                AuditService::log(AuditService::EVENT_CANCEL, $role->user_id, 'Event', $eventId, null, null, $eventName);
+                            }
+                            CalendarArrival::count($results, CalendarArrival::SOURCE_CANCELLED);
                             $processedUids[$eventData['uid']] = true;
 
                             continue;
@@ -433,14 +443,17 @@ class CalDAVService
                         // Etag changed, or the server provides no etag, so reconcile the
                         // fields. updateEventFromCalDAV guards its write with isDirty(), so
                         // etag-less servers don't churn when nothing actually changed.
-                        $changed = $this->updateEventFromCalDAV($eventData, $role);
+                        // The one full read reaches entries whose etag did not change: it re-judges
+                        // them and does not rewrite them, which would undo the owner's edits here.
+                        $unchanged = $incomingEtag !== null && $incomingEtag === $storedEtag;
+                        $changed = $rereading && $unchanged ? false : $this->updateEventFromCalDAV($eventData, $role);
 
                         // The calendar may now say it is private, or its text now carry a passcode.
                         if ($existing && CalendarArrival::reconsider($existing->fresh() ?? $existing, $role, CalendarArrival::CALDAV, $sourceReason)) {
                             $changed = true;
                         }
                         if ($existing) {
-                            CalendarExposureWatch::record($existing->fresh() ?? $existing, $eventData['location'] ?? null);
+                            CalendarExposureWatch::record($existing->fresh() ?? $existing);
                         }
 
                         if ($changed) {
@@ -485,7 +498,7 @@ class CalDAVService
                     // Create new event
                     $this->inboundCounts = [];
                     $created = $this->createEventFromCalDAV($eventData, $role);
-                    CalendarExposureWatch::record($created, $eventData['location'] ?? null);
+                    CalendarExposureWatch::record($created);
                     $results['created']++;
                     foreach ($this->inboundCounts as $key => $n) {
                         $results[$key] = ($results[$key] ?? 0) + $n;
@@ -661,6 +674,9 @@ class CalDAVService
             'class' => isset($vevent->CLASS) ? (string) $vevent->CLASS : null,
             'status' => isset($vevent->STATUS) ? (string) $vevent->STATUS : null,
             'attendees' => [],
+            // An override of one occurrence of a series: what it says about publishing is about
+            // that date, never the series (CalendarArrival is asked of the master entry only).
+            'recurrence_id' => isset($vevent->{'RECURRENCE-ID'}),
         ];
 
         foreach ($vevent->ATTENDEE ?? [] as $attendee) {

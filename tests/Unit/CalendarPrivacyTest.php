@@ -52,6 +52,7 @@ class CalendarPrivacyTest extends TestCase
             'french zoom' => ["ID de réunion : 812 3456 7890\nCode secret : 123456"],
             'spanish zoom' => ["ID de reunión: 812 3456 7890\nCódigo de acceso: 123456"],
             'hebrew zoom' => ['מזהה פגישה: 812 3456 7890'],
+            'teams short link with its passcode' => ['Join: https://teams.microsoft.com/meet/27381234567?p=AbCdEfGh'],
         ];
     }
 
@@ -124,6 +125,8 @@ class CalendarPrivacyTest extends TestCase
             'a dress code' => ['Gala', 'Dress code: black tie', null],
             'a reply in the middle of a title' => ['Ask me anything: Re: the future', null, null],
             'a church address' => ['Speaking on the first Sunday', null, 'Grace Hall, 12 Main Street, Springfield, IL 62701'],
+            'an event that lists its own times' => ['Gala', "Date: Saturday\nFrom: 7pm\nTo: 11pm", null],
+            'the same in Spanish' => ['Gala', "Fecha: sábado\nDe: 20h\nA: 23h", null],
         ];
     }
 
@@ -180,11 +183,11 @@ class CalendarPrivacyTest extends TestCase
         $html = (string) CalendarPrivacy::highlight('<b>Passcode: <script>1</script></b>', 'Passcode: <script>1</script></b>');
 
         $this->assertStringNotContainsString('<script>', $html);
-        $this->assertStringContainsString('<mark class="spam-word">Passcode: &lt;script&gt;', $html);
+        $this->assertStringContainsString('<mark class="spam-word" dir="ltr">Passcode: &lt;script&gt;', $html);
 
         $long = str_repeat('word ', 60).'Meeting ID: 812 3456 7890'.str_repeat(' tail', 60);
         $cut = (string) CalendarPrivacy::highlight($long, 'Meeting ID: 812 3456 7890', 60);
-        $this->assertStringContainsString('<mark class="spam-word">Meeting ID: 812 3456 7890</mark>', $cut);
+        $this->assertStringContainsString('<mark class="spam-word" dir="ltr">Meeting ID: 812 3456 7890</mark>', $cut);
         $this->assertStringStartsWith('…', $cut);
     }
 

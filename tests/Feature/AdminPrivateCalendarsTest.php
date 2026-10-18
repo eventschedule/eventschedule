@@ -124,7 +124,7 @@ class AdminPrivateCalendarsTest extends TestCase
         $page = $this->adminActing()->get(route('admin.private_calendars'))->assertOk();
 
         $page->assertSee('Sample Schedule');
-        $page->assertSee('<mark class="spam-word">', false);
+        $page->assertSee('<mark class="spam-word" dir="ltr">', false);
         $page->assertSee(__('messages.calendar_privacy_kind_access_codes'));
         $page->assertDontSee('Blocked One');
         $page->assertDontSee('Already Reviewed');
@@ -154,7 +154,7 @@ class AdminPrivateCalendarsTest extends TestCase
         $this->adminActing()->get(route('admin.private_calendars.show', ['hash' => $this->hash($c['role'])]))
             ->assertOk()
             ->assertSee('Ops daily call')
-            ->assertSee('<mark class="spam-word">', false)
+            ->assertSee('<mark class="spam-word" dir="ltr">', false)
             ->assertSee(__('messages.private_calendars_hide'))
             ->assertSee(__('messages.pause'))
             ->assertSee(route('admin.private_calendars.email_preview', ['hash' => $this->hash($c['role'])]), false)
@@ -193,7 +193,7 @@ class AdminPrivateCalendarsTest extends TestCase
         $this->adminActing()->post(route('admin.private_calendars.put_back', ['hash' => $this->hash($c['role'])]))->assertRedirect();
 
         $this->assertFalse($c['codes']->fresh()->is_draft);
-        $this->assertFalse(CalendarImportHold::where('event_id', $c['codes']->id)->exists());
+        $this->assertFalse(CalendarImportHold::where('event_id', $c['codes']->id)->whereNull('decided_at')->exists(), 'nothing left waiting');
         $this->assertTrue(AuditLog::where('action', AuditService::ADMIN_CALENDAR_PRIVACY_PUT_BACK)->exists());
     }
 

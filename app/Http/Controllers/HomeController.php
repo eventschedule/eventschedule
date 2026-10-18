@@ -473,7 +473,7 @@ class HomeController extends Controller
                 $items->push([
                     'type' => 'calendar_waiting',
                     'count' => (int) $cnt,
-                    'title' => trans_choice('messages.pending_action_calendar_waiting', $cnt, ['count' => $cnt]),
+                    'title' => trans_choice('messages.pending_action_calendar_waiting', $cnt, ['count' => number_format($cnt)]),
                     'subtitle' => $role->name,
                     'url' => route('role.calendar_review', ['subdomain' => $role->subdomain]),
                     'color' => 'blue',

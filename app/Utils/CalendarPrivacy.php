@@ -65,10 +65,10 @@ class CalendarPrivacy
     /** The same test PlaceLookupService used: a scheme, a www., or a host followed by a path. */
     private const HAS_LINK = '~(?:[a-z][a-z0-9+.-]*://|\bwww\.|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}/\S)~iu';
 
-    /** Query keys that carry a meeting's password. tk and MTID only count on a meeting host. */
+    /** Query keys that carry a meeting's password. tk, MTID and p (Teams' short links) only count on a meeting host. */
     private const PASSWORD_KEY = '~[?&;](?:pwd|passcode|password|meetingpassword)=~iu';
 
-    private const MEETING_PASSWORD_KEY = '~[?&;](?:tk|mtid)=~iu';
+    private const MEETING_PASSWORD_KEY = '~[?&;](?:tk|mtid|p)=~iu';
 
     /**
      * Labels a meeting's number is printed under, in the wording Zoom, Teams, Meet and Webex use
@@ -258,7 +258,9 @@ class CalendarPrivacy
 
         return new HtmlString(
             e(mb_substr($text, 0, $at))
-            .'<mark class="spam-word">'.e(mb_substr($text, $at, $length)).'</mark>'
+            // A code or a link reads left to right in a right-to-left page; the words around it
+            // keep their own direction.
+            .'<mark class="spam-word" dir="ltr">'.e(mb_substr($text, $at, $length)).'</mark>'
             .e(mb_substr($text, $at + $length))
         );
     }
@@ -351,10 +353,12 @@ class CalendarPrivacy
             $marks[] = ['description', $m[0]];
         }
 
-        // A header block: three different headers within ten lines of each other.
+        // A header block: a Subject, a From and a To or Sent line within ten lines of each other.
+        // The Subject is required, and Date is not a Sent: "Date: Saturday / From: 7pm / To: 11pm"
+        // is an event's own description.
         $canonical = [
             'from' => 'from|von|de|da|van|от|מאת|من|kellelt',
-            'sent' => 'sent|date|gesendet|datum|envoyé|enviado|fecha|inviato|data|verzonden|trimis|отправлено|נשלח|تاريخ الإرسال|saadetud',
+            'sent' => 'sent|gesendet|envoyé|enviado|inviato|verzonden|trimis|отправлено|נשלח|تاريخ الإرسال|saadetud',
             'to' => 'to|an|à|para|a|aan|către|кому|אל|إلى|kellele',
             'subject' => 'subject|betreff|objet|asunto|oggetto|onderwerp|assunto|subiect|тема|נושא|الموضوع|teema',
         ];
@@ -368,7 +372,7 @@ class CalendarPrivacy
             }
 
             $recent = array_filter($seen, fn (int $at) => $i - $at < 10);
-            if (count($recent) >= 3) {
+            if (isset($recent['subject'], $recent['from']) && (isset($recent['to']) || isset($recent['sent']))) {
                 $marks[] = ['description', trim($lines[min($recent)])];
                 break;
             }

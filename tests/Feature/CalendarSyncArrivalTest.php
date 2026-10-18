@@ -222,7 +222,7 @@ class CalendarSyncArrivalTest extends TestCase
 
         $this->pullGoogle($role, $this->googleEntry('g-1', 'Open rehearsal', ['visibility' => 'default']));
         $this->assertFalse($event->fresh()->is_draft);
-        $this->assertFalse(CalendarImportHold::where('event_id', $event->id)->exists());
+        $this->assertFalse(CalendarImportHold::where('event_id', $event->id)->whereNull('decided_at')->exists(), 'nothing left waiting');
     }
 
     public function test_an_already_public_entry_that_now_carries_a_passcode_is_taken_off_the_page(): void
@@ -375,5 +375,99 @@ class CalendarSyncArrivalTest extends TestCase
         $this->assertSame([CalendarArrival::GOOGLE, CalendarArrival::MICROSOFT], CalendarArrival::resumeReading($fresh, 'transfer'));
         $this->assertSame('both', $role->fresh()->sync_direction);
         $this->assertSame('from', $role->fresh()->microsoft_sync_direction);
+    }
+
+    public function test_a_syncs_draft_is_not_translated_and_a_draft_made_by_hand_still_is(): void
+    {
+        [, $role] = $this->schedule(['sync_direction' => 'from', 'language_code' => 'en', 'translation_language_code' => 'es']);
+        $synced = $this->createEvent($role, ['name' => 'Weekly sync', 'is_draft' => true, 'import_source' => Event::IMPORT_GOOGLE, 'creator_role_id' => $role->id]);
+        $handMade = $this->createEvent($role, ['name' => 'Open rehearsal', 'is_draft' => true]);
+
+        $queued = \App\Services\TranslationQueue::events(null, $role->id)->pluck('id')->all();
+
+        $this->assertNotContains($synced->id, $queued, 'somebody\'s own calendar until they publish it');
+        $this->assertContains($handMade->id, $queued, 'the NULL in import_source must not drop it');
+    }
+
+    public function test_an_unlisted_event_keeps_its_password_while_hidden_and_comes_back_with_it(): void
+    {
+        [, $role] = $this->schedule(['sync_direction' => 'both']);
+        CalendarArrival::setPublishing($role, CalendarArrival::GOOGLE, true);
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Members preview'));
+        $event = $this->synced($role, 'g-1');
+        $event->setVisibilityState('unlisted');
+        $event->event_password = 'secret';
+        $event->save();
+
+        // Its text gains a passcode: hidden. The calendar still marks it private (our own push).
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Members preview', ['visibility' => 'private', 'description' => 'Passcode: 123456']));
+        $this->assertTrue($event->fresh()->is_draft);
+        $this->assertSame('secret', $event->fresh()->event_password);
+
+        // The passcode goes; "private" in the calendar is still our own setting, so it comes back.
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Members preview', ['visibility' => 'private', 'description' => 'Agenda to follow']));
+        $this->assertSame('unlisted', $event->fresh()->visibilityState());
+        $this->assertSame('secret', $event->fresh()->event_password, 'its link must not open for anybody');
+    }
+
+    public function test_publishing_an_event_the_owner_had_kept_hidden_is_not_undone_by_the_next_read(): void
+    {
+        [$owner, $role] = $this->schedule();
+        $codes = "Webinar\nPasscode: 123456";
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Public webinar', ['description' => $codes]));
+        $event = $this->synced($role, 'g-1');
+        CalendarArrival::decide($event, $owner->id, CalendarArrival::DECISION_HIDDEN);
+
+        app(\App\Services\EventLifecycleService::class)->publish($event->fresh(), $owner->id, $role->fresh());
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Public webinar', ['description' => $codes]));
+
+        $this->assertFalse($event->fresh()->is_draft);
+    }
+
+    public function test_a_draft_that_later_shows_meeting_details_is_left_out_of_publish_all(): void
+    {
+        [, $role] = $this->schedule();
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Weekly call'));
+        $event = $this->synced($role, 'g-1');
+        $this->assertSame(CalendarArrival::HOLD_REVIEW, CalendarImportHold::where('event_id', $event->id)->value('reason'));
+
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Weekly call', ['description' => 'Meeting ID: 812 3456 7890']));
+
+        $this->assertSame(CalendarPrivacy::HOLD_MEETING_DETAILS, CalendarImportHold::where('event_id', $event->id)->value('reason'));
+    }
+
+    public function test_an_entry_held_on_arrival_is_not_taken_off_the_page_and_stays_a_draft_once_publishing_is_off(): void
+    {
+        [, $role] = $this->schedule();
+        CalendarArrival::setPublishing($role, CalendarArrival::GOOGLE, true);
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Weekly call', ['description' => 'Passcode: 123456']));
+        $event = $this->synced($role, 'g-1');
+
+        // Never on the page, so never "taken off" it, and nobody is mailed.
+        \Illuminate\Support\Facades\Bus::fake([\App\Jobs\SendQueuedEmail::class]);
+        CalendarArrival::recordPull($role->fresh(), CalendarArrival::GOOGLE, ['created' => 1], false);
+        \Illuminate\Support\Facades\Bus::assertNotDispatched(\App\Jobs\SendQueuedEmail::class);
+        $this->assertSame(0, CalendarArrival::notice($role->fresh())['taken']);
+
+        // The owner turns publishing off, then takes the passcode out: it stays a draft for a look.
+        CalendarArrival::setPublishing($role, CalendarArrival::GOOGLE, false);
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Weekly call', ['description' => 'Agenda to follow']));
+        $this->assertTrue($event->fresh()->is_draft);
+        $this->assertSame(CalendarArrival::HOLD_REVIEW, CalendarImportHold::where('event_id', $event->id)->value('reason'));
+    }
+
+    public function test_an_event_put_back_by_the_sync_keeps_its_first_read_mark(): void
+    {
+        [, $role] = $this->schedule();
+        CalendarArrival::setPublishing($role, CalendarArrival::GOOGLE, true);
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Weekly call', ['description' => 'Passcode: 123456']), true);
+        $event = $this->synced($role, 'g-1');
+
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Weekly call', ['description' => 'Agenda to follow']));
+
+        $this->assertFalse($event->fresh()->is_draft);
+        $hold = CalendarImportHold::where('event_id', $event->id)->first();
+        $this->assertTrue($hold->first_pull, 'a first read\'s backlog is not news to followers');
+        $this->assertSame(CalendarArrival::DECISION_RELEASED, $hold->decision);
     }
 }

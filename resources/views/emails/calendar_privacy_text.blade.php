@@ -22,13 +22,32 @@
 {{ __('messages.calendar_privacy_mail_done_safe') }}
 
 @endif
+@php
+    $steps = [];
+    if ($sync) {
+        $steps[] = __('messages.calendar_privacy_mail_step_choose_title').': '.__($sync === \App\Services\CalendarArrival::CALDAV ? 'messages.calendar_privacy_mail_step_choose_caldav' : 'messages.calendar_privacy_mail_step_choose');
+    }
+    if ($hidden > 0 || ! $sync) {
+        $steps[] = __('messages.calendar_privacy_mail_step_check_title').': '.__('messages.calendar_privacy_mail_step_check').' '.$reviewUrl;
+    }
+    if ($paused) {
+        $steps[] = __('messages.calendar_privacy_mail_step_resume_title').': '.__('messages.calendar_privacy_mail_step_resume');
+    }
+@endphp
+@if ($steps)
 {{ __('messages.calendar_privacy_mail_steps_title') }}
-1. {{ __('messages.calendar_privacy_mail_step_choose_title') }}: {{ __('messages.calendar_privacy_mail_step_choose') }}
-2. {{ __('messages.calendar_privacy_mail_step_check_title') }}: {{ __('messages.calendar_privacy_mail_step_check') }} {{ $reviewUrl }}
-3. {{ __('messages.calendar_privacy_mail_step_resume_title') }}: {{ __('messages.calendar_privacy_mail_step_resume') }}
+@foreach ($steps as $i => $step)
+{{ $i + 1 }}. {{ $step }}
+@endforeach
 
+@endif
+@if ($sync)
 {{ __('messages.calendar_privacy_mail_action') }}: {{ $chooseUrl }}
 
+@endif
+@if ($codes)
 {{ __('messages.calendar_privacy_mail_codes_note') }}
+
+@endif
 
 {{ __('messages.calendar_privacy_mail_reply') }}

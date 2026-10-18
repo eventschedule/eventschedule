@@ -112,10 +112,36 @@ class CalendarPublishSwitchTest extends TestCase
 
         $html = $this->actingAs($owner->fresh())->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
 
-        $this->assertMatchesRegularExpression('/data-calendar-publish="google"\s*>/', $html, 'shown, since the sync reads');
+        $this->assertSame(1, preg_match('/<div[^>]*data-calendar-publish="google"[^>]*>/', $html, $wrap));
+        $this->assertStringNotContainsString(' hidden', $wrap[0], 'shown, since the sync reads');
         $this->assertStringContainsString('name="google_publish_on_arrival"', $html);
-        $this->assertMatchesRegularExpression('/data-calendar-publish-warning="google"\s*>/', $html, 'the warning shows while it is on');
+        $this->assertSame(1, preg_match('/<div[^>]*data-calendar-publish-warning="google"[^>]*>/', $html, $warning));
+        $this->assertStringNotContainsString(' hidden', $warning[0], 'the warning shows while it is on');
         $this->assertStringContainsString('data-main-calendar-panel="google" hidden', $html);
         $this->assertStringContainsString(__('messages.google_main_calendar_warning'), $html);
+    }
+
+    public function test_a_page_opened_before_the_switch_existed_does_not_turn_publishing_off(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->caldavSchedule($owner);
+        CalendarArrival::setPublishing($role, CalendarArrival::CALDAV, true);
+
+        // The row's marker without the switch, as a tab left open across the release posts it.
+        $this->save($owner, $role, ['caldav_integration_submitted' => 1, 'caldav_sync_direction' => 'from'])->assertRedirect();
+
+        $this->assertTrue(CalendarArrival::publishes($role->fresh(), CalendarArrival::CALDAV));
+    }
+
+    public function test_saving_with_the_switch_on_does_not_answer_the_main_calendar_question(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->caldavSchedule($owner);
+        CalendarSyncSetting::create(['role_id' => $role->id, 'caldav_publishes' => true]);
+
+        $this->save($owner, $role, ['caldav_integration_submitted' => 1, 'caldav_sync_direction' => 'from', 'caldav_publish_on_arrival' => 1])->assertRedirect();
+
+        $this->assertTrue(CalendarArrival::publishes($role->fresh(), CalendarArrival::CALDAV));
+        $this->assertNull(CalendarSyncSetting::where('role_id', $role->id)->value('caldav_publish_confirmed_at'), 'only "Keep publishing" answers it');
     }
 }

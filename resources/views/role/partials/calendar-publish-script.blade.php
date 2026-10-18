@@ -9,11 +9,19 @@ document.addEventListener('DOMContentLoaded', function () {
         on: @json(__('messages.calendar_says_publishing_on'), JSON_UNESCAPED_UNICODE),
         off: @json(__('messages.calendar_says_publishing_off'), JSON_UNESCAPED_UNICODE),
         changed: @json(__('messages.calendar_says_calendar_changed'), JSON_UNESCAPED_UNICODE),
+        // trans_choice on the page's side: one and many, the count put in by the script.
+        waitingOne: @json(trans_choice('messages.calendar_says_waiting_stay_drafts', 1, ['count' => '__N__']), JSON_UNESCAPED_UNICODE),
+        waitingMany: @json(trans_choice('messages.calendar_says_waiting_stay_drafts', 2, ['count' => '__N__']), JSON_UNESCAPED_UNICODE),
     };
     var directionNames = { google: 'sync_direction', microsoft: 'microsoft_sync_direction', caldav: 'caldav_sync_direction' };
 
     function say(provider, text) {
         document.dispatchEvent(new CustomEvent('formkit:says', { detail: { key: 'calendar-publish-' + provider, text: text } }));
+    }
+
+    function readsFor(provider) {
+        var chosen = Array.prototype.slice.call(document.querySelectorAll('input[name="' + directionNames[provider] + '"]')).filter(function (radio) { return radio.checked; })[0];
+        return !! chosen && (chosen.value === 'from' || chosen.value === 'both');
     }
 
     Object.keys(directionNames).forEach(function (provider) {
@@ -26,9 +34,10 @@ document.addEventListener('DOMContentLoaded', function () {
         var radios = Array.prototype.slice.call(document.querySelectorAll('input[name="' + directionNames[provider] + '"]'));
         var saved = toggle && toggle.getAttribute('data-saved') === '1';
 
+        var waiting = parseInt(wrap.getAttribute('data-waiting') || '0', 10);
+
         function reads() {
-            var chosen = radios.filter(function (radio) { return radio.checked; })[0];
-            return !! chosen && (chosen.value === 'from' || chosen.value === 'both');
+            return readsFor(provider);
         }
 
         function paint() {
@@ -36,8 +45,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (warning) {
                 warning.hidden = ! (toggle && toggle.checked);
             }
-            var on = !! (toggle && toggle.checked && reads());
-            say(provider, on !== saved ? (on ? says.on : says.off) : '');
+            paintMain(provider);
+            // Nothing to say about arrivals from a calendar that is not being read.
+            if (! reads()) {
+                say(provider, '');
+                return;
+            }
+            var on = !! (toggle && toggle.checked);
+            var text = on !== saved ? (on ? says.on : says.off) : '';
+            if (on && on !== saved && waiting > 0) {
+                text += ' ' + (waiting === 1 ? says.waitingOne : says.waitingMany).replace('__N__', waiting.toLocaleString());
+            }
+            say(provider, text);
         }
 
         radios.forEach(function (radio) { radio.addEventListener('change', paint); });
@@ -65,7 +84,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         var option = select.options[select.selectedIndex];
-        panel.hidden = ! (option && option.dataset.primary === '1');
+        // Only while the sync reads the calendar: pushing out to the main calendar is harmless.
+        panel.hidden = ! (readsFor(provider) && option && option.dataset.primary === '1');
     }
 
     ['google', 'microsoft'].forEach(function (provider) {

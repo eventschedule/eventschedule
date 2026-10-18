@@ -61,7 +61,7 @@
                     </div>
                     <div>
                         <dt>@lang('messages.private_calendars_col_public')</dt>
-                        <dd>{{ number_format($publicCount) }}</dd>
+                        <dd>{{ number_format($publicNow) }}</dd>
                     </div>
                     <div>
                         <dt>@lang('messages.calendar_sync')</dt>
@@ -122,7 +122,7 @@
                             @php($state = $event->visibilityState())
                             <tr>
                                 <td class="c-main c-wrap"><span class="c-strong"><bdi>{{ $event->name }}</bdi></span></td>
-                                <td class="c-date" data-label="{{ __('messages.date') }}">{{ $event->starts_at ? $when(\Illuminate\Support\Carbon::parse($event->starts_at, 'UTC')) : '' }}</td>
+                                <td class="c-date" data-label="{{ __('messages.date') }}">{{ $event->starts_at ? $event->getStartDateTime(null, true)->translatedFormat('M j, Y, H:i') : '' }}</td>
                                 <td data-label="{{ __('messages.visibility') }}">
                                     <span class="event-status {{ in_array($state, ['public', 'unlisted'], true) ? 'is-bad' : '' }}">{{ $visibility[$state] ?? $state }}</span>
                                 </td>
@@ -239,7 +239,7 @@
                                 @else
                                 <form method="POST" action="{{ route('admin.private_calendars.email', ['hash' => $hash]) }}">
                                     @csrf
-                                    <button type="submit" class="{{ $button }}">@lang('messages.send')</button>
+                                    <button type="submit" class="{{ $button }}" data-confirm="{{ __('messages.private_calendars_send_confirm', ['email' => $masked]) }}">@lang('messages.send')</button>
                                 </form>
                                 @endif
                             </div>

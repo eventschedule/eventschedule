@@ -5739,7 +5739,9 @@ class RoleController extends Controller
 
         // Before the webhook below is made: Google's first ping pulls inside this request, and
         // what it reads in must arrive the way this save says.
-        if ($googleSubmitted && ! is_demo_mode()) {
+        // Only from a page that drew the switch: one opened before it existed posts the row's
+        // marker and no switch, which would read as "off" and quietly stop a sync that publishes.
+        if ($googleSubmitted && ! is_demo_mode() && $request->has('google_publish_on_arrival')) {
             $this->savePublishOnArrival($role, CalendarArrival::GOOGLE, $newSyncDirection, $oldSyncDirection, $request->boolean('google_publish_on_arrival'));
         }
 
@@ -5766,7 +5768,7 @@ class RoleController extends Controller
                 $ownerPivot?->update(['microsoft_calendar_id' => $newMicrosoftCalendarId ?: null]);
             }
 
-            if (! is_demo_mode()) {
+            if (! is_demo_mode() && $request->has('microsoft_publish_on_arrival')) {
                 $this->savePublishOnArrival($role, CalendarArrival::MICROSOFT, $newMicrosoftSyncDirection, $oldMicrosoftSyncDirection, $request->boolean('microsoft_publish_on_arrival'));
             }
 
@@ -5781,7 +5783,7 @@ class RoleController extends Controller
 
         // CalDAV's direction is a field of this form (its connection is made on the page by
         // CalDAVController); the switch beside it is saved here, behind its own marker.
-        if ($isOwner && $request->has('caldav_integration_submitted') && ! is_demo_mode()) {
+        if ($isOwner && $request->has('caldav_integration_submitted') && $request->has('caldav_publish_on_arrival') && ! is_demo_mode()) {
             $this->savePublishOnArrival($role, CalendarArrival::CALDAV, $role->caldav_sync_direction, $role->getOriginal('caldav_sync_direction'), $request->boolean('caldav_publish_on_arrival'));
         }
 
@@ -8956,8 +8958,14 @@ class RoleController extends Controller
     {
         $reads = in_array($direction, ['from', 'both'], true);
 
+        // Only a CHANGE is the owner's word. The rows post on every save the owner makes, from any
+        // tab, and a sync carried over from before drafts renders with the switch on: answering
+        // here would quietly settle the Schedule tab's "keep publishing your main calendar?"
+        // (publish_confirmed_at) for somebody who only fixed a typo.
         if ($reads && $wanted) {
-            CalendarArrival::setPublishing($role, $provider, true);
+            if (! CalendarArrival::publishes($role, $provider)) {
+                CalendarArrival::setPublishing($role, $provider, true);
+            }
         } elseif (CalendarArrival::tablesReady() && CalendarArrival::settings($role)->{"{$provider}_publishes"}) {
             CalendarArrival::setPublishing($role, $provider, false);
         }

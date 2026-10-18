@@ -162,6 +162,8 @@ class CalendarExposureSweepTest extends TestCase
         $venue->name = 'https://us02web.zoom.us/j/1?pwd=abc123';
         $venue->address1 = $venue->name;
         $venue->save();
+        // As ConvertsLocationToVenue makes one: the importing account follows it.
+        $venue->members()->attach($owner->id, ['level' => 'follower', 'created_at' => now()]);
 
         $this->artisan('calendar:scan-exposures')->assertSuccessful();
 

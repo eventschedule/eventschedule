@@ -52,7 +52,7 @@ class ScheduleCalendarReviewPageTest extends TestCase
             'import_source' => Event::IMPORT_GOOGLE,
             'creator_role_id' => $this->role->id,
         ]);
-        CalendarImportHold::create(['event_id' => $event->id, 'role_id' => $this->role->id, 'reason' => $reason, 'was_visibility' => $was]);
+        CalendarImportHold::create(['event_id' => $event->id, 'role_id' => $this->role->id, 'reason' => $reason, 'was_visibility' => $was, 'was_public' => $was !== null]);
 
         return $event;
     }
@@ -86,7 +86,7 @@ class ScheduleCalendarReviewPageTest extends TestCase
         $this->review()
             ->assertOk()
             ->assertSeeText(trans_choice('messages.calendar_review_dates', 3, ['count' => 3]))
-            ->assertSee('<mark class="spam-word">Meeting ID: 812 3456 7890</mark>', false)
+            ->assertSee('<mark class="spam-word" dir="ltr">Meeting ID: 812 3456 7890</mark>', false)
             ->assertSee(__('messages.calendar_publish_details_confirm'), false);
     }
 
@@ -107,7 +107,9 @@ class ScheduleCalendarReviewPageTest extends TestCase
         $this->assertSame(CalendarArrival::DECISION_HIDDEN, CalendarImportHold::where('event_id', $hide->id)->value('decision'));
 
         $this->review(['show' => 'hidden'])->assertSeeText('Dentist');
-        $this->review()->assertDontSeeText('Dentist');
+        $this->review(['show' => 'waiting'])->assertDontSeeText('Dentist');
+        // A link that names no list opens the first one with something in it.
+        $this->review()->assertSeeText('Dentist');
     }
 
     public function test_publish_all_queues_the_drafts_that_wait_only_for_a_look(): void
@@ -119,9 +121,10 @@ class ScheduleCalendarReviewPageTest extends TestCase
         $this->actingAs($this->owner)
             ->post(route('role.calendar_review.publish_all', ['subdomain' => $this->role->subdomain]))
             ->assertRedirect();
-        Queue::assertPushed(PublishCalendarHolds::class);
+        Queue::assertPushed(PublishCalendarHolds::class, fn ($job) => $job->eventIds === [$plain->id]);
+        $this->review()->assertSeeText(trans_choice('messages.calendar_publishing_now', 1, ['count' => 1]));
 
-        (new PublishCalendarHolds($this->role->id, $this->owner->id))->handle(app(\App\Services\EventLifecycleService::class));
+        (new PublishCalendarHolds($this->role->id, $this->owner->id, [$plain->id, $details->id]))->handle(app(\App\Services\EventLifecycleService::class));
 
         $this->assertFalse($plain->fresh()->is_draft);
         $this->assertTrue($details->fresh()->is_draft, 'meeting details are published one at a time');
@@ -179,5 +182,26 @@ class ScheduleCalendarReviewPageTest extends TestCase
             ->assertOk()
             ->assertDontSee(__('messages.next_step_publish_event'))
             ->assertSee(trans_choice('messages.pending_action_calendar_waiting', 1, ['count' => 1]));
+    }
+
+    public function test_publishing_what_is_ticked_leaves_out_meeting_details(): void
+    {
+        $plain = $this->held('Open rehearsal');
+        $details = $this->held('Weekly sync', CalendarPrivacy::HOLD_MEETING_DETAILS, null, ['description' => 'Passcode: 123456']);
+
+        $this->actingAs($this->owner)
+            ->post(route('role.calendar_review.decide', ['subdomain' => $this->role->subdomain]), [
+                'action' => 'publish',
+                'events' => [UrlUtils::encodeId($plain->id), UrlUtils::encodeId($details->id)],
+            ])
+            ->assertSessionHas('success', fn ($said) => str_contains($said, __('messages.calendar_publish_selected_left_out')));
+
+        $this->assertFalse($plain->fresh()->is_draft);
+        $this->assertTrue($details->fresh()->is_draft, 'published one at a time, after its own question');
+
+        // On its own, it is published.
+        $this->actingAs($this->owner)
+            ->post(route('role.calendar_review.decide', ['subdomain' => $this->role->subdomain]), ['publish_one' => UrlUtils::encodeId($details->id)]);
+        $this->assertFalse($details->fresh()->is_draft);
     }
 }

@@ -74,6 +74,11 @@ class CalendarPrivacyMail extends Mailable
                 'pageUrl' => $this->role->getGuestUrl(true),
                 'chooseUrl' => $chooseUrl,
                 'reviewUrl' => $reviewUrl,
+                // The calendar sync behind it, or null for a feed or a one-time import, which has
+                // no calendar to choose and no sync to turn back on.
+                'sync' => in_array($this->provider, CalendarArrival::PROVIDERS, true) ? $this->provider : null,
+                // The codes are worth changing only when links or codes were what was found.
+                'codes' => (bool) array_intersect([CalendarPrivacy::LINK_PASSWORD, CalendarPrivacy::ACCESS_CODES], $this->kinds),
             ],
         );
     }

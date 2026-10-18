@@ -36,53 +36,64 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('calendar_sync_settings', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('role_id')->unique()->constrained()->cascadeOnDelete();
+        // A short lock wait, and safe to run again after a run that stopped half way: the
+        // foreign keys take metadata locks on events, roles and users.
+        $previous = DB::selectOne('SELECT @@SESSION.lock_wait_timeout AS value')->value;
+        DB::statement('SET SESSION lock_wait_timeout = 10');
 
-            foreach (['google', 'microsoft', 'caldav'] as $p) {
-                $table->boolean("{$p}_publishes")->default(false);
-                $table->char("{$p}_publish_binding", 40)->nullable();
-                $table->timestamp("{$p}_publish_confirmed_at")->nullable();
-                $table->timestamp("{$p}_reread_at")->nullable();
-                $table->text("{$p}_reread_cursor")->nullable();
-                $table->json("{$p}_last_pull")->nullable();
-                $table->json("{$p}_first_pull")->nullable();
-                $table->string("{$p}_stopped_reason", 20)->nullable();
-                $table->timestamp("{$p}_stopped_at")->nullable();
-                $table->string("{$p}_stopped_direction", 10)->nullable();
+        try {
+            if (! Schema::hasTable('calendar_sync_settings')) {
+                Schema::create('calendar_sync_settings', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('role_id')->unique()->constrained()->cascadeOnDelete();
+
+                    foreach (['google', 'microsoft', 'caldav'] as $p) {
+                        $table->boolean("{$p}_publishes")->default(false);
+                        $table->char("{$p}_publish_binding", 40)->nullable();
+                        $table->timestamp("{$p}_publish_confirmed_at")->nullable();
+                        $table->timestamp("{$p}_reread_at")->nullable();
+                        $table->text("{$p}_reread_cursor")->nullable();
+                        $table->json("{$p}_last_pull")->nullable();
+                        $table->json("{$p}_first_pull")->nullable();
+                        $table->string("{$p}_stopped_reason", 20)->nullable();
+                        $table->timestamp("{$p}_stopped_at")->nullable();
+                        $table->string("{$p}_stopped_direction", 10)->nullable();
+                    }
+
+                    // When the owner was told that a sync took events off their public page. Once.
+                    $table->timestamp('taken_off_notified_at')->nullable();
+
+                    $table->timestamps();
+                });
             }
 
-            // When the owner was told that a sync took events off their public page. Once.
-            $table->timestamp('taken_off_notified_at')->nullable();
+            $now = now();
+            DB::table('roles')
+                ->select(['id', 'sync_direction', 'microsoft_sync_direction', 'caldav_sync_direction'])
+                ->where(function ($q) {
+                    $q->whereIn('sync_direction', ['from', 'both'])
+                        ->orWhereIn('microsoft_sync_direction', ['from', 'both'])
+                        ->orWhereIn('caldav_sync_direction', ['from', 'both']);
+                })
+                ->orderBy('id')
+                ->chunk(500, function ($roles) use ($now) {
+                    $rows = [];
+                    foreach ($roles as $role) {
+                        $rows[] = [
+                            'role_id' => $role->id,
+                            'google_publishes' => in_array($role->sync_direction, ['from', 'both'], true),
+                            'microsoft_publishes' => in_array($role->microsoft_sync_direction, ['from', 'both'], true),
+                            'caldav_publishes' => in_array($role->caldav_sync_direction, ['from', 'both'], true),
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
 
-            $table->timestamps();
-        });
-
-        $now = now();
-        DB::table('roles')
-            ->select(['id', 'sync_direction', 'microsoft_sync_direction', 'caldav_sync_direction'])
-            ->where(function ($q) {
-                $q->whereIn('sync_direction', ['from', 'both'])
-                    ->orWhereIn('microsoft_sync_direction', ['from', 'both'])
-                    ->orWhereIn('caldav_sync_direction', ['from', 'both']);
-            })
-            ->orderBy('id')
-            ->chunk(500, function ($roles) use ($now) {
-                $rows = [];
-                foreach ($roles as $role) {
-                    $rows[] = [
-                        'role_id' => $role->id,
-                        'google_publishes' => in_array($role->sync_direction, ['from', 'both'], true),
-                        'microsoft_publishes' => in_array($role->microsoft_sync_direction, ['from', 'both'], true),
-                        'caldav_publishes' => in_array($role->caldav_sync_direction, ['from', 'both'], true),
-                        'created_at' => $now,
-                        'updated_at' => $now,
-                    ];
-                }
-
-                DB::table('calendar_sync_settings')->insertOrIgnore($rows);
-            });
+                    DB::table('calendar_sync_settings')->insertOrIgnore($rows);
+                });
+        } finally {
+            DB::statement('SET SESSION lock_wait_timeout = '.(int) $previous);
+        }
     }
 
     public function down(): void

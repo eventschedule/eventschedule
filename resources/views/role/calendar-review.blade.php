@@ -8,11 +8,7 @@
         $here = ['subdomain' => $role->subdomain];
         $zone = $role->captureTimezone();
         $clock = get_use_24_hour_time($role) ? 'H:i' : 'g:i A';
-        $providerName = fn (?string $source) => match ($source) {
-            \App\Services\CalendarArrival::MICROSOFT => 'Outlook',
-            \App\Services\CalendarArrival::CALDAV => __('messages.caldav_calendar'),
-            default => 'Google Calendar',
-        };
+        $providerName = fn (?string $source) => \App\Services\CalendarArrival::providerName($source);
         $reasonLabel = fn (string $reason) => match ($reason) {
             \App\Utils\CalendarPrivacy::HOLD_MEETING_DETAILS => __('messages.calendar_hold_meeting_details'),
             \App\Utils\CalendarPrivacy::HOLD_EMAIL_THREAD => __('messages.calendar_hold_email_thread'),
@@ -44,7 +40,7 @@
     <div class="page-shell">
         <x-page-header :title="__('messages.calendar_review_title')" :lead="__('messages.calendar_review_lead')"
                        :back="route('role.view_admin', $here + ['tab' => 'schedule'])" :back-label="$role->getDisplayName()">
-            @if ($show === 'waiting' && $reviewCount > 0)
+            @if ($show === 'waiting' && $reviewCount > 0 && ! $publishingCount)
             <x-slot name="actions">
                 <button type="submit" form="calendar-publish-all" class="inline-flex items-center justify-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-3 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
                     {{ trans_choice('messages.calendar_publish_all', $reviewCount, ['count' => number_format($reviewCount)]) }}
@@ -69,13 +65,21 @@
                 </div>
             </form>
 
+            @if ($publishingCount)
+            <x-page-notice tone="info">{{ trans_choice('messages.calendar_publishing_now', $publishingCount, ['count' => number_format($publishingCount)]) }}</x-page-notice>
+            @endif
+
             @if ($show === 'waiting' && $reviewCount > 0 && $reviewCount < $counts['waiting'])
             <x-page-notice tone="info">{{ __('messages.calendar_publish_all_skips') }}</x-page-notice>
             @endif
 
             @if ($groups->isEmpty())
             <div class="ap-card rounded-xl">
-                <x-page-empty compact :title="__('messages.calendar_review_empty_title')" :text="__('messages.calendar_review_empty_text')" />
+                <x-page-empty :title="$search !== '' ? __('messages.calendar_review_empty_search') : match ($show) {
+                    'taken' => __('messages.calendar_review_empty_taken'),
+                    'hidden' => __('messages.calendar_review_empty_hidden'),
+                    default => __('messages.calendar_review_empty_title'),
+                }" :text="__('messages.calendar_review_empty_text')" />
             </div>
             @else
             <x-page-card flush id="calendar-review">
@@ -105,7 +109,11 @@
                                 $start = $event->starts_at ? $event->getStartDateTime(null, true) : null;
                                 $held = in_array($group['reason'], $content, true);
                                 $provider = $providerName($event->import_source);
-                                $publishes = $publishing[$event->import_source] ?? false;
+                                // Whether taking the details out in the calendar brings it back by
+                                // itself: a hide the sync made with somewhere to go back to. Not
+                                // one the operator made, nor a draft that waits for a look anyway.
+                                $firstHold = $group['holds']->first();
+                                $comesBack = $firstHold->was_visibility !== null && $firstHold->held_by === null;
                             @endphp
                             <tr>
                                 <td class="c-tick"><input type="checkbox" name="events[]" value="{{ $group['ids'] }}" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900" aria-label="{{ __('messages.feeds_select_one', ['name' => $event->name]) }}" data-calrev-tick></td>
@@ -127,8 +135,8 @@
                                                 <span class="event-status {{ $held ? 'is-warn' : '' }}">{{ $reasonLabel($group['reason']) }}</span>
                                             </div>
                                             @if ($held && $group['snippet'])
-                                            <div class="calrev-snippet" v-pre><bdi dir="ltr">{!! $group['snippet'] !!}</bdi></div>
-                                            <div class="calrev-advice">{{ $publishes ? __('messages.calendar_review_advice_publishes', ['provider' => $provider]) : __('messages.calendar_review_advice_drafts', ['provider' => $provider]) }}</div>
+                                            <div class="calrev-snippet" v-pre><bdi>{!! $group['snippet'] !!}</bdi></div>
+                                            <div class="calrev-advice">{{ $comesBack ? __('messages.calendar_review_advice_publishes', ['provider' => $provider]) : __('messages.calendar_review_advice_drafts', ['provider' => $provider]) }}</div>
                                             @endif
                                         </div>
                                     </div>
@@ -157,7 +165,7 @@
         </div>
     </div>
 
-    @if ($show === 'waiting' && $reviewCount > 0)
+    @if ($show === 'waiting' && $reviewCount > 0 && ! $publishingCount)
     <form method="post" id="calendar-publish-all" action="{{ route('role.calendar_review.publish_all', $here) }}" data-confirm="{{ trans_choice('messages.calendar_publish_all_confirm', $reviewCount, ['count' => number_format($reviewCount)]) }}">@csrf</form>
     @endif
 

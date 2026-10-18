@@ -11,20 +11,20 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
 /**
- * "Publish all" on a schedule's calendar review page: every event a calendar sync brought in as a
- * draft and that waits for nothing but a look. Not the ones held for meeting details or an email
- * thread, which are published one at a time. Off the request, in chunks: each publish pushes to
- * the connected calendars and fires a webhook, and a first read is hundreds of events.
+ * One chunk of "Publish all" on a schedule's calendar review page (CalendarReviewController):
+ * events a calendar sync brought in as drafts that wait for nothing but a look. Not the ones held
+ * for meeting details or an email thread, which are published one at a time. A job per chunk, so
+ * no one job holds the queue for long: each publish pushes to the connected calendars and fires a
+ * webhook, and the queue is drained between jobs.
  */
 class PublishCalendarHolds implements ShouldQueue
 {
     use Queueable;
 
-    private const CHUNK = 50;
+    public const CHUNK = 50;
 
-    public int $timeout = 600;
-
-    public function __construct(public int $roleId, public ?int $userId) {}
+    /** @param  list<int>  $eventIds */
+    public function __construct(public int $roleId, public ?int $userId, public array $eventIds) {}
 
     public function handle(EventLifecycleService $lifecycle): void
     {
@@ -33,24 +33,25 @@ class PublishCalendarHolds implements ShouldQueue
             return;
         }
 
-        CalendarImportHold::where('role_id', $role->id)
+        $holds = CalendarImportHold::where('role_id', $role->id)
+            ->whereIn('event_id', $this->eventIds)
             ->whereNull('decided_at')
-            ->whereNull('was_visibility')
+            ->where('was_public', false)
             ->where('reason', CalendarArrival::HOLD_REVIEW)
             ->with('event.roles')
-            ->chunkById(self::CHUNK, function ($holds) use ($role, $lifecycle) {
-                foreach ($holds as $hold) {
-                    $event = $hold->event;
-                    if (! $event || (int) $event->creator_role_id !== (int) $role->id || ! $event->is_draft) {
-                        continue;
-                    }
+            ->get();
 
-                    try {
-                        $lifecycle->publish($event, $this->userId, $role);
-                    } catch (\Throwable $e) {
-                        Log::warning('Publish all: an event could not be published', ['event_id' => $event->id, 'error' => $e->getMessage()]);
-                    }
-                }
-            });
+        foreach ($holds as $hold) {
+            $event = $hold->event;
+            if (! $event || (int) $event->creator_role_id !== (int) $role->id || ! $event->is_draft) {
+                continue;
+            }
+
+            try {
+                $lifecycle->publish($event, $this->userId, $role);
+            } catch (\Throwable $e) {
+                Log::warning('Publish all: an event could not be published', ['event_id' => $event->id, 'error' => $e->getMessage()]);
+            }
+        }
     }
 }

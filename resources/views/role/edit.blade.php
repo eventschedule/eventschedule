@@ -6819,6 +6819,10 @@ function loadGoogleCalendars() {
                 select.innerHTML = '<option value="">' + @json(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) + '</option>';
             }
             window.dispatchEvent(new CustomEvent('google-calendars-loaded'));
+            // A calendar chosen on the page and gone after a refresh: the select moved, so say so.
+            if (keep && select.value !== keep) {
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             window.dispatchEvent(new CustomEvent('calendar-list-loaded', { detail: { provider: 'google' } }));
         })
         .catch(error => {
@@ -6868,6 +6872,10 @@ function loadMicrosoftCalendars() {
                 select.innerHTML = '<option value="">' + @json(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) + '</option>';
             }
             window.dispatchEvent(new CustomEvent('microsoft-calendars-loaded'));
+            // A calendar chosen on the page and gone after a refresh: the select moved, so say so.
+            if (keep && select.value !== keep) {
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             window.dispatchEvent(new CustomEvent('calendar-list-loaded', { detail: { provider: 'microsoft' } }));
         })
         .catch(error => {

@@ -13,6 +13,7 @@ use App\Utils\UrlUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Events a calendar sync is keeping off a schedule's public page (CalendarArrival), for the
@@ -38,7 +39,14 @@ class CalendarReviewController extends Controller
             return $role;
         }
 
-        $show = in_array($request->query('show'), self::SHOWS, true) ? $request->query('show') : 'waiting';
+        $counts = collect(self::SHOWS)->mapWithKeys(fn ($s) => [$s => self::query($role, $s)->count()])->all();
+
+        // A link that names no list (the dashboard, the setup guide, a mail) opens the first one
+        // with something in it: after an operator's Hide everything is under "Taken off your
+        // page", and the link used to land on "Nothing is waiting".
+        $show = in_array($request->query('show'), self::SHOWS, true)
+            ? $request->query('show')
+            : (collect(self::SHOWS)->first(fn ($s) => $counts[$s] > 0) ?? 'waiting');
         $search = trim((string) $request->query('q', ''));
 
         $holds = self::query($role, $show)
@@ -54,20 +62,15 @@ class CalendarReviewController extends Controller
         $more = $holds->count() > self::LIMIT;
         $holds = $holds->take(self::LIMIT);
 
-        $publishing = [];
-        foreach (CalendarArrival::PROVIDERS as $provider) {
-            $publishing[$provider] = CalendarArrival::publishes($role, $provider);
-        }
-
         return view('role.calendar-review', [
             'role' => $role,
             'show' => $show,
             'search' => $search,
             'groups' => self::groups($holds),
             'more' => $more,
-            'counts' => collect(self::SHOWS)->mapWithKeys(fn ($s) => [$s => self::query($role, $s)->count()])->all(),
+            'counts' => $counts,
             'reviewCount' => self::query($role, 'waiting')->where('reason', CalendarArrival::HOLD_REVIEW)->count(),
-            'publishing' => $publishing,
+            'publishingCount' => (int) Cache::get(self::publishingKey($role), 0),
         ]);
     }
 
@@ -98,11 +101,21 @@ class CalendarReviewController extends Controller
         }
 
         $done = 0;
+        $leftOut = 0;
         $holds = CalendarImportHold::where('role_id', $role->id)->whereIn('event_id', $ids)->with('event.roles')->get();
 
         foreach ($holds as $hold) {
             $event = $hold->event;
             if (! $event || (int) $event->creator_role_id !== (int) $role->id) {
+                continue;
+            }
+
+            // Ticked with others, an event with meeting details or an email thread is left out,
+            // as Publish all leaves it out: it is published one at a time, after its own question.
+            if ($action === 'publish' && $one === null && $hold->isOpen()
+                && in_array($hold->reason, [CalendarPrivacy::HOLD_MEETING_DETAILS, CalendarPrivacy::HOLD_EMAIL_THREAD], true)) {
+                $leftOut++;
+
                 continue;
             }
 
@@ -116,11 +129,13 @@ class CalendarReviewController extends Controller
             }
         }
 
-        return $back->with('success', trans_choice(
+        $said = trans_choice(
             $action === 'publish' ? 'messages.calendar_review_published' : 'messages.calendar_review_kept_hidden_flash',
             $done,
             ['count' => number_format($done)]
-        ));
+        );
+
+        return $back->with('success', $leftOut ? $said.' '.__('messages.calendar_publish_selected_left_out') : $said);
     }
 
     /**
@@ -135,13 +150,25 @@ class CalendarReviewController extends Controller
             return $role;
         }
 
-        $count = self::query($role, 'waiting')->where('reason', CalendarArrival::HOLD_REVIEW)->count();
+        $ids = self::query($role, 'waiting')->where('reason', CalendarArrival::HOLD_REVIEW)->pluck('calendar_import_holds.event_id');
+        $count = $ids->count();
+        foreach ($ids->chunk(PublishCalendarHolds::CHUNK) as $chunk) {
+            PublishCalendarHolds::dispatch($role->id, $request->user()->id, $chunk->values()->all());
+        }
+
+        // The page says it is under way, and does not offer the button again meanwhile.
         if ($count > 0) {
-            PublishCalendarHolds::dispatch($role->id, $request->user()->id);
+            Cache::put(self::publishingKey($role), $count, now()->addMinutes(10));
         }
 
         return redirect()->route('role.calendar_review', ['subdomain' => $role->subdomain])
             ->with('success', trans_choice('messages.calendar_publishing_now', $count, ['count' => number_format($count)]));
+    }
+
+    /** Where "Publish all is under way" is kept for a few minutes. */
+    public static function publishingKey(Role $role): string
+    {
+        return 'calendar_review.publishing.'.$role->id;
     }
 
     /**
@@ -168,8 +195,8 @@ class CalendarReviewController extends Controller
     /**
      * The holds of one list, on events the schedule owns that are still off the page.
      *
-     * waiting: arrived as a draft (nothing to put back); taken: it was public; hidden: the owner
-     * chose to keep it hidden.
+     * waiting: arrived held and was never on the page; taken: it was public and was taken off;
+     * hidden: the owner chose to keep it hidden.
      */
     public static function query(Role $role, string $show)
     {
@@ -177,9 +204,9 @@ class CalendarReviewController extends Controller
             ->whereHas('event', fn ($q) => $q->where('creator_role_id', $role->id)->where('is_draft', true)->where('is_cancelled', false));
 
         return match ($show) {
-            'taken' => $query->whereNull('calendar_import_holds.decided_at')->whereNotNull('calendar_import_holds.was_visibility'),
+            'taken' => $query->whereNull('calendar_import_holds.decided_at')->where('calendar_import_holds.was_public', true),
             'hidden' => $query->where('calendar_import_holds.decision', CalendarArrival::DECISION_HIDDEN),
-            default => $query->whereNull('calendar_import_holds.decided_at')->whereNull('calendar_import_holds.was_visibility'),
+            default => $query->whereNull('calendar_import_holds.decided_at')->where('calendar_import_holds.was_public', false),
         };
     }
 

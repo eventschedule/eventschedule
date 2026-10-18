@@ -127,8 +127,9 @@ class SyncCalDAVCalendars extends Command
     private function mayReread(Role $role, string $provider): bool
     {
         if ($this->rereadsStarted >= CalendarArrival::REREADS_PER_RUN
-            || microtime(true) - $this->runStarted >= CalendarArrival::REREAD_BUDGET_SECONDS
-            || ! CalendarArrival::needsReread($role, $provider)) {
+            || microtime(true) - $this->runStarted >= CalendarArrival::rereadBudgetSeconds()
+            || ! CalendarArrival::needsReread($role, $provider)
+            || ! CalendarArrival::claimReread()) {
             return false;
         }
 

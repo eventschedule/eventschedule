@@ -59,7 +59,7 @@ class MeetingLinkVenuesTest extends TestCase
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent');
-        $event = $this->createEvent($role, ['name' => 'Block association committee']);
+        $event = $this->createEvent($role, ['name' => 'Block association committee', 'import_source' => Event::IMPORT_GOOGLE, 'creator_role_id' => $role->id]);
         $venue = $this->stub($owner, self::ZOOM);
         $event->roles()->attach($venue->id, ['is_accepted' => true]);
         $this->assertTrue(MeetingLinkVenues::isMeetingStub($venue));
@@ -75,8 +75,34 @@ class MeetingLinkVenuesTest extends TestCase
         $this->assertFalse($event->fresh()->roles()->where('roles.id', $venue->id)->exists());
         $this->assertNull($event->fresh()->venue, 'Event::venue() would otherwise still find it');
 
-        $audit = AuditLog::where('action', AuditService::ADMIN_CALENDAR_PRIVACY_VENUE_REMOVED)->firstOrFail();
-        $this->assertStringNotContainsStringIgnoringCase('zoom', json_encode($audit->getAttributes()));
+        $audits = AuditLog::where('action', AuditService::ADMIN_CALENDAR_PRIVACY_VENUE_REMOVED)->get();
+        $this->assertNotEmpty($audits);
+        $this->assertStringNotContainsStringIgnoringCase('zoom', json_encode($audits->map->getAttributes()));
+        $this->assertTrue($audits->contains(fn ($audit) => in_array($event->id, $audit->old_values['event_ids'] ?? [], true)), 'which events it was on is kept, to put it back');
+    }
+
+    public function test_a_venue_a_person_made_is_never_one_whatever_it_is_called(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'curator');
+
+        // The event form and the AI import make venues with nobody running them, out of what was
+        // typed: a club whose "address" is its website, or a venue simply called Zoom.
+        $website = $this->stub($owner, 'www.thecomedystore.com');
+        $typed = $this->stub($owner, 'Zoom');
+        $handMade = $this->createEvent($role, ['name' => 'Open mic']);
+        $typed->events()->attach($handMade->id, ['is_accepted' => true]);
+
+        $notFollowed = new Role(['type' => 'venue']);
+        $notFollowed->forceFill(['subdomain' => 'teams-'.Str::lower(Str::random(6)), 'name' => 'Microsoft Teams Meeting', 'address1' => 'Microsoft Teams Meeting'])->save();
+
+        foreach ([$website, $typed, $notFollowed->fresh()] as $venue) {
+            $this->assertFalse(MeetingLinkVenues::isMeetingStub($venue), $venue->name);
+        }
+
+        MeetingLinkVenues::sweep();
+        $this->assertFalse((bool) $typed->fresh()->is_deleted);
+        $this->assertTrue($handMade->fresh()->roles()->where('roles.id', $typed->id)->exists());
     }
 
     /**
@@ -154,5 +180,27 @@ class MeetingLinkVenuesTest extends TestCase
         $this->assertSame(0, (int) Cache::get('meeting_link_venues.cursor.v1'), 'past the last venue, back to the start');
 
         $this->assertSame(1, MeetingLinkVenues::sweep());
+    }
+
+    public function test_a_placeholder_from_before_sources_were_recorded_is_still_one(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $venue = $this->stub($owner, self::ZOOM);
+
+        // Synced before 2026-10-05: no import_source, but still mapped to the calendar entry.
+        $older = $this->createEvent($role, ['name' => 'Block association committee']);
+        \Illuminate\Support\Facades\DB::table('events')->where('id', $older->id)->update(['created_at' => '2026-09-20 10:00:00']);
+        \App\Models\CalendarSync::create(['user_id' => $owner->id, 'event_id' => $older->id, 'role_id' => $role->id, 'google_event_id' => 'g-old', 'google_calendar_id' => 'primary']);
+        $older->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        $this->assertTrue(MeetingLinkVenues::isMeetingStub($venue->fresh()));
+
+        // The same, made by hand at that time (no calendar entry): a person's venue.
+        $handMade = $this->createEvent($role, ['name' => 'Open mic']);
+        \Illuminate\Support\Facades\DB::table('events')->where('id', $handMade->id)->update(['created_at' => '2026-09-20 10:00:00']);
+        $handMade->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        $this->assertFalse(MeetingLinkVenues::isMeetingStub($venue->fresh()));
     }
 }

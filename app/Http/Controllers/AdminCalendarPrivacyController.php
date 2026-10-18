@@ -55,7 +55,9 @@ class AdminCalendarPrivacyController extends Controller
                 return null;
             }
 
-            $events = CalendarExposureWatch::eventsFor($role, true, 10);
+            // The evidence whatever has been done since: after Hide the events are drafts, and a
+            // row with nothing in "what was found" said nothing about why it was listed.
+            $events = CalendarExposureWatch::eventsFor($role, false, 10);
 
             return [
                 'role' => $role,
@@ -85,6 +87,8 @@ class AdminCalendarPrivacyController extends Controller
         $syncs = CalendarExposureWatch::syncs($role);
 
         $public = $events->filter(fn ($item) => ! $item['event']->is_draft);
+        // What Hide can take off: never an event people hold tickets to (CalendarArrival::hide()).
+        $hideable = $public->filter(fn ($item) => \App\Services\TicketPresets::liveSaleCount($item['event']) === 0);
         $stubs = $this->meetingStubs($events->pluck('event'));
         $heldByUs = CalendarImportHold::where('role_id', $role->id)->whereNotNull('held_by')->whereNull('decided_at')->count();
         $owner = $role->user;
@@ -97,7 +101,8 @@ class AdminCalendarPrivacyController extends Controller
             'snippets' => CalendarExposureWatch::snippets($events, 3, 120),
             'syncs' => $syncs,
             'review' => $review,
-            'publicCount' => $public->count(),
+            'publicNow' => $public->count(),
+            'publicCount' => $hideable->count(),
             'stubCount' => $stubs->count(),
             'heldByUs' => $heldByUs,
             'reading' => collect($syncs)->contains(fn ($sync) => ! $sync['paused']),

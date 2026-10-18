@@ -16,6 +16,7 @@ class CalendarImportHold extends Model
 
     protected $casts = [
         'first_pull' => 'boolean',
+        'was_public' => 'boolean',
         'decided_at' => 'datetime',
     ];
 

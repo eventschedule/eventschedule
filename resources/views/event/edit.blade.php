@@ -2370,6 +2370,26 @@
                 <div id="section-details" class="section-content section-plain">
                     <div class="event-tab{{ $isFirstEventRun ? ' event-tab-first max-w-xl' : '' }}">
 
+                        @php
+                            // A draft a calendar sync is holding back from the public page, and why
+                            // (CalendarArrival). Publishing it here is the owner's decision, and the save bar's
+                            // Publish is on every tab, so it is said on the first one.
+                            $calendarHold = $event->exists && \App\Services\CalendarArrival::tablesReady()
+                                ? \App\Models\CalendarImportHold::where('event_id', $event->id)->whereNull('decided_at')->first()
+                                : null;
+                        @endphp
+                        @if ($calendarHold && $event->is_draft)
+                        <div class="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20" data-calendar-hold>
+                            <svg class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+                            <p class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.calendar_hold_form_notice_'.match ($calendarHold->reason) {
+                                'meeting_details', 'email_thread' => $calendarHold->reason,
+                                'private', 'declined', 'cancelled', 'not_an_event' => 'calendar',
+                                default => 'review',
+                            }, ['provider' => \App\Services\CalendarArrival::providerName($event->import_source)]) }}</p>
+                        </div>
+                        @endif
                         <div class="ap-card rounded-xl p-4 sm:p-6" id="event-basics">
                         <div class="event-basics-grid">
 
@@ -5200,25 +5220,6 @@
                             // on first paint instead of only once Vue mounts.
                             $currentVisibility = $visibilityNow;
                         @endphp
-                        @php
-                            // A draft a calendar sync is holding back from the public page, and why
-                            // (CalendarArrival). Publishing it here is the owner's decision.
-                            $calendarHold = $event->exists && \App\Services\CalendarArrival::tablesReady()
-                                ? \App\Models\CalendarImportHold::where('event_id', $event->id)->whereNull('decided_at')->first()
-                                : null;
-                        @endphp
-                        @if ($calendarHold && $event->is_draft)
-                        <div class="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20" data-calendar-hold>
-                            <svg class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                            </svg>
-                            <p class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.calendar_hold_form_notice_'.match ($calendarHold->reason) {
-                                'meeting_details', 'email_thread' => $calendarHold->reason,
-                                'private', 'declined', 'cancelled', 'not_an_event' => 'calendar',
-                                default => 'review',
-                            }, ['provider' => \App\Services\CalendarArrival::providerName($event->import_source)]) }}</p>
-                        </div>
-                        @endif
                         <fieldset class="mb-6">
                             <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.visibility') }}</legend>
                             <input type="hidden" name="is_draft" :value="event.is_draft ? 1 : 0">

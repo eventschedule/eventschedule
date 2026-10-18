@@ -72,7 +72,7 @@
                                     {{ $row['last']['label'] }}
                                     <span class="c-sub">{{ $when($row['last']['at']) }}</span>
                                     @else
-                                    <span class="c-sub">@lang('messages.never')</span>
+                                    <span class="c-sub">@lang('messages.private_calendars_none_yet')</span>
                                     @endif
                                 </td>
                                 <td class="c-actions">
