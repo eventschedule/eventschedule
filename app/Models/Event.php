@@ -343,6 +343,34 @@ class Event extends Model
             ?->feed;
     }
 
+    /** The standing calendar syncs, as import_source names them. */
+    public const CALENDAR_SYNC_SOURCES = [self::IMPORT_GOOGLE, self::IMPORT_MICROSOFT, self::IMPORT_CALDAV];
+
+    /**
+     * Whether a standing calendar sync read this event in from its schedule's calendar, so the
+     * entry there is the owner's own and this event the copy, not the other way round. Unpublishing
+     * or deleting the copy must not reach back and delete the original, and the original must not
+     * be created a second time when the copy is published.
+     *
+     * A one-time import from the same calendar names the same source but always carries a batch
+     * (ImportRun), which a standing sync never writes. An event synced before import_source existed
+     * (2026-10-04) cannot be told from one made here and pushed out, and answers no.
+     */
+    public function cameFromCalendarSync(?string $provider = null, ?Role $role = null): bool
+    {
+        $source = $this->import_source;
+
+        if (! in_array($source, self::CALENDAR_SYNC_SOURCES, true) || $this->import_batch !== null) {
+            return false;
+        }
+
+        if ($provider !== null && $source !== $provider) {
+            return false;
+        }
+
+        return $role === null || (int) $this->creator_role_id === (int) $role->id;
+    }
+
     public static function importColumnsReady(): bool
     {
         return self::$importColumnsReady = self::$importColumnsReady

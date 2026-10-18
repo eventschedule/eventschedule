@@ -180,6 +180,13 @@ class SyncEventToGoogleCalendar implements ShouldQueue
     private function createEvent(GoogleCalendarService $googleCalendarService): void
     {
         $calendarId = $this->getSyncCalendarId();
+
+        // Already in that calendar: read in from it by the sync, or pushed there before. Publishing
+        // a draft the sync brought in used to make a second copy beside the owner's own entry.
+        $sync = $this->getCalendarSync();
+        if ($sync?->google_event_id && (! $sync->google_calendar_id || $sync->google_calendar_id === $calendarId)) {
+            return;
+        }
         $googleEvent = $googleCalendarService->createEvent($this->event, $this->role, $calendarId);
 
         if ($googleEvent) {
@@ -222,7 +229,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
         $sync = $this->getCalendarSync();
         $googleEventId = $sync?->google_event_id;
 
-        if (! $googleEventId) {
+        if (! $googleEventId || $this->isOwnersOriginal()) {
             return;
         }
 
@@ -233,5 +240,17 @@ class SyncEventToGoogleCalendar implements ShouldQueue
         if ($success) {
             $sync->delete();
         }
+    }
+
+    /**
+     * Whether the entry this would delete is the owner's own, which the sync read this draft in
+     * from. Hiding or deleting the draft here (to keep it off the public page) must leave the
+     * owner's calendar as it was. A team member's copy is always ours to remove.
+     */
+    private function isOwnersOriginal(): bool
+    {
+        return $this->event->is_draft
+            && (int) $this->getSyncUser()->id === (int) $this->role->user_id
+            && $this->event->cameFromCalendarSync(Event::IMPORT_GOOGLE, $this->role);
     }
 }

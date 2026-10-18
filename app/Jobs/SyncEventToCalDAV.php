@@ -75,6 +75,12 @@ class SyncEventToCalDAV implements ShouldQueue
      */
     private function createEvent(CalDAVService $calDAVService): void
     {
+        // Already on that server: read in from it by the sync, or pushed there before. Publishing
+        // a draft the sync brought in used to make a second copy beside the owner's own entry.
+        if ($this->event->getCalDAVEventUidForRole($this->role->id)) {
+            return;
+        }
+
         $uid = $calDAVService->createEvent($this->event, $this->role);
 
         if ($uid) {
@@ -121,7 +127,9 @@ class SyncEventToCalDAV implements ShouldQueue
     {
         $uid = $this->event->getCalDAVEventUidForRole($this->role->id);
 
-        if (! $uid) {
+        // The owner's own entry, which the sync read this draft in from: hiding or deleting the
+        // draft here (to keep it off the public page) must leave their calendar as it was.
+        if (! $uid || ($this->event->is_draft && $this->event->cameFromCalendarSync(Event::IMPORT_CALDAV, $this->role))) {
             return;
         }
 

@@ -141,6 +141,14 @@ class SyncEventToMicrosoftCalendar implements ShouldQueue
     private function createEvent(MicrosoftCalendarService $microsoftCalendarService): void
     {
         $calendarId = $this->getSyncCalendarId();
+
+        // Already in that calendar: read in from it by the sync, or pushed there before. Publishing
+        // a draft the sync brought in used to make a second copy beside the owner's own entry,
+        // and with Teams meetings on, a new Teams meeting for it.
+        $sync = $this->getCalendarSync();
+        if ($sync?->microsoft_event_id && (! $sync->microsoft_calendar_id || $sync->microsoft_calendar_id === $calendarId)) {
+            return;
+        }
         $microsoftEvent = $microsoftCalendarService->createEvent($this->event, $this->role, $calendarId);
 
         if ($microsoftEvent && ! empty($microsoftEvent['id'])) {
@@ -182,7 +190,7 @@ class SyncEventToMicrosoftCalendar implements ShouldQueue
         $sync = $this->getCalendarSync();
         $microsoftEventId = $sync?->microsoft_event_id;
 
-        if (! $microsoftEventId) {
+        if (! $microsoftEventId || $this->isOwnersOriginal()) {
             return;
         }
 
@@ -193,5 +201,17 @@ class SyncEventToMicrosoftCalendar implements ShouldQueue
         if ($success) {
             $sync->delete();
         }
+    }
+
+    /**
+     * Whether the entry this would delete is the owner's own, which the sync read this draft in
+     * from. Hiding or deleting the draft here (to keep it off the public page) must leave the
+     * owner's calendar as it was. A team member's copy is always ours to remove.
+     */
+    private function isOwnersOriginal(): bool
+    {
+        return $this->event->is_draft
+            && (int) $this->getSyncUser()->id === (int) $this->role->user_id
+            && $this->event->cameFromCalendarSync(Event::IMPORT_MICROSOFT, $this->role);
     }
 }
