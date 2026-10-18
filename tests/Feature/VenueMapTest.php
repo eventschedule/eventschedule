@@ -115,6 +115,15 @@ class VenueMapTest extends TestCase
         $this->assertFalse(VenueMap::enabledFor($curator));
     }
 
+    public function test_a_tile_address_may_carry_its_braces_percent_encoded(): void
+    {
+        // DigitalOcean's console refuses a brace in a variable's value, so an operator there
+        // writes the placeholders encoded; the map must be handed the template it can fill.
+        config(['services.map.tile_url' => 'https://tile.openstreetmap.org/%7Bz%7D/%7bx%7d/%7By%7D.png']);
+
+        $this->assertSame('https://tile.openstreetmap.org/{z}/{x}/{y}.png', map_tiles()['url']);
+    }
+
     public function test_only_venues_of_public_events_are_on_the_map(): void
     {
         $curator = $this->curator();

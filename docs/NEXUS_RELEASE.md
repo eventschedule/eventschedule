@@ -706,13 +706,17 @@ stops on it with 1118, that is this limit and nothing else. Before the NEXT colu
 move a long `varchar` to `TEXT` (the four `varchar(500)` columns `slug_pattern`,
 `ai_style_instructions`, `ai_content_instructions` and `agenda_ai_prompt` hold 2,002 bytes each).
 
-**To switch the map on for eventschedule.com**, add to the app spec (both components, web and
-worker, since the worker asks the address search):
+**To switch the map on for eventschedule.com**, add as **app-level** variables (the web
+service and the worker both read them, and the worker is what asks the address search):
 
 ```
 MAP_GEOCODER_URL=https://nominatim.openstreetmap.org/search
-MAP_TILE_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png
+MAP_TILE_URL=https://tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png
 ```
+
+The tile address is written with its braces percent-encoded because the console refuses a brace
+in a value (it reads `{...}` as its own template syntax: "Unexpected '}'"). `map_tiles()` turns them
+back into `{z}`, `{x}`, `{y}`.
 
 Both services are OpenStreetMap's own and free, and both have a usage policy:
 - the address search allows one request a second at the very most, four a minute for a script on

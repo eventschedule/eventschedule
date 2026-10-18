@@ -120,11 +120,15 @@ if (! function_exists('map_tiles')) {
      * fetched from it before the visitor has allowed marketing cookies or pressed the control
      * beside the sentence that names it.
      *
+     * The braces of the address's placeholders may be written percent-encoded (%7Bz%7D for {z}):
+     * DigitalOcean's console reads a brace in a variable's value as its own template syntax and
+     * refuses to save it, and no tile server's address holds an encoded brace of its own.
+     *
      * @return array{url: string, name: string, attribution: string}|null
      */
     function map_tiles(): ?array
     {
-        $url = trim((string) config('services.map.tile_url'));
+        $url = str_ireplace(['%7B', '%7D'], ['{', '}'], trim((string) config('services.map.tile_url')));
 
         return $url === '' ? null : [
             'url' => $url,
