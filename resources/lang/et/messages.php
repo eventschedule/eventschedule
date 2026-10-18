@@ -6291,6 +6291,8 @@ return [
     'import_stopped_daily_limit' => 'Peatatud: tänane uute sündmuste limiit on täis. Ülejäänud saab lisada homme.',
     'import_all_day' => 'Terve päev',
     'import_already_listed' => 'Paistab olevat juba olemas',
+    'import_row_meeting_details' => 'Sisaldab koosoleku andmeid (pääsukoodi või sissehelistamise koodi), seetõttu pole see valitud',
+    'import_row_email_thread' => 'Paistab olevat pigem e-kiri kui sündmus, seetõttu pole see valitud',
     'import_row_incomplete' => 'Lisa nimi, kuupäev ja kellaaeg',
     'import_series_dates' => ':count kuupäeva, kuni :date',
     'import_repeats_daily' => 'Kordub iga päev',

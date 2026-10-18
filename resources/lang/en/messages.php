@@ -6362,6 +6362,8 @@ return [
     'import_stopped_daily_limit' => 'Stopped: today\'s limit for new events has been reached. The rest can be added tomorrow.',
     'import_all_day' => 'All day',
     'import_already_listed' => 'Looks like one you already have',
+    'import_row_meeting_details' => 'Shows meeting details (a passcode or dial-in code), so it is not ticked',
+    'import_row_email_thread' => 'Looks like an email rather than an event, so it is not ticked',
     'import_row_incomplete' => 'Add a name, date and time',
     'import_series_dates' => ':count dates, through :date',
     'import_repeats_daily' => 'Repeats daily',

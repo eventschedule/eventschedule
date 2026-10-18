@@ -6289,6 +6289,8 @@ return [
     'import_stopped_daily_limit' => 'נעצר: הגעת למגבלת האירועים החדשים להיום. את השאר אפשר להוסיף מחר.',
     'import_all_day' => 'כל היום',
     'import_already_listed' => 'נראה כמו אירוע שכבר קיים',
+    'import_row_meeting_details' => 'מופיעים בו פרטי פגישה (קוד גישה או קוד חיוג), ולכן הוא לא מסומן',
+    'import_row_email_thread' => 'נראה כמו הודעת אימייל ולא כמו אירוע, ולכן הוא לא מסומן',
     'import_row_incomplete' => 'יש להוסיף שם, תאריך ושעה',
     'import_series_dates' => ':count תאריכים, עד :date',
     'import_repeats_daily' => 'חוזר מדי יום',

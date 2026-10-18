@@ -669,4 +669,19 @@ class LinkImportParseTest extends TestCase
         $this->assertSame(['Something else'], array_column($response->json('parsed'), 'event_name'));
         $this->assertSame(1, $response->json('meta.already_on_schedule'));
     }
+
+    public function test_a_calendar_entry_with_meeting_details_or_an_email_thread_is_marked_for_the_page_to_leave_unticked(): void
+    {
+        $this->serveFeed($this->feed(
+            "UID:zoom\nSUMMARY:Weekly sync\nDTSTART:20261020T180000Z\nDTEND:20261020T190000Z\nDESCRIPTION:Meeting ID: 812 3456 7890\\nPasscode: 123456",
+            "UID:thread\nSUMMARY:Re: [EXTERNAL] Appointment\nDTSTART:20261021T180000Z\nDTEND:20261021T190000Z",
+            "UID:jazz\nSUMMARY:Jazz Night\nDTSTART:20261022T180000Z\nDTEND:20261022T190000Z\nLOCATION:The Hall, 12 Main St",
+        ));
+
+        $parsed = collect($this->parse(self::FEED)->assertOk()->json('parsed'))->keyBy('event_name');
+
+        $this->assertSame('meeting_details', $parsed['Weekly sync']['privacy']);
+        $this->assertSame('email_thread', $parsed['Re: [EXTERNAL] Appointment']['privacy']);
+        $this->assertNull($parsed['Jazz Night']['privacy']);
+    }
 }

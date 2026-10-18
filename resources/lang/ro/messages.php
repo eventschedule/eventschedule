@@ -6310,6 +6310,8 @@ return [
     'import_stopped_daily_limit' => 'Oprit: limita de azi pentru evenimente noi a fost atinsă. Restul pot fi adăugate mâine.',
     'import_all_day' => 'Toată ziua',
     'import_already_listed' => 'Pare unul pe care îl ai deja',
+    'import_row_meeting_details' => 'Conține detaliile unei întâlniri (un cod de acces sau de apelare), așa că nu este bifat',
+    'import_row_email_thread' => 'Pare mai degrabă un e-mail decât un eveniment, așa că nu este bifat',
     'import_row_incomplete' => 'Adaugă un nume, o dată și o oră',
     'import_series_dates' => ':count date, până la :date',
     'import_repeats_daily' => 'Se repetă zilnic',

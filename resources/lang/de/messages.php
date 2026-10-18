@@ -6290,6 +6290,8 @@ return [
     'import_stopped_daily_limit' => 'Angehalten: Das heutige Limit für neue Veranstaltungen ist erreicht. Die übrigen können morgen hinzugefügt werden.',
     'import_all_day' => 'Ganztägig',
     'import_already_listed' => 'Sieht nach einer bereits vorhandenen aus',
+    'import_row_meeting_details' => 'Enthält Besprechungsdaten (einen Kenncode oder eine Einwahlnummer), daher nicht ausgewählt',
+    'import_row_email_thread' => 'Sieht eher nach einer E-Mail als nach einer Veranstaltung aus, daher nicht ausgewählt',
     'import_row_incomplete' => 'Name, Datum und Uhrzeit hinzufügen',
     'import_series_dates' => ':count Termine, bis :date',
     'import_repeats_daily' => 'Wiederholt sich täglich',

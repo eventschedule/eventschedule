@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Repos\EventRepo;
 use App\Services\AuditService;
 use App\Services\EventChangeNotifier;
+use App\Utils\CalendarPrivacy;
 use App\Utils\GeminiUtils;
 use App\Utils\RemoteImage;
 use App\Utils\UrlUtils;
@@ -109,7 +110,11 @@ class FeedEventWriter
             // $asDraft: an event coming back after it went (deleted by the feed and listed again)
             // is for the owner to look at, and is made a draft, not published and then hidden:
             // a publish is a push to calendars, a webhook and a line in the digest to followers.
-            'is_draft' => $asDraft || ! $feed->publishes(),
+            // And one that carries a meeting's passcode or an email thread waits for the owner
+            // even on a feed that publishes: a private calendar's address read as a feed
+            // published one person's meetings that way (CalendarPrivacy).
+            'is_draft' => $asDraft || ! $feed->publishes()
+                || CalendarPrivacy::holdReason(CalendarPrivacy::findings($wanted['name'], $wanted['description'], null)) !== null,
             'is_private' => false,
             'is_internal' => false,
             // The schedule's own place on its own event, as the API and the form give it.

@@ -6295,6 +6295,8 @@ return [
     'import_stopped_daily_limit' => 'Arrêté : la limite du jour pour les nouveaux événements est atteinte. Le reste pourra être ajouté demain.',
     'import_all_day' => 'Toute la journée',
     'import_already_listed' => 'Ressemble à un événement déjà présent',
+    'import_row_meeting_details' => 'Contient des informations de réunion (un code secret ou un code d\'accès téléphonique), donc non coché',
+    'import_row_email_thread' => 'Ressemble plus à un e-mail qu\'à un événement, donc non coché',
     'import_row_incomplete' => 'Ajoutez un nom, une date et une heure',
     'import_series_dates' => ':count dates, jusqu\'au :date',
     'import_repeats_daily' => 'Se répète chaque jour',

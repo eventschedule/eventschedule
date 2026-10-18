@@ -6290,6 +6290,8 @@ return [
     'import_stopped_daily_limit' => 'Detenido: se alcanzó el límite de hoy para eventos nuevos. El resto se puede añadir mañana.',
     'import_all_day' => 'Todo el día',
     'import_already_listed' => 'Parece uno que ya tienes',
+    'import_row_meeting_details' => 'Muestra datos de una reunión (un código de acceso o de marcación), así que no está marcado',
+    'import_row_email_thread' => 'Parece un correo electrónico más que un evento, así que no está marcado',
     'import_row_incomplete' => 'Añade un nombre, fecha y hora',
     'import_series_dates' => ':count fechas, hasta el :date',
     'import_repeats_daily' => 'Se repite cada día',

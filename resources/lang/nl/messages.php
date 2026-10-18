@@ -6292,6 +6292,8 @@ return [
     'import_stopped_daily_limit' => 'Gestopt: de limiet van vandaag voor nieuwe evenementen is bereikt. De rest kan morgen worden toegevoegd.',
     'import_all_day' => 'Hele dag',
     'import_already_listed' => 'Lijkt op een die je al hebt',
+    'import_row_meeting_details' => 'Bevat vergadergegevens (een toegangscode of inbelcode), dus niet aangevinkt',
+    'import_row_email_thread' => 'Lijkt meer op een e-mail dan op een evenement, dus niet aangevinkt',
     'import_row_incomplete' => 'Voeg een naam, datum en tijd toe',
     'import_series_dates' => ':count data, tot en met :date',
     'import_repeats_daily' => 'Herhaalt dagelijks',

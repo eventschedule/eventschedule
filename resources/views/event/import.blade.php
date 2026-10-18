@@ -2480,7 +2480,7 @@
                         this.seriesOriginals[event.series.id] = JSON.parse(JSON.stringify(event));
                     }
                 });
-                this.selectedRows = this.preview.parsed.map((event, i) => this.rowComplete(i) && this.rowListedIndex(i) === null);
+                this.selectedRows = this.preview.parsed.map((event, i) => this.rowComplete(i) && this.rowListedIndex(i) === null && ! event.privacy);
                 this.expandedRow = null;
                 this.addSummary = null;
                 this.stoppedByLimit = false;
@@ -2578,6 +2578,12 @@
                 }
                 if (this.rowListedIndex(idx) !== null) {
                     return @json(__('messages.import_already_listed'), JSON_UNESCAPED_UNICODE);
+                }
+                if (this.preview.parsed[idx].privacy === 'meeting_details') {
+                    return @json(__('messages.import_row_meeting_details'), JSON_UNESCAPED_UNICODE);
+                }
+                if (this.preview.parsed[idx].privacy === 'email_thread') {
+                    return @json(__('messages.import_row_email_thread'), JSON_UNESCAPED_UNICODE);
                 }
 
                 return '';

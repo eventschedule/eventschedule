@@ -498,4 +498,16 @@ class FeedWriterTest extends TestCase
             $byHand, ['summary' => 'Echoed', 'description' => null, 'start' => $start, 'end' => $end, 'location' => null], $this->role,
         ]));
     }
+
+    public function test_a_feed_that_publishes_still_holds_an_entry_with_meeting_details(): void
+    {
+        // A private calendar's own address read as a feed publishes one person's meetings.
+        [, $held] = $this->made(['event_name' => 'Weekly sync', 'event_details' => "Meeting ID: 812 3456 7890\nPasscode: 123456"]);
+        $this->assertTrue((bool) $held->is_draft);
+
+        $this->item('post-2');
+        $wanted = $this->writer()->wanted($this->feed, $this->role, $this->row(['event_name' => 'Re: [EXTERNAL] Appointment']), null);
+        $thread = $this->writer()->create($this->feed, $this->role, $this->owner, EventFeedItem::where('external_id', 'post-2')->first(), $wanted, null);
+        $this->assertTrue((bool) $thread->fresh()->is_draft);
+    }
 }

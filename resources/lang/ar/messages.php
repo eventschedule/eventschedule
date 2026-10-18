@@ -6290,6 +6290,8 @@ return [
     'import_stopped_daily_limit' => 'توقف: تم بلوغ حد اليوم للفعاليات الجديدة. يمكن إضافة الباقي غداً.',
     'import_all_day' => 'طوال اليوم',
     'import_already_listed' => 'تبدو كفعالية لديك بالفعل',
+    'import_row_meeting_details' => 'تظهر فيها تفاصيل اجتماع (رمز مرور أو رمز اتصال)، لذلك لم يتم تحديدها',
+    'import_row_email_thread' => 'تبدو كرسالة بريد إلكتروني وليست فعالية، لذلك لم يتم تحديدها',
     'import_row_incomplete' => 'أضف اسماً وتاريخاً ووقتاً',
     'import_series_dates' => ':count تواريخ، حتى :date',
     'import_repeats_daily' => 'يتكرر يومياً',

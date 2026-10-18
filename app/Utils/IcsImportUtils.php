@@ -688,8 +688,18 @@ class IcsImportUtils
         }
 
         if (self::isWebUrl($location)) {
-            $result['url'] = $location;
+            // Never a link that carries the meeting's password: it would be the event's public link.
+            if (! CalendarPrivacy::flags(CalendarPrivacy::findings(null, null, $location))) {
+                $result['url'] = $location;
+            }
 
+            return $result;
+        }
+
+        // A dial-in with its code, or a provider's name standing in for a place ("Microsoft Teams
+        // Meeting"), is no venue; what a location says beside a link is (CalendarPrivacy).
+        $location = CalendarPrivacy::venueFromLocation($location);
+        if ($location === null) {
             return $result;
         }
 

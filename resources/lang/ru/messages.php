@@ -6292,6 +6292,8 @@ return [
     'import_stopped_daily_limit' => 'Остановлено: достигнут сегодняшний лимит новых событий. Остальные можно добавить завтра.',
     'import_all_day' => 'Весь день',
     'import_already_listed' => 'Похоже на уже имеющееся',
+    'import_row_meeting_details' => 'Содержит данные встречи (код доступа или код для звонка), поэтому не отмечено',
+    'import_row_email_thread' => 'Похоже скорее на письмо, чем на событие, поэтому не отмечено',
     'import_row_incomplete' => 'Добавьте название, дату и время',
     'import_series_dates' => 'Дат: :count, по :date',
     'import_repeats_daily' => 'Повторяется ежедневно',

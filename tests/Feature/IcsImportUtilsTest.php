@@ -621,4 +621,23 @@ class IcsImportUtilsTest extends TestCase
         $this->assertSame('listed', $changed['seen']['class#20261020']);
         $this->assertSame(['past' => 0, 'cancelled' => 0, 'private' => 0, 'unreadable' => 0], $changed['skipped']);
     }
+
+    public function test_a_meeting_location_names_no_venue_and_its_password_is_no_link(): void
+    {
+        $nothing = ['venue_name' => '', 'event_address' => '', 'url' => ''];
+
+        // A provider's name, or a dial-in with its code, used to become a venue called that.
+        $this->assertSame($nothing, IcsImportUtils::location('Microsoft Teams Meeting'));
+        $this->assertSame($nothing, IcsImportUtils::location('Conference call #: (555)-010-0199 / Code: 583920174#'));
+
+        // A join link carrying the meeting's password would be the event's public link.
+        $this->assertSame($nothing, IcsImportUtils::location('https://us02web.zoom.us/j/81234567890?pwd=abc123'));
+        $this->assertSame('https://example.org/tickets', IcsImportUtils::location('https://example.org/tickets')['url']);
+
+        // What stands beside the meeting is still the place.
+        $this->assertSame(
+            ['venue_name' => 'The Blue Room', 'event_address' => '12 Main St', 'url' => ''],
+            IcsImportUtils::location('Microsoft Teams Meeting; The Blue Room, 12 Main St')
+        );
+    }
 }

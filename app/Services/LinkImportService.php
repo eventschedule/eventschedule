@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\LinkImportException;
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\CalendarPrivacy;
 use App\Utils\GeminiUtils;
 use App\Utils\IcsImportUtils;
 use App\Utils\ImportAddress;
@@ -308,6 +309,16 @@ class LinkImportService
 
         $rows = $this->fetchImages($rows);
         $rows = GeminiUtils::enrichParsedEvents($role, $rows, ['source' => $source, 'timezone' => $timezone]);
+
+        // An entry with a meeting's passcode or an email thread in it starts unticked, and says
+        // why: importing somebody's own calendar is how a work calendar ended up public.
+        foreach ($rows as $index => $row) {
+            $rows[$index]['privacy'] = CalendarPrivacy::holdReason(CalendarPrivacy::findings(
+                $row['event_name'] ?? null,
+                $row['event_details'] ?? null,
+                trim(($row['venue_name'] ?? '').' '.($row['event_address'] ?? '')),
+            ));
+        }
 
         return [
             'parsed' => array_values($rows),
