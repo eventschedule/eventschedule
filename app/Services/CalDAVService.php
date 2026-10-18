@@ -374,6 +374,9 @@ class CalDAVService
             // A server that did not answer is not an empty calendar: nothing is recorded, and the
             // full read is not marked done.
             if ($this->reportFailed) {
+                // hasChanges() stored the server's change marker before asking; forgotten, the
+                // next run reads again instead of finding "no changes".
+                $role->writeOperationalColumns(['caldav_sync_token' => null]);
                 $results['errors']++;
 
                 return $results;
@@ -422,13 +425,13 @@ class CalDAVService
                     }
 
                     // One occurrence moved or cancelled (RECURRENCE-ID) is the first of its UID
-                    // when the resource holds only overrides, and stands for the whole entry: its
-                    // CLASS and the owner's answer count, but a cancelled date is not a
-                    // cancelled series.
-                    $sourceReason = CalendarArrival::calDavReason($eventData, $settings['username'] ?? null);
-                    if (! empty($eventData['recurrence_id']) && $sourceReason === CalendarArrival::SOURCE_CANCELLED) {
-                        $sourceReason = null;
-                    }
+                    // when the resource holds only overrides, and stands for the whole entry. Its
+                    // CLASS is the entry's; its STATUS and the owner's answer are about that one
+                    // date, so they do not keep the other dates out.
+                    $sourceReason = CalendarArrival::calDavReason(
+                        empty($eventData['recurrence_id']) ? $eventData : ['status' => null, 'attendees' => []] + $eventData,
+                        $settings['username'] ?? null
+                    );
 
                     // Check if event already exists by UID using the pre-fetched etag map.
                     // Use array_key_exists (not isset) because a stored etag can be null.
@@ -699,8 +702,8 @@ class CalDAVService
             'class' => isset($vevent->CLASS) ? (string) $vevent->CLASS : null,
             'status' => isset($vevent->STATUS) ? (string) $vevent->STATUS : null,
             'attendees' => [],
-            // An override of one occurrence of a series: what it says about publishing is about
-            // that date, never the series (CalendarArrival is asked of the master entry only).
+            // An override of one occurrence of a series: its STATUS and the owner's answer are about
+            // that date, never the series; its CLASS is the entry's (syncFromCalDAV()).
             'recurrence_id' => isset($vevent->{'RECURRENCE-ID'}),
         ];
 

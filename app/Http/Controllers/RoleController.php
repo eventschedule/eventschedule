@@ -8974,6 +8974,17 @@ class RoleController extends Controller
             CalendarArrival::clearStopped($role, $provider);
         }
 
+        // A sync that no longer reads takes the word given for its arrivals with it, whatever the
+        // hidden switch still posts; so does a word given for another calendar (the binding no
+        // longer matches), or it would hold again the day that calendar is chosen again.
+        if (CalendarArrival::tablesReady() && CalendarArrival::settings($role)->{"{$provider}_publishes"}
+            && (! $reads || ! CalendarArrival::publishes($role, $provider))) {
+            CalendarArrival::setPublishing($role, $provider, false);
+        }
+        if (! $reads) {
+            return;
+        }
+
         // The switch as the page drew it: left as it was, it says nothing. Otherwise a tab opened
         // before the operator paused the sync (which takes the owner's word back) would give it
         // again with the next save. A page from before this was posted has no such field.
@@ -8985,11 +8996,11 @@ class RoleController extends Controller
         // tab, and a sync carried over from before drafts renders with the switch on: answering
         // here would quietly settle the Schedule tab's "keep publishing your main calendar?"
         // (publish_confirmed_at) for somebody who only fixed a typo.
-        if ($reads && $wanted) {
+        if ($wanted) {
             if (! CalendarArrival::publishes($role, $provider)) {
                 CalendarArrival::setPublishing($role, $provider, true);
             }
-        } elseif (CalendarArrival::tablesReady() && CalendarArrival::settings($role)->{"{$provider}_publishes"}) {
+        } elseif (CalendarArrival::publishes($role, $provider)) {
             CalendarArrival::setPublishing($role, $provider, false);
         }
     }

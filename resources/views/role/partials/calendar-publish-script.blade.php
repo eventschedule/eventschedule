@@ -66,6 +66,12 @@ document.addEventListener('DOMContentLoaded', function () {
         var select = document.getElementById(provider + '-calendar-select');
         if (select && toggle) {
             select.addEventListener('change', function () {
+                // The switch was drawn for the calendar the page opened with: turned on again
+                // after choosing another, it is a new word (RoleController::savePublishOnArrival()).
+                var rendered = document.querySelector('input[name="' + provider + '_publish_rendered"]');
+                if (rendered) {
+                    rendered.value = '0';
+                }
                 if (toggle.checked) {
                     toggle.checked = false;
                     toggle.dispatchEvent(new Event('change', { bubbles: true }));

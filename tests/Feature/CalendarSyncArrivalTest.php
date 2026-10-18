@@ -477,6 +477,7 @@ class CalendarSyncArrivalTest extends TestCase
         $role->forceFill([
             'caldav_settings' => ['server_url' => 'https://dav.example.org', 'username' => 'me@example.org', 'password' => 'p', 'calendar_url' => 'https://dav.example.org/cal'],
             'caldav_last_sync_at' => now()->subHour(),
+            'caldav_sync_token' => 'ctag-2',
         ])->save();
         $this->assertTrue(CalendarArrival::needsReread($role->fresh(), CalendarArrival::CALDAV));
 
@@ -488,6 +489,7 @@ class CalendarSyncArrivalTest extends TestCase
 
         $this->assertSame(1, $results['errors']);
         $this->assertTrue(CalendarArrival::needsReread($role->fresh(), CalendarArrival::CALDAV), 'it read nothing, so it is not done');
+        $this->assertNull($role->fresh()->caldav_sync_token, 'the next run would find "no changes" and never read it');
     }
 
     public function test_a_caldav_override_that_comes_first_still_carries_its_class(): void
@@ -508,6 +510,24 @@ class CalendarSyncArrivalTest extends TestCase
         $service->syncFromCalDAV($role->fresh());
 
         $this->assertSame(0, Event::where('name', 'Therapy')->count());
+    }
+
+    public function test_a_caldav_override_declined_for_one_date_does_not_keep_the_entry_out(): void
+    {
+        [, $role] = $this->schedule(['sync_direction' => null, 'caldav_sync_direction' => 'from']);
+        $role->forceFill(['caldav_settings' => ['server_url' => 'https://dav.example.org', 'username' => 'me@example.org', 'password' => 'p', 'calendar_url' => 'https://dav.example.org/cal']])->save();
+
+        $at = now()->addDays(5)->setTime(18, 0);
+        $service = Mockery::mock(CalDAVService::class, [app(EventRepo::class)])->makePartial()->shouldAllowMockingProtectedMethods();
+        $service->shouldReceive('getEventsFromCalDAV')->andReturn([[
+            'uid' => 'c-1', 'etag' => null, 'summary' => 'Choir practice', 'description' => '', 'location' => null,
+            'start' => $at->copy(), 'end' => $at->copy()->addHour(), 'duration' => 1,
+            'attendees' => ['me@example.org' => 'DECLINED'], 'recurrence_id' => true,
+        ]]);
+
+        $service->syncFromCalDAV($role->fresh());
+
+        $this->assertSame(1, Event::where('name', 'Choir practice')->count(), 'one date declined is not the whole series');
     }
 
     public function test_publishing_an_unlisted_event_that_was_taken_off_puts_it_back_unlisted(): void

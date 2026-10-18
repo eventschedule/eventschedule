@@ -5441,7 +5441,8 @@
                                     </div>
                                 </div>
 
-                                @include('role.partials.calendar-publish-switch', ['provider' => 'google', 'direction' => $role->sync_direction])
+                                {{-- The direction the radios above are drawn with: a read-only connection shows "both" as "from". --}}
+                                @include('role.partials.calendar-publish-switch', ['provider' => 'google', 'direction' => $googleReadOnly ? match ($role->sync_direction) { 'both' => 'from', 'to' => null, default => $role->sync_direction } : $role->sync_direction])
 
                                 @include('role.partials.calendar-delete-action', ['provider' => 'google'])
 

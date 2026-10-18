@@ -902,10 +902,12 @@ class GoogleCalendarService
             } finally {
                 $this->rereadAllowed = true;
             }
-            if ($changes['errors'] > 0) {
+            $role->refresh();
+            // A failed read, or a stored token that was refused and read the whole window
+            // afresh (which finished the full read), leaves nothing to do.
+            if ($changes['errors'] > 0 || ! $role->google_sync_token || ! CalendarArrival::needsReread($role, CalendarArrival::GOOGLE)) {
                 return $changes;
             }
-            $role->refresh();
         }
         $this->inboundRereading = (bool) $rereading;
 

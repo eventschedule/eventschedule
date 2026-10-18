@@ -180,4 +180,21 @@ class CalendarPublishSwitchTest extends TestCase
         $this->assertSame('from', $role->fresh()->caldav_sync_direction);
         $this->assertTrue(CalendarArrival::publishes($role->fresh(), CalendarArrival::CALDAV));
     }
+
+    public function test_a_row_that_stops_reading_takes_the_owners_word_back(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->caldavSchedule($owner, 'both');
+        CalendarArrival::setPublishing($role, CalendarArrival::CALDAV, true);
+
+        // "To" only: the switch is hidden but still ticked, and posts as it was drawn.
+        $this->save($owner, $role, [
+            'caldav_integration_submitted' => 1,
+            'caldav_sync_direction' => 'to', 'caldav_direction_rendered' => 'both',
+            'caldav_publish_on_arrival' => 1, 'caldav_publish_rendered' => 1,
+        ])->assertRedirect();
+
+        $this->assertSame('to', $role->fresh()->caldav_sync_direction);
+        $this->assertFalse((bool) CalendarSyncSetting::where('role_id', $role->id)->value('caldav_publishes'), 'reading again later would have published at once');
+    }
 }
