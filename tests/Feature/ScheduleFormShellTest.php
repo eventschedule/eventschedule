@@ -71,20 +71,22 @@ class ScheduleFormShellTest extends TestCase
         [, , $html] = $this->talentForm();
 
         $rows = [
-            'details' => ['localization' => 'details-tab-localization', 'contact' => 'details-tab-contact'],
+            'details' => ['localization' => 'details-tab-localization', 'contact' => 'details-tab-contact', 'announcement' => 'details-tab-announcement'],
             'style' => [
                 'advanced' => 'style-content-advanced', 'background' => 'style-content-background',
                 'animation' => 'style-content-animation', 'css' => 'style-content-css',
             ],
+            'page' => ['videos' => 'page-tab-videos', 'gallery' => 'page-tab-gallery', 'sponsors' => 'page-tab-sponsors'],
             'customize' => [
                 'subschedules' => 'customize-tab-subschedules', 'custom-fields' => 'customize-tab-custom-fields',
                 'categories' => 'customize-tab-categories', 'custom-labels' => 'customize-tab-custom-labels',
             ],
-            'settings' => ['notifications' => 'settings-tab-notifications', 'advanced' => 'settings-tab-advanced'],
             'engagement' => [
-                'requests' => 'engagement-tab-requests', 'fan_content' => 'engagement-tab-fan_content',
-                'feedback' => 'engagement-tab-feedback', 'carpool' => 'engagement-tab-carpool', 'sponsors' => 'engagement-tab-sponsors',
+                'requests' => 'engagement-tab-requests', 'mailing-list' => 'engagement-tab-mailing-list', 'fan_content' => 'engagement-tab-fan_content',
+                'feedback' => 'engagement-tab-feedback', 'carpool' => 'engagement-tab-carpool',
             ],
+            'tickets' => ['presets' => 'tickets-tab-presets', 'gift-cards' => 'tickets-tab-gift-cards'],
+            'settings' => ['events' => 'settings-tab-events', 'notifications' => 'settings-tab-notifications', 'advanced' => 'settings-tab-advanced'],
             'integration' => [
                 'email' => 'integration-tab-email', 'google' => 'integration-tab-google', 'microsoft' => 'integration-tab-microsoft',
                 'caldav' => 'integration-tab-caldav', 'feeds' => 'integration-tab-feeds', 'advanced' => 'integration-tab-advanced',
@@ -106,7 +108,7 @@ class ScheduleFormShellTest extends TestCase
         }
 
         // What every schedule fills in first is on the page without opening anything.
-        foreach (['details-tab-general', 'style-content-branding', 'settings-tab-general'] as $always) {
+        foreach (['details-tab-general', 'style-content-branding', 'page-tab-general', 'settings-tab-general'] as $always) {
             $this->assertMatchesRegularExpression('/<div id="'.$always.'"[^>]*>/', $html);
             $this->assertDoesNotMatchRegularExpression('/<div id="'.$always.'"[^>]* hidden>/', $html, "{$always} is always open");
         }
@@ -117,7 +119,7 @@ class ScheduleFormShellTest extends TestCase
     {
         [, , $html] = $this->talentForm();
 
-        foreach (['details-tab' => 'contact', 'customize-tab' => 'categories', 'settings-tab' => 'notifications', 'engagement-tab' => 'requests', 'integration-tab' => 'google'] as $class => $tab) {
+        foreach (['details-tab' => 'contact', 'page-tab' => 'sponsors', 'customize-tab' => 'categories', 'engagement-tab' => 'requests', 'tickets-tab' => 'gift-cards', 'settings-tab' => 'notifications', 'integration-tab' => 'google'] as $class => $tab) {
             $this->assertMatchesRegularExpression('/<button type="button" class="event-subrow '.$class.'"[^>]*data-tab="'.$tab.'"/', $html);
         }
         foreach (['advanced', 'background', 'animation', 'css'] as $row) {
@@ -158,7 +160,7 @@ class ScheduleFormShellTest extends TestCase
         $this->assertStringContainsString('name="gift_card_amounts_submitted" value="1"', $html);
 
         config(['app.hosted' => false]);
-        $this->assertStringContainsString('name="import_lists_submitted" value="1"', $this->formHtml($owner, $role), 'auto import is a selfhost tab');
+        $this->assertStringContainsString('name="import_lists_submitted" value="1"', $this->formHtml($owner, $role), 'auto import is a selfhost row of Integrations');
     }
 
     public function test_a_sub_schedule_is_one_row_of_its_list(): void
@@ -359,20 +361,25 @@ class ScheduleFormShellTest extends TestCase
         $this->assertMatchesRegularExpression('/<div id="event-categories-container" class="event-list sched-list"[^>]*>\s*<div class="event-list-row event-category-item" data-list-row data-category-id="\d+"/', $html);
         $this->assertSame(12, preg_match_all('/class="event-list-row event-category-item" data-list-row data-category-id="\d+"/', $html), 'the twelve defaults');
 
-        // Settings > Advanced: three headings, in order, and the event URL pattern under the first.
-        $advanced = substr($html, strpos($html, 'id="settings-tab-advanced"'));
-        $advanced = substr($advanced, 0, strpos($advanced, '<!-- End Tab Content: Advanced -->'));
-        $order = array_map(fn ($needle) => strpos($advanced, $needle), [
-            '>'.__('messages.settings_group_new_events').'</p>', 'name="default_event_visibility"', 'name="slug_pattern"', 'name="default_category_id"',
-            '>'.__('messages.settings_group_public_page').'</p>', 'name="hide_past_events"', 'name="first_day_of_week"',
+        // Settings > New events: what a new event starts as, in this order, and (hosted) what the AI
+        // import asks for under its own heading.
+        $newEvents = substr($html, strpos($html, 'id="settings-tab-events"'));
+        $newEvents = substr($newEvents, 0, strpos($newEvents, '<!-- End Tab Content: New events -->'));
+        $order = array_map(fn ($needle) => strpos($newEvents, $needle), [
+            'name="default_event_visibility"', 'name="slug_pattern"', 'name="default_category_id"',
             '>'.__('messages.ai_import').'</p>', 'id="import_form_fields_section"',
         ]);
-        $this->assertNotContains(false, $order, 'each heading and each of its settings is in the row');
+        $this->assertNotContains(false, $order, 'each setting is in the row');
         $sorted = $order;
         sort($sorted);
-        $this->assertSame($sorted, $order, 'in the order the headings promise');
-        $general = substr($html, strpos($html, 'id="settings-tab-general"'), strpos($html, 'id="settings-tab-notifications"') - strpos($html, 'id="settings-tab-general"'));
+        $this->assertSame($sorted, $order, 'in that order');
+        $general = substr($html, strpos($html, 'id="settings-tab-general"'), strpos($html, 'id="settings-tab-events"') - strpos($html, 'id="settings-tab-general"'));
         $this->assertStringNotContainsString('name="slug_pattern"', $general, 'the first screen of Settings is the address');
+        // Advanced keeps what no other tab is about, with no headings left to group it.
+        $advanced = substr($html, strpos($html, 'id="settings-tab-advanced"'));
+        $advanced = substr($advanced, 0, strpos($advanced, '<!-- End Tab Content: Advanced -->'));
+        $this->assertStringContainsString('name="show_accessibility_widget"', $advanced);
+        $this->assertStringNotContainsString('class="event-group-label', $advanced);
 
         // Settings > Notifications: by who the email goes to.
         $notifications = substr($html, strpos($html, 'id="settings-tab-notifications"'), strpos($html, 'id="settings-tab-advanced"') - strpos($html, 'id="settings-tab-notifications"'));
@@ -501,8 +508,208 @@ class ScheduleFormShellTest extends TestCase
             ), "{$tab}: one quiet line when empty, then its own Add link, and nothing else before the list ends");
         }
         $this->assertStringNotContainsString('link-empty-state text-center py-8', substr($html, 0, strpos($html, 'id="youtube_links_data"')), 'no tall empty state is left in a live list');
-        // The next list stands apart: a rule and a wider gap, from the page's own styles.
-        $this->assertSame(1, preg_match('/\.links-tab-content \+ \.event-group-label \{[^}]*border-top: 1px solid/', $html), 'the next list begins after a rule');
-        $this->assertSame(1, preg_match('/<\/div>\s*<p class="event-group-label">'.preg_quote(__('messages.social_links'), '/').'<\/p>/', $html), 'and its name follows the first list directly, which is what the rule is hung on');
+        // Social links open the Page content tab under their own name; the videos are a row of it.
+        $this->assertSame(1, preg_match('/<div id="page-tab-general" class="page-tab-content">\s*<p class="event-group-label">'.preg_quote(__('messages.social_links'), '/').'<\/p>\s*<div id="links-tab-social_links"/', $html), 'the social links are the first thing in Page content');
+        $this->assertSame(1, preg_match('/<div id="page-tab-videos" class="event-subrow-body page-tab-content" hidden>\s*<div id="links-tab-youtube_videos"/', $html), 'and the videos are its first row');
+    }
+
+    /** The ids of the panes and tabs that hold each element of a rendered form. */
+    private function holders(string $html): \DOMXPath
+    {
+        $document = new \DOMDocument;
+        libxml_use_internal_errors(true);
+        $document->loadHTML('<?xml encoding="utf-8"?>'.$html);
+        libxml_clear_errors();
+
+        return new \DOMXPath($document);
+    }
+
+    private function assertInside(\DOMXPath $xpath, string $pane, string $test, string $what): void
+    {
+        $this->assertGreaterThan(0, $xpath->query('//*[@id="'.$pane.'"]//*['.$test.']')->length, "{$what} is in #{$pane}");
+    }
+
+    /**
+     * Every setting the 2026-10 rearrangement moved sits in the tab, and the row, that is now
+     * about it: what the public page shows in Page content, the ways visitors leave an address in
+     * Engagement, ticket setups beside gift cards, defaults for new events in their own row of
+     * Settings, how the event list looks in Style, and the week's first day beside the timezone.
+     */
+    public function test_each_setting_sits_in_the_tab_and_row_that_is_about_it(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['address1' => '131 W 3rd St']);
+        $xpath = $this->holders($this->formHtml($owner, $venue));
+
+        $named = [
+            'details-tab-localization' => ['first_day_of_week', 'timezone', 'use_24_hour_time'],
+            'details-tab-announcement' => ['banner_enabled', 'banner_message', 'banner_on_event_pages'],
+            'style-content-animation' => ['event_layout', 'hide_past_events', 'list_animation', 'list_wording', 'list_template'],
+            'page-tab-videos' => ['hide_videos'],
+            'engagement-tab-mailing-list' => ['show_subscribe_panel', 'show_event_interest'],
+            'tickets-tab-gift-cards' => ['gift_cards_enabled'],
+            'settings-tab-events' => ['default_event_visibility', 'slug_pattern', 'default_category_id'],
+            'settings-tab-notifications' => ['announce_new_events'],
+            'settings-tab-advanced' => ['show_accessibility_widget'],
+        ];
+        foreach ($named as $pane => $names) {
+            foreach ($names as $name) {
+                $this->assertInside($xpath, $pane, '@name="'.$name.'"', $name);
+            }
+        }
+        foreach (['page-tab-general' => 'links-tab-social_links', 'page-tab-videos' => 'links-tab-youtube_videos', 'page-tab-sponsors' => 'sponsors-empty', 'tickets-tab-presets' => 'ticket-preset-items', 'tickets-tab-gift-cards' => 'gift-card-details', 'settings-tab-events' => 'import_form_fields_section'] as $pane => $id) {
+            $this->assertInside($xpath, $pane, '@id="'.$id.'"', "#{$id}");
+        }
+        $this->assertInside($xpath, 'section-page', '@id="page-tab-gallery"', 'the gallery row');
+
+        // Nothing stayed behind in the rows they left.
+        foreach (['hide_past_events', 'first_day_of_week', 'list_wording', 'show_subscribe_panel', 'show_event_interest', 'default_event_visibility', 'hide_videos'] as $name) {
+            $this->assertSame(0, $xpath->query('//*[@id="settings-tab-advanced"]//*[@name="'.$name.'"]')->length, "{$name} left Settings > Advanced");
+        }
+        $this->assertSame(0, $xpath->query('//*[@id="details-tab-general"]//*[@name="banner_enabled"]')->length, 'the announcement bar left the top of Details');
+        $this->assertSame(0, $xpath->query('//*[@id="section-engagement"]//*[@id="sponsors-empty"]')->length, 'the sponsors left Engagement');
+
+        // The map and the hotels, on a schedule that is offered both: a curator, on an install with
+        // an address search and the accommodation map.
+        config(['services.map.geocoder_url' => 'https://lookup.test/search', 'stay22.enabled' => true]);
+        $curator = $this->holders($this->formHtml($owner, $this->createCurator($owner)));
+        foreach (['page-tab-map' => 'show_venues_map', 'page-tab-accommodation' => 'stay22_enabled'] as $pane => $name) {
+            $this->assertInside($curator, $pane, '@name="'.$name.'"', $name);
+            $this->assertSame(0, $curator->query('//*[@id="section-engagement"]//*[@name="'.$name.'"]')->length, "{$name} left Engagement");
+        }
+
+        // A selfhost install's auto import is a row of Integrations, not a tab of its own.
+        config(['app.hosted' => false]);
+        $xpath = $this->holders($this->formHtml($owner, $venue));
+        $this->assertInside($xpath, 'integration-tab-auto-import', '@name="import_urls[]" or @id="import-url-items"', 'the import addresses');
+        $this->assertSame(0, $xpath->query('//*[@id="section-auto-import"]')->length);
+    }
+
+    /**
+     * A refused save comes back with its message where the field now is, which is what the page
+     * reads to open that tab and that row (FormKit.routeErrors()): a message for a moved field
+     * printed in its old place would open a tab without it.
+     */
+    public function test_a_refused_field_brings_its_message_back_inside_its_new_row(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $errors = ['first_day_of_week' => 'Pick a day.', 'banner_message' => 'Too long.', 'slug_pattern' => 'Not a pattern.', 'stay22_aid' => 'Not an id.'];
+        config(['stay22.enabled' => true]);
+
+        // As a refused save leaves them: in the session, which the page's middleware shares.
+        $bag = fn (array $messages) => ['errors' => (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag($messages))];
+        $html = $this->withSession($bag($errors))->actingAs($owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+        $xpath = $this->holders($html);
+
+        foreach (['first_day_of_week' => 'details-tab-localization', 'banner_message' => 'details-tab-announcement', 'slug_pattern' => 'settings-tab-events', 'stay22_aid' => 'page-tab-accommodation'] as $field => $pane) {
+            $this->assertInside($xpath, $pane, 'contains(normalize-space(.), "'.$errors[$field].'") and not(*)', "the message for {$field}");
+        }
+
+        config(['app.hosted' => false]);
+        $selfhost = $this->holders($this->withSession($bag(['import_urls' => 'Not an address.']))->actingAs($owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->getContent());
+        $this->assertInside($selfhost, 'integration-tab-auto-import', 'contains(normalize-space(.), "Not an address.") and not(*)', 'the message for import_urls');
+    }
+
+    /** The sidebar, and the phone's stack of headers, in the new order for each kind of schedule. */
+    public function test_the_tabs_come_in_the_order_of_the_form(): void
+    {
+        $owner = $this->createOwner();
+        $after = ['section-style', 'section-page', 'section-subschedules', 'section-engagement', 'section-tickets', 'section-settings', 'section-integrations'];
+        $cases = [
+            'talent' => [$this->createRole($owner, 'talent'), array_merge(['section-details'], $after)],
+            'venue' => [$this->createRole($owner, 'venue', ['address1' => '131 W 3rd St']), array_merge(['section-details', 'section-address'], $after)],
+            'curator' => [$this->createCurator($owner), array_merge(['section-details', 'section-sources'], $after)],
+        ];
+        foreach ([true, false] as $hosted) {
+            config(['app.hosted' => $hosted]);
+            foreach ($cases as $type => [$role, $expected]) {
+                $html = $this->formHtml($owner, $role);
+                preg_match_all('/class="section-nav-link" data-section="(section-[a-z-]+)"/', $html, $links);
+                preg_match_all('/class="mobile-section-header" data-section="(section-[a-z-]+)"/', $html, $headers);
+                preg_match_all('/<div id="(section-[a-z-]+)" class="section-content/', $html, $sections);
+                $where = $type.($hosted ? ' on hosted' : ' on selfhost');
+                $this->assertSame($expected, $links[1], "the sidebar of a {$where}");
+                $this->assertSame($expected, $headers[1], "the phone headers of a {$where}");
+                $this->assertSame($expected, $sections[1], "the tabs themselves, for a {$where}");
+            }
+        }
+    }
+
+    /**
+     * Ids that used to be tabs or rows (a notice links the gallery, the venue map has a link on the
+     * schedule's page, a preset its manage link, owners have bookmarks) are sent to where the thing
+     * lives now: each old id is gone from the form and each new one is there.
+     */
+    public function test_old_addresses_are_sent_to_where_the_thing_lives_now(): void
+    {
+        [, , $html] = $this->talentForm();
+        $source = preg_replace('/\{\{--.*?--\}\}/s', '', file_get_contents(resource_path('views/role/edit.blade.php')));
+
+        $this->assertSame(1, preg_match('/var moved = \{(.*?)\};/s', $html, $map), 'the page carries its map of moved ids');
+        preg_match_all("/'([a-z_-]+)': '([a-z_-]+)'/", $map[1], $pairs, PREG_SET_ORDER);
+        $this->assertCount(8, $pairs);
+        foreach ($pairs as [, $old, $new]) {
+            $this->assertStringNotContainsString('id="'.$old.'"', $source, "#{$old} is no longer an element of the form");
+            $this->assertStringContainsString('id="'.$new.'"', $source, "#{$old} is sent to #{$new}, which is on the form");
+        }
+        // The rewrite runs while the page is read, not on load: the Help link reads the address in
+        // a DOMContentLoaded handler of its own, which would run first.
+        $script = substr($html, strrpos(substr($html, 0, strpos($html, 'var moved = {')), '<script'));
+        $script = substr($script, 0, strpos($script, '</script>'));
+        $this->assertStringNotContainsString('DOMContentLoaded', $script);
+        $this->assertStringNotContainsString("addEventListener('load'", $script);
+
+        // And the links this app writes already name the new places.
+        $this->assertStringContainsString("'#tickets-tab-presets'", file_get_contents(app_path('Services/TicketPresets.php')));
+        $this->assertStringContainsString("'#page-tab-gallery'", file_get_contents(app_path('Http/Controllers/RoleController.php')));
+        $this->assertStringContainsString('#page-tab-map', file_get_contents(resource_path('views/role/show-admin-schedule.blade.php')));
+    }
+
+    /**
+     * Turning the sign-up panel off takes it off the pages and does not stop the emails to the people already on
+     * the list, so each of the two rows says how the other's switch stands.
+     */
+    public function test_the_mailing_list_and_the_notifications_say_each_others_switch(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['announce_new_events' => true, 'show_subscribe_panel' => false]);
+        $xpath = $this->holders($this->formHtml($owner, $role));
+
+        $note = $xpath->query('//*[@id="engagement-tab-mailing-list"]//*[@id="mailing-list-note"]')->item(0);
+        $this->assertNotNull($note);
+        $this->assertSame(__('messages.mailing_list_note_on'), trim($xpath->query('.//*[@data-note-text]', $note)->item(0)->textContent));
+        $this->assertSame('settings-tab-notifications', $xpath->query('.//a', $note)->item(0)->getAttribute('data-form-jump'));
+
+        $back = $xpath->query('//*[@id="settings-tab-notifications"]//*[@id="announce-list-note"]')->item(0);
+        $this->assertNotNull($back);
+        $this->assertSame(__('messages.announce_list_panel_off'), trim($xpath->query('.//*[@data-note-text]', $back)->item(0)->textContent));
+        $this->assertSame('engagement-tab-mailing-list', $xpath->query('.//a', $back)->item(0)->getAttribute('data-form-jump'));
+
+        // And the other way round: each line follows its switch, not a fixed sentence.
+        $flipped = $this->createRole($owner, 'talent', ['announce_new_events' => false, 'show_subscribe_panel' => true]);
+        $xpath = $this->holders($this->formHtml($owner, $flipped));
+        $this->assertSame(__('messages.mailing_list_note_off'), trim($xpath->query('//*[@id="mailing-list-note"]//*[@data-note-text]')->item(0)->textContent));
+        $this->assertSame(__('messages.announce_list_panel_on'), trim($xpath->query('//*[@id="announce-list-note"]//*[@data-note-text]')->item(0)->textContent));
+    }
+
+    /**
+     * The pointer under Website ends on its link: x-link ends with a line break, and a period after
+     * it was drawn as "Page content ." in every language.
+     */
+    public function test_the_social_links_pointer_ends_on_its_link(): void
+    {
+        [, , $html] = $this->talentForm();
+        $xpath = $this->holders($html);
+
+        $link = $xpath->query('//*[@id="details-tab-contact"]//a[@data-form-jump="section-page"]')->item(0);
+        $this->assertNotNull($link, 'the pointer is in Contact info');
+        $line = preg_replace('/\s+/u', ' ', trim($link->parentNode->textContent));
+        $this->assertSame(str_replace(':tab', __('messages.page_content'), __('messages.contact_links_hint')), $line);
+        $this->assertStringEndsWith(__('messages.page_content'), $line);
+        foreach (config('app.supported_languages') as $code => $name) {
+            $hint = trans('messages.contact_links_hint', [], $code);
+            $this->assertStringEndsWith(':tab', $hint, "{$code}: the link ends the sentence");
+        }
     }
 }

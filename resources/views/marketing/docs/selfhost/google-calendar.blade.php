@@ -82,7 +82,7 @@
             </table>
         </div>
 
-        <x-doc-screenshot id="creating-schedules--section-integrations" alt="The Integrations tab of the schedule form, with Google Calendar, Outlook Calendar, CalDAV Calendar and Calendar text and feeds as rows that open in place" />
+        <x-doc-screenshot id="creating-schedules--section-integrations" alt="The Integrations tab of the schedule form, with Google Calendar, Outlook Calendar, CalDAV Calendar, Auto import, Feeds from other sites and Calendar text and feeds as rows that open in place" />
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Included on every plan</div>

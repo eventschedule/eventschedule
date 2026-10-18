@@ -354,7 +354,7 @@ html[data-es-view="list"] #gp-calendar {
       </style>
 
       {{-- shownSponsorLogos(), not getSponsorLogos(): the owner can switch the section off without
-           deleting the sponsors (Engagement > Sponsors), and the margin test below reads the same list. --}}
+           deleting the sponsors (Page content > Sponsors), and the margin test below reads the same list. --}}
       @php $sponsorLogos = $role->shownSponsorLogos(); @endphp
 
       @if (!empty($sponsorLogos))

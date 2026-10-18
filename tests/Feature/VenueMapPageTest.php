@@ -206,16 +206,17 @@ class VenueMapPageTest extends TestCase
         $form = fn (Role $role) => $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
 
         $html = $form($curator);
-        $this->assertMatchesRegularExpression('/data-row-group="engagement" data-tab="map"\s+aria-expanded="false" aria-controls="engagement-tab-map"/', $html);
-        $this->assertMatchesRegularExpression('/<div id="engagement-tab-map" class="event-subrow-body[^"]*"[^>]* hidden>/', $html, 'the pane starts closed');
-        $this->assertStringContainsString('data-summary="engagement:map"', $html);
+        // A row of Page content: the map is something the page shows.
+        $this->assertMatchesRegularExpression('/data-row-group="page" data-tab="map"\s+aria-expanded="false" aria-controls="page-tab-map"/', $html);
+        $this->assertMatchesRegularExpression('/<div id="page-tab-map" class="event-subrow-body[^"]*"[^>]* hidden>/', $html, 'the pane starts closed');
+        $this->assertStringContainsString('data-summary="page:map"', $html);
         $this->assertMatchesRegularExpression('/<input type="checkbox"[^>]*name="show_venues_map"/', $html);
         $this->assertStringContainsString('lookup.test', $html, 'the switch says where the addresses go');
 
-        $this->assertStringNotContainsString('id="engagement-tab-map"', $form($venue), 'a venue schedule is one place');
+        $this->assertStringNotContainsString('id="page-tab-map"', $form($venue), 'a venue schedule is one place');
 
         config(['services.map.geocoder_url' => null]);
-        $this->assertStringNotContainsString('id="engagement-tab-map"', $form($curator), 'no row on an install with no address search');
+        $this->assertStringNotContainsString('id="page-tab-map"', $form($curator), 'no row on an install with no address search');
     }
 
     public function test_the_owners_list_of_venues_is_an_empty_host_with_its_data_beside_it(): void
@@ -245,8 +246,8 @@ class VenueMapPageTest extends TestCase
     {
         $anchor = \App\Utils\HelpUtils::class;
         $source = file_get_contents(app_path('Utils/HelpUtils.php'));
-        $this->assertStringContainsString("'engagement-tab-map' => '/docs/creating-schedules#engagement-venue-map'", $source);
-        $this->assertStringContainsString('id="engagement-venue-map"', file_get_contents(resource_path('views/marketing/docs/creating-schedules.blade.php')));
+        $this->assertStringContainsString("'page-tab-map' => '/docs/creating-schedules#venue-map'", $source);
+        $this->assertStringContainsString('id="venue-map"', file_get_contents(resource_path('views/marketing/docs/creating-schedules.blade.php')));
         $this->assertTrue(class_exists($anchor));
     }
 
@@ -333,7 +334,7 @@ class VenueMapPageTest extends TestCase
 
         $this->assertMatchesRegularExpression('/id="venue-map-notice"[^>]*data-ready="0"\s+data-total="2" data-asked="2" data-placed="2"/s', $html);
         $this->assertStringContainsString(route('role.venue_map.status', ['subdomain' => $curator->subdomain]), $html);
-        $this->assertStringContainsString('#engagement-tab-map', $html, 'Review venues leads to the row');
+        $this->assertStringContainsString('#page-tab-map', $html, 'Review venues leads to the row');
 
         // Without the flash there is no card: it is said once, after the save.
         $this->flushSession();

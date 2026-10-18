@@ -299,7 +299,7 @@ class RoleUpdateRequest extends FormRequest
             'social_links' => ['nullable', 'json'],
             'payment_links' => ['nullable', 'json'],
             'logo_wall_order' => ['nullable', 'string', 'json', 'max:2000'],
-            // Settings > Ticket presets (App\Services\TicketPresets::saveFromSchedule()). Every
+            // Tickets > Ticket presets (App\Services\TicketPresets::saveFromSchedule()). Every
             // ticket type in a preset has a price, 0 for a free one: a blank price saving as a free
             // ticket is what issue #130 was about.
             'ticket_presets' => ['nullable', 'array', 'max:30'],
@@ -324,7 +324,7 @@ class RoleUpdateRequest extends FormRequest
         ];
     }
 
-    /** Settings > Ticket presets: messages name the field as the editor labels it, not by its key. */
+    /** Tickets > Ticket presets: messages name the field as the editor labels it, not by its key. */
     public function attributes(): array
     {
         return [

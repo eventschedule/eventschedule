@@ -94,7 +94,7 @@
                                         <div class="ms-3 text-sm text-amber-700 dark:text-amber-300">
                                             <p class="font-medium">{{ __('messages.embed_subscribe_announcements_off') }}</p>
                                             <p class="mt-1">
-                                                <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#section-settings" class="underline font-medium">{{ __('messages.embed_subscribe_turn_on_announcements') }}</a>
+                                                <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#settings-tab-notifications" class="underline font-medium">{{ __('messages.embed_subscribe_turn_on_announcements') }}</a>
                                             </p>
                                         </div>
                                     </div>

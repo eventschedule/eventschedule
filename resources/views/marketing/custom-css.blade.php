@@ -664,7 +664,7 @@
         $faqs = [
             [
                 'q' => 'How do I add Custom CSS to my schedule?',
-                'a' => 'Edit your schedule, open the Style section and then the Advanced tab. Custom CSS is a plain text area there. It saves with the rest of your styling settings and applies from the next page load.',
+                'a' => 'Edit your schedule, open the Style section and then its Custom CSS row. Custom CSS is a plain text area there. It saves with the rest of your styling settings and applies from the next page load.',
             ],
             [
                 'q' => 'Where does my CSS land in the cascade?',

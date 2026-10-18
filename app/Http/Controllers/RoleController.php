@@ -4744,7 +4744,7 @@ class RoleController extends Controller
         // default(true), so no schedule created through the UI would ever announce a new event,
         // silently breaking the promise the subscribe panel makes to every guest who signs up.
         $role->announce_new_events = true;
-        // Same again for roles.show_subscribe_panel (Settings > Advanced, also rendered here), or
+        // Same again for roles.show_subscribe_panel (Engagement > Mailing list, also rendered here), or
         // every schedule made through the UI would start with its sign-up panel hidden. Its
         // sibling show_event_interest defaults to false, which is what a missing attribute paints.
         $role->show_subscribe_panel = true;
@@ -5423,7 +5423,7 @@ class RoleController extends Controller
     ];
 
     /**
-     * "Event list wording" (Settings, Advanced; App\Utils\ListWording): how the schedule's list
+     * "Event list wording" (Style, Events; App\Utils\ListWording): how the schedule's list
      * words each event. Kept in graphic_settings, which no fill reaches (SERVER_OWNED_FIELDS), so it
      * is written here, by key, and only from a save whose form carried the field: absent is not
      * "standard". A wording of the list's own is kept when another choice is made, so choosing it
@@ -6211,7 +6211,7 @@ class RoleController extends Controller
 
         $role->save();
 
-        // Settings > Ticket presets, right after the schedule's own save and before the image
+        // Tickets > Ticket presets, right after the schedule's own save and before the image
         // checks below can return early. Only from a page that showed the list, and only by whoever
         // may change it (the owner, or an editor while the team does not pick from presets); the
         // switch is the owner's alone and is offered where a schedule can have a team.
@@ -6712,7 +6712,7 @@ class RoleController extends Controller
                 'is_hidden' => ! $role->getGuestUrl(),
                 'thumbs' => $role->galleryImages->take(4)->map(fn ($image) => $image->thumbUrl())->all(),
                 'url' => $role->getGuestUrl() ? $role->getGuestUrl().'#gp-gallery' : null,
-                'edit_url' => route('role.edit', ['subdomain' => $role->subdomain]).'#section-gallery',
+                'edit_url' => route('role.edit', ['subdomain' => $role->subdomain]).'#page-tab-gallery',
             ]);
         }
 
@@ -7467,7 +7467,7 @@ class RoleController extends Controller
     }
 
     /**
-     * The AI import form's optional fields (Settings > Advanced): which ones it shows, and which of
+     * The AI import form's optional fields (Settings > New events): which ones it shows, and which of
      * those a submitter must fill in. Only when the section was on the page.
      */
     private function applyImportFormFields(Request $request, Role $role): void

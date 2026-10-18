@@ -313,7 +313,7 @@ class TicketPresetScheduleTest extends TestCase
         $this->assertFalse(TicketPresets::teamUsesPresets($venue->fresh()));
     }
 
-    public function test_the_row_is_on_the_settings_tab_and_read_only_for_a_bound_admin(): void
+    public function test_the_row_is_on_the_tickets_tab_and_read_only_for_a_bound_admin(): void
     {
         $owner = $this->createOwner();
         $venue = $this->createRole($owner, 'venue');
@@ -322,7 +322,7 @@ class TicketPresetScheduleTest extends TestCase
         TicketPreset::create(['role_id' => $venue->id, 'name' => 'Regular <b>x</b>', 'kind' => 'tickets', 'is_default' => true, 'settings' => ['tickets' => [['price' => 5]]]]);
 
         $ownerPage = $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $venue->subdomain]))->assertOk()->getContent();
-        $this->assertStringContainsString('id="settings-tab-tickets"', $ownerPage);
+        $this->assertStringContainsString('id="tickets-tab-presets"', $ownerPage);
         $this->assertStringContainsString('"canEdit":true', $ownerPage, 'the island draws the list and its marker for the owner');
         $this->assertStringContainsString('data-action="add-ticket-preset"', $ownerPage);
         $this->assertStringContainsString('id="ticket_presets_team"', $ownerPage);
@@ -330,7 +330,7 @@ class TicketPresetScheduleTest extends TestCase
 
         TicketPresets::setTeamUsesPresets($venue, true);
         $adminPage = $this->actingAs($admin)->get(route('role.edit', ['subdomain' => $venue->subdomain]))->assertOk()->getContent();
-        $this->assertStringContainsString('id="settings-tab-tickets"', $adminPage);
+        $this->assertStringContainsString('id="tickets-tab-presets"', $adminPage);
         $this->assertStringContainsString('"canEdit":false', $adminPage, 'read only, so no marker: a save from it changes no preset');
         $this->assertStringNotContainsString('id="ticket_presets_team"', $adminPage);
         $this->assertStringContainsString(e(__('messages.ticket_presets_locked_note', ['owner' => $owner->name])), $adminPage);

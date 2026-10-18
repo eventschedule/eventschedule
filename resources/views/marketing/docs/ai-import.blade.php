@@ -536,7 +536,7 @@ Tickets: $20</code></pre>
                     </tr>
                     <tr>
                         <td>Import Form Fields</td>
-                        <td>Edit Schedule &rarr; Settings &rarr; Advanced (hosted service)</td>
+                        <td>Edit Schedule &rarr; Settings &rarr; New events (hosted service)</td>
                         <td>A toggle per extra field (short description, description, price, coupon code and its discount, registration URL, category and sub-schedules) that chooses which ones appear on each parsed card, each with a <strong class="text-gray-900 dark:text-white">Required</strong> tick box for fields that must be filled in before the event can be saved</td>
                     </tr>
                     <tr>

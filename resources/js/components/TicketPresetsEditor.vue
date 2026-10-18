@@ -342,7 +342,7 @@ export default {
     },
     // Called by the "+ Add preset" link under the list (role/edit), which sits outside this app.
     add() {
-      // As many as Settings > Ticket presets can save (TicketPresets::MAX_PRESETS).
+      // As many as Tickets > Ticket presets can save (TicketPresets::MAX_PRESETS).
       if (this.rows.length >= this.maxPresets) {
         return;
       }

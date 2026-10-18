@@ -76,7 +76,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Schedules are public, and the create form says so: <strong class="text-gray-900 dark:text-white">your schedule will be publicly visible</strong>. If you want to work on events before anyone sees them, save them as <a href="{{ route('marketing.docs.creating_events') }}#draft" class="doc-link">Drafts</a> rather than trying to hide the schedule.</p>
 
         <h3 id="contact-email" class="doc-subheading">The contact email has to be verified</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">On eventschedule.com a schedule is only live while its contact email is confirmed. A new schedule takes your account's email, which you confirmed when you signed up, so it is live from the start. If you change the address later (<strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Details &rarr; Contact Info</strong>), Event Schedule emails the new one a verification link and shows a <strong class="text-gray-900 dark:text-white">"Please verify the email address"</strong> banner with a <strong class="text-gray-900 dark:text-white">Resend Email</strong> button on the schedule's pages until you click it. Until then the public page shows visitors a page-not-found, you and your team are taken into the app when you open it signed in, and the schedule's address with its <strong class="text-gray-900 dark:text-white">View</strong> link is left out of the top of its pages. (A verified phone number counts too, but the email is the route almost everyone takes.) A selfhosted install treats the address as verified.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On eventschedule.com a schedule is only live while its contact email is confirmed. A new schedule takes your account's email, which you confirmed when you signed up, so it is live from the start. If you change the address later (<strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Details &rarr; Contact info</strong>), Event Schedule emails the new one a verification link and shows a <strong class="text-gray-900 dark:text-white">"Please verify the email address"</strong> banner with a <strong class="text-gray-900 dark:text-white">Resend Email</strong> button on the schedule's pages until you click it. Until then the public page shows visitors a page-not-found, you and your team are taken into the app when you open it signed in, and the schedule's address with its <strong class="text-gray-900 dark:text-white">View</strong> link is left out of the top of its pages. (A verified phone number counts too, but the email is the route almost everyone takes.) A selfhosted install treats the address as verified.</p>
     </section>
 
     <!-- Schedule Types -->
@@ -158,7 +158,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Details</span></td>
-                        <td>The name, Short Description, the Markdown Description and an announcement bar <x-doc-badge plan="pro" link />. Two rows under them: <strong class="text-gray-900 dark:text-white">Language and time</strong> holds the language, an optional second language to offer translations in, the timezone your event times are read in, and a 24-hour clock switch. <strong class="text-gray-900 dark:text-white">Contact Info</strong> holds the email, phone and website.</td>
+                        <td>The name, Short Description and the Markdown Description. Three rows under them: <strong class="text-gray-900 dark:text-white">Language and time</strong> holds the language, an optional second language to offer translations in, the timezone your event times are read in, a 24-hour clock switch and the first day of the week. <strong class="text-gray-900 dark:text-white">Contact info</strong> holds the email, phone and website. The <strong class="text-gray-900 dark:text-white">Announcement bar</strong> <x-doc-badge plan="pro" link /> shows a message at the top of your page.</td>
                         <td>Every schedule</td>
                     </tr>
                     <tr>
@@ -173,17 +173,12 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Style</span></td>
-                        <td>Your <strong class="text-gray-900 dark:text-white">Square Profile Image</strong> (your logo), accent colour and font, with a preview of your page beside them. Four rows under them, in the order of your page: <strong class="text-gray-900 dark:text-white">Header</strong> (the header style and header image), <strong class="text-gray-900 dark:text-white">Background</strong>, <strong class="text-gray-900 dark:text-white">Events</strong> (the default layout and the event animation) and <strong class="text-gray-900 dark:text-white">Custom CSS</strong>. Full reference in <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>. Custom CSS requires <x-doc-badge plan="pro" link /></td>
+                        <td>Your <strong class="text-gray-900 dark:text-white">Square Profile Image</strong> (your logo), accent colour and font, with a preview of your page beside them. Four rows under them, in the order of your page: <strong class="text-gray-900 dark:text-white">Header</strong> (the header style and header image), <strong class="text-gray-900 dark:text-white">Background</strong>, <strong class="text-gray-900 dark:text-white">Events</strong> (the default layout, hiding past events, the event animation and how each event is worded on your list) and <strong class="text-gray-900 dark:text-white">Custom CSS</strong>. Full reference in <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>. Custom CSS requires <x-doc-badge plan="pro" link /></td>
                         <td>Every schedule</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Gallery</span></td>
-                        <td>Photos of your venue, past events or your team, shown on your schedule page. Requires <x-doc-badge plan="pro" link /></td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Videos &amp; Links</span></td>
-                        <td>Your featured YouTube videos and your social links. Each social link also answers at a short address on your schedule URL, which counts its clicks.</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Page content</span></td>
+                        <td>Your social links, each also answering at a short address on your schedule URL that counts its clicks. Rows under them for your featured YouTube videos, a <strong class="text-gray-900 dark:text-white">Gallery</strong> of photos of your venue, past events or your team <x-doc-badge plan="pro" link />, sponsor logos <x-doc-badge plan="pro" link />, and, where the site offers them, a map of your venues and nearby accommodation.</td>
                         <td>Every schedule</td>
                     </tr>
                     <tr>
@@ -192,28 +187,23 @@
                         <td>Every schedule</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Settings</span></td>
-                        <td>The <strong class="text-gray-900 dark:text-white">Schedule URL</strong>, with rows for <strong class="text-gray-900 dark:text-white">Notifications</strong> and <strong class="text-gray-900 dark:text-white">Advanced</strong>.</td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Engagement</span></td>
-                        <td>Event requests from visitors, fan content, post-event feedback, carpooling and sponsor logos, each in its own row.</td>
+                        <td>Event requests from visitors, the sign-up panel and &ldquo;Notify me&rdquo; card that collect visitors' email addresses, fan content, post-event feedback and carpooling, each in its own row.</td>
                         <td>Every schedule</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Gift Cards</span></td>
-                        <td>Sell balance-tracked gift cards that buyers send to a recipient by email. Requires <x-doc-badge plan="pro" link /></td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Tickets</span></td>
+                        <td><strong class="text-gray-900 dark:text-white">Ticket presets</strong>, the ticket setups each new event starts from, and <strong class="text-gray-900 dark:text-white">Gift cards</strong>: balance-tracked gift cards that buyers send to a recipient by email. Gift cards require <x-doc-badge plan="pro" link /></td>
                         <td>Every schedule</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Auto Import</span></td>
-                        <td>Read events from a list of web pages once a day. An optional list of cities keeps only the events held there.</td>
-                        <td>Selfhosted installs</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Settings</span></td>
+                        <td>The <strong class="text-gray-900 dark:text-white">Schedule URL</strong>, with rows for <strong class="text-gray-900 dark:text-white">New events</strong> (what each new event starts with), <strong class="text-gray-900 dark:text-white">Notifications</strong> and <strong class="text-gray-900 dark:text-white">Advanced</strong>.</td>
+                        <td>Every schedule</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Integrations</span></td>
-                        <td>Rows for <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong> and <strong class="text-gray-900 dark:text-white">Calendar text and feeds</strong>, with <strong class="text-gray-900 dark:text-white">Email Settings</strong> first on eventschedule.com.</td>
+                        <td>Rows for <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong>, <strong class="text-gray-900 dark:text-white">Feeds from other sites</strong> and <strong class="text-gray-900 dark:text-white">Calendar text and feeds</strong>, with <strong class="text-gray-900 dark:text-white">Email Settings</strong> first on eventschedule.com. A selfhosted install adds <strong class="text-gray-900 dark:text-white">Auto import</strong>, which reads events from a list of web pages once a day and can keep only the events held in the cities you name.</td>
                         <td>Every schedule</td>
                     </tr>
                 </tbody>

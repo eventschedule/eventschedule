@@ -809,7 +809,7 @@ Leave them unset and nothing about this ships to anyone: the feature stays dark.
 
 **After the deploy (with the vars set):**
 - `/admin/queue`'s Scheduler card lists `app-place-venues` with a recent run.
-- On a curator schedule, Engagement > Venue map is there. Switch it on and save: the schedule's
+- On a curator schedule, Page content > Venue map is there. Switch it on and save: the schedule's
   admin page shows "Your venue map is being prepared" with a count that moves, then "Your venue map
   is on your page". In a private window the schedule page shows the band, and the Network tab
   shows NO request to `tile.openstreetmap.org` until Show map is pressed.

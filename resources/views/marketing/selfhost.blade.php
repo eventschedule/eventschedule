@@ -1879,14 +1879,14 @@
             <div class="sh-only-grid" data-reveal-group="110">
                 {{-- ImportCuratorEvents reads the configured URLs only, once a day from the
                      scheduler. Configured cities are a filter on what those pages return, not a
-                     search. The panel's labels are the schedule form's own (Auto Import). --}}
+                     search. The panel's labels are the schedule form's own (Auto import). --}}
                 <article class="sh-only" data-reveal="panel">
                     <span class="sh-only-tag">Selfhost only</span>
                     <h3 class="hp-h3">Auto import from the web</h3>
                     <p>Point Event Schedule at a list of URLs and AI pulls the events in once a day, keeping only the cities you name. It checks each site's robots.txt first.</p>
                     <div class="sh-app-push"></div>
                     <div class="sh-app" data-sh-import-box>
-                        <div class="sh-app-top"><strong>Auto Import</strong><button type="button" class="sh-app-btn" data-sh-import>Test Import</button></div>
+                        <div class="sh-app-top"><strong>Auto import</strong><button type="button" class="sh-app-btn" data-sh-import>Test Import</button></div>
                         <div class="sh-app-body">
                             <div class="sh-app-cap">Import URLs</div>
                             <div class="sh-app-rows" dir="ltr">
@@ -1902,7 +1902,7 @@
                             </ul>
                         </div>
                     </div>
-                    <p class="sh-cap">The Auto Import panel of the schedule form, with example addresses and an example result in it.</p>
+                    <p class="sh-cap">The Auto import row of the schedule form's Integrations tab, with example addresses and an example result in it.</p>
                 </article>
 
                 {{-- The real screen at /admin/app-update: its three figures, its mark, its

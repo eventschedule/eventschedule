@@ -567,7 +567,7 @@ class EventController extends Controller
             session()->forget('cloned_event');
         } else {
             // Default behavior for new event: the schedule's default ticket preset, if it has one
-            // (Settings > Ticket presets, which took over from roles.default_tickets).
+            // (Tickets > Ticket presets, which took over from roles.default_tickets).
             $event->ticket_currency_code = MoneyUtils::getCurrencyForCountry($role->country_code);
             $event->payment_method = payment_gateways()->defaultMethodFor($user, $event->ticket_currency_code);
             $event->tickets = collect([new Ticket]);
@@ -1573,7 +1573,7 @@ class EventController extends Controller
     }
 
     /**
-     * "Save these tickets as a preset" that Settings > Ticket presets could not hold is refused
+     * "Save these tickets as a preset" that Tickets > Ticket presets could not hold is refused
      * before the event is saved, so nothing is half done (TicketPresets::assertSavable()).
      */
     private function refuseUnsavablePreset(Request $request, Role $presetSchedule): void

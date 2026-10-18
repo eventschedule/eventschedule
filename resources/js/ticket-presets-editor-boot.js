@@ -2,7 +2,7 @@ import { createApp } from 'vue';
 import TicketPresetsEditor from './components/TicketPresetsEditor.vue';
 
 /**
- * Mounts Settings > Ticket presets on the schedule form, if the page drew it.
+ * Mounts Tickets > Ticket presets on the schedule form, if the page drew it.
  *
  * The same contract as venue-map-editor-boot.js: an EMPTY host and every value (preset names among
  * them) through the JSON blob, because server-rendered text inside a Vue mount is compiled as a

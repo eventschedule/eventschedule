@@ -195,7 +195,7 @@ return [
             'shot' => 'creating-events--schedule-tab',
             'shot_alt' => 'A schedule in the admin panel, on a month of events',
             'published' => '2024-01-01',
-            'modified' => '2026-10-09',
+            'modified' => '2026-10-18',
         ],
 
         'creating-schedules' => [
@@ -204,12 +204,12 @@ return [
             'route' => 'marketing.docs.creating_schedules',
             'path' => '/docs/creating-schedules',
             'title' => 'Creating Schedules',
-            'blurb' => 'Configure details, settings, sub-schedules, auto import, and integrations.',
+            'blurb' => 'Configure details, page content, sub-schedules, tickets, settings and integrations.',
             'icon' => 'cog',
             'shot' => 'creating-schedules--section-details',
             'shot_alt' => 'The schedule form, open on its Details tab',
             'published' => '2024-01-01',
-            'modified' => '2026-10-16',
+            'modified' => '2026-10-18',
         ],
 
         'schedule-styling' => [
@@ -224,7 +224,7 @@ return [
             'shot' => 'schedule-styling--section-style',
             'shot_alt' => 'The Style tab, with its live preview',
             'published' => '2024-01-01',
-            'modified' => '2026-10-09',
+            'modified' => '2026-10-18',
         ],
 
         'creating-events' => [
@@ -238,7 +238,7 @@ return [
             'shot' => 'creating-events--add-event',
             'shot_alt' => 'The Add Event form',
             'published' => '2024-01-01',
-            'modified' => '2026-10-08',
+            'modified' => '2026-10-18',
         ],
 
         'ai-import' => [
@@ -253,7 +253,7 @@ return [
             'shot' => 'creating-events--import',
             'shot_alt' => 'The Import Events page',
             'published' => '2024-01-01',
-            'modified' => '2026-10-08',
+            'modified' => '2026-10-18',
         ],
 
         'scan-agenda' => [
@@ -283,7 +283,7 @@ return [
             'shot' => 'tickets--sales',
             'shot_alt' => 'The Sales page, listing orders',
             'published' => '2024-01-01',
-            'modified' => '2026-10-16',
+            'modified' => '2026-10-18',
         ],
 
         'subscriptions' => [
@@ -327,9 +327,9 @@ return [
             'blurb' => 'Sell prepaid gift cards buyers send to someone else.',
             'icon' => 'gift',
             'shot' => 'gift-cards--settings',
-            'shot_alt' => 'The Gift Cards tab of a schedule',
+            'shot_alt' => 'The Gift cards row of a schedule\'s Tickets tab',
             'published' => '2026-07-16',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         'appointments' => [
@@ -360,7 +360,7 @@ return [
             'shot' => 'sharing--embed-dialog',
             'shot_alt' => 'The Embed Schedule dialog',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         'event-graphics' => [
@@ -375,7 +375,7 @@ return [
             'shot' => 'event-graphics--graphic-page',
             'shot_alt' => 'The Events Graphic page',
             'published' => '2024-01-01',
-            'modified' => '2026-10-08',
+            'modified' => '2026-10-18',
         ],
 
         'newsletters' => [
@@ -390,7 +390,7 @@ return [
             'shot' => 'newsletters--create',
             'shot_alt' => 'The newsletter builder',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         'boost' => [
@@ -405,7 +405,7 @@ return [
             'shot' => 'boost--page',
             'shot_alt' => 'The Boost Event page',
             'published' => '2024-01-01',
-            'modified' => '2026-10-15',
+            'modified' => '2026-10-18',
         ],
 
         'managing-schedules' => [
@@ -435,7 +435,7 @@ return [
             'shot' => 'analytics--dashboard',
             'shot_alt' => 'The Analytics page',
             'published' => '2024-01-01',
-            'modified' => '2026-10-16',
+            'modified' => '2026-10-18',
         ],
 
         'account-settings' => [
@@ -479,7 +479,7 @@ return [
             'blurb' => 'Install, configure and run Event Schedule on your own server.',
             'icon' => 'server',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         'selfhost/installation' => [
@@ -516,7 +516,7 @@ return [
             'blurb' => 'Bidirectional Google Calendar sync.',
             'icon' => 'calendar',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         'selfhost/google-wallet' => [
@@ -539,7 +539,7 @@ return [
             'blurb' => 'Bidirectional Outlook sync via Microsoft Graph.',
             'icon' => 'calendar',
             'published' => '2026-07-14',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         'selfhost/email' => [
@@ -564,7 +564,7 @@ return [
             'blurb' => 'Configure Google Gemini or OpenAI for import, scanning and translation.',
             'icon' => 'sparkles',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         'selfhost/boost' => [
@@ -588,7 +588,7 @@ return [
             'blurb' => 'Monitor users, revenue and analytics, and manage platform settings.',
             'icon' => 'shield',
             'published' => '2024-01-01',
-            'modified' => '2026-10-08',
+            'modified' => '2026-10-18',
         ],
 
         'selfhost/federation' => [
@@ -652,7 +652,7 @@ return [
             'blurb' => 'Phone verification and WhatsApp messaging.',
             'icon' => 'phone',
             'published' => '2026-02-27',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         'saas/facebook-login' => [
@@ -690,7 +690,7 @@ return [
             'blurb' => 'Show ads on free schedules and sell promotional placement to paid ones.',
             'icon' => 'megaphone',
             'published' => '2026-07-28',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-18',
         ],
 
         // ---- Developer ------------------------------------------------------

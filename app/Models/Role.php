@@ -4430,7 +4430,7 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
-     * The schedule's venue map settings (Engagement > Venue map). Not columns here because this
+     * The schedule's venue map settings (Page content > Venue map). Not columns here because this
      * table is at MySQL's row-size limit; a schedule with no row has its map off, which the
      * default model says. Read through App\Services\VenueMap, which also knows whether the
      * install has a map at all.
@@ -5191,7 +5191,7 @@ class Role extends Model implements MustVerifyEmail
         return $this->hasMany(\App\Models\EventTemplate::class)->orderByDesc('created_at');
     }
 
-    /** Ticket presets (Settings > Ticket presets), in the owner's order. Read through App\Services\TicketPresets. */
+    /** Ticket presets (Tickets > Ticket presets), in the owner's order. Read through App\Services\TicketPresets. */
     public function ticketPresets()
     {
         return $this->hasMany(\App\Models\TicketPreset::class)->orderBy('sort_order')->orderBy('id');

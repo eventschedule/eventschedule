@@ -4929,7 +4929,7 @@ class Event extends Model
 
         // Tickets
         $data->tickets_enabled = (bool) $this->tickets_enabled;
-        // The schedule's ticket preset these tickets came from (Settings > Ticket presets), if any.
+        // The schedule's ticket preset these tickets came from (Tickets > Ticket presets), if any.
         $data->ticket_preset_id = $this->ticket_preset_id ? UrlUtils::encodeId($this->ticket_preset_id) : null;
         // Encoded like every other user-visible id. Present but null on a general-admission event
         // so a subscriber can branch on it without special-casing a missing key.

@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
  * an organizer posts to WhatsApp each week, said the same way on the list), or a wording of the
  * list's own, written with the same {variables}.
  *
- * Chosen in the schedule form (Settings, Advanced, "Event list wording") and stored in
+ * Chosen in the schedule form (Style, Events, "Event list wording") and stored in
  * graphic_settings ('list_wording' is standard, caption or custom; 'list_template' holds the
  * list's own), because roles is at its row limit. Until an owner chooses one, nothing about the
  * list changes. The caption itself is never touched here: this reads a template and fills it

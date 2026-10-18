@@ -207,6 +207,17 @@ class SetupGuideTest extends TestCase
         $this->assertNull($state['draft']);
     }
 
+    /** "Animate your event list" opens the row the animation is chosen in, not Style's closed rows. */
+    public function test_animating_the_list_lands_on_the_events_row_of_style(): void
+    {
+        [$user, $role] = $this->startGuide();
+
+        $urls = $this->state($user)['urls'];
+
+        $this->assertSame(route('role.edit', ['subdomain' => $role->subdomain]).'#style-content-animation', $urls['animate']);
+        $this->assertStringEndsWith('#section-style', $urls['style'], 'a photo or logo is at the top of the tab, which needs no row');
+    }
+
     public function test_a_draft_is_not_live_and_is_offered_for_publishing(): void
     {
         [$user, $role] = $this->startGuide();

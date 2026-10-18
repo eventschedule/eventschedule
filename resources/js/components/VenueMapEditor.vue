@@ -82,7 +82,7 @@
 import { loadLeaflet } from '../leaflet-loader';
 
 /**
- * Engagement > Venue map > Venues, on the schedule form: every venue the schedule's map holds,
+ * Page content > Venue map > Venues, on the schedule form: every venue the schedule's map holds,
  * where it stands, and what its owner can do about it. Take a venue off the map and put it back;
  * move a pin that landed in the wrong place; place one by hand where the address search found
  * nothing (a kibbutz, a field, a venue with no street).

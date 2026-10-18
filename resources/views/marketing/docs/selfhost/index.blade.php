@@ -124,7 +124,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Auto Import</span></td>
-                        <td>An <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> tab on a schedule's edit page imports the events found at its <strong>Import URLs</strong> once a day, from the scheduler. <strong>Import Cities</strong> is optional and only filters: an event held in a city that is not on the list is skipped. Needs an AI key.</td>
+                        <td>An <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto import</a> row in the Integrations tab of a schedule's edit page imports the events found at its <strong>Import URLs</strong> once a day, from the scheduler. <strong>Import Cities</strong> is optional and only filters: an event held in a city that is not on the list is skipped. Needs an AI key.</td>
                         <td>Not available</td>
                     </tr>
                     <tr>

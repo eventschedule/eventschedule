@@ -81,7 +81,7 @@
               <SetupGuideSuggestions v-if="ownRows.length" plain class="sg-own" :rows="ownRows" :t="t" :st="st" @dismiss="sug.dismiss" @undo="sug.undo" @hold="sug.holdStubs" @release="sug.startStubs" />
               <div class="sg-links">
                 <SetupGuideAction :action="{ label: t.add_photo, href: g.urls.style }" kind="link" />
-                <SetupGuideAction :action="{ label: t.animate_list, href: g.urls.style }" kind="link" />
+                <SetupGuideAction :action="{ label: t.animate_list, href: g.urls.animate || g.urls.style }" kind="link" />
                 <SetupGuideAction :action="{ label: t.dismiss, act: 'dismiss' }" kind="quiet" @act="act" />
               </div>
             </div>
@@ -293,7 +293,7 @@
           </div>
           <div class="sg-links">
             <SetupGuideAction :action="{ label: t.add_photo, href: g.urls.style }" kind="link" />
-            <SetupGuideAction :action="{ label: t.animate_list, href: g.urls.style }" kind="link" />
+            <SetupGuideAction :action="{ label: t.animate_list, href: g.urls.animate || g.urls.style }" kind="link" />
           </div>
         </div>
         <SetupGuideSteps v-else :rows="rows" :guide="g" :t="t" :csrf="csrf" :current="current" :copied="copied" :fresh="freshSteps" @act="act" @copy="copy" />

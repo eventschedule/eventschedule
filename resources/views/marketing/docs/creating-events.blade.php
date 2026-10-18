@@ -647,7 +647,7 @@
             Gallery
             <x-doc-badge plan="pro" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">An event can show one flyer, and the Gallery tab adds as many photos as you like beside it, up to {{ \App\Utils\GalleryUtils::maxImages() }}: past editions, the room, the lineup. Guests see them on the event page and can open any photo full screen. The gallery is yours to curate; photos guests send in are separate and live under <a href="#fan-content" class="doc-link">Fan Content</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">An event can show one flyer, and the Gallery tab adds as many photos as you like beside it, up to {{ \App\Utils\GalleryUtils::maxImages() }}: past editions, the room, the lineup. Guests see them on the event page and can open any photo full screen. The gallery is yours to curate; photos guests send in are separate and live under <a href="#fan-content" class="doc-link">Fan content</a>.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -719,7 +719,7 @@
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">To choose the visibility that all new events start with, use <strong class="text-gray-900 dark:text-white">Default visibility for new events</strong> in your schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">To choose the visibility that all new events start with, use <strong class="text-gray-900 dark:text-white">Default visibility for new events</strong> in your schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#settings-new-events" class="doc-link">Settings &rarr; New events</a>.</p>
     </section>
 
     <!-- Privacy -->
@@ -749,7 +749,7 @@
                         <td>Listed for everyone</td>
                         <td>Anyone</td>
                         <td>Included</td>
-                        <td>Offered once the <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">&ldquo;Notify me&rdquo; card</a> is switched on</td>
+                        <td>Offered once the <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-mailing-list" class="doc-link">&ldquo;Notify me&rdquo; card</a> is switched on</td>
                         <td>Synced</td>
                     </tr>
                     <tr>
@@ -869,7 +869,7 @@
             </svg>
             Engagement
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The Engagement tab is a row for each of <strong class="text-gray-900 dark:text-white">Polls</strong>, <strong class="text-gray-900 dark:text-white">Fan Content</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, and <strong class="text-gray-900 dark:text-white">Carpool</strong> when carpooling is enabled on the schedule. Each row says what is set and opens in place; rows start closed, and one is open at a time. Rows with something waiting for you, such as pending fan content or suggested poll options, carry a count badge, and on a free schedule the Polls and Feedback rows carry a Pro lock.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The Engagement tab is a row for each of <strong class="text-gray-900 dark:text-white">Polls</strong>, <strong class="text-gray-900 dark:text-white">Fan content</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, and <strong class="text-gray-900 dark:text-white">Carpool</strong> when carpooling is enabled on the schedule. Each row says what is set and opens in place; rows start closed, and one is open at a time. Rows with something waiting for you, such as pending fan content or suggested poll options, carry a count badge, and on a free schedule the Polls and Feedback rows carry a Pro lock.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Most of these settings decide whether an event follows the schedule-wide setting or overrides it. For the schedule-wide versions see <a href="{{ route('marketing.docs.creating_schedules') }}#engagement" class="doc-link">Engagement settings</a>, and for carpooling see <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-carpool" class="doc-link">Carpool</a>.</p>
     </section>
 
@@ -958,7 +958,7 @@
 
         <h3 class="doc-subheading">Per-Event Overrides <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            On a Pro schedule, the <strong class="text-gray-900 dark:text-white">Fan Content</strong> row of an event's Engagement tab has three choices per type: <strong class="text-gray-900 dark:text-white">Same as schedule</strong>, <strong class="text-gray-900 dark:text-white">Enabled</strong>, or <strong class="text-gray-900 dark:text-white">Disabled</strong>. Under each type's name the form says what the schedule's own setting is, for example <em>Schedule: enabled</em>. The row itself says what is in force, for example <em>Comments, Photos</em>, followed by <em>Same as schedule</em> while none of the three has been changed for this event. That lets you open one event up while the rest of the schedule stays closed, or the other way round.
+            On a Pro schedule, the <strong class="text-gray-900 dark:text-white">Fan content</strong> row of an event's Engagement tab has three choices per type: <strong class="text-gray-900 dark:text-white">Same as schedule</strong>, <strong class="text-gray-900 dark:text-white">Enabled</strong>, or <strong class="text-gray-900 dark:text-white">Disabled</strong>. Under each type's name the form says what the schedule's own setting is, for example <em>Schedule: enabled</em>. The row itself says what is in force, for example <em>Comments, Photos</em>, followed by <em>Same as schedule</em> while none of the three has been changed for this event. That lets you open one event up while the rest of the schedule stays closed, or the other way round.
         </p>
 
         <h3 class="doc-subheading">Moderation</h3>
@@ -989,7 +989,7 @@
             </svg>
             Feedback <x-doc-badge plan="pro" /></h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Post-event feedback emails attendees after an event ends to collect a star rating and comments. Turn it on for the whole schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-feedback" class="doc-link">Settings &rarr; Engagement &rarr; Feedback</a>, where you also choose how long after the event the request goes out. On the hosted platform this needs your schedule's own email settings.
+            Post-event feedback emails attendees after an event ends to collect a star rating and comments. Turn it on for the whole schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-feedback" class="doc-link">Edit Schedule &rarr; Engagement &rarr; Feedback</a>, where you also choose how long after the event the request goes out. On the hosted platform this needs your schedule's own email settings.
         </p>
 
         <h3 class="doc-subheading">Per-Event Override</h3>
@@ -1039,7 +1039,7 @@
             <p>Choosing <strong>Same as schedule</strong> or <strong>No sponsors</strong> on an event that has sponsors of its own removes them when you save. The save bar reads <em>Saving removes this event's sponsors.</em> first, and choosing <strong>This event's own</strong> again before saving keeps them.</p>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Logos are uploaded when you save the event, and only 15 new ones can be queued per save: with a long list, save partway through and then carry on. To set the sponsors every event starts with, see <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-sponsors" class="doc-link">Schedule Sponsors</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Logos are uploaded when you save the event, and only 15 new ones can be queued per save: with a long list, save partway through and then carry on. To set the sponsors every event starts with, see <a href="{{ route('marketing.docs.creating_schedules') }}#sponsors" class="doc-link">Schedule Sponsors</a>.</p>
     </section>
 
     <!-- WhatsApp -->

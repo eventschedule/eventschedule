@@ -3445,7 +3445,7 @@
                                                 <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
                                                     {{ __('messages.event_interest_signups_off') }}
                                                     @if ($event->creatorRole && auth()->user()->isEditor($event->creatorRole->subdomain))
-                                                        <x-link href="{{ route('role.edit', ['subdomain' => $event->creatorRole->subdomain]) }}#section-settings">{{ __('messages.settings') }}</x-link>
+                                                        <x-link href="{{ route('role.edit', ['subdomain' => $event->creatorRole->subdomain]) }}#engagement-tab-mailing-list">{{ __('messages.announce_list_link') }}</x-link>
                                                     @endif
                                                 </p>
                                             @endif
@@ -6041,7 +6041,7 @@
                                         {{-- Whose and which: the names of the schedule's sponsors, or that it has none.
                                              v-pre: a sponsor's name is its owner's text, inside the Vue mount. --}}
                                         @php $scheduleSponsorNames = collect($role->getSponsorLogos())->pluck('name')->filter()->implode(', '); @endphp
-                                        {{-- And when the schedule has them switched off (Engagement > Sponsors), the tile says
+                                        {{-- And when the schedule has them switched off (Page content > Sponsors), the tile says
                                              so: an event that follows the schedule shows none then. --}}
                                         <span class="event-tile-help" v-pre>{{ $scheduleSponsorNames ? $scheduleSponsorNames.($role->show_sponsors === false ? ' · '.__('messages.sponsors_hidden') : '') : __('messages.sponsors_same_help').': '.mb_strtolower(__('messages.none')) }}</span>
                                     </button>

@@ -66,7 +66,7 @@
             $rowTime = $rowEvent->is_multi_day
                 ? $rowStart->translatedFormat('M j').' - '.$rowEvent->getEndDateTime($rowDate, true, $rowEvent->scheduleTimezone())->translatedFormat('M j')
                 : $rowStart->format($upUse24 ? 'H:i' : 'g:i A');
-            // In the owner's own words where the schedule has chosen that (Settings, Advanced,
+            // In the owner's own words where the schedule has chosen that (Style, Events,
             // "Event list wording"; App\Utils\ListWording); null is the standard card.
             $rowWording = \App\Utils\ListWording::card($rowEvent, $role, $displayLang);
             // The filter the visitor arrived with rides along, as it did on the list this replaces.

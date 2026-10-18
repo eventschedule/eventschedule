@@ -674,7 +674,7 @@
                         <div class="es-plate-card p-6" data-reveal="panel">
                             <p class="es-plate-tag mb-3">Your links</p>
                             <p class="es-plate-mono mb-3">events.yourdomain.com/summer-social</p>
-                            <p class="text-sm leading-relaxed text-gray-400">Event pages keep the slug you set on the event, and your social and website links answer at <a href="{{ route('marketing.docs.creating_schedules') }}#videos-links" class="es-plate-lit font-medium hover:underline">short addresses</a> there too, like /instagram. Only the host in front is different.</p>
+                            <p class="text-sm leading-relaxed text-gray-400">Event pages keep the slug you set on the event, and your social and website links answer at <a href="{{ route('marketing.docs.creating_schedules') }}#social-links" class="es-plate-lit font-medium hover:underline">short addresses</a> there too, like /instagram. Only the host in front is different.</p>
                         </div>
                         <div class="es-plate-card p-6" data-reveal="panel">
                             <p class="es-plate-tag mb-3">Your feeds</p>

@@ -2,7 +2,7 @@ import { createApp } from 'vue';
 import VenueMapEditor from './components/VenueMapEditor.vue';
 
 /**
- * Mounts the list of venues in Engagement > Venue map on the schedule form, if the page drew one.
+ * Mounts the list of venues in Page content > Venue map on the schedule form, if the page drew one.
  *
  * The same contract as venue-map-boot.js: an EMPTY host, and every value (venue names and
  * addresses among them) through the JSON blob, because server-rendered text inside a Vue mount is

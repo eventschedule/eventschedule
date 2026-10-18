@@ -40,7 +40,7 @@ class ScheduleStyleTabTest extends TestCase
     {
         $start = strpos($html, '<div id="section-style"');
         $this->assertNotFalse($start, 'the Style tab is on the page');
-        $end = strpos($html, 'id="section-gallery"', $start) ?: strpos($html, 'id="section-links"', $start);
+        $end = strpos($html, 'class="mobile-section-header" data-section="section-page"', $start) ?: strpos($html, 'class="mobile-section-header" data-section="section-subschedules"', $start);
         $this->assertNotFalse($end);
 
         return substr($html, $start, $end - $start);

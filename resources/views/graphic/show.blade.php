@@ -941,11 +941,11 @@
                                 <template v-if="s.text_template !== defaultTemplate"> &middot; <button type="button" @click="s.text_template = defaultTemplate">{{ __('messages.graphic_template_reset') }}</button></template>
                             </p>
                         </div>
-                        {{-- Where the owner chose, in the schedule form (Settings, Advanced, "Event list
+                        {{-- Where the owner chose, in the schedule form (Style, Events, "Event list
                              wording"), to word the schedule's list with this caption, say so here, where the
                              wording is changed: a save here changes the list too. --}}
                         @if ($listFollows)
-                        <p class="gfx-hint gfx-follows">{{ __('messages.list_wording_follows') }} <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#settings-tab-advanced">{{ __('messages.list_wording_change') }}</a></p>
+                        <p class="gfx-hint gfx-follows">{{ __('messages.list_wording_follows') }} <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#style-content-animation">{{ __('messages.list_wording_change') }}</a></p>
                         @endif
                         <div class="gfx-field gfx-switch">
                             <x-toggle name="text_show_all" :label="__('messages.graphic_all_events')" v-model="s.text_show_all" v-bind:disabled="s.number_events" />

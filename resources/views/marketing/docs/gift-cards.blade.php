@@ -43,7 +43,7 @@
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Redemption happens in the ticket checkout only. Appointment bookings have no gift card field, so a card cannot pay for a booked time slot.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Selling gift cards is a <strong class="text-gray-900 dark:text-white">Pro</strong> feature, and is included on all selfhosted deployments. Cards you have already sold stay redeemable even if you later turn selling off or your plan lapses.</p>
-        <p class="text-gray-600 dark:text-gray-300">You switch gift cards on in the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab of a schedule's edit page, and follow the cards you have sold on the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab of <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>.</p>
+        <p class="text-gray-600 dark:text-gray-300">You switch gift cards on in the <strong class="text-gray-900 dark:text-white">Gift cards</strong> row of the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab of a schedule's edit page, and follow the cards you have sold on the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab of <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>.</p>
     </section>
 
     <!-- Setup -->
@@ -58,13 +58,13 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Gift cards are set up per schedule, so each schedule has its own amounts, currency and codes.</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong>.</li>
-            <li>Choose the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab.</li>
+            <li>Choose the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab and open its <strong class="text-gray-900 dark:text-white">Gift cards</strong> row.</li>
             <li>Turn on <strong class="text-gray-900 dark:text-white">Enable gift cards</strong>.</li>
             <li>Fill in the settings that appear under the switch (they stay hidden while it is off), then <strong class="text-gray-900 dark:text-white">Save</strong>.</li>
         </ol>
 
-        <x-doc-screenshot id="gift-cards--settings" alt="The Gift Cards tab of the schedule form with Enable gift cards switched on and three amounts: 25, 50 and 100" />
-        <p class="text-gray-600 dark:text-gray-300 mb-6">On a free schedule the tab shows an upgrade prompt instead of the settings, because selling gift cards requires <strong class="text-gray-900 dark:text-white">Pro</strong>.</p>
+        <x-doc-screenshot id="gift-cards--settings" alt="The Gift cards row of the schedule form's Tickets tab, open, with Enable gift cards switched on and three amounts: 25, 50 and 100" />
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a free schedule the row carries a lock and opens on an upgrade prompt instead of the settings, because selling gift cards requires <strong class="text-gray-900 dark:text-white">Pro</strong>.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -105,12 +105,12 @@
             <li>The schedule is on <strong class="text-gray-900 dark:text-white">Pro</strong> (or the install is selfhosted).</li>
             <li><strong class="text-gray-900 dark:text-white">Enable gift cards</strong> is on and at least one amount is saved.</li>
             <li>The payment method you picked is actually connected. Use <strong class="text-gray-900 dark:text-white">Manage payment methods</strong> under the list to connect Stripe, add your Invoice Ninja key, or set a payment link. Cash needs nothing.</li>
-            <li>On eventschedule.com only, the schedule has its own email settings. Until it does, a notice at the top of the tab says so and links to them.</li>
+            <li>On eventschedule.com only, the schedule has its own email settings. Until it does, a notice at the top of the row says so and links to them.</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The email requirement exists because the recipient's email <em>is</em> the delivery. On eventschedule.com a schedule must have its own SMTP host and username saved under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Integrations &rarr; Email Settings</strong> before gift cards go live. Selfhosted installations use the server's mail configuration instead, so there is nothing extra to do. See <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-2">Once selling is live, a <strong class="text-gray-900 dark:text-white">Gift card purchase link</strong> appears at the bottom of the tab with a <strong class="text-gray-900 dark:text-white">Copy</strong> button. Share it in a newsletter, a social post, or anywhere you would put a ticket link.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-2">Once selling is live, a <strong class="text-gray-900 dark:text-white">Gift card purchase link</strong> appears at the bottom of the row with a <strong class="text-gray-900 dark:text-white">Copy</strong> button. Share it in a newsletter, a social post, or anywhere you would put a ticket link.</p>
     </section>
 
     <!-- Buying -->

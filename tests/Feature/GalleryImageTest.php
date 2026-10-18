@@ -662,7 +662,7 @@ class GalleryImageTest extends TestCase
 
         $html = $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
 
-        $this->assertStringContainsString('id="section-gallery"', $html);
+        $this->assertStringContainsString('id="page-tab-gallery"', $html);
         $this->assertStringNotContainsString('id="gallery-editor-app"', $html);
         $this->assertStringContainsString(__('messages.gallery_upsell_title'), $html);
     }
@@ -675,7 +675,7 @@ class GalleryImageTest extends TestCase
         $this->actingAs($owner)
             ->withSession(['gallery_published' => [
                 'name' => 'Jazz Night', 'count' => 3, 'is_hidden' => false, 'thumbs' => [],
-                'url' => 'https://example.test/jazz#gp-gallery', 'edit_url' => 'https://example.test/edit#section-gallery',
+                'url' => 'https://example.test/jazz#gp-gallery', 'edit_url' => 'https://example.test/edit#page-tab-gallery',
             ]])
             ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
             ->assertOk()

@@ -9,7 +9,7 @@ use Tests\TestCase;
  * Keeps the marketing site from describing the "Notify me" card as something every page has.
  *
  * Until 2026-09-17 every upcoming public event page carried "Tell me when tickets go on sale". It is
- * now the "Notify me" card, a free per-schedule switch under Settings > Advanced
+ * now the "Notify me" card, a free per-schedule switch under Engagement > Mailing list
  * (roles.show_event_interest) that is OFF by default - existing schedules included, because the
  * migration's column default applied to them - and EventInterestController::store() refuses new
  * sign-ups while it is off. About eighty sentences across fifty marketing pages said a page simply

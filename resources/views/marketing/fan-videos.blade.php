@@ -1165,7 +1165,7 @@
 
                 <div class="space-y-4">
                     <div class="es-reel-card p-5 sm:p-7" data-reveal="panel">
-                        <p class="es-reel-tag mb-4">Engagement &rsaquo; Fan Content</p>
+                        <p class="es-reel-tag mb-4">Engagement &rsaquo; Fan content</p>
                         <div class="space-y-3">
                             @foreach ($switches as [$swName, $swOn, $swNote])
                                 <div class="flex items-start gap-3.5">

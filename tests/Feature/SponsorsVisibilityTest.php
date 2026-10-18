@@ -13,7 +13,7 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * The owner's switch for the sponsors section (Engagement > Sponsors, roles.show_sponsors).
+ * The owner's switch for the sponsors section (Page content > Sponsors, roles.show_sponsors).
  *
  * Until it existed the section showed whenever a sponsor was stored, so taking it off the page for
  * a while meant deleting the sponsors and uploading them again. Off hides the section on the

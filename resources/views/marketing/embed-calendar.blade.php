@@ -537,7 +537,7 @@
             ],
             [
                 'q' => 'Can visitors add events to their calendar or subscribe from the embed?',
-                'a' => 'Not inside the frame, which is the calendar on its own. A click on an event opens its page in a new tab, and that page has the rest: Add to Calendar for that date, a link to subscribe to your whole schedule as a live calendar feed that updates itself when a date moves, and, on an upcoming event with the "Notify me" card switched on, a box to leave an email address and hear when tickets go on sale or if anything changes. To put the feed link on your own page as well, copy its address from your schedule\'s settings under Integrations, then Advanced.',
+                'a' => 'Not inside the frame, which is the calendar on its own. A click on an event opens its page in a new tab, and that page has the rest: Add to Calendar for that date, a link to subscribe to your whole schedule as a live calendar feed that updates itself when a date moves, and, on an upcoming event with the "Notify me" card switched on, a box to leave an email address and hear when tickets go on sale or if anything changes. To put the feed link on your own page as well, copy its address from your schedule\'s settings under Integrations, then Calendar text and feeds.',
             ],
         ];
 

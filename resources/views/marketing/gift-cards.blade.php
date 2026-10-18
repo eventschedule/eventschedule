@@ -1055,7 +1055,7 @@
                     Four decisions, <span class="es-gift-grad">then it sells itself</span>.
                 </h2>
                 <p class="es-gift-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Everything lives in the Gift Cards section of your schedule's Edit page.
+                    Everything lives in the Gift cards row of the Tickets tab on your schedule's Edit page.
                 </p>
             </div>
 

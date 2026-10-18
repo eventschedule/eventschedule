@@ -119,6 +119,15 @@ class ScheduleFormJourneyTest extends DuskTestCase
         $browser->pause(150)->click($selector)->pause(200);
     }
 
+    /** The Gift cards row, in the Tickets tab where it lives since the tabs were rearranged. */
+    private function openGiftCards(Browser $browser): void
+    {
+        $this->showTab($browser, 'section-tickets');
+        if (! $this->paneOpen($browser, 'tickets-tab-gift-cards')) {
+            $this->press($browser, '.tickets-tab[data-tab="gift-cards"]');
+        }
+    }
+
     private function type(Browser $browser, string $selector, string $value): void
     {
         $browser->script('var el = document.querySelector('.json_encode($selector).'); el.value = '.json_encode($value).'; el.dispatchEvent(new Event("input", { bubbles: true }));');
@@ -128,8 +137,11 @@ class ScheduleFormJourneyTest extends DuskTestCase
     public function test_a_ticket_preset_is_added_and_the_team_switch_waits_for_one(): void
     {
         $this->browse(function (Browser $browser) {
+            // By the row's address from before it moved, which still lands on it.
             $this->open($browser, '#settings-tab-tickets');
             $browser->waitUntil('document.getElementById("ticket-preset-items").dataset.mounted === "1"', 15);
+            $this->assertSame('section-tickets', $this->shownTab($browser));
+            $this->assertTrue($this->paneOpen($browser, 'tickets-tab-presets'));
 
             $state = $browser->script('return {
                 disabled: document.getElementById("ticket_presets_team").disabled,
@@ -152,12 +164,12 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $state = $browser->script('return {
                 disabled: document.getElementById("ticket_presets_team").disabled,
                 line: document.querySelector("#ticket-preset-items [data-list-row] .event-list-sub").innerText.trim(),
-                summary: document.querySelector(\'[data-summary="settings:tickets"]\').textContent.trim(),
+                summary: document.querySelector(\'[data-summary="tickets:presets"]\').textContent.trim(),
             };')[0];
             $this->assertFalse($state['disabled']);
             $this->assertStringContainsString('Entry $5', $state['line']);
             $this->assertSame('Regular ('.__('messages.ticket_preset_default').')', $state['summary']);
-            $this->assertStringContainsString(__('messages.settings'), $this->barText($browser), 'the tab is marked unsaved');
+            $this->assertStringContainsString(__('messages.tickets'), $this->barText($browser), 'the tab is marked unsaved');
 
             $browser->script('document.querySelector("label[for=ticket_presets_team]").click();');
             $browser->pause(200);
@@ -389,15 +401,15 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $browser->script('document.querySelector(".event-custom-field-item [data-action=\"remove-custom-field\"]").click();');
 
             // Gift cards: the settings appear with the switch.
-            $this->showTab($browser, 'section-gift-cards');
+            $this->openGiftCards($browser);
             $this->assertFalse((bool) $browser->script('return document.getElementById("gift-card-details").offsetParent !== null;')[0]);
             $browser->script('var s = document.querySelector("input[type=\"checkbox\"][name=\"gift_cards_enabled\"]"); s.checked = true; s.dispatchEvent(new Event("change", { bubbles: true }));');
             $browser->pause(200);
             $this->assertTrue((bool) $browser->script('return document.getElementById("gift-card-details").offsetParent !== null;')[0]);
 
             // Sponsors: an empty line, the form behind its link, and a reason when Add cannot add.
-            $this->showTab($browser, 'section-engagement');
-            $this->press($browser, '.engagement-tab[data-tab="sponsors"]');
+            $this->showTab($browser, 'section-page');
+            $this->press($browser, '.page-tab[data-tab="sponsors"]');
             $this->assertTrue((bool) $browser->script('return document.getElementById("sponsors-empty").offsetParent !== null && document.getElementById("sponsor-form-shell").hidden;')[0]);
             $this->press($browser, '#sponsor-form-open');
             $this->assertFalse((bool) $browser->script('return document.getElementById("sponsor-form-shell").hidden;')[0]);
@@ -998,7 +1010,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->open($browser);
-            $this->showTab($browser, 'section-gift-cards');
+            $this->openGiftCards($browser);
 
             $this->giftSwitch($browser, true);
             $this->type($browser, '#gift_card_valid_days', '99999');
@@ -1009,9 +1021,10 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $browser->script('document.getElementById("edit-form").requestSubmit();');
             $browser->pause(600);
 
-            $this->assertSame('section-gift-cards', $this->shownTab($browser), 'the tab is shown');
+            $this->assertSame('section-tickets', $this->shownTab($browser), 'the tab is shown');
+            $this->assertTrue($this->paneOpen($browser, 'tickets-tab-gift-cards'), 'with its row open');
             $this->assertTrue((bool) $browser->script('var f = document.getElementById("gift_card_valid_days"); return ! document.getElementById("gift-card-details").hidden && f.offsetParent !== null;')[0], 'and the field is on the page to be fixed');
-            $this->assertSame(__('messages.check_tabs').': '.__('messages.gift_cards'), $this->barText($browser));
+            $this->assertSame(__('messages.check_tabs').': '.__('messages.tickets'), $this->barText($browser));
             $this->assertStringContainsString('/journeyquartet/edit', $browser->driver->getCurrentURL(), 'nothing was sent');
         });
     }
@@ -1021,7 +1034,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->open($browser);
-            $this->showTab($browser, 'section-engagement');
+            $this->showTab($browser, 'section-page');
             $browser->script('window.FormKit.openFromHash("#sponsor-form-open");');
             $browser->pause(300);
 
@@ -1063,7 +1076,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $this->open($browser);
             // Longer than the server stores, set past the field's own limit: only the server objects.
             $this->type($browser, '#name', str_repeat('x', 300));
-            $this->showTab($browser, 'section-gift-cards');
+            $this->openGiftCards($browser);
 
             $this->giftSwitch($browser, true);
             $this->press($browser, '#add-gift-card-amount');
@@ -1075,9 +1088,75 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $browser->waitUntil('document.readyState === "complete" && window.FormKit !== undefined && document.querySelector("ul.text-red-600, ul.text-red-400") !== null', 30)->pause(500);
 
             $this->assertSame('section-details', $this->shownTab($browser), 'the first tab with a message is the one shown');
-            $this->assertStringContainsString(__('messages.gift_cards'), $this->barText($browser), 'and the bar names the other');
-            $this->showTab($browser, 'section-gift-cards');
+            $this->assertStringContainsString(__('messages.tickets'), $this->barText($browser), 'and the bar names the other');
+            $this->openGiftCards($browser);
             $this->assertTrue((bool) $browser->script('var m = document.querySelector("#gift-card-details ul.text-red-600, #gift-card-details ul.text-red-400"); return m !== null && m.offsetParent !== null;')[0], 'its message can be read');
+        });
+    }
+
+    /**
+     * The tabs were rearranged in 2026-10: an address from before still lands on the row it meant,
+     * and the Help link follows it; a link inside the form shows the tab it names; and Mailing list
+     * and Notifications each say how the other's switch stands, as it is switched.
+     */
+    public function test_old_addresses_and_links_inside_the_form_land_on_the_new_rows(): void
+    {
+        $this->browse(function (Browser $browser) {
+            // This install is selfhosted with an address search (.env.dusk.local), so a talent has
+            // both the venue map row and the Auto import row.
+            foreach ([
+                '#section-gallery' => ['section-page', 'page-tab-gallery', '#gallery'],
+                '#section-gift-cards' => ['section-tickets', 'tickets-tab-gift-cards', '/docs/gift-cards#setup'],
+                '#section-links' => ['section-page', 'page-tab-videos', '#videos'],
+                '#engagement-tab-map' => ['section-page', 'page-tab-map', '#venue-map'],
+                '#section-auto-import' => ['section-integrations', 'integration-tab-auto-import', '#auto-import'],
+            ] as $old => [$tab, $pane, $help]) {
+                $this->open($browser, $old);
+                $this->assertSame($tab, $this->shownTab($browser), "{$old} shows {$tab}");
+                $this->assertTrue($this->paneOpen($browser, $pane), "and opens #{$pane}");
+                $this->assertStringEndsWith($help, $browser->script('return document.querySelector(".js-help-link").href;')[0], "and Help follows it to {$help}");
+            }
+
+            // A link within the page that names an old row, followed after load.
+            $this->open($browser);
+            $browser->script('window.location.hash = "section-gift-cards";');
+            $browser->pause(400);
+            $this->assertSame('section-tickets', $this->shownTab($browser));
+            $this->assertTrue($this->paneOpen($browser, 'tickets-tab-gift-cards'));
+            $this->assertStringEndsWith('/docs/gift-cards#setup', $browser->script('return document.querySelector(".js-help-link").href;')[0]);
+
+            // Website points to the social links, in the tab that has them now.
+            $this->open($browser);
+            $this->press($browser, '.details-tab[data-tab="contact"]');
+            $this->press($browser, '[data-form-jump="section-page"]');
+            $this->assertSame('section-page', $this->shownTab($browser));
+            $this->assertTrue((bool) $browser->script('return document.getElementById("links-tab-social_links").offsetParent !== null;')[0]);
+
+            // The mailing list says whether its people are emailed about new events, as that
+            // switch is changed in Notifications, and its link goes there.
+            $this->showTab($browser, 'section-engagement');
+            $this->press($browser, '.engagement-tab[data-tab="mailing-list"]');
+            $note = 'return document.querySelector("#mailing-list-note [data-note-text]").textContent.trim();';
+            $before = $browser->script($note)[0];
+            $this->press($browser, '#mailing-list-note [data-form-jump]');
+            $this->assertSame('section-settings', $this->shownTab($browser));
+            $this->assertTrue($this->paneOpen($browser, 'settings-tab-notifications'));
+            $this->assertStringEndsWith('#settings-notifications', $browser->script('return document.querySelector(".js-help-link").href;')[0], 'and Help follows the jump');
+            // The row it opened is below the portal's sticky top bar (4rem), not under it.
+            $browser->pause(900);
+            $this->assertGreaterThanOrEqual(64, (int) $browser->script('return Math.round(document.querySelector(\'button[aria-controls="settings-tab-notifications"]\').getBoundingClientRect().top);')[0]);
+            $browser->script('document.querySelector("label[for=announce_new_events]").click();');
+            $browser->pause(200);
+            $after = $browser->script($note)[0];
+            $this->assertNotSame($before, $after);
+            $this->assertContains($after, [__('messages.mailing_list_note_on'), __('messages.mailing_list_note_off')]);
+
+            // An address added to Auto import is named by its row and its tab before any save
+            // (a row added on the page is named import_urls[new_0], not import_urls[]).
+            $this->open($browser, '#integration-tab-auto-import');
+            $this->press($browser, '[data-action="add-import-url"]');
+            $this->type($browser, '#import-url-items input[name^="import_urls["]', 'https://example.org/events');
+            $this->assertSame('example.org/events', $this->summary($browser, 'integration:auto-import'));
         });
     }
 }

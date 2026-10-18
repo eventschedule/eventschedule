@@ -64,7 +64,7 @@
             : null;
     }
 
-    // The owner's switch (Settings > Advanced, on by default), with two exceptions that both
+    // The owner's switch (Engagement > Mailing list, on by default), with two exceptions that both
     // outrank it:
     //  - ?subscribe=1 is what the Followers tab's QR code and "Your follow link" open. The owner
     //    printed or shared that on purpose, so it keeps working with the panel otherwise hidden.

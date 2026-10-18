@@ -29,7 +29,7 @@ class TicketPresets
     public const LIVE_SALE_STATUSES = ['unpaid', 'paid', 'amount_mismatch', 'refunded'];
 
     /**
-     * What Settings > Ticket presets accepts (RoleUpdateRequest), and so what may be stored: the
+     * What Tickets > Ticket presets accepts (RoleUpdateRequest), and so what may be stored: the
      * editor posts every preset on every save of the schedule form, and one it would refuse
      * refuses that whole form, on any tab, with nothing on the page to fix it with.
      */
@@ -292,7 +292,7 @@ class TicketPresets
      */
     /**
      * Refuse "Save these tickets as a preset" before the event is saved, when what it would store
-     * is more than Settings > Ticket presets accepts (MAX_*): a new name past the last preset a
+     * is more than Tickets > Ticket presets accepts (MAX_*): a new name past the last preset a
      * schedule may have, or a setup bigger than the editor takes. Keyed `ticket_preset_name`,
      * which the block on the event form shows.
      */
@@ -367,7 +367,7 @@ class TicketPresets
     }
 
     /**
-     * Save the list from Settings > Ticket presets. Rows are matched by their encoded id; a row the
+     * Save the list from Tickets > Ticket presets. Rows are matched by their encoded id; a row the
      * page no longer has is removed. What the editor does not show (add-ons, promo codes, options a
      * preset was saved with from an event) is kept. The first row is the default when none is.
      *
@@ -503,7 +503,7 @@ class TicketPresets
     }
 
     /**
-     * What Settings > Ticket presets on the schedule form starts with (resources/js/components/
+     * What Tickets > Ticket presets on the schedule form starts with (resources/js/components/
      * TicketPresetsEditor.vue). After a refused save the rows come back as they were posted, laid
      * over the stored ones, so nothing typed is lost and the row with the problem opens again.
      */
@@ -690,7 +690,7 @@ class TicketPresets
             'has_team' => $presets->isEmpty() && $isOwner
                 && DB::table('role_user')->where('role_id', $owning->id)->whereIn('level', ['owner', 'admin'])->count() > 1,
             'may_edit' => self::mayEdit($user, $owning),
-            'manage_url' => route('role.edit', ['subdomain' => $owning->subdomain]).'#settings-tab-tickets',
+            'manage_url' => route('role.edit', ['subdomain' => $owning->subdomain]).'#tickets-tab-presets',
             'copied_from' => $copiedFrom,
             'event_tickets_line' => $event ? self::eventTicketsLine($event) : '',
             'event_types_line' => $event ? self::eventTypesLine($event) : '',

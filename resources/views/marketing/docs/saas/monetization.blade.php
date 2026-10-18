@@ -430,7 +430,7 @@
         </div>
 
         <p>Set <code class="doc-inline-code">STAY22_ENABLED=true</code> and an
-        <strong>Accommodation</strong> row appears in the <strong>Engagement</strong> tab of every
+        <strong>Accommodation</strong> row appears in the <strong>Page content</strong> tab of every
         schedule's edit page, holding a <strong>Show nearby accommodation</strong> toggle and a
         <strong>Stay22 affiliate ID</strong> field. Nothing is shown to visitors until a schedule
         owner turns it on there; it is off by default for every schedule, on every plan.</p>

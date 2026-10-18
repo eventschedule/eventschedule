@@ -107,7 +107,7 @@
         </div>
 
         <h3 class="doc-subheading">Daily Auto Import from event URLs <x-doc-badge plan="selfhost" /></h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">An <strong class="text-gray-900 dark:text-white">Auto Import</strong> tab appears on the schedule form on selfhosted installs only, between Gift Cards and Integrations, and it is the one AI feature that runs unattended. It is offered on every schedule type, but every event it creates is attached to the schedule as that event's <em>curator</em>, so it is really a curator tool. A scheduled task visits your sources once a day, so the cron entry has to be running and an AI key has to be set, otherwise the task reports that no key was found and stops without importing anything.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">An <strong class="text-gray-900 dark:text-white">Auto import</strong> row appears in the <strong class="text-gray-900 dark:text-white">Integrations</strong> tab of the schedule form on selfhosted installs only, and it is the one AI feature that runs unattended. It is offered on every schedule type, but every event it creates is attached to the schedule as that event's <em>curator</em>, so it is really a curator tool. A scheduled task visits your sources once a day, so the cron entry has to be running and an AI key has to be set, otherwise the task reports that no key was found and stops without importing anything.</p>
 
         <div class="doc-fields">
             <div class="doc-field">

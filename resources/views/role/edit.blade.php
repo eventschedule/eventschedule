@@ -34,7 +34,7 @@
     <x-slot name="head">
 
         <style {!! nonce_attr() !!}>
-        /* "Event list wording" (Settings, Advanced): the schedule's next events as the list's phone
+        /* "Event list wording" (Style, Events): the schedule's next events as the list's phone
            cards would say them, small, in the portal's own tokens. */
         .lw-preview { margin-top: 0.875rem; }
         .lw-preview-label { margin: 0 0 0.375rem; font-size: 0.8125rem; font-weight: 600; color: rgb(var(--ap-ink-3)); }
@@ -60,19 +60,24 @@
             display: block;
         }
 
-        /* Videos and Links. "Add video" stays with its own list: under a tall empty state it sat
-           nearer the next list's name than anything of its own, and read as that list's. The next
-           list begins after a rule and a wider gap. */
+        /* Social links and Videos (Page content). "Add" stays with its own list: under a tall empty
+           state it sat nearer the next list's name than anything of its own. */
         .links-tab-content .link-empty-state .event-empty {
             margin: 0;
         }
         .links-tab-content .btn-show-add-link {
             margin-top: 0.75rem;
         }
-        .links-tab-content + .event-group-label {
-            margin-top: 1.75rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgb(var(--ap-border));
+        /* The always-open block above Page content's rows. */
+        #page-tab-general {
+            margin-bottom: 1.5rem;
+        }
+        /* A link inside the form scrolls to a row or a tab's header: below the portal's sticky top
+           bar (4rem, layouts/app-admin), not under it. */
+        .event-subrow,
+        .event-subrow-body,
+        .mobile-section-header {
+            scroll-margin-top: 5rem;
         }
 
         {{-- The Style tab: its grid, its preview and its pickers (plain CSS on the --ap-* tokens). --}}
@@ -735,14 +740,12 @@
             'section-address' => __('messages.venue_address'),
             'section-merge' => __('messages.merge_venue'),
             'section-style' => __('messages.schedule_style'),
-            'section-gallery' => __('messages.gallery'),
-            'section-links' => __('messages.videos_and_links'),
+            'section-page' => __('messages.page_content'),
             'section-subschedules' => __('messages.customize'),
-            'section-settings' => __('messages.schedule_settings'),
             'section-engagement' => __('messages.engagement'),
-            'section-gift-cards' => __('messages.gift_cards'),
+            'section-tickets' => __('messages.tickets'),
+            'section-settings' => __('messages.schedule_settings'),
             'section-sources' => __('messages.event_sources'),
-            'section-auto-import' => __('messages.auto_import_settings'),
             'section-integrations' => __('messages.integrations'),
         ];
 
@@ -768,7 +771,18 @@
             'email' => __('messages.email'),
             'not_connected' => __('messages.settings_not_connected'),
             'gallery_prompt' => __('messages.gallery_add_first'),
-            'settings_holds' => implode(', ', array_filter([__('messages.schedule_url'), $role->exists ? __('messages.ticket_presets') : null, __('messages.notifications'), __('messages.advanced')])),
+            'settings_holds' => implode(', ', [__('messages.schedule_url'), __('messages.settings_group_new_events'), __('messages.notifications'), __('messages.advanced')]),
+            // Page content and Tickets are said by what is in them, in the order of their rows.
+            'social_links' => __('messages.social_links'),
+            'videos' => __('messages.videos'),
+            'gallery' => __('messages.gallery'),
+            'accommodation' => __('messages.accommodation'),
+            'ticket_presets' => __('messages.ticket_presets'),
+            'gift_cards' => __('messages.tickets_row_gift_cards'),
+            'mailing_list' => __('messages.engagement_row_mailing_list'),
+            'auto_import' => __('messages.auto_import_settings'),
+            'hide_past_events' => __('messages.hide_past_events'),
+            'banner_is_pro' => $role->isPro(),
             'preset_default' => __('messages.ticket_preset_default'),
             'preset_team' => __('messages.ticket_presets_team_summary'),
             'gallery_count' => count($galleryState['images'] ?? []),
@@ -792,7 +806,7 @@
         @if ($scheduleUrl)
         <div class="event-url-strip">
             <span class="event-url-text" dir="ltr">@if ($scheduleLinkHost !== '')<span class="event-url-host">{{ $scheduleLinkHost }}</span>@endif<span class="event-url-path">{{ $scheduleLinkPath }}</span></span>
-            <button type="button" class="event-link" id="copy-schedule-link-btn" data-copy-text="{{ $scheduleUrl }}" data-copied="{{ __('messages.copied') }}">{{ __('messages.copy') }}</button>
+            <button type="button" class="event-link" id="copy-schedule-link-btn" data-setup-share="link" data-copy-text="{{ $scheduleUrl }}" data-copied="{{ __('messages.copied') }}">{{ __('messages.copy') }}</button>
             <a href="{{ $scheduleUrl }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view') }}</a>
         </div>
         @endif
@@ -894,30 +908,15 @@
                                 <span class="section-nav-dot" data-dirty-dot="section-style" hidden></span>
                             </a>
                             @if ($role->exists)
-                            <a href="#section-gallery" class="section-nav-link" data-section="section-gallery">
+                            <a href="#section-page" class="section-nav-link" data-section="section-page">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
                                 </svg>
                                 <span class="section-nav-text">
-                                    <span>{{ __('messages.gallery') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-gallery"><bdi></bdi></span>
+                                    <span>{{ __('messages.page_content') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-page"><bdi></bdi></span>
                                 </span>
-                                @if ($galleryMode === 'locked')
-                                <x-lock-badge tier="pro" />
-                                @elseif (count($galleryState['images']))
-                                <span class="ms-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 px-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">{{ count($galleryState['images']) }}</span>
-                                @endif
-                                <span class="section-nav-dot" data-dirty-dot="section-gallery" hidden></span>
-                            </a>
-                            <a href="#section-links" class="section-nav-link" data-section="section-links">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                                </svg>
-                                <span class="section-nav-text">
-                                    <span>{{ __('messages.videos_and_links') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-links"><bdi></bdi></span>
-                                </span>
-                                <span class="section-nav-dot" data-dirty-dot="section-links" hidden></span>
+                                <span class="section-nav-dot" data-dirty-dot="section-page" hidden></span>
                             </a>
                             @endif
                             <a href="#section-subschedules" class="section-nav-link" data-section="section-subschedules">
@@ -930,17 +929,6 @@
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-subschedules" hidden></span>
                             </a>
-                            <a href="#section-settings" class="section-nav-link" data-section="section-settings">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span class="section-nav-text">
-                                    <span>{{ __('messages.schedule_settings') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-settings"><bdi></bdi></span>
-                                </span>
-                                <span class="section-nav-dot" data-dirty-dot="section-settings" hidden></span>
-                            </a>
                             <a href="#section-engagement" class="section-nav-link" data-section="section-engagement">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
@@ -952,29 +940,28 @@
                                 <span class="section-nav-dot" data-dirty-dot="section-engagement" hidden></span>
                             </a>
                             @if ($role->exists)
-                            <a href="#section-gift-cards" class="section-nav-link" data-section="section-gift-cards">
+                            <a href="#section-tickets" class="section-nav-link" data-section="section-tickets">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
                                 </svg>
                                 <span class="section-nav-text">
-                                    <span>{{ __('messages.gift_cards') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-gift-cards"><bdi></bdi></span>
+                                    <span>{{ __('messages.tickets') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-tickets"><bdi></bdi></span>
                                 </span>
-                                <span class="section-nav-dot" data-dirty-dot="section-gift-cards" hidden></span>
+                                <span class="section-nav-dot" data-dirty-dot="section-tickets" hidden></span>
                             </a>
                             @endif
-                            @if (! config('app.hosted'))
-                            <a href="#section-auto-import" class="section-nav-link" data-section="section-auto-import">
+                            <a href="#section-settings" class="section-nav-link" data-section="section-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 <span class="section-nav-text">
-                                    <span>{{ __('messages.auto_import_settings') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-auto-import"><bdi></bdi></span>
+                                    <span>{{ __('messages.schedule_settings') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-settings"><bdi></bdi></span>
                                 </span>
-                                <span class="section-nav-dot" data-dirty-dot="section-auto-import" hidden></span>
+                                <span class="section-nav-dot" data-dirty-dot="section-settings" hidden></span>
                             </a>
-                            @endif
                             <a href="#section-integrations" class="section-nav-link" data-section="section-integrations">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
@@ -1088,54 +1075,6 @@
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
-                        @php $bannerDisabled = ! $role->isPro(); @endphp
-
-                        @if ($bannerDisabled)
-                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <span>{{ __('messages.banner_pro_only') }}</span>
-                                </p>
-                            </div>
-                        @endif
-
-                        <div class="mb-6">
-                            <x-toggle name="banner_enabled"
-                                label="{{ __('messages.show_announcement_bar') }}"
-                                checked="{{ old('banner_enabled', $role->banner_enabled) }}"
-                                help="{{ __('messages.banner_enabled_help') }}"
-                                :disabled="$bannerDisabled" />
-                        </div>
-
-                        <div class="mb-6" id="banner-message-wrapper" style="{{ old('banner_enabled', $role->banner_enabled) && ! $bannerDisabled ? '' : 'display: none;' }}">
-                            <x-input-label for="banner_message" :value="__('messages.banner_message')" />
-                            <textarea id="banner_message" name="banner_message"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                rows="3" dir="auto" maxlength="500"
-                                placeholder="{{ __('messages.enter_banner_message') }}">{{ old('banner_message', $role->banner_message) }}</textarea>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.banner_message_hint') }}</p>
-                            <x-input-error class="mt-2" :messages="$errors->get('banner_message')" />
-
-                            @if ($role->banner_message_en)
-                            <div class="mt-4">
-                                <x-input-label for="banner_message_en" :value="__('messages.banner_message') . ' (' . $role->translationLanguageName() . ')'" />
-                                <textarea id="banner_message_en" name="banner_message_en"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                    rows="3" dir="auto" maxlength="500">{{ old('banner_message_en', $role->banner_message_en) }}</textarea>
-                                <x-input-error class="mt-2" :messages="$errors->get('banner_message_en')" />
-                            </div>
-                            @endif
-
-                            <div class="mt-4">
-                                <x-toggle name="banner_on_event_pages"
-                                    label="{{ __('messages.banner_on_event_pages') }}"
-                                    checked="{{ old('banner_on_event_pages', $role->banner_on_event_pages) }}"
-                                    help="{{ __('messages.banner_on_event_pages_help') }}"
-                                    :disabled="$bannerDisabled" />
-                            </div>
-                        </div>
 
                         </div>
 
@@ -1256,6 +1195,19 @@
                             <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
                         </div>
 
+                            <div class="mb-6">
+                                <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
+                                <select name="first_day_of_week" id="first_day_of_week"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
+                                    <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
+                                        {{ __('messages.' . $dayName) }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
+                            </div>
+
                         </div>
 
                         <!-- Tab Content: Contact Info -->
@@ -1319,6 +1271,13 @@
                             <x-text-input id="website" name="website" type="url" class="mt-1 block w-full"
                                 :value="old('website', $role->website)" />
                             <x-input-error class="mt-2" :messages="$errors->get('website')" />
+                            {{-- Website and the social links are one strip of icons on the page, and Website is
+                                 where an owner looks for them first. The link ends the sentence: x-link ends
+                                 with a line break, which put a space before a period after it. --}}
+                            @if ($role->exists)
+                            @php [$linksHintBefore, $linksHintAfter] = array_pad(explode('__TAB__', __('messages.contact_links_hint', ['tab' => '__TAB__']), 2), 2, ''); @endphp
+                            <p class="event-hint mt-2">{{ $linksHintBefore }}<x-link href="#section-page" data-form-jump="section-page">{{ __('messages.page_content') }}</x-link>{{ $linksHintAfter }}</p>
+                            @endif
                         </div>
 
                         @if ($role->isCurator())
@@ -1339,6 +1298,62 @@
                         @endif
 
                         </div>
+
+                        <!-- Tab Content: Announcement bar -->
+                        {{-- Last of the rows: it is a Pro feature, and on Free the first tab used to open on
+                             a disabled switch. A Pro owner reads the message in the row's line. --}}
+                        <x-form-row group="details" tab="announcement" :title="__('messages.announcement_bar')" class="details-tab" :locked="$role->isPro() ? null : 'pro'" />
+                        <div id="details-tab-announcement" class="event-subrow-body details-tab-content" hidden>
+                        @php $bannerDisabled = ! $role->isPro(); @endphp
+
+                        @if ($bannerDisabled)
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.banner_pro_only') }}</span>
+                                </p>
+                            </div>
+                        @endif
+
+                        <div class="mb-6">
+                            <x-toggle name="banner_enabled"
+                                label="{{ __('messages.show_announcement_bar') }}"
+                                checked="{{ old('banner_enabled', $role->banner_enabled) }}"
+                                help="{{ __('messages.banner_enabled_help') }}"
+                                :disabled="$bannerDisabled" />
+                        </div>
+
+                        <div class="mb-6" id="banner-message-wrapper" style="{{ old('banner_enabled', $role->banner_enabled) && ! $bannerDisabled ? '' : 'display: none;' }}">
+                            <x-input-label for="banner_message" :value="__('messages.banner_message')" />
+                            <textarea id="banner_message" name="banner_message"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                rows="3" dir="auto" maxlength="500"
+                                placeholder="{{ __('messages.enter_banner_message') }}">{{ old('banner_message', $role->banner_message) }}</textarea>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.banner_message_hint') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('banner_message')" />
+
+                            @if ($role->banner_message_en)
+                            <div class="mt-4">
+                                <x-input-label for="banner_message_en" :value="__('messages.banner_message') . ' (' . $role->translationLanguageName() . ')'" />
+                                <textarea id="banner_message_en" name="banner_message_en"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                    rows="3" dir="auto" maxlength="500">{{ old('banner_message_en', $role->banner_message_en) }}</textarea>
+                                <x-input-error class="mt-2" :messages="$errors->get('banner_message_en')" />
+                            </div>
+                            @endif
+
+                            <div class="mt-4">
+                                <x-toggle name="banner_on_event_pages"
+                                    label="{{ __('messages.banner_on_event_pages') }}"
+                                    checked="{{ old('banner_on_event_pages', $role->banner_on_event_pages) }}"
+                                    help="{{ __('messages.banner_on_event_pages_help') }}"
+                                    :disabled="$bannerDisabled" />
+                            </div>
+                        </div>
+                        </div>
+                        <!-- End Tab Content: Announcement bar -->
                         </div>
                     </div>
                 </div>
@@ -2142,6 +2157,14 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('event_layout')" />
                             </div>
 
+                            <div class="mb-6">
+                                <x-toggle name="hide_past_events"
+                                    label="{{ __('messages.hide_past_events') }}"
+                                    checked="{{ old('hide_past_events', $role->hide_past_events) }}"
+                                    help="{{ __('messages.hide_past_events_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
+                            </div>
+
                         {{-- Event animation: how event cards arrive as visitors scroll the schedule
                              (resources/css/list-reveal.css). The radios are plain Blade so the form
                              posts without JS; the island above them plays the chosen design on the
@@ -2224,6 +2247,166 @@
                             @endif
                             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.list_animation_device_motion') }}</p>
                         </fieldset>
+
+                            {{-- How each event on the schedule's list is worded (App\Utils\ListWording): the
+                                 list's own cards, the wording of the Events graphic caption (what the owner
+                                 posts to WhatsApp), or a wording of the list's own with the same {variables}.
+                                 Stored in graphic_settings, because roles is at its row limit, and written only
+                                 from a save that carries list_wording_submitted. The preview under it is the
+                                 schedule's next three events as the list would draw them; nothing of it is
+                                 public until Save. --}}
+                            @php
+                                $listWordingMode = old('list_wording', \App\Utils\ListWording::mode($role));
+                                $listWordingTemplate = old('list_template', ($role->graphic_settings ?? [])['list_template'] ?? '');
+                                // A schedule read in two languages: the owner's words cannot be translated, so
+                                // a visitor reading the other one keeps the usual cards.
+                                $listWordingTwoLanguages = ($role->language_code ?: 'en') !== ($role->translation_language_code ?: 'en');
+                            @endphp
+                            <div class="mt-6 mb-6" id="list-wording" data-preview="{{ $role->exists ? route('event.graphic_list_preview', ['subdomain' => $role->subdomain]) : '' }}" data-caption="{{ (($role->graphic_settings ?? [])['text_template'] ?? '') ?: \App\Utils\EventTextGenerator::getDefaultTemplate() }}">
+                                <input type="hidden" name="list_wording_submitted" value="1">
+                                <x-input-label for="list_wording" :value="__('messages.list_wording_label')" />
+                                <select name="list_wording" id="list_wording"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    @foreach (\App\Utils\ListWording::MODES as $mode)
+                                    <option value="{{ $mode }}" {{ $listWordingMode === $mode ? 'selected' : '' }}>{{ __('messages.list_wording_'.$mode) }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.list_wording_help') }}</p>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" data-list-wording-when="caption" @if ($listWordingMode !== 'caption') hidden @endif>
+                                    {{ __('messages.list_wording_caption_help') }}
+                                    @if ($role->exists)
+                                    <x-link href="{{ route('event.generate_graphic', ['subdomain' => $role->subdomain]) }}#graphic-pane-caption">{{ __('messages.list_wording_edit_caption') }}</x-link>
+                                    @endif
+                                </p>
+                                <div class="mt-3" data-list-wording-when="custom" @if ($listWordingMode !== 'custom') hidden @endif>
+                                    <x-input-label for="list_template" :value="__('messages.list_wording_template')" />
+                                    <textarea id="list_template" name="list_template" rows="5" maxlength="2000" dir="ltr" spellcheck="false"
+                                        class="mt-1 block w-full font-mono text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                        placeholder="*{event_name}*&#10;{short_description}&#10;📍 {venue}">{{ $listWordingTemplate }}</textarea>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.list_wording_template_help') }} <x-link href="{{ marketing_url('/docs/event-graphics#variables') }}" target="_blank">{{ __('messages.graphic_all_variables') }}</x-link></p>
+                                    <x-input-error class="mt-2" :messages="$errors->get('list_template')" />
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('list_wording')" />
+                                @if ($listWordingTwoLanguages)
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" data-list-wording-when="caption custom" @if ($listWordingMode === 'standard') hidden @endif>{{ __('messages.list_wording_language', ['language' => __('messages.'.(config('app.supported_languages')[\App\Utils\ListWording::language($role)] ?? 'english'))]) }}</p>
+                                @endif
+                                <div class="lw-preview" data-list-wording-preview hidden>
+                                    <p class="lw-preview-label">{{ __('messages.list_wording_preview') }}</p>
+                                    <ul class="lw-cards"></ul>
+                                    <p class="lw-preview-note" data-note-no-name hidden>{{ __('messages.list_wording_no_name') }}</p>
+                                </div>
+                            </div>
+                            <script {!! nonce_attr() !!}>
+                            {{-- Plain DOM, as the rest of this form is: the choice shows its own fields, and the
+                                 preview asks the server for the next three cards in the wording being chosen
+                                 (GraphicController::listWordingPreview()). Everything it draws is text. --}}
+                            (function () {
+                                var root = document.getElementById('list-wording');
+                                if (! root) { return; }
+                                var select = document.getElementById('list_wording');
+                                var text = document.getElementById('list_template');
+                                var box = root.querySelector('[data-list-wording-preview]');
+                                var cards = box.querySelector('.lw-cards');
+                                var noName = box.querySelector('[data-note-no-name]');
+                                var url = root.dataset.preview;
+                                var timer = null;
+                                var turn = 0;
+                                var make = function (tag, cls, words) {
+                                    var node = document.createElement(tag);
+                                    if (cls) { node.className = cls; }
+                                    if (words != null) { node.textContent = words; }
+                                    return node;
+                                };
+                                var parts = function (target, list) {
+                                    list.forEach(function (part) {
+                                        var node = make(part.k === 'lit' ? 'span' : 'bdi', part.c || '', part.v);
+                                        if (part.l) { node.dir = 'ltr'; }
+                                        if (part.d) { node.setAttribute('aria-hidden', 'true'); }
+                                        target.appendChild(node);
+                                    });
+                                };
+                                var draw = function (list) {
+                                    var missing = false;
+                                    cards.textContent = '';
+                                    list.forEach(function (card) {
+                                        var item = make('li', 'lw-card');
+                                        var body = make('div', 'lw-text');
+                                        var time = make('span', 'lw-time');
+                                        var clock = make('bdi', null, card.time);
+                                        clock.dir = 'ltr';
+                                        time.appendChild(clock);
+                                        body.appendChild(time);
+                                        if (card.wording) {
+                                            var name = make('strong', 'lw-name');
+                                            name.dir = card.wording.dir;
+                                            parts(name, card.wording.name);
+                                            body.appendChild(name);
+                                            card.wording.body.forEach(function (line) {
+                                                var row = make('span', 'lw-line');
+                                                row.dir = card.wording.dir;
+                                                parts(row, line.p);
+                                                body.appendChild(row);
+                                            });
+                                        } else {
+                                            missing = true;
+                                            var plain = make('strong', 'lw-name', card.name);
+                                            plain.dir = card.dir;
+                                            body.appendChild(plain);
+                                            if (card.about) { body.appendChild(make('span', 'lw-line', card.about)); }
+                                            if (card.where) { body.appendChild(make('span', 'lw-line lw-where', card.where)); }
+                                        }
+                                        item.appendChild(body);
+                                        if (card.image) {
+                                            var img = make('img', 'lw-img');
+                                            img.src = card.image;
+                                            img.alt = '';
+                                            img.loading = 'lazy';
+                                            item.appendChild(img);
+                                        } else {
+                                            item.classList.add('is-bare');
+                                        }
+                                        cards.appendChild(item);
+                                    });
+                                    noName.hidden = ! missing;
+                                };
+                                var load = function () {
+                                    var mode = select.value;
+                                    var mine = ++turn;
+                                    var query = new URLSearchParams({ mode: mode, template: mode === 'custom' ? text.value : '' });
+                                    fetch(url + '?' + query.toString(), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                                        .then(function (response) { return response.ok ? response.json() : null; })
+                                        .then(function (body) {
+                                            if (mine !== turn) { return; }
+                                            if (! body || ! body.cards || ! body.cards.length) { box.hidden = true; return; }
+                                            draw(body.cards);
+                                            box.hidden = false;
+                                        })
+                                        .catch(function () { if (mine === turn) { box.hidden = true; } });
+                                };
+                                var show = function () {
+                                    var mode = select.value;
+                                    root.querySelectorAll('[data-list-wording-when]').forEach(function (node) {
+                                        node.hidden = node.getAttribute('data-list-wording-when').split(' ').indexOf(mode) === -1;
+                                    });
+                                    // A wording of the list's own starts from the caption's, not from nothing.
+                                    if (mode === 'custom' && ! text.value.trim()) {
+                                        text.value = root.dataset.caption || '';
+                                        text.dispatchEvent(new Event('input', { bubbles: true }));
+                                    }
+                                    clearTimeout(timer);
+                                    turn++;
+                                    if (mode === 'standard' || ! url) { box.hidden = true; return; }
+                                    timer = setTimeout(load, 300);
+                                };
+                                select.addEventListener('change', show);
+                                text.addEventListener('input', function () {
+                                    if (select.value !== 'custom') { return; }
+                                    clearTimeout(timer);
+                                    timer = setTimeout(load, 450);
+                                });
+                                if (select.value !== 'standard') { show(); }
+                            })();
+                            </script>
                     </div>
 
                     <!-- Custom CSS -->
@@ -2279,104 +2462,37 @@
                     </div>
                 </div>
 
-                @if ($role->exists)
-                <button type="button" class="mobile-section-header" data-section="section-gallery">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                        </svg>
-                        <span class="section-nav-text">
-                            <span>{{ __('messages.gallery') }}</span>
-                            <span class="section-nav-summary" data-summary="section-gallery"><bdi></bdi></span>
-                        </span>
-                        <span class="section-nav-dot" data-dirty-dot="section-gallery" hidden></span>
-                        @if ($galleryMode === 'locked')
-                        <x-lock-badge tier="pro" />
-                        @endif
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-gallery" class="section-content lg:mt-0">
-                    @include('partials.gallery-section', [
-                        'galleryContext' => 'schedule',
-                        'galleryMode' => $galleryMode,
-                        'galleryRole' => $role,
-                        'galleryCanUpgrade' => (bool) config('app.hosted'),
-                        'galleryImageCount' => count($galleryState['images']),
-                    ])
-                </div>
 
-                <button type="button" class="mobile-section-header" data-section="section-links">
+                @if ($role->exists)
+                <button type="button" class="mobile-section-header" data-section="section-page">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
                         </svg>
                         <span class="section-nav-text">
-                            <span>{{ __('messages.videos_and_links') }}</span>
-                            <span class="section-nav-summary" data-summary="section-links"><bdi></bdi></span>
+                            <span>{{ __('messages.page_content') }}</span>
+                            <span class="section-nav-summary" data-summary="section-page"><bdi></bdi></span>
                         </span>
-                        <span class="section-nav-dot" data-dirty-dot="section-links" hidden></span>
+                        <span class="section-nav-dot" data-dirty-dot="section-page" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-links" class="section-content lg:mt-0">
+                <div id="section-page" class="section-content lg:mt-0">
                     <div class="form-kit-col">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <span class="section-heading-name inline-flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
                                 </svg>
-                                {{ __('messages.videos_and_links') }}
+                                {{ __('messages.page_content') }}
                             </span>
                         </h2>
 
-
-                        {{-- YouTube Videos --}}
-                        <p class="event-group-label">{{ __('messages.youtube_videos') }}</p>
-                        <div id="links-tab-youtube_videos" class="links-tab-content">
-                            <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
-                                {!! (!$role->youtube_links || $role->youtube_links == '[]') ? 'style="display:none"' : '' !!}>
-                                @if ($role->youtube_links && $role->youtube_links != '[]')
-                                @foreach($role->decodeLinks('youtube_links') as $link)
-                                <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
-                                    <div class="flex items-start gap-4">
-                                        <div class="flex-shrink-0 text-gray-500 dark:text-gray-400 pt-1">
-                                            <x-url-icon class="w-5 h-5" color="currentColor">
-                                                {{ \App\Utils\UrlUtils::clean($link->url) }}
-                                            </x-url-icon>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
-                                                <h4 class="text-sm font-semibold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name ?? '' }}</h4>
-                                                <img src="{{ $link->thumbnail_url ?? '' }}" class="mt-2 rounded"/>
-                                            </x-link>
-                                        </div>
-                                        <button type="button"
-                                            class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
-                                            data-link-type="youtube_links" data-link-url="{{ $link->url }}">
-                                            {{ __('messages.remove') }}
-                                        </button>
-                                    </div>
-                                </li>
-                                @endforeach
-                                @endif
-                            </ul>
-                            <div class="link-empty-state"
-                                {!! ($role->youtube_links && $role->youtube_links != '[]') ? 'style="display:none"' : '' !!}>
-                                <p class="event-empty">{{ __('messages.no_youtube_videos') }}</p>
-                            </div>
-                            <button type="button"
-                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]"
-                                data-link-type="youtube_links">
-                                + {{ __('messages.add_video') }}
-                            </button>
-                        </div>
-
-                        {{-- Social Links --}}
+                        {{-- What the public page shows besides its events. Social links are part of a
+                             schedule's first week, so they are never behind a row. --}}
+                        <div id="page-tab-general" class="page-tab-content">
                         <p class="event-group-label">{{ __('messages.social_links') }}</p>
                         <div id="links-tab-social_links" class="links-tab-content">
                             <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
@@ -2496,6 +2612,441 @@
                                  rejection has nowhere else to render; the editor reports collisions
                                  inline as the owner types. --}}
                             <x-input-error class="mt-2" :messages="$errors->get('social_links')" />
+                        </div>
+                        </div>
+
+                        <div class="event-subrows">
+                        <!-- Tab Content: Videos -->
+                        <x-form-row group="page" tab="videos" :title="__('messages.videos')" class="page-tab" />
+                        <div id="page-tab-videos" class="event-subrow-body page-tab-content" hidden>
+                        <div id="links-tab-youtube_videos" class="links-tab-content">
+                            <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                                {!! (!$role->youtube_links || $role->youtube_links == '[]') ? 'style="display:none"' : '' !!}>
+                                @if ($role->youtube_links && $role->youtube_links != '[]')
+                                @foreach($role->decodeLinks('youtube_links') as $link)
+                                <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex-shrink-0 text-gray-500 dark:text-gray-400 pt-1">
+                                            <x-url-icon class="w-5 h-5" color="currentColor">
+                                                {{ \App\Utils\UrlUtils::clean($link->url) }}
+                                            </x-url-icon>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
+                                                <h4 class="text-sm font-semibold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name ?? '' }}</h4>
+                                                <img src="{{ $link->thumbnail_url ?? '' }}" class="mt-2 rounded"/>
+                                            </x-link>
+                                        </div>
+                                        <button type="button"
+                                            class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
+                                            data-link-type="youtube_links" data-link-url="{{ $link->url }}">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                    </div>
+                                </li>
+                                @endforeach
+                                @endif
+                            </ul>
+                            <div class="link-empty-state"
+                                {!! ($role->youtube_links && $role->youtube_links != '[]') ? 'style="display:none"' : '' !!}>
+                                <p class="event-empty">{{ __('messages.no_youtube_videos') }}</p>
+                            </div>
+                            <button type="button"
+                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]"
+                                data-link-type="youtube_links">
+                                + {{ __('messages.add_video') }}
+                            </button>
+                        </div>
+                            @if (! $role->isTalent())
+                            <div class="mt-6">
+                                <x-toggle name="hide_videos"
+                                    label="{{ __('messages.hide_videos') }}"
+                                    checked="{{ old('hide_videos', $role->hide_videos) }}"
+                                    help="{{ __('messages.hide_videos_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hide_videos')" />
+                            </div>
+                            @endif
+                        </div>
+                        <!-- End Tab Content: Videos -->
+
+                        <!-- Tab Content: Gallery -->
+                        <x-form-row group="page" tab="gallery" :title="__('messages.gallery')" class="page-tab" :locked="$galleryMode === 'locked' ? 'pro' : null" />
+                        <div id="page-tab-gallery" class="event-subrow-body page-tab-content" hidden>
+                    @include('partials.gallery-section', [
+                        'galleryContext' => 'schedule',
+                        'galleryMode' => $galleryMode,
+                        'galleryRole' => $role,
+                        'galleryCanUpgrade' => (bool) config('app.hosted'),
+                        'galleryImageCount' => count($galleryState['images']),
+                        'galleryInRow' => true,
+                    ])
+                        </div>
+                        <!-- End Tab Content: Gallery -->
+
+                        <!-- Tab Content: Sponsors -->
+                        <x-form-row group="page" tab="sponsors" :title="__('messages.sponsors')" :locked="$role->isPro() ? null : 'pro'" class="page-tab" />
+                        <div id="page-tab-sponsors" class="event-subrow-body page-tab-content" hidden>
+                        {{-- Above the plan branch on purpose: a guest page prints stored sponsors on any
+                             plan, so a schedule whose plan lapsed must still be able to hide them, and to
+                             show them again. Drawn once there is a sponsor to hide. --}}
+                        @php $storedSponsorCount = count(json_decode($role->sponsor_logos ?? '[]', true) ?: []); @endphp
+                        @if ($storedSponsorCount)
+                            <div class="mb-6">
+                                <x-toggle name="show_sponsors"
+                                    label="{{ __('messages.show_sponsors') }}"
+                                    checked="{{ old('show_sponsors', $role->show_sponsors !== false) }}"
+                                    help="{{ __('messages.show_sponsors_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_sponsors')" />
+                                <p id="sponsors-hidden-note" class="mt-3 ms-14 text-sm font-medium text-gray-700 dark:text-gray-300" hidden>{{ __('messages.sponsors_hidden_notice') }}</p>
+                            </div>
+                        @endif
+                        @if ($role->isPro())
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.sponsor_logos_help') }}</p>
+
+                            <input type="hidden" name="existing_sponsors" id="existing_sponsors_input" value="{{ $role->sponsor_logos ?? '[]' }}" />
+
+                            @php
+                                $existingSponsors = json_decode($role->sponsor_logos ?? '[]', true) ?: [];
+                                $maxSponsors = config('app.max_sponsors');
+                                $sponsorBackground = old('sponsor_background_color', $role->sponsor_background_color);
+                                if ($sponsorBackground === 'transparent') {
+                                    $sponsorBackgroundMode = 'transparent';
+                                } elseif (preg_match('/^#[0-9a-fA-F]{6}$/', (string) $sponsorBackground)) {
+                                    $sponsorBackgroundMode = 'custom';
+                                } else {
+                                    $sponsorBackgroundMode = 'default';
+                                }
+                            @endphp
+
+                            {{-- The strip's background matters once there is a sponsor to put on it. --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" id="sponsor-background-controls" @if (! count($existingSponsors)) hidden @endif>
+                                <div>
+                                    <x-input-label for="sponsor_background_mode" :value="__('messages.sponsor_background')" />
+                                    <select id="sponsor_background_mode" data-action="sponsor-background-change"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
+                                        <option value="default" @selected($sponsorBackgroundMode === 'default')>{{ __('messages.sponsor_background_default') }}</option>
+                                        <option value="transparent" @selected($sponsorBackgroundMode === 'transparent')>{{ __('messages.sponsor_background_transparent') }}</option>
+                                        <option value="custom" @selected($sponsorBackgroundMode === 'custom')>{{ __('messages.sponsor_background_custom') }}</option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.sponsor_background_help') }}</p>
+                                </div>
+                                <div id="sponsor_background_color_wrapper" class="{{ $sponsorBackgroundMode === 'custom' ? '' : 'hidden' }}">
+                                    <x-input-label for="sponsor_background_color_input" :value="__('messages.color')" />
+                                    <x-text-input id="sponsor_background_color_input" type="color" class="mt-1 block w-1/2"
+                                        :value="$sponsorBackgroundMode === 'custom' ? $sponsorBackground : '#ffffff'"
+                                        data-action="sponsor-background-change" />
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="sponsor_background_color" id="sponsor_background_color" value="{{ $sponsorBackgroundMode === 'default' ? '' : $sponsorBackground }}" />
+                            <x-input-error class="mb-4" :messages="$errors->get('sponsor_background_color')" />
+
+                            <p class="event-empty" id="sponsors-empty" @if (count($existingSponsors)) hidden @endif>{{ __('messages.no_sponsors') }}</p>
+                            <div id="sponsors-list" class="space-y-3 mb-6">
+                                @foreach ($existingSponsors as $index => $sponsor)
+                                @php
+                                    $logoUrl = '';
+                                    if (!empty($sponsor['logo'])) {
+                                        if (str_starts_with($sponsor['logo'], 'demo_')) {
+                                            $logoUrl = url('/images/demo/' . $sponsor['logo']);
+                                        } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                                            $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $sponsor['logo'];
+                                        } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
+                                            $logoUrl = url('/storage/' . $sponsor['logo']);
+                                        } else {
+                                            $logoUrl = $sponsor['logo'];
+                                        }
+                                    }
+                                @endphp
+                                <div class="sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg" data-sponsor='@json($sponsor)' data-logo-url="{{ $logoUrl }}">
+                                    <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 120px; height: 80px;">
+                                        @if ($logoUrl)
+                                            <img src="{{ $logoUrl }}" alt="{{ $sponsor['name'] ?? '' }}" class="max-w-full max-h-full object-contain" />
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" data-row-name>{{ $sponsor['name'] ?? '' }}</div>
+                                        @if (!empty($sponsor['tier']))
+                                            <span class="inline-block text-xs px-1.5 py-0.5 rounded
+                                                {{ $sponsor['tier'] === 'gold' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : '' }}
+                                                {{ $sponsor['tier'] === 'silver' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : '' }}
+                                                {{ $sponsor['tier'] === 'bronze' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' : '' }}
+                                            ">{{ __('messages.' . $sponsor['tier']) }}</span>
+                                        @endif
+                                        @if (!empty($sponsor['url']))
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $sponsor['url'] }}</div>
+                                        @endif
+                                    </div>
+                                    <button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                @endforeach
+                            </div>
+
+                            <div id="sponsor-limit-message" class="mb-4 {{ count($existingSponsors) >= $maxSponsors ? '' : 'hidden' }}">
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span>{{ __('messages.max_sponsors_reached', ['count' => $maxSponsors]) }}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div id="sponsor-pending-uploads-message" class="mb-4 hidden">
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span>{{ __('messages.save_sponsors_before_adding_more') }}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- The form is behind its link: always open, it read as a sponsor half filled in.
+                                 #add-sponsor-form keeps its own hidden class, which the page script uses for
+                                 "the list is full". --}}
+                            <button type="button" class="event-link" id="sponsor-form-open">+ {{ __('messages.add_sponsor') }}</button>
+                            <div id="sponsor-form-shell" hidden>
+                            <div id="add-sponsor-form" class="{{ count($existingSponsors) >= $maxSponsors ? 'hidden' : '' }}">
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                        <div>
+                                            <x-input-label for="new_sponsor_name_input" :value="__('messages.sponsor_name')" />
+                                            <input type="text" id="new_sponsor_name_input" maxlength="100"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" />
+                                            <input type="url" id="new_sponsor_url_input" maxlength="500"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                        <div>
+                                            <x-input-label :value="__('messages.sponsor_tier')" />
+                                            <select id="new_sponsor_tier_input"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
+                                                <option value="">—</option>
+                                                <option value="gold">{{ __('messages.gold') }}</option>
+                                                <option value="silver">{{ __('messages.silver') }}</option>
+                                                <option value="bronze">{{ __('messages.bronze') }}</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label id="sponsor-logo-label" :value="__('messages.logo') . ' *'" />
+                                            <input type="file" id="new_sponsor_logo_input" accept="image/*"
+                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]"
+                                                />
+                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" data-action="add-sponsor" id="sponsor-action-btn"
+                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
+                                            <svg id="sponsor-action-icon" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            <span id="sponsor-action-text">{{ __('messages.add_sponsor') }}</span>
+                                        </button>
+                                        <button type="button" data-action="cancel-edit-sponsor" id="cancel-edit-sponsor-btn"
+                                            class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                            {{ __('messages.cancel') }}
+                                        </button>
+                                        {{-- Closes the form when it was opened to add: the button above is for an edit. --}}
+                                        <button type="button" id="sponsor-form-close" class="event-link event-link-quiet">{{ __('messages.cancel') }}</button>
+                                    </div>
+                                    {{-- Why Add did nothing (no logo chosen, or the list is full). --}}
+                                    <p id="sponsor-form-note" class="sched-inline-error" role="alert"></p>
+                                </div>
+                            </div>
+
+                            </div>
+
+                            <div id="new-sponsor-inputs-container"></div>
+                        @else
+                            <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/docs/creating-schedules#sponsors')" :subdomain="$role->subdomain">
+                                <x-slot:icon>
+                                    <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                                    </svg>
+                                </x-slot:icon>
+                                {{ __('messages.upgrade_sponsor_logos') }}
+                            </x-upgrade-prompt>
+                        @endif
+                        </div>
+                        <!-- End Tab Content: Sponsors -->
+
+                        <!-- Tab Content: Venue map -->
+                        {{-- A map of the schedule's venues on its guest page (App\Services\VenueMap). Not for
+                             a venue schedule, which is one place, nor on an install with no address search
+                             (services.map.geocoder_url), nor before the schedule exists. Free on every plan.
+                             The two switches are not columns of the schedule: RoleController::update()
+                             hands them to VenueMap::saveSettings(). --}}
+                        @if ($role->exists && \App\Services\VenueMap::offeredTo($role))
+                        @php
+                            $venueMapStored = \App\Services\VenueMap::enabledFor($role);
+                            $venueMapOn = (bool) old('show_venues_map', $venueMapStored);
+                            $venueMapStatus = $venueMapStored ? \App\Services\VenueMap::status($role, auth()->user()) : null;
+                        @endphp
+                        <x-form-row group="page" tab="map" :title="__('messages.venue_map')" class="page-tab" />
+                        <div id="page-tab-map" class="event-subrow-body page-tab-content" hidden>
+
+                        <div class="mb-6">
+                            <x-toggle name="show_venues_map"
+                                label="{{ __('messages.show_venues_map') }}"
+                                checked="{{ $venueMapOn }}"
+                                help="{{ __('messages.show_venues_map_help', ['provider' => e(map_lookup()['name'])]) }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('show_venues_map')" />
+                        </div>
+
+                        {{-- A map that starts open is for visitors who have allowed cookies. On an install
+                             that fetches street images and asks nobody (cookie_banner_required(), the
+                             predicate behind the banner itself) nobody can, so the switch would do
+                             nothing and is not drawn. --}}
+                        @if (! (map_tiles() && ! cookie_banner_required()))
+                        <div class="mb-6" id="venues-map-open-row" @if (! $venueMapOn) hidden @endif>
+                            <x-toggle name="venues_map_open"
+                                label="{{ __('messages.venues_map_open') }}"
+                                checked="{{ old('venues_map_open', \App\Services\VenueMap::startsOpen($role)) }}"
+                                help="{{ map_tiles() ? __('messages.venues_map_open_help') : __('messages.venues_map_open_help_plain') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('venues_map_open')" />
+                        </div>
+                        @endif
+
+                        {{-- Every venue the map would hold, where each stands and what can be done about it
+                             (resources/js/components/VenueMapEditor.vue): take one off the map, move a
+                             pin, place one by hand. Drawn once the map is switched on and saved: before
+                             that nothing has been asked. An island with an EMPTY host: a venue's name
+                             inside a Vue mount would be compiled as a template, and this form is not a
+                             Vue app. Its changes are saved at once and are no part of this form's Save. --}}
+                        @if ($venueMapStatus)
+                        @php
+                            $venueMapTiles = map_tiles();
+                            $venueMapEditor = [
+                                'venues' => $venueMapStatus['venues'],
+                                'placedNow' => (int) $venueMapStatus['placed'],
+                                'markUrl' => route('role.venue_map.mark', ['subdomain' => $role->subdomain, 'venue' => '__VENUE__']),
+                                'csrf' => csrf_token(),
+                                'tiles' => $venueMapTiles ? ['url' => $venueMapTiles['url']] : null,
+                                'credit' => (string) config('services.map.attribution'),
+                                'creditUrl' => preg_match('~^https?://~i', (string) config('services.map.attribution_url')) ? config('services.map.attribution_url') : null,
+                                'assets' => [
+                                    'leaflet' => asset('vendor/leaflet/leaflet.js').'?v=1.9.4',
+                                    'leafletCss' => asset('vendor/leaflet/leaflet.css').'?v=1.9.4',
+                                    // The pin's own picture, named outright (see leaflet-loader.js).
+                                    'images' => asset('vendor/leaflet/images').'/',
+                                ],
+                                'rtl' => is_rtl(),
+                                't' => [
+                                    'venues' => __('messages.venues'),
+                                    'none' => __('messages.venue_map_no_venues'),
+                                    'help' => __('messages.venue_map_venues_help'),
+                                    'streets_note' => __('messages.venue_map_editor_streets', ['provider' => $venueMapTiles['name'] ?? '']),
+                                    'state_placed' => __('messages.venue_map_placed'),
+                                    'state_approximate' => __('messages.venue_map_approx'),
+                                    'state_waiting' => __('messages.venue_map_waiting'),
+                                    'state_no_address' => __('messages.venue_map_no_address'),
+                                    'state_not_found' => __('messages.venue_map_address_not_found'),
+                                    'state_no_country' => __('messages.venue_map_no_country'),
+                                    'needs_two' => __('messages.venue_map_needs_two_here'),
+                                    'pin_centre' => __('messages.venue_map_pin_centre'),
+                                    'expired' => __('messages.venue_map_session_expired'),
+                                    'state_hidden' => __('messages.venue_map_off_the_map'),
+                                    'state_by_hand' => __('messages.venue_map_by_hand'),
+                                    'fix_no_address' => __('messages.venue_map_fix_no_address'),
+                                    'fix_no_country' => __('messages.venue_map_fix_no_country'),
+                                    'fix_not_found' => __('messages.venue_map_fix_not_found'),
+                                    'owner_only' => __('messages.venue_map_owner_only'),
+                                    'in_its_events' => __('messages.venue_map_in_its_events'),
+                                    'or_place' => __('messages.venue_map_or_place'),
+                                    'take_off' => __('messages.venue_map_take_off'),
+                                    'put_back' => __('messages.venue_map_put_back'),
+                                    'move' => __('messages.venue_map_move_pin'),
+                                    'place' => __('messages.venue_map_place_by_hand'),
+                                    'edit_venue' => __('messages.venue_map_edit_venue'),
+                                    'saved' => __('messages.saved'),
+                                    'failed' => __('messages.venue_map_not_saved'),
+                                    'where' => __('messages.venue_map_where'),
+                                    'drag' => __('messages.venue_map_drag'),
+                                    'use_found' => __('messages.venue_map_use_found'),
+                                    'save_position' => __('messages.venue_map_save_position'),
+                                    'cancel' => __('messages.cancel'),
+                                    'map_failed' => __('messages.venue_map_failed'),
+                                ],
+                            ];
+                            // Bare flags, spelled out, as for the guest map: "<" never reaches the block.
+                            $venueMapEditorJson = json_encode($venueMapEditor, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                        @endphp
+                        <div id="venue-map-venues" class="mb-6" @if (! $venueMapOn) hidden @endif>
+                            <div id="es-venue-map-editor" data-venue-map-editor></div>
+                            <script type="application/json" id="es-venue-map-editor-json" {!! nonce_attr() !!}>{!! $venueMapEditorJson !!}</script>
+                        </div>
+                        @endif
+
+                        </div>
+                        @endif
+                        <!-- End Tab Content: Venue map -->
+
+                        <!-- Tab Content: Accommodation -->
+                        @if (\App\Services\Stay22Service::isEnabled())
+                        <x-form-row group="page" tab="accommodation" :title="__('messages.accommodation')" class="page-tab" />
+                        <div id="page-tab-accommodation" class="event-subrow-body page-tab-content" hidden>
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.stay22_help') }}</p>
+
+                        <div class="mb-6">
+                            <x-toggle name="stay22_enabled"
+                                label="{{ __('messages.stay22_enabled') }}"
+                                checked="{{ old('stay22_enabled', $role->stay22_enabled) }}"
+                                help="{{ __('messages.stay22_enabled_help', ['operator' => marketing_domain()]) }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('stay22_enabled')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="stay22_aid" :value="__('messages.stay22_aid')" />
+                            <x-text-input id="stay22_aid" name="stay22_aid" type="text"
+                                class="mt-1 block w-full font-mono text-sm"
+                                :value="old('stay22_aid', $role->stay22_aid)"
+                                placeholder="{{ __('messages.stay22_aid_placeholder') }}" />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ __('messages.stay22_aid_help', ['operator' => marketing_domain()]) }}
+                            </p>
+                            <x-input-error class="mt-2" :messages="$errors->get('stay22_aid')" />
+
+                            {{-- Restates the consequence as a present-tense fact about THIS schedule
+                                 once the map is actually live. The toggle's own help text carries the
+                                 same disclosure, because an owner may never scroll this far. --}}
+                            @if ($role->stay22_enabled && ! \App\Services\Stay22Service::hasOwnAid($role) && \App\Services\Stay22Service::operatorAid())
+                            <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.stay22_no_own_aid_warning', ['operator' => marketing_domain()]) }}</span>
+                                </p>
+                            </div>
+                            @endif
+                        </div>
+
+                        </div>
+                        @endif
+                        <!-- End Tab Content: Accommodation -->
                         </div>
 
                         {{-- Payment Links (hidden) --}}
@@ -3102,6 +3653,659 @@
                     </div>
                 </div>
 
+                <button type="button" class="mobile-section-header" data-section="section-engagement">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                        </svg>
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.engagement') }}</span>
+                            <span class="section-nav-summary" data-summary="section-engagement"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-engagement" hidden></span>
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-engagement" class="section-content lg:mt-0">
+                    <div class="form-kit-col">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                                </svg>
+                                {{ __('messages.engagement') }}
+                            </span>
+                        </h2>
+
+                        @php $showRequestsTab = $role->isCurator() || $role->isVenue() || $role->isTalent(); @endphp
+
+
+                        <div class="event-subrows">
+                        <!-- Tab Content: Requests -->
+                        @if ($showRequestsTab)
+                        <x-form-row group="engagement" tab="requests" :title="__('messages.requests')" class="engagement-tab" />
+                        <div id="engagement-tab-requests" class="event-subrow-body engagement-tab-content" hidden>
+
+                        <div class="mb-6">
+                            <x-toggle name="accept_requests"
+                                label="{{ __('messages.accept_requests') }}"
+                                checked="{{ old('accept_requests', $role->accept_requests) }}"
+                                help="{{ __($role->isTalent() ? 'messages.accept_requests_help_talent' : 'messages.accept_requests_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
+                        </div>
+                        @if (! $role->isTalent())
+                        <div class="mb-6" id="require_account_section">
+                            <x-toggle name="require_account"
+                                label="{{ __('messages.require_account') }}"
+                                checked="{{ old('require_account', $role->exists ? $role->require_account : ($role->require_account ?? $role->isCurator())) }}"
+                                help="{{ __('messages.require_account_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
+                        </div>
+                        <div class="mb-6" id="event_request_form_section">
+                            <x-input-label :value="__('messages.event_request_form')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.event_request_form_help') }}</p>
+                            <div class="space-y-2">
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="event_request_form" value="import"
+                                        {{ old('event_request_form', $role->event_request_form ?? 'import') === 'import' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.ai_import') }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_import_description') }}</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="event_request_form" value="booking"
+                                        {{ old('event_request_form', $role->event_request_form ?? 'import') === 'booking' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.booking_form') }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.booking_form_description') }}</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        @endif
+                        {{-- Booking form options, saved by RoleController::applyBookingFormConfig(). Rendered for
+                             every type, since a talent always uses the booking form; the script at the top of
+                             the page shows it only while the booking form is the one guests get. --}}
+                        @php
+                            $bookingFormOptions = $role->bookingFormConfig();
+                            $bookingFieldLabels = [
+                                'event_name' => __('messages.event_name'),
+                                'date_time' => __('messages.date_and_time'),
+                                'description' => __('messages.description'),
+                                'location' => __('messages.location'),
+                            ];
+                            // A venue is its own location, so that requirement never applies there.
+                            if ($role->isVenue()) {
+                                unset($bookingFieldLabels['location']);
+                            }
+                            // `phone` is requirable but deliberately absent from this list: every row
+                            // here is a field that is always on the form, so the checkbox answers one
+                            // question. Phone answers two (ask at all, then require), so it gets its
+                            // own nested block below instead.
+                        @endphp
+                        <div class="mb-6" id="booking_form_section" data-always-booking="{{ $role->isTalent() ? '1' : '0' }}">
+                            <input type="hidden" name="booking_form_submitted" value="1">
+                            <x-input-label :value="__('messages.booking_form_required_fields')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.booking_form_required_fields_help') }}</p>
+                            <div class="space-y-2 mb-6">
+                                @foreach ($bookingFieldLabels as $bookingFieldKey => $bookingFieldLabel)
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="hidden" name="booking_required_fields[{{ $bookingFieldKey }}]" value="0">
+                                    <input type="checkbox" id="booking_required_{{ $bookingFieldKey }}" name="booking_required_fields[{{ $bookingFieldKey }}]" value="1"
+                                        {{ old('booking_required_fields.'.$bookingFieldKey, $bookingFormOptions['required_fields'][$bookingFieldKey]) ? 'checked' : '' }}
+                                        class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)] dark:bg-gray-900" />
+                                    <span class="ms-2 text-sm text-gray-700 dark:text-gray-300">{{ $bookingFieldLabel }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                            <x-toggle name="booking_allow_online"
+                                label="{{ __('messages.booking_allow_online') }}"
+                                checked="{{ old('booking_allow_online', $bookingFormOptions['allow_online']) }}"
+                                help="{{ __('messages.booking_allow_online_help') }}" />
+
+                            {{-- The phone field, in the same shape as the appointment editor's
+                                 (role/partials/appointment-editor.blade.php) and the ticket-buyer
+                                 phone on the event form: ask first, then require. --}}
+                            <div class="mt-6">
+                                <x-toggle name="booking_ask_phone"
+                                    label="{{ __('messages.ask_for_phone_number') }}"
+                                    checked="{{ old('booking_ask_phone', $bookingFormOptions['ask_phone']) }}"
+                                    help="{{ __('messages.booking_ask_phone_help') }}" />
+                                {{-- Nested: "required" only means anything while the field is asked
+                                     for at all, and Role::bookingFormRequires() normalises the
+                                     stored value the same way. Hiding the row does not lose it: a
+                                     hidden checked box still posts, and applyBookingFormConfig()
+                                     only falls back to the stored value on an ABSENT key. --}}
+                                <div id="booking-require-phone-row" class="ms-14 mt-2 {{ old('booking_ask_phone', $bookingFormOptions['ask_phone']) ? '' : 'hidden' }}">
+                                    <x-toggle name="booking_required_fields[phone]" id="booking_required_phone"
+                                        label="{{ __('messages.field_required') }}"
+                                        checked="{{ old('booking_required_fields.phone', $bookingFormOptions['required_fields']['phone']) }}" />
+                                </div>
+                            </div>
+                        </div>
+                        @if (! $role->isTalent())
+                        <div class="mb-6" id="require_approval_section">
+                            <x-toggle name="require_approval"
+                                label="{{ __('messages.require_approval') }}"
+                                checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
+                                help="{{ __('messages.require_approval_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
+                        </div>
+                        <div class="mb-6" id="approved_subdomains_section">
+                            {{-- Same sentinel as event_categories_submitted, and for the same
+                                 reason: the list below is hidden entirely on a talent schedule, so
+                                 without this the controller could not tell "the operator emptied
+                                 the list" from "this form never showed it" and every talent save
+                                 silently nulled the column. That matters now because claiming a
+                                 page pre-approves the schedules already listing the act, and a
+                                 talent's first settings save would have thrown that away. --}}
+                            <input type="hidden" name="approved_subdomains_submitted" value="1">
+                            <x-input-label :value="__('messages.approved_schedules')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.approved_schedules_help') }}</p>
+                            <div id="approved-subdomains-items">
+                                @foreach(old('approved_subdomains', $role->approved_subdomains ?? []) as $i => $subdomain)
+                                    <div class="mb-2 relative">
+                                        <div class="flex items-center">
+                                            <input type="text" data-subdomain-search value="{{ isset($approvedSubdomainNames[$subdomain]) ? $approvedSubdomainNames[$subdomain] . ' (' . $subdomain . ')' : $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                            <button type="button" data-action="remove-parent-item"
+                                                class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                        </div>
+                                        <input type="hidden" name="approved_subdomains[]" value="{{ $subdomain }}" />
+                                        <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                + {{ __('messages.add_schedule') }}
+                            </button>
+                        </div>
+                        @endif
+                        <div class="mb-6" id="request_terms_section">
+                            <x-input-label for="request_terms" :value="__('messages.request_terms')" />
+                            <textarea id="request_terms" name="request_terms"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                rows="4"
+                                dir="auto"
+                                placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
+                        </div>
+
+                        {{-- The questions themselves live in Customize > Custom Fields, which is not
+                             where someone looking for "extra questions on my request form" looks. --}}
+                        <div class="mb-6">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ __('messages.request_custom_fields_pointer') }}
+                                <button type="button" data-action="goto-custom-fields" class="text-[var(--brand-blue)] hover:underline">
+                                    {{ __('messages.custom_fields') }}
+                                </button>
+                            </p>
+                        </div>
+
+                        </div>
+                        @endif
+                        <!-- End Tab Content: Requests -->
+
+                        <!-- Tab Content: Mailing list -->
+                        {{-- The two ways a visitor leaves an address with this schedule, and a line saying whether
+                             the people who did are emailed about new events (Settings, Notifications), because
+                             switching the panel off only takes it off the pages and does not stop those emails. --}}
+                        <x-form-row group="engagement" tab="mailing-list" :title="__('messages.engagement_row_mailing_list')" class="engagement-tab" />
+                        <div id="engagement-tab-mailing-list" class="event-subrow-body engagement-tab-content" hidden>
+                            {{-- The two guest-page email sign-up surfaces. Free on every plan: turning a
+                                 capture surface off is a choice about the page, not a paid feature.
+                                 The panel defaults on and the "Notify me" card defaults off;
+                                 RoleController::create() sets the panel's default so this create page
+                                 paints it. The card follows the switch of the schedule that CREATED
+                                 an event, wherever the event is listed. --}}
+                            <div class="mb-6">
+                                <x-toggle name="show_subscribe_panel"
+                                    label="{{ __('messages.show_subscribe_panel') }}"
+                                    checked="{{ old('show_subscribe_panel', $role->show_subscribe_panel) }}"
+                                    help="{{ __('messages.show_subscribe_panel_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_subscribe_panel')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-toggle name="show_event_interest"
+                                    label="{{ __('messages.show_event_interest') }}"
+                                    checked="{{ old('show_event_interest', $role->show_event_interest) }}"
+                                    help="{{ __('messages.show_event_interest_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_event_interest')" />
+                            </div>
+                        <p class="event-hint" id="mailing-list-note" data-on="{{ __('messages.mailing_list_note_on') }}" data-off="{{ __('messages.mailing_list_note_off') }}">
+                            <span data-note-text>{{ old('announce_new_events', $role->announce_new_events) ? __('messages.mailing_list_note_on') : __('messages.mailing_list_note_off') }}</span>
+                            <x-link href="#settings-tab-notifications" data-form-jump="settings-tab-notifications">{{ __('messages.mailing_list_note_link') }}</x-link>
+                        </p>
+                        </div>
+                        <!-- End Tab Content: Mailing list -->
+
+                        <!-- Tab Content: Fan Content -->
+                        <x-form-row group="engagement" tab="fan_content" :title="__('messages.fan_content')" class="engagement-tab" />
+                        <div id="engagement-tab-fan_content" class="event-subrow-body engagement-tab-content" hidden>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.fan_content_help') }}</p>
+                            <div class="mb-4">
+                                <x-toggle name="fan_comments_enabled"
+                                    label="{{ __('messages.fan_comments_enabled') }}"
+                                    checked="{{ old('fan_comments_enabled', $role->fan_comments_enabled) }}" />
+                            </div>
+                            <div class="mb-4">
+                                <x-toggle name="fan_photos_enabled"
+                                    label="{{ __('messages.fan_photos_enabled') }}"
+                                    checked="{{ old('fan_photos_enabled', $role->fan_photos_enabled) }}" />
+                            </div>
+                            <div class="mb-4">
+                                <x-toggle name="fan_videos_enabled"
+                                    label="{{ __('messages.fan_videos_enabled') }}"
+                                    checked="{{ old('fan_videos_enabled', $role->fan_videos_enabled) }}" />
+                            </div>
+                            <div class="mb-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <x-toggle name="fan_content_require_account"
+                                    label="{{ __('messages.fan_content_require_account') }}"
+                                    checked="{{ old('fan_content_require_account', $role->fan_content_require_account) }}"
+                                    help="{{ __('messages.fan_content_require_account_help') }}" />
+                            </div>
+                        </div>
+                        <!-- End Tab Content: Fan Content -->
+
+                        <!-- Tab Content: Feedback -->
+                        <x-form-row group="engagement" tab="feedback" :title="__('messages.feedback')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
+                        <div id="engagement-tab-feedback" class="event-subrow-body engagement-tab-content" hidden>
+
+                        @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
+
+                        @if (! $role->isPro())
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.feedback_pro_only') }}</span>
+                                </p>
+                            </div>
+                        @endif
+
+                        @if ($emailDisabled)
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>
+                                        {{ __('messages.notification_requires_email_settings') }}
+                                        <a href="#section-integrations" class="js-email-settings-link text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
+                                    </span>
+                                </p>
+                            </div>
+                        @endif
+
+                        @php $feedbackDisabled = $emailDisabled || ! $role->isPro(); @endphp
+
+                        <div class="mb-6">
+                            <x-toggle name="feedback_enabled"
+                                label="{{ __('messages.feedback_enabled') }}"
+                                checked="{{ old('feedback_enabled', $role->feedback_enabled) }}"
+                                help="{{ __('messages.feedback_enabled_help') }}"
+                                :disabled="$feedbackDisabled" />
+                        </div>
+
+                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
+                            <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
+                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" {{ $feedbackDisabled ? 'disabled' : '' }}>
+                                @foreach ([1, 2, 6, 12, 24, 48] as $hours)
+                                <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
+                                    {{ $hours }} {{ __('messages.feedback_hours') }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <p id="feedback-delay-hint" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
+                        </div>
+
+                        <div class="mb-6" id="feedback-public-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
+                            <x-toggle name="feedback_public"
+                                label="{{ __('messages.feedback_public') }}"
+                                checked="{{ old('feedback_public', $role->feedback_public) }}"
+                                help="{{ __('messages.feedback_public_help') }}"
+                                :disabled="$feedbackDisabled" />
+                        </div>
+
+                        <div class="mb-6" id="feedback-test-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
+                            <button type="button" id="send-test-feedback-btn" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all duration-200">
+                                <svg class="w-4 h-4 me-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                {{ __('messages.feedback_send_test') }}
+                            </button>
+                            <div id="test-feedback-result" class="mt-2 hidden"></div>
+                        </div>
+
+                        </div>
+                        <!-- End Tab Content: Feedback -->
+
+                        <!-- Tab Content: Carpool -->
+                        <x-form-row group="engagement" tab="carpool" :title="__('messages.carpool')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
+                        <div id="engagement-tab-carpool" class="event-subrow-body engagement-tab-content" hidden>
+
+                        @if (! $role->isPro())
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.carpool_pro_only') }}</span>
+                                </p>
+                            </div>
+                        @endif
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.carpool_help') }}</p>
+                        <div class="mb-6">
+                            <x-toggle name="carpool_enabled"
+                                label="{{ __('messages.carpool_enabled') }}"
+                                checked="{{ old('carpool_enabled', $role->carpool_enabled) }}"
+                                help="{{ __('messages.carpool_enabled_help') }}"
+                                :disabled="! $role->isPro()" />
+                        </div>
+
+                        </div>
+                        <!-- End Tab Content: Carpool -->
+                        </div>
+                    </div>
+                </div>
+
+
+                @if ($role->exists)
+                <button type="button" class="mobile-section-header" data-section="section-tickets">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                        </svg>
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.tickets') }}</span>
+                            <span class="section-nav-summary" data-summary="section-tickets"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-tickets" hidden></span>
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-tickets" class="section-content lg:mt-0">
+                    <div class="form-kit-col">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                                </svg>
+                                {{ __('messages.tickets') }}
+                            </span>
+                        </h2>
+                        <p class="form-kit-lead mb-6">{{ __('messages.tickets_tab_lead') }}</p>
+
+                        <div class="event-subrows">
+                        @if ($role->exists)
+                        {{-- Ticket presets (issue #130): the ticket setups an event's Tickets tab starts from,
+                             one the default for new events, and the owner's switch that has the rest of
+                             the team pick one instead of typing prices. The list is a Vue island mounted
+                             ON #ticket-preset-items (resources/js/components/TicketPresetsEditor.vue), so
+                             its rows are direct children of the element the list watcher below observes;
+                             every value reaches it through the JSON blob, never as markup. A schedule not
+                             yet saved has no events to start, so the row waits for one. --}}
+                        @php
+                            $presetEditor = \App\Services\TicketPresets::scheduleEditorState($role, auth()->user());
+                            $presetEditorJson = json_encode($presetEditor, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                            $presetTeamOn = \App\Services\TicketPresets::teamUsesPresets($role);
+                            $presetSummary = collect($presetEditor['presets'])->map(fn ($p) => ($p['name'] !== '' ? $p['name'] : ($p['label'] ?? '')).(! empty($p['is_default']) ? ' ('.__('messages.ticket_preset_default').')' : ''))->implode(', ');
+                            if ($presetSummary !== '' && $presetTeamOn) {
+                                $presetSummary .= ' · '.__('messages.ticket_presets_team_summary');
+                            }
+                        @endphp
+                        <x-form-row group="tickets" tab="presets" :title="__('messages.ticket_presets')" :summary="$presetSummary !== '' ? $presetSummary : __('messages.none')" :muted="$presetSummary === ''" class="tickets-tab" />
+                        <div id="tickets-tab-presets" class="event-subrow-body tickets-tab-content" hidden>
+                            <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_presets_help') }}</p>
+                            {{-- ticket_presets_submitted is drawn by the island itself (see TicketPresetsEditor.vue). --}}
+                            <p id="ticket-presets-empty" class="py-3 text-sm text-gray-500 dark:text-gray-400" @if ($presetEditor['presets']) hidden @endif>{{ __('messages.ticket_presets_empty') }}</p>
+                            <div id="ticket-preset-items" class="event-list" data-island data-summary="{{ $presetSummary }}" data-team-on="{{ $presetTeamOn ? 1 : 0 }}"></div>
+                            <script type="application/json" id="ticket-preset-items-json" {!! nonce_attr() !!}>{!! $presetEditorJson !!}</script>
+                            <x-input-error class="mt-2" :messages="$errors->get('ticket_presets.*')" />
+                            @if ($presetEditor['canEdit'])
+                            <button type="button" data-action="add-ticket-preset" class="event-link mt-3" disabled>+ {{ __('messages.ticket_preset_add') }}</button>
+                            @endif
+
+                            @if ($presetEditor['switchOffered'])
+                            <div class="preset-switch">
+                                <x-toggle name="ticket_presets_team" id="ticket_presets_team"
+                                    :checked="(bool) old('ticket_presets_team', $presetTeamOn)"
+                                    label="{{ __('messages.ticket_presets_team') }}"
+                                    help="{{ __('messages.ticket_presets_team_help') }}" />
+                                <p id="ticket-presets-team-blocker" class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14" hidden></p>
+                                <x-input-error class="mt-2 ms-14" :messages="$errors->get('ticket_presets_team')" />
+                            </div>
+                            @elseif ($presetTeamOn)
+                            <div class="mt-4 mb-4 preset-note">
+                                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                                <span v-pre>{{ __('messages.ticket_presets_locked_note', ['owner' => \App\Services\TicketPresets::ownerName($role)]) }}</span>
+                            </div>
+                            @endif
+                        </div>
+                        <!-- End Tab Content: Ticket presets -->
+                        @endif
+
+                        <!-- Tab Content: Gift cards -->
+                        <x-form-row group="tickets" tab="gift-cards" :title="__('messages.tickets_row_gift_cards')" class="tickets-tab" :locked="$role->isPro() ? null : 'pro'" />
+                        <div id="tickets-tab-gift-cards" class="event-subrow-body tickets-tab-content" hidden>
+                        @if ($role->isPro())
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.gift_cards_settings_help') }}</p>
+
+                        @php $giftCardOwner = $role->user; @endphp
+
+                        @if (config('app.hosted') && ! $role->hasEmailSettings())
+                        <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                </svg>
+                                <div class="text-sm text-amber-800 dark:text-amber-400">
+                                    {{ __('messages.gift_cards_email_required') }}
+                                    <a href="#integration-tab-email" class="js-email-settings-link underline font-medium">{{ __('messages.email_settings') }}</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="mb-6">
+                            <x-toggle name="gift_cards_enabled"
+                                label="{{ __('messages.enable_gift_cards') }}"
+                                checked="{{ old('gift_cards_enabled', $role->gift_cards_enabled) }}"
+                                help="{{ __('messages.enable_gift_cards_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_cards_enabled')" />
+                        </div>
+
+                        {{-- Everything a gift card needs, shown once the switch is on: four live-looking
+                             settings used to sit under "Disabled". Hidden, not removed, so they are
+                             still posted and nothing stored is lost by switching off and on. --}}
+                        <div id="gift-card-details" @if (! old('gift_cards_enabled', $role->gift_cards_enabled)) hidden @endif>
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.gift_card_amounts')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.gift_card_amounts_help') }}</p>
+                            {{-- Says the list was on the page, so taking off the last amount is saved. --}}
+                            <input type="hidden" name="gift_card_amounts_submitted" value="1">
+                            <div id="gift-card-amounts-items" class="space-y-2">
+                                @foreach (old('gift_card_amounts', $role->gift_card_amounts ?? []) as $amount)
+                                <div class="flex items-center gap-2" data-gift-card-amount-row>
+                                    <input type="number" name="gift_card_amounts[]" value="{{ $amount }}" min="0.01" step="0.01"
+                                        class="block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <button type="button" data-remove-gift-card-amount
+                                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                </div>
+                                @endforeach
+                            </div>
+                            <button type="button" id="add-gift-card-amount" class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                + {{ __('messages.add_amount') }}
+                            </button>
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_amounts')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_amounts.*')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="gift_card_currency_code" :value="__('messages.currency')" />
+                            @php
+                                $giftCardCurrencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
+                                $giftCardCurrencyDefault = old('gift_card_currency_code', $role->gift_card_currency_code
+                                    ?: ($role->events()->whereNotNull('ticket_currency_code')->orderByDesc('events.id')->value('ticket_currency_code') ?: platform_currency()));
+                            @endphp
+                            <select id="gift_card_currency_code" name="gift_card_currency_code"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                @foreach ($giftCardCurrencies as $currency)
+                                @if ($loop->index == 2)
+                                <option disabled>──────────</option>
+                                @endif
+                                <option value="{{ $currency->value }}" {{ $giftCardCurrencyDefault == $currency->value ? 'selected' : '' }}>
+                                    {{ $currency->value }} - {{ $currency->label }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_currency_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_currency_code')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="gift_card_valid_days" :value="__('messages.gift_card_valid_days')" />
+                            <input type="number" id="gift_card_valid_days" name="gift_card_valid_days" min="1" max="3650"
+                                value="{{ old('gift_card_valid_days', $role->gift_card_valid_days) }}" placeholder="365"
+                                class="mt-1 block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_valid_days_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_valid_days')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.payment_method')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.gift_card_payment_method_help') }}</p>
+                            @php $giftCardMethod = old('gift_card_payment_method', $role->gift_card_payment_method ?: 'cash'); @endphp
+                            <div class="space-y-2">
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="gift_card_payment_method" value="cash" {{ $giftCardMethod === 'cash' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.cash') }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.gift_card_cash_help') }}</div>
+                                    </div>
+                                </label>
+                                @if ($giftCardOwner && $giftCardOwner->canAcceptStripePayments())
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="gift_card_payment_method" value="stripe" {{ $giftCardMethod === 'stripe' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Stripe{{ $giftCardOwner->stripe_completed_at && $giftCardOwner->stripe_company_name ? ' - '.$giftCardOwner->stripe_company_name : '' }}</div>
+                                    </div>
+                                </label>
+                                @endif
+                                @if ($giftCardOwner && $giftCardOwner->invoiceninja_api_key)
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="gift_card_payment_method" value="invoiceninja" {{ $giftCardMethod === 'invoiceninja' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Invoice Ninja{{ $giftCardOwner->invoiceninja_company_name ? ' - '.$giftCardOwner->invoiceninja_company_name : '' }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.gift_card_invoiceninja_help') }}</div>
+                                    </div>
+                                </label>
+                                @endif
+                                @if ($giftCardOwner && $giftCardOwner->payment_url)
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="gift_card_payment_method" value="payment_url" {{ $giftCardMethod === 'payment_url' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.payment_url') }} - {{ $giftCardOwner->paymentUrlHost() }}</div>
+                                    </div>
+                                </label>
+                                @endif
+                            </div>
+                            <div class="text-xs pt-1">
+                                <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
+                                    {{ __('messages.manage_payment_methods') }}
+                                </x-link>
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_payment_method')" />
+                        </div>
+
+                        @if ($role->canSellGiftCards())
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.gift_card_share_link')" />
+                            <div class="mt-1 flex items-center gap-2">
+                                <input type="text" readonly id="gift-card-purchase-url"
+                                    value="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}"
+                                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm text-sm bg-gray-50 dark:bg-gray-800">
+                                <button type="button" id="copy-gift-card-url"
+                                    class="shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
+                                    {{ __('messages.copy') }}
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_share_link_help') }}</p>
+                        </div>
+                        @endif
+                        </div>
+
+                        @else
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/docs/gift-cards')" :subdomain="$role->subdomain">
+                            <x-slot:icon>
+                                <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                </svg>
+                            </x-slot:icon>
+                            {{ __('messages.upgrade_gift_cards') }}
+                        </x-upgrade-prompt>
+                        @endif
+                        </div>
+                        <!-- End Tab Content: Gift cards -->
+                        </div>
+                    </div>
+                </div>
+                <script {!! nonce_attr() !!}>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var addButton = document.getElementById('add-gift-card-amount');
+                        var container = document.getElementById('gift-card-amounts-items');
+                        if (addButton && container) {
+                            addButton.addEventListener('click', function () {
+                                var row = document.createElement('div');
+                                row.className = 'flex items-center gap-2';
+                                row.setAttribute('data-gift-card-amount-row', '');
+                                row.innerHTML = '<input type="number" name="gift_card_amounts[]" min="0.01" step="0.01" class="block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">'
+                                    + '<button type="button" data-remove-gift-card-amount class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>';
+                                container.appendChild(row);
+                                row.querySelector('input').focus();
+                            });
+                            container.addEventListener('click', function (e) {
+                                var removeButton = e.target.closest('[data-remove-gift-card-amount]');
+                                if (removeButton) {
+                                    removeButton.closest('[data-gift-card-amount-row]').remove();
+                                }
+                            });
+                        }
+
+                        var copyButton = document.getElementById('copy-gift-card-url');
+                        var urlInput = document.getElementById('gift-card-purchase-url');
+                        if (copyButton && urlInput) {
+                            copyButton.addEventListener('click', function () {
+                                var done = function () {
+                                    var original = copyButton.textContent;
+                                    copyButton.textContent = @json(__('messages.copied'));
+                                    setTimeout(function () { copyButton.textContent = original; }, 2000);
+                                };
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(urlInput.value).then(done).catch(function () {});
+                                } else {
+                                    urlInput.select();
+                                    try { document.execCommand('copy'); done(); } catch (err) {}
+                                }
+                            });
+                        }
+                    });
+                </script>
+                @endif
+
                 <button type="button" class="mobile-section-header" data-section="section-settings">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -3321,53 +4525,164 @@
                         <!-- End Tab Content: General -->
 
                         <div class="event-subrows">
-                        @if ($role->exists)
-                        {{-- Ticket presets (issue #130): the ticket setups an event's Tickets tab starts from,
-                             one the default for new events, and the owner's switch that has the rest of
-                             the team pick one instead of typing prices. The list is a Vue island mounted
-                             ON #ticket-preset-items (resources/js/components/TicketPresetsEditor.vue), so
-                             its rows are direct children of the element the list watcher below observes;
-                             every value reaches it through the JSON blob, never as markup. A schedule not
-                             yet saved has no events to start, so the row waits for one. --}}
-                        @php
-                            $presetEditor = \App\Services\TicketPresets::scheduleEditorState($role, auth()->user());
-                            $presetEditorJson = json_encode($presetEditor, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                            $presetTeamOn = \App\Services\TicketPresets::teamUsesPresets($role);
-                            $presetSummary = collect($presetEditor['presets'])->map(fn ($p) => ($p['name'] !== '' ? $p['name'] : ($p['label'] ?? '')).(! empty($p['is_default']) ? ' ('.__('messages.ticket_preset_default').')' : ''))->implode(', ');
-                            if ($presetSummary !== '' && $presetTeamOn) {
-                                $presetSummary .= ' · '.__('messages.ticket_presets_team_summary');
-                            }
-                        @endphp
-                        <x-form-row group="settings" tab="tickets" :title="__('messages.ticket_presets')" :summary="$presetSummary !== '' ? $presetSummary : __('messages.none')" :muted="$presetSummary === ''" class="settings-tab" />
-                        <div id="settings-tab-tickets" class="event-subrow-body settings-tab-content" hidden>
-                            <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_presets_help') }}</p>
-                            {{-- ticket_presets_submitted is drawn by the island itself (see TicketPresetsEditor.vue). --}}
-                            <p id="ticket-presets-empty" class="py-3 text-sm text-gray-500 dark:text-gray-400" @if ($presetEditor['presets']) hidden @endif>{{ __('messages.ticket_presets_empty') }}</p>
-                            <div id="ticket-preset-items" class="event-list" data-island data-summary="{{ $presetSummary }}" data-team-on="{{ $presetTeamOn ? 1 : 0 }}"></div>
-                            <script type="application/json" id="ticket-preset-items-json" {!! nonce_attr() !!}>{!! $presetEditorJson !!}</script>
-                            <x-input-error class="mt-2" :messages="$errors->get('ticket_presets.*')" />
-                            @if ($presetEditor['canEdit'])
-                            <button type="button" data-action="add-ticket-preset" class="event-link mt-3" disabled>+ {{ __('messages.ticket_preset_add') }}</button>
-                            @endif
+                        <!-- Tab Content: New events -->
+                        {{-- What every new event starts with: who can see it, its address, its category, the
+                             curators it is offered to, and (hosted) what the AI import asks for. --}}
+                        <x-form-row group="settings" tab="events" :title="__('messages.settings_group_new_events')" class="settings-tab" />
+                        <div id="settings-tab-events" class="event-subrow-body settings-tab-content" hidden>
+                            <div class="mb-6">
+                                <x-input-label for="default_event_visibility" :value="__('messages.default_event_visibility')" />
+                                @php $currentDefaultVisibility = old('default_event_visibility', $role->default_event_visibility ?: 'public'); @endphp
+                                <select name="default_event_visibility" id="default_event_visibility"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="public" {{ $currentDefaultVisibility === 'public' ? 'selected' : '' }}>{{ __('messages.public') }}</option>
+                                    <option value="draft" {{ $currentDefaultVisibility === 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}</option>
+                                    {{-- Enterprise-only options; still rendered when already the stored value so a
+                                         downgraded schedule's default round-trips instead of silently flipping to public. --}}
+                                    @if ($role->isEnterprise() || $currentDefaultVisibility === 'internal')
+                                    <option value="internal" {{ $currentDefaultVisibility === 'internal' ? 'selected' : '' }}>{{ __('messages.internal') }}</option>
+                                    @endif
+                                    @if ($role->isEnterprise() || $currentDefaultVisibility === 'unlisted')
+                                    <option value="unlisted" {{ $currentDefaultVisibility === 'unlisted' ? 'selected' : '' }}>{{ __('messages.unlisted') }}</option>
+                                    @endif
+                                </select>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.default_event_visibility_help') }}</p>
+                                @if (! $role->isEnterprise())
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.upgrade_enterprise_privacy') }}</p>
+                                @endif
+                                <x-input-error class="mt-2" :messages="$errors->get('default_event_visibility')" />
+                            </div>
 
-                            @if ($presetEditor['switchOffered'])
-                            <div class="preset-switch">
-                                <x-toggle name="ticket_presets_team" id="ticket_presets_team"
-                                    :checked="(bool) old('ticket_presets_team', $presetTeamOn)"
-                                    label="{{ __('messages.ticket_presets_team') }}"
-                                    help="{{ __('messages.ticket_presets_team_help') }}" />
-                                <p id="ticket-presets-team-blocker" class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14" hidden></p>
-                                <x-input-error class="mt-2 ms-14" :messages="$errors->get('ticket_presets_team')" />
+                            <div class="mb-6">
+                                <x-input-label for="slug_pattern" :value="__('messages.slug_pattern')" />
+                                <x-text-input id="slug_pattern" name="slug_pattern" type="text" class="mt-1 block w-full"
+                                    :value="old('slug_pattern', $role->slug_pattern)"
+                                    placeholder="{event_name}" />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
+
+                                <div class="mt-4 flex items-start justify-between">
+                                    <x-link href="{{ marketing_url('/docs/creating-schedules#url-pattern-variables') }}" target="_blank" class="text-sm">
+                                        {{ __('messages.show_available_variables') }}
+                                    </x-link>
+                                    <div class="flex items-center gap-2">
+                                        <span id="update-all-slugs-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
+                                        <button type="button" id="update-all-slugs-btn" style="display: none;"
+                                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                            {{ __('messages.update_all_events_slugs') }}
+                                        </button>
+                                    </div>
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
                             </div>
-                            @elseif ($presetTeamOn)
-                            <div class="mt-4 mb-4 preset-note">
-                                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                                <span v-pre>{{ __('messages.ticket_presets_locked_note', ['owner' => \App\Services\TicketPresets::ownerName($role)]) }}</span>
+
+                            <div class="mb-6">
+                                <x-input-label for="default_category_id" :value="__('messages.default_category')" />
+                                @php
+                                    $effectiveDefaultCategories = get_translated_categories($role);
+                                    $savedDefaultId = old('default_category_id', $role->default_category_id);
+                                    $defaultIsOrphaned = $savedDefaultId && ! isset($effectiveDefaultCategories[$savedDefaultId]);
+                                @endphp
+                                <select name="default_category_id" id="default_category_id"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="">{{ __('messages.none') }}</option>
+                                    @foreach($effectiveDefaultCategories as $id => $label)
+                                        <option value="{{ $id }}" {{ $savedDefaultId == $id ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                    @if($defaultIsOrphaned)
+                                        @php
+                                            $orphanName = $role->getCategoryName((int) $savedDefaultId) ?? '';
+                                        @endphp
+                                        <option value="{{ $savedDefaultId }}" selected disabled>{{ $orphanName }} ({{ __('messages.removed') }})</option>
+                                    @endif
+                                </select>
+                                @if($defaultIsOrphaned)
+                                <div class="mt-2 flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>
+                                    <p class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.default_category_disabled_warning') }}</p>
+                                </div>
+                                @endif
+                                <div class="mt-4 flex items-start justify-end">
+                                    @if ($role->exists && $role->subdomain)
+                                    <div class="flex items-center gap-2">
+                                        <span id="update-all-categories-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
+                                        <button type="button" id="update-all-categories-btn" style="display: none;"
+                                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                            {{ __('messages.update_all_events_category') }}
+                                        </button>
+                                    </div>
+                                    @endif
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('default_category_id')" />
                             </div>
-                            @endif
-                        </div>
-                        <!-- End Tab Content: Ticket presets -->
+
+                        @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())
+                            <div class="mb-6">
+                                <x-input-label :value="__('messages.default_curator_schedules')" />
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.default_curator_schedules_help') }}</p>
+                                @php $selectedCuratorIds = old('default_curator_ids', $role->default_curator_ids ?? []); @endphp
+                                <input type="hidden" name="default_curator_ids[]" value="">
+                                @foreach ($availableCurators as $curator)
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" name="default_curator_ids[]" value="{{ $curator->id }}"
+                                        {{ in_array($curator->id, $selectedCuratorIds ?: []) ? 'checked' : '' }}
+                                        class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)] dark:bg-gray-900" />
+                                    <span class="ms-2 text-sm text-gray-700 dark:text-gray-300">{{ $curator->name }}</span>
+                                </label>
+                                @endforeach
+                            </div>
                         @endif
+
+
+                        @if (config('app.hosted') || config('app.is_testing'))
+                        <p class="event-group-label mt-8">{{ __('messages.ai_import') }}</p>
+                        <div class="mb-6" id="import_form_fields_section">
+                            <x-input-label :value="__('messages.import_form_fields')" />
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.import_form_fields_help') }}</p>
+                            @php
+                                $importFields = $role->import_config['fields'] ?? [];
+                                $requiredFields = $role->import_config['required_fields'] ?? [];
+                                $fieldItems = [
+                                    'short_description' => __('messages.short_description'),
+                                    'description' => __('messages.description'),
+                                    'ticket_price' => __('messages.price'),
+                                    'coupon_code' => __('messages.coupon_code'),
+                                    'registration_url' => __('messages.registration_url'),
+                                    'category_id' => __('messages.category'),
+                                ];
+                                if (($role->groups ?? collect())->count() > 0) {
+                                    $fieldItems['group_id'] = __('messages.subschedules');
+                                }
+                            @endphp
+                            <div class="space-y-3">
+                                @foreach ($fieldItems as $fieldKey => $fieldLabel)
+                                @php
+                                    $isChecked = old('import_fields.' . $fieldKey, $importFields[$fieldKey] ?? false);
+                                    $isRequired = old('required_fields.' . $fieldKey, $requiredFields[$fieldKey] ?? false);
+                                @endphp
+                                <div class="flex items-center gap-3">
+                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                        <input type="hidden" name="import_fields[{{ $fieldKey }}]" value="0">
+                                        <input type="checkbox" id="import_field_{{ $fieldKey }}" name="import_fields[{{ $fieldKey }}]" value="1"
+                                            {{ $isChecked ? 'checked' : '' }}
+                                            class="sr-only peer import-field-toggle" data-field="{{ $fieldKey }}">
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                    </label>
+                                    <label for="import_field_{{ $fieldKey }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-36 cursor-pointer">{{ $fieldLabel }}</label>
+                                    <label id="required_label_{{ $fieldKey }}" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 cursor-pointer" style="{{ $isChecked ? '' : 'display: none;' }}">
+                                        <input type="hidden" name="required_fields[{{ $fieldKey }}]" value="0">
+                                        <input type="checkbox" name="required_fields[{{ $fieldKey }}]" value="1"
+                                            {{ $isRequired ? 'checked' : '' }}
+                                            class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                        {{ __('messages.required') }}
+                                    </label>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                        </div>
+                        <!-- End Tab Content: New events -->
 
                         <!-- Tab Content: Notifications -->
                         <x-form-row group="settings" tab="notifications" :title="__('messages.notifications')" class="settings-tab" />
@@ -3594,6 +4909,10 @@
                                 label="{{ __('messages.announce_new_events') }}"
                                 checked="{{ old('announce_new_events', $role->announce_new_events) }}"
                                 help="{{ __('messages.announce_new_events_help') }}" />
+                            <p class="event-hint ms-14 mt-2" id="announce-list-note" data-on="{{ __('messages.announce_list_panel_on') }}" data-off="{{ __('messages.announce_list_panel_off') }}">
+                                <span data-note-text>{{ old('show_subscribe_panel', $role->show_subscribe_panel) ? __('messages.announce_list_panel_on') : __('messages.announce_list_panel_off') }}</span>
+                                <x-link href="#engagement-tab-mailing-list" data-form-jump="engagement-tab-mailing-list">{{ __('messages.announce_list_link') }}</x-link>
+                            </p>
                         </div>
 
                         @if ($role->exists)
@@ -3717,332 +5036,12 @@
                         <!-- Tab Content: Advanced -->
                         <x-form-row group="settings" tab="advanced" :title="__('messages.advanced')" class="settings-tab" />
                         <div id="settings-tab-advanced" class="event-subrow-body settings-tab-content" hidden>
-                            {{-- Twelve settings that were one stack, in the three groups they fall into: what a new
-                                 event starts with, what the public page shows, and where the schedule is listed. --}}
-                            <p class="event-group-label">{{ __('messages.settings_group_new_events') }}</p>
-                            <div class="mb-6">
-                                <x-input-label for="default_event_visibility" :value="__('messages.default_event_visibility')" />
-                                @php $currentDefaultVisibility = old('default_event_visibility', $role->default_event_visibility ?: 'public'); @endphp
-                                <select name="default_event_visibility" id="default_event_visibility"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    <option value="public" {{ $currentDefaultVisibility === 'public' ? 'selected' : '' }}>{{ __('messages.public') }}</option>
-                                    <option value="draft" {{ $currentDefaultVisibility === 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}</option>
-                                    {{-- Enterprise-only options; still rendered when already the stored value so a
-                                         downgraded schedule's default round-trips instead of silently flipping to public. --}}
-                                    @if ($role->isEnterprise() || $currentDefaultVisibility === 'internal')
-                                    <option value="internal" {{ $currentDefaultVisibility === 'internal' ? 'selected' : '' }}>{{ __('messages.internal') }}</option>
-                                    @endif
-                                    @if ($role->isEnterprise() || $currentDefaultVisibility === 'unlisted')
-                                    <option value="unlisted" {{ $currentDefaultVisibility === 'unlisted' ? 'selected' : '' }}>{{ __('messages.unlisted') }}</option>
-                                    @endif
-                                </select>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.default_event_visibility_help') }}</p>
-                                @if (! $role->isEnterprise())
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.upgrade_enterprise_privacy') }}</p>
-                                @endif
-                                <x-input-error class="mt-2" :messages="$errors->get('default_event_visibility')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="slug_pattern" :value="__('messages.slug_pattern')" />
-                                <x-text-input id="slug_pattern" name="slug_pattern" type="text" class="mt-1 block w-full"
-                                    :value="old('slug_pattern', $role->slug_pattern)"
-                                    placeholder="{event_name}" />
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
-
-                                <div class="mt-4 flex items-start justify-between">
-                                    <x-link href="{{ marketing_url('/docs/creating-schedules#url-pattern-variables') }}" target="_blank" class="text-sm">
-                                        {{ __('messages.show_available_variables') }}
-                                    </x-link>
-                                    <div class="flex items-center gap-2">
-                                        <span id="update-all-slugs-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
-                                        <button type="button" id="update-all-slugs-btn" style="display: none;"
-                                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
-                                            {{ __('messages.update_all_events_slugs') }}
-                                        </button>
-                                    </div>
-                                </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="default_category_id" :value="__('messages.default_category')" />
-                                @php
-                                    $effectiveDefaultCategories = get_translated_categories($role);
-                                    $savedDefaultId = old('default_category_id', $role->default_category_id);
-                                    $defaultIsOrphaned = $savedDefaultId && ! isset($effectiveDefaultCategories[$savedDefaultId]);
-                                @endphp
-                                <select name="default_category_id" id="default_category_id"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    <option value="">{{ __('messages.none') }}</option>
-                                    @foreach($effectiveDefaultCategories as $id => $label)
-                                        <option value="{{ $id }}" {{ $savedDefaultId == $id ? 'selected' : '' }}>{{ $label }}</option>
-                                    @endforeach
-                                    @if($defaultIsOrphaned)
-                                        @php
-                                            $orphanName = $role->getCategoryName((int) $savedDefaultId) ?? '';
-                                        @endphp
-                                        <option value="{{ $savedDefaultId }}" selected disabled>{{ $orphanName }} ({{ __('messages.removed') }})</option>
-                                    @endif
-                                </select>
-                                @if($defaultIsOrphaned)
-                                <div class="mt-2 flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>
-                                    <p class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.default_category_disabled_warning') }}</p>
-                                </div>
-                                @endif
-                                <div class="mt-4 flex items-start justify-end">
-                                    @if ($role->exists && $role->subdomain)
-                                    <div class="flex items-center gap-2">
-                                        <span id="update-all-categories-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
-                                        <button type="button" id="update-all-categories-btn" style="display: none;"
-                                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
-                                            {{ __('messages.update_all_events_category') }}
-                                        </button>
-                                    </div>
-                                    @endif
-                                </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('default_category_id')" />
-                            </div>
-
-                        @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())
-                            <div class="mb-6">
-                                <x-input-label :value="__('messages.default_curator_schedules')" />
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.default_curator_schedules_help') }}</p>
-                                @php $selectedCuratorIds = old('default_curator_ids', $role->default_curator_ids ?? []); @endphp
-                                <input type="hidden" name="default_curator_ids[]" value="">
-                                @foreach ($availableCurators as $curator)
-                                <label class="flex items-center mb-2">
-                                    <input type="checkbox" name="default_curator_ids[]" value="{{ $curator->id }}"
-                                        {{ in_array($curator->id, $selectedCuratorIds ?: []) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)] dark:bg-gray-900" />
-                                    <span class="ms-2 text-sm text-gray-700 dark:text-gray-300">{{ $curator->name }}</span>
-                                </label>
-                                @endforeach
-                            </div>
-                        @endif
-
-
-                            <p class="event-group-label mt-8">{{ __('messages.settings_group_public_page') }}</p>
-                            <div class="mb-6">
-                                <x-toggle name="hide_past_events"
-                                    label="{{ __('messages.hide_past_events') }}"
-                                    checked="{{ old('hide_past_events', $role->hide_past_events) }}"
-                                    help="{{ __('messages.hide_past_events_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
-                            </div>
-
-                            @if (! $role->isTalent())
-                            <div class="mb-6">
-                                <x-toggle name="hide_videos"
-                                    label="{{ __('messages.hide_videos') }}"
-                                    checked="{{ old('hide_videos', $role->hide_videos) }}"
-                                    help="{{ __('messages.hide_videos_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('hide_videos')" />
-                            </div>
-                            @endif
-
-                            <div class="mb-6">
-                                <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
-                                <select name="first_day_of_week" id="first_day_of_week"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
-                                    <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
-                                        {{ __('messages.' . $dayName) }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
-                            </div>
-
-                            {{-- How each event on the schedule's list is worded (App\Utils\ListWording): the
-                                 list's own cards, the wording of the Events graphic caption (what the owner
-                                 posts to WhatsApp), or a wording of the list's own with the same {variables}.
-                                 Stored in graphic_settings, because roles is at its row limit, and written only
-                                 from a save that carries list_wording_submitted. The preview under it is the
-                                 schedule's next three events as the list would draw them; nothing of it is
-                                 public until Save. --}}
-                            @php
-                                $listWordingMode = old('list_wording', \App\Utils\ListWording::mode($role));
-                                $listWordingTemplate = old('list_template', ($role->graphic_settings ?? [])['list_template'] ?? '');
-                                // A schedule read in two languages: the owner's words cannot be translated, so
-                                // a visitor reading the other one keeps the usual cards.
-                                $listWordingTwoLanguages = ($role->language_code ?: 'en') !== ($role->translation_language_code ?: 'en');
-                            @endphp
-                            <div class="mb-6" id="list-wording" data-preview="{{ $role->exists ? route('event.graphic_list_preview', ['subdomain' => $role->subdomain]) : '' }}" data-caption="{{ (($role->graphic_settings ?? [])['text_template'] ?? '') ?: \App\Utils\EventTextGenerator::getDefaultTemplate() }}">
-                                <input type="hidden" name="list_wording_submitted" value="1">
-                                <x-input-label for="list_wording" :value="__('messages.list_wording_label')" />
-                                <select name="list_wording" id="list_wording"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    @foreach (\App\Utils\ListWording::MODES as $mode)
-                                    <option value="{{ $mode }}" {{ $listWordingMode === $mode ? 'selected' : '' }}>{{ __('messages.list_wording_'.$mode) }}</option>
-                                    @endforeach
-                                </select>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.list_wording_help') }}</p>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" data-list-wording-when="caption" @if ($listWordingMode !== 'caption') hidden @endif>
-                                    {{ __('messages.list_wording_caption_help') }}
-                                    @if ($role->exists)
-                                    <x-link href="{{ route('event.generate_graphic', ['subdomain' => $role->subdomain]) }}#graphic-pane-caption">{{ __('messages.list_wording_edit_caption') }}</x-link>
-                                    @endif
-                                </p>
-                                <div class="mt-3" data-list-wording-when="custom" @if ($listWordingMode !== 'custom') hidden @endif>
-                                    <x-input-label for="list_template" :value="__('messages.list_wording_template')" />
-                                    <textarea id="list_template" name="list_template" rows="5" maxlength="2000" dir="ltr" spellcheck="false"
-                                        class="mt-1 block w-full font-mono text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                        placeholder="*{event_name}*&#10;{short_description}&#10;📍 {venue}">{{ $listWordingTemplate }}</textarea>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.list_wording_template_help') }} <x-link href="{{ marketing_url('/docs/event-graphics#variables') }}" target="_blank">{{ __('messages.graphic_all_variables') }}</x-link></p>
-                                    <x-input-error class="mt-2" :messages="$errors->get('list_template')" />
-                                </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('list_wording')" />
-                                @if ($listWordingTwoLanguages)
-                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" data-list-wording-when="caption custom" @if ($listWordingMode === 'standard') hidden @endif>{{ __('messages.list_wording_language', ['language' => __('messages.'.(config('app.supported_languages')[\App\Utils\ListWording::language($role)] ?? 'english'))]) }}</p>
-                                @endif
-                                <div class="lw-preview" data-list-wording-preview hidden>
-                                    <p class="lw-preview-label">{{ __('messages.list_wording_preview') }}</p>
-                                    <ul class="lw-cards"></ul>
-                                    <p class="lw-preview-note" data-note-no-name hidden>{{ __('messages.list_wording_no_name') }}</p>
-                                </div>
-                            </div>
-                            <script {!! nonce_attr() !!}>
-                            {{-- Plain DOM, as the rest of this form is: the choice shows its own fields, and the
-                                 preview asks the server for the next three cards in the wording being chosen
-                                 (GraphicController::listWordingPreview()). Everything it draws is text. --}}
-                            (function () {
-                                var root = document.getElementById('list-wording');
-                                if (! root) { return; }
-                                var select = document.getElementById('list_wording');
-                                var text = document.getElementById('list_template');
-                                var box = root.querySelector('[data-list-wording-preview]');
-                                var cards = box.querySelector('.lw-cards');
-                                var noName = box.querySelector('[data-note-no-name]');
-                                var url = root.dataset.preview;
-                                var timer = null;
-                                var turn = 0;
-                                var make = function (tag, cls, words) {
-                                    var node = document.createElement(tag);
-                                    if (cls) { node.className = cls; }
-                                    if (words != null) { node.textContent = words; }
-                                    return node;
-                                };
-                                var parts = function (target, list) {
-                                    list.forEach(function (part) {
-                                        var node = make(part.k === 'lit' ? 'span' : 'bdi', part.c || '', part.v);
-                                        if (part.l) { node.dir = 'ltr'; }
-                                        if (part.d) { node.setAttribute('aria-hidden', 'true'); }
-                                        target.appendChild(node);
-                                    });
-                                };
-                                var draw = function (list) {
-                                    var missing = false;
-                                    cards.textContent = '';
-                                    list.forEach(function (card) {
-                                        var item = make('li', 'lw-card');
-                                        var body = make('div', 'lw-text');
-                                        var time = make('span', 'lw-time');
-                                        var clock = make('bdi', null, card.time);
-                                        clock.dir = 'ltr';
-                                        time.appendChild(clock);
-                                        body.appendChild(time);
-                                        if (card.wording) {
-                                            var name = make('strong', 'lw-name');
-                                            name.dir = card.wording.dir;
-                                            parts(name, card.wording.name);
-                                            body.appendChild(name);
-                                            card.wording.body.forEach(function (line) {
-                                                var row = make('span', 'lw-line');
-                                                row.dir = card.wording.dir;
-                                                parts(row, line.p);
-                                                body.appendChild(row);
-                                            });
-                                        } else {
-                                            missing = true;
-                                            var plain = make('strong', 'lw-name', card.name);
-                                            plain.dir = card.dir;
-                                            body.appendChild(plain);
-                                            if (card.about) { body.appendChild(make('span', 'lw-line', card.about)); }
-                                            if (card.where) { body.appendChild(make('span', 'lw-line lw-where', card.where)); }
-                                        }
-                                        item.appendChild(body);
-                                        if (card.image) {
-                                            var img = make('img', 'lw-img');
-                                            img.src = card.image;
-                                            img.alt = '';
-                                            img.loading = 'lazy';
-                                            item.appendChild(img);
-                                        } else {
-                                            item.classList.add('is-bare');
-                                        }
-                                        cards.appendChild(item);
-                                    });
-                                    noName.hidden = ! missing;
-                                };
-                                var load = function () {
-                                    var mode = select.value;
-                                    var mine = ++turn;
-                                    var query = new URLSearchParams({ mode: mode, template: mode === 'custom' ? text.value : '' });
-                                    fetch(url + '?' + query.toString(), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
-                                        .then(function (response) { return response.ok ? response.json() : null; })
-                                        .then(function (body) {
-                                            if (mine !== turn) { return; }
-                                            if (! body || ! body.cards || ! body.cards.length) { box.hidden = true; return; }
-                                            draw(body.cards);
-                                            box.hidden = false;
-                                        })
-                                        .catch(function () { if (mine === turn) { box.hidden = true; } });
-                                };
-                                var show = function () {
-                                    var mode = select.value;
-                                    root.querySelectorAll('[data-list-wording-when]').forEach(function (node) {
-                                        node.hidden = node.getAttribute('data-list-wording-when').split(' ').indexOf(mode) === -1;
-                                    });
-                                    // A wording of the list's own starts from the caption's, not from nothing.
-                                    if (mode === 'custom' && ! text.value.trim()) {
-                                        text.value = root.dataset.caption || '';
-                                        text.dispatchEvent(new Event('input', { bubbles: true }));
-                                    }
-                                    clearTimeout(timer);
-                                    turn++;
-                                    if (mode === 'standard' || ! url) { box.hidden = true; return; }
-                                    timer = setTimeout(load, 300);
-                                };
-                                select.addEventListener('change', show);
-                                text.addEventListener('input', function () {
-                                    if (select.value !== 'custom') { return; }
-                                    clearTimeout(timer);
-                                    timer = setTimeout(load, 450);
-                                });
-                                if (select.value !== 'standard') { show(); }
-                            })();
-                            </script>
-
                             <div class="mb-6">
                                 <x-toggle name="show_accessibility_widget"
                                     label="{{ __('messages.show_accessibility_widget') }}"
                                     checked="{{ old('show_accessibility_widget', $role->show_accessibility_widget) }}"
                                     help="{{ __('messages.show_accessibility_widget_help') }}" />
                                 <x-input-error class="mt-2" :messages="$errors->get('show_accessibility_widget')" />
-                            </div>
-
-                            {{-- The two guest-page email sign-up surfaces. Free on every plan: turning a
-                                 capture surface off is a choice about the page, not a paid feature.
-                                 The panel defaults on and the "Notify me" card defaults off;
-                                 RoleController::create() sets the panel's default so this create page
-                                 paints it. The card follows the switch of the schedule that CREATED
-                                 an event, wherever the event is listed. --}}
-                            <div class="mb-6">
-                                <x-toggle name="show_subscribe_panel"
-                                    label="{{ __('messages.show_subscribe_panel') }}"
-                                    checked="{{ old('show_subscribe_panel', $role->show_subscribe_panel) }}"
-                                    help="{{ __('messages.show_subscribe_panel_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('show_subscribe_panel')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-toggle name="show_event_interest"
-                                    label="{{ __('messages.show_event_interest') }}"
-                                    checked="{{ old('show_event_interest', $role->show_event_interest) }}"
-                                    help="{{ __('messages.show_event_interest_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('show_event_interest')" />
                             </div>
 
                             {{-- Free rather than Pro-gated on purpose: forcing a schedule to
@@ -4090,1096 +5089,12 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('federation_enabled')" />
                             </div>
                             @endif
-
-
-                        @if (config('app.hosted') || config('app.is_testing'))
-                        <p class="event-group-label mt-8">{{ __('messages.ai_import') }}</p>
-                        <div class="mb-6" id="import_form_fields_section">
-                            <x-input-label :value="__('messages.import_form_fields')" />
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.import_form_fields_help') }}</p>
-                            @php
-                                $importFields = $role->import_config['fields'] ?? [];
-                                $requiredFields = $role->import_config['required_fields'] ?? [];
-                                $fieldItems = [
-                                    'short_description' => __('messages.short_description'),
-                                    'description' => __('messages.description'),
-                                    'ticket_price' => __('messages.price'),
-                                    'coupon_code' => __('messages.coupon_code'),
-                                    'registration_url' => __('messages.registration_url'),
-                                    'category_id' => __('messages.category'),
-                                ];
-                                if (($role->groups ?? collect())->count() > 0) {
-                                    $fieldItems['group_id'] = __('messages.subschedules');
-                                }
-                            @endphp
-                            <div class="space-y-3">
-                                @foreach ($fieldItems as $fieldKey => $fieldLabel)
-                                @php
-                                    $isChecked = old('import_fields.' . $fieldKey, $importFields[$fieldKey] ?? false);
-                                    $isRequired = old('required_fields.' . $fieldKey, $requiredFields[$fieldKey] ?? false);
-                                @endphp
-                                <div class="flex items-center gap-3">
-                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                        <input type="hidden" name="import_fields[{{ $fieldKey }}]" value="0">
-                                        <input type="checkbox" id="import_field_{{ $fieldKey }}" name="import_fields[{{ $fieldKey }}]" value="1"
-                                            {{ $isChecked ? 'checked' : '' }}
-                                            class="sr-only peer import-field-toggle" data-field="{{ $fieldKey }}">
-                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                    </label>
-                                    <label for="import_field_{{ $fieldKey }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-36 cursor-pointer">{{ $fieldLabel }}</label>
-                                    <label id="required_label_{{ $fieldKey }}" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 cursor-pointer" style="{{ $isChecked ? '' : 'display: none;' }}">
-                                        <input type="hidden" name="required_fields[{{ $fieldKey }}]" value="0">
-                                        <input type="checkbox" name="required_fields[{{ $fieldKey }}]" value="1"
-                                            {{ $isRequired ? 'checked' : '' }}
-                                            class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                        {{ __('messages.required') }}
-                                    </label>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-
-                        </div>
                         </div>
                         <!-- End Tab Content: Advanced -->
+                        </div>
 
                     </div>
                 </div>
-
-                <button type="button" class="mobile-section-header" data-section="section-engagement">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                        </svg>
-                        <span class="section-nav-text">
-                            <span>{{ __('messages.engagement') }}</span>
-                            <span class="section-nav-summary" data-summary="section-engagement"><bdi></bdi></span>
-                        </span>
-                        <span class="section-nav-dot" data-dirty-dot="section-engagement" hidden></span>
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-engagement" class="section-content lg:mt-0">
-                    <div class="form-kit-col">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <span class="section-heading-name inline-flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                                </svg>
-                                {{ __('messages.engagement') }}
-                            </span>
-                        </h2>
-
-                        @php $showRequestsTab = $role->isCurator() || $role->isVenue() || $role->isTalent(); @endphp
-
-
-                        <div class="event-subrows">
-                        <!-- Tab Content: Requests -->
-                        @if ($showRequestsTab)
-                        <x-form-row group="engagement" tab="requests" :title="__('messages.requests')" class="engagement-tab" />
-                        <div id="engagement-tab-requests" class="event-subrow-body engagement-tab-content" hidden>
-
-                        <div class="mb-6">
-                            <x-toggle name="accept_requests"
-                                label="{{ __('messages.accept_requests') }}"
-                                checked="{{ old('accept_requests', $role->accept_requests) }}"
-                                help="{{ __($role->isTalent() ? 'messages.accept_requests_help_talent' : 'messages.accept_requests_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
-                        </div>
-                        @if (! $role->isTalent())
-                        <div class="mb-6" id="require_account_section">
-                            <x-toggle name="require_account"
-                                label="{{ __('messages.require_account') }}"
-                                checked="{{ old('require_account', $role->exists ? $role->require_account : ($role->require_account ?? $role->isCurator())) }}"
-                                help="{{ __('messages.require_account_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
-                        </div>
-                        <div class="mb-6" id="event_request_form_section">
-                            <x-input-label :value="__('messages.event_request_form')" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.event_request_form_help') }}</p>
-                            <div class="space-y-2">
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-                                    <input type="radio" name="event_request_form" value="import"
-                                        {{ old('event_request_form', $role->event_request_form ?? 'import') === 'import' ? 'checked' : '' }}
-                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.ai_import') }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_import_description') }}</div>
-                                    </div>
-                                </label>
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-                                    <input type="radio" name="event_request_form" value="booking"
-                                        {{ old('event_request_form', $role->event_request_form ?? 'import') === 'booking' ? 'checked' : '' }}
-                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.booking_form') }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.booking_form_description') }}</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        @endif
-                        {{-- Booking form options, saved by RoleController::applyBookingFormConfig(). Rendered for
-                             every type, since a talent always uses the booking form; the script at the top of
-                             the page shows it only while the booking form is the one guests get. --}}
-                        @php
-                            $bookingFormOptions = $role->bookingFormConfig();
-                            $bookingFieldLabels = [
-                                'event_name' => __('messages.event_name'),
-                                'date_time' => __('messages.date_and_time'),
-                                'description' => __('messages.description'),
-                                'location' => __('messages.location'),
-                            ];
-                            // A venue is its own location, so that requirement never applies there.
-                            if ($role->isVenue()) {
-                                unset($bookingFieldLabels['location']);
-                            }
-                            // `phone` is requirable but deliberately absent from this list: every row
-                            // here is a field that is always on the form, so the checkbox answers one
-                            // question. Phone answers two (ask at all, then require), so it gets its
-                            // own nested block below instead.
-                        @endphp
-                        <div class="mb-6" id="booking_form_section" data-always-booking="{{ $role->isTalent() ? '1' : '0' }}">
-                            <input type="hidden" name="booking_form_submitted" value="1">
-                            <x-input-label :value="__('messages.booking_form_required_fields')" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.booking_form_required_fields_help') }}</p>
-                            <div class="space-y-2 mb-6">
-                                @foreach ($bookingFieldLabels as $bookingFieldKey => $bookingFieldLabel)
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="hidden" name="booking_required_fields[{{ $bookingFieldKey }}]" value="0">
-                                    <input type="checkbox" id="booking_required_{{ $bookingFieldKey }}" name="booking_required_fields[{{ $bookingFieldKey }}]" value="1"
-                                        {{ old('booking_required_fields.'.$bookingFieldKey, $bookingFormOptions['required_fields'][$bookingFieldKey]) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)] dark:bg-gray-900" />
-                                    <span class="ms-2 text-sm text-gray-700 dark:text-gray-300">{{ $bookingFieldLabel }}</span>
-                                </label>
-                                @endforeach
-                            </div>
-                            <x-toggle name="booking_allow_online"
-                                label="{{ __('messages.booking_allow_online') }}"
-                                checked="{{ old('booking_allow_online', $bookingFormOptions['allow_online']) }}"
-                                help="{{ __('messages.booking_allow_online_help') }}" />
-
-                            {{-- The phone field, in the same shape as the appointment editor's
-                                 (role/partials/appointment-editor.blade.php) and the ticket-buyer
-                                 phone on the event form: ask first, then require. --}}
-                            <div class="mt-6">
-                                <x-toggle name="booking_ask_phone"
-                                    label="{{ __('messages.ask_for_phone_number') }}"
-                                    checked="{{ old('booking_ask_phone', $bookingFormOptions['ask_phone']) }}"
-                                    help="{{ __('messages.booking_ask_phone_help') }}" />
-                                {{-- Nested: "required" only means anything while the field is asked
-                                     for at all, and Role::bookingFormRequires() normalises the
-                                     stored value the same way. Hiding the row does not lose it: a
-                                     hidden checked box still posts, and applyBookingFormConfig()
-                                     only falls back to the stored value on an ABSENT key. --}}
-                                <div id="booking-require-phone-row" class="ms-14 mt-2 {{ old('booking_ask_phone', $bookingFormOptions['ask_phone']) ? '' : 'hidden' }}">
-                                    <x-toggle name="booking_required_fields[phone]" id="booking_required_phone"
-                                        label="{{ __('messages.field_required') }}"
-                                        checked="{{ old('booking_required_fields.phone', $bookingFormOptions['required_fields']['phone']) }}" />
-                                </div>
-                            </div>
-                        </div>
-                        @if (! $role->isTalent())
-                        <div class="mb-6" id="require_approval_section">
-                            <x-toggle name="require_approval"
-                                label="{{ __('messages.require_approval') }}"
-                                checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
-                                help="{{ __('messages.require_approval_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
-                        </div>
-                        <div class="mb-6" id="approved_subdomains_section">
-                            {{-- Same sentinel as event_categories_submitted, and for the same
-                                 reason: the list below is hidden entirely on a talent schedule, so
-                                 without this the controller could not tell "the operator emptied
-                                 the list" from "this form never showed it" and every talent save
-                                 silently nulled the column. That matters now because claiming a
-                                 page pre-approves the schedules already listing the act, and a
-                                 talent's first settings save would have thrown that away. --}}
-                            <input type="hidden" name="approved_subdomains_submitted" value="1">
-                            <x-input-label :value="__('messages.approved_schedules')" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.approved_schedules_help') }}</p>
-                            <div id="approved-subdomains-items">
-                                @foreach(old('approved_subdomains', $role->approved_subdomains ?? []) as $i => $subdomain)
-                                    <div class="mb-2 relative">
-                                        <div class="flex items-center">
-                                            <input type="text" data-subdomain-search value="{{ isset($approvedSubdomainNames[$subdomain]) ? $approvedSubdomainNames[$subdomain] . ' (' . $subdomain . ')' : $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
-                                            <button type="button" data-action="remove-parent-item"
-                                                class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
-                                        </div>
-                                        <input type="hidden" name="approved_subdomains[]" value="{{ $subdomain }}" />
-                                        <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
-                                    </div>
-                                @endforeach
-                            </div>
-                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                + {{ __('messages.add_schedule') }}
-                            </button>
-                        </div>
-                        @endif
-                        <div class="mb-6" id="request_terms_section">
-                            <x-input-label for="request_terms" :value="__('messages.request_terms')" />
-                            <textarea id="request_terms" name="request_terms"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                rows="4"
-                                dir="auto"
-                                placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
-                            <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
-                        </div>
-
-                        {{-- The questions themselves live in Customize > Custom Fields, which is not
-                             where someone looking for "extra questions on my request form" looks. --}}
-                        <div class="mb-6">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ __('messages.request_custom_fields_pointer') }}
-                                <button type="button" data-action="goto-custom-fields" class="text-[var(--brand-blue)] hover:underline">
-                                    {{ __('messages.custom_fields') }}
-                                </button>
-                            </p>
-                        </div>
-
-                        </div>
-                        @endif
-                        <!-- End Tab Content: Requests -->
-
-                        <!-- Tab Content: Fan Content -->
-                        <x-form-row group="engagement" tab="fan_content" :title="__('messages.fan_content')" class="engagement-tab" />
-                        <div id="engagement-tab-fan_content" class="event-subrow-body engagement-tab-content" hidden>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.fan_content_help') }}</p>
-                            <div class="mb-4">
-                                <x-toggle name="fan_comments_enabled"
-                                    label="{{ __('messages.fan_comments_enabled') }}"
-                                    checked="{{ old('fan_comments_enabled', $role->fan_comments_enabled) }}" />
-                            </div>
-                            <div class="mb-4">
-                                <x-toggle name="fan_photos_enabled"
-                                    label="{{ __('messages.fan_photos_enabled') }}"
-                                    checked="{{ old('fan_photos_enabled', $role->fan_photos_enabled) }}" />
-                            </div>
-                            <div class="mb-4">
-                                <x-toggle name="fan_videos_enabled"
-                                    label="{{ __('messages.fan_videos_enabled') }}"
-                                    checked="{{ old('fan_videos_enabled', $role->fan_videos_enabled) }}" />
-                            </div>
-                            <div class="mb-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <x-toggle name="fan_content_require_account"
-                                    label="{{ __('messages.fan_content_require_account') }}"
-                                    checked="{{ old('fan_content_require_account', $role->fan_content_require_account) }}"
-                                    help="{{ __('messages.fan_content_require_account_help') }}" />
-                            </div>
-                        </div>
-                        <!-- End Tab Content: Fan Content -->
-
-                        <!-- Tab Content: Feedback -->
-                        <x-form-row group="engagement" tab="feedback" :title="__('messages.feedback')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
-                        <div id="engagement-tab-feedback" class="event-subrow-body engagement-tab-content" hidden>
-
-                        @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
-
-                        @if (! $role->isPro())
-                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <span>{{ __('messages.feedback_pro_only') }}</span>
-                                </p>
-                            </div>
-                        @endif
-
-                        @if ($emailDisabled)
-                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <span>
-                                        {{ __('messages.notification_requires_email_settings') }}
-                                        <a href="#section-integrations" class="js-email-settings-link text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
-                                    </span>
-                                </p>
-                            </div>
-                        @endif
-
-                        @php $feedbackDisabled = $emailDisabled || ! $role->isPro(); @endphp
-
-                        <div class="mb-6">
-                            <x-toggle name="feedback_enabled"
-                                label="{{ __('messages.feedback_enabled') }}"
-                                checked="{{ old('feedback_enabled', $role->feedback_enabled) }}"
-                                help="{{ __('messages.feedback_enabled_help') }}"
-                                :disabled="$feedbackDisabled" />
-                        </div>
-
-                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
-                            <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
-                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" {{ $feedbackDisabled ? 'disabled' : '' }}>
-                                @foreach ([1, 2, 6, 12, 24, 48] as $hours)
-                                <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
-                                    {{ $hours }} {{ __('messages.feedback_hours') }}
-                                </option>
-                                @endforeach
-                            </select>
-                            <p id="feedback-delay-hint" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
-                        </div>
-
-                        <div class="mb-6" id="feedback-public-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
-                            <x-toggle name="feedback_public"
-                                label="{{ __('messages.feedback_public') }}"
-                                checked="{{ old('feedback_public', $role->feedback_public) }}"
-                                help="{{ __('messages.feedback_public_help') }}"
-                                :disabled="$feedbackDisabled" />
-                        </div>
-
-                        <div class="mb-6" id="feedback-test-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
-                            <button type="button" id="send-test-feedback-btn" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all duration-200">
-                                <svg class="w-4 h-4 me-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                {{ __('messages.feedback_send_test') }}
-                            </button>
-                            <div id="test-feedback-result" class="mt-2 hidden"></div>
-                        </div>
-
-                        </div>
-                        <!-- End Tab Content: Feedback -->
-
-                        <!-- Tab Content: Carpool -->
-                        <x-form-row group="engagement" tab="carpool" :title="__('messages.carpool')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
-                        <div id="engagement-tab-carpool" class="event-subrow-body engagement-tab-content" hidden>
-
-                        @if (! $role->isPro())
-                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <span>{{ __('messages.carpool_pro_only') }}</span>
-                                </p>
-                            </div>
-                        @endif
-
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.carpool_help') }}</p>
-                        <div class="mb-6">
-                            <x-toggle name="carpool_enabled"
-                                label="{{ __('messages.carpool_enabled') }}"
-                                checked="{{ old('carpool_enabled', $role->carpool_enabled) }}"
-                                help="{{ __('messages.carpool_enabled_help') }}"
-                                :disabled="! $role->isPro()" />
-                        </div>
-
-                        </div>
-                        <!-- End Tab Content: Carpool -->
-
-                        <!-- Tab Content: Sponsors -->
-                        <x-form-row group="engagement" tab="sponsors" :title="__('messages.sponsors')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
-                        <div id="engagement-tab-sponsors" class="event-subrow-body engagement-tab-content" hidden>
-                        {{-- Above the plan branch on purpose: a guest page prints stored sponsors on any
-                             plan, so a schedule whose plan lapsed must still be able to hide them, and to
-                             show them again. Drawn once there is a sponsor to hide. --}}
-                        @php $storedSponsorCount = count(json_decode($role->sponsor_logos ?? '[]', true) ?: []); @endphp
-                        @if ($storedSponsorCount)
-                            <div class="mb-6">
-                                <x-toggle name="show_sponsors"
-                                    label="{{ __('messages.show_sponsors') }}"
-                                    checked="{{ old('show_sponsors', $role->show_sponsors !== false) }}"
-                                    help="{{ __('messages.show_sponsors_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('show_sponsors')" />
-                                <p id="sponsors-hidden-note" class="mt-3 ms-14 text-sm font-medium text-gray-700 dark:text-gray-300" hidden>{{ __('messages.sponsors_hidden_notice') }}</p>
-                            </div>
-                        @endif
-                        @if ($role->isPro())
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.sponsor_logos_help') }}</p>
-
-                            <input type="hidden" name="existing_sponsors" id="existing_sponsors_input" value="{{ $role->sponsor_logos ?? '[]' }}" />
-
-                            @php
-                                $existingSponsors = json_decode($role->sponsor_logos ?? '[]', true) ?: [];
-                                $maxSponsors = config('app.max_sponsors');
-                                $sponsorBackground = old('sponsor_background_color', $role->sponsor_background_color);
-                                if ($sponsorBackground === 'transparent') {
-                                    $sponsorBackgroundMode = 'transparent';
-                                } elseif (preg_match('/^#[0-9a-fA-F]{6}$/', (string) $sponsorBackground)) {
-                                    $sponsorBackgroundMode = 'custom';
-                                } else {
-                                    $sponsorBackgroundMode = 'default';
-                                }
-                            @endphp
-
-                            {{-- The strip's background matters once there is a sponsor to put on it. --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" id="sponsor-background-controls" @if (! count($existingSponsors)) hidden @endif>
-                                <div>
-                                    <x-input-label for="sponsor_background_mode" :value="__('messages.sponsor_background')" />
-                                    <select id="sponsor_background_mode" data-action="sponsor-background-change"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
-                                        <option value="default" @selected($sponsorBackgroundMode === 'default')>{{ __('messages.sponsor_background_default') }}</option>
-                                        <option value="transparent" @selected($sponsorBackgroundMode === 'transparent')>{{ __('messages.sponsor_background_transparent') }}</option>
-                                        <option value="custom" @selected($sponsorBackgroundMode === 'custom')>{{ __('messages.sponsor_background_custom') }}</option>
-                                    </select>
-                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.sponsor_background_help') }}</p>
-                                </div>
-                                <div id="sponsor_background_color_wrapper" class="{{ $sponsorBackgroundMode === 'custom' ? '' : 'hidden' }}">
-                                    <x-input-label for="sponsor_background_color_input" :value="__('messages.color')" />
-                                    <x-text-input id="sponsor_background_color_input" type="color" class="mt-1 block w-1/2"
-                                        :value="$sponsorBackgroundMode === 'custom' ? $sponsorBackground : '#ffffff'"
-                                        data-action="sponsor-background-change" />
-                                </div>
-                            </div>
-
-                            <input type="hidden" name="sponsor_background_color" id="sponsor_background_color" value="{{ $sponsorBackgroundMode === 'default' ? '' : $sponsorBackground }}" />
-                            <x-input-error class="mb-4" :messages="$errors->get('sponsor_background_color')" />
-
-                            <p class="event-empty" id="sponsors-empty" @if (count($existingSponsors)) hidden @endif>{{ __('messages.no_sponsors') }}</p>
-                            <div id="sponsors-list" class="space-y-3 mb-6">
-                                @foreach ($existingSponsors as $index => $sponsor)
-                                @php
-                                    $logoUrl = '';
-                                    if (!empty($sponsor['logo'])) {
-                                        if (str_starts_with($sponsor['logo'], 'demo_')) {
-                                            $logoUrl = url('/images/demo/' . $sponsor['logo']);
-                                        } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                                            $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $sponsor['logo'];
-                                        } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
-                                            $logoUrl = url('/storage/' . $sponsor['logo']);
-                                        } else {
-                                            $logoUrl = $sponsor['logo'];
-                                        }
-                                    }
-                                @endphp
-                                <div class="sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg" data-sponsor='@json($sponsor)' data-logo-url="{{ $logoUrl }}">
-                                    <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                                        </svg>
-                                    </div>
-                                    <div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 120px; height: 80px;">
-                                        @if ($logoUrl)
-                                            <img src="{{ $logoUrl }}" alt="{{ $sponsor['name'] ?? '' }}" class="max-w-full max-h-full object-contain" />
-                                        @endif
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" data-row-name>{{ $sponsor['name'] ?? '' }}</div>
-                                        @if (!empty($sponsor['tier']))
-                                            <span class="inline-block text-xs px-1.5 py-0.5 rounded
-                                                {{ $sponsor['tier'] === 'gold' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : '' }}
-                                                {{ $sponsor['tier'] === 'silver' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : '' }}
-                                                {{ $sponsor['tier'] === 'bronze' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' : '' }}
-                                            ">{{ __('messages.' . $sponsor['tier']) }}</span>
-                                        @endif
-                                        @if (!empty($sponsor['url']))
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $sponsor['url'] }}</div>
-                                        @endif
-                                    </div>
-                                    <button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </button>
-                                    <button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                @endforeach
-                            </div>
-
-                            <div id="sponsor-limit-message" class="mb-4 {{ count($existingSponsors) >= $maxSponsors ? '' : 'hidden' }}">
-                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        <span>{{ __('messages.max_sponsors_reached', ['count' => $maxSponsors]) }}</span>
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div id="sponsor-pending-uploads-message" class="mb-4 hidden">
-                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        <span>{{ __('messages.save_sponsors_before_adding_more') }}</span>
-                                    </p>
-                                </div>
-                            </div>
-
-                            {{-- The form is behind its link: always open, it read as a sponsor half filled in.
-                                 #add-sponsor-form keeps its own hidden class, which the page script uses for
-                                 "the list is full". --}}
-                            <button type="button" class="event-link" id="sponsor-form-open">+ {{ __('messages.add_sponsor') }}</button>
-                            <div id="sponsor-form-shell" hidden>
-                            <div id="add-sponsor-form" class="{{ count($existingSponsors) >= $maxSponsors ? 'hidden' : '' }}">
-                                <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                                        <div>
-                                            <x-input-label for="new_sponsor_name_input" :value="__('messages.sponsor_name')" />
-                                            <input type="text" id="new_sponsor_name_input" maxlength="100"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
-                                        </div>
-                                        <div>
-                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" />
-                                            <input type="url" id="new_sponsor_url_input" maxlength="500"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                                        <div>
-                                            <x-input-label :value="__('messages.sponsor_tier')" />
-                                            <select id="new_sponsor_tier_input"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
-                                                <option value="">—</option>
-                                                <option value="gold">{{ __('messages.gold') }}</option>
-                                                <option value="silver">{{ __('messages.silver') }}</option>
-                                                <option value="bronze">{{ __('messages.bronze') }}</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <x-input-label id="sponsor-logo-label" :value="__('messages.logo') . ' *'" />
-                                            <input type="file" id="new_sponsor_logo_input" accept="image/*"
-                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]"
-                                                />
-                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <button type="button" data-action="add-sponsor" id="sponsor-action-btn"
-                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
-                                            <svg id="sponsor-action-icon" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                            </svg>
-                                            <span id="sponsor-action-text">{{ __('messages.add_sponsor') }}</span>
-                                        </button>
-                                        <button type="button" data-action="cancel-edit-sponsor" id="cancel-edit-sponsor-btn"
-                                            class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                            {{ __('messages.cancel') }}
-                                        </button>
-                                        {{-- Closes the form when it was opened to add: the button above is for an edit. --}}
-                                        <button type="button" id="sponsor-form-close" class="event-link event-link-quiet">{{ __('messages.cancel') }}</button>
-                                    </div>
-                                    {{-- Why Add did nothing (no logo chosen, or the list is full). --}}
-                                    <p id="sponsor-form-note" class="sched-inline-error" role="alert"></p>
-                                </div>
-                            </div>
-
-                            </div>
-
-                            <div id="new-sponsor-inputs-container"></div>
-                        @else
-                            <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/docs/creating-schedules#engagement-sponsors')" :subdomain="$role->subdomain">
-                                <x-slot:icon>
-                                    <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                                    </svg>
-                                </x-slot:icon>
-                                {{ __('messages.upgrade_sponsor_logos') }}
-                            </x-upgrade-prompt>
-                        @endif
-                        </div>
-                        <!-- End Tab Content: Sponsors -->
-
-                        <!-- Tab Content: Venue map -->
-                        {{-- A map of the schedule's venues on its guest page (App\Services\VenueMap). Not for
-                             a venue schedule, which is one place, nor on an install with no address search
-                             (services.map.geocoder_url), nor before the schedule exists. Free on every plan.
-                             The two switches are not columns of the schedule: RoleController::update()
-                             hands them to VenueMap::saveSettings(). --}}
-                        @if ($role->exists && \App\Services\VenueMap::offeredTo($role))
-                        @php
-                            $venueMapStored = \App\Services\VenueMap::enabledFor($role);
-                            $venueMapOn = (bool) old('show_venues_map', $venueMapStored);
-                            $venueMapStatus = $venueMapStored ? \App\Services\VenueMap::status($role, auth()->user()) : null;
-                        @endphp
-                        <x-form-row group="engagement" tab="map" :title="__('messages.venue_map')" class="engagement-tab" />
-                        <div id="engagement-tab-map" class="event-subrow-body engagement-tab-content" hidden>
-
-                        <div class="mb-6">
-                            <x-toggle name="show_venues_map"
-                                label="{{ __('messages.show_venues_map') }}"
-                                checked="{{ $venueMapOn }}"
-                                help="{{ __('messages.show_venues_map_help', ['provider' => e(map_lookup()['name'])]) }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('show_venues_map')" />
-                        </div>
-
-                        {{-- A map that starts open is for visitors who have allowed cookies. On an install
-                             that fetches street images and asks nobody (cookie_banner_required(), the
-                             predicate behind the banner itself) nobody can, so the switch would do
-                             nothing and is not drawn. --}}
-                        @if (! (map_tiles() && ! cookie_banner_required()))
-                        <div class="mb-6" id="venues-map-open-row" @if (! $venueMapOn) hidden @endif>
-                            <x-toggle name="venues_map_open"
-                                label="{{ __('messages.venues_map_open') }}"
-                                checked="{{ old('venues_map_open', \App\Services\VenueMap::startsOpen($role)) }}"
-                                help="{{ map_tiles() ? __('messages.venues_map_open_help') : __('messages.venues_map_open_help_plain') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('venues_map_open')" />
-                        </div>
-                        @endif
-
-                        {{-- Every venue the map would hold, where each stands and what can be done about it
-                             (resources/js/components/VenueMapEditor.vue): take one off the map, move a
-                             pin, place one by hand. Drawn once the map is switched on and saved: before
-                             that nothing has been asked. An island with an EMPTY host: a venue's name
-                             inside a Vue mount would be compiled as a template, and this form is not a
-                             Vue app. Its changes are saved at once and are no part of this form's Save. --}}
-                        @if ($venueMapStatus)
-                        @php
-                            $venueMapTiles = map_tiles();
-                            $venueMapEditor = [
-                                'venues' => $venueMapStatus['venues'],
-                                'placedNow' => (int) $venueMapStatus['placed'],
-                                'markUrl' => route('role.venue_map.mark', ['subdomain' => $role->subdomain, 'venue' => '__VENUE__']),
-                                'csrf' => csrf_token(),
-                                'tiles' => $venueMapTiles ? ['url' => $venueMapTiles['url']] : null,
-                                'credit' => (string) config('services.map.attribution'),
-                                'creditUrl' => preg_match('~^https?://~i', (string) config('services.map.attribution_url')) ? config('services.map.attribution_url') : null,
-                                'assets' => [
-                                    'leaflet' => asset('vendor/leaflet/leaflet.js').'?v=1.9.4',
-                                    'leafletCss' => asset('vendor/leaflet/leaflet.css').'?v=1.9.4',
-                                    // The pin's own picture, named outright (see leaflet-loader.js).
-                                    'images' => asset('vendor/leaflet/images').'/',
-                                ],
-                                'rtl' => is_rtl(),
-                                't' => [
-                                    'venues' => __('messages.venues'),
-                                    'none' => __('messages.venue_map_no_venues'),
-                                    'help' => __('messages.venue_map_venues_help'),
-                                    'streets_note' => __('messages.venue_map_editor_streets', ['provider' => $venueMapTiles['name'] ?? '']),
-                                    'state_placed' => __('messages.venue_map_placed'),
-                                    'state_approximate' => __('messages.venue_map_approx'),
-                                    'state_waiting' => __('messages.venue_map_waiting'),
-                                    'state_no_address' => __('messages.venue_map_no_address'),
-                                    'state_not_found' => __('messages.venue_map_address_not_found'),
-                                    'state_no_country' => __('messages.venue_map_no_country'),
-                                    'needs_two' => __('messages.venue_map_needs_two_here'),
-                                    'pin_centre' => __('messages.venue_map_pin_centre'),
-                                    'expired' => __('messages.venue_map_session_expired'),
-                                    'state_hidden' => __('messages.venue_map_off_the_map'),
-                                    'state_by_hand' => __('messages.venue_map_by_hand'),
-                                    'fix_no_address' => __('messages.venue_map_fix_no_address'),
-                                    'fix_no_country' => __('messages.venue_map_fix_no_country'),
-                                    'fix_not_found' => __('messages.venue_map_fix_not_found'),
-                                    'owner_only' => __('messages.venue_map_owner_only'),
-                                    'in_its_events' => __('messages.venue_map_in_its_events'),
-                                    'or_place' => __('messages.venue_map_or_place'),
-                                    'take_off' => __('messages.venue_map_take_off'),
-                                    'put_back' => __('messages.venue_map_put_back'),
-                                    'move' => __('messages.venue_map_move_pin'),
-                                    'place' => __('messages.venue_map_place_by_hand'),
-                                    'edit_venue' => __('messages.venue_map_edit_venue'),
-                                    'saved' => __('messages.saved'),
-                                    'failed' => __('messages.venue_map_not_saved'),
-                                    'where' => __('messages.venue_map_where'),
-                                    'drag' => __('messages.venue_map_drag'),
-                                    'use_found' => __('messages.venue_map_use_found'),
-                                    'save_position' => __('messages.venue_map_save_position'),
-                                    'cancel' => __('messages.cancel'),
-                                    'map_failed' => __('messages.venue_map_failed'),
-                                ],
-                            ];
-                            // Bare flags, spelled out, as for the guest map: "<" never reaches the block.
-                            $venueMapEditorJson = json_encode($venueMapEditor, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                        @endphp
-                        <div id="venue-map-venues" class="mb-6" @if (! $venueMapOn) hidden @endif>
-                            <div id="es-venue-map-editor" data-venue-map-editor></div>
-                            <script type="application/json" id="es-venue-map-editor-json" {!! nonce_attr() !!}>{!! $venueMapEditorJson !!}</script>
-                        </div>
-                        @endif
-
-                        </div>
-                        @endif
-                        <!-- End Tab Content: Venue map -->
-
-                        <!-- Tab Content: Accommodation -->
-                        @if (\App\Services\Stay22Service::isEnabled())
-                        <x-form-row group="engagement" tab="accommodation" :title="__('messages.accommodation')" class="engagement-tab" />
-                        <div id="engagement-tab-accommodation" class="event-subrow-body engagement-tab-content" hidden>
-
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.stay22_help') }}</p>
-
-                        <div class="mb-6">
-                            <x-toggle name="stay22_enabled"
-                                label="{{ __('messages.stay22_enabled') }}"
-                                checked="{{ old('stay22_enabled', $role->stay22_enabled) }}"
-                                help="{{ __('messages.stay22_enabled_help', ['operator' => marketing_domain()]) }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('stay22_enabled')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="stay22_aid" :value="__('messages.stay22_aid')" />
-                            <x-text-input id="stay22_aid" name="stay22_aid" type="text"
-                                class="mt-1 block w-full font-mono text-sm"
-                                :value="old('stay22_aid', $role->stay22_aid)"
-                                placeholder="{{ __('messages.stay22_aid_placeholder') }}" />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                {{ __('messages.stay22_aid_help', ['operator' => marketing_domain()]) }}
-                            </p>
-                            <x-input-error class="mt-2" :messages="$errors->get('stay22_aid')" />
-
-                            {{-- Restates the consequence as a present-tense fact about THIS schedule
-                                 once the map is actually live. The toggle's own help text carries the
-                                 same disclosure, because an owner may never scroll this far. --}}
-                            @if ($role->stay22_enabled && ! \App\Services\Stay22Service::hasOwnAid($role) && \App\Services\Stay22Service::operatorAid())
-                            <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <span>{{ __('messages.stay22_no_own_aid_warning', ['operator' => marketing_domain()]) }}</span>
-                                </p>
-                            </div>
-                            @endif
-                        </div>
-
-                        </div>
-                        @endif
-                        </div>
-                        <!-- End Tab Content: Accommodation -->
-                    </div>
-                </div>
-
-                @if ($role->exists)
-                <button type="button" class="mobile-section-header" data-section="section-gift-cards">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                        </svg>
-                        <span class="section-nav-text">
-                            <span>{{ __('messages.gift_cards') }}</span>
-                            <span class="section-nav-summary" data-summary="section-gift-cards"><bdi></bdi></span>
-                        </span>
-                        <span class="section-nav-dot" data-dirty-dot="section-gift-cards" hidden></span>
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-gift-cards" class="section-content lg:mt-0">
-                    <div class="form-kit-col">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <span class="section-heading-name inline-flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                                </svg>
-                                {{ __('messages.gift_cards') }}
-                            </span>
-                        </h2>
-
-                        @if ($role->isPro())
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.gift_cards_settings_help') }}</p>
-
-                        @php $giftCardOwner = $role->user; @endphp
-
-                        @if (config('app.hosted') && ! $role->hasEmailSettings())
-                        <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                            <div class="flex items-start gap-2">
-                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                </svg>
-                                <div class="text-sm text-amber-800 dark:text-amber-400">
-                                    {{ __('messages.gift_cards_email_required') }}
-                                    <a href="#integration-tab-email" class="js-email-settings-link underline font-medium">{{ __('messages.email_settings') }}</a>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
-                        <div class="mb-6">
-                            <x-toggle name="gift_cards_enabled"
-                                label="{{ __('messages.enable_gift_cards') }}"
-                                checked="{{ old('gift_cards_enabled', $role->gift_cards_enabled) }}"
-                                help="{{ __('messages.enable_gift_cards_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('gift_cards_enabled')" />
-                        </div>
-
-                        {{-- Everything a gift card needs, shown once the switch is on: four live-looking
-                             settings used to sit under "Disabled". Hidden, not removed, so they are
-                             still posted and nothing stored is lost by switching off and on. --}}
-                        <div id="gift-card-details" @if (! old('gift_cards_enabled', $role->gift_cards_enabled)) hidden @endif>
-                        <div class="mb-6">
-                            <x-input-label :value="__('messages.gift_card_amounts')" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.gift_card_amounts_help') }}</p>
-                            {{-- Says the list was on the page, so taking off the last amount is saved. --}}
-                            <input type="hidden" name="gift_card_amounts_submitted" value="1">
-                            <div id="gift-card-amounts-items" class="space-y-2">
-                                @foreach (old('gift_card_amounts', $role->gift_card_amounts ?? []) as $amount)
-                                <div class="flex items-center gap-2" data-gift-card-amount-row>
-                                    <input type="number" name="gift_card_amounts[]" value="{{ $amount }}" min="0.01" step="0.01"
-                                        class="block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    <button type="button" data-remove-gift-card-amount
-                                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
-                                </div>
-                                @endforeach
-                            </div>
-                            <button type="button" id="add-gift-card-amount" class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                + {{ __('messages.add_amount') }}
-                            </button>
-                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_amounts')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_amounts.*')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="gift_card_currency_code" :value="__('messages.currency')" />
-                            @php
-                                $giftCardCurrencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
-                                $giftCardCurrencyDefault = old('gift_card_currency_code', $role->gift_card_currency_code
-                                    ?: ($role->events()->whereNotNull('ticket_currency_code')->orderByDesc('events.id')->value('ticket_currency_code') ?: platform_currency()));
-                            @endphp
-                            <select id="gift_card_currency_code" name="gift_card_currency_code"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                @foreach ($giftCardCurrencies as $currency)
-                                @if ($loop->index == 2)
-                                <option disabled>──────────</option>
-                                @endif
-                                <option value="{{ $currency->value }}" {{ $giftCardCurrencyDefault == $currency->value ? 'selected' : '' }}>
-                                    {{ $currency->value }} - {{ $currency->label }}
-                                </option>
-                                @endforeach
-                            </select>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_currency_help') }}</p>
-                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_currency_code')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="gift_card_valid_days" :value="__('messages.gift_card_valid_days')" />
-                            <input type="number" id="gift_card_valid_days" name="gift_card_valid_days" min="1" max="3650"
-                                value="{{ old('gift_card_valid_days', $role->gift_card_valid_days) }}" placeholder="365"
-                                class="mt-1 block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_valid_days_help') }}</p>
-                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_valid_days')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label :value="__('messages.payment_method')" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.gift_card_payment_method_help') }}</p>
-                            @php $giftCardMethod = old('gift_card_payment_method', $role->gift_card_payment_method ?: 'cash'); @endphp
-                            <div class="space-y-2">
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-                                    <input type="radio" name="gift_card_payment_method" value="cash" {{ $giftCardMethod === 'cash' ? 'checked' : '' }}
-                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.cash') }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.gift_card_cash_help') }}</div>
-                                    </div>
-                                </label>
-                                @if ($giftCardOwner && $giftCardOwner->canAcceptStripePayments())
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-                                    <input type="radio" name="gift_card_payment_method" value="stripe" {{ $giftCardMethod === 'stripe' ? 'checked' : '' }}
-                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Stripe{{ $giftCardOwner->stripe_completed_at && $giftCardOwner->stripe_company_name ? ' - '.$giftCardOwner->stripe_company_name : '' }}</div>
-                                    </div>
-                                </label>
-                                @endif
-                                @if ($giftCardOwner && $giftCardOwner->invoiceninja_api_key)
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-                                    <input type="radio" name="gift_card_payment_method" value="invoiceninja" {{ $giftCardMethod === 'invoiceninja' ? 'checked' : '' }}
-                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Invoice Ninja{{ $giftCardOwner->invoiceninja_company_name ? ' - '.$giftCardOwner->invoiceninja_company_name : '' }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.gift_card_invoiceninja_help') }}</div>
-                                    </div>
-                                </label>
-                                @endif
-                                @if ($giftCardOwner && $giftCardOwner->payment_url)
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-                                    <input type="radio" name="gift_card_payment_method" value="payment_url" {{ $giftCardMethod === 'payment_url' ? 'checked' : '' }}
-                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.payment_url') }} - {{ $giftCardOwner->paymentUrlHost() }}</div>
-                                    </div>
-                                </label>
-                                @endif
-                            </div>
-                            <div class="text-xs pt-1">
-                                <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
-                                    {{ __('messages.manage_payment_methods') }}
-                                </x-link>
-                            </div>
-                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_payment_method')" />
-                        </div>
-
-                        @if ($role->canSellGiftCards())
-                        <div class="mb-6">
-                            <x-input-label :value="__('messages.gift_card_share_link')" />
-                            <div class="mt-1 flex items-center gap-2">
-                                <input type="text" readonly id="gift-card-purchase-url"
-                                    value="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}"
-                                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm text-sm bg-gray-50 dark:bg-gray-800">
-                                <button type="button" id="copy-gift-card-url"
-                                    class="shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
-                                    {{ __('messages.copy') }}
-                                </button>
-                            </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_share_link_help') }}</p>
-                        </div>
-                        @endif
-                        </div>
-
-                        @else
-                        <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/docs/gift-cards')" :subdomain="$role->subdomain">
-                            <x-slot:icon>
-                                <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                                </svg>
-                            </x-slot:icon>
-                            {{ __('messages.upgrade_gift_cards') }}
-                        </x-upgrade-prompt>
-                        @endif
-                    </div>
-                </div>
-                <script {!! nonce_attr() !!}>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        var addButton = document.getElementById('add-gift-card-amount');
-                        var container = document.getElementById('gift-card-amounts-items');
-                        if (addButton && container) {
-                            addButton.addEventListener('click', function () {
-                                var row = document.createElement('div');
-                                row.className = 'flex items-center gap-2';
-                                row.setAttribute('data-gift-card-amount-row', '');
-                                row.innerHTML = '<input type="number" name="gift_card_amounts[]" min="0.01" step="0.01" class="block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">'
-                                    + '<button type="button" data-remove-gift-card-amount class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>';
-                                container.appendChild(row);
-                                row.querySelector('input').focus();
-                            });
-                            container.addEventListener('click', function (e) {
-                                var removeButton = e.target.closest('[data-remove-gift-card-amount]');
-                                if (removeButton) {
-                                    removeButton.closest('[data-gift-card-amount-row]').remove();
-                                }
-                            });
-                        }
-
-                        var copyButton = document.getElementById('copy-gift-card-url');
-                        var urlInput = document.getElementById('gift-card-purchase-url');
-                        if (copyButton && urlInput) {
-                            copyButton.addEventListener('click', function () {
-                                var done = function () {
-                                    var original = copyButton.textContent;
-                                    copyButton.textContent = @json(__('messages.copied'));
-                                    setTimeout(function () { copyButton.textContent = original; }, 2000);
-                                };
-                                if (navigator.clipboard && navigator.clipboard.writeText) {
-                                    navigator.clipboard.writeText(urlInput.value).then(done).catch(function () {});
-                                } else {
-                                    urlInput.select();
-                                    try { document.execCommand('copy'); done(); } catch (err) {}
-                                }
-                            });
-                        }
-
-                        document.querySelectorAll('.section-jump-link').forEach(function (link) {
-                            link.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                var target = document.querySelector('.section-nav-link[data-section="' + link.dataset.section + '"]');
-                                if (target) target.click();
-                            });
-                        });
-                    });
-                </script>
-                @endif
-
-                @if (! config('app.hosted'))
-                <button type="button" class="mobile-section-header" data-section="section-auto-import">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                        </svg>
-                        <span class="section-nav-text">
-                            <span>{{ __('messages.auto_import_settings') }}</span>
-                            <span class="section-nav-summary" data-summary="section-auto-import"><bdi></bdi></span>
-                        </span>
-                        <span class="section-nav-dot" data-dirty-dot="section-auto-import" hidden></span>
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-auto-import" class="section-content lg:mt-0">
-                    <div class="form-kit-col">
-
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <span class="section-heading-name inline-flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                                </svg>
-                                {{ __('messages.auto_import_settings') }}
-                            </span>
-                        </h2>
-
-                        <div class="mb-6">
-                            <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
-                                {{ __('messages.import_urls') }}
-                            </h3>
-                            {{-- Says both lists were on the page, so removing the last address or city is saved. --}}
-                            <input type="hidden" name="import_lists_submitted" value="1">
-                            <div id="import-urls-list">
-                                <div id="import-url-items">
-                                    @php $urls = $role->import_config['urls'] ?? []; @endphp
-                                    @foreach(old('import_urls', $urls) as $i => $url)
-                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div class="mb-4">
-                                                <x-input-label for="import_url_{{ $i }}" :value="__('messages.url')" />
-                                                <x-text-input name="import_urls[]" type="url" class="mt-1 block w-full" :value="$url" />
-                                            </div>
-                                            <div class="flex gap-4 items-center">
-                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <button type="button" data-action="add-import-url" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                    + {{ __('messages.add') }}
-                                </button>
-                            </div>
-                            <x-input-error class="mt-2" :messages="$errors->get('import_urls')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
-                                {{ __('messages.import_cities') }}
-                            </h3>
-                            <div id="import-cities-list">
-                                <div id="import-city-items">
-                                    @php $cities = $role->import_config['cities'] ?? []; @endphp
-                                    @foreach(old('import_cities', $cities) as $i => $city)
-                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div class="mb-4">
-                                                <x-input-label for="import_city_{{ $i }}" :value="__('messages.city')" />
-                                                <x-text-input name="import_cities[]" type="text" class="mt-1 block w-full" :value="$city" placeholder="{{ __('messages.placeholder_city') }}" />
-                                            </div>
-                                            <div class="flex gap-4 items-center">
-                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <button type="button" data-action="add-import-city" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                    + {{ __('messages.add') }}
-                                </button>
-                            </div>
-                            <x-input-error class="mt-2" :messages="$errors->get('import_cities')" />
-                        </div>
-
-                        @if ($role->exists)
-                        <div class="mb-6">
-                            <x-secondary-button id="test-import-btn" type="button">
-                                {{ __('messages.test_import') }}
-                            </x-secondary-button>
-                        </div>
-                        @endif
-                        
-                    </div>
-                </div>
-                @endif
 
                 <button type="button" class="mobile-section-header" data-section="section-integrations">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -5884,6 +5799,75 @@
 
                         @include('role.partials.calendar-publish-script')
 
+                        @if (! config('app.hosted'))
+                        <!-- Tab Content: Auto import -->
+                        <x-form-row group="integration" tab="auto-import" :title="__('messages.auto_import_settings')" class="integration-tab" />
+                        <div id="integration-tab-auto-import" class="event-subrow-body integration-tab-content" hidden>
+                        <div class="mb-6">
+                            <p class="event-group-label">{{ __('messages.import_urls') }}</p>
+                            {{-- Says both lists were on the page, so removing the last address or city is saved. --}}
+                            <input type="hidden" name="import_lists_submitted" value="1">
+                            <div id="import-urls-list">
+                                <div id="import-url-items">
+                                    @php $urls = $role->import_config['urls'] ?? []; @endphp
+                                    @foreach(old('import_urls', $urls) as $i => $url)
+                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <div class="mb-4">
+                                                <x-input-label for="import_url_{{ $i }}" :value="__('messages.url')" />
+                                                <x-text-input name="import_urls[]" type="url" class="mt-1 block w-full" :value="$url" />
+                                            </div>
+                                            <div class="flex gap-4 items-center">
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                    {{ __('messages.remove') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button type="button" data-action="add-import-url" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                    + {{ __('messages.add') }}
+                                </button>
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('import_urls')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="event-group-label">{{ __('messages.import_cities') }}</p>
+                            <div id="import-cities-list">
+                                <div id="import-city-items">
+                                    @php $cities = $role->import_config['cities'] ?? []; @endphp
+                                    @foreach(old('import_cities', $cities) as $i => $city)
+                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <div class="mb-4">
+                                                <x-input-label for="import_city_{{ $i }}" :value="__('messages.city')" />
+                                                <x-text-input name="import_cities[]" type="text" class="mt-1 block w-full" :value="$city" placeholder="{{ __('messages.placeholder_city') }}" />
+                                            </div>
+                                            <div class="flex gap-4 items-center">
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                    {{ __('messages.remove') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button type="button" data-action="add-import-city" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                    + {{ __('messages.add') }}
+                                </button>
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('import_cities')" />
+                        </div>
+
+                        @if ($role->exists)
+                        <div class="mb-6">
+                            <x-secondary-button id="test-import-btn" type="button">
+                                {{ __('messages.test_import') }}
+                            </x-secondary-button>
+                        </div>
+                        @endif
+                        </div>
+                        <!-- End Tab Content: Auto import -->
+                        @endif
+
                         {{-- Feeds from other sites: the way in to the Feeds tab, which a schedule
                              only shows once it has a feed. Nothing here is saved with the form,
                              so the row holds links and no fields, and its line is written here
@@ -5987,6 +5971,42 @@
 
 @include('partials.form-kit-script')
 @include('partials.form-save-bar-script', ['tabs' => $shellTabs])
+<script {!! nonce_attr() !!}>
+{{-- Addresses that named a tab or row of this form before its tabs were rearranged in 2026-10 (the
+     gallery notice, the venue map link, a preset's manage link, bookmarks): the address is
+     rewritten to where the thing lives now. At the top level, not on load, because the Help link
+     reads the address in its own DOMContentLoaded handler, which runs first; and on a link
+     followed within the page Help hears popstate, which the browser fires before hashchange, so
+     it is told again. The keys carry no hash sign on purpose. --}}
+(function () {
+    var moved = {
+        'section-gallery': 'page-tab-gallery',
+        'section-links': 'page-tab-videos',
+        'section-gift-cards': 'tickets-tab-gift-cards',
+        'settings-tab-tickets': 'tickets-tab-presets',
+        'section-auto-import': 'integration-tab-auto-import',
+        'engagement-tab-sponsors': 'page-tab-sponsors',
+        'engagement-tab-map': 'page-tab-map',
+        'engagement-tab-accommodation': 'page-tab-accommodation',
+    };
+    function rewrite() {
+        var id = (window.location.hash || '').replace(/^#/, '');
+        if (! Object.prototype.hasOwnProperty.call(moved, id) || ! window.history.replaceState) {
+            return false;
+        }
+        window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + '#' + moved[id]);
+
+        return true;
+    }
+    rewrite();
+    // Added before the form's own hashchange listener, so that one reads the new address.
+    window.addEventListener('hashchange', function () {
+        if (rewrite()) {
+            window.dispatchEvent(new PopStateEvent('popstate'));
+        }
+    });
+})();
+</script>
 <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
 
 @if ($role->exists && $galleryMode !== 'locked')
@@ -6018,7 +6038,10 @@
         knownIds: @json($galleryState['known']),
         onChange: function () {
             if (window._markFormDirty) { window._markFormDirty(); }
-            window.FormKit.markDirty('section-gallery');
+            window.FormKit.markDirty('section-page');
+            // The editor fires no input event, so its row's line is drawn again here: on the next
+            // tick, because this runs inside the store's own change and the tiles are redrawn after.
+            if (window.FormKit.refresh) { Vue.nextTick(function () { window.FormKit.refresh(); }); }
         },
     });
 
@@ -6027,6 +6050,8 @@
             return { galleryStore: store, galleryUnsavedLabel: @json(__('messages.gallery_unsaved_schedule')) };
         },
     }).component('gallery-editor', window.EsGallery.component).mount(mountEl);
+    // From here the tiles on the page are the count, none included (the row's line reads it).
+    mountEl.dataset.mounted = '1';
 
     // Photos still uploading would be missing from what this save commits, so the save waits for
     // them. In the capture phase, so it runs before the form's other submit listeners - the one
@@ -6056,9 +6081,10 @@
             // Some photos did not make it: saving now would leave them out without a word.
             if (store.failedCount() > 0) {
                 store.reportFailedBeforeSave();
-                var section = document.getElementById('section-gallery');
-                window.FormKit.showSection('section-gallery');
-                if (section) { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                var row = document.querySelector('button[aria-controls="page-tab-gallery"]');
+                window.FormKit.showSection('section-page');
+                window.FormKit.openRow('page', 'gallery');
+                if (row) { row.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
                 return;
             }
 
@@ -7281,6 +7307,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // the message was about: the tab (and the row) holding the first message wins. Then the
     // link's own hash, which may name a tab, a row or a field inside one. Then the first tab.
     function initializeSections() {
+        // Opening a tab or a row writes its id into the address, so what the link asked for is
+        // kept first, for the email row below (a refused save opens a tab too).
+        window.__formLandingHash = window.location.hash;
         const errorTabs = window.FormKit.errorSections();
         if (errorTabs.length) {
             window.FormKit.routeErrors();
@@ -7471,8 +7500,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Links written while Integrations was a strip of tabs, some of them in mail already sent:
     // Email was the tab that opened by itself, and "?tab=email" was added to some and never read.
     // Such a link, or one that arrives while the email settings are failing, opens the Email row.
+    // The address as the link gave it: a row opened on load (an old Auto import link) has already
+    // put its tab's id there, and is not to be taken over by the Email row.
     const emailFailing = @json($role->isEmailSettingsFailureActive());
-    if (window.location.hash === '#section-integrations' && (settingsParams.get('tab') === 'email' || emailFailing)) {
+    const landingHash = window.__formLandingHash !== undefined ? window.__formLandingHash : window.location.hash;
+    if (landingHash === '#section-integrations' && (settingsParams.get('tab') === 'email' || emailFailing)) {
         window.FormKit.openRow('integration', 'email');
     }
 
@@ -7491,14 +7523,68 @@ document.addEventListener('DOMContentLoaded', function() {
         window.__settingsFocusId = settingsFocus;
     }
 
-    // "Email settings" links from other tabs: the Integrations tab, with its Email row open.
-    document.querySelectorAll('.js-email-settings-link').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.FormKit.showSection('section-integrations');
-            window.FormKit.openRow('integration', 'email');
-        });
+    // A link inside the form to another tab or row: shown, opened, and brought into view, because
+    // showSection() never scrolls and on a phone the reader was left far below the tab it opened.
+    // A row is scrolled to; a tab to its header on a phone and to the top of the page otherwise.
+    function jumpTo(id) {
+        var target = document.getElementById(id);
+        if (! target || ! window.FormKit.openFromHash('#' + id)) {
+            return false;
+        }
+        var section = target.classList.contains('section-content') ? target : target.closest('.section-content');
+        var header = section ? document.querySelector('.mobile-section-header[data-section="' + section.id + '"]') : null;
+        var row = target.classList.contains('event-subrow-body')
+            ? document.querySelector('button[data-row-group][aria-controls="' + id + '"]')
+            : null;
+        var anchor = row || (header && header.offsetParent !== null ? header : null);
+        if (anchor) {
+            anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        // The address changed by replaceState, which the Help link does not hear: told, so it
+        // follows to the row the link opened.
+        window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + '#' + id);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+
+        return true;
+    }
+    document.addEventListener('click', function(e) {
+        var link = e.target.closest ? e.target.closest('[data-form-jump], .js-email-settings-link') : null;
+        // A click with a modifier, or not the main button, opens the address the browser's way.
+        if (! link || e.metaKey || e.ctrlKey || e.shiftKey || e.button) {
+            return;
+        }
+        e.preventDefault();
+        // "Email settings" links from other tabs: the Integrations tab, with its Email row open.
+        if (link.classList.contains('js-email-settings-link')) {
+            if (! jumpTo('integration-tab-email')) {
+                window.FormKit.showSection('section-integrations');
+            }
+
+            return;
+        }
+        jumpTo(link.getAttribute('data-form-jump'));
     });
+
+    // Mailing list and Notifications each say how the other's switch stands: turning off the
+    // sign-up panel takes it off the pages and does not stop the emails to the people already on the list.
+    function syncListNotes() {
+        [['mailing-list-note', 'announce_new_events'], ['announce-list-note', 'show_subscribe_panel']].forEach(function(pair) {
+            var note = document.getElementById(pair[0]);
+            var text = note ? note.querySelector('[data-note-text]') : null;
+            if (text) {
+                text.textContent = window.FormKit.on(pair[1]) ? note.dataset.on : note.dataset.off;
+            }
+        });
+    }
+    document.addEventListener('change', function(e) {
+        if (e.target && (e.target.name === 'announce_new_events' || e.target.name === 'show_subscribe_panel')) {
+            syncListNotes();
+        }
+    });
+    // Once at load as well: a browser that restores a form on reload ticks a switch silently.
+    syncListNotes();
 });
 
 // The new shell: what each tab and row holds, said in one line; which tabs have unsaved changes;
@@ -7577,7 +7663,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     kit.summary('details:localization', function() {
         var translated = kit.on('translation_enabled') ? kit.chosen('#translation_language_code') : '';
-        return kit.join([kit.chosen('#language_code') + (translated ? ' + ' + translated : ''), kit.chosen('#timezone'), kit.on('use_24_hour_time') ? '24h' : '12h']);
+        // The first day of the week only when it is not the usual Sunday.
+        var weekStart = kit.value('#first_day_of_week') && kit.value('#first_day_of_week') !== '0' ? kit.chosen('#first_day_of_week') : '';
+        return kit.join([kit.chosen('#language_code') + (translated ? ' + ' + translated : ''), kit.chosen('#timezone'), kit.on('use_24_hour_time') ? '24h' : '12h', weekStart]);
+    });
+    // The message's first line as it reads, without its Markdown; off (or not on Pro, where the
+    // page does not show it) says so.
+    kit.summary('details:announcement', function() {
+        if (! words.banner_is_pro || ! kit.on('banner_enabled')) {
+            return { text: words.disabled, empty: true };
+        }
+        var message = kit.value('#banner_message').split('\n')[0]
+            .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+            .replace(/[*_`~#>]+/g, '')
+            .trim();
+        return message ? message.slice(0, 80) : words.enabled;
     });
     kit.summary('details:contact', function() {
         var phone = byId('role_phone') ? String(byId('role_phone').value || '').trim() : '';
@@ -7623,7 +7723,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // The animation is named under Calendar too: it plays on a phone, and whenever a visitor
     // switches to the list.
     kit.summary('style:animation', function() {
-        return kit.join([radioLabel('event_layout'), kit.radio('list_animation') === 'none' ? '' : radioLabel('list_animation')]);
+        return kit.join([radioLabel('event_layout'), kit.on('hide_past_events') ? words.hide_past_events : '', kit.radio('list_animation') === 'none' ? '' : radioLabel('list_animation')]);
     });
     kit.summary('style:css', function() {
         var css = document.querySelector('#custom_css, #custom_css_stored');
@@ -7634,15 +7734,41 @@ document.addEventListener('DOMContentLoaded', function() {
     // the chips are there.
     document.addEventListener('style:ready', function() { kit.refresh(); });
 
-    // Gallery, Videos and Links
-    kit.summary('section-gallery', function() {
-        var count = all('#gallery-editor-app .es-gallery-tile').length || words.gallery_count;
+    // Page content. The tab says what it holds, as Settings does, in the order of its rows: the
+    // only place the words Gallery and Sponsors are in the sidebar now that they are rows. Names,
+    // not counts (a count would need a plural in twelve languages).
+    function galleryCount() {
+        var editor = byId('gallery-editor-app');
+        var tiles = all('#gallery-editor-app .es-gallery-tile').length;
+        return editor && editor.dataset.mounted ? tiles : (tiles || words.gallery_count);
+    }
+    kit.summary('page:videos', function() {
+        // By name, at most three: a count would need a plural in every language, and a phone
+        // shows a row's whole line.
+        var names = jsonNames('youtube_links');
+        if (! names.length) {
+            return { text: words.none, empty: true };
+        }
+        return names.slice(0, 3).join(', ') + (names.length > 3 ? ', …' : '');
+    });
+    kit.summary('page:gallery', function() {
+        // Locked: the plain state, not an invitation to add photos the plan does not allow.
+        if (! byId('gallery-editor-app')) {
+            return { text: words.none, empty: true };
+        }
+        var count = galleryCount();
         return count ? String(count) : { text: words.gallery_prompt, empty: true };
     });
-    kit.summary('section-links', function() {
-        // By name: a count would need a plural in every language.
-        var names = jsonNames('youtube_links').concat(jsonNames('social_links'));
-        return names.length ? names.join(', ') : { text: words.none, empty: true };
+    kit.summary('section-page', function() {
+        var held = [
+            words.social_links,
+            words.videos,
+            words.gallery,
+            words.sponsors,
+            byId('page-tab-map') ? words.venue_map : '',
+            byId('page-tab-accommodation') ? words.accommodation : '',
+        ].filter(Boolean);
+        return { text: held.join(', '), empty: true };
     });
 
     // Customize
@@ -7693,28 +7819,61 @@ document.addEventListener('DOMContentLoaded', function() {
     kit.summary('settings:advanced', function() {
         return labelsIn(byId('settings-tab-advanced'));
     });
+    // What a new event starts as: its visibility, and its category when it has one.
+    kit.summary('settings:events', function() {
+        var category = kit.value('#default_category_id') ? kit.chosen('#default_category_id') : '';
+        return kit.join([kit.chosen('#default_event_visibility'), category]);
+    });
+
+    // Tickets
     // The presets by name, the default marked, as the island draws them; the server's words until
     // it has (TicketPresetsEditor.vue mounts on the list).
-    kit.summary('settings:tickets', function() {
+    function presetNames() {
         var host = byId('ticket-preset-items');
         if (! host) {
-            return '';
+            return [];
         }
         if (! host.dataset.mounted) {
-            return host.dataset.summary ? host.dataset.summary : { text: words.none, empty: true };
+            return host.dataset.summary ? [host.dataset.summary] : [];
         }
-        var names = Array.prototype.map.call(host.querySelectorAll(':scope > [data-list-row]'), function(row) {
+        return Array.prototype.map.call(host.querySelectorAll(':scope > [data-list-row]'), function(row) {
             var named = row.querySelector('[data-row-name]');
             var name = named ? named.textContent.replace(/\s+/g, ' ').trim() : '';
             return name && row.querySelector('.event-chip') ? name + ' (' + words.preset_default + ')' : name;
         }).filter(Boolean);
+    }
+    kit.summary('tickets:presets', function() {
+        var host = byId('ticket-preset-items');
+        if (! host) {
+            return '';
+        }
+        var names = presetNames();
         if (! names.length) {
             return { text: words.none, empty: true };
+        }
+        if (! host.dataset.mounted) {
+            return names[0];
         }
         // The owner's toggle as it stands; anyone else has no toggle, and reads what is saved.
         var team = byId('ticket_presets_team');
         var teamOn = team ? team.checked : host.dataset.teamOn === '1';
         return names.join(', ') + (teamOn ? ' · ' + words.preset_team : '');
+    });
+    kit.summary('tickets:gift-cards', function() {
+        if (! kit.on('gift_cards_enabled')) {
+            return { text: words.disabled, empty: true };
+        }
+        return kit.join([words.enabled, values('input[name="gift_card_amounts[]"]').join(', ')]);
+    });
+    // Never "None" beside the word Tickets: with nothing set, what the tab holds.
+    kit.summary('section-tickets', function() {
+        var names = presetNames();
+        if (names.length && byId('ticket-preset-items') && ! byId('ticket-preset-items').dataset.mounted) {
+            // The server's line already ends with the team note; the tab keeps to the names.
+            names = [names[0].split(' · ')[0]];
+        }
+        var held = names.concat(kit.on('gift_cards_enabled') ? [words.gift_cards] : []);
+        return held.length ? held.join(', ') : { text: [words.ticket_presets, words.gift_cards].join(', '), empty: true };
     });
     kit.summary('integration:advanced', function() {
         return labelsIn(byId('integration-tab-advanced'));
@@ -7735,7 +7894,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // The list is drawn only on a plan that can edit it; a schedule whose plan lapsed still has
     // its stored sponsors on its pages, so the row counts those.
     function sponsorCount() {
-        return byId('sponsors-list') ? all('#sponsors-list .sponsor-item').length : {{ (int) $storedSponsorCount }};
+        return byId('sponsors-list') ? all('#sponsors-list .sponsor-item').length : {{ (int) ($storedSponsorCount ?? 0) }};
     }
     // Off dims the list and says so beside the switch: the sponsors are kept, only not shown.
     function sponsorsShown() {
@@ -7788,49 +7947,50 @@ document.addEventListener('DOMContentLoaded', function() {
     kit.summary('engagement:carpool', function() {
         return kit.on('carpool_enabled') ? words.enabled : { text: words.disabled, empty: true };
     });
-    kit.summary('engagement:sponsors', function() {
+    kit.summary('page:sponsors', function() {
         var count = sponsorCount();
         if (! count) {
             return { text: words.none, empty: true };
         }
         return sponsorsShown() ? String(count) : kit.join([String(count), words.sponsors_hidden]);
     });
-    kit.summary('engagement:map', function() {
+    kit.summary('page:map', function() {
         if (! kit.on('show_venues_map')) {
             return { text: words.disabled, empty: true };
         }
         return kit.on('venues_map_open') ? kit.join([words.enabled, words.venue_map_starts_open]) : words.enabled;
     });
-    kit.summary('engagement:accommodation', function() {
+    kit.summary('page:accommodation', function() {
         return kit.on('stay22_enabled') ? words.enabled : { text: words.disabled, empty: true };
+    });
+    // The two places a visitor leaves an address, by the names of the switches that are on.
+    kit.summary('engagement:mailing-list', function() {
+        var pane = byId('engagement-tab-mailing-list');
+        return pane ? list(onLabels(pane), words.disabled) : '';
     });
     kit.summary('section-engagement', function() {
         var on = [
             kit.on('accept_requests') ? words.requests : '',
+            kit.on('show_subscribe_panel') || kit.on('show_event_interest') ? words.mailing_list : '',
             fanContent().length ? words.fan_content : '',
             kit.on('feedback_enabled') ? words.feedback : '',
             kit.on('carpool_enabled') ? words.carpool : '',
-            sponsorCount() ? words.sponsors : '',
-            kit.on('show_venues_map') ? words.venue_map : '',
         ].filter(Boolean);
         return on.length ? on.join(', ') : { text: words.disabled, empty: true };
     });
 
-    // Gift cards, sources, auto import
-    kit.summary('section-gift-cards', function() {
-        if (! kit.on('gift_cards_enabled')) {
-            return { text: words.disabled, empty: true };
-        }
-        return kit.join([words.enabled, values('input[name="gift_card_amounts[]"]').join(', ')]);
-    });
+    // Sources, auto import
     kit.summary('section-sources', function() {
         var names = values('#source-schedule-items input[type="text"]');
         return names.length ? names.join(', ') : { text: words.none, empty: true };
     });
-    kit.summary('section-auto-import', function() {
+    function autoImports() {
+        // By prefix: a row added on the page is named import_urls[new_0], not import_urls[].
         var urls = values('input[name^="import_urls["]').map(function(url) { return url.replace(/^https?:\/\//, ''); });
-        var cities = values('input[name^="import_cities["]');
-        return urls.concat(cities).join(', ') || { text: words.none, empty: true };
+        return urls.concat(values('input[name^="import_cities["]'));
+    }
+    kit.summary('integration:auto-import', function() {
+        return autoImports().join(', ') || { text: words.none, empty: true };
     });
 
     // Integrations
@@ -7864,6 +8024,7 @@ document.addEventListener('DOMContentLoaded', function() {
             words.google_connected ? 'Google' : '',
             words.microsoft_connected ? 'Outlook' : '',
             words.caldav_connected ? 'CalDAV' : '',
+            byId('integration-tab-auto-import') && autoImports().length ? words.auto_import : '',
         ].filter(Boolean);
         if (words.email_failing) {
             return { text: words.email_failing, warn: true };
@@ -7981,15 +8142,15 @@ document.addEventListener('DOMContentLoaded', function() {
         ['section-subschedules', '#event-custom-fields-container'],
         ['section-subschedules', '#event-categories-container'],
         ['section-subschedules', '#custom-labels-list'],
-        ['section-engagement', '#sponsors-list'],
+        ['section-page', '#sponsors-list'],
         ['section-engagement', '#approved-subdomains-items'],
         ['section-sources', '#source-schedule-items'],
-        ['section-gift-cards', '#gift-card-amounts-items'],
-        ['section-settings', '#ticket-preset-items'],
-        ['section-auto-import', '#import-url-items'],
-        ['section-auto-import', '#import-city-items'],
-        ['section-links', '#links-tab-youtube_videos'],
-        ['section-links', '#links-tab-social_links'],
+        ['section-tickets', '#gift-card-amounts-items'],
+        ['section-tickets', '#ticket-preset-items'],
+        ['section-integrations', '#import-url-items'],
+        ['section-integrations', '#import-city-items'],
+        ['section-page', '#links-tab-youtube_videos'],
+        ['section-page', '#links-tab-social_links'],
     ].map(function(entry) {
         var element = document.querySelector(entry[1]);
         return element ? { section: entry[0], element: element, saved: [] } : null;
@@ -8026,7 +8187,8 @@ document.addEventListener('DOMContentLoaded', function() {
             lists.forEach(function(entry) {
                 var watch = function() {
                     // The two link lists are redrawn whole on every change, so a redraw is not a removal.
-                    entry.saved = entry.section === 'section-links' ? [] : Array.prototype.slice.call(entry.element.children).map(function(row) {
+                    var linkList = entry.element.classList.contains('links-tab-content');
+                    entry.saved = linkList ? [] : Array.prototype.slice.call(entry.element.children).map(function(row) {
                         return { row: row, name: rowName(row) };
                     });
                     new MutationObserver(function() {
@@ -8034,9 +8196,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (window._markFormDirty) { window._markFormDirty(); }
                         kit.refresh();
                         removals();
-                    }).observe(entry.element, { childList: true, subtree: entry.section === 'section-links' });
+                    }).observe(entry.element, { childList: true, subtree: linkList });
                 };
-                // A list a Vue island draws (data-island, Settings > Ticket presets) is counted once
+                // A list a Vue island draws (data-island, Tickets > Ticket presets) is counted once
                 // it has drawn its rows: drawn late, they read as a change nobody made, and a row
                 // removed later was never in the snapshot to be announced.
                 if (entry.element.hasAttribute('data-island') && ! entry.element.dataset.mounted) {
@@ -9968,7 +10130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Videos & Links section ---
+    // --- Social links and Videos (Page content) ---
     var addLinkModal = document.getElementById('add_link_modal');
     if (addLinkModal) {
         // Link data state (parsed from hidden inputs)

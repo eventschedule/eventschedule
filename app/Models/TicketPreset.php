@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * A named ticket setup on a schedule (Edit schedule > Settings > Ticket presets) that an event's
+ * A named ticket setup on a schedule (Edit schedule > Tickets > Ticket presets) that an event's
  * Tickets tab starts from (issue #130). Read and written through App\Services\TicketPresets, which
  * also knows who a schedule's presets bind.
  *

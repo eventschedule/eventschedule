@@ -111,16 +111,16 @@ class Stay22SettingsTest extends TestCase
 
     // ---------------------------------------------------------------- schedule fields
 
-    public function test_the_engagement_tab_renders_only_when_the_master_switch_is_on(): void
+    public function test_the_page_content_row_renders_only_when_the_master_switch_is_on(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue');
         $url = route('role.edit', ['subdomain' => $role->subdomain]);
 
         // Assert on the markup, not the bare id: HelpUtils' anchor map ships
-        // 'engagement-tab-accommodation' into every admin page regardless of this gate.
+        // 'page-tab-accommodation' into every admin page regardless of this gate.
         $this->actingAs($owner)->get($url)->assertOk()
-            ->assertSee('id="engagement-tab-accommodation"', false)
+            ->assertSee('id="page-tab-accommodation"', false)
             ->assertSee('data-tab="accommodation"', false)
             ->assertSee('name="stay22_enabled"', false)
             ->assertSee('name="stay22_aid"', false);
@@ -128,7 +128,7 @@ class Stay22SettingsTest extends TestCase
         config(['stay22.enabled' => false]);
 
         $this->actingAs($owner)->get($url)->assertOk()
-            ->assertDontSee('id="engagement-tab-accommodation"', false)
+            ->assertDontSee('id="page-tab-accommodation"', false)
             ->assertDontSee('data-tab="accommodation"', false)
             ->assertDontSee('name="stay22_enabled"', false)
             ->assertDontSee('name="stay22_aid"', false);

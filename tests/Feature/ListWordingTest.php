@@ -270,6 +270,6 @@ class ListWordingTest extends TestCase
         $save(['list_wording_submitted' => '1', 'list_wording' => 'caption', 'list_template' => ''])->assertSessionHasNoErrors();
         $page = $this->actingAs($owner)->get(route('event.generate_graphic', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
         $this->assertStringContainsString(e(__('messages.list_wording_follows')), $page);
-        $this->assertStringContainsString('#settings-tab-advanced', $page);
+        $this->assertStringContainsString('#style-content-animation', $page);
     }
 }

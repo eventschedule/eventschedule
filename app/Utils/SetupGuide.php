@@ -766,6 +766,9 @@ class SetupGuide
                 'schedule' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']),
                 'embed' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']).'#embed',
                 'style' => route('role.edit', ['subdomain' => $subdomain]).'#section-style',
+                // The Events row of Style, where the animation is chosen: the tab alone opened on
+                // its rows closed.
+                'animate' => route('role.edit', ['subdomain' => $subdomain]).'#style-content-animation',
                 'repeat' => $owned
                     ? route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($owned->id)]).'#section-recurring'
                     : null,

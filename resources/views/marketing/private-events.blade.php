@@ -902,7 +902,7 @@
                         Decide once <span class="es-vault-lit">which door is the default.</span>
                     </h2>
                     <p class="mt-5 text-lg es-vault-band-soft" data-reveal style="--reveal-delay: 0.15s;">
-                        Your schedule's Advanced settings hold the state every new event starts in. Set it to Draft and nothing goes out by accident.
+                        The New events row of your schedule's Settings holds the state every new event starts in. Set it to Draft and nothing goes out by accident.
                     </p>
                 </div>
 

@@ -560,19 +560,19 @@ class VenueMapJourneyTest extends DuskTestCase
                 ->waitUntil('window.FormKit !== undefined && window.FormSaveBar !== undefined && window.FormKit.isArmed()', 15)
                 ->pause(100);
 
-            $browser->script('document.querySelector(\'a[data-section="section-engagement"]\').click();');
-            $browser->waitUntil('document.getElementById("section-engagement").style.display === "block"', 10);
+            $browser->script('document.querySelector(\'a[data-section="section-page"]\').click();');
+            $browser->waitUntil('document.getElementById("section-page").style.display === "block"', 10);
 
-            $this->assertSame('Disabled', trim($this->js($browser, 'document.querySelector(\'[data-summary="engagement:map"]\').textContent')));
+            $this->assertSame('Disabled', trim($this->js($browser, 'document.querySelector(\'[data-summary="page:map"]\').textContent')));
 
-            $browser->script('document.querySelector(\'button.engagement-tab[data-tab="map"]\').scrollIntoView({ block: "center" });');
-            $browser->pause(150)->click('button.engagement-tab[data-tab="map"]')->pause(200);
-            $this->assertTrue((bool) $this->js($browser, '! document.getElementById("engagement-tab-map").hidden'));
+            $browser->script('document.querySelector(\'button.page-tab[data-tab="map"]\').scrollIntoView({ block: "center" });');
+            $browser->pause(150)->click('button.page-tab[data-tab="map"]')->pause(200);
+            $this->assertTrue((bool) $this->js($browser, '! document.getElementById("page-tab-map").hidden'));
 
             // The switch is a styled checkbox: its label is what a person presses.
             $browser->script('document.querySelector(\'label[for="show_venues_map"]\').click();');
             $browser->pause(200);
-            $this->assertSame('Enabled', trim($this->js($browser, 'document.querySelector(\'[data-summary="engagement:map"]\').textContent')));
+            $this->assertSame('Enabled', trim($this->js($browser, 'document.querySelector(\'[data-summary="page:map"]\').textContent')));
 
             $browser->script('window._skipUnsavedWarning = true; document.getElementById("edit-form").requestSubmit();');
             $browser->waitForLocation('/mapjourney/schedule', 30)
@@ -610,10 +610,10 @@ class VenueMapJourneyTest extends DuskTestCase
                 ->waitUntil('window.FormKit !== undefined && window.FormSaveBar !== undefined && window.FormKit.isArmed()', 15)
                 ->pause(100);
 
-            $browser->script('document.querySelector(\'a[data-section="section-engagement"]\').click();');
-            $browser->waitUntil('document.getElementById("section-engagement").style.display === "block"', 10);
-            $browser->script('document.querySelector(\'button.engagement-tab[data-tab="map"]\').scrollIntoView({ block: "center" });');
-            $browser->pause(150)->click('button.engagement-tab[data-tab="map"]')
+            $browser->script('document.querySelector(\'a[data-section="section-page"]\').click();');
+            $browser->waitUntil('document.getElementById("section-page").style.display === "block"', 10);
+            $browser->script('document.querySelector(\'button.page-tab[data-tab="map"]\').scrollIntoView({ block: "center" });');
+            $browser->pause(150)->click('button.page-tab[data-tab="map"]')
                 ->waitFor($row($loft), 10);
 
             $this->assertSame(4, $this->js($browser, 'document.querySelectorAll("#es-venue-map-editor li").length'));

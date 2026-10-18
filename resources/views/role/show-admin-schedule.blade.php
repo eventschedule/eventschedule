@@ -267,7 +267,7 @@ document.addEventListener('click', function (e) {
         </div>
 
         <div class="mt-4 flex flex-wrap gap-3" data-map-notice-actions hidden>
-            <x-secondary-link href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#engagement-tab-map">
+            <x-secondary-link href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#page-tab-map">
                 {{ __('messages.venue_map_review') }}
             </x-secondary-link>
             @if ($venueMapGuestUrl)

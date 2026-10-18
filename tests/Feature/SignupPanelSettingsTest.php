@@ -344,7 +344,7 @@ class SignupPanelSettingsTest extends TestCase
         $this->actingAs($owner)->get($editUrl)
             ->assertOk()
             ->assertSee(__('messages.event_interest_signups_off'))
-            ->assertSee(route('role.edit', ['subdomain' => $role->subdomain]).'#section-settings', false);
+            ->assertSee(route('role.edit', ['subdomain' => $role->subdomain]).'#engagement-tab-mailing-list', false);
 
         $role->forceFill(['show_event_interest' => true])->save();
 

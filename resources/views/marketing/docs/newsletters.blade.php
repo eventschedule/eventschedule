@@ -240,7 +240,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sponsors</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your <a href="{{ route('marketing.docs.creating_schedules') }}#engagement" class="doc-link">sponsor logos</a>, under the section title you set on the schedule. The block shows them even while the sponsors section is switched off on your pages: a block is something you placed in this newsletter.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your <a href="{{ route('marketing.docs.creating_schedules') }}#sponsors" class="doc-link">sponsor logos</a>, under the section title you set on the schedule. The block shows them even while the sponsors section is switched off on your pages: a block is something you placed in this newsletter.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Sponsor Source (from your schedule settings, or from the first event in the newsletter)</p>
             </div>
             <div class="doc-field">
@@ -444,7 +444,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The sign-up panel</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A short form on your schedule page and on each event page. Signing up here sends a confirmation email, and the address joins your audience only once that link is clicked. It is on unless you turn off <strong>Show Sign-Up Panel</strong> in the <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Advanced</a> row of the schedule's Settings tab, and your sign-up link opens it either way.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A short form on your schedule page and on each event page. Signing up here sends a confirmation email, and the address joins your audience only once that link is clicked. It is on unless you turn off <strong>Show Sign-Up Panel</strong> in the <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-mailing-list" class="doc-link">Mailing list</a> row of the schedule's Engagement tab, and your sign-up link opens it either way.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">At checkout</h4>

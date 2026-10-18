@@ -363,12 +363,18 @@ class GenerateDocScreenshots extends Command
             'creating-schedules' => [
                 ['id' => 'creating-schedules--section-details', 'route' => '/simpsons/edit', 'section' => 'section-details'],
                 ['id' => 'creating-schedules--section-address', 'route' => $venueRole ? '/demo-moestavern/edit' : null, 'section' => 'section-address'],
+                // The row scripts below scroll a row to the top and then 90px more: the schedule form
+                // already keeps a scrolled-to row 5rem below its sticky bar (scroll-margin-top in
+                // role/edit), so the row lands about 170px down, under its tab's previous row.
                 ['id' => 'creating-schedules--section-contact-info', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-details\"]').click(); var row = document.querySelector('.details-tab[data-tab=\"contact\"]'); row.click(); row.scrollIntoView({ block: 'start' }); window.scrollBy(0, -90);"],
+                ['id' => 'creating-schedules--section-page', 'route' => '/simpsons/edit', 'section' => 'section-page'],
                 ['id' => 'creating-schedules--section-subschedules', 'route' => '/simpsons/edit', 'section' => 'section-subschedules'],
                 ['id' => 'creating-schedules--section-settings', 'route' => '/simpsons/edit', 'section' => 'section-settings'],
                 ['id' => 'creating-schedules--section-engagement', 'route' => '/simpsons/edit', 'section' => 'section-engagement'],
+                ['id' => 'creating-schedules--section-tickets', 'route' => '/simpsons/edit', 'section' => 'section-tickets'],
                 ['id' => 'creating-schedules--section-sources', 'route' => '/simpsons/edit', 'section' => 'section-sources'],
-                ['id' => 'creating-schedules--section-auto-import', 'route' => '/simpsons/edit', 'section' => 'section-auto-import'],
+                // Auto import is a row of Integrations (selfhost, which is how this command runs).
+                ['id' => 'creating-schedules--section-auto-import', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-integrations\"]').click(); var row = document.querySelector('.integration-tab[data-tab=\"auto-import\"]'); if (row) { row.click(); row.scrollIntoView({ block: 'start' }); window.scrollBy(0, -90); }"],
                 ['id' => 'creating-schedules--section-integrations', 'route' => '/simpsons/edit', 'section' => 'section-integrations'],
                 // No picture of the Email Settings row: it exists only on a hosted install, and this
                 // command's server runs with IS_HOSTED=false. The entry that used to be here clicked
@@ -406,7 +412,8 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'tickets--checkin', 'route' => $checkinRoute, 'pause' => 2500],
             ],
             'gift-cards' => [
-                ['id' => 'gift-cards--settings', 'route' => $venueRole ? '/demo-moestavern/edit' : null, 'section' => 'section-gift-cards'],
+                // Gift cards is a row of the Tickets tab: the tab alone shows both rows closed.
+                ['id' => 'gift-cards--settings', 'route' => $venueRole ? '/demo-moestavern/edit' : null, 'script' => "document.querySelector('a[data-section=\"section-tickets\"]').click(); var row = document.querySelector('.tickets-tab[data-tab=\"gift-cards\"]'); row.click(); row.scrollIntoView({ block: 'start' }); window.scrollBy(0, -90);"],
                 ['id' => 'gift-cards--sales-tab', 'route' => '/sales?tab=gift-cards'],
             ],
             // Three appointment types are made for the pictures and removed (see handle()).

@@ -14,7 +14,9 @@
         <x-doc-nav-link href="#header-images">Header Image</x-doc-nav-link>
         <x-doc-nav-link href="#backgrounds">Background</x-doc-nav-link>
         <x-doc-nav-link href="#event-layout">Default Layout</x-doc-nav-link>
+        <x-doc-nav-link href="#hide-past-events">Hide Past Events</x-doc-nav-link>
         <x-doc-nav-link href="#list-animation">Event Animation</x-doc-nav-link>
+        <x-doc-nav-link href="#list-wording">Event List Wording</x-doc-nav-link>
         <x-doc-nav-link href="#custom-css">Custom CSS</x-doc-nav-link>
         <x-doc-nav-link href="#hiding-sections">Hiding Sections</x-doc-nav-link>
         <x-doc-nav-link href="#live-preview">Live Preview</x-doc-nav-link>
@@ -40,7 +42,7 @@
             <li>Click <strong class="text-gray-900 dark:text-white">Save</strong>, in the bar at the bottom of the page. Nothing is applied to your public page until you do.</li>
         </ol>
 
-        <x-doc-screenshot id="schedule-styling--section-style" alt="The Style section of the schedule form: Square Profile Image, Accent Color and Font Family, the Header, Background, Events and Custom CSS rows under them, and the Preview of the page beside them" loading="eager" />
+        <x-doc-screenshot id="schedule-styling--section-style" alt="The Style section of the schedule form: Square Profile Image, Accent Color and Font Family, with the Preview of the page beside them" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The Style section opens on its branding fields, with four rows under them that open in place. Each row says its current choice, so most never need opening. The rows follow your page from top to bottom, and this guide follows the rows:</p>
         <div class="doc-table-wrap">
@@ -66,7 +68,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Events</span></td>
-                        <td><a href="#event-layout" class="doc-link">Default Layout</a>, and <a href="#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll your schedule</td>
+                        <td><a href="#event-layout" class="doc-link">Default Layout</a>, <a href="#hide-past-events" class="doc-link">Hide Past Events</a>, <a href="#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll your schedule, and <a href="#list-wording" class="doc-link">how each event is worded</a> on your list</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Custom CSS</span></td>
@@ -297,6 +299,17 @@
         </div>
     </section>
 
+    <!-- Hide Past Events -->
+    <section id="hide-past-events" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Hide Past Events
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300">Under Default Layout in the same <strong class="text-gray-900 dark:text-white">Events</strong> row, <strong class="text-gray-900 dark:text-white">Hide Past Events</strong> keeps past events off your public schedule, so visitors only ever see what is still to come. It is off until you turn it on, it is free on every plan, and while it is on the closed row says so. Your own admin views are unaffected, so nothing is lost: the events are still there when you need them.</p>
+    </section>
+
     <!-- Event Animation -->
     <section id="list-animation" class="doc-section">
         <h2 class="doc-heading">
@@ -305,7 +318,7 @@
             </svg>
             Event Animation
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Event animation</strong> setting, under Default Layout in the <strong class="text-gray-900 dark:text-white">Events</strong> row of the Style section, brings your events to life as visitors scroll your schedule: each event card animates into place as it comes into view, then its details follow one after another: the title, the date (which flips down like a tear-off calendar page), the venue, the price and the performers. The first screen plays as an entrance when someone opens your link. It is off (<strong class="text-gray-900 dark:text-white">None</strong>) until you pick a style, and it is available on every plan.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Event animation</strong> setting, under Hide Past Events in the <strong class="text-gray-900 dark:text-white">Events</strong> row of the Style section, brings your events to life as visitors scroll your schedule: each event card animates into place as it comes into view, then its details follow one after another: the title, the date (which flips down like a tear-off calendar page), the venue, the price and the performers. The first screen plays as an entrance when someone opens your link. It is off (<strong class="text-gray-900 dark:text-white">None</strong>) until you pick a style, and it is available on every plan.</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -366,6 +379,18 @@
         </div>
     </section>
 
+    <!-- Event List Wording -->
+    <section id="list-wording" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+            </svg>
+            Event List Wording
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The last setting of the <strong class="text-gray-900 dark:text-white">Events</strong> row, under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Events &rarr; Event list wording</strong>, decides how each event is worded on your schedule's list, from three choices. <strong class="text-gray-900 dark:text-white">Standard</strong> is the list's own card, and what every schedule starts with. <strong class="text-gray-900 dark:text-white">Same as the Events graphic caption</strong> words each card the way your <a href="{{ route('marketing.docs.event_graphics') }}#text-template" class="doc-link">caption</a> does, so the list says what you post to WhatsApp, and follows the caption when you change it. <strong class="text-gray-900 dark:text-white">My own wording</strong> is a template for the list alone, written with the same <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="doc-link">variables</a>; it starts from your caption.</p>
+        <p class="text-gray-600 dark:text-gray-300">The line with <code class="doc-inline-code">{event_name}</code> becomes the card's title and the next three lines go under it. The list keeps its day headings, each card's time, the price and Sold out labels and the picture, so the date, time, price and link variables are left out on the list, together with the words around them (<code class="doc-inline-code">🕗 {time} | 📍 {venue}</code> reads <em>📍 Blue Room</em>), and so is any line above the title. A custom field shows only where it is set to show on the event page. <code class="doc-inline-code">*bold*</code>, <code class="doc-inline-code">_italic_</code> and <code class="doc-inline-code">~strike~</code> work as they do in WhatsApp. A preview under the field shows your next three events before you save. Visitors who read your schedule in its other language see the standard cards, because your own words cannot be translated. Free on every plan.</p>
+    </section>
+
     <!-- Custom CSS -->
     <section id="custom-css" class="doc-section">
         <h2 class="doc-heading">
@@ -410,7 +435,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Two panels have their own switch</div>
-            <p>The <strong>&ldquo;Notify me when tickets go on sale&rdquo;</strong> card is off unless you turn it on, and the <strong>Stay up to date</strong> sign-up panel can be turned off. Both switches are under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a> and work on every plan, so neither needs CSS.</p>
+            <p>The <strong>&ldquo;Notify me when tickets go on sale&rdquo;</strong> card is off unless you turn it on, and the <strong>Stay up to date</strong> sign-up panel can be turned off. Both switches are in the <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-mailing-list" class="doc-link">Mailing list</a> row of the schedule form's Engagement section and work on every plan, so neither needs CSS.</p>
         </div>
 
         <h3 class="doc-subheading">A common example</h3>

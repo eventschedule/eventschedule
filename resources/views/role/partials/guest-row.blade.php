@@ -21,7 +21,7 @@
             <i v-if="getEventDotColor(event)" class="gk-row-dot" :style="{ backgroundColor: getEventDotColor(event) }"></i><bdi v-text="getEventTime(event)"></bdi><span v-if="event._multiDayNum > 1" v-text="event._multiDayNum + ' / ' + event._multiDayTotal"></span>
         </div>
         <div class="gk-row-body" data-reveal-body>
-            {{-- In the owner's own words where the schedule has chosen that (Settings, Advanced,
+            {{-- In the owner's own words where the schedule has chosen that (Style, Events,
                  "Event list wording"; App\Utils\ListWording): the wording's line with the name, as
                  written, and up to three of its lines under it. The time line above, the chips and
                  the picture stay the list's own. --}}

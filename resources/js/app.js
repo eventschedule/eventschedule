@@ -246,7 +246,7 @@ const mountVenueMap = () => {
         .catch(() => document.getElementById('es-venue-map-host')?.classList.add('is-mounted'));
 };
 
-// The owner's list of venues on the schedule form (Engagement > Venue map), with its dialog for
+// The owner's list of venues on the schedule form (Page content > Venue map), with its dialog for
 // placing a pin. Only where the form drew its host.
 const mountVenueMapEditor = () => {
     if (! document.getElementById('es-venue-map-editor')) {
@@ -258,7 +258,7 @@ const mountVenueMapEditor = () => {
         .catch(() => {});
 };
 
-// Settings > Ticket presets on the schedule form. Only where the form drew its list.
+// Tickets > Ticket presets on the schedule form. Only where the form drew its list.
 const mountTicketPresetsEditor = () => {
     if (! document.getElementById('ticket-preset-items')) {
         return;
