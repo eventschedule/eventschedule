@@ -230,6 +230,11 @@ class ScheduleTransferService
             // make events in the new owner's name.
             \App\Models\EventFeed::pauseWhere(fn ($query) => $query->where('role_id', $role->id), \App\Models\EventFeed::PAUSED_TRANSFER);
 
+            // The same for its calendar syncs: the next read would use the NEW owner's account,
+            // and with no calendar chosen that is their main one, which they never offered to
+            // publish. Reading stops (pushing out stays) until they choose a calendar themselves.
+            \App\Services\CalendarArrival::stopReading($role, 'transfer');
+
             // Cashier writes these two from Stripe; clearing them here means the new owner
             // never sees the previous owner's card. The detach itself happens after the
             // commit, where a Stripe outage costs nothing.

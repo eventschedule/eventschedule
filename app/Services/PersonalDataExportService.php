@@ -43,6 +43,8 @@ class PersonalDataExportService
         'spam_clearances' => 'An operator\'s decision that an account a watched word turned up for is not spam (SpamWatch). It is about the account, not something the person gave, and it is deleted with the account.',
         'calendar_syncs' => 'Which event maps to which calendar entry; covered by the calendar_connections summary.',
         'microsoft_calendar_syncs' => 'Same, for Outlook.',
+        'calendar_import_holds' => 'Which synced events wait for the owner and why (CalendarArrival): bookkeeping about the schedule\'s own events, whose content is exported with them. Deleted with the event.',
+        'calendar_sync_settings' => 'How a schedule\'s calendar syncs publish what they read in, and counts of each read; settings of the schedule, not something the person gave. Deleted with the schedule.',
         'dismissed_next_steps' => 'Interface state.',
         'dismissed_timezone_warnings' => 'Interface state.',
         'dismissed_venue_merge_suggestions' => 'Interface state.',

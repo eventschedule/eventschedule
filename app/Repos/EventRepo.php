@@ -15,6 +15,7 @@ use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\CalendarArrival;
 use App\Services\EventChangeNotifier;
 use App\Services\SmsService;
 use App\Services\TicketVolumeDiscount;
@@ -2694,6 +2695,12 @@ class EventRepo
         $event->parts()->whereNotIn('id', $partIds)->delete();
 
         $event->load(['tickets', 'addons', 'roles']);
+
+        // A draft a calendar sync was holding, published on the form: the owner's decision, which
+        // the sync honours for the text it was made on (CalendarArrival).
+        if ($wasDraftBeforeSave && ! $event->is_draft) {
+            CalendarArrival::decide($event, auth()->id(), CalendarArrival::DECISION_PUBLISHED);
+        }
 
         // Skip external sync and webhooks for draft events
         if (! $event->is_draft) {

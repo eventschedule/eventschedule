@@ -7,6 +7,7 @@ use App\Mail\EventAnnouncement;
 use App\Models\Event;
 use App\Models\Role;
 use App\Services\AudienceResolver;
+use App\Services\CalendarArrival;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -368,6 +369,13 @@ class SendEventAnnouncements extends Command
             // that it still holds after the feed is removed. What a feed adds afterwards has no
             // mark and is announced like any other new event.
             ->whereRaw('NOT (events.import_source <=> ? AND events.import_batch IS NOT NULL)', [Event::IMPORT_FEED])
+            // The same for a calendar sync's first read, published from the review page: the
+            // schedule catching up with a calendar, not news (CalendarArrival marks those holds).
+            ->when(CalendarArrival::tablesReady(), fn ($q) => $q->whereNotExists(fn ($held) => $held
+                ->selectRaw('1')
+                ->from('calendar_import_holds')
+                ->whereColumn('calendar_import_holds.event_id', 'events.id')
+                ->where('calendar_import_holds.first_pull', true)))
             // The repo's own scope, so "still worth telling somebody about" means the same thing
             // here as on the calendar - including a multi-day event that has started and is still
             // running. Back-filling last month's gigs is an ordinary thing to do and is not news.

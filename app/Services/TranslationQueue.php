@@ -153,6 +153,10 @@ class TranslationQueue
             // events that may never be published; one that is, joins the queue then.
             // (NULL-safe: most events have no import_source at all.)
             ->whereRaw('NOT (events.is_draft = 1 AND events.import_source <=> ?)', [Event::IMPORT_FEED])
+            // The same for a draft a standing calendar sync read in, which is somebody's own
+            // calendar until they publish it (CalendarArrival): sending it to a translation model
+            // would be spend, and would send a private entry out of the app as well.
+            ->whereRaw('NOT (events.is_draft = 1 AND events.import_source IN (?, ?, ?) AND events.import_batch IS NULL)', Event::CALENDAR_SYNC_SOURCES)
             ->where(function ($q) use ($cutoff) {
                 $q->where('starts_at', '>=', $cutoff)
                     ->orWhereNotNull('days_of_week')

@@ -174,6 +174,9 @@ class EventLifecycleService
         $event->setVisibilityState('public');
         $event->save();
 
+        // A draft a calendar sync was holding: the owner's decision (CalendarArrival).
+        CalendarArrival::decide($event, $actorUserId, CalendarArrival::DECISION_PUBLISHED);
+
         if ($through) {
             if ($through->syncsToGoogle()) {
                 $event->syncToGoogleCalendar('create');

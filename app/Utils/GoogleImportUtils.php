@@ -24,7 +24,7 @@ class GoogleImportUtils
      * Entry types that are not events: birthdays, working locations, out-of-office and focus
      * blocks, and entries Google made from mail (a flight, a hotel booking).
      */
-    private const EVENT_TYPES = ['default'];
+    public const EVENT_TYPES = ['default'];
 
     /**
      * The calendars to offer, in the order to offer them: the person's own first, then ones

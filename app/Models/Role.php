@@ -5207,6 +5207,20 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * How this schedule's calendar syncs treat what they read in (App\Services\CalendarArrival).
+     * A table of its own because this one is at MySQL's row-size limit; no row reads as "arrive
+     * as drafts", which is the safe answer for a sync nobody has said anything about.
+     */
+    public function calendarSyncSetting()
+    {
+        return $this->hasOne(\App\Models\CalendarSyncSetting::class)->withDefault([
+            'google_publishes' => false,
+            'microsoft_publishes' => false,
+            'caldav_publishes' => false,
+        ]);
+    }
+
+    /**
      * Get event custom fields definition
      */
     public function getEventCustomFields(): array

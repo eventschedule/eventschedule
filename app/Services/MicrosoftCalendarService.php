@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Repos\EventRepo;
 use App\Services\Concerns\ConvertsLocationToVenue;
+use App\Utils\CalendarPrivacy;
 use App\Utils\EventTextGenerator;
 use App\Utils\MarkdownUtils;
 use App\Utils\SlugPatternUtils;
@@ -45,6 +46,12 @@ class MicrosoftCalendarService
      * account state GoogleCalendarService keeps via setAccessToken().
      */
     protected ?User $currentUser = null;
+
+    /** Whether the inbound read under way is this calendar's very first (CalendarArrival). */
+    protected bool $inboundFirstPull = false;
+
+    /** What creating one entry held back, by reason, for the read's counts. */
+    protected array $inboundCounts = [];
 
     public function __construct(EventRepo $eventRepo)
     {
@@ -294,6 +301,7 @@ class MicrosoftCalendarService
             'microsoft_last_sync_at' => null,
         ]);
         Role::where('user_id', $user->id)->update(['microsoft_sync_direction' => null]);
+        CalendarArrival::resetConsentForOwner($user->id, CalendarArrival::MICROSOFT);
 
         if (! $keepEventLinks) {
             MicrosoftCalendarSync::where('user_id', $user->id)->delete();
@@ -676,6 +684,10 @@ class MicrosoftCalendarService
                 return $results;
             }
 
+            // The very first read of this calendar, which the owner is told about.
+            $this->inboundFirstPull = ! $role->microsoft_sync_token && empty(CalendarArrival::settings($role)->microsoft_first_pull);
+            CalendarArrival::bindCarriedOver($role, CalendarArrival::MICROSOFT);
+
             $nextUrl = $role->microsoft_sync_token ?: $this->initialDeltaUrl($calendarId);
             $deltaLink = null;
             $checkpoint = null;
@@ -728,7 +740,11 @@ class MicrosoftCalendarService
 
                 foreach (($body['value'] ?? []) as $item) {
                     try {
+                        $this->inboundCounts = [];
                         $outcome = $this->processDeltaItem($item, $role, $calendarId);
+                        foreach ($this->inboundCounts as $key => $n) {
+                            $results[$key] = ($results[$key] ?? 0) + $n;
+                        }
                         if ($outcome === 'created') {
                             $results['created']++;
                             UsageTrackingService::track(UsageTrackingService::MSCAL_SYNC, $role->id);
@@ -763,6 +779,7 @@ class MicrosoftCalendarService
                     'microsoft_sync_token' => $deltaLink,
                     'microsoft_last_sync_at' => now(),
                 ]);
+                CalendarArrival::recordPull($role, CalendarArrival::MICROSOFT, $results, $this->inboundFirstPull);
             } elseif ($checkpoint && $this->isGraphUrl($checkpoint)) {
                 // Page cap hit before the deltaLink: store the mid-cycle nextLink so we resume here.
                 $role->writeOperationalColumns([
@@ -841,6 +858,8 @@ class MicrosoftCalendarService
             return 'skipped';
         }
 
+        $sourceReason = CalendarArrival::graphReason($item);
+
         $existingSync = MicrosoftCalendarSync::where('role_id', $role->id)
             ->where('microsoft_event_id', $item['id'])
             ->first();
@@ -859,8 +878,29 @@ class MicrosoftCalendarService
             }
         }
 
+        // A meeting cancelled in Outlook is still on the calendar, marked cancelled. It is what the
+        // schedule does with a deleted one, and under "keep it" it is still not on the page.
+        if ($existingEvent && $sourceReason === CalendarArrival::SOURCE_CANCELLED && $role->calendarDeleteAction() !== 'ignore') {
+            $eventId = $existingEvent->id;
+            $eventName = $existingEvent->name;
+            $outcome = $existingEvent->applyInboundDeletion($role->calendarDeleteAction(), $role);
+
+            if ($outcome === 'deleted') {
+                AuditService::log(AuditService::EVENT_DELETE, $role->user_id, 'Event', $eventId, null, null, $eventName);
+            } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled', 'detached'], true)) {
+                AuditService::log(AuditService::EVENT_CANCEL, $role->user_id, 'Event', $eventId, null, null, $eventName);
+            }
+
+            return 'skipped';
+        }
+
         if ($existingEvent) {
             $changed = $this->updateEventFromMicrosoft($item, $existingEvent, $role);
+
+            // The calendar may now say it is private, or its text now carry a passcode.
+            if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::MICROSOFT, $sourceReason)) {
+                $changed = true;
+            }
 
             // Backfill the mapping when matched via the name+time fallback.
             if (! $existingSync) {
@@ -871,6 +911,13 @@ class MicrosoftCalendarService
             }
 
             return $changed ? 'updated' : 'skipped';
+        }
+
+        // Marked private, declined, cancelled, or an out-of-office block: not read in.
+        if ($sourceReason !== null) {
+            CalendarArrival::count($this->inboundCounts, $sourceReason);
+
+            return 'skipped';
         }
 
         $this->createEventFromMicrosoft($item, $role, $calendarId);
@@ -941,11 +988,17 @@ class MicrosoftCalendarService
             $event->category_id = $defaultCategoryId;
         }
 
+        $arrival = CalendarArrival::arrival($role, CalendarArrival::MICROSOFT, CalendarPrivacy::findings($event->name, $event->description, $item['location']['displayName'] ?? null));
+        $event->setVisibilityState($arrival['state']);
+
         $event->save();
 
         $event->roles()->attach($role->id, [
             'is_accepted' => true,
         ]);
+
+        CalendarArrival::holdOnArrival($event, $role, $arrival, $this->inboundFirstPull);
+        CalendarArrival::count($this->inboundCounts, $arrival['hold'] === CalendarArrival::HOLD_REVIEW ? null : $arrival['hold']);
 
         MicrosoftCalendarSync::create([
             'user_id' => $role->user_id,

@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Repos\EventRepo;
 use App\Services\Concerns\ConvertsLocationToVenue;
+use App\Utils\CalendarPrivacy;
 use App\Utils\EventTextGenerator;
 use App\Utils\MarkdownUtils;
 use App\Utils\SlugPatternUtils;
@@ -32,6 +33,12 @@ class GoogleCalendarService
     protected $calendarService;
 
     protected $eventRepo;
+
+    /** Whether the inbound read under way is this calendar's very first (CalendarArrival). */
+    protected bool $inboundFirstPull = false;
+
+    /** What creating one entry held back, by reason, for the read's counts. */
+    protected array $inboundCounts = [];
 
     /** What the standing sync needs: read the calendars, and write events to one of them. */
     public const FULL_SCOPES = [
@@ -269,6 +276,7 @@ class GoogleCalendarService
             'google_webhook_expires_at' => null,
         ]);
         Role::where('user_id', $user->id)->update(['sync_direction' => null, 'google_sync_token' => null]);
+        CalendarArrival::resetConsentForOwner($user->id, CalendarArrival::GOOGLE);
 
         \App\Models\CalendarSync::where('user_id', $user->id)->delete();
 
@@ -620,14 +628,7 @@ class GoogleCalendarService
      */
     public static function importEntry(GoogleEvent $event): array
     {
-        // An invitation the calendar's owner said no to is still on the calendar. `self` marks
-        // the reply that is theirs.
-        $declined = false;
-        foreach ($event->getAttendees() ?: [] as $attendee) {
-            if ($attendee->getSelf() && $attendee->getResponseStatus() === 'declined') {
-                $declined = true;
-            }
-        }
+        $declined = self::declinedBySelf($event);
 
         return [
             'id' => $event->getId(),
@@ -805,7 +806,26 @@ class GoogleCalendarService
             'htmlLink' => $event->getHtmlLink(),
             'created' => $event->getCreated(),
             'updated' => $event->getUpdated(),
+            // What the calendar says about publishing it (CalendarArrival::googleReason()).
+            'visibility' => $event->getVisibility(),
+            'event_type' => $event->getEventType(),
+            'declined' => self::declinedBySelf($event),
         ];
+    }
+
+    /**
+     * An invitation the calendar's owner said no to is still on the calendar. `self` marks the
+     * reply that is theirs.
+     */
+    public static function declinedBySelf(GoogleEvent $event): bool
+    {
+        foreach ($event->getAttendees() ?: [] as $attendee) {
+            if ($attendee->getSelf() && $attendee->getResponseStatus() === 'declined') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -870,6 +890,11 @@ class GoogleCalendarService
             }
 
             $syncToken = $role->google_sync_token ?: null;
+
+            // The very first read of this calendar, which the owner is told about. A token Google
+            // threw away and the read starting over is not one.
+            $this->inboundFirstPull = ! $syncToken && empty(CalendarArrival::settings($role)->google_first_pull);
+            CalendarArrival::bindCarriedOver($role, CalendarArrival::GOOGLE);
 
             // Compute the initial-sync window ONCE - it must stay identical across paginated
             // requests (Google rejects a page request whose params differ from the first).
@@ -959,6 +984,7 @@ class GoogleCalendarService
             // Persist the fresh token only after a clean, fully-paginated run.
             if ($nextSyncToken) {
                 $this->storeGoogleSyncToken($role, $nextSyncToken);
+                CalendarArrival::recordPull($role, CalendarArrival::GOOGLE, $results, $this->inboundFirstPull);
             }
         } catch (\Exception $e) {
             Log::error('Failed to sync from Google Calendar', [
@@ -989,6 +1015,7 @@ class GoogleCalendarService
         }
 
         $data = $this->mapGoogleEvent($googleEvent);
+        $sourceReason = CalendarArrival::googleReason($data);
 
         // Match by google_event_id in calendar_syncs.
         $existingSync = \App\Models\CalendarSync::where('role_id', $role->id)
@@ -1018,6 +1045,11 @@ class GoogleCalendarService
         if ($existingEvent) {
             $changed = $this->updateEventFromGoogle($existingEvent, $data, $role);
 
+            // The calendar may now say it is private, or its text now carry a passcode.
+            if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::GOOGLE, $sourceReason)) {
+                $changed = true;
+            }
+
             // Backfill the sync mapping when the match came from the name+time fallback (no
             // CalendarSync row yet) so future syncs match reliably by google_event_id even if the
             // title or time later change.
@@ -1032,9 +1064,16 @@ class GoogleCalendarService
                 $results['updated']++;
                 UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
             }
+        } elseif ($sourceReason !== null) {
+            // Marked private, declined, or not an event at all: not read in.
+            CalendarArrival::count($results, $sourceReason);
         } else {
+            $this->inboundCounts = [];
             $this->createEventFromGoogle($data, $role, $calendarId);
             $results['created']++;
+            foreach ($this->inboundCounts as $key => $n) {
+                $results[$key] = ($results[$key] ?? 0) + $n;
+            }
             UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
         }
     }
@@ -1141,12 +1180,18 @@ class GoogleCalendarService
             $event->category_id = $defaultCategoryId;
         }
 
+        $arrival = CalendarArrival::arrival($role, CalendarArrival::GOOGLE, CalendarPrivacy::findings($event->name, $event->description, $googleEvent['location'] ?? null));
+        $event->setVisibilityState($arrival['state']);
+
         $event->save();
 
         // Attach to the role
         $event->roles()->attach($role->id, [
             'is_accepted' => true,
         ]);
+
+        CalendarArrival::holdOnArrival($event, $role, $arrival, $this->inboundFirstPull);
+        CalendarArrival::count($this->inboundCounts, $arrival['hold'] === CalendarArrival::HOLD_REVIEW ? null : $arrival['hold']);
 
         // Track the google_event_id in calendar_syncs
         \App\Models\CalendarSync::create([

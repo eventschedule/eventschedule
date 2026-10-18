@@ -4,12 +4,13 @@ namespace App\Services\Concerns;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\CalendarPrivacy;
 use App\Utils\GeminiUtils;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Shared by the calendar-sync services (Google + CalDAV) to turn an inbound
+ * Shared by the calendar-sync services (Google, Outlook, CalDAV) to turn an inbound
  * free-text location into a venue Role.
  *
  * Matching reuses the same normalized columns the rest of the app dedupes on
@@ -38,9 +39,20 @@ trait ConvertsLocationToVenue
      */
     protected function attachLocationVenue(Event $event, Role $role, ?string $location): bool
     {
-        if (! $location) {
+        // A meeting link, a dial-in with its code, or a provider's name standing in for a place
+        // is not a venue. It used to become one: a public page named after a Zoom link with the
+        // meeting's password in it. What a location says beside a link ("Room 4") is kept.
+        $place = CalendarPrivacy::venueFromLocation($location);
+
+        if (! $place) {
+            if (trim((string) $location) !== '' && property_exists($this, 'inboundCounts')) {
+                $this->inboundCounts['places_left_out'] = ($this->inboundCounts['places_left_out'] ?? 0) + 1;
+            }
+
             return false;
         }
+
+        $location = $place;
 
         if ($event->roles()->where('roles.type', 'venue')->exists()) {
             return false;
