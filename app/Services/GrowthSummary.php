@@ -59,7 +59,7 @@ class GrowthSummary
             ['label' => 'Cancellations (all time)', 'value' => $data['churn']['cancelled'] ?? null],
             ['label' => '  cancelled, still paid to period end', 'value' => self::pendingCancellations($data)],
             ['label' => 'Stripe trials ending within 7 days (schedules / owners)', 'value' => self::trialsEndingSoon($data)],
-            ['label' => 'Schedules that made 100+ events in one day reading a primary Google calendar', 'value' => self::countRows($data, 'max_events_one_day_90d', fn ($v, $row) => $v >= 100 && ($row['gsync_calendar'] ?? null) === 'primary')],
+            ['label' => 'Schedules whose Google sync made 100+ events in one day from a primary calendar', 'value' => self::bulkPrimarySyncs($data)],
             // Rolling windows off daily[] and buyers[] (schema 9+), so they compare between any two
             // pulls without a calendar month having to close first.
             ['label' => 'Paid orders, last 30 days', 'value' => self::dailySum($data, 'paid_orders', 30)],
@@ -243,6 +243,24 @@ class GrowthSummary
         }
 
         return $total.' ('.implode(', ', array_map(fn ($reason, $n) => "{$reason} {$n}", array_keys($reasons), $reasons)).')';
+    }
+
+    /**
+     * Schedules whose busiest day was 100+ events pulled by a Google sync that reads the token
+     * account's primary calendar: the shape of a sync that read somebody else's calendar. A day
+     * of hand or ICS imports, or a sync that only pushes (`to`), is not that.
+     */
+    private static function bulkPrimarySyncs(array $data): ?int
+    {
+        $rows = self::scheduleRows($data, ['max_events_one_day_90d', 'max_day_source', 'gsync_direction', 'gsync_calendar']);
+        if ($rows === null) {
+            return null;
+        }
+
+        return count(array_filter($rows, fn ($row) => ($row['max_events_one_day_90d'] ?? 0) >= 100
+            && ($row['max_day_source'] ?? null) === 'google'
+            && in_array($row['gsync_direction'] ?? null, ['from', 'both'], true)
+            && ($row['gsync_calendar'] ?? null) === 'primary'));
     }
 
     /** Stripe trials ending within a week and not cancelled, as "schedules / owners": one owner can trial several. */

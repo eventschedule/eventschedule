@@ -227,13 +227,26 @@ class PullGrowth extends Command
             }
         }
 
-        $count = new Process(['git', 'rev-list', '--count', $commit.'..HEAD'], base_path());
-        $count->run();
-        $behind = $count->isSuccessful()
-            ? (int) trim($count->getOutput()).' commits on this checkout\'s HEAD are not deployed'
-            : 'that commit is not in this checkout (git fetch?)';
+        $ahead = $this->countCommits($commit.'..HEAD');
+        $behind = $ahead === 0 ? $this->countCommits('HEAD..'.$commit) : 0;
+        $state = match (true) {
+            $ahead === null => 'that commit is not in this checkout (git fetch?)',
+            // Nothing here is undeployed because this checkout is OLDER than production, which
+            // "0 commits not deployed" alone would read as up to date.
+            $behind > 0 => "this checkout is {$behind} commits behind production (git pull?)",
+            default => "{$ahead} commits on this checkout's HEAD are not deployed",
+        };
 
-        return "Production runs {$commit}".($since ? " (first seen {$since})" : '').": {$behind}.";
+        return "Production runs {$commit}".($since ? " (first seen {$since})" : '').": {$state}.";
+    }
+
+    /** `git rev-list --count $range` in this checkout, without a shell; null when git cannot say. */
+    private function countCommits(string $range): ?int
+    {
+        $process = new Process(['git', 'rev-list', '--count', $range], base_path());
+        $process->run();
+
+        return $process->isSuccessful() ? (int) trim($process->getOutput()) : null;
     }
 
     /**

@@ -385,6 +385,10 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     lead.
   - `winner` (`{key, date}`): the locked variant and the day it locked.
   - `reset_at`: the day the counts were last started over from `/admin/growth`, or null.
+  - `daily` (schema 21): `[{date, variant, visitors, clicks, signups}]` since `reset_at`, one entry
+    per day and current variant that had anything. The same rows and cut as `rows`, so a variant's
+    days sum to its totals, give or take what arrived in the up to 10 minutes `rows` may be cached.
+    Use it to split the test at a change to the page under the headline.
   - Reading it:
     - **Join `signups.hero_variant` to `schedules` on `uid` to judge a variant on the sellers it
       produced**, not on signups alone.
@@ -398,10 +402,6 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
       of which needs a counted click, so `signups` can exceed `clicks`.
     - **`p_best` moves between pulls on the same counts.** It is a 4000-draw simulation, and the
       section is cached for up to 10 minutes.
-  - `daily` (schema 21): `[{date, variant, visitors, clicks, signups}]` since `reset_at`, one entry
-    per day and current variant that had anything. The same rows and cut as `rows`, so a variant's
-    days sum to its totals, give or take what arrived in the up to 10 minutes `rows` may be cached.
-    Use it to split the test at a change to the page under the headline.
     - **How a signup reaches a variant changed twice**, in two releases committed on 2026-10-04.
       - Schema 9 and 10 pulls taken after the consent release: the attribution cookie only,
         which is written only with marketing consent. The beacons need none, so a visitor who
@@ -495,12 +495,12 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `ticket_trial_ends_in` | The card-free selling trial's end, as a bucket (`ended` once over); null = never had one |
 | `upcoming_ticketed_events` | Events it created with tickets switched on, published, not cancelled, with a date in the next 60 days (`GrowthExportService::UPCOMING_DAYS`). A series counts once (`Event::constrainToOccurrencesSince()`, the sitemap's window), from its first date until it ends, so a monthly series, or one held up only by added dates, can count while its next date is further off |
 | `upcoming_paid_events` | Of those, the ones with a live priced ticket type |
-| `upcoming_paid_blocked` | Of those, the ones a guest cannot pay for: the schedule's plan cannot sell paid tickets and the event was never grandfathered (the two questions `Event::canSellPaidTickets()` asks) |
-| `upcoming_orders` | Orders, paid or unpaid, for dates still to come on those events (no imports) |
+| `upcoming_paid_blocked` | Of those, the ones a guest cannot pay for: the schedule's plan cannot sell paid tickets and the event was never grandfathered (the two questions `Event::canSellPaidTickets()` asks). An old event with no `creator_role_id` is credited to every schedule on it and judged by each one's plan, where the event page asks only the schedule that owns it, so a free schedule on a Pro schedule's old event can read blocked here |
+| `upcoming_orders` | Orders, paid or unpaid, for dates still to come on those events (no imports). Free registrations count: an RSVP or a $0 ticket is stored as a paid order, so this is interest, not money (`unpaid_orders_30d` leaves them out) |
 | `unpaid_orders_30d` | `{unpaid, expired}`: orders placed in the last 30 days that were never paid. `unpaid` is still waiting (cash or a payment link, until the organizer marks it paid); `expired` was released after its hold, which includes every checkout abandoned online. No free registrations or imports |
 | `last_event_created` | Days since it last created an event by hand or through an import a person ran, as a bucket: `0-7`, `8-30`, `31-90`, `91+`; null = never. Feeds and calendar syncs (`feed`, `google`, `microsoft`, `caldav`) are left out, because they add events with nobody there; the import page's own Google read goes with them |
 | `gsync_direction`, `gsync_calendar` | The owner's Google sync: `to`, `from` or `both`, and `chosen` (a calendar picked) or `primary` (none picked, so it reads the token account's primary calendar); both null with no sync |
-| `max_events_one_day_90d`, `max_day_source` | Most events it created on one day in the last 90 days, and where most of that day's came from: an import source (`google`, `feed`, `ics`, ...) or `hand`. 0 and null when it created none |
+| `max_events_one_day_90d`, `max_day_source` | Most events it created on one day in the last 90 days, and where most of that day's came from: an import source (`google`, `feed`, `ics`, ...) or `hand`. 0 and null when it created none. An event made before the import source was recorded (schema 12, 2026-10-04) reads `hand` whatever made it |
 
 A bucket of days ahead (`*_ends_in`) is `0-3`, `4-7`, `8-14`, `15-30`, `31+`, or `ended` once the
 date has passed. Dates leave only as buckets: an exact date beside the rest of a pseudonymous row

@@ -121,6 +121,7 @@ class GrowthSummaryTest extends TestCase
         $this->assertNull($this->value($kpis, '  of them, nothing on sale in the next 60 days'));
         $this->assertNull($this->value($kpis, '  cancelled, still paid to period end'));
         $this->assertNull($this->value($kpis, 'Stripe trials ending within 7 days (schedules / owners)'));
+        $this->assertNull($this->value($kpis, 'Schedules whose Google sync made 100+ events in one day from a primary calendar'));
     }
 
     /**
@@ -131,17 +132,22 @@ class GrowthSummaryTest extends TestCase
     public function test_it_reads_where_each_schedule_stands(): void
     {
         $columns = ['sid', 'uid', 'paid_tickets_90d', 'upcoming_ticketed_events', 'upcoming_paid_blocked',
-            'sub_status', 'cancel_pending', 'cancel_reason', 'trial_ends_in', 'max_events_one_day_90d', 'gsync_calendar'];
+            'sub_status', 'cancel_pending', 'cancel_reason', 'trial_ends_in',
+            'max_events_one_day_90d', 'max_day_source', 'gsync_direction', 'gsync_calendar'];
         $pull = $this->pull(['schedules' => ['columns' => $columns, 'rows' => [
-            ['s:1', 'u:a', 40, 0, 0, 'active', true, 'season_over', null, 2, null],
-            ['s:2', 'u:b', 12, 3, 0, 'past_due', true, 'season_over', null, 0, null],
-            ['s:3', 'u:c', 0, 2, 1, 'trialing', false, null, '4-7', 0, null],
-            ['s:4', 'u:c', 0, 1, 0, 'trialing', false, null, '0-3', 0, null],
-            ['s:5', 'u:c', 0, 0, 0, 'trialing', false, null, '8-14', 0, null],
-            ['s:6', 'u:d', 0, 0, 0, 'active', true, 'none', null, 1789, 'primary'],
-            ['s:7', 'u:e', 0, 0, 0, null, false, null, null, 300, 'chosen'],
+            ['s:1', 'u:a', 40, 0, 0, 'active', true, 'season_over', null, 2, 'hand', null, null],
+            ['s:2', 'u:b', 12, 3, 0, 'past_due', true, 'season_over', null, 0, null, null, null],
+            ['s:3', 'u:c', 0, 2, 1, 'trialing', false, null, '4-7', 0, null, null, null],
+            ['s:4', 'u:c', 0, 1, 0, 'trialing', false, null, '0-3', 0, null, null, null],
+            ['s:5', 'u:c', 0, 0, 0, 'trialing', false, null, '8-14', 0, null, null, null],
+            ['s:6', 'u:d', 0, 0, 0, 'active', true, 'none', null, 1789, 'google', 'from', 'primary'],
+            ['s:7', 'u:e', 0, 0, 0, null, false, null, null, 300, 'google', 'both', 'chosen'],
             // A cancelled trial: neither still paying nor a trial to watch.
-            ['s:8', 'u:f', 0, 0, 0, 'trialing', true, 'not_using', '0-3', 0, null],
+            ['s:8', 'u:f', 0, 0, 0, 'trialing', true, 'not_using', '0-3', 0, null, null, null],
+            // A big day of the owner's own imports, and a sync that only pushes: neither is a
+            // sync reading somebody's primary calendar.
+            ['s:9', 'u:g', 0, 0, 0, null, false, null, null, 500, 'hand', 'from', 'primary'],
+            ['s:10', 'u:h', 0, 0, 0, null, false, null, null, 400, 'google', 'to', 'primary'],
         ]]]);
 
         $kpis = GrowthSummary::kpis($pull);
@@ -150,7 +156,7 @@ class GrowthSummaryTest extends TestCase
         $this->assertSame(1, $this->value($kpis, 'Schedules with upcoming paid events their plan cannot sell'));
         $this->assertSame('3 (season_over 2, none 1)', $this->value($kpis, '  cancelled, still paid to period end'));
         $this->assertSame('2 / 1', $this->value($kpis, 'Stripe trials ending within 7 days (schedules / owners)'));
-        $this->assertSame(1, $this->value($kpis, 'Schedules that made 100+ events in one day reading a primary Google calendar'));
+        $this->assertSame(1, $this->value($kpis, 'Schedules whose Google sync made 100+ events in one day from a primary calendar'));
     }
 
     /**

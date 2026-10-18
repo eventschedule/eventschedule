@@ -24,7 +24,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 | Version | Tagged | What it needs from you |
 |---|---|---|
 | [Unreleased](#unreleased-boost-partners-appointment-hosts-and-the-appointment-api-2026-10-15) | not yet | Confirm the Meta token is a system user's, add `META_BUSINESS_ID`, `META_SYSTEM_USER_ID` and `APP_COMMIT`, check the Stripe platform webhook; after: the scheduler entry, then the pilot partner's setup |
-| [v1.0.134](#v10134) | live by 2026-10-17 (a schema 18 pull) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN`; [GDPR](#gdpr-2026-10-04): 2FA on every admin first, then the policy-change notice |
+| [v1.0.134](#v10134) | live (as v1.0.135 from 2026-10-08; past `b9777e3d9` by 2026-10-17) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN`; [GDPR](#gdpr-2026-10-04): 2FA on every admin first, then the policy-change notice |
 | [v1.0.133](#v10133) | 2026-09-25 | Four read-only queries, the image backfill, a sitemap cache key, a Cloudflare purge |
 | [v1.0.132](#v10132) | 2026-09-23 | The ticket amnesty migration by hand, a `SESSION_LIFETIME` decision, a MySQL check, the federation welcome order |
 | [v1.0.131](#v10131) | 2026-09-10 | Nothing; four optional features |
@@ -245,10 +245,13 @@ Five. None irreversible; all are new tables or nullable columns.
 ## v1.0.134
 
 **Deployed.** Everything on `main` after v1.0.133. The version was bumped on 2026-09-28; commits
-since then ship under the same number. A growth pull on 2026-10-17 reported schema 18, which only
-the commits from `b9777e3d9` (2026-10-09) up to `e87e13e4f` (2026-10-15) carry: everything in this
-section is live, and so is every commit up to `b9777e3d9`. Which commit exactly is unknown
-until `APP_COMMIT` is set (see Unreleased). It went live in two steps. From the 2026-09-30 deploy
+since then ship under the same number. The growth pull's `meta.releases` has production on v1.0.135
+from 2026-10-08, so everything up to that version bump was live by then. A growth pull on
+2026-10-17 reported schema 18, which only the commits from `b9777e3d9` (2026-10-09) to the one
+before `e87e13e4f` (2026-10-15) carry, so every commit up to `b9777e3d9` is live too. The one part
+of this section committed after it is the examples page (from `94c7e56d4`), live only if production
+is past that commit. Which commit exactly is unknown until `APP_COMMIT` is set (see Unreleased); the
+first pull after that says. It went live in steps. From the 2026-09-30 deploy
 production ran `dcf7bd8b6`, so this was **live first**: the conversion, churn
 and owner-email batch (its emails have been sending since 2026-09-28), the photo gallery, the
 homepage headline test, guest support chat, list animations on schedule pages, per-schedule custom
@@ -270,7 +273,8 @@ checklist:
 - [Event import](#event-import-2026-10-05) (a link, a list to choose from, Undo, and Google
   Calendar as a read-only source; nothing to do before the deploy, three checks after)
 - [The examples page](#the-examples-page-2026-10-09) (nothing before the deploy; a look and a
-  re-scrape after, and a command to run whenever the guest page's look changes)
+  re-scrape after, and a command to run whenever the guest page's look changes; may not be live
+  yet, see above)
 
 ### Checklist
 

@@ -226,6 +226,16 @@ class GrowthExportScheduleStateTest extends TestCase
         $both = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'pro', 'plan_source' => 'admin',
             'plan_expires' => now()->addDays(20)->format('Y-m-d'), 'trial_ends_at' => now()->addDays(2)]);
         $this->assertSame('15-30', $this->row($this->build(), $both)['plan_ends_in']);
+
+        // A grant on a schedule a live subscription pays for ends nothing: the subscription goes on.
+        $paid = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'pro', 'plan_source' => 'admin',
+            'plan_expires' => now()->addDays(5)->format('Y-m-d')]);
+        $paid->subscriptions()->create(['type' => 'default', 'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'active', 'stripe_price' => 'price_x', 'quantity' => 1]);
+        $paidRow = $this->row($this->build(), $paid);
+        $this->assertSame('active', $paidRow['sub_status']);
+        $this->assertNull($paidRow['plan_ends_in']);
+
         $this->assertNull($this->row($data, $granted)['sub_status']);
         $this->assertNull($this->row($data, $free)['plan_ends_in']);
         $this->assertNull($this->row($data, $free)['ticket_trial_ends_in']);
