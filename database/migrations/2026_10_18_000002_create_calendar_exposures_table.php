@@ -28,18 +28,27 @@ return new class extends Migration
 
         try {
             if (! Schema::hasTable('calendar_exposures')) {
-                Schema::create('calendar_exposures', function (Blueprint $table) {
-                    $table->id();
-                    $table->foreignId('event_id')->unique()->constrained()->cascadeOnDelete();
-                    $table->foreignId('role_id')->constrained()->cascadeOnDelete();
-                    $table->json('kinds');
-                    $table->char('text_hash', 40);
-                    $table->timestamp('matched_at');
-                    $table->timestamps();
+                try {
+                    Schema::create('calendar_exposures', function (Blueprint $table) {
+                        $table->id();
+                        $table->foreignId('event_id')->unique()->constrained()->cascadeOnDelete();
+                        $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+                        $table->json('kinds');
+                        $table->char('text_hash', 40);
+                        $table->timestamp('matched_at');
+                        $table->timestamps();
 
-                    // What the list and the alert read: a schedule's matches newer than its review.
-                    $table->index(['role_id', 'matched_at']);
-                });
+                        // What the list and the alert read: a schedule's matches newer than its review.
+                        $table->index(['role_id', 'matched_at']);
+                    });
+                } catch (\Throwable $e) {
+                    // Each key and index is its own statement after CREATE TABLE. One that fails (a
+                    // lock wait on a busy table) leaves the table without it, and the next run would
+                    // pass it by. Nothing has written to it yet.
+                    Schema::dropIfExists('calendar_exposures');
+
+                    throw $e;
+                }
             }
         } finally {
             DB::statement('SET SESSION lock_wait_timeout = '.(int) $previous);

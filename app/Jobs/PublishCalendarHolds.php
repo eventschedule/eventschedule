@@ -8,6 +8,7 @@ use App\Services\CalendarArrival;
 use App\Services\EventLifecycleService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -26,7 +27,27 @@ class PublishCalendarHolds implements ShouldQueue
     /** @param  list<int>  $eventIds */
     public function __construct(public int $roleId, public ?int $userId, public array $eventIds) {}
 
+    /** Where "Publish all is under way" is counted down, chunk by chunk, for the review page. */
+    public static function publishingKey(int $roleId): string
+    {
+        return 'calendar_review.publishing.'.$roleId;
+    }
+
     public function handle(EventLifecycleService $lifecycle): void
+    {
+        try {
+            $this->publish($lifecycle);
+        } finally {
+            // Counted down whatever happened to this chunk; the last one clears it, so the page
+            // stops saying it is publishing when it is done.
+            $left = Cache::decrement(self::publishingKey($this->roleId), count($this->eventIds));
+            if ($left !== false && $left <= 0) {
+                Cache::forget(self::publishingKey($this->roleId));
+            }
+        }
+    }
+
+    private function publish(EventLifecycleService $lifecycle): void
     {
         $role = Role::find($this->roleId);
         if (! $role || $role->is_deleted || ! CalendarArrival::tablesReady()) {

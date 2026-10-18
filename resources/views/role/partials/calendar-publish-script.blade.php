@@ -9,9 +9,6 @@ document.addEventListener('DOMContentLoaded', function () {
         on: @json(__('messages.calendar_says_publishing_on'), JSON_UNESCAPED_UNICODE),
         off: @json(__('messages.calendar_says_publishing_off'), JSON_UNESCAPED_UNICODE),
         changed: @json(__('messages.calendar_says_calendar_changed'), JSON_UNESCAPED_UNICODE),
-        // trans_choice on the page's side: one and many, the count put in by the script.
-        waitingOne: @json(trans_choice('messages.calendar_says_waiting_stay_drafts', 1, ['count' => '__N__']), JSON_UNESCAPED_UNICODE),
-        waitingMany: @json(trans_choice('messages.calendar_says_waiting_stay_drafts', 2, ['count' => '__N__']), JSON_UNESCAPED_UNICODE),
     };
     var directionNames = { google: 'sync_direction', microsoft: 'microsoft_sync_direction', caldav: 'caldav_sync_direction' };
 
@@ -34,7 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var radios = Array.prototype.slice.call(document.querySelectorAll('input[name="' + directionNames[provider] + '"]'));
         var saved = toggle && toggle.getAttribute('data-saved') === '1';
 
-        var waiting = parseInt(wrap.getAttribute('data-waiting') || '0', 10);
+        // The drafts waiting now, in a sentence the server made with their count.
+        var waitingSays = wrap.getAttribute('data-waiting-says') || '';
 
         function reads() {
             return readsFor(provider);
@@ -53,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             var on = !! (toggle && toggle.checked);
             var text = on !== saved ? (on ? says.on : says.off) : '';
-            if (on && on !== saved && waiting > 0) {
-                text += ' ' + (waiting === 1 ? says.waitingOne : says.waitingMany).replace('__N__', waiting.toLocaleString());
+            if (on && on !== saved && waitingSays) {
+                text += ' ' + waitingSays;
             }
             say(provider, text);
         }

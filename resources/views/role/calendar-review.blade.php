@@ -9,6 +9,7 @@
         $zone = $role->captureTimezone();
         $clock = get_use_24_hour_time($role) ? 'H:i' : 'g:i A';
         $providerName = fn (?string $source) => \App\Services\CalendarArrival::providerName($source);
+        $reading = \App\Services\CalendarArrival::readingProviders($role);
         $reasonLabel = fn (string $reason) => match ($reason) {
             \App\Utils\CalendarPrivacy::HOLD_MEETING_DETAILS => __('messages.calendar_hold_meeting_details'),
             \App\Utils\CalendarPrivacy::HOLD_EMAIL_THREAD => __('messages.calendar_hold_email_thread'),
@@ -65,7 +66,8 @@
                 </div>
             </form>
 
-            @if ($publishingCount)
+            {{-- Not beside the flash that just said the same. --}}
+            @if ($publishingCount && ! session('success'))
             <x-page-notice tone="info">{{ trans_choice('messages.calendar_publishing_now', $publishingCount, ['count' => number_format($publishingCount)]) }}</x-page-notice>
             @endif
 
@@ -75,11 +77,11 @@
 
             @if ($groups->isEmpty())
             <div class="ap-card rounded-xl">
-                <x-page-empty :title="$search !== '' ? __('messages.calendar_review_empty_search') : match ($show) {
-                    'taken' => __('messages.calendar_review_empty_taken'),
-                    'hidden' => __('messages.calendar_review_empty_hidden'),
-                    default => __('messages.calendar_review_empty_title'),
-                }" :text="__('messages.calendar_review_empty_text')" />
+                @php
+                    $emptyKey = $search !== '' ? 'search' : match ($show) { 'taken' => 'taken', 'hidden' => 'hidden', default => null };
+                @endphp
+                <x-page-empty :title="__($emptyKey ? 'messages.calendar_review_empty_'.$emptyKey : 'messages.calendar_review_empty_title')"
+                              :text="__($emptyKey ? 'messages.calendar_review_empty_'.$emptyKey.'_text' : 'messages.calendar_review_empty_text')" />
             </div>
             @else
             <x-page-card flush id="calendar-review">
@@ -112,8 +114,13 @@
                                 // Whether taking the details out in the calendar brings it back by
                                 // itself: a hide the sync made with somewhere to go back to. Not
                                 // one the operator made, nor a draft that waits for a look anyway.
+                                // Only while the sync reads that calendar, and for one that arrived
+                                // held, only while it still publishes (CalendarArrival::restore()).
                                 $firstHold = $group['holds']->first();
-                                $comesBack = $firstHold->was_visibility !== null && $firstHold->held_by === null;
+                                $fromSync = $event->cameFromCalendarSync();
+                                $comesBack = $fromSync && $firstHold->was_visibility !== null && $firstHold->held_by === null
+                                    && in_array($event->import_source, $reading, true)
+                                    && ($firstHold->was_public || \App\Services\CalendarArrival::publishes($role, (string) $event->import_source));
                             @endphp
                             <tr>
                                 <td class="c-tick"><input type="checkbox" name="events[]" value="{{ $group['ids'] }}" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900" aria-label="{{ __('messages.feeds_select_one', ['name' => $event->name]) }}" data-calrev-tick></td>
@@ -136,7 +143,10 @@
                                             </div>
                                             @if ($held && $group['snippet'])
                                             <div class="calrev-snippet" v-pre><bdi>{!! $group['snippet'] !!}</bdi></div>
-                                            <div class="calrev-advice">{{ $comesBack ? __('messages.calendar_review_advice_publishes', ['provider' => $provider]) : __('messages.calendar_review_advice_drafts', ['provider' => $provider]) }}</div>
+                                            {{-- A feed's or a one-time import's event has no calendar of the owner's to change. --}}
+                                            <div class="calrev-advice">{{ ! $fromSync
+                                                ? __('messages.calendar_review_advice_edit')
+                                                : __($comesBack ? 'messages.calendar_review_advice_publishes' : 'messages.calendar_review_advice_drafts', ['provider' => $provider]) }}</div>
                                             @endif
                                         </div>
                                     </div>

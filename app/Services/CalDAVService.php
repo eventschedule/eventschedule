@@ -31,6 +31,9 @@ class CalDAVService
     /** What creating one entry held back, by reason, for the read's counts. */
     protected array $inboundCounts = [];
 
+    /** The last REPORT got no answer it could read (getEventsFromCalDAV() then returns none). */
+    protected bool $reportFailed = false;
+
     /**
      * Set by the sync command for the schedules it may give their one full read this run
      * (CalendarArrival::needsReread()): every entry is reconciled, unchanged etag or not.
@@ -357,11 +360,24 @@ class CalDAVService
 
             // The very first read of this calendar, which the owner is told about.
             $this->inboundFirstPull = ! $role->caldav_last_sync_at && empty(CalendarArrival::settings($role)->caldav_first_pull);
-            $rereading = $this->rereadAllowed && CalendarArrival::needsReread($role, CalendarArrival::CALDAV);
+            // Owed only by a sync that has read before: a first read reads everything anyway. It
+            // only judges: a changed entry (its etag) is still applied, as on any read, but an
+            // entry with no event here is left for the next ordinary read, which the server's
+            // change marker (hasChanges()) still sends, so one the owner deleted is not made again.
+            $rereading = $this->rereadAllowed && $role->caldav_last_sync_at && CalendarArrival::needsReread($role, CalendarArrival::CALDAV);
             CalendarArrival::bindCarriedOver($role, CalendarArrival::CALDAV);
 
             // Get events from CalDAV
+            $this->reportFailed = false;
             $events = $this->getEventsFromCalDAV($settings);
+
+            // A server that did not answer is not an empty calendar: nothing is recorded, and the
+            // full read is not marked done.
+            if ($this->reportFailed) {
+                $results['errors']++;
+
+                return $results;
+            }
 
             // Batch fetch existing UIDs to avoid N+1 queries
             $eventUids = collect($events)
@@ -405,9 +421,14 @@ class CalDAVService
                         continue;
                     }
 
-                    $sourceReason = empty($eventData['recurrence_id'])
-                        ? CalendarArrival::calDavReason($eventData, $settings['username'] ?? null)
-                        : null;
+                    // One occurrence moved or cancelled (RECURRENCE-ID) is the first of its UID
+                    // when the resource holds only overrides, and stands for the whole entry: its
+                    // CLASS and the owner's answer count, but a cancelled date is not a
+                    // cancelled series.
+                    $sourceReason = CalendarArrival::calDavReason($eventData, $settings['username'] ?? null);
+                    if (! empty($eventData['recurrence_id']) && $sourceReason === CalendarArrival::SOURCE_CANCELLED) {
+                        $sourceReason = null;
+                    }
 
                     // Check if event already exists by UID using the pre-fetched etag map.
                     // Use array_key_exists (not isset) because a stored etag can be null.
@@ -449,7 +470,7 @@ class CalDAVService
                         $changed = $rereading && $unchanged ? false : $this->updateEventFromCalDAV($eventData, $role);
 
                         // The calendar may now say it is private, or its text now carry a passcode.
-                        if ($existing && CalendarArrival::reconsider($existing->fresh() ?? $existing, $role, CalendarArrival::CALDAV, $sourceReason)) {
+                        if ($existing && CalendarArrival::reconsider($existing->fresh() ?? $existing, $role, CalendarArrival::CALDAV, $sourceReason, true)) {
                             $changed = true;
                         }
                         if ($existing) {
@@ -485,6 +506,10 @@ class CalDAVService
                         if ($existingByNameTime) {
                             continue;
                         }
+                    }
+
+                    if ($rereading) {
+                        continue;
                     }
 
                     // Marked private, declined or cancelled: not read in.
@@ -743,6 +768,7 @@ class CalDAVService
         );
 
         if (! $response->successful() && $response->status() !== 207) {
+            $this->reportFailed = true;
             Log::error('CalDAV REPORT request failed', [
                 'status' => $response->status(),
                 'body' => $this->sanitizeResponseBody($response->body()),

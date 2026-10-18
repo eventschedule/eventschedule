@@ -677,16 +677,34 @@ class MicrosoftCalendarService
         // Serialize inbound sync per role: the webhook job and the 15-min poll (or two
         // overlapping runs) could otherwise both import the same remote event as two local
         // events (the sync-row lookup + name/time fallback are not constraint-backed).
-        $rereading = $this->rereadAllowed && CalendarArrival::needsReread($role, CalendarArrival::MICROSOFT);
-        $this->inboundRereading = $rereading;
+        // Owed only by a sync that already has a delta link: one without reads the window anyway.
+        $rereading = $this->rereadAllowed && $role->microsoft_sync_token && CalendarArrival::needsReread($role, CalendarArrival::MICROSOFT);
+
+        // What changed comes first, through the stored delta link, so the full read after it only
+        // judges (GoogleCalendarService::syncFromGoogleCalendar() says why), and keeps no link.
+        $changes = null;
+        if ($rereading) {
+            $this->rereadAllowed = false;
+            try {
+                $changes = $this->syncFromMicrosoftCalendar($user, $role, $calendarId);
+            } finally {
+                $this->rereadAllowed = true;
+            }
+            if ($changes['errors'] > 0) {
+                return $changes;
+            }
+            $role->refresh();
+        }
+        $this->inboundRereading = (bool) $rereading;
 
         // A full read saves every entry in the window, which can outlast the usual five minutes.
         $lock = Cache::lock('microsoft-role-sync-'.$role->id, $rereading ? 900 : 300);
         if (! $lock->get()) {
             // Another inbound sync for this role is running; its deltaLink advance covers
             // these changes, so skipping is safe (not a lost update).
-            return $results;
+            return $changes ?? $results;
         }
+        $results = $changes ?? $results;
 
         $restarted = false;
 
@@ -813,10 +831,14 @@ class MicrosoftCalendarService
             // Targeted writes, not save(): a cursor is not a reason to run the schedule's saving
             // hook or to move its updated_at every fifteen minutes.
             if ($deltaLink) {
-                $role->writeOperationalColumns([
-                    'microsoft_sync_token' => $deltaLink,
-                    'microsoft_last_sync_at' => now(),
-                ]);
+                // Never the full read's link: the one the read of changes left is where the next
+                // read starts.
+                if (! $rereading) {
+                    $role->writeOperationalColumns([
+                        'microsoft_sync_token' => $deltaLink,
+                        'microsoft_last_sync_at' => now(),
+                    ]);
+                }
                 CalendarArrival::recordPull($role, CalendarArrival::MICROSOFT, $results, $this->inboundFirstPull);
 
                 if ($fullRead) {
@@ -944,12 +966,12 @@ class MicrosoftCalendarService
         }
 
         if ($existingEvent) {
-            // The one full read is for the privacy rules: it does not rewrite an event from an
-            // entry nobody changed, which would undo what the owner edited here since.
+            // The one full read only judges: what changed in the calendar was applied by the read
+            // of changes before it, and rewriting the rest would undo what the owner edited here.
             $changed = $this->inboundRereading ? false : $this->updateEventFromMicrosoft($item, $existingEvent, $role);
 
             // The calendar may now say it is private, or its text now carry a passcode.
-            if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::MICROSOFT, $sourceReason)) {
+            if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::MICROSOFT, $sourceReason, $existingSync !== null)) {
                 $changed = true;
             }
             CalendarExposureWatch::record($existingEvent);
@@ -963,6 +985,11 @@ class MicrosoftCalendarService
             }
 
             return $changed ? 'updated' : 'skipped';
+        }
+
+        // The full read only judges what is here; a new entry is the read of changes' to add.
+        if ($this->inboundRereading) {
+            return 'skipped';
         }
 
         // Marked private, declined, cancelled, or an out-of-office block: not read in.

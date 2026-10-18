@@ -156,14 +156,15 @@
                             <h3 class="privacy-step-title">@lang('messages.private_calendars_step_hide')</h3>
                             @if ($review?->hidden_at)
                             <p class="privacy-step-done">{{ __('messages.private_calendars_hidden_state', ['events' => $review->hidden_count, 'venues' => $review->venue_count]) }} · {{ $by($review->hidden_at, $review->hider) }}</p>
-                            @if ($review->kept_count > 0)
-                            <p class="privacy-step-text">{{ trans_choice('messages.private_calendars_kept_with_tickets', $review->kept_count, ['count' => $review->kept_count]) }}</p>
-                            @endif
                             @endif
                             @if ($publicCount > 0)
                             <p class="privacy-step-text">{{ trans_choice('messages.private_calendars_step_hide_text', $publicCount, ['count' => $publicCount]) }}@if ($stubCount > 0) {{ trans_choice('messages.private_calendars_step_hide_venues', $stubCount, ['count' => $stubCount]) }}@endif</p>
-                            @elseif (! $review?->hidden_at)
+                            @elseif ($publicNow === 0 && ! $review?->hidden_at)
                             <p class="privacy-step-text">@lang('messages.private_calendars_nothing_to_hide')</p>
+                            @endif
+                            {{-- What Hide leaves, as it stands now: never an event people hold tickets to. --}}
+                            @if ($publicNow > $publicCount)
+                            <p class="privacy-step-text">{{ trans_choice('messages.private_calendars_kept_with_tickets', $publicNow - $publicCount, ['count' => $publicNow - $publicCount]) }}</p>
                             @endif
                             <div class="privacy-step-actions">
                                 @if ($heldByUs > 0)

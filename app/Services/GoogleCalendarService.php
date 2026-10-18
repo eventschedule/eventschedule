@@ -886,14 +886,35 @@ class GoogleCalendarService
 
         // Serialize inbound sync per role: the webhook and the 15-min poll (or two overlapping runs)
         // could otherwise import the same event twice and race on the sync-token advance.
-        $rereading = $this->rereadAllowed && CalendarArrival::needsReread($role, CalendarArrival::GOOGLE);
-        $this->inboundRereading = $rereading;
+        // The one full read is owed only by a sync that already has a token: one without reads the
+        // whole window anyway.
+        $rereading = $this->rereadAllowed && $role->google_sync_token && CalendarArrival::needsReread($role, CalendarArrival::GOOGLE);
+
+        // What changed comes first, through the stored token, so the full read after it only
+        // judges: it neither applies an edit (that is the token's job, and skipping one there lost
+        // it) nor creates an entry it finds no event for (one the owner deleted here). Its own
+        // token is not kept, so nothing the read of changes has not seen is passed by.
+        $changes = null;
+        if ($rereading) {
+            $this->rereadAllowed = false;
+            try {
+                $changes = $this->syncFromGoogleCalendar($user, $role, $calendarId);
+            } finally {
+                $this->rereadAllowed = true;
+            }
+            if ($changes['errors'] > 0) {
+                return $changes;
+            }
+            $role->refresh();
+        }
+        $this->inboundRereading = (bool) $rereading;
 
         // A full read saves every entry in the window, which can outlast the usual two minutes.
         $lock = Cache::lock('google-role-sync-'.$role->id, $rereading ? 900 : 120);
         if (! $lock->get()) {
-            return $results;
+            return $changes ?? $results;
         }
+        $results = $changes ?? $results;
 
         try {
             if (! $this->refreshTokenIfNeeded($user)) {
@@ -1029,9 +1050,12 @@ class GoogleCalendarService
                 }
             }
 
-            // Persist the fresh token only after a clean, fully-paginated run.
+            // Persist the fresh token only after a clean, fully-paginated run, and never the full
+            // read's: the token the read of changes left is what the next read starts from.
             if ($nextSyncToken) {
-                $this->storeGoogleSyncToken($role, $nextSyncToken);
+                if (! $rereading) {
+                    $this->storeGoogleSyncToken($role, $nextSyncToken);
+                }
                 CalendarArrival::recordPull($role, CalendarArrival::GOOGLE, $results, $this->inboundFirstPull);
 
                 // A read that started with no token read the whole window: it was the full read.
@@ -1096,12 +1120,12 @@ class GoogleCalendarService
         }
 
         if ($existingEvent) {
-            // The one full read is for the privacy rules: it does not rewrite an event from an
-            // entry nobody changed, which would undo what the owner edited here since.
+            // The one full read only judges: what changed in the calendar was applied by the read
+            // of changes before it, and rewriting the rest would undo what the owner edited here.
             $changed = $this->inboundRereading ? false : $this->updateEventFromGoogle($existingEvent, $data, $role);
 
             // The calendar may now say it is private, or its text now carry a passcode.
-            if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::GOOGLE, $sourceReason)) {
+            if (CalendarArrival::reconsider($existingEvent, $role, CalendarArrival::GOOGLE, $sourceReason, $existingSync !== null)) {
                 $changed = true;
             }
             CalendarExposureWatch::record($existingEvent);
@@ -1120,6 +1144,8 @@ class GoogleCalendarService
                 $results['updated']++;
                 UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
             }
+        } elseif ($this->inboundRereading) {
+            // The full read only judges what is here; a new entry is the read of changes' to add.
         } elseif ($sourceReason !== null) {
             // Marked private, declined, or not an event at all: not read in.
             CalendarArrival::count($results, $sourceReason);

@@ -33,7 +33,10 @@
 </div>
 @endif
 
-<div class="space-y-3" data-calendar-publish="{{ $provider }}" data-waiting="{{ $waitingNow }}" @if (! $readsNow) hidden @endif>
+{{-- What the row was drawn with: RoleController::update() changes only what the owner changed. --}}
+<input type="hidden" name="{{ $provider }}_direction_rendered" value="{{ $direction }}">
+<input type="hidden" name="{{ $provider }}_publish_rendered" value="{{ $publishesNow ? '1' : '0' }}">
+<div class="space-y-3" data-calendar-publish="{{ $provider }}" @if ($waitingNow > 0) data-waiting-says="{{ trans_choice('messages.calendar_says_waiting_stay_drafts', $waitingNow, ['count' => number_format($waitingNow)]) }}" @endif @if (! $readsNow) hidden @endif>
     <x-toggle :name="$provider.'_publish_on_arrival'" :id="$provider.'-publish-on-arrival'"
         :label="__('messages.publish_on_arrival')" :checked="$publishesNow"
         :help="__('messages.publish_on_arrival_help')"

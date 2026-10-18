@@ -32,24 +32,33 @@ return new class extends Migration
 
         try {
             if (! Schema::hasTable('calendar_import_holds')) {
-                Schema::create('calendar_import_holds', function (Blueprint $table) {
-                    $table->id();
-                    $table->foreignId('event_id')->unique()->constrained()->cascadeOnDelete();
-                    $table->foreignId('role_id')->constrained()->cascadeOnDelete();
-                    $table->string('reason', 20);
-                    $table->string('was_visibility', 10)->nullable();
-                    $table->boolean('was_public')->default(false);
-                    $table->boolean('first_pull')->default(false);
-                    $table->foreignId('held_by')->nullable()->constrained('users')->nullOnDelete();
-                    $table->string('decision', 10)->nullable();
-                    $table->timestamp('decided_at')->nullable();
-                    $table->foreignId('decided_by')->nullable()->constrained('users')->nullOnDelete();
-                    $table->char('decided_hash', 40)->nullable();
-                    $table->timestamps();
+                try {
+                    Schema::create('calendar_import_holds', function (Blueprint $table) {
+                        $table->id();
+                        $table->foreignId('event_id')->unique()->constrained()->cascadeOnDelete();
+                        $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+                        $table->string('reason', 20);
+                        $table->string('was_visibility', 10)->nullable();
+                        $table->boolean('was_public')->default(false);
+                        $table->boolean('first_pull')->default(false);
+                        $table->foreignId('held_by')->nullable()->constrained('users')->nullOnDelete();
+                        $table->string('decision', 10)->nullable();
+                        $table->timestamp('decided_at')->nullable();
+                        $table->foreignId('decided_by')->nullable()->constrained('users')->nullOnDelete();
+                        $table->char('decided_hash', 40)->nullable();
+                        $table->timestamps();
 
-                    // What the schedule's notice and review page read: the holds still waiting.
-                    $table->index(['role_id', 'decided_at']);
-                });
+                        // What the schedule's notice and review page read: the holds still waiting.
+                        $table->index(['role_id', 'decided_at']);
+                    });
+                } catch (\Throwable $e) {
+                    // Each key and index is its own statement after CREATE TABLE. One that fails (a
+                    // lock wait on a busy table) leaves the table without it, and the next run would
+                    // pass it by. Nothing has written to it yet.
+                    Schema::dropIfExists('calendar_import_holds');
+
+                    throw $e;
+                }
             }
         } finally {
             DB::statement('SET SESSION lock_wait_timeout = '.(int) $previous);

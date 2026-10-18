@@ -128,6 +128,10 @@ class ScheduleCalendarReviewPageTest extends TestCase
 
         $this->assertFalse($plain->fresh()->is_draft);
         $this->assertTrue($details->fresh()->is_draft, 'meeting details are published one at a time');
+
+        // Done: the page stops saying it is publishing, and offers the button again.
+        $this->assertNull(\Illuminate\Support\Facades\Cache::get(PublishCalendarHolds::publishingKey($this->role->id)));
+        $this->review()->assertDontSeeText(trans_choice('messages.calendar_publishing_now', 1, ['count' => 1]));
     }
 
     public function test_only_the_owner_and_admins_review(): void
@@ -203,5 +207,22 @@ class ScheduleCalendarReviewPageTest extends TestCase
         $this->actingAs($this->owner)
             ->post(route('role.calendar_review.decide', ['subdomain' => $this->role->subdomain]), ['publish_one' => UrlUtils::encodeId($details->id)]);
         $this->assertFalse($details->fresh()->is_draft);
+    }
+
+    public function test_each_notice_names_the_calendar_its_own_events_came_from(): void
+    {
+        // Reading Outlook was paused, and a feed's event was hidden by the operator before the
+        // Outlook drafts: neither may lend its name to the drafts that are waiting.
+        $this->role->forceFill(['sync_direction' => null])->save();
+        $feed = $this->createEvent($this->role, ['name' => 'Feed item', 'is_draft' => true, 'import_source' => 'feed', 'creator_role_id' => $this->role->id]);
+        CalendarImportHold::create(['event_id' => $feed->id, 'role_id' => $this->role->id, 'reason' => CalendarPrivacy::HOLD_MEETING_DETAILS, 'was_visibility' => 'public', 'was_public' => true, 'held_by' => $this->owner->id]);
+        $this->held('Weekly sync', CalendarArrival::HOLD_REVIEW, null, ['import_source' => Event::IMPORT_MICROSOFT]);
+
+        $this->actingAs($this->owner)
+            ->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))
+            ->assertOk()
+            ->assertSee(trans_choice('messages.calendar_waiting_title', 1, ['count' => 1, 'provider' => __('messages.microsoft_calendar')]))
+            // Nothing reads Outlook now: no switch to point at.
+            ->assertDontSee(__('messages.publish_on_arrival'));
     }
 }

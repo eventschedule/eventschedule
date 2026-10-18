@@ -447,11 +447,20 @@ class CalendarArrival
         $hiddenByAdmin = $open()->where('was_public', true)->whereNotNull('held_by')->count();
 
         $settings = self::settings($role);
-        $provider = collect(self::readingProviders($role))->first()
-            ?? CalendarImportHold::where('calendar_import_holds.role_id', $role->id)->join('events', 'events.id', '=', 'calendar_import_holds.event_id')->value('events.import_source')
+        $reading = self::readingProviders($role);
+        // Each notice names the calendar its own events came from. Only a sync writes a hold that
+        // waits or one taken off by the sync (held_by null); an operator's hide can be on a feed's
+        // event, which has no calendar to name.
+        $sourceOf = fn ($query) => $query->join('events', 'events.id', '=', 'calendar_import_holds.event_id')
+            ->whereIn('events.import_source', self::PROVIDERS)
+            ->orderBy('calendar_import_holds.id')
+            ->value('events.import_source');
+        $provider = ($waiting ? $sourceOf($open()->where('was_public', false)) : null)
+            ?? collect($reading)->first()
             ?? self::GOOGLE;
+        $takenProvider = ($taken ? $sourceOf($open()->where('was_public', true)->whereNull('held_by')) : null) ?? $provider;
 
-        $confirm = collect(self::readingProviders($role))->first(fn ($p) => $settings->{"{$p}_publishes"}
+        $confirm = collect($reading)->first(fn ($p) => $settings->{"{$p}_publishes"}
             && $settings->{"{$p}_publish_confirmed_at"} === null
             && self::isMainCalendar($role, $p));
 
@@ -461,6 +470,11 @@ class CalendarArrival
 
         return [
             'provider' => $provider,
+            // Whether that calendar is being read now: a paused sync puts nothing back by itself,
+            // and its switch is hidden.
+            'reads' => in_array($provider, $reading, true),
+            'taken_provider' => $takenProvider,
+            'taken_reads' => in_array($takenProvider, $reading, true),
             'waiting' => $waiting,
             'held' => $held,
             'review' => $waiting - $held,
@@ -637,9 +651,21 @@ class CalendarArrival
      * published as it stands; put it back when the reason has gone and the hide was the sync's own.
      * True when it changed what the page shows.
      */
-    public static function reconsider(Event $event, Role $role, string $provider, ?string $sourceReason): bool
+    public static function reconsider(Event $event, Role $role, string $provider, ?string $sourceReason, bool $byMapping = false): bool
     {
-        if (! self::tablesReady() || ! $event->cameFromCalendarSync($provider, $role) || $event->is_cancelled) {
+        // An event read in before import_source existed (2026-10-04) carries no source, and the
+        // mapping row that matched it is written by a push too. What the calendar SAYS about the
+        // entry (private, declined, not an event) cannot be our own push coming back, Unlisted
+        // aside, which is handled below, so those still count for it. Its text does not: a
+        // passcode in an event made here and pushed out is the owner's own, and Teams adds one
+        // to what is pushed. Those are left to /admin/private-calendars, which lists them.
+        $unlabelled = $byMapping
+            && $event->import_source === null
+            && (int) $event->creator_role_id === (int) $role->id
+            && $event->created_at !== null
+            && $event->created_at->lt(\Carbon\Carbon::parse(CalendarExposureWatch::UNLABELLED_BEFORE));
+
+        if (! self::tablesReady() || ! ($unlabelled || $event->cameFromCalendarSync($provider, $role)) || $event->is_cancelled) {
             return false;
         }
 
@@ -653,7 +679,7 @@ class CalendarArrival
             $sourceReason = null;
         }
 
-        $content = CalendarPrivacy::holdReason(CalendarPrivacy::findings($event->name, $event->description, null));
+        $content = $unlabelled ? null : CalendarPrivacy::holdReason(CalendarPrivacy::findings($event->name, $event->description, null));
         $published = $hold && $hold->decision === self::DECISION_PUBLISHED
             && $hold->decided_hash === self::decisionHash($event);
 
@@ -740,6 +766,21 @@ class CalendarArrival
         self::pushToMembers($event, 'create');
 
         return true;
+    }
+
+    /**
+     * Where publishing a held event puts it: back to Unlisted when that is what it was (its
+     * password was kept for this), and Public otherwise.
+     */
+    public static function publishedState(Event $event): string
+    {
+        if (! self::tablesReady() || ! $event->exists) {
+            return 'public';
+        }
+
+        $was = CalendarImportHold::where('event_id', $event->id)->whereNull('decided_at')->value('was_visibility');
+
+        return $was === 'unlisted' ? 'unlisted' : 'public';
     }
 
     /**

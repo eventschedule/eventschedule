@@ -52,7 +52,8 @@
         {!! $triangle !!}
         <div class="min-w-0 flex-1 text-sm text-amber-900 dark:text-amber-100">
             <p class="font-semibold">{{ trans_choice('messages.calendar_taken_off_title', $calendarNotice['taken'], ['count' => number_format($calendarNotice['taken'])]) }}</p>
-            <p class="mt-1">{{ __('messages.calendar_taken_off_body', ['provider' => \App\Services\CalendarArrival::providerName($calendarNotice['provider'])]) }}</p>
+            {{-- "Comes back by itself" only while the sync reads that calendar. --}}
+            <p class="mt-1">{{ __($calendarNotice['taken_reads'] ? 'messages.calendar_taken_off_body' : 'messages.calendar_taken_off_body_paused', ['provider' => \App\Services\CalendarArrival::providerName($calendarNotice['taken_provider'])]) }}</p>
             @if ($calendarNotice['taken_events']->isNotEmpty())
             <ul class="mt-2 space-y-0.5" v-pre>
                 @foreach ($calendarNotice['taken_events'] as $takenEvent)
@@ -120,7 +121,7 @@
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                @if (! $calendarNotice['publishes'] && $isOwner)
+                @if (! $calendarNotice['publishes'] && $calendarNotice['reads'] && $isOwner)
                 <x-link :href="$rowUrl($calendarNotice['provider'])">{{ __('messages.publish_on_arrival') }}</x-link>
                 @endif
                 <x-brand-link :href="$reviewUrl">{{ trans_choice('messages.calendar_review_button', $calendarNotice['waiting'], ['count' => number_format($calendarNotice['waiting'])]) }}</x-brand-link>

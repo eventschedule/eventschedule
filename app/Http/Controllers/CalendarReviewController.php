@@ -70,7 +70,7 @@ class CalendarReviewController extends Controller
             'more' => $more,
             'counts' => $counts,
             'reviewCount' => self::query($role, 'waiting')->where('reason', CalendarArrival::HOLD_REVIEW)->count(),
-            'publishingCount' => (int) Cache::get(self::publishingKey($role), 0),
+            'publishingCount' => (int) Cache::get(PublishCalendarHolds::publishingKey($role->id), 0),
         ]);
     }
 
@@ -152,23 +152,18 @@ class CalendarReviewController extends Controller
 
         $ids = self::query($role, 'waiting')->where('reason', CalendarArrival::HOLD_REVIEW)->pluck('calendar_import_holds.event_id');
         $count = $ids->count();
+
+        // The page says it is under way, and does not offer the button again meanwhile. Set first:
+        // on a queue that runs at once (selfhost's default) the last chunk clears it.
+        if ($count > 0) {
+            Cache::put(PublishCalendarHolds::publishingKey($role->id), $count, now()->addMinutes(10));
+        }
         foreach ($ids->chunk(PublishCalendarHolds::CHUNK) as $chunk) {
             PublishCalendarHolds::dispatch($role->id, $request->user()->id, $chunk->values()->all());
         }
 
-        // The page says it is under way, and does not offer the button again meanwhile.
-        if ($count > 0) {
-            Cache::put(self::publishingKey($role), $count, now()->addMinutes(10));
-        }
-
         return redirect()->route('role.calendar_review', ['subdomain' => $role->subdomain])
             ->with('success', trans_choice('messages.calendar_publishing_now', $count, ['count' => number_format($count)]));
-    }
-
-    /** Where "Publish all is under way" is kept for a few minutes. */
-    public static function publishingKey(Role $role): string
-    {
-        return 'calendar_review.publishing.'.$role->id;
     }
 
     /**

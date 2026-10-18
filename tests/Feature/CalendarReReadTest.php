@@ -77,16 +77,18 @@ class CalendarReReadTest extends TestCase
         return $entry;
     }
 
-    /** A Google service whose calendar answers with $items, recording what it was asked. */
-    private function google(array $items, array &$asked): GoogleCalendarService
+    /**
+     * A Google service whose calendar answers a read of the whole window with $items and a read
+     * through a sync token with $changed (what changed since), recording what it was asked.
+     */
+    private function google(array $items, array &$asked, array $changed = []): GoogleCalendarService
     {
-        $page = new Events;
-        $page->setItems($items);
-        $page->setNextSyncToken('fresh-token');
-
         $events = Mockery::mock();
-        $events->shouldReceive('listEvents')->andReturnUsing(function ($calendarId, $params) use ($page, &$asked) {
+        $events->shouldReceive('listEvents')->andReturnUsing(function ($calendarId, $params) use ($items, $changed, &$asked) {
             $asked[] = $params;
+            $page = new Events;
+            $page->setItems(isset($params['syncToken']) ? $changed : $items);
+            $page->setNextSyncToken(isset($params['syncToken']) ? 'changes-token' : 'window-token');
 
             return $page;
         });
@@ -109,15 +111,18 @@ class CalendarReReadTest extends TestCase
         $service->rereadAllowed = true;
         $service->syncFromGoogleCalendar($owner, $role->fresh(), 'primary');
 
-        $this->assertArrayNotHasKey('syncToken', $asked[0], 'the stored token only sees what changed');
-        $this->assertArrayHasKey('timeMin', $asked[0]);
+        // What changed first, through the stored token; then the whole window, which the stored
+        // token alone never shows again.
+        $this->assertSame('old-token', $asked[0]['syncToken']);
+        $this->assertArrayNotHasKey('syncToken', $asked[1]);
+        $this->assertArrayHasKey('timeMin', $asked[1]);
 
         $this->assertTrue($event->fresh()->is_draft);
         $hold = CalendarImportHold::where('event_id', $event->id)->first();
         $this->assertSame(CalendarPrivacy::HOLD_MEETING_DETAILS, $hold->reason);
         $this->assertSame('public', $hold->was_visibility);
 
-        $this->assertSame('fresh-token', $role->fresh()->google_sync_token);
+        $this->assertSame('changes-token', $role->fresh()->google_sync_token, 'the full read keeps no token of its own');
         $this->assertNotNull(CalendarSyncSetting::where('role_id', $role->id)->value('google_reread_at'));
         $this->assertFalse(CalendarArrival::needsReread($role->fresh(), CalendarArrival::GOOGLE));
         $this->assertNull(CalendarSyncSetting::where('role_id', $role->id)->value('google_first_pull'), 'a full read of an old sync is not its first');
@@ -147,14 +152,20 @@ class CalendarReReadTest extends TestCase
         $this->assertSame('old-token', $asked[0]['syncToken']);
     }
 
-    public function test_outlook_starts_its_full_read_from_the_window_not_the_delta_link(): void
+    public function test_outlook_reads_what_changed_then_the_window(): void
     {
         [$owner, $role, $event] = $this->publishingScheduleWithAPublicEntry(['sync_direction' => null, 'microsoft_sync_direction' => 'from', 'microsoft_sync_token' => 'https://graph.microsoft.com/v1.0/me/calendarView/delta?$deltatoken=old']);
         MicrosoftCalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'microsoft_event_id' => 'm-1']);
 
         $at = \Carbon\Carbon::parse($event->starts_at, 'UTC');
-        Http::fake(function ($request) use ($event, $at) {
-            $this->assertStringNotContainsString('deltatoken=old', $request->url());
+        $urls = [];
+        Http::fake(function ($request) use ($event, $at, &$urls) {
+            $urls[] = $request->url();
+
+            // The stored delta link: nothing changed since. The window: every entry in it.
+            if (str_contains($request->url(), 'deltatoken=old')) {
+                return Http::response(['value' => [], '@odata.deltaLink' => 'https://graph.microsoft.com/v1.0/me/calendarView/delta?$deltatoken=changes']);
+            }
 
             return Http::response([
                 'value' => [[
@@ -164,7 +175,7 @@ class CalendarReReadTest extends TestCase
                     'start' => ['dateTime' => $at->format('Y-m-d\TH:i:s'), 'timeZone' => 'UTC'],
                     'end' => ['dateTime' => $at->copy()->addHour()->format('Y-m-d\TH:i:s'), 'timeZone' => 'UTC'],
                 ]],
-                '@odata.deltaLink' => 'https://graph.microsoft.com/v1.0/me/calendarView/delta?$deltatoken=fresh',
+                '@odata.deltaLink' => 'https://graph.microsoft.com/v1.0/me/calendarView/delta?$deltatoken=window',
             ]);
         });
 
@@ -173,8 +184,10 @@ class CalendarReReadTest extends TestCase
         $service->rereadAllowed = true;
         $service->syncFromMicrosoftCalendar($owner, $role->fresh(), null);
 
+        $this->assertStringContainsString('deltatoken=old', $urls[0]);
+        $this->assertStringContainsString('startDateTime', $urls[1]);
         $this->assertTrue($event->fresh()->is_draft);
-        $this->assertStringContainsString('deltatoken=fresh', $role->fresh()->microsoft_sync_token);
+        $this->assertStringContainsString('deltatoken=changes', $role->fresh()->microsoft_sync_token, 'the full read keeps no link of its own');
         $this->assertFalse(CalendarArrival::needsReread($role->fresh(), CalendarArrival::MICROSOFT));
     }
 
@@ -236,6 +249,67 @@ class CalendarReReadTest extends TestCase
         $service = $this->google([], $asked);
         $service->rereadAllowed = true;
         $service->syncFromGoogleCalendar($owner, $role->fresh(), 'public@group.calendar.google.com');
-        $this->assertArrayNotHasKey('pageToken', $asked[0]);
+        $this->assertArrayNotHasKey('pageToken', end($asked));
+    }
+
+    public function test_a_change_made_in_the_calendar_is_applied_while_the_full_read_is_due(): void
+    {
+        [$owner, $role, $event] = $this->publishingScheduleWithAPublicEntry(['sync_direction' => 'from', 'google_sync_token' => 'old-token']);
+        $event->forceFill(['description' => 'Doors at seven.'])->save();
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'google_event_id' => 'g-1', 'google_calendar_id' => 'primary']);
+
+        // The owner renamed the meeting in Google since the last read.
+        $moved = $this->googleEntry($event);
+        $moved->setSummary('Open rehearsal, new room');
+        $moved->setDescription('Doors at seven.');
+
+        $asked = [];
+        $service = $this->google([$moved], $asked, [$moved]);
+        $service->rereadAllowed = true;
+        $service->syncFromGoogleCalendar($owner, $role->fresh(), 'primary');
+
+        $this->assertSame('Open rehearsal, new room', $event->fresh()->name, 'skipped by the full read, it was never applied');
+        $this->assertFalse(CalendarArrival::needsReread($role->fresh(), CalendarArrival::GOOGLE));
+    }
+
+    public function test_the_full_read_does_not_bring_back_an_event_deleted_here(): void
+    {
+        [$owner, $role, $event] = $this->publishingScheduleWithAPublicEntry(['sync_direction' => 'from', 'google_sync_token' => 'old-token']);
+        $entry = $this->googleEntry($event);
+        $entry->setSummary('Rehearsal');
+        $entry->setDescription('Bring a friend.');
+        $event->delete();
+
+        $asked = [];
+        $service = $this->google([$entry], $asked);
+        $service->rereadAllowed = true;
+        $service->syncFromGoogleCalendar($owner, $role->fresh(), 'primary');
+
+        $this->assertSame(0, Event::where('name', 'Rehearsal')->count(), 'on a sync that publishes it went straight back on the page');
+    }
+
+    public function test_an_entry_read_in_before_its_source_was_recorded_is_judged_on_what_the_calendar_says(): void
+    {
+        [$owner, $role, $event] = $this->publishingScheduleWithAPublicEntry(['sync_direction' => 'from', 'google_sync_token' => 'old-token']);
+        // Read in in September: no import_source, only the mapping row.
+        $event->forceFill(['import_source' => null, 'created_at' => '2026-09-01 10:00:00'])->save();
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'google_event_id' => 'g-1', 'google_calendar_id' => 'primary']);
+        $codes = $this->createEvent($role, ['name' => 'Made here', 'description' => 'Passcode: 123456', 'creator_role_id' => $role->id]);
+        $codes->forceFill(['import_source' => null, 'created_at' => '2026-09-01 10:00:00'])->save();
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $codes->id, 'role_id' => $role->id, 'google_event_id' => 'g-2', 'google_calendar_id' => 'primary']);
+
+        $private = $this->googleEntry($event);
+        $private->setVisibility('private');
+        $pushed = $this->googleEntry($codes);
+        $pushed->setId('g-2');
+
+        $asked = [];
+        $service = $this->google([$private, $pushed], $asked);
+        $service->rereadAllowed = true;
+        $service->syncFromGoogleCalendar($owner, $role->fresh(), 'primary');
+
+        $this->assertTrue($event->fresh()->is_draft, 'the calendar marks it private');
+        // A mapping row is written by a push too: a passcode in an event made here is the owner's.
+        $this->assertFalse($codes->fresh()->is_draft);
     }
 }

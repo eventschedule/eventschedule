@@ -144,4 +144,40 @@ class CalendarPublishSwitchTest extends TestCase
         $this->assertTrue(CalendarArrival::publishes($role->fresh(), CalendarArrival::CALDAV));
         $this->assertNull(CalendarSyncSetting::where('role_id', $role->id)->value('caldav_publish_confirmed_at'), 'only "Keep publishing" answers it');
     }
+
+    public function test_a_tab_opened_before_the_operator_paused_reading_does_not_start_it_again(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->caldavSchedule($owner);
+        CalendarArrival::setPublishing($role, CalendarArrival::CALDAV, true);
+
+        // The operator pauses: reading stops and the owner's word is taken back.
+        $role->writeOperationalColumns(['caldav_sync_direction' => null]);
+        CalendarArrival::setPublishing($role->fresh(), CalendarArrival::CALDAV, false);
+
+        // The page drawn before that, saved for something else.
+        $this->save($owner, $role->fresh(), [
+            'caldav_integration_submitted' => 1,
+            'caldav_sync_direction' => 'from', 'caldav_direction_rendered' => 'from',
+            'caldav_publish_on_arrival' => 1, 'caldav_publish_rendered' => 1,
+        ])->assertRedirect();
+
+        $this->assertNull($role->fresh()->caldav_sync_direction);
+        $this->assertFalse(CalendarArrival::publishes($role->fresh(), CalendarArrival::CALDAV));
+    }
+
+    public function test_what_the_owner_changes_on_the_page_is_still_saved(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->caldavSchedule($owner, null);
+
+        $this->save($owner, $role, [
+            'caldav_integration_submitted' => 1,
+            'caldav_sync_direction' => 'from', 'caldav_direction_rendered' => '',
+            'caldav_publish_on_arrival' => 1, 'caldav_publish_rendered' => 0,
+        ])->assertRedirect();
+
+        $this->assertSame('from', $role->fresh()->caldav_sync_direction);
+        $this->assertTrue(CalendarArrival::publishes($role->fresh(), CalendarArrival::CALDAV));
+    }
 }

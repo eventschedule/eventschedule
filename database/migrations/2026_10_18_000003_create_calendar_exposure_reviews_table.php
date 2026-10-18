@@ -28,23 +28,32 @@ return new class extends Migration
 
         try {
             if (! Schema::hasTable('calendar_exposure_reviews')) {
-                Schema::create('calendar_exposure_reviews', function (Blueprint $table) {
-                    $table->id();
-                    $table->foreignId('role_id')->unique()->constrained()->cascadeOnDelete();
-                    $table->timestamp('reviewed_at')->nullable();
-                    $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
-                    $table->timestamp('hidden_at')->nullable();
-                    $table->foreignId('hidden_by')->nullable()->constrained('users')->nullOnDelete();
-                    $table->unsignedInteger('hidden_count')->default(0);
-                    $table->unsignedInteger('kept_count')->default(0);
-                    $table->unsignedInteger('venue_count')->default(0);
-                    $table->timestamp('paused_at')->nullable();
-                    $table->foreignId('paused_by')->nullable()->constrained('users')->nullOnDelete();
-                    $table->timestamp('emailed_at')->nullable();
-                    $table->foreignId('emailed_by')->nullable()->constrained('users')->nullOnDelete();
-                    $table->json('emailed_kinds')->nullable();
-                    $table->timestamps();
-                });
+                try {
+                    Schema::create('calendar_exposure_reviews', function (Blueprint $table) {
+                        $table->id();
+                        $table->foreignId('role_id')->unique()->constrained()->cascadeOnDelete();
+                        $table->timestamp('reviewed_at')->nullable();
+                        $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+                        $table->timestamp('hidden_at')->nullable();
+                        $table->foreignId('hidden_by')->nullable()->constrained('users')->nullOnDelete();
+                        $table->unsignedInteger('hidden_count')->default(0);
+                        $table->unsignedInteger('kept_count')->default(0);
+                        $table->unsignedInteger('venue_count')->default(0);
+                        $table->timestamp('paused_at')->nullable();
+                        $table->foreignId('paused_by')->nullable()->constrained('users')->nullOnDelete();
+                        $table->timestamp('emailed_at')->nullable();
+                        $table->foreignId('emailed_by')->nullable()->constrained('users')->nullOnDelete();
+                        $table->json('emailed_kinds')->nullable();
+                        $table->timestamps();
+                    });
+                } catch (\Throwable $e) {
+                    // Each key and index is its own statement after CREATE TABLE. One that fails (a
+                    // lock wait on a busy table) leaves the table without it, and the next run would
+                    // pass it by. Nothing has written to it yet.
+                    Schema::dropIfExists('calendar_exposure_reviews');
+
+                    throw $e;
+                }
             }
         } finally {
             DB::statement('SET SESSION lock_wait_timeout = '.(int) $previous);

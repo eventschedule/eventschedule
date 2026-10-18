@@ -39,6 +39,54 @@ class CalendarPrivacyMail extends Mailable
         public ?string $provider,
     ) {}
 
+    /**
+     * The steps that apply, in order, each with where it is done; the first one's is the button.
+     * Choosing a calendar is for a calendar sync (CalDAV's is made again, it has no chooser).
+     * Checking the hidden events is for when some were hidden, and taking them off the page for
+     * when none were: they are still public. Turning the sync back on is for a paused one.
+     *
+     * @return non-empty-list<array{title: string, text: string, url: ?string, link: ?string}>
+     */
+    public static function steps(?string $sync, int $hidden, bool $paused, string $chooseUrl, string $reviewUrl, string $scheduleUrl): array
+    {
+        $steps = [];
+
+        if ($sync) {
+            $caldav = $sync === CalendarArrival::CALDAV;
+            $steps[] = [
+                'title' => __('messages.calendar_privacy_mail_step_choose_title'),
+                'text' => __($caldav ? 'messages.calendar_privacy_mail_step_choose_caldav' : 'messages.calendar_privacy_mail_step_choose'),
+                'url' => $chooseUrl,
+                'link' => __($caldav ? 'messages.calendar_privacy_mail_action_caldav' : 'messages.calendar_privacy_mail_action'),
+            ];
+        }
+
+        $steps[] = $hidden > 0
+            ? [
+                'title' => __('messages.calendar_privacy_mail_step_check_title'),
+                'text' => __('messages.calendar_privacy_mail_step_check'),
+                'url' => $reviewUrl,
+                'link' => __('messages.calendar_privacy_mail_step_check_link'),
+            ]
+            : [
+                'title' => __('messages.calendar_privacy_mail_step_unpublish_title'),
+                'text' => __('messages.calendar_privacy_mail_step_unpublish'),
+                'url' => $scheduleUrl,
+                'link' => __('messages.calendar_privacy_mail_step_unpublish_link'),
+            ];
+
+        if ($paused) {
+            $steps[] = [
+                'title' => __('messages.calendar_privacy_mail_step_resume_title'),
+                'text' => __('messages.calendar_privacy_mail_step_resume'),
+                'url' => null,
+                'link' => null,
+            ];
+        }
+
+        return $steps;
+    }
+
     public function envelope(): Envelope
     {
         $support = config('app.support_email');
@@ -74,6 +122,8 @@ class CalendarPrivacyMail extends Mailable
                 'pageUrl' => $this->role->getGuestUrl(true),
                 'chooseUrl' => $chooseUrl,
                 'reviewUrl' => $reviewUrl,
+                // Where the owner takes events off the page themselves, when nothing was hidden.
+                'scheduleUrl' => route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']),
                 // The calendar sync behind it, or null for a feed or a one-time import, which has
                 // no calendar to choose and no sync to turn back on.
                 'sync' => in_array($this->provider, CalendarArrival::PROVIDERS, true) ? $this->provider : null,

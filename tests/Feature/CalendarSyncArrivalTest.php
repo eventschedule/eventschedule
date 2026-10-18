@@ -470,4 +470,61 @@ class CalendarSyncArrivalTest extends TestCase
         $this->assertTrue($hold->first_pull, 'a first read\'s backlog is not news to followers');
         $this->assertSame(CalendarArrival::DECISION_RELEASED, $hold->decision);
     }
+
+    public function test_a_caldav_server_that_does_not_answer_is_not_an_empty_calendar(): void
+    {
+        [, $role] = $this->schedule(['sync_direction' => null, 'caldav_sync_direction' => 'from']);
+        $role->forceFill([
+            'caldav_settings' => ['server_url' => 'https://dav.example.org', 'username' => 'me@example.org', 'password' => 'p', 'calendar_url' => 'https://dav.example.org/cal'],
+            'caldav_last_sync_at' => now()->subHour(),
+        ])->save();
+        $this->assertTrue(CalendarArrival::needsReread($role->fresh(), CalendarArrival::CALDAV));
+
+        $service = Mockery::mock(CalDAVService::class, [app(EventRepo::class)])->makePartial()->shouldAllowMockingProtectedMethods();
+        $service->shouldReceive('makeRequest')->andReturn(new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(401)));
+        $service->rereadAllowed = true;
+
+        $results = $service->syncFromCalDAV($role->fresh());
+
+        $this->assertSame(1, $results['errors']);
+        $this->assertTrue(CalendarArrival::needsReread($role->fresh(), CalendarArrival::CALDAV), 'it read nothing, so it is not done');
+    }
+
+    public function test_a_caldav_override_that_comes_first_still_carries_its_class(): void
+    {
+        [, $role] = $this->schedule(['sync_direction' => null, 'caldav_sync_direction' => 'from']);
+        $role->forceFill(['caldav_settings' => ['server_url' => 'https://dav.example.org', 'username' => 'me@example.org', 'password' => 'p', 'calendar_url' => 'https://dav.example.org/cal']])->save();
+        CalendarArrival::setPublishing($role->fresh(), CalendarArrival::CALDAV, true);
+
+        $at = now()->addDays(5)->setTime(18, 0);
+        $service = Mockery::mock(CalDAVService::class, [app(EventRepo::class)])->makePartial()->shouldAllowMockingProtectedMethods();
+        // An invitation to one occurrence: the resource holds the override and nothing else.
+        $service->shouldReceive('getEventsFromCalDAV')->andReturn([[
+            'uid' => 'c-1', 'etag' => null, 'summary' => 'Therapy', 'description' => '', 'location' => null,
+            'start' => $at->copy(), 'end' => $at->copy()->addHour(), 'duration' => 1, 'attendees' => [],
+            'recurrence_id' => $at->format('Ymd\THis\Z'), 'class' => 'PRIVATE',
+        ]]);
+
+        $service->syncFromCalDAV($role->fresh());
+
+        $this->assertSame(0, Event::where('name', 'Therapy')->count());
+    }
+
+    public function test_publishing_an_unlisted_event_that_was_taken_off_puts_it_back_unlisted(): void
+    {
+        [$owner, $role] = $this->schedule(['sync_direction' => 'both']);
+        CalendarArrival::setPublishing($role, CalendarArrival::GOOGLE, true);
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Members preview'));
+        $event = $this->synced($role, 'g-1');
+        $event->setVisibilityState('unlisted');
+        $event->event_password = 'secret';
+        $event->save();
+        $this->pullGoogle($role, $this->googleEntry('g-1', 'Members preview', ['visibility' => 'private', 'description' => 'Passcode: 123456']));
+        $this->assertTrue($event->fresh()->is_draft);
+
+        app(\App\Services\EventLifecycleService::class)->publish($event->fresh(), $owner->id, $role->fresh());
+
+        $this->assertSame('unlisted', $event->fresh()->visibilityState(), 'it was listed for everybody');
+        $this->assertSame('secret', $event->fresh()->event_password);
+    }
 }

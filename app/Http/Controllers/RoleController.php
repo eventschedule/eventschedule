@@ -5474,6 +5474,18 @@ class RoleController extends Controller
             $request->files->remove('new_sponsor_logos');
         }
 
+        // A calendar row posts the direction it was drawn with (role/partials/calendar-publish-
+        // switch). When that is what is posted, the owner left the radios alone, and a direction
+        // that changed since the page was opened (the operator paused reading, a transfer stopped
+        // it) stays as it is: a tab left open must not start reading the calendar again.
+        foreach (['google' => 'sync_direction', 'microsoft' => 'microsoft_sync_direction', 'caldav' => 'caldav_sync_direction'] as $provider => $field) {
+            if ($request->has("{$provider}_direction_rendered") && $request->has($field)
+                && (string) $request->input($field) === (string) $request->input("{$provider}_direction_rendered")
+                && (string) $role->{$field} !== (string) $request->input("{$provider}_direction_rendered")) {
+                $request->merge([$field => $role->{$field}]);
+            }
+        }
+
         // Guard custom_css behind Pro plan
         if (! $role->isPro()) {
             $request->merge(['custom_css' => $role->custom_css]);
@@ -5742,7 +5754,7 @@ class RoleController extends Controller
         // Only from a page that drew the switch: one opened before it existed posts the row's
         // marker and no switch, which would read as "off" and quietly stop a sync that publishes.
         if ($googleSubmitted && ! is_demo_mode() && $request->has('google_publish_on_arrival')) {
-            $this->savePublishOnArrival($role, CalendarArrival::GOOGLE, $newSyncDirection, $oldSyncDirection, $request->boolean('google_publish_on_arrival'));
+            $this->savePublishOnArrival($role, CalendarArrival::GOOGLE, $newSyncDirection, $oldSyncDirection, $request->boolean('google_publish_on_arrival'), $request->input('google_publish_rendered'));
         }
 
         // If sync_direction or calendar changed, handle webhook management
@@ -5769,7 +5781,7 @@ class RoleController extends Controller
             }
 
             if (! is_demo_mode() && $request->has('microsoft_publish_on_arrival')) {
-                $this->savePublishOnArrival($role, CalendarArrival::MICROSOFT, $newMicrosoftSyncDirection, $oldMicrosoftSyncDirection, $request->boolean('microsoft_publish_on_arrival'));
+                $this->savePublishOnArrival($role, CalendarArrival::MICROSOFT, $newMicrosoftSyncDirection, $oldMicrosoftSyncDirection, $request->boolean('microsoft_publish_on_arrival'), $request->input('microsoft_publish_rendered'));
             }
 
             // Handle subscription management whenever the direction (incl. to "no sync") or the
@@ -5784,7 +5796,7 @@ class RoleController extends Controller
         // CalDAV's direction is a field of this form (its connection is made on the page by
         // CalDAVController); the switch beside it is saved here, behind its own marker.
         if ($isOwner && $request->has('caldav_integration_submitted') && $request->has('caldav_publish_on_arrival') && ! is_demo_mode()) {
-            $this->savePublishOnArrival($role, CalendarArrival::CALDAV, $role->caldav_sync_direction, $role->getOriginal('caldav_sync_direction'), $request->boolean('caldav_publish_on_arrival'));
+            $this->savePublishOnArrival($role, CalendarArrival::CALDAV, $role->caldav_sync_direction, $role->getOriginal('caldav_sync_direction'), $request->boolean('caldav_publish_on_arrival'), $request->input('caldav_publish_rendered'));
         }
 
         // Only a CHANGE is cleaned, and the outer guard is load-bearing now that cleanSubdomain()
@@ -8954,9 +8966,20 @@ class RoleController extends Controller
      * choosing another one by any path falls back to drafts. Choosing a direction also answers
      * a pause or a change of owner that stopped the reading.
      */
-    private function savePublishOnArrival(Role $role, string $provider, ?string $direction, ?string $oldDirection, bool $wanted): void
+    private function savePublishOnArrival(Role $role, string $provider, ?string $direction, ?string $oldDirection, bool $wanted, ?string $rendered = null): void
     {
         $reads = in_array($direction, ['from', 'both'], true);
+
+        if ($direction !== $oldDirection) {
+            CalendarArrival::clearStopped($role, $provider);
+        }
+
+        // The switch as the page drew it: left as it was, it says nothing. Otherwise a tab opened
+        // before the operator paused the sync (which takes the owner's word back) would give it
+        // again with the next save. A page from before this was posted has no such field.
+        if ($rendered !== null && (bool) $rendered === $wanted) {
+            return;
+        }
 
         // Only a CHANGE is the owner's word. The rows post on every save the owner makes, from any
         // tab, and a sync carried over from before drafts renders with the switch on: answering
@@ -8968,10 +8991,6 @@ class RoleController extends Controller
             }
         } elseif (CalendarArrival::tablesReady() && CalendarArrival::settings($role)->{"{$provider}_publishes"}) {
             CalendarArrival::setPublishing($role, $provider, false);
-        }
-
-        if ($direction !== $oldDirection) {
-            CalendarArrival::clearStopped($role, $provider);
         }
     }
 

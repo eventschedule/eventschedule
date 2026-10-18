@@ -91,4 +91,34 @@ class CalendarPrivacyMailTest extends TestCase
         // Replies reach the operator, not the platform's no-reply.
         $this->assertSame(config('app.support_email'), $mail->envelope()->replyTo[0]->address);
     }
+
+    public function test_with_nothing_hidden_it_asks_the_owner_to_take_the_events_off_their_page(): void
+    {
+        [$owner, $role] = $this->schedule();
+
+        $mail = new CalendarPrivacyMail($role, $owner, [CalendarPrivacy::ACCESS_CODES], 0, false, CalendarArrival::GOOGLE);
+        $html = $mail->render();
+        $text = view('emails.calendar_privacy_text', $mail->content()->with)->render();
+
+        // They are still public, and the review page would say nothing is waiting.
+        $this->assertStringContainsString(e(__('messages.calendar_privacy_mail_step_unpublish_title')), $html);
+        $this->assertStringNotContainsString(e(__('messages.calendar_privacy_mail_step_check_title')), $html);
+        $this->assertStringContainsString(e(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])), $html);
+        $this->assertStringNotContainsString(e(route('role.calendar_review', ['subdomain' => $role->subdomain])), $html);
+        $this->assertStringContainsString(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']), $text);
+    }
+
+    public function test_a_caldav_sync_is_sent_to_its_settings_and_a_feed_to_its_schedule(): void
+    {
+        [$owner, $role] = $this->schedule();
+
+        $caldav = (new CalendarPrivacyMail($role, $owner, [CalendarPrivacy::ACCESS_CODES], 2, true, CalendarArrival::CALDAV))->render();
+        $this->assertStringContainsString(e(__('messages.calendar_privacy_mail_action_caldav')), $caldav);
+        $this->assertStringContainsString(e(__('messages.calendar_privacy_mail_step_choose_caldav')), $caldav);
+        $this->assertStringNotContainsString(e(__('messages.calendar_privacy_mail_action')).'<', $caldav);
+
+        $feed = (new CalendarPrivacyMail($role, $owner, [CalendarPrivacy::ACCESS_CODES], 0, false, 'feed'))->render();
+        $this->assertStringNotContainsString(e(__('messages.calendar_privacy_mail_step_choose_title')), $feed);
+        $this->assertStringContainsString(e(__('messages.calendar_privacy_mail_step_unpublish_link')), $feed);
+    }
 }

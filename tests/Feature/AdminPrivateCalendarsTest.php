@@ -179,10 +179,15 @@ class AdminPrivateCalendarsTest extends TestCase
         $this->assertSame([2, 1, 1], [$review->hidden_count, $review->kept_count, $review->venue_count]);
         $this->assertTrue(AuditLog::where('action', AuditService::ADMIN_CALENDAR_PRIVACY_HIDE)->exists());
 
-        // The page says it was done, and offers to put it back.
+        // The page says it was done, and offers to put it back. What is still public is the
+        // event with ticket holders, said as such, not "nothing public left".
         $this->adminActing()->get(route('admin.private_calendars.show', ['hash' => $this->hash($c['role'])]))
             ->assertOk()
             ->assertSee(__('messages.private_calendars_put_back'));
+        // Opened again, past the flash that also said it.
+        $this->adminActing()->get(route('admin.private_calendars.show', ['hash' => $this->hash($c['role'])]))
+            ->assertSeeText(trans_choice('messages.private_calendars_kept_with_tickets', 1, ['count' => 1]))
+            ->assertDontSeeText(__('messages.private_calendars_nothing_to_hide'));
     }
 
     public function test_put_back_restores_what_the_operator_hid(): void

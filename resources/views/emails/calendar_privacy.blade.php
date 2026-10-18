@@ -28,31 +28,19 @@
 @endif
 
 {{-- Only the steps that apply: choosing a calendar is for a calendar sync (CalDAV has no chooser,
-     its connection is made again), checking hidden events only when some were hidden, turning the
-     sync back on only when it was paused. --}}
+     its connection is made again); checking the hidden events when some were hidden, and taking
+     them off the page when none were; turning the sync back on only when it was paused. The
+     button is the first step's. --}}
 @php
-    $steps = [];
-    if ($sync) {
-        $steps[] = [__('messages.calendar_privacy_mail_step_choose_title'), __($sync === \App\Services\CalendarArrival::CALDAV ? 'messages.calendar_privacy_mail_step_choose_caldav' : 'messages.calendar_privacy_mail_step_choose'), null];
-    }
-    if ($hidden > 0 || ! $sync) {
-        $steps[] = [__('messages.calendar_privacy_mail_step_check_title'), __('messages.calendar_privacy_mail_step_check'), $reviewUrl];
-    }
-    if ($paused) {
-        $steps[] = [__('messages.calendar_privacy_mail_step_resume_title'), __('messages.calendar_privacy_mail_step_resume'), null];
-    }
+    $steps = \App\Mail\CalendarPrivacyMail::steps($sync, $hidden, $paused, $chooseUrl, $reviewUrl, $scheduleUrl);
 @endphp
 @if ($steps)
 <x-email.section :label="__('messages.calendar_privacy_mail_steps_title')" />
-@foreach ($steps as $i => [$stepTitle, $stepText, $stepUrl])
-<x-email.step :number="(string) ($i + 1)" :title="$stepTitle" :last="$loop->last">{{ $stepText }}@if ($stepUrl) <x-email.link :href="$stepUrl">{{ __('messages.calendar_privacy_mail_step_check_link') }}</x-email.link>@endif</x-email.step>
+@foreach ($steps as $i => $step)
+<x-email.step :number="(string) ($i + 1)" :title="$step['title']" :last="$loop->last">{{ $step['text'] }}@if ($step['url'] && ! $loop->first) <x-email.link :href="$step['url']">{{ $step['link'] }}</x-email.link>@endif</x-email.step>
 @endforeach
-@endif
 
-@if ($sync)
-<x-email.button :href="$chooseUrl">{{ __('messages.calendar_privacy_mail_action') }}</x-email.button>
-@else
-<x-email.button :href="$reviewUrl">{{ __('messages.calendar_privacy_mail_step_check_link') }}</x-email.button>
+<x-email.button :href="$steps[0]['url']">{{ $steps[0]['link'] }}</x-email.button>
 @endif
 
 @if ($codes)

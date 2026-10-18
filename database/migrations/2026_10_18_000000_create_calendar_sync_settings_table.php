@@ -43,28 +43,37 @@ return new class extends Migration
 
         try {
             if (! Schema::hasTable('calendar_sync_settings')) {
-                Schema::create('calendar_sync_settings', function (Blueprint $table) {
-                    $table->id();
-                    $table->foreignId('role_id')->unique()->constrained()->cascadeOnDelete();
+                try {
+                    Schema::create('calendar_sync_settings', function (Blueprint $table) {
+                        $table->id();
+                        $table->foreignId('role_id')->unique()->constrained()->cascadeOnDelete();
 
-                    foreach (['google', 'microsoft', 'caldav'] as $p) {
-                        $table->boolean("{$p}_publishes")->default(false);
-                        $table->char("{$p}_publish_binding", 40)->nullable();
-                        $table->timestamp("{$p}_publish_confirmed_at")->nullable();
-                        $table->timestamp("{$p}_reread_at")->nullable();
-                        $table->text("{$p}_reread_cursor")->nullable();
-                        $table->json("{$p}_last_pull")->nullable();
-                        $table->json("{$p}_first_pull")->nullable();
-                        $table->string("{$p}_stopped_reason", 20)->nullable();
-                        $table->timestamp("{$p}_stopped_at")->nullable();
-                        $table->string("{$p}_stopped_direction", 10)->nullable();
-                    }
+                        foreach (['google', 'microsoft', 'caldav'] as $p) {
+                            $table->boolean("{$p}_publishes")->default(false);
+                            $table->char("{$p}_publish_binding", 40)->nullable();
+                            $table->timestamp("{$p}_publish_confirmed_at")->nullable();
+                            $table->timestamp("{$p}_reread_at")->nullable();
+                            $table->text("{$p}_reread_cursor")->nullable();
+                            $table->json("{$p}_last_pull")->nullable();
+                            $table->json("{$p}_first_pull")->nullable();
+                            $table->string("{$p}_stopped_reason", 20)->nullable();
+                            $table->timestamp("{$p}_stopped_at")->nullable();
+                            $table->string("{$p}_stopped_direction", 10)->nullable();
+                        }
 
-                    // When the owner was told that a sync took events off their public page. Once.
-                    $table->timestamp('taken_off_notified_at')->nullable();
+                        // When the owner was told that a sync took events off their public page. Once.
+                        $table->timestamp('taken_off_notified_at')->nullable();
 
-                    $table->timestamps();
-                });
+                        $table->timestamps();
+                    });
+                } catch (\Throwable $e) {
+                    // Each key and index is its own statement after CREATE TABLE. One that fails (a
+                    // lock wait on a busy table) leaves the table without it, and the next run would
+                    // pass it by. Nothing has written to it yet.
+                    Schema::dropIfExists('calendar_sync_settings');
+
+                    throw $e;
+                }
             }
 
             $now = now();

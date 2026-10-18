@@ -171,7 +171,14 @@ class EventLifecycleService
             return self::NOT_PUBLISHABLE;
         }
 
-        $event->setVisibilityState('public');
+        // A draft a calendar sync took off the page while it was Unlisted goes back to Unlisted,
+        // password and all (CalendarArrival::hide() kept it).
+        $state = CalendarArrival::publishedState($event);
+        $password = $event->event_password;
+        $event->setVisibilityState($state);
+        if ($state === 'unlisted') {
+            $event->event_password = $password;
+        }
         $event->save();
 
         // A draft a calendar sync was holding: the owner's decision (CalendarArrival).
