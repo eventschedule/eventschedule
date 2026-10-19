@@ -103,7 +103,8 @@ class DiscoveryHiddenScheduleTest extends TestCase
 
         $before = $this->everywhere();
         $this->assertContains('Gala Night', $before['home']);
-        $this->assertContains('Gala Act Live', $before['browse']);
+        // Not /browse or the homepage: those show one event per schedule ON it, and the venue's own night takes the venue's place.
+        $this->assertContains('Gala Act Live', $before['search']);
         $this->assertContains('Gala Hall', $before['schedules']);
         // An act's event at a venue is addressed under the act's subdomain, then the venue's.
         $this->assertStringContainsString('/'.$act->subdomain.'/', $this->sitemap('events'));
