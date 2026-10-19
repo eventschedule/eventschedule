@@ -149,44 +149,64 @@ class EventDuplicateTest extends TestCase
     }
 
     /** The guard on the fix: what a duplicate is meant to carry, it still carries. */
-    public function test_a_duplicate_left_as_it_is_keeps_its_venue_its_performer_and_its_listing(): void
+    public function test_a_duplicate_left_as_it_is_keeps_its_venue_and_its_performer(): void
     {
         $act = $this->createRole($this->owner, 'talent', ['name' => 'Second Act']);
-        $listing = $this->createCurator($this->owner, ['name' => 'The Listing', 'require_approval' => false]);
-        $other = $this->createCurator($this->owner, ['name' => 'Another Listing']);
-        $group = $this->createGroup($listing, ['name' => 'Jazz']);
-
-        $source = $this->sourceEvent([
-            'members' => $this->member($this->band) + $this->member($act),
-            'curators' => [UrlUtils::encodeId($listing->id)],
-            'curator_groups' => [UrlUtils::encodeId($listing->id) => UrlUtils::encodeId($group->id)],
-        ]);
+        $source = $this->sourceEvent(['members' => $this->member($this->band) + $this->member($act)]);
 
         $html = $this->duplicateForm($source);
-        $ticked = $this->tickedBoxes($html);
-
-        $this->assertSame([UrlUtils::encodeId($listing->id)], $ticked, 'the listing is the one box that is ticked');
         $this->assertSame(UrlUtils::encodeId($this->venueA->id), $this->pickedVenue($html), 'the venue is in the venue field');
         $this->assertMatchesRegularExpression('/selectedMembers: .*Second Act/', $html, 'the performer is on the Participants tab');
-        $this->assertMatchesRegularExpression(
-            '/<option[^>]*value="'.preg_quote(UrlUtils::encodeId($group->id), '/').'"[^>]*selected/',
-            $html,
-            'the sub-schedule it was filed under comes too'
-        );
 
         $this->postCreateEvent($this->owner, $this->band, [
             'name' => 'The copy',
             'venue_id' => $this->pickedVenue($html), 'venue_submitted' => 1,
             'members' => $this->member($this->band) + $this->member($act), 'members_submitted' => 1,
-            'curators_submitted' => 1, 'curators' => $ticked,
+            'curators_submitted' => 1, 'curators' => $this->tickedBoxes($html),
+        ])->assertRedirect();
+
+        $this->assertSame(
+            collect([$this->band->id, $act->id, $this->venueA->id])->sort()->values()->all(),
+            $this->attachedTo($this->latestEvent())
+        );
+    }
+
+    /**
+     * A duplicate is listed where a new event of the schedule is: on its default curators, and
+     * not on the curators the source was listed on.
+     */
+    public function test_a_duplicate_is_listed_on_the_schedules_default_curators_not_the_sources(): void
+    {
+        $sourceListing = $this->createCurator($this->owner, ['name' => 'The Listing', 'require_approval' => false]);
+        $default = $this->createCurator($this->owner, ['name' => 'Default Listing', 'require_approval' => false]);
+        $group = $this->createGroup($sourceListing, ['name' => 'Jazz']);
+
+        $source = $this->sourceEvent([
+            'curators' => [UrlUtils::encodeId($sourceListing->id)],
+            'curator_groups' => [UrlUtils::encodeId($sourceListing->id) => UrlUtils::encodeId($group->id)],
+        ]);
+        $this->assertTrue($source->roles()->where('roles.id', $sourceListing->id)->exists(), 'sanity check: the source is listed');
+
+        $this->band->forceFill(['default_curator_ids' => [$default->id]])->save();
+
+        $html = $this->duplicateForm($source);
+        $this->assertSame([], $this->tickedBoxes($html), 'the source\'s listing is not ticked');
+        $this->assertDoesNotMatchRegularExpression(
+            '/<option[^>]*value="'.preg_quote(UrlUtils::encodeId($group->id), '/').'"[^>]*selected/',
+            $html,
+            'nor its sub-schedule picked'
+        );
+
+        $this->postCreateEvent($this->owner, $this->band, [
+            'name' => 'The copy',
+            'venue_id' => $this->pickedVenue($html), 'venue_submitted' => 1,
+            'members' => $this->member($this->band), 'members_submitted' => 1,
+            'curators_submitted' => 1, 'curators' => $this->tickedBoxes($html),
         ])->assertRedirect();
         $copy = $this->latestEvent();
 
-        $this->assertSame(
-            collect([$this->band->id, $act->id, $this->venueA->id, $listing->id])->sort()->values()->all(),
-            $this->attachedTo($copy)
-        );
-        $this->assertFalse($copy->roles()->where('roles.id', $other->id)->exists());
+        $this->assertTrue($copy->roles()->where('roles.id', $default->id)->exists(), 'the copy is on the schedule\'s default curator');
+        $this->assertFalse($copy->roles()->where('roles.id', $sourceListing->id)->exists(), 'and not on the source\'s');
     }
 
     /** A template saved before the fix holds the venue and the performers in its "curators". */

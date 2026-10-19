@@ -798,7 +798,14 @@ class EventController extends Controller
 
         // Build the clone payload (shared with Event Templates) and stash it for the
         // create form to consume.
-        session(['cloned_event' => EventRepo::buildClonePayload($event)]);
+        //
+        // A copy is listed where a new event is: on the schedule's default curators, which store()
+        // adds through autoCurateEvent(), and not on every curator the source happened to be on.
+        // A template keeps its curators, because somebody saved that listing on purpose.
+        $payload = EventRepo::buildClonePayload($event);
+        $payload['curators'] = [];
+        $payload['curator_groups'] = [];
+        session(['cloned_event' => $payload]);
 
         return redirect(route('event.create', ['subdomain' => $subdomain]));
     }
