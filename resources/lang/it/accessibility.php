@@ -64,7 +64,7 @@ return [
     'toolbar_declaration' => 'Dichiarazione di accessibilità',
 
     'settings_widget_heading' => 'Widget di accessibilità',
-    'settings_widget_hidden_note' => 'Il widget di accessibilità è nascosto su questo dispositivo.',
+    'settings_widget_hidden_note' => 'Nascosto su questo dispositivo',
     'settings_show_widget' => 'Mostra widget di accessibilità',
 
     'skip_to_main' => 'Vai al contenuto principale',

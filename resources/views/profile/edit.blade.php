@@ -278,12 +278,12 @@
         $paymentStates = [];
         foreach ($settingsGateways as $gatewayKey => $gateway) {
             // Not connected yet: the row says what the method is, which "Not connected" five
-            // times over did not. A gateway added later says it with a settings_<key>_about
-            // line; until it has one, its row says that it is not connected.
+            // times over did not, in a phrase short enough for the line (the panes keep the
+            // longer *_help text). A gateway added later says it with a settings_<key>_about
+            // line; until it has one, its row says that it is not connected. Selfhosted Stripe
+            // is the install's own keys, so there is nothing to connect: it is not set up.
             $about = match (true) {
-                $gatewayKey === 'stripe' => config('app.hosted') ? __('messages.stripe_help') : __('messages.settings_not_connected'),
-                $gatewayKey === 'invoiceninja' => __('messages.invoiceninja_help'),
-                $gatewayKey === 'payment_url' => __('messages.payment_url_help'),
+                $gatewayKey === 'stripe' && ! config('app.hosted') => __('messages.summary_not_set_up'),
                 \Illuminate\Support\Facades\Lang::has('messages.settings_'.$gatewayKey.'_about') => __('messages.settings_'.$gatewayKey.'_about'),
                 default => __('messages.settings_not_connected'),
             };
@@ -308,7 +308,10 @@
                     $state = ['on' => true, 'warn' => false, 'text' => $settingsJoin([__('messages.connected'), $user->paymentUrlHost()])];
                 }
             } elseif ($gateway->hasOwnCredentials($user)) {
-                $state = ['on' => true, 'warn' => false, 'text' => $settingsJoin(array_merge([__('messages.connected')], $gateway->settingsStatusNotes($user)))];
+                // Test mode, or no webhook (Razorpay): buyers cannot pay, or a payer who never
+                // comes back gets no ticket. Said first, in amber.
+                $statusNotes = $gateway->settingsStatusNotes($user);
+                $state = ['on' => true, 'warn' => $statusNotes !== [], 'text' => $settingsJoin(array_merge($statusNotes, [__('messages.connected')])), 'note' => $settingsJoin($statusNotes)];
             } elseif ($gateway->platformCredentials() !== []) {
                 $state = ['on' => true, 'warn' => false, 'text' => __('messages.gateway_provided_by_install')];
             }
@@ -316,11 +319,19 @@
         }
         $paymentNames = [];
         foreach ($settingsGateways as $gatewayKey => $gateway) {
-            if ($paymentStates[$gatewayKey]['on']) {
+            if ($paymentStates[$gatewayKey]['on'] && ! $paymentStates[$gatewayKey]['warn']) {
                 $paymentNames[] = $gateway->label(null);
             }
         }
-        $paymentPending = collect($paymentStates)->contains(fn ($state) => $state['warn']);
+        // A method that needs something, by name and what it needs (a setup left half way, test
+        // mode): it is the one thing on this tab to act on, and it used to vanish from the line as
+        // soon as any other method was connected.
+        $paymentPendingNames = [];
+        foreach ($settingsGateways as $gatewayKey => $gateway) {
+            if ($paymentStates[$gatewayKey]['warn']) {
+                $paymentPendingNames[] = $gateway->label(null).': '.($paymentStates[$gatewayKey]['note'] ?? $paymentStates[$gatewayKey]['text']);
+            }
+        }
 
         // Webhooks, read by the sidebar and by the section.
         $settingsWebhooks = $user->webhooks()->orderByDesc('created_at')->get();
@@ -336,26 +347,30 @@
             ? $user->language_code
             : app()->getLocale();
         $languageKey = config('app.supported_languages')[$settingsLanguage] ?? null;
+        // The zone by its city ("New York"), as the schedule form says it.
         $settingsLocalization = $settingsJoin([
             $languageKey ? __('messages.'.$languageKey) : null,
-            $user->timezone,
+            $user->timezone ? str_replace('_', ' ', \Illuminate\Support\Str::afterLast($user->timezone, '/')) : null,
             $user->use_24_hour_time ? __('messages.settings_24_hour') : __('messages.settings_12_hour'),
         ]);
 
-        // The line under each name: what is saved now, from what the page already knows.
-        $filled = fn (string $text) => ['text' => $text, 'empty' => false];
-        $quiet = fn (string $text) => ['text' => $text, 'empty' => true];
+        // The line under each name: what is saved now, from what the page already knows. A warning
+        // (something to act on) is amber, and comes first.
+        $filled = fn (string $text) => ['text' => $text, 'empty' => false, 'warn' => false];
+        $quiet = fn (string $text) => ['text' => $text, 'empty' => true, 'warn' => false];
+        $warn = fn (string $text) => ['text' => $text, 'empty' => false, 'warn' => true];
         $settingsSummaries = [
             // No "email not verified" here: the page is behind the verified middleware, so nobody
-            // with an unverified address ever reaches it.
-            'section-profile' => $filled($settingsJoin([$user->name, $user->email])),
-            'section-payment-methods' => $paymentNames
-                ? $filled(implode(', ', $paymentNames))
-                : ($paymentPending ? $filled(__('messages.settings_setup_not_finished')) : $quiet(__('messages.settings_none_connected'))),
+            // with an unverified address ever reaches it. The address alone: the name beside it
+            // pushed the address, the part worth checking, off the end of the line.
+            'section-profile' => $filled((string) $user->email),
+            'section-payment-methods' => $paymentPendingNames
+                ? $warn($settingsJoin(array_merge($paymentPendingNames, $paymentNames ? [implode(', ', $paymentNames)] : [])))
+                : ($paymentNames ? $filled(implode(', ', $paymentNames)) : $quiet(__('messages.settings_none_connected'))),
             // A key past its date is refused by the API, so it is not "Enabled".
             'section-api' => ! $user->api_key
                 ? $quiet(__('messages.disabled'))
-                : ($user->api_key_expires_at && $user->api_key_expires_at->isPast() ? $filled(__('messages.expired')) : $filled(__('messages.enabled'))),
+                : ($user->api_key_expires_at && $user->api_key_expires_at->isPast() ? $warn(__('messages.expired')) : $filled(__('messages.enabled'))),
             'section-webhooks' => $settingsWebhooks->isEmpty()
                 ? $quiet(__('messages.none'))
                 : ($activeWebhooks->isEmpty()
@@ -371,15 +386,16 @@
             'section-backup' => ($activeExportJobId || $activeImportJobId)
                 ? $filled(__('messages.settings_in_progress'))
                 : $quiet(__('messages.backup_export').', '.__('messages.backup_import')),
+            // Which version is waiting, when it is known (the string carries its own "v").
             'section-app' => isset($version_installed)
                 ? (($update_available ?? false)
-                    ? $filled(__('messages.settings_update_available'))
+                    ? $filled(__('messages.settings_update_available').(($version_available ?? null) ? ': '.$version_available : ''))
                     : $quiet($settingsJoin([$version_installed, ($version_available ?? null) === null ? null : __('messages.settings_up_to_date')])))
                 : $quiet(''),
             'section-password' => $user->hasPassword() ? $filled(__('messages.settings_password_set')) : $quiet(__('messages.settings_password_not_set')),
             'section-two-factor' => $user->two_factor_confirmed_at
                 ? $filled(__('messages.enabled'))
-                : ($user->two_factor_secret ? $filled(__('messages.settings_setup_not_finished')) : $quiet(__('messages.disabled'))),
+                : ($user->two_factor_secret ? $warn(__('messages.settings_setup_not_finished')) : $quiet(__('messages.disabled'))),
             'section-data' => $quiet(__('messages.data_export_button')),
             'section-delete' => $quiet(__('messages.settings_cannot_be_undone')),
         ];
@@ -401,10 +417,15 @@
             $user->microsoft_token ? 'Outlook' : null,
             isset($settingsSections['section-facebook']) && $user->facebook_id ? 'Facebook' : null,
         ]));
+        // "API: Enabled" as "API: Expired" is said; a bare "API" read the same as the quiet list of
+        // what the tab holds. An expired key comes first, in amber: calls with it are refused.
         $apiKeyExpired = $user->api_key && $user->api_key_expires_at && $user->api_key_expires_at->isPast();
         $developerParts = array_values(array_filter([
-            $user->api_key ? $settingsSections['section-api']['label'].($apiKeyExpired ? ': '.__('messages.expired') : '') : null,
-            $settingsSummaries['section-webhooks']['empty'] ? null : $settingsSummaries['section-webhooks']['text'],
+            $user->api_key ? $settingsSections['section-api']['label'].': '.($apiKeyExpired ? __('messages.expired') : __('messages.enabled')) : null,
+            // Switched-off webhooks are named only when nothing else is set: "Not set up" would hide them.
+            $activeWebhooks->isNotEmpty()
+                ? $settingsSummaries['section-webhooks']['text']
+                : (! $user->api_key && $settingsWebhooks->isNotEmpty() ? $settingsSections['section-webhooks']['label'].': '.__('messages.disabled') : null),
         ]));
         $settingsTabSummaries = [
             // Two-factor is the one to see at a glance; the password only when there is none.
@@ -414,17 +435,19 @@
                     __('messages.settings_two_factor_short').': '.$settingsSummaries['section-two-factor']['text'],
                 ]),
                 'empty' => $user->hasPassword() && $settingsSummaries['section-two-factor']['empty'],
+                'warn' => $settingsSummaries['section-two-factor']['warn'],
             ],
             'section-integrations' => $connectedNames
                 ? $filled(implode(', ', $connectedNames))
                 : $quiet(__('messages.settings_none_connected')),
             'section-developers' => $developerParts
-                ? $filled($settingsJoin($developerParts))
-                : $quiet($settingsSections['section-api']['label'].', '.$settingsSections['section-webhooks']['label']),
-            // Nothing to report, so what it is for, quietly: the names of what is inside.
+                ? ['text' => $settingsJoin($developerParts), 'empty' => ! $user->api_key && $activeWebhooks->isEmpty(), 'warn' => $apiKeyExpired]
+                : $quiet(__('messages.summary_not_set_up')),
+            // No state of its own, so what it is for, quietly (the three section names ran past the
+            // end of the line).
             'section-account-data' => ($activeExportJobId || $activeImportJobId)
                 ? $filled(__('messages.settings_in_progress'))
-                : $quiet(implode(', ', array_map(fn ($block) => $settingsSections[$block]['label'], $settingsTabs['section-account-data']['blocks'] ?? []))),
+                : $quiet(__('messages.settings_data_summary')),
         ];
         if ($boostPartner) {
             // Whether boosts can launch, then the card, by name.
@@ -434,6 +457,7 @@
                     $boostPartner->hasCard() ? $settingsSummaries['section-boost-card']['text'] : null,
                 ]),
                 'empty' => $boostState === 'not_connected',
+                'warn' => false,
             ];
         }
         foreach ($settingsTabs as $tabId => $tab) {
@@ -462,7 +486,7 @@
                             </svg>
                             <span class="section-nav-text">
                                 <span>{{ $tab['label'] }}</span>
-                                <span class="section-nav-summary {{ $settingsTabSummaries[$tabId]['empty'] ? 'is-empty' : '' }}"><bdi>{{ $settingsTabSummaries[$tabId]['text'] }}</bdi></span>
+                                <span @class(['section-nav-summary', 'is-empty' => $settingsTabSummaries[$tabId]['empty'], 'is-warn' => $settingsTabSummaries[$tabId]['warn']])><bdi dir="{{ is_rtl() ? 'rtl' : 'auto' }}">{{ $settingsTabSummaries[$tabId]['text'] }}</bdi></span>
                             </span>
                             <span class="section-nav-dot" data-dirty-dot="{{ $tabId }}" hidden></span>
                         </a>

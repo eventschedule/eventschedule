@@ -64,7 +64,7 @@ return [
     'toolbar_declaration' => 'Juurdepääsetavuse avaldus',
 
     'settings_widget_heading' => 'Juurdepääsetavuse vidin',
-    'settings_widget_hidden_note' => 'Juurdepääsetavuse vidin on selles seadmes peidetud.',
+    'settings_widget_hidden_note' => 'Selles seadmes peidetud',
     'settings_show_widget' => 'Näita juurdepääsetavuse vidinat',
 
     'skip_to_main' => 'Liigu põhisisu juurde',

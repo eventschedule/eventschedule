@@ -749,12 +749,13 @@
             'section-integrations' => __('messages.integrations'),
         ];
 
+        // A tab's line is the page's words around somebody's names: on a Hebrew or Arabic page it
+        // runs right to left even when it starts with a Latin name ("Google, Outlook", "Stripe: ...").
+        $summaryDir = is_rtl() ? 'rtl' : 'auto';
+
         // The words the tabs' and rows' one-line summaries are made of (see the page script).
         $summaryWords = [
-            'enabled' => __('messages.enabled'),
-            'disabled' => __('messages.disabled'),
             'none' => __('messages.none'),
-            'connected' => __('messages.connected'),
             'comments' => __('messages.fan_comments_enabled'),
             'photos' => __('messages.fan_photos_enabled'),
             'videos_label' => __('messages.fan_videos_enabled'),
@@ -766,12 +767,59 @@
             'sponsors_hidden' => __('messages.sponsors_hidden'),
             'venue_map' => __('messages.venue_map'),
             'venue_map_starts_open' => __('messages.venue_map_starts_open'),
-            'require_approval' => __('messages.require_approval'),
             'custom_css' => __('messages.custom_css'),
             'email' => __('messages.email'),
             'not_connected' => __('messages.settings_not_connected'),
             'gallery_prompt' => __('messages.gallery_add_first'),
-            'settings_holds' => implode(', ', [__('messages.schedule_url'), __('messages.settings_group_new_events'), __('messages.notifications'), __('messages.advanced')]),
+            // Not the address: it is under the page's title, and the line holds some 25 characters.
+            'settings_holds' => implode(', ', [__('messages.settings_group_new_events'), __('messages.notifications')]),
+            'new_events' => __('messages.settings_group_new_events'),
+            // An empty tab: a prompt where adding is the next step, a quiet state everywhere else.
+            'prompt_address' => __('messages.summary_prompt_address'),
+            'prompt_sources' => __('messages.summary_prompt_sources'),
+            'nothing_added' => __('messages.summary_nothing_added'),
+            'all_off' => __('messages.summary_all_off'),
+            'defaults' => __('messages.summary_defaults'),
+            'not_set_up' => __('messages.summary_not_set_up'),
+            'none_connected' => __('messages.settings_none_connected'),
+            'announcement' => __('messages.summary_announcement'),
+            'background' => __('messages.background'),
+            'subschedules' => __('messages.subschedules'),
+            'custom_fields' => __('messages.custom_fields'),
+            'categories' => __('messages.categories'),
+            'custom_labels' => __('messages.custom_labels'),
+            'feeds' => __('messages.feeds'),
+            'has_feeds' => $role->exists && $role->subdomain && \App\Models\EventFeed::namesFor($role) !== [],
+            'gallery_mode' => $galleryMode,
+            'gallery_hidden' => __('messages.gallery_hidden_title'),
+            // A row's line: one switch is On or Off, several are named or "All on" / "All off".
+            'on' => __('messages.summary_on'),
+            'off' => __('messages.summary_off'),
+            'all_on' => __('messages.summary_all_on'),
+            'week_starts' => __('messages.summary_week_starts', ['day' => ':day']),
+            'hours_12' => __('messages.settings_12_hour'),
+            'hours_24' => __('messages.settings_24_hour'),
+            'past_events_hidden' => __('messages.summary_past_events_hidden'),
+            'approval_required' => __('messages.summary_approval_required'),
+            'signup_panel' => __('messages.summary_signup_panel'),
+            'notify_card' => __('messages.summary_notify_card'),
+            'accessibility_widget' => __('messages.summary_accessibility_widget'),
+            'promotions_hidden' => __('messages.summary_promotions_hidden'),
+            'on_network' => __('messages.summary_on_network'),
+            'default_sender' => __('messages.summary_default_sender'),
+            'custom_text' => __('messages.summary_custom_text'),
+            'default_text' => __('messages.summary_default_text'),
+            'sync_to' => __('messages.sync_summary_to', ['calendar' => ':calendar']),
+            'sync_from' => __('messages.sync_summary_from', ['calendar' => ':calendar']),
+            'sync_both' => __('messages.sync_summary_both'),
+            'sync_off' => __('messages.sync_summary_off'),
+            'gallery_one' => trans_choice('messages.gallery_photo_count', 1, ['count' => 1]),
+            'gallery_many' => trans_choice('messages.gallery_photo_count', 2, ['count' => ':count']),
+            'money' => \App\Utils\MoneyUtils::displayRules(),
+            // The saved direction, for a member who has no radios to read. Empty for an owner
+            // whose account is not connected: the row offers to connect it, and says so.
+            'google_direction' => auth()->id() === $role->user_id && ! auth()->user()?->google_token ? '' : (string) $role->sync_direction,
+            'microsoft_direction' => auth()->id() === $role->user_id && ! auth()->user()?->microsoft_token ? '' : (string) $role->microsoft_sync_direction,
             // Page content and Tickets are said by what is in them, in the order of their rows.
             'social_links' => __('messages.social_links'),
             'videos' => __('messages.videos'),
@@ -781,7 +829,6 @@
             'gift_cards' => __('messages.tickets_row_gift_cards'),
             'mailing_list' => __('messages.engagement_row_mailing_list'),
             'auto_import' => __('messages.auto_import_settings'),
-            'hide_past_events' => __('messages.hide_past_events'),
             'banner_is_pro' => $role->isPro(),
             'preset_default' => __('messages.ticket_preset_default'),
             'preset_team' => __('messages.ticket_presets_team_summary'),
@@ -852,7 +899,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.details') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-details"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-details"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-details" hidden></span>
                             </a>
@@ -865,7 +912,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.event_sources') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-sources"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-sources"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-sources" hidden></span>
                             </a>
@@ -878,7 +925,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.venue_address') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-address"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-address"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-address" hidden></span>
                             </a>
@@ -892,7 +939,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.merge_venue') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-merge"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-merge"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-merge" hidden></span>
                             </a>
@@ -903,7 +950,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.schedule_style') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-style"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-style"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-style" hidden></span>
                             </a>
@@ -914,7 +961,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.page_content') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-page"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-page"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-page" hidden></span>
                             </a>
@@ -925,7 +972,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.customize') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-subschedules"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-subschedules"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-subschedules" hidden></span>
                             </a>
@@ -935,7 +982,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.engagement') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-engagement"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-engagement"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-engagement" hidden></span>
                             </a>
@@ -946,7 +993,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.tickets') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-tickets"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-tickets"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-tickets" hidden></span>
                             </a>
@@ -958,7 +1005,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.schedule_settings') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-settings"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-settings"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-settings" hidden></span>
                             </a>
@@ -968,7 +1015,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.integrations') }}</span>
-                                    <span class="section-nav-summary" data-summary="section-integrations"><bdi></bdi></span>
+                                    <span class="section-nav-summary" data-summary="section-integrations"><bdi dir="{{ $summaryDir }}"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" data-dirty-dot="section-integrations" hidden></span>
                             </a>
@@ -985,7 +1032,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.details') }}</span>
-                            <span class="section-nav-summary" data-summary="section-details"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-details"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-details" hidden></span>
                     </span>
@@ -1379,7 +1426,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.event_sources') }}</span>
-                            <span class="section-nav-summary" data-summary="section-sources"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-sources"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-sources" hidden></span>
                     </span>
@@ -1481,7 +1528,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.venue_address') }}</span>
-                            <span class="section-nav-summary" data-summary="section-address"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-address"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-address" hidden></span>
                     </span>
@@ -1567,7 +1614,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.merge_venue') }}</span>
-                            <span class="section-nav-summary" data-summary="section-merge"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-merge"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-merge" hidden></span>
                     </span>
@@ -1679,7 +1726,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.schedule_style') }}</span>
-                            <span class="section-nav-summary" data-summary="section-style"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-style"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-style" hidden></span>
                     </span>
@@ -2471,7 +2518,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.page_content') }}</span>
-                            <span class="section-nav-summary" data-summary="section-page"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-page"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-page" hidden></span>
                     </span>
@@ -3147,7 +3194,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.customize') }}</span>
-                            <span class="section-nav-summary" data-summary="section-subschedules"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-subschedules"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-subschedules" hidden></span>
                     </span>
@@ -3660,7 +3707,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.engagement') }}</span>
-                            <span class="section-nav-summary" data-summary="section-engagement"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-engagement"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-engagement" hidden></span>
                     </span>
@@ -4025,7 +4072,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.tickets') }}</span>
-                            <span class="section-nav-summary" data-summary="section-tickets"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-tickets"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-tickets" hidden></span>
                     </span>
@@ -4062,13 +4109,15 @@
                             if ($presetSummary !== '' && $presetTeamOn) {
                                 $presetSummary .= ' · '.__('messages.ticket_presets_team_summary');
                             }
+                            // The tab's line: the names alone (the row marks the default and the team switch).
+                            $presetPlainNames = collect($presetEditor['presets'])->map(fn ($p) => $p['name'] !== '' ? $p['name'] : ($p['label'] ?? ''))->filter()->implode(', ');
                         @endphp
                         <x-form-row group="tickets" tab="presets" :title="__('messages.ticket_presets')" :summary="$presetSummary !== '' ? $presetSummary : __('messages.none')" :muted="$presetSummary === ''" class="tickets-tab" />
                         <div id="tickets-tab-presets" class="event-subrow-body tickets-tab-content" hidden>
                             <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_presets_help') }}</p>
                             {{-- ticket_presets_submitted is drawn by the island itself (see TicketPresetsEditor.vue). --}}
                             <p id="ticket-presets-empty" class="py-3 text-sm text-gray-500 dark:text-gray-400" @if ($presetEditor['presets']) hidden @endif>{{ __('messages.ticket_presets_empty') }}</p>
-                            <div id="ticket-preset-items" class="event-list" data-island data-summary="{{ $presetSummary }}" data-team-on="{{ $presetTeamOn ? 1 : 0 }}"></div>
+                            <div id="ticket-preset-items" class="event-list" data-island data-summary="{{ $presetSummary }}" data-names="{{ $presetPlainNames }}" data-team-on="{{ $presetTeamOn ? 1 : 0 }}"></div>
                             <script type="application/json" id="ticket-preset-items-json" {!! nonce_attr() !!}>{!! $presetEditorJson !!}</script>
                             <x-input-error class="mt-2" :messages="$errors->get('ticket_presets.*')" />
                             @if ($presetEditor['canEdit'])
@@ -4314,7 +4363,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.schedule_settings') }}</span>
-                            <span class="section-nav-summary" data-summary="section-settings"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-settings"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-settings" hidden></span>
                     </span>
@@ -5103,7 +5152,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.integrations') }}</span>
-                            <span class="section-nav-summary" data-summary="section-integrations"><bdi></bdi></span>
+                            <span class="section-nav-summary" data-summary="section-integrations"><bdi dir="{{ $summaryDir }}"></bdi></span>
                         </span>
                         <span class="section-nav-dot" data-dirty-dot="section-integrations" hidden></span>
                     </span>
@@ -7616,9 +7665,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var words = label ? (label.querySelector('.font-medium, .font-semibold') || label) : null;
         return words ? words.textContent.trim().split('\n')[0].trim() : '';
     }
-    function onOff(name) {
-        return kit.on(name) ? words.enabled : words.disabled;
-    }
     // The names in one of the hidden link lists (a video's title, a link's site).
     function jsonNames(name) {
         try {
@@ -7635,58 +7681,55 @@ document.addEventListener('DOMContentLoaded', function() {
     function byId(id) {
         return document.getElementById(id);
     }
-    // What a pane holds, by the names of its first settings: for a row whose contents are too
-    // mixed to have one value ("Advanced"). Read from the labels on the page, so it is already in
-    // the page's language.
-    function labelsIn(pane) {
-        if (! pane) {
-            return '';
-        }
-        // Where the pane is laid out in named groups, those names say what it holds.
-        var groups = all('.event-group-label', pane).map(function(group) { return group.textContent.trim(); }).filter(Boolean);
-        if (groups.length) {
-            return { text: groups.join(', '), empty: true };
-        }
-        var names = [];
-        all('label', pane).forEach(function(label) {
-            var text = label.textContent.replace(/\s+/g, ' ').replace(/\s*\*$/, '').trim();
-            if (text && text.length < 48 && ! names.includes(text) && names.length < 4) {
-                names.push(text);
-            }
-        });
-        return names.length ? { text: names.join(', '), empty: true } : { text: '', empty: true };
+    // Details. Not the name: that is the page's title, just above. Where the schedule's times are
+    // (a wrong zone shifts every event, so it comes first) and its language; a live announcement
+    // instead, since that is on every page a visitor opens and easy to forget.
+    function announcementText() {
+        return kit.value('#banner_message').split('\n')[0]
+            .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+            .replace(/[*_`~#>]+/g, '')
+            .trim();
     }
-
-    // Details
     kit.summary('section-details', function() {
-        return kit.value('#name');
+        if (words.banner_is_pro && kit.on('banner_enabled')) {
+            return words.announcement + ': ' + (announcementText() || words.on);
+        }
+        // "America/Argentina/Buenos_Aires" says Buenos Aires.
+        var zone = kit.value('#timezone').split('/').pop().replace(/_/g, ' ');
+        return kit.join([zone, kit.chosen('#language_code')]);
     });
+    // In the words the settings page uses ("12-hour"), the zone by its city as the tab says it,
+    // and the first day of the week only when it is not the usual Sunday.
     kit.summary('details:localization', function() {
         var translated = kit.on('translation_enabled') ? kit.chosen('#translation_language_code') : '';
-        // The first day of the week only when it is not the usual Sunday.
-        var weekStart = kit.value('#first_day_of_week') && kit.value('#first_day_of_week') !== '0' ? kit.chosen('#first_day_of_week') : '';
-        return kit.join([kit.chosen('#language_code') + (translated ? ' + ' + translated : ''), kit.chosen('#timezone'), kit.on('use_24_hour_time') ? '24h' : '12h', weekStart]);
+        var weekStart = kit.value('#first_day_of_week') && kit.value('#first_day_of_week') !== '0' ? words.week_starts.replace(':day', kit.chosen('#first_day_of_week')) : '';
+        return kit.join([
+            kit.chosen('#language_code') + (translated ? ' + ' + translated : ''),
+            kit.value('#timezone').split('/').pop().replace(/_/g, ' '),
+            kit.on('use_24_hour_time') ? words.hours_24 : words.hours_12,
+            weekStart,
+        ]);
     });
     // The message's first line as it reads, without its Markdown; off (or not on Pro, where the
     // page does not show it) says so.
     kit.summary('details:announcement', function() {
         if (! words.banner_is_pro || ! kit.on('banner_enabled')) {
-            return { text: words.disabled, empty: true };
+            return { text: words.off, empty: true };
         }
-        var message = kit.value('#banner_message').split('\n')[0]
-            .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-            .replace(/[*_`~#>]+/g, '')
-            .trim();
-        return message ? message.slice(0, 80) : words.enabled;
+        var message = announcementText();
+        return message ? message.slice(0, 80) : words.on;
     });
     kit.summary('details:contact', function() {
         var phone = byId('role_phone') ? String(byId('role_phone').value || '').trim() : '';
-        return kit.join([kit.value('#email'), phone, kit.value('#website').replace(/^https?:\/\//, '')]);
+        return kit.join([kit.value('#email'), phone, kit.value('#website').replace(/^https?:\/\//, '')]) || { text: words.none, empty: true };
     });
 
     // Address
+    // Written the way an address is, with a comma; without one, the map and the guest page have
+    // nothing to place the venue by, so it asks.
     kit.summary('section-address', function() {
-        return kit.join([kit.value('#address1'), kit.value('#city')]) || { text: '', empty: true };
+        var parts = [kit.value('#address1'), kit.value('#city')].filter(Boolean);
+        return parts.length ? parts.join(', ') : { text: words.prompt_address, empty: true };
     });
 
     // Style. A part that is "none" is left out, so a row never reads "Banner · None". The chip
@@ -7707,8 +7750,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return { text: text, chip: styleChip('backgroundChip') };
     }
+    // The background first, named as one ("Image" alone said nothing): it is most of what a
+    // visitor sees. Then the header and the font only where they are not the defaults (Banner,
+    // Roboto); at 1280 the line holds some 25 characters.
     kit.summary('section-style', function() {
-        return kit.join([kit.chosen('#font_family'), radioLabel('background')]);
+        var background = radioLabel('background');
+        return kit.join([
+            background ? words.background + ': ' + background : '',
+            kit.radio('header_style') && kit.radio('header_style') !== 'banner' ? radioLabel('header_style') : '',
+            kit.value('#font_family') && kit.value('#font_family') !== 'Roboto' ? kit.chosen('#font_family') : '',
+        ]);
     });
     kit.summary('style:advanced', function() {
         if (kit.radio('header_style') !== 'banner') {
@@ -7723,7 +7774,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // The animation is named under Calendar too: it plays on a phone, and whenever a visitor
     // switches to the list.
     kit.summary('style:animation', function() {
-        return kit.join([radioLabel('event_layout'), kit.on('hide_past_events') ? words.hide_past_events : '', kit.radio('list_animation') === 'none' ? '' : radioLabel('list_animation')]);
+        return kit.join([radioLabel('event_layout'), kit.on('hide_past_events') ? words.past_events_hidden : '', kit.radio('list_animation') === 'none' ? '' : radioLabel('list_animation')]);
     });
     kit.summary('style:css', function() {
         var css = document.querySelector('#custom_css, #custom_css_stored');
@@ -7734,9 +7785,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // the chips are there.
     document.addEventListener('style:ready', function() { kit.refresh(); });
 
-    // Page content. The tab says what it holds, as Settings does, in the order of its rows: the
-    // only place the words Gallery and Sponsors are in the sidebar now that they are rows. Names,
-    // not counts (a count would need a plural in twelve languages).
+    // Page content. Names where there are names; the photos are counted with the plural the
+    // event form uses ("12 photos").
     function galleryCount() {
         var editor = byId('gallery-editor-app');
         var tiles = all('#gallery-editor-app .es-gallery-tile').length;
@@ -7757,18 +7807,33 @@ document.addEventListener('DOMContentLoaded', function() {
             return { text: words.none, empty: true };
         }
         var count = galleryCount();
-        return count ? String(count) : { text: words.gallery_prompt, empty: true };
+        // Photos kept from a lapsed plan are not on the page: that is what to say.
+        if (words.gallery_mode === 'downgraded' && count) {
+            return { text: words.gallery_hidden, warn: true };
+        }
+        if (! count) {
+            return { text: words.gallery_prompt, empty: true };
+        }
+        return count === 1 ? words.gallery_one : words.gallery_many.replace(':count', count);
     });
+    // The tab names what the public page shows, in the order of its rows, and nothing it merely
+    // could: the list of everything the tab holds read exactly like a list of what was on.
     kit.summary('section-page', function() {
-        var held = [
-            words.social_links,
-            words.videos,
-            words.gallery,
-            words.sponsors,
-            byId('page-tab-map') ? words.venue_map : '',
-            byId('page-tab-accommodation') ? words.accommodation : '',
+        var photos = byId('gallery-editor-app') ? galleryCount() : 0;
+        // Photos kept from a lapsed plan are not on the page; that is the thing to say.
+        if (words.gallery_mode === 'downgraded' && photos) {
+            return { text: words.gallery_hidden, warn: true };
+        }
+        var shown = [
+            jsonNames('social_links').length ? words.social_links : '',
+            jsonNames('youtube_links').length ? words.videos : '',
+            photos ? words.gallery : '',
+            // Stored sponsors stay on the page on any plan, so they are named on any plan.
+            sponsorCount() && sponsorsShown() ? words.sponsors : '',
+            byId('page-tab-map') && kit.on('show_venues_map') ? words.venue_map : '',
+            byId('page-tab-accommodation') && kit.on('stay22_enabled') ? words.accommodation : '',
         ].filter(Boolean);
-        return { text: held.join(', '), empty: true };
+        return shown.length ? shown.join(', ') : { text: words.nothing_added, empty: true };
     });
 
     // Customize
@@ -7796,28 +7861,53 @@ document.addEventListener('DOMContentLoaded', function() {
             return [];
         }
     })();
+    function categoriesUntouched(names) {
+        var sorted = names.slice().sort();
+        return defaultCategoryNames.length > 0 && sorted.length === defaultCategoryNames.length
+            && sorted.every(function(name, index) { return name === defaultCategoryNames[index]; });
+    }
     kit.summary('customize:categories', function() {
         var names = categoryNames();
-        var sorted = names.slice().sort();
-        var untouched = defaultCategoryNames.length > 0 && sorted.length === defaultCategoryNames.length
-            && sorted.every(function(name, index) { return name === defaultCategoryNames[index]; });
-        return untouched
+        return categoriesUntouched(names)
             ? @json(__('messages.default_categories_summary', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', names.length)
             : list(names);
     });
     kit.summary('customize:custom-labels', function() { return list(labelValues()); });
+    // What has been made the schedule's own, counted ("Sub-schedules: 2", no plural needed); the
+    // rows name them. Names here mixed with row names read as one list. The categories a schedule
+    // starts with are not a change.
     kit.summary('section-subschedules', function() {
-        var names = subscheduleNames();
-        return names.length ? names.join(', ') : { text: words.none, empty: true };
+        var categories = categoryNames();
+        // Null is "not changed"; every default category removed is a change, and counts as 0.
+        var counted = [
+            [words.subschedules, subscheduleNames().length || null],
+            [words.custom_fields, fieldNames().length || null],
+            [words.categories, ! byId('event-categories-container') || categoriesUntouched(categories) ? null : categories.length],
+            [words.custom_labels, labelValues().length || null],
+        ].filter(function(pair) { return pair[1] !== null; }).map(function(pair) { return pair[0] + ': ' + pair[1]; });
+        return counted.length ? kit.join(counted) : { text: words.defaults, empty: true };
     });
 
     // Settings
-    // What the tab holds, not the address again: that is under the page's title.
+    // What the tab holds, not the address again: that is under the page's title. The one setting
+    // here that changes what happens is what a new event starts as, so it is said when it is not
+    // the usual Public.
     kit.summary('section-settings', function() {
+        var visibility = kit.value('#default_event_visibility');
+        if (visibility && visibility !== 'public') {
+            return words.new_events + ': ' + kit.chosen('#default_event_visibility');
+        }
         return { text: words.settings_holds, empty: true };
     });
+    // What is on, each only where its control is on the page; the network only when the schedule
+    // is listed on it ("Not listed" and "Not decided yet" are its off states).
     kit.summary('settings:advanced', function() {
-        return labelsIn(byId('settings-tab-advanced'));
+        var on = [
+            kit.on('show_accessibility_widget') ? words.accessibility_widget : '',
+            kit.on('promotions_opt_out') ? words.promotions_hidden : '',
+            kit.value('#federation_enabled') === '1' ? words.on_network : '',
+        ].filter(Boolean);
+        return on.length ? on.join(', ') : { text: words.all_off, empty: true };
     });
     // What a new event starts as: its visibility, and its category when it has one.
     kit.summary('settings:events', function() {
@@ -7859,28 +7949,66 @@ document.addEventListener('DOMContentLoaded', function() {
         var teamOn = team ? team.checked : host.dataset.teamOn === '1';
         return names.join(', ') + (teamOn ? ' · ' + words.preset_team : '');
     });
+    // MoneyUtils::format() in the browser, as the event form has it: the currency's decimals, a
+    // ',' between thousands, a whole amount without '.00', the symbol in front or the code after.
+    function formatMoney(amount, currency) {
+        var rules = words.money;
+        var code = String(currency || 'USD').toUpperCase();
+        var decimals = rules.zero_decimal.indexOf(code) === -1 ? 2 : 0;
+        var parts = (parseFloat(amount) || 0).toFixed(decimals).split('.');
+        var number = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (parts[1] && parts[1] !== '00' ? '.' + parts[1] : '');
+        return rules.symbols[code] ? rules.symbols[code] + number : number + ' ' + (rules.codes[code] || code);
+    }
+    // The amounts in the currency chosen for them: "25, 50" did not say whose money.
     kit.summary('tickets:gift-cards', function() {
         if (! kit.on('gift_cards_enabled')) {
-            return { text: words.disabled, empty: true };
+            return { text: words.off, empty: true };
         }
-        return kit.join([words.enabled, values('input[name="gift_card_amounts[]"]').join(', ')]);
+        var currency = kit.value('#gift_card_currency_code');
+        var amounts = values('input[name="gift_card_amounts[]"]').map(function(amount) { return formatMoney(amount, currency); });
+        return kit.join([words.on, amounts.join(', ')]);
     });
-    // Never "None" beside the word Tickets: with nothing set, what the tab holds.
+    // The presets by name alone (the row marks the default and the team switch), then gift cards
+    // after a dot, so a feature is not read as one more preset. Nothing: a quiet state, since a
+    // schedule that never sells is not asked to.
+    function presetPlainNames() {
+        var host = byId('ticket-preset-items');
+        if (! host) {
+            return [];
+        }
+        if (! host.dataset.mounted) {
+            return host.dataset.names ? [host.dataset.names] : [];
+        }
+        return Array.prototype.map.call(host.querySelectorAll(':scope > [data-list-row] [data-row-name]'), function(named) {
+            return named.textContent.replace(/\s+/g, ' ').trim();
+        }).filter(Boolean);
+    }
     kit.summary('section-tickets', function() {
-        var names = presetNames();
-        if (names.length && byId('ticket-preset-items') && ! byId('ticket-preset-items').dataset.mounted) {
-            // The server's line already ends with the team note; the tab keeps to the names.
-            names = [names[0].split(' · ')[0]];
-        }
-        var held = names.concat(kit.on('gift_cards_enabled') ? [words.gift_cards] : []);
-        return held.length ? held.join(', ') : { text: [words.ticket_presets, words.gift_cards].join(', '), empty: true };
+        var names = presetPlainNames();
+        var held = kit.join([names.join(', '), kit.on('gift_cards_enabled') ? words.gift_cards : '']);
+        return held || { text: words.not_set_up, empty: true };
     });
+    // Whether the calendar entries carry text of the schedule's own, then the two feeds, which a
+    // saved schedule always has. Its field names read as a list of things switched on.
     kit.summary('integration:advanced', function() {
-        return labelsIn(byId('integration-tab-advanced'));
+        var custom = kit.value('#calendar_description_template') !== '';
+        return {
+            text: kit.join([custom ? words.custom_text : words.default_text, byId('ical_feed_url') ? 'iCal, RSS' : '']),
+            empty: ! custom,
+        };
     });
+    // The shared address's switches repeat the owner's names, so each name is said once.
     kit.summary('settings:notifications', function() {
         var pane = byId('settings-tab-notifications');
-        return pane ? list(onLabels(pane)) : '';
+        if (! pane) {
+            return '';
+        }
+        var boxes = all('input[type="checkbox"]', pane);
+        if (boxes.length && boxes.every(function(box) { return box.checked; })) {
+            return words.all_on;
+        }
+        var names = onLabels(pane).filter(function(name, index, names) { return names.indexOf(name) === index; });
+        return names.length ? names.join(', ') : { text: words.all_off, empty: true };
     });
 
     // Engagement
@@ -7928,45 +8056,61 @@ document.addEventListener('DOMContentLoaded', function() {
     // Once at load too: a browser that restores a form on reload ticks the switch without
     // saying so, and "Open the map on arrival" stayed hidden under a switch that was on.
     syncVenueMapRows();
+    // A row of one switch says On or Off, the words beside the tab's "All off".
     kit.summary('engagement:requests', function() {
         if (! kit.on('accept_requests')) {
-            return { text: words.disabled, empty: true };
+            return { text: words.off, empty: true };
         }
-        return kit.join([words.enabled, kit.on('require_approval') ? words.require_approval : '']);
+        return kit.join([words.on, kit.on('require_approval') ? words.approval_required : '']);
     });
     kit.summary('engagement:fan_content', function() {
         var kinds = fanContent();
-        return kinds.length ? kinds.join(', ') : { text: words.disabled, empty: true };
+        return kinds.length ? kinds.join(', ') : { text: words.all_off, empty: true };
     });
     kit.summary('engagement:feedback', function() {
         if (! kit.on('feedback_enabled')) {
-            return { text: words.disabled, empty: true };
+            return { text: words.off, empty: true };
         }
-        return kit.join([words.enabled, kit.chosen('#feedback_delay_hours')]);
+        return kit.join([words.on, kit.chosen('#feedback_delay_hours')]);
     });
     kit.summary('engagement:carpool', function() {
-        return kit.on('carpool_enabled') ? words.enabled : { text: words.disabled, empty: true };
+        return kit.on('carpool_enabled') ? words.on : { text: words.off, empty: true };
     });
+    // By name, from each card's own data (a name is optional, and a card added on the page has no
+    // name element); a list with no names is counted. A plan without the editor shows the stored
+    // sponsors on the page, so they are counted from the server's number.
     kit.summary('page:sponsors', function() {
         var count = sponsorCount();
         if (! count) {
             return { text: words.none, empty: true };
         }
-        return sponsorsShown() ? String(count) : kit.join([String(count), words.sponsors_hidden]);
+        var names = all('#sponsors-list .sponsor-item').map(function(item) {
+            try {
+                return String(JSON.parse(item.dataset.sponsor || '{}').name || '').trim();
+            } catch (e) {
+                return '';
+            }
+        }).filter(Boolean);
+        var said = names.length ? names.join(', ') : words.sponsors + ': ' + count;
+        return sponsorsShown() ? said : kit.join([said, words.sponsors_hidden]);
     });
     kit.summary('page:map', function() {
         if (! kit.on('show_venues_map')) {
-            return { text: words.disabled, empty: true };
+            return { text: words.off, empty: true };
         }
-        return kit.on('venues_map_open') ? kit.join([words.enabled, words.venue_map_starts_open]) : words.enabled;
+        return kit.on('venues_map_open') ? kit.join([words.on, words.venue_map_starts_open]) : words.on;
     });
     kit.summary('page:accommodation', function() {
-        return kit.on('stay22_enabled') ? words.enabled : { text: words.disabled, empty: true };
+        return kit.on('stay22_enabled') ? words.on : { text: words.off, empty: true };
     });
-    // The two places a visitor leaves an address, by the names of the switches that are on.
+    // The two places a visitor leaves an address, by short names (the switches' labels are in
+    // Title Case and long).
     kit.summary('engagement:mailing-list', function() {
-        var pane = byId('engagement-tab-mailing-list');
-        return pane ? list(onLabels(pane), words.disabled) : '';
+        var on = [
+            kit.on('show_subscribe_panel') ? words.signup_panel : '',
+            kit.on('show_event_interest') ? words.notify_card : '',
+        ].filter(Boolean);
+        return on.length ? on.join(', ') : { text: words.all_off, empty: true };
     });
     kit.summary('section-engagement', function() {
         var on = [
@@ -7976,13 +8120,13 @@ document.addEventListener('DOMContentLoaded', function() {
             kit.on('feedback_enabled') ? words.feedback : '',
             kit.on('carpool_enabled') ? words.carpool : '',
         ].filter(Boolean);
-        return on.length ? on.join(', ') : { text: words.disabled, empty: true };
+        return on.length ? on.join(', ') : { text: words.all_off, empty: true };
     });
 
-    // Sources, auto import
+    // Sources, auto import. Pulling events in is a curator's main job, so an empty list asks.
     kit.summary('section-sources', function() {
         var names = values('#source-schedule-items input[type="text"]');
-        return names.length ? names.join(', ') : { text: words.none, empty: true };
+        return names.length ? names.join(', ') : { text: words.prompt_sources, empty: true };
     });
     function autoImports() {
         // By prefix: a row added on the page is named import_urls[new_0], not import_urls[].
@@ -7994,29 +8138,41 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Integrations
-    // The direction where its radios are on the page (the owner's view); elsewhere, that it syncs.
-    function syncing(name, saved) {
+    // Which way events go, with the schedule named, since the row's title is the calendar:
+    // "To Google Calendar" beside "Google Calendar" said it twice. Read from the radios where they
+    // are on the page (the owner with a connected account, and CalDAV for everyone); elsewhere the
+    // saved direction, which the server leaves empty for an owner whose account is not connected.
+    function syncing(name, calendar, saved) {
         var radios = document.querySelector('input[type="radio"][name="' + name + '"]');
-        if (radios) {
-            return kit.radio(name) ? radioLabel(name) : { text: words.not_connected, empty: true };
+        var direction = radios ? kit.radio(name) : saved;
+        if (direction === 'to') {
+            return words.sync_to.replace(':calendar', calendar);
         }
-        return saved ? words.connected : { text: words.not_connected, empty: true };
+        if (direction === 'from') {
+            return words.sync_from.replace(':calendar', calendar);
+        }
+        if (direction === 'both') {
+            return words.sync_both;
+        }
+        return { text: radios ? words.sync_off : words.not_connected, empty: true };
     }
+    // The address buyers see the mail come from; with no server of the schedule's own, mail still
+    // goes out, from the default sender.
     kit.summary('integration:email', function() {
-        var host = kit.value('input[name="email_settings[host]"]');
         if (words.email_failing) {
             return { text: words.email_failing, warn: true };
         }
-        return host || { text: words.not_connected, empty: true };
+        return kit.value('input[name="email_settings[from_address]"]') || kit.value('input[name="email_settings[host]"]')
+            || { text: words.default_sender, empty: true };
     });
     kit.summary('integration:google', function() {
-        return syncing('sync_direction', words.google_connected);
+        return syncing('sync_direction', 'Google', words.google_direction);
     });
     kit.summary('integration:microsoft', function() {
-        return syncing('microsoft_sync_direction', words.microsoft_connected);
+        return syncing('microsoft_sync_direction', 'Outlook', words.microsoft_direction);
     });
     kit.summary('integration:caldav', function() {
-        return words.caldav_connected ? syncing('caldav_sync_direction', true) : { text: words.not_connected, empty: true };
+        return words.caldav_connected ? syncing('caldav_sync_direction', 'CalDAV', '') : { text: words.not_connected, empty: true };
     });
     kit.summary('section-integrations', function() {
         var on = [
@@ -8025,11 +8181,13 @@ document.addEventListener('DOMContentLoaded', function() {
             words.microsoft_connected ? 'Outlook' : '',
             words.caldav_connected ? 'CalDAV' : '',
             byId('integration-tab-auto-import') && autoImports().length ? words.auto_import : '',
+            words.has_feeds ? words.feeds : '',
         ].filter(Boolean);
         if (words.email_failing) {
             return { text: words.email_failing, warn: true };
         }
-        return on.length ? on.join(', ') : { text: words.not_connected, empty: true };
+        // The account's Integrations tab says it the same way.
+        return on.length ? on.join(', ') : { text: words.none_connected, empty: true };
     });
 
     // Gift cards: what a gift card needs is shown once the switch is on.

@@ -72,7 +72,7 @@
         </ol>
 
         <h3 id="tabs" class="doc-subheading">Tabs of the Event Form</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The event form is split into tabs, listed in a sidebar on desktop and as collapsible headers on mobile. Under each tab's name is a one-line summary of what it holds, and a dot marks a tab with changes you have not saved yet. Some tabs only appear once they apply to your schedule:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The event form is split into tabs, listed in a sidebar on desktop and as collapsible headers on mobile. Under each tab's name is a one-line summary of what it holds, and a dot marks a tab with changes you have not saved yet. A summary in amber is something to act on, such as fan content waiting for review or a calendar the event should be in and is not. Some tabs only appear once they apply to your schedule:</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -727,7 +727,7 @@
             </svg>
             Listing
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Listing tab decides where and how the event is shown: the link it lives at, who can see it, its category, the other schedules it appears on and, on a saved event, the calendars it is copied to. Its summary in the sidebar reads, for example, "Public &middot; Concert".</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Listing tab decides where and how the event is shown: the link it lives at, who can see it, its category, the other schedules it appears on and, on a saved event, the calendars it is copied to. Its summary in the sidebar reads, for example, "Public &middot; Concert". When a synced calendar does not have the event yet, the summary starts with that, for example "Google: Not synced", in amber.</p>
 
         <x-doc-screenshot id="creating-events--listing" alt="The Listing tab of a new event: Visibility with Public chosen, Category, and the Also list on checkboxes" />
 

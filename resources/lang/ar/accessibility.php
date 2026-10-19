@@ -64,7 +64,7 @@ return [
     'toolbar_declaration' => 'بيان إمكانية الوصول',
 
     'settings_widget_heading' => 'أداة إمكانية الوصول',
-    'settings_widget_hidden_note' => 'أداة إمكانية الوصول مخفية على هذا الجهاز.',
+    'settings_widget_hidden_note' => 'مخفية على هذا الجهاز',
     'settings_show_widget' => 'إظهار أداة إمكانية الوصول',
 
     'skip_to_main' => 'تخطي إلى المحتوى الرئيسي',

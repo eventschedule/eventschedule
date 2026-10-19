@@ -64,7 +64,7 @@ return [
     'toolbar_declaration' => 'Barrierefreiheitserklärung',
 
     'settings_widget_heading' => 'Barrierefreiheits-Widget',
-    'settings_widget_hidden_note' => 'Das Barrierefreiheits-Widget ist auf diesem Gerät ausgeblendet.',
+    'settings_widget_hidden_note' => 'Auf diesem Gerät ausgeblendet',
     'settings_show_widget' => 'Barrierefreiheits-Widget anzeigen',
 
     'skip_to_main' => 'Zum Hauptinhalt springen',

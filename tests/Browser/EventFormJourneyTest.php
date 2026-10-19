@@ -442,7 +442,7 @@ class EventFormJourneyTest extends DuskTestCase
             $this->assertSame('true', $state['pressed']);
             $this->assertSame('rsvp', $state['mode']);
             $this->assertSame(['1', '0'], $state['posted']);
-            $this->assertSame('Registration', $state['summary']);
+            $this->assertSame('Free registration', $state['summary'], 'the tile\'s own name');
             $this->assertTrue($state['dot'], 'the Tickets tab shows it has an unsaved change');
             $this->assertSame('rsvp_limit', $state['focused'], 'the limit is the first thing asked, and has the caret');
             $this->assertTrue($state['moreRow'], 'the rest is one row away');
@@ -499,7 +499,7 @@ class EventFormJourneyTest extends DuskTestCase
                 };
             ')[0];
 
-            $this->assertSame('Door', $state['summary']);
+            $this->assertSame('Door $12', $state['summary'], 'each type with its price, as the event page writes it');
             $this->assertSame(0, $state['strip'], 'no second row of tabs');
             $this->assertSame([true, true, true, true, true], $state['rows']);
             $this->assertSame('Connect Stripe to get paid', $state['payment'], 'a price with no way to be paid says so without being opened');

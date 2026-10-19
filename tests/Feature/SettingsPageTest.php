@@ -37,7 +37,7 @@ class SettingsPageTest extends TestCase
     /** The line under a section's name: once in the sidebar and once in the phone header. */
     private function summaries(string $html, string $section): array
     {
-        preg_match_all('/data-section="'.$section.'">.*?<span class="section-nav-summary[^"]*"><bdi>(.*?)<\/bdi>/s', $html, $found);
+        preg_match_all('/data-section="'.$section.'">.*?<span class="section-nav-summary[^"]*"><bdi[^>]*>(.*?)<\/bdi>/s', $html, $found);
 
         return array_map(fn ($text) => html_entity_decode($text, ENT_QUOTES), $found[1]);
     }
@@ -87,6 +87,14 @@ class SettingsPageTest extends TestCase
         return str_contains($found[1], 'is-empty');
     }
 
+    /** Whether the line under a tab's name is amber: something there to act on. */
+    private function warned(string $html, string $tab): bool
+    {
+        $this->assertSame(1, preg_match('/data-section="'.$tab.'">.*?<span class="section-nav-summary([^"]*)">/s', $html, $found), "{$tab} has a line under its name");
+
+        return str_contains($found[1], 'is-warn');
+    }
+
     /** The sections stacked inside one tab, in the order they come. */
     private function blocks(string $html, string $tab): array
     {
@@ -115,18 +123,17 @@ class SettingsPageTest extends TestCase
         $nothing = $this->createOwner();
         $html = $this->page($nothing);
 
-        $this->assertSame($nothing->name.' · '.$nothing->email, $this->summary($html, 'section-profile'));
+        // The address alone: beside the name it was pushed off the end of the line.
+        $this->assertSame($nothing->email, $this->summary($html, 'section-profile'));
         $this->assertSame(__('messages.settings_none_connected'), $this->summary($html, 'section-payment-methods'));
         // A tab of several sections says the one or two things worth knowing before it is opened.
         // Security: two-factor, and the password only when there is none.
         $this->assertSame(__('messages.settings_two_factor_short').': '.__('messages.disabled'), $this->summary($html, 'section-security'));
         $this->assertSame(__('messages.settings_none_connected'), $this->summary($html, 'section-integrations'));
-        // With no state to report a tab says what is in it, quietly: none is left blank.
-        $this->assertSame('API, '.__('messages.webhooks'), $this->summary($html, 'section-developers'));
-        $this->assertSame(
-            __('messages.backup_and_restore').', '.__('messages.data_export_title').', '.__('messages.delete_account'),
-            $this->summary($html, 'section-account-data')
-        );
+        // Nothing set is a state, said quietly; a list of names would read as what is on. A tab
+        // with no state of its own says what it is for, short enough for the line.
+        $this->assertSame(__('messages.summary_not_set_up'), $this->summary($html, 'section-developers'));
+        $this->assertSame(__('messages.settings_data_summary'), $this->summary($html, 'section-account-data'));
         foreach (['section-security', 'section-integrations', 'section-developers', 'section-account-data'] as $tab) {
             $this->assertTrue($this->quiet($html, $tab), "{$tab}: said quietly");
         }
@@ -140,7 +147,7 @@ class SettingsPageTest extends TestCase
         $this->assertSame('Stripe, Invoice Ninja, '.__('messages.payment_url'), $this->summary($html, 'section-payment-methods'));
         $this->assertSame(__('messages.settings_two_factor_short').': '.__('messages.enabled'), $this->summary($html, 'section-security'));
         $this->assertSame('Google, Outlook', $this->summary($html, 'section-integrations'), 'what is connected, by name');
-        $this->assertSame('API · hooks.springfieldjazz.org +1', $this->summary($html, 'section-developers'), 'the key is on; a webhook that is ON, and how many more there are: the newer one is switched off');
+        $this->assertSame('API: '.__('messages.enabled').' · hooks.springfieldjazz.org +1', $this->summary($html, 'section-developers'), 'the key is on; a webhook that is ON, and how many more there are: the newer one is switched off');
         foreach (['section-security', 'section-integrations', 'section-developers'] as $tab) {
             $this->assertFalse($this->quiet($html, $tab), "{$tab}: something is on, so it is not said quietly");
         }
@@ -158,6 +165,7 @@ class SettingsPageTest extends TestCase
         // The only webhook is switched off, so it is not named; a key past its date is refused
         // by the API, so it is not simply "API".
         $this->assertSame('API: '.__('messages.expired'), $this->summary($html, 'section-developers'));
+        $this->assertTrue($this->warned($html, 'section-developers'), 'calls with the key are refused: amber');
 
         // Three webhooks on one host are three webhooks.
         foreach (['a', 'b', 'c'] as $path) {
@@ -176,7 +184,9 @@ class SettingsPageTest extends TestCase
         ])->saveQuietly();
         $html = $this->page($user->fresh());
 
-        $this->assertSame(__('messages.settings_setup_not_finished'), $this->summary($html, 'section-payment-methods'));
+        $this->assertSame('Stripe: '.__('messages.settings_setup_not_finished'), $this->summary($html, 'section-payment-methods'), 'which method, by name');
+        $this->assertTrue($this->warned($html, 'section-payment-methods'));
+        $this->assertTrue($this->warned($html, 'section-security'), 'two-factor left half way');
         $this->assertSame(['text' => __('messages.settings_setup_not_finished'), 'warn' => true], $this->row($html, 'payment', 'stripe'));
         $this->assertSame(
             __('messages.password').': '.__('messages.settings_password_not_set').' · '.__('messages.settings_two_factor_short').': '.__('messages.settings_setup_not_finished'),
@@ -184,6 +194,31 @@ class SettingsPageTest extends TestCase
             'no password is worth saying; two-factor left half way is said as that'
         );
         $this->assertSame('Google', $this->summary($html, 'section-integrations'));
+    }
+
+    public function test_a_method_left_half_way_is_not_hidden_by_one_that_is_connected(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill([
+            'stripe_account_id' => 'acct_1Bart', 'stripe_completed_at' => null,
+            'invoiceninja_api_key' => 'in-key', 'invoiceninja_company_name' => 'Springfield Jazz',
+        ])->saveQuietly();
+        $html = $this->page($user->fresh());
+
+        // It used to say "Invoice Ninja" alone, and the Stripe setup waiting to be finished was gone.
+        $this->assertSame('Stripe: '.__('messages.settings_setup_not_finished').' · Invoice Ninja', $this->summary($html, 'section-payment-methods'));
+        $this->assertTrue($this->warned($html, 'section-payment-methods'));
+    }
+
+    public function test_switched_off_webhooks_are_not_said_as_nothing_set(): void
+    {
+        $user = $this->createOwner();
+        Webhook::create(['user_id' => $user->id, 'url' => 'https://hooks.example.org/in', 'secret' => 's1', 'is_active' => false]);
+        $html = $this->page($user->fresh());
+
+        $this->assertSame(__('messages.webhooks').': '.__('messages.disabled'), $this->summary($html, 'section-developers'));
+        $this->assertTrue($this->quiet($html, 'section-developers'));
+        $this->assertFalse($this->warned($html, 'section-developers'));
     }
 
     public function test_payment_methods_are_rows_that_say_whether_each_is_connected(): void
@@ -229,7 +264,7 @@ class SettingsPageTest extends TestCase
         $this->assertLessThan(strpos($profile, 'name="is_subscribed"'), strpos($profile, 'id="phone-field"'), 'Phone follows Email with nothing between them');
 
         // And the rows are the three that were tabs, in a list of their own.
-        $this->assertSame(1, preg_match('/English · America\/New_York · '.preg_quote(__('messages.settings_12_hour'), '/').'/', $this->row($profile, 'profile', 'localization')['text']));
+        $this->assertSame(1, preg_match('/English · New York · '.preg_quote(__('messages.settings_12_hour'), '/').'/', $this->row($profile, 'profile', 'localization')['text']), 'the zone by its city, as the schedule form says it');
         $this->assertMatchesRegularExpression('/<div id="profile-tab-localization" class="event-subrow-body" hidden>/', $profile);
         $this->assertMatchesRegularExpression('/<div id="profile-tab-appearance" class="event-subrow-body" hidden/', $profile);
     }
@@ -644,11 +679,14 @@ class SettingsPageTest extends TestCase
         $owner->forceFill(['razorpay_key_id' => 'rzp_test_AbCdEf123456', 'razorpay_key_secret' => 'key-secret'])->save();
         $html = $this->page($owner->fresh());
 
-        // Test keys take no money, and without a webhook a buyer who never comes back gets no ticket.
+        // Test keys take no money, and without a webhook a buyer who never comes back gets no ticket:
+        // said first, in amber, on the row and on the tab.
         $this->assertSame(
-            ['text' => implode(' · ', [__('messages.connected'), __('messages.razorpay_test_mode'), __('messages.razorpay_no_webhook')]), 'warn' => false],
+            ['text' => implode(' · ', [__('messages.razorpay_test_mode'), __('messages.razorpay_no_webhook'), __('messages.connected')]), 'warn' => true],
             $this->row($html, 'payment', 'razorpay'),
         );
+        $this->assertSame('Razorpay: '.__('messages.razorpay_test_mode').' · '.__('messages.razorpay_no_webhook'), $this->summary($html, 'section-payment-methods'));
+        $this->assertTrue($this->warned($html, 'section-payment-methods'));
 
         // Dots stand for a stored value: the key secret has one, the webhook secret does not.
         $this->assertMatchesRegularExpression('/<input[^>]*name="razorpay_key_secret"[^>]*placeholder="•+"/u', $html);
@@ -663,10 +701,14 @@ class SettingsPageTest extends TestCase
         $html = $this->page($this->createOwner());
         $section = $this->section($html, 'section-payment-methods');
 
-        $this->assertSame(__('messages.stripe_help'), $this->row($html, 'payment', 'stripe')['text']);
-        $this->assertSame(__('messages.invoiceninja_help'), $this->row($html, 'payment', 'invoiceninja')['text']);
-        $this->assertSame(__('messages.payment_url_help'), $this->row($html, 'payment', 'payment-url')['text']);
-        // What the method is, not how to fill in its form: that is said inside the row.
+        // What the method is, in a phrase the line can hold (the pane keeps the longer help), not
+        // how to fill in its form: that is said inside the row.
+        $this->assertSame(__('messages.settings_stripe_about'), $this->row($html, 'payment', 'stripe')['text']);
+        $this->assertSame(__('messages.settings_invoiceninja_about'), $this->row($html, 'payment', 'invoiceninja')['text']);
+        $this->assertSame(__('messages.settings_payment_url_about'), $this->row($html, 'payment', 'payment-url')['text']);
+        foreach (['stripe', 'invoiceninja', 'payment-url', 'payfast', 'paypal', 'razorpay'] as $tab) {
+            $this->assertStringEndsNotWith('.', $this->row($html, 'payment', $tab)['text'], "{$tab}: a phrase, not a sentence");
+        }
         $this->assertSame(__('messages.settings_payfast_about'), $this->row($html, 'payment', 'payfast')['text']);
         $this->assertSame(__('messages.settings_paypal_about'), $this->row($html, 'payment', 'paypal')['text']);
         $this->assertSame(__('messages.settings_razorpay_about'), $this->row($html, 'payment', 'razorpay')['text']);

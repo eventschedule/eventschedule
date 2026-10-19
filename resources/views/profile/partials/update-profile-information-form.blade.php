@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
     FormKit.summary('profile:localization', function() {
         return FormKit.join([
             FormKit.chosen('#language_code'),
-            FormKit.value('#timezone'),
+            FormKit.value('#timezone').split('/').pop().replace(/_/g, ' '),
             FormKit.on('use_24_hour_time') ? @json(__('messages.settings_24_hour'), JSON_UNESCAPED_UNICODE) : @json(__('messages.settings_12_hour'), JSON_UNESCAPED_UNICODE)
         ]);
     });

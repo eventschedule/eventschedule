@@ -87,6 +87,20 @@ class MoneyUtils
     }
 
     /**
+     * What format() decides by, for a page that formats a price in the browser as it is typed
+     * (the event form's Tickets line): the symbols, and the currencies with no decimals.
+     * Intl.NumberFormat would print "CA$20.00" or "20,00 €" where the server prints "C$20".
+     */
+    public static function displayRules(): array
+    {
+        return [
+            'symbols' => self::$displaySymbols,
+            'codes' => self::$displayCodeOverrides,
+            'zero_decimal' => self::$zeroDecimalCurrencies,
+        ];
+    }
+
+    /**
      * The glyph for a currency, for the few places that need a bare symbol next to a
      * number they format themselves (a budget input's label, a JS-driven counter).
      * Prefer format(), which puts the two together correctly.

@@ -112,12 +112,6 @@
     margin-top: 0.375rem;
 }
 
-{{-- The four rows share one column for their names: a longer name (Custom CSS, in Hebrew) used
-     to push its line out of the column the others keep. --}}
-#section-style .event-subrow .event-row-title {
-    min-width: 8rem;
-}
-
 #section-style button.st-logo-tile:focus-visible,
 #section-style button.st-tile:focus-visible,
 #section-style button.st-swatch:focus-visible,

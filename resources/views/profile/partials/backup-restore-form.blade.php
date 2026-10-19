@@ -12,7 +12,7 @@
     <div id="backup-app" class="event-subrows {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}" data-no-dirty @if (is_demo_mode()) inert @endif>
         <button type="button" class="event-subrow" data-tab="export" :aria-expanded="activeTab === 'export' ? 'true' : 'false'" @click="activeTab = activeTab === 'export' ? '' : 'export'">
             <span class="event-row-title">{{ __('messages.backup_export') }}</span>
-            <span class="event-row-summary" :class="{ 'is-empty': ! exportBusy }"><bdi v-if="exportBusy">{{ __('messages.settings_in_progress') }}</bdi><bdi v-else>{{ __('messages.backup_export_description') }}</bdi></span>
+            <span class="event-row-summary" :class="{ 'is-empty': ! exportBusy }"><bdi v-if="exportBusy">{{ __('messages.settings_in_progress') }}</bdi><bdi v-else>{{ __('messages.backup_export_summary') }}</bdi></span>
             <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
         </button>
 
@@ -110,7 +110,7 @@
         {{-- Import Section --}}
         <button type="button" class="event-subrow" data-tab="import" :aria-expanded="activeTab === 'import' ? 'true' : 'false'" @click="activeTab = activeTab === 'import' ? '' : 'import'">
             <span class="event-row-title">{{ __('messages.backup_import') }}</span>
-            <span class="event-row-summary" :class="{ 'is-empty': ! importBusy }"><bdi v-if="importBusy">{{ __('messages.settings_in_progress') }}</bdi><bdi v-else>{{ __('messages.backup_import_description') }}</bdi></span>
+            <span class="event-row-summary" :class="{ 'is-empty': ! importBusy }"><bdi v-if="importBusy">{{ __('messages.settings_in_progress') }}</bdi><bdi v-else>{{ __('messages.backup_import_summary') }}</bdi></span>
             <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
         </button>
         <div id="backup-tab-import" v-show="activeTab === 'import'" class="event-subrow-body">

@@ -192,25 +192,34 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $this->open($browser);
 
             $this->assertSame('section-details', $this->shownTab($browser));
-            $this->assertSame('Journey Quartet', $this->summary($browser, 'section-details'));
-            // A tab with nothing in it says so, quietly, where it used to say nothing.
-            $this->assertSame(__('messages.settings_not_connected'), $this->summary($browser, 'section-integrations'));
+            // Not the name, which is the page's title just above: where its times are, and its language.
+            $this->assertSame('New York · English', $this->summary($browser, 'section-details'));
+            // A tab with nothing in it says so, quietly, in words that cannot pass for a list of
+            // what is on (Page content used to list everything it could hold).
+            $this->assertSame(__('messages.settings_none_connected'), $this->summary($browser, 'section-integrations'));
+            $this->assertSame(__('messages.summary_nothing_added'), $this->summary($browser, 'section-page'));
+            $this->assertTrue((bool) $browser->script('return document.querySelector(\'[data-summary="section-page"]\').classList.contains("is-empty");')[0]);
             $this->assertSame(__('messages.settings_not_connected'), $this->summary($browser, 'integration:google'));
             $this->assertTrue((bool) $browser->script('return document.querySelector(\'[data-summary="section-integrations"]\').classList.contains("is-empty");')[0]);
-            $this->assertNotSame('', $this->summary($browser, 'settings:advanced'), 'a row of mixed settings names the first of them');
-            $this->assertSame('Main stage, Late shows', $this->summary($browser, 'section-subschedules'));
+            // A row of several switches names the ones that are on, and says so when none is.
+            $this->assertSame(__('messages.summary_all_off'), $this->summary($browser, 'settings:advanced'));
+            // The calendar text and the two feeds, not the names of the fields that hold them.
+            $this->assertSame(__('messages.summary_default_text').' · iCal, RSS', $this->summary($browser, 'integration:advanced'));
+            // Counted on the tab, so the names cannot read as more settings; the row names them.
+            $this->assertStringStartsWith(__('messages.subschedules').': 2', $this->summary($browser, 'section-subschedules'));
             $this->assertSame('Main stage, Late shows', $this->summary($browser, 'customize:subschedules'));
             $this->assertStringContainsString('journeyquartet@gmail.com', $this->summary($browser, 'details:contact'));
             $this->assertStringContainsString('quartet.example.org', $this->summary($browser, 'details:contact'));
-            $this->assertStringContainsString('America/New_York', $this->summary($browser, 'details:localization'));
+            // The zone by its city, as the tab says it, and the hours as the settings page says them.
+            $this->assertStringContainsString('New York · '.__('messages.settings_12_hour'), $this->summary($browser, 'details:localization'));
 
             // Nothing is unsaved on arrival, and nothing claims to be.
             $this->assertSame(__('messages.no_unsaved_changes'), $this->barText($browser));
             $this->assertSame(0, $browser->script('return Array.prototype.filter.call(document.querySelectorAll("[data-dirty-dot]"), function (d) { return ! d.hidden; }).length;')[0]);
 
-            // The name typed is the tab's summary as it is typed.
+            // A name typed is the title's business, not the tab's.
             $this->type($browser, '#name', 'Journey Quintet');
-            $this->assertSame('Journey Quintet', $this->summary($browser, 'section-details'));
+            $this->assertSame('New York · English', $this->summary($browser, 'section-details'));
         });
     }
 
@@ -652,7 +661,9 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $browser->click('#style-font-panel .st-font-row[data-value="Bangers"]')->pause(300);
             $this->assertSame('Bangers', $browser->value('#font_family'));
             $this->assertSame(__('messages.unsaved').': '.__('messages.schedule_style'), $this->barText($browser));
-            $this->assertStringStartsWith('Bangers', $this->summary($browser, 'section-style'));
+            // The background first, then a font that is not the default.
+            $this->assertStringStartsWith(__('messages.background').': ', $this->summary($browser, 'section-style'));
+            $this->assertStringEndsWith('Bangers', $this->summary($browser, 'section-style'));
             $this->assertStringContainsString('Bangers', $this->js($browser, 'getComputedStyle(document.querySelector("#style-preview .st-pv-name")).fontFamily'));
             $this->assertTrue((bool) $this->js($browser, 'document.getElementById("style-font-panel").offsetParent !== null'), 'the list stays open, so the next face is one press away');
 

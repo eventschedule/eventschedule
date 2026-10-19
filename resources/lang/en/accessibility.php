@@ -65,7 +65,7 @@ return [
     'toolbar_declaration' => 'Accessibility statement',
 
     'settings_widget_heading' => 'Accessibility widget',
-    'settings_widget_hidden_note' => 'The accessibility widget is hidden on this device.',
+    'settings_widget_hidden_note' => 'Hidden on this device',
     'settings_show_widget' => 'Show accessibility widget',
 
     'skip_to_main' => 'Skip to main content',

@@ -64,7 +64,7 @@ return [
     'toolbar_declaration' => 'Заявление о доступности',
 
     'settings_widget_heading' => 'Виджет доступности',
-    'settings_widget_hidden_note' => 'Виджет доступности скрыт на этом устройстве.',
+    'settings_widget_hidden_note' => 'Скрыт на этом устройстве',
     'settings_show_widget' => 'Показать виджет доступности',
 
     'skip_to_main' => 'Перейти к основному содержимому',

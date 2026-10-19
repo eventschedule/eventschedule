@@ -64,7 +64,7 @@ return [
     'toolbar_declaration' => 'Declarație de accesibilitate',
 
     'settings_widget_heading' => 'Widget de accesibilitate',
-    'settings_widget_hidden_note' => 'Widgetul de accesibilitate este ascuns pe acest dispozitiv.',
+    'settings_widget_hidden_note' => 'Ascuns pe acest dispozitiv',
     'settings_show_widget' => 'Afișează widgetul de accesibilitate',
 
     'skip_to_main' => 'Sari la conținutul principal',

@@ -64,7 +64,7 @@ return [
     'toolbar_declaration' => 'הצהרת נגישות',
 
     'settings_widget_heading' => 'חלונית נגישות',
-    'settings_widget_hidden_note' => 'חלונית הנגישות מוסתרת במכשיר זה.',
+    'settings_widget_hidden_note' => 'מוסתרת במכשיר זה',
     'settings_show_widget' => 'הצג חלונית נגישות',
 
     'skip_to_main' => 'דלג לתוכן הראשי',

@@ -563,7 +563,7 @@ class VenueMapJourneyTest extends DuskTestCase
             $browser->script('document.querySelector(\'a[data-section="section-page"]\').click();');
             $browser->waitUntil('document.getElementById("section-page").style.display === "block"', 10);
 
-            $this->assertSame('Disabled', trim($this->js($browser, 'document.querySelector(\'[data-summary="page:map"]\').textContent')));
+            $this->assertSame(__('messages.summary_off'), trim($this->js($browser, 'document.querySelector(\'[data-summary="page:map"]\').textContent')));
 
             $browser->script('document.querySelector(\'button.page-tab[data-tab="map"]\').scrollIntoView({ block: "center" });');
             $browser->pause(150)->click('button.page-tab[data-tab="map"]')->pause(200);
@@ -572,7 +572,7 @@ class VenueMapJourneyTest extends DuskTestCase
             // The switch is a styled checkbox: its label is what a person presses.
             $browser->script('document.querySelector(\'label[for="show_venues_map"]\').click();');
             $browser->pause(200);
-            $this->assertSame('Enabled', trim($this->js($browser, 'document.querySelector(\'[data-summary="page:map"]\').textContent')));
+            $this->assertSame(__('messages.summary_on'), trim($this->js($browser, 'document.querySelector(\'[data-summary="page:map"]\').textContent')));
 
             $browser->script('window._skipUnsavedWarning = true; document.getElementById("edit-form").requestSubmit();');
             $browser->waitForLocation('/mapjourney/schedule', 30)

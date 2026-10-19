@@ -830,6 +830,14 @@
     .section-nav-summary.is-empty {
       color: rgb(var(--ap-ink-3));
     }
+    /* Something to act on (email failing, a setup not finished): the rows' amber, on the tab. */
+    .section-nav-summary.is-warn {
+      color: #b45309;
+      font-weight: 500;
+    }
+    .dark .section-nav-summary.is-warn {
+      color: #fcd34d;
+    }
     .section-nav-summary:has(bdi:empty) {
       display: none;
     }
@@ -1071,6 +1079,58 @@
     .event-subrow .event-row-lock {
       flex: none;
       margin-inline-start: auto;
+    }
+
+    /* The rows of one list share their columns, so every line starts on one edge: each used to
+       start where its own title ended. The names take the width of the longest (up to 13rem, a
+       longer one wraps), then the line, then a count, a lock and the chevron, each in a column
+       of its own so a lock sits in one place down the list. The gaps are margins on what is there,
+       so a column no row uses takes no room. A phone keeps the line under the name (above); the
+       event graphics page does that at every width, in a column a phone wide. */
+    @media (min-width: 640px) {
+      @supports (grid-template-columns: subgrid) {
+        .event-subrows:not(.gfx-rows .event-subrows) {
+          display: grid;
+          /* fit-content() cannot sit inside minmax(): the title's own 7rem minimum is the floor. */
+          grid-template-columns: fit-content(13rem) minmax(0, 1fr) auto auto auto;
+          column-gap: 0;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > * {
+          grid-column: 1 / -1;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow {
+          display: grid;
+          grid-template-columns: subgrid;
+          column-gap: 0;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > * {
+          grid-row: 1;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-row-title {
+          grid-column: 1;
+          white-space: normal;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-row-summary {
+          grid-column: 2;
+          margin-inline-start: 0.875rem;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-badge-count {
+          grid-column: 3;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-row-lock {
+          grid-column: 4;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-row-chevron,
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-row-lock:last-child {
+          grid-column: 5;
+        }
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-badge-count,
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-row-lock,
+        .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-row-chevron {
+          justify-self: end;
+          margin-inline-start: 0.75rem;
+        }
+      }
     }
 
     /* A stack of fields. As wide as its column, so a field ends where the rows around it end. */

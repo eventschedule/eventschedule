@@ -83,6 +83,10 @@
   // Page content's rows, likewise: only the sponsors have rules of their own.
   $pageTabOnError = collect($errors->keys())->contains(fn ($key) => (bool) preg_match('/^(sponsor|event_sponsor|existing_event_sponsors|new_event_sponsor)/', $key)) ? 'sponsors' : null;
 
+  // A tab's line is the page's words around somebody's names: on a Hebrew or Arabic page it runs
+  // right to left even when it starts with a Latin name ("Google: Not synced").
+  $summaryDir = is_rtl() ? 'rtl' : 'auto';
+
   // The words the tab summaries and the save bar are built from. One array through one JSON
   // directive: translated text never goes into a Vue attribute.
   $tabLabels = [
@@ -116,8 +120,18 @@
       'tickets' => __('messages.tickets'),
       'free' => __('messages.free'),
       'registration' => __('messages.registration'),
+      'free_registration' => __('messages.free_registration'),
       'limit' => __('messages.limit'),
       'no_tickets' => __('messages.no_tickets'),
+      'when_prompt' => __('messages.summary_prompt_when'),
+      'recurring' => __('messages.recurring'),
+      'online' => __('messages.online'),
+      'parts' => __('messages.summary_parts'),
+      'feedback' => __('messages.feedback'),
+      'all_off' => __('messages.summary_all_off'),
+      // How the server writes a price (MoneyUtils::format()), so the Tickets line says "C$20" as
+      // the event page will, not the browser's "CA$20.00".
+      'money' => \App\Utils\MoneyUtils::displayRules(),
       'participants_prompt' => __('messages.participants_prompt'),
       'agenda_prompt' => __('messages.agenda_prompt'),
       'gallery_prompt' => __('messages.gallery_add_first'),
@@ -145,27 +159,29 @@
           'enabled' => __('messages.enabled'),
           'disabled' => __('messages.disabled'),
           'polls_prompt' => __('messages.polls_row_prompt'),
-          'fan_prompt' => __('messages.fan_content_row_prompt'),
-          'feedback_prompt' => __('messages.feedback_row_prompt'),
           'poll_unfinished' => __('messages.poll_needs_question_and_options'),
           'settings_on_plan' => (bool) $role->isPro(),
       ],
-      // What the Tickets tab's Checkout and Sales rules rows have on, by each one's own label, in
-      // the order of the row.
+      // What the Tickets tab's Checkout and Sales rules rows have on, in the order of the row, by
+      // short names: the switches' own labels are instructions ("Ask for phone number", "Allow
+      // sales after event starts") and ran the line past its end.
       'checkout' => [
-          'ask_phone' => __('messages.ask_for_phone_number'),
+          'ask_phone' => __('messages.summary_phone_number'),
           'custom_fields' => __('messages.checkout_custom_fields'),
           'individual_tickets' => __('messages.individual_tickets'),
-          'terms_url' => __('messages.terms_url'),
+          'terms_url' => __('messages.summary_terms'),
           'ticket_notes' => __('messages.ticket_notes'),
           'registration_notes' => __('messages.registration_notes'),
       ],
       'sales_rules' => [
           'sales_dates' => __('messages.sales_dates'),
-          'sell_after_start' => __('messages.sell_after_start'),
-          'show_unavailable' => __('messages.show_unavailable_tickets'),
-          'expire_unpaid' => __('messages.expire_unpaid_tickets'),
+          'sell_after_start' => __('messages.summary_sales_after_start'),
+          'show_unavailable' => __('messages.summary_unavailable_shown'),
+          'expire_unpaid' => __('messages.summary_unpaid_expire'),
       ],
+      'choose_payment' => __('messages.summary_choose_payment'),
+      'on' => __('messages.summary_on'),
+      'off' => __('messages.summary_off'),
       'no_sponsors' => __('messages.no_sponsors'),
       'sponsors' => __('messages.sponsors'),
       'gallery' => __('messages.gallery'),
@@ -2270,7 +2286,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.event') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-details'].empty }"><bdi v-text="tabSummaries['section-details'].text"></bdi></span>
+                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-details'].empty, 'is-warn': tabSummaries['section-details'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-details'].text"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-details']"></span>
                             </a>
@@ -2291,7 +2307,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.tickets') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-tickets'].empty }"><bdi v-text="tabSummaries['section-tickets'].text"></bdi></span>
+                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-tickets'].empty, 'is-warn': tabSummaries['section-tickets'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-tickets'].text"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-tickets']"></span>
                             </a>
@@ -2302,7 +2318,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.participants') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-participants'].empty }"><bdi v-text="tabSummaries['section-participants'].text"></bdi></span>
+                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-participants'].empty, 'is-warn': tabSummaries['section-participants'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-participants'].text"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-participants']"></span>
                             </a>
@@ -2312,7 +2328,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.agenda') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-agenda'].empty }"><bdi v-text="tabSummaries['section-agenda'].text"></bdi></span>
+                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-agenda'].empty, 'is-warn': tabSummaries['section-agenda'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-agenda'].text"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-agenda']"></span>
                             </a>
@@ -2323,7 +2339,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.page_content') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-page'].empty }"><bdi v-text="tabSummaries['section-page'].text"></bdi></span>
+                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-page'].empty, 'is-warn': tabSummaries['section-page'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-page'].text"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-page']"></span>
                             </a>
@@ -2335,7 +2351,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.listing') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-listing'].empty }"><bdi v-text="tabSummaries['section-listing'].text"></bdi></span>
+                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-listing'].empty, 'is-warn': tabSummaries['section-listing'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-listing'].text"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-listing']"></span>
                             </a>
@@ -2347,7 +2363,7 @@
                                 </svg>
                                 <span class="section-nav-text">
                                     <span>{{ __('messages.engagement') }}</span>
-                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-engagement'].empty }"><bdi v-text="tabSummaries['section-engagement'].text"></bdi></span>
+                                    <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-engagement'].empty, 'is-warn': tabSummaries['section-engagement'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-engagement'].text"></bdi></span>
                                 </span>
                                 <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-engagement']"></span>
                             </a>
@@ -2379,7 +2395,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.event') }}</span>
-                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-details'].empty }"><bdi v-text="tabSummaries['section-details'].text"></bdi></span>
+                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-details'].empty, 'is-warn': tabSummaries['section-details'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-details'].text"></bdi></span>
                         </span>
                         <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-details']"></span>
                     </span>
@@ -3026,7 +3042,7 @@
                             </svg>
                             <span class="section-nav-text">
                                 <span>{{ __('messages.tickets') }}</span>
-                                <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-tickets'].empty }"><bdi v-text="tabSummaries['section-tickets'].text"></bdi></span>
+                                <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-tickets'].empty, 'is-warn': tabSummaries['section-tickets'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-tickets'].text"></bdi></span>
                             </span>
                             <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-tickets']"></span>
                         </span>
@@ -4748,7 +4764,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.participants') }}</span>
-                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-participants'].empty }"><bdi v-text="tabSummaries['section-participants'].text"></bdi></span>
+                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-participants'].empty, 'is-warn': tabSummaries['section-participants'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-participants'].text"></bdi></span>
                         </span>
                         <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-participants']"></span>
                     </span>
@@ -4956,7 +4972,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.agenda') }}</span>
-                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-agenda'].empty }"><bdi v-text="tabSummaries['section-agenda'].text"></bdi></span>
+                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-agenda'].empty, 'is-warn': tabSummaries['section-agenda'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-agenda'].text"></bdi></span>
                         </span>
                         <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-agenda']"></span>
                     </span>
@@ -5062,13 +5078,13 @@
                                  controls, which then failed with an alert. --}}
                             <button type="button" class="event-subrow agenda-tab" data-tab="import" aria-expanded="false" @click.prevent="openUpgrade('upgrade-ai-details')">
                                 <span class="event-row-title">{{ __('messages.import') }}</span>
-                                <span class="event-row-summary">{{ __('messages.agenda_import_prompt') }}</span>
-                                <x-lock-badge tier="enterprise" />
+                                <span class="event-row-summary is-empty">{{ __('messages.agenda_import_prompt') }}</span>
+                                <x-lock-badge tier="enterprise" class="event-row-lock" />
                             </button>
                             @else
                             <button type="button" class="event-subrow agenda-tab" data-tab="import" :aria-expanded="(agendaImportOpen || showPartsPreview) ? 'true' : 'false'" @click="agendaImportOpen = ! agendaImportOpen">
                                 <span class="event-row-title">{{ __('messages.import') }}</span>
-                                <span class="event-row-summary">{{ __('messages.agenda_import_prompt') }}</span>
+                                <span class="event-row-summary is-empty">{{ __('messages.agenda_import_prompt') }}</span>
                                 <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                             </button>
                             <div v-show="agendaImportOpen || showPartsPreview" class="event-subrow-body">
@@ -5151,7 +5167,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.page_content') }}</span>
-                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-page'].empty }"><bdi v-text="tabSummaries['section-page'].text"></bdi></span>
+                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-page'].empty, 'is-warn': tabSummaries['section-page'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-page'].text"></bdi></span>
                         </span>
                         <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-page']"></span>
                     </span>
@@ -5178,7 +5194,7 @@
                             @click="togglePageRow('gallery', $event)">
                             <span class="event-row-title">{{ __('messages.gallery') }}</span>
                             <span class="event-row-summary" v-cloak :class="{ 'is-empty': pageRows.gallery.empty, 'is-warn': pageRows.gallery.warn }"><bdi v-text="pageRows.gallery.text"></bdi></span>
-                            @if ($galleryMode === 'locked' && $galleryCanUpgrade)<x-lock-badge tier="pro" />@endif
+                            @if ($galleryMode === 'locked' && $galleryCanUpgrade)<x-lock-badge tier="pro" class="event-row-lock" />@endif
                             <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                         </button>
                         <div id="page-tab-gallery" v-show="activePageTab === 'gallery'" class="event-subrow-body" data-page-pane="gallery">
@@ -5197,7 +5213,7 @@
                             @click="togglePageRow('sponsors', $event)">
                             <span class="event-row-title">{{ __('messages.sponsors') }}</span>
                             <span class="event-row-summary" v-cloak :class="{ 'is-empty': pageRows.sponsors.empty, 'is-warn': pageRows.sponsors.warn }"><bdi v-text="pageRows.sponsors.text"></bdi></span>
-                            @unless ($sponsorsUnlocked)<x-lock-badge tier="pro" />@endunless
+                            @unless ($sponsorsUnlocked)<x-lock-badge tier="pro" class="event-row-lock" />@endunless
                             <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                         </button>
                         <div id="page-tab-sponsors" v-show="activePageTab === 'sponsors'" class="event-subrow-body" data-page-pane="sponsors">
@@ -5384,7 +5400,7 @@
                         </svg>
                         <span class="section-nav-text">
                             <span>{{ __('messages.listing') }}</span>
-                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-listing'].empty }"><bdi v-text="tabSummaries['section-listing'].text"></bdi></span>
+                            <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-listing'].empty, 'is-warn': tabSummaries['section-listing'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-listing'].text"></bdi></span>
                         </span>
                         <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-listing']"></span>
                     </span>
@@ -5723,7 +5739,7 @@
                     </svg>
                     <span class="section-nav-text">
                         <span>{{ __('messages.engagement') }}</span>
-                        <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-engagement'].empty }"><bdi v-text="tabSummaries['section-engagement'].text"></bdi></span>
+                        <span class="section-nav-summary" v-cloak :class="{ 'is-empty': tabSummaries['section-engagement'].empty, 'is-warn': tabSummaries['section-engagement'].warn }"><bdi dir="{{ $summaryDir }}" v-text="tabSummaries['section-engagement'].text"></bdi></span>
                     </span>
                     <span class="section-nav-dot" v-cloak v-show="sectionDirty['section-engagement']"></span>
                 </span>
@@ -5749,8 +5765,8 @@
                     <button type="button" class="event-subrow engagement-tab" data-tab="polls" :aria-expanded="activeEngagementTab === 'polls' ? 'true' : 'false'"
                         @click="activeEngagementTab = activeEngagementTab === 'polls' ? '' : 'polls'">
                         <span class="event-row-title">{{ __('messages.polls') }}</span>
-                        <span class="event-row-summary" v-cloak v-text="engagementRows.polls"></span>
-                        <span v-cloak v-if="polls.some(p => p.pending_options && p.pending_options.length > 0)" class="event-badge-count">@{{ polls.reduce((sum, p) => sum + (p.pending_options ? p.pending_options.length : 0), 0) }}</span>@if (! $role->isPro())<x-lock-badge tier="pro" />@endif
+                        <span class="event-row-summary" v-cloak :class="{ 'is-empty': engagementRows.polls.empty }"><bdi v-text="engagementRows.polls.text"></bdi></span>
+                        <span v-cloak v-if="polls.some(p => p.pending_options && p.pending_options.length > 0)" class="event-badge-count">@{{ polls.reduce((sum, p) => sum + (p.pending_options ? p.pending_options.length : 0), 0) }}</span>@if (! $role->isPro())<x-lock-badge tier="pro" class="event-row-lock" />@endif
                         <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                     </button>
                     <div v-show="activeEngagementTab === 'polls'" class="event-subrow-body" data-engagement-pane="polls">
@@ -5910,7 +5926,7 @@
                     <button type="button" class="event-subrow engagement-tab" data-tab="fan_content" :aria-expanded="activeEngagementTab === 'fan_content' ? 'true' : 'false'"
                         @click="activeEngagementTab = activeEngagementTab === 'fan_content' ? '' : 'fan_content'">
                         <span class="event-row-title">{{ __('messages.fan_content') }}</span>
-                        <span class="event-row-summary" v-cloak v-text="engagementRows.fan_content"></span>
+                        <span class="event-row-summary" v-cloak :class="{ 'is-empty': engagementRows.fan_content.empty }"><bdi v-text="engagementRows.fan_content.text"></bdi></span>
                         <span v-cloak v-if="fanContentPending > 0" class="event-badge-count" v-text="fanContentPending"></span>
                         <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                     </button>
@@ -6137,8 +6153,8 @@
                     <button type="button" class="event-subrow engagement-tab" data-tab="feedback" :aria-expanded="activeEngagementTab === 'feedback' ? 'true' : 'false'"
                         @click="activeEngagementTab = activeEngagementTab === 'feedback' ? '' : 'feedback'">
                         <span class="event-row-title">{{ __('messages.feedback') }}</span>
-                        <span class="event-row-summary" v-cloak v-text="engagementRows.feedback"></span>
-                        @if (! $role->isPro())<x-lock-badge tier="pro" />@endif
+                        <span class="event-row-summary" v-cloak :class="{ 'is-empty': engagementRows.feedback.empty }"><bdi v-text="engagementRows.feedback.text"></bdi></span>
+                        @if (! $role->isPro())<x-lock-badge tier="pro" class="event-row-lock" />@endif
                         <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                     </button>
                     <div v-show="activeEngagementTab === 'feedback'" class="event-subrow-body" data-engagement-pane="feedback">
@@ -6169,18 +6185,25 @@
                     </div>
 
                     @if ($role->carpool_enabled)
+                    {{-- Read before the row, which says what the pane holds: the offers, and in amber
+                         the reports somebody has made about one. --}}
+                    @php
+                        $carpoolOffers = $event->carpoolOffers()->with(['user', 'approvedRequests', 'reports.reporter'])->where('status', 'active')->get();
+                        $carpoolReports = \App\Models\CarpoolReport::whereIn('carpool_offer_id', $carpoolOffers->pluck('id'))->with(['reporter', 'reported', 'offer'])->get();
+                    @endphp
                     <button type="button" class="event-subrow engagement-tab" data-tab="carpool" :aria-expanded="activeEngagementTab === 'carpool' ? 'true' : 'false'"
                         @click="activeEngagementTab = activeEngagementTab === 'carpool' ? '' : 'carpool'">
                         <span class="event-row-title">{{ __('messages.carpool') }}</span>
-                        <span class="event-row-summary">{{ __('messages.carpool_row_prompt') }}</span>
-                        
+                        @if ($carpoolReports->count() > 0)
+                        <span class="event-row-summary is-warn"><bdi>{{ __('messages.carpool_reports') }}: {{ $carpoolReports->count() }}</bdi></span>
+                        @elseif ($carpoolOffers->count() > 0)
+                        <span class="event-row-summary"><bdi>{{ __('messages.carpool_active_offers') }}: {{ $carpoolOffers->count() }}</bdi></span>
+                        @else
+                        <span class="event-row-summary is-empty"><bdi>{{ __('messages.carpool_row_prompt') }}</bdi></span>
+                        @endif
                         <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                     </button>
                     <div v-show="activeEngagementTab === 'carpool'" class="event-subrow-body" data-engagement-pane="carpool">
-                        @php
-                            $carpoolOffers = $event->carpoolOffers()->with(['user', 'approvedRequests', 'reports.reporter'])->where('status', 'active')->get();
-                            $carpoolReports = \App\Models\CarpoolReport::whereIn('carpool_offer_id', $carpoolOffers->pluck('id'))->with(['reporter', 'reported', 'offer'])->get();
-                        @endphp
 
                         @if ($carpoolOffers->count() > 0)
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.carpool_active_offers') }}: {{ $carpoolOffers->count() }}</p>
@@ -7583,6 +7606,16 @@
           var link = document.querySelector('[data-sales-dates-link="' + ticket.uid + '"]');
           if (link) { link.focus(); }
         });
+      },
+      // MoneyUtils::format() in the browser: the currency's decimals, a ',' between thousands, a
+      // whole amount without '.00', and the symbol in front or the code after.
+      formatMoney(amount, currency) {
+        var rules = this.tabLabels.money;
+        var code = String(currency || 'USD').toUpperCase();
+        var decimals = rules.zero_decimal.indexOf(code) === -1 ? 2 : 0;
+        var parts = (parseFloat(amount) || 0).toFixed(decimals).split('.');
+        var number = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (parts[1] && parts[1] !== '00' ? '.' + parts[1] : '');
+        return rules.symbols[code] ? rules.symbols[code] + number : number + ' ' + (rules.codes[code] || code);
       },
       // tickets.sold is a JSON map of date to count.
       soldCount(ticket) {
@@ -9662,6 +9695,9 @@
         var payment;
         if (this.anyTicketPriced && this.paymentWarning) {
           payment = { text: this.paymentWarning, warn: true };
+        } else if (this.anyTicketPriced && ! this.paymentLabels[e.payment_method]) {
+          // A saved method this page no longer offers: the row used to say only "USD".
+          payment = { text: this.tabLabels.choose_payment, warn: true };
         } else {
           payment = { text: [this.paymentLabels[e.payment_method], e.ticket_currency_code].filter(Boolean).join(' \u00b7 '), empty: false };
         }
@@ -9817,19 +9853,47 @@
 
         return { gallery: gallery, sponsors: sponsors, tab: tab };
       },
-      // One line per tab, from what is on screen now and not from what was saved.
+      // One line per tab, from what is on screen now and not from what was saved. Names mean in
+      // use; an empty tab asks only where adding is the next step; a warning comes first and turns
+      // the line amber; the rest in order of use, as the line is cut at its end.
       tabSummaries() {
         var L = this.tabLabels;
         var self = this;
         var names = function (list, key) {
           return list.map(function (item) { return (item[key] || '').trim(); }).filter(Boolean).join(', ');
         };
+        var dot = ' · ';
+
+        // When, then where. A series is said by its weekday and time: the first date alone read as
+        // a one-off. The preview's own words when it has them; the date alone when it has not (no
+        // schedule time zone, or a multi-day event from midnight), never the prompt over a date.
+        var when = '';
+        var start = (this.startsAt || '').match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+        if (start) {
+          var startDate = new Date(+start[1], +start[2] - 1, +start[3], +start[4], +start[5]);
+          var locale = document.documentElement.lang || undefined;
+          try {
+            if (this.isRecurring) {
+              when = L.recurring + dot + new Intl.DateTimeFormat(locale, { weekday: 'short', hour: 'numeric', minute: '2-digit' }).format(startDate);
+            } else {
+              when = this.whenLabel || new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric' }).format(startDate);
+            }
+          } catch (e) {
+            when = this.whenLabel;
+          }
+        }
+        // A venue schedule's own events are at that venue: naming it again says nothing.
+        var where = [
+          this.isInPerson && ! this.roleIsVenue ? (this.venueName || this.venueAddress1 || this.venueCity || '').trim() : '',
+          this.isOnline ? L.online : '',
+        ].filter(Boolean).join(dot);
+        var details = when ? { text: [when, where].filter(Boolean).join(dot), empty: false } : { text: L.when_prompt, empty: true };
 
         var tickets;
         if (this.presetLocked) {
           // A bound team member's tab: the preset pressed, or what the event has.
           var picked = this.presetChosen;
-          tickets = { text: picked && (this.presetApply || ! this.eventIsSaved) ? picked.chip : (picked ? picked.label + ' \u00b7 ' + this.presetEvent.types : this.presetEvent.types), empty: false };
+          tickets = { text: picked && (this.presetApply || ! this.eventIsSaved) ? picked.chip : (picked ? picked.label + dot + this.presetEvent.types : this.presetEvent.types), empty: false };
         } else if (this.presetFitsMode
           && (! this.eventIsSaved || this.presetLit !== this.presetSaved || this.presetRebuilt)
           && ! this.tickets.some(function (t) { return self.soldCount(t) > 0; })) {
@@ -9844,12 +9908,10 @@
           var total = this.tickets.reduce(function (n, t) { return n + (parseInt(t.quantity, 10) || 0); }, 0);
           var parts = [];
           if (sold > 0) { parts.push(L.sold + ': ' + sold + (capped ? '/' + total : '')); }
-          // One unnamed type is the usual first ticket; say what it costs to get in, not "Tickets".
-          var allFree = this.tickets.every(function (t) { return ! (parseFloat(t.price) > 0); });
-          parts.push(names(this.tickets, 'type') || (allFree ? L.free : L.tickets));
-          tickets = { text: parts.join(' \u00b7 '), empty: false };
+          parts.push(this.ticketTypesLine);
+          tickets = { text: parts.join(dot), empty: false };
         } else if (this.event.rsvp_enabled) {
-          tickets = { text: L.registration + (this.event.rsvp_limit ? ' \u00b7 ' + L.limit + ': ' + this.event.rsvp_limit : ''), empty: false };
+          tickets = { text: L.free_registration + (this.event.rsvp_limit ? dot + L.limit + ': ' + this.event.rsvp_limit : ''), empty: false };
         } else if ((this.event.registration_url || '').trim()) {
           var link = this.event.registration_url.trim();
           try { link = new URL(link).hostname.replace(/^www\./, ''); } catch (e) {}
@@ -9858,27 +9920,77 @@
           tickets = { text: L.no_tickets, empty: true };
         }
 
-        // The useful part first, as the line is cut at its end: who can see it, then a calendar the
-        // event should be in and is not, then the rest. Schedule names are the longest and lose least.
-        var listing = [L.visibility[this.visibility], this.calendarSummary, this.categoryLabel].concat(this.alsoListedOn).filter(Boolean).join(' \u00b7 ');
+        // A row's warning is the tab's: photos hidden by a lapsed plan, sponsors a save will clear.
+        var page = this.pageRows;
+        var pageTab = page.gallery.warn ? page.gallery : (page.sponsors.warn ? page.sponsors : page.tab);
 
-        var engagement = [];
-        if (this.fanContentPending > 0) { engagement.push(L.to_review + ': ' + this.fanContentPending); }
-        if (this.polls && this.polls.length) { engagement.push(L.polls + ': ' + this.polls.length); }
-
+        // Who can see it, then the rest. A calendar the event should be in and is not is the one
+        // thing here to act on, so it goes first and the line is amber.
+        var listingParts = [L.visibility[this.visibility], this.categoryLabel].concat(this.alsoListedOn);
+        var listing = this.calendarSummary
+          ? { text: [this.calendarSummary].concat(listingParts).filter(Boolean).join(dot), empty: false, warn: true }
+          : { text: listingParts.filter(Boolean).join(dot), empty: false };
 
         return {
-          'section-details': { text: this.whenLabel, empty: ! this.whenLabel },
+          'section-details': details,
           'section-tickets': tickets,
           'section-participants': this.selectedMembers.length
             ? { text: names(this.selectedMembers, 'name'), empty: false }
             : { text: L.participants_prompt, empty: true },
           'section-agenda': this.eventParts.length
-            ? { text: names(this.eventParts, 'name') || L.tabs['section-agenda'], empty: false }
+            ? { text: names(this.eventParts, 'name') || L.parts + ': ' + this.eventParts.length, empty: false }
             : { text: L.agenda_prompt, empty: true },
-          'section-page': this.pageRows.tab,
-          'section-listing': { text: listing, empty: false },
-          'section-engagement': engagement.length ? { text: engagement.join(' \u00b7 '), empty: false } : { text: L.engagement_prompt, empty: true },
+          'section-page': pageTab,
+          'section-listing': listing,
+          'section-engagement': this.engagementTab,
+        };
+      },
+      // "General $20, VIP $45", or "$20" for one unnamed type: what TicketPresets::eventTypesLine()
+      // says on the server, never the tab's own name.
+      ticketTypesLine() {
+        var L = this.tabLabels;
+        var self = this;
+        var currency = this.event.ticket_currency_code || 'USD';
+        return this.tickets
+          .filter(function (t) { return t.id || (t.type || '').trim() || parseFloat(t.price) > 0; })
+          .map(function (t) {
+            var price = parseFloat(t.price) > 0 ? self.formatMoney(t.price, currency) : L.free;
+            var type = (t.type || '').trim();
+            return type ? type + ' ' + price : price;
+          })
+          .join(', ') || L.free;
+      },
+      // Engagement: what waits to be reviewed (amber), the polls, then whether fan content and
+      // feedback follow the schedule or what the event has on. Carpool is a list of offers here,
+      // not a switch, so it is not named.
+      engagementTab() {
+        var L = this.tabLabels, E = L.engagement, s = this.engagementSettings;
+        var dot = ' · ';
+        var parts = [];
+        if (this.fanContentPending > 0) { parts.push(L.to_review + ': ' + this.fanContentPending); }
+        if (this.polls && this.polls.length) { parts.push(L.polls + ': ' + this.polls.length); }
+        var inheritedOnly = true;
+        if (E.settings_on_plan) {
+          var keys = Object.keys(E.names).concat(['feedback_enabled']);
+          if (keys.every(function (key) { return s[key] === ''; })) {
+            parts.push(L.same_as_schedule);
+          } else {
+            inheritedOnly = false;
+            var inherited = this.engagementInherited;
+            var inForce = function (key) { return s[key] === '' ? !! inherited[key] : s[key] === '1'; };
+            var on = Object.keys(E.names).filter(inForce).map(function (key) { return E.names[key]; }).join(', ');
+            var kinds = [on, inForce('feedback_enabled') ? L.feedback : ''].filter(Boolean);
+            parts.push(kinds.length ? kinds.join(dot) : L.all_off);
+          }
+        }
+        if (! parts.length) {
+          return { text: L.engagement_prompt, empty: true };
+        }
+        return {
+          text: parts.join(dot),
+          // Only the schedule's settings, and nothing of the event's own: said quietly.
+          empty: inheritedOnly && ! this.fanContentPending && ! (this.polls && this.polls.length),
+          warn: this.fanContentPending > 0,
         };
       },
       // What the save bar says. It answers one question: what will Save do, or what is in its way.
@@ -10141,10 +10253,17 @@
         }
         return this.tickets.filter(ticket => !ticket.is_pass).reduce((total, ticket) => total + (ticket.quantity || 0), 0);
       },
-      // One line for each row of the Engagement tab: the setting, not a description of the feature.
+      // One line for each row of the Engagement tab: the setting, not a description of the feature,
+      // quiet when nothing is on. Waiting fan content is the red count beside the row (and the tab's
+      // amber line), so the row does not say it a second time. A row the plan locks says the plain
+      // state, never an invitation to what the plan does not allow.
       engagementRows() {
         var L = this.tabLabels, E = L.engagement, s = this.engagementSettings;
-        var fan = E.fan_prompt, feedback = E.feedback_prompt;
+        var dot = ' · ';
+        // Below Pro an event cannot set its own, so what is in force is the schedule's.
+        var inheritedKinds = Object.keys(E.names).filter(function (key) { return this.engagementInherited[key]; }, this).map(function (key) { return E.names[key]; });
+        var fan = { text: (inheritedKinds.length ? inheritedKinds.join(', ') : L.all_off) + dot + L.same_as_schedule, empty: ! inheritedKinds.length };
+        var feedback = { text: L.off, empty: true };
         if (E.settings_on_plan) {
           // What is in force, then whether that is the schedule's doing: "Same as schedule" alone
           // did not say whether comments were on.
@@ -10152,17 +10271,17 @@
           var inForce = function (key) { return s[key] === '' ? !! inherited[key] : s[key] === '1'; };
           var kinds = Object.keys(E.names).filter(inForce).map(function (key) { return E.names[key]; });
           var allInherited = Object.keys(E.names).every(function (key) { return s[key] === ''; });
-          fan = (kinds.length ? kinds.join(', ') : E.disabled) + (allInherited ? ' \u00b7 ' + L.same_as_schedule : '');
-          feedback = (inForce('feedback_enabled') ? E.enabled : E.disabled) + (s.feedback_enabled === '' ? ' \u00b7 ' + L.same_as_schedule : '');
+          fan = { text: (kinds.length ? kinds.join(', ') : L.all_off) + (allInherited ? dot + L.same_as_schedule : ''), empty: ! kinds.length };
+          var feedbackOn = inForce('feedback_enabled');
+          feedback = { text: (feedbackOn ? L.on : L.off) + (s.feedback_enabled === '' ? dot + L.same_as_schedule : ''), empty: ! feedbackOn };
         }
-        if (this.fanContentPending > 0) {
-          fan = L.to_review + ': ' + this.fanContentPending + ' \u00b7 ' + fan;
-        }
-        var polls = E.polls_prompt;
+        var polls;
         if (this.polls.length === 1 && (this.polls[0].question || '').trim()) {
-          polls = this.polls[0].question;
+          polls = { text: this.polls[0].question, empty: false };
         } else if (this.polls.length) {
-          polls = L.polls + ': ' + this.polls.length;
+          polls = { text: L.polls + ': ' + this.polls.length, empty: false };
+        } else {
+          polls = { text: E.settings_on_plan ? E.polls_prompt : L.none, empty: true };
         }
         return { polls: polls, fan_content: fan, feedback: feedback };
       },

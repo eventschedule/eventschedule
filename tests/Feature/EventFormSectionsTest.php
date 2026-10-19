@@ -120,7 +120,7 @@ class EventFormSectionsTest extends TestCase
             $this->assertGreaterThanOrEqual(7, count($tabs), "sanity check: the {$name} page has its tabs");
 
             foreach ($tabs as $tab) {
-                $summary = '<span class="section-nav-summary" v-cloak :class="{ \'is-empty\': tabSummaries[\''.$tab.'\'].empty }"><bdi v-text="tabSummaries[\''.$tab.'\'].text"></bdi></span>';
+                $summary = '<span class="section-nav-summary" v-cloak :class="{ \'is-empty\': tabSummaries[\''.$tab.'\'].empty, \'is-warn\': tabSummaries[\''.$tab.'\'].warn }"><bdi dir="auto" v-text="tabSummaries[\''.$tab.'\'].text"></bdi></span>';
                 $this->assertSame(2, substr_count($html, $summary), "{$tab} has a summary on the sidebar and on its phone header ({$name})");
                 $this->assertSame(2, substr_count($html, 'v-show="sectionDirty[\''.$tab.'\']"'), "{$tab} can show unsaved changes in both places ({$name})");
                 // What the page's data answers with, and the name the save bar calls the tab by.

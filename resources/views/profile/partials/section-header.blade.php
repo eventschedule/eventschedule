@@ -13,7 +13,7 @@
         </svg>
         <span class="section-nav-text">
             <span>{{ $header['label'] }}</span>
-            <span class="section-nav-summary {{ $headerSummary['empty'] ? 'is-empty' : '' }}"><bdi>{{ $headerSummary['text'] }}</bdi></span>
+            <span @class(['section-nav-summary', 'is-empty' => $headerSummary['empty'], 'is-warn' => $headerSummary['warn']])><bdi dir="{{ is_rtl() ? 'rtl' : 'auto' }}">{{ $headerSummary['text'] }}</bdi></span>
         </span>
         <span class="section-nav-dot" data-dirty-dot="{{ $settingsSection }}" hidden></span>
     </span>

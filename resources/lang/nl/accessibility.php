@@ -64,7 +64,7 @@ return [
     'toolbar_declaration' => 'Toegankelijkheidsverklaring',
 
     'settings_widget_heading' => 'Toegankelijkheidswidget',
-    'settings_widget_hidden_note' => 'De toegankelijkheidswidget is verborgen op dit apparaat.',
+    'settings_widget_hidden_note' => 'Verborgen op dit apparaat',
     'settings_show_widget' => 'Toegankelijkheidswidget tonen',
 
     'skip_to_main' => 'Naar hoofdinhoud springen',
