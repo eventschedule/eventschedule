@@ -3787,26 +3787,8 @@
     <!-- ============================================================ -->
     @php $discoverPinned = $discoverEvents->count() >= 4; @endphp
     <section id="discover" class="hp-discover">
-        @if (auth()->user()?->isAdmin() && is_array(session('discovery_notice')))
-            @php $discoveryNotice = session('discovery_notice'); @endphp
-            <div @class(['hp-admin-note', 'is-bad' => ! empty($discoveryNotice['bad'])]) role="status">
-                <p>{{ $discoveryNotice['text'] }}</p>
-                @if (! empty($discoveryNotice['undo']))
-                    <form method="POST" action="{{ $discoveryNotice['undo']['action'] }}">
-                        @csrf
-                        <input type="hidden" name="hide" value="{{ $discoveryNotice['undo']['hide'] ? 1 : 0 }}">
-                        <input type="hidden" name="anchor" value="discover">
-                        <button type="submit">Undo</button>
-                    </form>
-                @endif
-                @if (! empty($discoveryNotice['list']))
-                    <a href="{{ $discoveryNotice['list'] }}">Hidden schedules</a>
-                @endif
-                @if (! empty($discoveryNotice['confirm']))
-                    <a href="{{ $discoveryNotice['confirm'] }}">Confirm password</a>
-                @endif
-            </div>
-        @endif
+        {{-- A platform admin's note after a pill, put in by the script at the foot of the page. --}}
+        <div data-discovery-notice hidden></div>
         <div @class([
             'hp-discover-band 2xl:mx-auto 2xl:max-w-[100rem]',
             'es-gallery' => $discoverPinned,
@@ -4342,6 +4324,43 @@
                 });
             }, { threshold: 0.5 });
             seen.observe(finale);
+        })();
+    </script>
+    {{-- A platform admin's pills on the rail's cards, and the note left by the last one pressed.
+         This page is the edge's one anonymous copy for everyone (docs/CACHING.md), so they are
+         asked for after it loads, by a browser that holds es_signed_in (MarkSignedIn), from
+         MarketingController::discoveryControls(), which answers an admin only. --}}
+    <script {!! nonce_attr() !!}>
+        (function () {
+            if (!/(?:^|;\s*)es_signed_in=1(?:;|$)/.test(document.cookie) || !window.fetch) {
+                return;
+            }
+            var cards = Array.prototype.slice.call(document.querySelectorAll('#discover [data-discovery-event]'));
+            var ids = cards.map(function (card) { return card.getAttribute('data-discovery-event'); });
+            fetch(@json(route('discovery.controls')) + '?events=' + encodeURIComponent(ids.join(',')), {
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: { Accept: 'application/json' },
+            }).then(function (response) {
+                return response.status === 200 ? response.json() : null;
+            }).then(function (data) {
+                if (!data) {
+                    return;
+                }
+                var slot = document.querySelector('#discover [data-discovery-notice]');
+                if (slot && data.notice) {
+                    slot.innerHTML = data.notice;
+                    slot.hidden = false;
+                }
+                cards.forEach(function (card) {
+                    var controls = data.cards && data.cards[card.getAttribute('data-discovery-event')];
+                    if (!controls) {
+                        return;
+                    }
+                    card.insertAdjacentHTML('beforeend', controls.html);
+                    card.style.opacity = controls.dim ? '0.6' : '';
+                });
+            }).catch(function () {});
         })();
     </script>
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>

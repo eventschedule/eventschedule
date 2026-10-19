@@ -111,7 +111,7 @@ class DiscoveryHiddenScheduleTest extends TestCase
 
         $this->hide($venue)
             ->assertRedirect(route('marketing.index').'#discover')
-            ->assertSessionHas('discovery_notice', fn ($notice) => str_starts_with($notice['text'], '2 upcoming events from Gala Hall are now hidden')
+            ->assertSessionHas('discovery_notice_home', fn ($notice) => str_starts_with($notice['text'], '2 upcoming events from Gala Hall are now hidden')
                 && $notice['undo']['hide'] === false);
 
         $after = $this->everywhere();
@@ -124,7 +124,7 @@ class DiscoveryHiddenScheduleTest extends TestCase
         $this->assertStringNotContainsString('/'.$act->subdomain.'/', $this->sitemap('events'));
         $this->assertStringNotContainsString($venue->subdomain, $this->sitemap('schedules'));
 
-        $this->hide($venue, false)->assertSessionHas('discovery_notice', fn ($notice) => $notice['undo']['hide'] === true);
+        $this->hide($venue, false)->assertSessionHas('discovery_notice_home', fn ($notice) => $notice['undo']['hide'] === true);
 
         $this->assertSame($before, $this->asGuest()->everywhere());
         $this->assertStringContainsString('/'.$act->subdomain.'/', $this->sitemap('events'));
@@ -198,10 +198,18 @@ class DiscoveryHiddenScheduleTest extends TestCase
         }
     }
 
+    /** What the homepage's script is given for these events (MarketingController::discoveryControls()). */
+    private function controls(Event ...$events)
+    {
+        $ids = implode(',', array_map(fn (Event $event) => $event->hashedId(), $events));
+
+        return $this->get(route('discovery.controls').'?events='.$ids);
+    }
+
     public function test_the_card_that_was_pressed_is_gone_and_a_curators_listing_has_no_pill(): void
     {
         $venue = $this->schedule('Pressed Venue');
-        $this->event($venue, 'Pressed Night');
+        $pressed = $this->event($venue, 'Pressed Night');
 
         // A placeholder venue nobody has claimed, listed by a curator: the card credits the
         // curator, whose hide would not take the card away, so it gets no schedule pill.
@@ -210,14 +218,49 @@ class DiscoveryHiddenScheduleTest extends TestCase
         $listed = $this->event($placeholder, 'Listed Night');
         $listed->roles()->attach($curator->id, ['is_accepted' => true]);
 
-        $home = $this->admin()->get('/')->assertOk();
+        $cards = $this->admin()->controls($pressed, $listed)->assertOk()->json('cards');
         $pill = route('marketing.discovery.schedule', UrlUtils::encodeId($venue->id));
-        $home->assertSee($pill, false)->assertSee('Hide schedule')->assertSee('Hide event');
-        $home->assertDontSee(route('marketing.discovery.schedule', UrlUtils::encodeId($curator->id)), false);
+        $this->assertStringContainsString($pill, $cards[$pressed->hashedId()]['html']);
+        $this->assertStringContainsString('Hide schedule', $cards[$pressed->hashedId()]['html']);
+        $this->assertStringContainsString('Hide event', $cards[$pressed->hashedId()]['html']);
+        $this->assertStringNotContainsString('Hide schedule', $cards[$listed->hashedId()]['html']);
+        $this->assertStringContainsString('Hide event', $cards[$listed->hashedId()]['html']);
 
         $this->hide($venue);
 
         $this->assertNotContains('Pressed Night', $this->names($this->get('/'), 'discoverEvents'));
+
+        // The edge can still show the card for a while: its pill now offers the way back, once.
+        $after = $this->admin()->controls($pressed)->assertOk();
+        $this->assertStringContainsString('Unhide schedule', $after->json('cards.'.$pressed->hashedId().'.html'));
+        $this->assertTrue($after->json('cards.'.$pressed->hashedId().'.dim'));
+        $this->assertStringContainsString('now hidden from the homepage', $after->json('notice'));
+        $this->assertStringContainsString('>Undo</button>', $after->json('notice'));
+        $this->assertNull($this->admin()->controls($pressed)->json('notice'), 'The note is shown once');
+    }
+
+    /**
+     * The homepage is the edge's one anonymous copy for everyone, signed-in admins included
+     * (docs/CACHING.md), so it never carries an admin's pills: the page asks for them after it
+     * loads, and only an admin is answered.
+     */
+    public function test_the_homepage_asks_for_the_pills_and_only_an_admin_is_given_them(): void
+    {
+        $venue = $this->schedule('Asked Venue');
+        $event = $this->event($venue, 'Asked Night');
+
+        $home = $this->admin()->get('/')->assertOk();
+        $home->assertSee('data-discovery-event="'.$event->hashedId().'"', false)
+            ->assertSee(json_encode(route('discovery.controls')), false)
+            ->assertDontSee('Hide schedule')
+            ->assertDontSee(route('marketing.discovery.toggle', $event->hashedId()), false);
+
+        $answer = $this->admin()->controls($event)->assertOk();
+        $this->assertStringContainsString('no-store', $answer->headers->get('Cache-Control'));
+        $this->assertStringContainsString('private', $answer->headers->get('Cache-Control'));
+
+        $this->actingAs($this->createOwner())->controls($event)->assertNoContent();
+        $this->asGuest()->controls($event)->assertNoContent();
     }
 
     public function test_only_a_confirmed_admin_may_hide_and_a_refusal_says_how_to_confirm(): void
@@ -231,7 +274,7 @@ class DiscoveryHiddenScheduleTest extends TestCase
             ->post($url, ['hide' => 1, 'anchor' => 'discover'])
             ->assertRedirect(route('marketing.index').'#discover')
             ->assertSessionHas('url.intended', route('marketing.index').'#discover')
-            ->assertSessionHas('discovery_notice', fn ($notice) => $notice['confirm'] === route('admin.password.confirm.show'));
+            ->assertSessionHas('discovery_notice_home', fn ($notice) => $notice['confirm'] === route('admin.password.confirm.show'));
 
         $this->assertSame(0, DiscoveryHiddenSchedule::count());
     }

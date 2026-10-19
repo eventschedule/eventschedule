@@ -246,6 +246,10 @@ That branch only runs on a miss, though. On the live zone the cookie clauses do 
 carrying `laravel_session` comes back `cf-cache-status: HIT`), so the anonymous copy also carries a
 Dashboard link, and the page shows it instead of Sign In and Get Started when the browser holds the
 script-readable `es_signed_in=1` cookie that `MarkSignedIn` keeps in step with the session.
+For the same reason a platform admin's Hide schedule / Hide event pills on the homepage rail, and
+the note with Undo after one is pressed, are not in the page: a browser holding that cookie asks
+`GET /browse/discovery-controls` (`discovery.controls`, `private, no-store`, answered for an admin
+only) after the page loads.
 
 So this rule ships only once cookie matching is available. Everything else it needs is fine on
 Free: 10 cache rules, `http.host` and `http.request.uri.path`, `starts_with()`, cache eligibility,

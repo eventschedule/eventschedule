@@ -7374,6 +7374,70 @@ class MarketingController extends Controller
         ]);
     }
 
+    /** The session key a homepage discovery note waits under for discoveryControls(). */
+    private const HOME_NOTICE = 'discovery_notice_home';
+
+    /**
+     * A platform admin's pills for the homepage rail's cards, and the note left by the last one
+     * pressed there, as HTML for the page to put in place.
+     *
+     * The homepage is served from the edge's one anonymous copy to everyone, signed-in visitors
+     * included (docs/CACHING.md), so anything drawn for an admin on the server never reaches them.
+     * The page asks here after it loads, when the browser holds es_signed_in (MarkSignedIn). Named
+     * outside marketing.*, so CacheableMarketingResponse can never mark it public, and said
+     * private besides. Each card's state is read now, not from the copy: the edge can show a card
+     * for up to ten minutes after it was hidden, and its pill then offers the way back.
+     */
+    public function discoveryControls(Request $request)
+    {
+        $private = ['Cache-Control' => 'private, no-store'];
+
+        // An ordinary signed-in visitor asks too (the cookie does not say who is an admin). Their
+        // flash is kept for the page it was meant for.
+        $request->session()->reflash();
+
+        if (! $request->user()?->isAdmin()) {
+            return response()->noContent(204, $private);
+        }
+
+        $ids = collect(explode(',', (string) $request->query('events')))
+            ->take(30)
+            ->map(fn ($hash) => UrlUtils::decodeId(trim($hash)))
+            ->filter()
+            ->all();
+
+        $events = Event::with(['roles', 'creatorRole'])->whereIn('id', $ids)->get();
+        $cardRoles = $events->mapWithKeys(fn (Event $event) => [$event->id => $event->getViewableRole()]);
+        $hiddenSchedules = DiscoveryHiddenSchedule::whereIn('role_id', $cardRoles->filter()->pluck('id'))
+            ->pluck('role_id')
+            ->flip();
+
+        $cards = [];
+
+        foreach ($events as $event) {
+            $cardRole = $cardRoles[$event->id];
+            // Offered only where hiding the schedule takes this card away: never a curator's listing.
+            $schedule = $cardRole && $event->isFromSchedule($cardRole) ? $cardRole : null;
+            $scheduleHidden = $schedule && $hiddenSchedules->has($schedule->id);
+
+            $cards[$event->hashedId()] = [
+                'html' => view('marketing.partials.home-discovery-pills', [
+                    'event' => $event,
+                    'schedule' => $schedule,
+                    'scheduleHidden' => $scheduleHidden,
+                ])->render(),
+                'dim' => $event->is_hidden_from_discovery || $scheduleHidden,
+            ];
+        }
+
+        $notice = $request->session()->pull(self::HOME_NOTICE);
+
+        return response()->json([
+            'cards' => (object) $cards,
+            'notice' => is_array($notice) ? view('marketing.partials.home-discovery-notice', ['notice' => $notice])->render() : null,
+        ], 200, $private);
+    }
+
     /**
      * Where a discovery pill returns the admin to: a fixed page for each anchor the forms send,
      * never the Referer. back() reads the Referer and then the session's last page, and the hosted
@@ -7399,6 +7463,15 @@ class MarketingController extends Controller
     private function backToDiscovery(Request $request, string $key, string $said, array $notice): RedirectResponse
     {
         $target = $this->discoveryTarget($request);
+
+        // The homepage is the edge's anonymous copy, so nothing reads a flash there: the page asks
+        // discoveryControls() for the note after it loads. Kept until that request takes it, not
+        // flashed, because the page's own beacons reach the session first and would age a flash.
+        if ($request->input('anchor') === 'discover') {
+            $request->session()->put(self::HOME_NOTICE, $notice + ['text' => $said]);
+
+            return redirect()->to($target);
+        }
 
         return ($target ? redirect()->to($target) : back())
             ->with($key, $said)
