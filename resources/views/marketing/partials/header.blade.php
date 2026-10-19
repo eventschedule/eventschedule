@@ -83,7 +83,7 @@
                 </button>
 
                 <!-- Auth buttons -->
-                <div class="hidden sm:flex items-center space-x-6">
+                <div class="hidden sm:flex items-center gap-6">
                     @auth
                         @if(auth()->user()->email === \App\Services\DemoService::DEMO_EMAIL)
                             <a href="{{ app_url('/login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
@@ -98,11 +98,16 @@
                             </a>
                         @endif
                     @else
-                        <a href="{{ app_url('/login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        {{-- The edge serves this copy to signed-in visitors too, so the browser
+                             picks a pair from the es_signed_in cookie (MarkSignedIn). --}}
+                        <a href="{{ app_url('/login') }}" class="es-auth-guest text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Sign In
                         </a>
-                        <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-sm font-medium rounded-lg transition-all shadow-sm shadow-blue-500/25">
+                        <a href="{{ app_url('/sign_up') }}" class="es-auth-guest inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-sm font-medium rounded-lg transition-all shadow-sm shadow-blue-500/25">
                             Get Started
+                        </a>
+                        <a href="{{ app_url('/dashboard') }}" class="es-auth-user text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            Dashboard
                         </a>
                     @endauth
                 </div>
@@ -143,7 +148,7 @@
                 <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Docs
                 </a>
-                <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex sm:hidden flex-col space-y-3">
+                <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex sm:hidden flex-col gap-3">
                     @auth
                         @if(auth()->user()->email === \App\Services\DemoService::DEMO_EMAIL)
                             <a href="{{ app_url('/login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
@@ -158,11 +163,14 @@
                             </a>
                         @endif
                     @else
-                        <a href="{{ app_url('/login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
+                        <a href="{{ app_url('/login') }}" class="es-auth-guest text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                             Sign In
                         </a>
-                        <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-sm font-medium rounded-lg transition-colors">
+                        <a href="{{ app_url('/sign_up') }}" class="es-auth-guest inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-sm font-medium rounded-lg transition-colors">
                             Get Started
+                        </a>
+                        <a href="{{ app_url('/dashboard') }}" class="es-auth-user text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
+                            Dashboard
                         </a>
                     @endauth
                 </div>

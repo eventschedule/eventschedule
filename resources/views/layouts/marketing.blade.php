@@ -308,6 +308,17 @@
 
     @include('partials.theme-script', ['variants' => false])
 
+    {{-- The page is the edge's one anonymous copy for everyone (docs/CACHING.md), so the header
+         asks the browser whether it is signed in (MarkSignedIn) before it paints. --}}
+    <style {!! nonce_attr() !!}>
+        html.es-signed-in .es-auth-guest, html:not(.es-signed-in) .es-auth-user { display: none !important; }
+    </style>
+    <script {!! nonce_attr() !!}>
+        if (/(?:^|;\s*)es_signed_in=1(?:;|$)/.test(document.cookie)) {
+            document.documentElement.classList.add('es-signed-in');
+        }
+    </script>
+
 
     {{-- The blog exists on the nexus only, but this layout also renders the legal pages and the
          404 off it, so the feed is linked only where the route is registered. --}}

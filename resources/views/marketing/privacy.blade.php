@@ -1263,6 +1263,7 @@
                                                                 ['Always', $sessionCookie, 'Keeps you signed in, holds your cart and checkout, and protects forms. '.$sessionHours.' hours after your last request.'],
                                                                 ['Always', 'XSRF-TOKEN', 'Protects forms against requests forged by other sites. As long as the session.'],
                                                                 ['Always', 'remember_web_*', 'Keeps you signed in on this device. Set when you sign in or create an account; up to 400 days, or until you log out.'],
+                                                                ['Always', 'es_signed_in', 'Whether this browser is signed in, so our marketing pages offer Dashboard instead of Sign In. Holds no identifier. As long as the session, or as long as remember_web_* when that is set; removed when you log out.'],
                                                                 ['Always', 'last_login_method', 'Whether you last signed in with a password, Google or Facebook, to show that option first. 1 year.'],
                                                                 ['Always', 'browser_timezone, browser_language', 'Sets up a new account in your timezone and language. 1 hour, on the sign-in and sign-up pages only.'],
                                                                 ['Always', 'cookie_consent', 'Your choice in the cookie banner. 12 months.'],

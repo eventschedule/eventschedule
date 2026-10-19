@@ -242,6 +242,10 @@ never gets a chance to apply. A rule without the cookie clauses would serve the 
 signed-in visitors for up to the edge TTL. `session.domain` is `.eventschedule.com`
 (`AppServiceProvider.php`), so the apex really does receive `laravel_session`, and
 `marketing/partials/header.blade.php` really does branch on `@auth`.
+That branch only runs on a miss, though. On the live zone the cookie clauses do not work (a request
+carrying `laravel_session` comes back `cf-cache-status: HIT`), so the anonymous copy also carries a
+Dashboard link, and the page shows it instead of Sign In and Get Started when the browser holds the
+script-readable `es_signed_in=1` cookie that `MarkSignedIn` keeps in step with the session.
 
 So this rule ships only once cookie matching is available. Everything else it needs is fine on
 Free: 10 cache rules, `http.host` and `http.request.uri.path`, `starts_with()`, cache eligibility,

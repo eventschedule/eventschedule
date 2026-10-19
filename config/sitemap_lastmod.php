@@ -181,7 +181,7 @@ return [
     '/posh-alternative' => '2026-10-15',
     '/pretix-alternative' => '2026-10-15',
     '/pricing' => '2026-10-15',
-    '/privacy' => '2026-10-15',
+    '/privacy' => '2026-10-19',
     '/qr-code-generator-replacement' => '2026-10-15',
     '/replace' => '2026-10-15',
     '/saas' => '2026-10-15',
