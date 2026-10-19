@@ -322,6 +322,52 @@ class DiscoveryPerScheduleCapTest extends TestCase
         }
     }
 
+    public function test_an_event_counts_against_every_schedule_on_it(): void
+    {
+        // Production, 2026-10: a venue's "Sip & Paint" night listed the painting schedule as its
+        // act, the painting schedule had its own event for the same night, and the two cards sat
+        // side by side at the end of the homepage rail. Each card names one schedule, and the
+        // two names differed, so one-per-schedule kept both.
+        $painting = $this->createRole($this->createOwner(), 'venue', ['name' => 'Painting Club']);
+        $room = $this->createRole($this->createOwner(), 'venue', ['name' => 'Panic Room']);
+        $at = now()->addDays(3)->setTime(13, 0)->format('Y-m-d H:i:s');
+
+        $roomNight = $this->createEvent($room, [
+            'name' => 'Room Paint Night',
+            'creator_role_id' => $room->id,
+            'flyer_image_url' => 'room.png',
+            'starts_at' => $at,
+        ]);
+        $roomNight->roles()->attach($painting->id, ['is_accepted' => true]);
+
+        $this->createEvent($painting, [
+            'name' => 'Club Paint Night',
+            'creator_role_id' => $painting->id,
+            'flyer_image_url' => 'club.png',
+            'starts_at' => now()->addDays(4)->setTime(13, 0)->format('Y-m-d H:i:s'),
+        ]);
+
+        // A curator that only LISTS events does not count: it lists other schedules' events,
+        // and one of them must not stand for all.
+        $curator = $this->createRole($this->createOwner(), 'curator', ['name' => 'City Picks']);
+        $roomNight->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        $other = $this->createRole($this->createOwner(), 'talent', ['name' => 'Other Act']);
+        $otherNight = $this->createEvent($other, [
+            'name' => 'Other Night',
+            'creator_role_id' => $other->id,
+            'flyer_image_url' => 'other.png',
+            'starts_at' => now()->addDays(5)->setTime(13, 0)->format('Y-m-d H:i:s'),
+        ]);
+        $otherNight->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        $this->assertSame(['room.png', 'other.png'], $this->flyers($this->get('/')->assertOk(), 'discoverEvents'));
+        $this->assertSame(
+            ['Room Paint Night', 'Other Night'],
+            $this->get('/browse')->assertOk()->viewData('events')->map(fn ($e) => $e->name)->all()
+        );
+    }
+
     public function test_a_busy_schedule_does_not_keep_the_others_out_of_the_pool(): void
     {
         // The pool used to be the 100 soonest rows. One schedule with more upcoming events than

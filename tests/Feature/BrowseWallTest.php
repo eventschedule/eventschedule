@@ -255,10 +255,12 @@ class BrowseWallTest extends TestCase
         $this->assertNull($poster['scheduleUrl']);
         $response->assertDontSee('/'.$act->subdomain.'"', false);
 
-        // And one that is listed is linked.
-        $this->event($venue, 'Open Night', '2026-10-10 23:00:00');
+        // And one that is listed is linked. Another venue: The Venue is on Billed Here already,
+        // and the wall takes one event for each schedule on it.
+        $open = $this->schedule('The Open Venue');
+        $this->event($open, 'Open Night', '2026-10-10 23:00:00');
         $linked = collect($this->posters($this->get('/browse')->assertOk()))->firstWhere('name', 'Open Night');
-        $this->assertStringContainsString($venue->subdomain, (string) $linked['scheduleUrl']);
+        $this->assertStringContainsString($open->subdomain, (string) $linked['scheduleUrl']);
     }
 
     // ------------------------------------------------------------------- page

@@ -268,6 +268,9 @@ class DiscoveryUtils
      * as the number of schedules in the pool and never longer. The caller has to be able to
      * stand a short list, which the homepage can (see MarketingController::discoverWallEvents()).
      *
+     * An event counts against every schedule on it (scheduleKeys()), not only the one its card
+     * names, so a second event that shares any of them is left off too.
+     *
      * No fingerprints here. They exist to tell a schedule's repeats from its other events, and
      * with one event a schedule there is nothing to tell apart.
      */
@@ -287,13 +290,13 @@ class DiscoveryUtils
                 break;
             }
 
-            $key = self::scheduleKey($event);
+            $keys = self::scheduleKeys($event);
 
-            if (isset($shown[$key])) {
+            if (array_intersect_key($shown, array_flip($keys))) {
                 continue;
             }
 
-            $shown[$key] = true;
+            $shown += array_fill_keys($keys, true);
             $placed[] = $event;
         }
 
@@ -324,6 +327,37 @@ class DiscoveryUtils
         }
 
         return 'e'.$event->id;
+    }
+
+    /**
+     * Every schedule an event shows up under, for the lists that take one event from each
+     * (onePerSchedule(), BrowseWall::pick()): the one its card names (scheduleKey()), the one
+     * that made it, and each talent and venue that accepted it.
+     *
+     * The card names one schedule, but the event is on the others' pages too. Until 2026-10 only
+     * the named one counted, so a venue's "Sip & Paint" night that listed the painting schedule
+     * as its act sat at the end of the homepage rail beside the painting schedule's own event
+     * for the same night. A curator that only LISTS the event is not counted unless it is the
+     * one named: it lists many schedules' events, and counting it would let one of them stand
+     * for all.
+     *
+     * @return list<string>
+     */
+    public static function scheduleKeys(Event $event): array
+    {
+        $keys = [self::scheduleKey($event)];
+
+        if ($event->creator_role_id) {
+            $keys[] = 'r'.$event->creator_role_id;
+        }
+
+        foreach ($event->roles as $role) {
+            if ($role->type !== 'curator' && $role->pivot?->is_accepted) {
+                $keys[] = 'r'.$role->id;
+            }
+        }
+
+        return array_values(array_unique($keys));
     }
 
     /**

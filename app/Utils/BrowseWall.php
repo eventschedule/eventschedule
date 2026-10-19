@@ -88,34 +88,44 @@ class BrowseWall
     /**
      * One event for each schedule: the one that is on next, soonest first.
      *
-     * The schedule is the one the poster credits (Event::getViewableRole()), because a visitor
-     * counts repeats by the name they read. The order of $pool does not matter.
+     * An event counts against every schedule it shows up under (DiscoveryUtils::scheduleKeys():
+     * the one the poster credits, the one that made it, its talent and venues), so two events
+     * that share a schedule are never both on the wall. The order of $pool does not matter.
      */
     public static function pick(Collection $pool, int $limit = self::LIMIT, ?Carbon $now = null): Collection
     {
         $now ??= Carbon::now('UTC');
-        $best = [];
+        $on = [];
 
         foreach ($pool as $event) {
-            $next = self::next($event, $now);
-
-            if (! $next) {
-                continue;
-            }
-
-            // By start, so whatever is on now (it started before anything still to come) is
-            // first. The id settles a tie.
-            $order = [$next['at']->getTimestamp(), $event->id];
-            $key = self::scheduleKey($event);
-
-            if (! isset($best[$key]) || $order < $best[$key][0]) {
-                $best[$key] = [$order, $event];
+            if ($next = self::next($event, $now)) {
+                // By start, so whatever is on now (it started before anything still to come) is
+                // first. The id settles a tie.
+                $on[] = [[$next['at']->getTimestamp(), $event->id], $event];
             }
         }
 
-        usort($best, fn ($a, $b) => $a[0] <=> $b[0]);
+        usort($on, fn ($a, $b) => $a[0] <=> $b[0]);
 
-        return $pool->take(0)->concat(array_column(array_slice($best, 0, $limit), 1))->values();
+        $taken = [];
+        $picked = [];
+
+        foreach ($on as [, $event]) {
+            if (count($picked) >= $limit) {
+                break;
+            }
+
+            $keys = DiscoveryUtils::scheduleKeys($event);
+
+            if (array_intersect_key($taken, array_flip($keys))) {
+                continue;
+            }
+
+            $taken += array_fill_keys($keys, true);
+            $picked[] = $event;
+        }
+
+        return $pool->take(0)->concat($picked)->values();
     }
 
     /** The schedules on the wall that have something else coming up as well. */
