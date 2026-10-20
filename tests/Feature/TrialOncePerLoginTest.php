@@ -30,7 +30,9 @@ class TrialOncePerLoginTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['app.hosted' => true, 'app.trial_days' => 7]);
+        // The editor offers checkout and goes on to it only with a platform Stripe key, which a
+        // developer's .env has and CI's does not.
+        config(['app.hosted' => true, 'app.trial_days' => 7, 'cashier.key' => 'pk_test_fixture']);
     }
 
     /** A free schedule as a real one is: no legacy plan_expires (createFreeRole() leaves an expired one). */

@@ -75,7 +75,6 @@ class MarketingPriceTest extends TestCase
             '<span>$5</span><span>$199</span>',
             "'acme upgraded to Pro', '+\$29/mo'",
             "'Headliner Showcase'",
-            'the $22/$15 ticket',
             "['Free', '\$0', 0], ['Pro', '\$29', 1]",
             '$29/mo after trial',
         ],

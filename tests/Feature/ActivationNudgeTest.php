@@ -886,6 +886,7 @@ class ActivationNudgeTest extends TestCase
      */
     public function test_the_free_copy_only_offers_the_trial_to_owners_who_can_start_it(): void
     {
+        config(['app.trial_days' => 7]);
         $trialLine = 'Pro comes with a 7-day free trial';
 
         $firstTimer = $this->createFreeRole($this->owner());
