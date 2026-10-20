@@ -1742,7 +1742,7 @@
             </svg>
             Embed Widget
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Embed a ticket purchase or RSVP form directly on your own website using an iframe. Visitors can buy tickets or register without leaving your site.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Embed a ticket purchase or RSVP form directly on your own website using an iframe. Visitors can buy tickets or register without leaving your site. <a href="{{ marketing_url('/features/embed-tickets') }}" class="doc-link">Embed Tickets</a> shows what the checkout looks like on a site.</p>
 
         <div class="doc-callout doc-callout-plan mb-6">
             <div class="doc-callout-title">RSVP embed is free; the ticket embed is Pro</div>

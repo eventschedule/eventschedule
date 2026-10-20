@@ -625,7 +625,7 @@
             ['Gift cards', 'Sell a balance somebody sends to a recipient by email, redeemable against tickets on your schedule.', 'Pro'],
             ['Post-event feedback', 'Star ratings and comments collected from ticket buyers and registrants after the event ends.', 'Pro'],
             ['Webhooks', 'POST notifications for sales, cancellations and check-ins, into whatever you already run.', 'Pro'],
-            ['Embeddable ticket form', 'Put the purchase form on the website you already have, in one iframe. The RSVP embed is free.', 'Pro'],
+            ['Embeddable ticket form', 'Put the purchase form on the website you already have, in one iframe. The RSVP embed is free.', 'Pro', null, ['marketing.embed_tickets', 'How the ticket embed works']],
         ];
 
         $steps = [
@@ -1215,11 +1215,17 @@
 
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="70">
                 @foreach ($afterSale as $afterRow)
-                    @php [$aTitle, $aBody, $aPlan] = $afterRow; $aAnchor = $afterRow[3] ?? null; @endphp
+                    @php [$aTitle, $aBody, $aPlan] = $afterRow; $aAnchor = $afterRow[3] ?? null; $aLink = $afterRow[4] ?? null; @endphp
                     <div @if ($aAnchor) id="{{ $aAnchor }}" @endif class="es-turn-card flex scroll-mt-24 flex-col p-6" data-reveal="panel">
                         <span class="es-turn-plan es-turn-plan-pro mb-3 self-start">{{ $aPlan }}</span>
                         <h3 class="es-turn-ink mb-2 text-base font-bold">{{ $aTitle }}</h3>
                         <p class="es-turn-muted text-sm leading-relaxed">{{ $aBody }}</p>
+                        @if ($aLink)
+                            <a href="{{ route($aLink[0]) }}" class="es-turn-link mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold transition-colors">
+                                {{ $aLink[1] }}
+                                <svg aria-hidden="true" class="h-3.5 w-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+                        @endif
                     </div>
                 @endforeach
             </div>

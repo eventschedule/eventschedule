@@ -145,6 +145,7 @@
         // (03 then 05, with the dark band silently holding 04).
         $fieldKeys = array_values(array_filter([
             ! empty($auto_import) ? 'import' : null,
+            ! empty($fee_example) ? 'fees' : null,
             'card',
             'limits',
             'edge',
@@ -158,6 +159,7 @@
         $dotSections = array_values(array_filter([
             ['top', 'The scorecard'],
             ! empty($auto_import) ? ['import', 'Bring them over'] : null,
+            ! empty($fee_example) ? ['fees', 'Fees, worked out'] : null,
             ['card', 'Line by line'],
             ['limits', 'What we do not claim'],
             ['edge', 'Where the marks fall'],
@@ -482,6 +484,16 @@
             background: #14181f;
         }
         .es-score-table thead th:first-child { min-width: 12.5rem; }
+
+        /* The fees table is three short columns and its last one is the point, so it never
+           scrolls sideways: on a phone the middle column moves under the platform's name. */
+        .es-score-table.es-fee-table { min-width: 0; }
+        .es-fee-table thead th:first-child { min-width: 0; }
+        .es-fee-sub { display: none; }
+        @media (max-width: 767px) {
+            .es-fee-table .es-fee-charges { display: none; }
+            .es-fee-table .es-fee-sub { display: block; }
+        }
         .es-score-table thead th + th { min-width: 9.5rem; }
 
         /* A section of the card. Each is its own <tbody> row group. Its label
@@ -965,6 +977,58 @@
                         <p class="es-score-note">Importing is on the {{ $importPlan }} plan. Publishing your schedule and its dates stays free forever.</p>
                     @endif
                 </div>
+            </div>
+        </div>
+    </section>
+    @endif
+
+    @if (! empty($fee_example))
+    {{-- One month of sales priced on each platform. Every figure, the competitor's name
+         included, comes from the entry's fee_example (MarketingController::feeExample()). --}}
+    <section id="fees" class="es-score-sep-y scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-score-field mb-6" data-reveal aria-hidden="true"><span>{{ $fieldNo('fees') }}</span></div>
+                <p class="es-score-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">{{ $fee_example['tag'] }}</p>
+                <h2 class="es-balance es-score-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    {{ $fee_example['title'] }}
+                </h2>
+                <p class="es-score-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    {{ $fee_example['lead'] }}
+                </p>
+            </div>
+
+            <div class="es-score-card overflow-hidden" data-reveal="panel">
+                <div class="es-score-scroll">
+                    <table class="es-score-table es-fee-table">
+                        <caption class="sr-only">{{ $fee_example['caption'] }}</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="es-score-tag">Platform</span></th>
+                                <th scope="col" class="es-fee-charges"><span class="es-score-tag">What it takes</span></th>
+                                <th scope="col" class="text-end"><span class="es-score-tag">{{ $fee_example['total_label'] }}</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($fee_example['rows'] as $feeRow)
+                                <tr class="es-score-row">
+                                    <th scope="row" class="{{ $feeRow['ours'] ? 'es-score-ours' : '' }}">
+                                        <span class="es-score-plate {{ $feeRow['ours'] ? 'es-score-plate-ours' : 'es-score-plate-theirs' }}">{{ $feeRow['name'] }}</span>
+                                        <span class="es-fee-sub es-score-muted mt-2 text-xs font-normal">{{ $feeRow['charges'] }}</span>
+                                    </th>
+                                    <td class="es-fee-charges es-score-muted text-sm {{ $feeRow['ours'] ? 'es-score-ours' : '' }}">{{ $feeRow['charges'] }}</td>
+                                    <td class="es-score-num text-end text-xl {{ $feeRow['ours'] ? 'es-score-ours es-score-accent' : 'es-score-ink' }}">{{ $feeRow['total'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mx-auto mt-8 max-w-3xl space-y-3" data-reveal>
+                @foreach ($fee_example['notes'] as $feeNote)
+                    <p class="es-score-muted">{{ $feeNote }}</p>
+                @endforeach
             </div>
         </div>
     </section>

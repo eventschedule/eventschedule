@@ -41,6 +41,36 @@ class MarketingController extends Controller
     }
 
     /**
+     * One month of ticket sales priced on each platform, for a comparison page's "fees, worked
+     * out" table. The totals are worked out here from each platform's published rates rather than
+     * typed, so a changed rate or plan price cannot leave a sum behind. Every ticket is its own
+     * order, which is what makes a processor's fixed fee count once per ticket.
+     *
+     * A row: name, charges (the sentence shown), platform_percent, platform_fixed (per ticket),
+     * processing_percent, processing_fixed (per order), monthly (subscription), ours.
+     */
+    private function feeExample(int $tickets, float $price, array $rows): array
+    {
+        $sales = $tickets * $price;
+
+        return array_map(function (array $row) use ($tickets, $price, $sales) {
+            $total = $tickets * ($price * ($row['platform_percent'] ?? 0) + ($row['platform_fixed'] ?? 0))
+                + $sales * ($row['processing_percent'] ?? 0)
+                + $tickets * ($row['processing_fixed'] ?? 0)
+                + ($row['monthly'] ?? 0);
+            $total = round($total, 2);
+
+            return [
+                'name' => $row['name'],
+                'charges' => $row['charges'],
+                // Our row includes the plan price, which is in the installation's currency.
+                'total' => ! empty($row['ours']) ? plan_price($total) : '$'.number_format($total, fmod($total, 1) ? 2 : 0),
+                'ours' => ! empty($row['ours']),
+            ];
+        }, $rows);
+    }
+
+    /**
      * Home page
      */
     public function index()
@@ -2167,10 +2197,10 @@ class MarketingController extends Controller
                 'name' => 'Luma',
                 'key' => 'luma',
                 'slug' => 'luma-alternative',
-                'meta_title' => 'Luma Alternative, Open Source With 0% Fees | Event Schedule',
+                'meta_title' => 'Luma Alternative: Luma Pricing and Fees vs 0% | Event Schedule',
                 'tagline' => 'An open source alternative to Luma with zero platform fees, on the free plan too.',
-                'description' => 'Compare Event Schedule with Luma: zero platform fees even on the free plan, where Luma takes 5%, open source code, and Pro at '.plan_price($this->planPrice()).'/mo, not $59/mo.',
-                'keywords' => 'luma alternative, luma alternative open source, lu.ma alternative, event platform comparison, luma competitor',
+                'description' => 'Luma\'s free plan takes 5% of paid tickets on top of Stripe, and Luma Plus is $59/mo billed annually. Event Schedule takes 0% on every plan, with Pro at '.plan_price($this->planPrice()).'/mo.',
+                'keywords' => 'luma alternative, luma pricing, luma fees, luma plus pricing, is luma free, luma vs eventbrite, lu.ma alternative',
                 'about' => 'Luma (lu.ma) is a modern event platform popular with tech communities and creators. It offers sleek event pages, built-in video streaming, and community features.',
                 'competitor_strengths' => [
                     'Polished, modern event page design with strong visual focus',
@@ -2305,7 +2335,37 @@ class MarketingController extends Controller
                         'Stripe or PayPal checkout, with refunds from the Sales page, on Pro',
                     ],
                 ],
+                // Search brings this page people asking what Luma costs (its fees, Luma Plus, whether
+                // it is free, how it compares with Eventbrite), so the page answers that with a worked
+                // month at Luma's published rates. Rates as published in October 2026.
+                'fee_example' => [
+                    'tag' => 'Luma fees, worked out',
+                    'title' => 'What 100 tickets at $20 cost you on Luma',
+                    'lead' => 'Luma\'s free plan takes a 5% platform fee on paid tickets, and Stripe\'s processing fee, typically 2.9% + 30 cents, comes on top. Luma Plus drops the platform fee for $59 a month, billed annually. Here is one month of $2,000 in ticket sales on each, at the rates each company publishes.',
+                    'total_label' => 'Fees on $2,000',
+                    'caption' => 'Fees on 100 tickets at $20, each bought in its own order, on Event Schedule Pro, Luma Plus, Luma Free and Eventbrite.',
+                    'rows' => $this->feeExample(100, 20, [
+                        ['name' => 'Event Schedule Pro', 'charges' => '0% platform fee, Stripe\'s own fee, and Pro at '.plan_price($this->planPrice()).'/mo', 'processing_percent' => 0.029, 'processing_fixed' => 0.30, 'monthly' => $this->planPrice(), 'ours' => true],
+                        ['name' => 'Luma Plus', 'charges' => '0% platform fee, Stripe\'s own fee, and $59/mo billed annually', 'processing_percent' => 0.029, 'processing_fixed' => 0.30, 'monthly' => 59],
+                        ['name' => 'Luma Free', 'charges' => '5% platform fee on top of Stripe\'s own fee', 'platform_percent' => 0.05, 'processing_percent' => 0.029, 'processing_fixed' => 0.30],
+                        ['name' => 'Eventbrite', 'charges' => '3.7% + $1.79 a ticket, and 2.9% of each order for processing', 'platform_percent' => 0.037, 'platform_fixed' => 1.79, 'processing_percent' => 0.029],
+                    ]),
+                    'notes' => [
+                        'Stripe\'s fee is on every row because every row pays it: it is the card processor\'s charge, not the platform\'s. Each ticket is counted as its own order, which is what makes the 30 cents count a hundred times.',
+                        'Between Luma\'s own two plans, the 5% costs less than Luma Plus until a month\'s ticket sales pass $1,180. Event Schedule Pro costs less than Luma\'s 5% once a month\'s sales pass '.plan_price($this->planPrice() / 0.05).', and free registration costs nothing on either.',
+                        'Luma Plus is billed annually, so its $59 is a twelfth of a $708 bill paid up front. These are the published US rates as of October 2026; your own numbers move with the ticket price, the number of orders and the country.',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your schedule', 'description' => 'Free, no card, with its own address the moment it exists. Your Luma pages can stay up while you move.', 'doc' => 'getting-started#create-schedule'],
+                    ['title' => 'Bring your Luma events across', 'description' => 'Paste the link to a Luma event or calendar page into AI import, and it fills in the name, date, time, venue and description for you to check before anything is saved.', 'doc' => 'ai-import'],
+                    ['title' => 'Bring your guests across', 'description' => 'Export your guest list from Luma as a CSV and upload it to your newsletter list, up to ten thousand rows, on any plan.', 'doc' => 'newsletters#importing-emails'],
+                    ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Paid tickets settle into your own account with no platform fee on top, where Luma\'s free plan takes 5%. Selling a ticket with a price is on Pro.', 'doc' => 'tickets#payment'],
+                ],
                 'faq' => [
+                    ['question' => 'Is Luma free?', 'answer' => 'Luma\'s free plan has no monthly charge, but on paid tickets it takes a 5% platform fee, and Stripe\'s processing fee (typically 2.9% + 30 cents) is charged on top. Luma Plus removes the platform fee for $59 a month, billed annually. Event Schedule takes no platform fee on any plan: free registration is unlimited on the free plan, and selling a ticket with a price on it is on Pro at '.plan_price($this->planPrice()).'/mo.'],
+                    ['question' => 'What does Luma Plus cost, and what does it add?', 'answer' => 'Luma Plus is $59 a month, billed annually, which is $708 a year. It removes the 5% platform fee, raises calendar admins from three to five, and raises invites and newsletters from 500 a week to 5,000. Stripe\'s processing fee still applies. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with a 7-day free trial and no platform fee.'],
+                    ['question' => 'Luma or Eventbrite: which charges less per ticket?', 'answer' => 'On a $20 ticket, Luma\'s free plan takes $1.00 (5%) and Eventbrite takes $2.53 (3.7% + $1.79), before payment processing on either. Luma Plus takes nothing per ticket for $59 a month. Event Schedule takes nothing per ticket on any plan; the only deduction is your payment processor\'s own.'],
                     ['question' => 'Is it easy to switch from Luma to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Your audience can sign up by email for an occasional digest of the new events you create, or subscribe to the schedule\'s live calendar feed, which needs no email address.'],
                     ['question' => 'How does Event Schedule pricing compare to Luma?', 'answer' => 'Luma Plus is $59/mo billed annually, and Luma\'s free plan takes a 5% platform fee on paid events. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, unlimited free registration and newsletters, with no platform fee on anything you sell.'],
                     ['question' => 'Does Event Schedule support virtual events like Luma?', 'answer' => 'Yes. Event Schedule supports online events with video links, descriptions, and ticketing. While Luma has built-in video streaming, Event Schedule integrates with any video platform you already use.'],
