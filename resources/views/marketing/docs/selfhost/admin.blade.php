@@ -653,7 +653,7 @@
             </div>
             <div class="doc-field">
                 <h4>Churn and selling trials</h4>
-                <p>Cancelled subscriptions with the reasons people gave, and cancellations taken back. Then the selling trials: started, running now, sold during the trial, subscribed, and ended without subscribing.</p>
+                <p>Cancelled subscriptions with the reasons people gave, and cancellations taken back. Then the card-free selling trials, which were retired on 2026-10-20 and are kept as history: started, running now, sold during the trial, subscribed, and ended without subscribing.</p>
             </div>
             <div class="doc-field">
                 <h4>Acquisition</h4>

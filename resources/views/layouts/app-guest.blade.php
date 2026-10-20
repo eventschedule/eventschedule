@@ -669,32 +669,17 @@
     @endif
 
     {{-- Monetization slot. Deliberately outside #main-content (and so outside the
-         #calendar-app Vue mount), directly above the free-tier branding footer that it
-         shares a gate with. Opt-in per view: see AppGuestLayout::$adSlot. --}}
+         #calendar-app Vue mount), directly above the privacy pill and the credit chip. Opt-in per view: see AppGuestLayout::$adSlot. --}}
     @if ($adSlot)
         @include('partials.promo-slot')
-    @endif
-
-    {{-- The dark footer strip: an operator's free-tier growth CTA, linking their own
-         marketing_url(). eventschedule.com has none - its free tier carries the corner chip
-         below instead - so Role::showFooterStrip() is false on the nexus whatever the plan. --}}
-    @if (! request()->embed && $role->showFooterStrip())
-    <footer class="bg-gray-800">
-      <div class="container mx-auto relative flex flex-row justify-center items-center py-5 px-5">
-        <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-        <p class="text-[#F5F9FE] text-base text-center" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
-            {!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" rel="noopener" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}
-        </p>
-      </div>
-    </footer>
     @endif
 
     @php
         // Which of the chip's jobs applies here, or null for none - see
         // Role::creditChipReason(). Off the nexus it is unconditional, whatever the tenant's
-        // plan, bar a free tier already carrying the operator's strip; on the nexus it is the
-        // free tier's credit and an admin-granted plan's. hosted and is_nexus are independent
-        // env vars, so the reasons are ordered there rather than unpicked here.
+        // plan; on the nexus it is the free tier's credit and an admin-granted plan's. hosted
+        // and is_nexus are independent env vars, so the reasons are ordered there rather than
+        // unpicked here.
         $creditReason = $role->creditChipReason();
 
         // Tagged per reason so the /admin traffic sources report can tell an operator's own
@@ -730,7 +715,7 @@
     @if (! request()->embed && $creditReason)
     <div class="es-credit-chip flex justify-{{ $isRtl ? 'start' : 'end' }} p-4 {{ $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
         {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
-        <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"
+        <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}"
            class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white hover:text-gray-900">
             <span aria-hidden="true" class="flex h-4 w-4 items-center justify-center rounded-[5px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[8px] font-black leading-none text-white">ES</span>
             <span>Event Schedule</span>

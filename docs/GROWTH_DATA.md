@@ -176,7 +176,8 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `gmv_by_currency[]` (`{currency, month, amount, sales}`): ticket money organizers took, not
     ours, demo excluded;
   - `ticket_trials` (`{started, running, sold_during, converted, expired_unconverted,
-    started_from}`): the card-free selling trial, which is not a plan.
+    started_from}`): the card-free selling trial, which is not a plan. Retired on 2026-10-20:
+    nothing starts one after that date, so these figures are history from then on.
 - `churn`: `cancelled`, `transferred`, `resumed`, `with_reason`, `by_reason`, `by_source`,
   `by_month`.
 - `nudges`: per activation-nudge key, `{total, last_7_days, last_sent_at}`.

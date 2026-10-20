@@ -37,7 +37,10 @@
     // Nearly every free schedule is trial-eligible, and "start a free trial" converts far better
     // than "subscribe". Demo schedules see the explanation but never a way to buy.
     $isDemo = is_demo_role($role);
-    $canTrial = $role && ! $isDemo && $role->isEligibleForTrial();
+    // checkoutTrialDays(), not isEligibleForTrial(): a selling trial still running on the
+    // schedule carries its own end date into checkout, and the gate says what checkout does.
+    $trialDays = $role && ! $isDemo ? $role->checkoutTrialDays() : null;
+    $canTrial = (bool) $trialDays;
 
     $upgradeUrl = $subdomain
         ? route('role.subscribe', array_filter(['subdomain' => $subdomain, 'tier' => $tier, 'source' => $source]))
@@ -71,7 +74,7 @@
                         @endif
                         @isset($actions)
                         {{-- A caller that needs its own buttons, such as the event editor's
-                             in-place selling trial. It replaces the upgrade button, not the
+                             "Save and start free trial". It replaces the upgrade button, not the
                              "learn more" link. --}}
                         {{ $actions }}
                         @elseif ($canUpgrade)
@@ -134,8 +137,8 @@
         @if ($showPrice && ! $isDemo)
             <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                 {{ __('messages.plan_price_line', ['monthly' => plan_price($monthly), 'yearly' => plan_price($yearly)]) }}
-                @if ($canTrial)
-                    <span class="text-green-600 dark:text-green-400">{{ __('messages.plan_trial_note', ['days' => config('app.trial_days', 7)]) }}</span>
+                @if ($canTrial && $trialDays === (int) config('app.trial_days', 7))
+                    <span class="text-green-600 dark:text-green-400">{{ __('messages.plan_trial_note', ['days' => $trialDays]) }}</span>
                 @endif
             </p>
         @endif

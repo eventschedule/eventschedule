@@ -277,6 +277,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'subscribe_form_viewed_at' => 'datetime',
             'ticket_paywall_viewed_at' => 'datetime',
             'ticket_trial_used_at' => 'datetime',
+            'trial_used_at' => 'datetime',
             'onboarding_nudge_sent_at' => 'datetime',
             // App\Utils\SetupGuide. Deliberately NOT fillable: it is written only by that class.
             'setup_guide' => 'array',

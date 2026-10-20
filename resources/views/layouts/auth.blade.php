@@ -94,7 +94,7 @@
         @if ($authSchedule && ($authCreditUrl = $authSchedule->creditChipUrl()))
         <p class="mt-8 flex justify-center px-4">
             {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
-            <a href="{{ $authCreditUrl }}" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"
+            <a href="{{ $authCreditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}"
                class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-white hover:text-gray-900">
                 <span aria-hidden="true" class="flex h-4 w-4 items-center justify-center rounded-[5px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[8px] font-black leading-none text-white">ES</span>
                 <span>Event Schedule</span>

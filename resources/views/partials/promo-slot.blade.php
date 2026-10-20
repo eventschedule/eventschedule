@@ -38,8 +38,8 @@
     @once
     <style {!! nonce_attr() !!}>
         /* The event page pins a CTA bar to the bottom of the viewport on small screens
-           (#gp-mobile-cta, sm:hidden fixed bottom-0). The branding footer below absorbs most
-           of the overlap, but on a short page the slot can still end up underneath it, so
+           (#gp-mobile-cta, sm:hidden fixed bottom-0). The privacy pill and credit chip below
+           absorb most of the overlap, but on a short page the slot can still end up underneath it, so
            reserve room. --es-a11y-cta-clearance is set to the bar's measured height by
            show-guest.blade.php (not by the accessibility widget, which only consumes it), so
            the 0px fallback applies on pages with no bar and for the first paint before that

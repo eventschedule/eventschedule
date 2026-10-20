@@ -18,6 +18,9 @@ class SubscriptionStoreRequest extends FormRequest
             'plan' => ['required', 'in:monthly,yearly'],
             'tier' => ['sometimes', 'in:pro,enterprise'],
             'source' => ['sometimes', 'nullable', 'in:'.implode(',', \App\Http\Controllers\SubscriptionController::CHECKOUT_SOURCES)],
+            // The event a "Save and start free trial" came from; resolved and checked by the
+            // controller (SubscriptionController::returnEvent()).
+            'event' => ['sometimes', 'nullable', 'string', 'max:64'],
         ];
     }
 }

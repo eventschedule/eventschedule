@@ -75,7 +75,7 @@ class StripeController extends Controller
                 $user->stripe_completed_at = now();
                 $user->save();
 
-                return redirect()->to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.stripe_connected'));
+                return redirect()->to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.stripe_connected_first_payout'));
             }
         }
 

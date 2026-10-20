@@ -512,7 +512,7 @@ return [
     'activation_nudge_cta_no_ticket_type' => 'Set up tickets',
     'activation_nudge_subject_no_ticket_type_free' => 'Let people sign up on your ":schedule" schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'Take sign-ups from this page',
-    'activation_nudge_body_no_ticket_type_free' => 'Your ":schedule" schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door. If you want to charge, you can try selling paid tickets free for 7 days, with no card.',
+    'activation_nudge_body_no_ticket_type_free' => 'Your ":schedule" schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door. If you want to charge, Pro comes with a :days-day free trial.',
     'activation_nudge_body_no_ticket_type_free_no_trial' => 'Your ":schedule" schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door.',
     'activation_nudge_cta_no_ticket_type_free' => 'Set up registration',
 
@@ -1375,7 +1375,7 @@ return [
     'change_to_free_plan' => 'Change to Free Plan',
     'plan_changed' => 'Plan changed successfully!',
     'first_year_free' => 'First year free',
-    'free_trial_badge' => '7-day free trial',
+    'free_trial_badge' => ':days-day free trial',
     'copy_url' => 'Copy URL',
     'note_all_schedules_are_publicly_listed' => 'Your schedule will be publicly visible',
     'note_all_events_are_publicly_listed' => 'Your event will be publicly visible',
@@ -2104,7 +2104,6 @@ return [
     'cancel_reason_other' => 'Something else',
     'cancel_subscription_first' => 'Please cancel your subscription before changing plans.',
     'resume_subscription' => 'Resume Subscription',
-    'subscription_created' => 'Subscription created successfully!',
     'subscription_cancelled' => 'Subscription cancelled. You will retain access until the end of your billing period.',
     'subscription_resumed' => 'Subscription resumed successfully!',
     'subscription_updated' => 'Subscription updated successfully!',
@@ -2127,7 +2126,6 @@ return [
     'subscribe' => 'Subscribe',
     'processing' => 'Processing...',
     'you_wont_be_charged_until' => 'You won\'t be charged until :date',
-    'trial_days_remaining_info' => 'You have :days days remaining on your trial. You won\'t be charged until your trial ends.',
     'pro_features' => 'Pro Features Include',
     'feature_white_label' => 'Remove Event Schedule branding',
     'feature_custom_domain' => 'Use your own custom domain',
@@ -3329,7 +3327,7 @@ return [
     'subscription_payment_failed_update' => 'Update Payment Method',
 
     // Subscription trial ending email
-    'subscription_trial_ending_subject' => 'Your Free Trial Ends Tomorrow',
+    'subscription_trial_ending_subject' => 'Your free trial on the ":schedule" schedule ends tomorrow',
     'subscription_trial_ending_body' => 'Your free trial for the ":schedule" schedule (:plan plan) ends on :date. After your trial, your card on file will be charged :amount.',
     'subscription_trial_ending_continue' => 'You don\'t need to do anything to continue. Your :plan subscription will start automatically when the trial ends.',
     'subscription_trial_ending_cancel' => 'If you\'d rather not continue, simply cancel from your plan settings before the trial ends. You won\'t be charged.',
@@ -3337,7 +3335,7 @@ return [
     'subscription_trial_ending_manage' => 'Manage Your Plan',
 
     // Subscription trial ending email (no card on file)
-    'subscription_trial_ending_subject_no_card' => 'Action Required: Your Free Trial Ends Tomorrow',
+    'subscription_trial_ending_subject_no_card' => 'Action required: your free trial on the ":schedule" schedule ends tomorrow',
     'subscription_trial_ending_body_no_card' => 'Your free trial for the ":schedule" schedule (:plan plan) ends on :date. To continue on the :plan plan, please add a payment method before your trial ends.',
     'subscription_trial_ending_continue_no_card' => 'Without a payment method on file, your schedule will be downgraded to the free plan when the trial ends.',
     'subscription_trial_ending_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
@@ -4124,11 +4122,7 @@ return [
     'plan_price_line' => ':monthly per month or :yearly per year. Cancel anytime.',
     'plan_trial_note' => 'Includes a :days day free trial.',
     'plan_gate_ask_owner' => 'Only the schedule owner can change the plan. Ask them to upgrade.',
-    'ticket_trial_start' => 'Sell tickets free for :days days',
     'ticket_trial_title' => 'Paid ticket selling trial',
-    'ticket_trial_plan_hint' => 'Priced tickets go on sale for :days days, with no card and no change to your plan. Other Pro features stay on Pro.',
-    'ticket_trial_started' => 'Paid ticket selling is on for the next :days days. Save the event to start selling. Your plan does not change, and nothing is charged.',
-    'ticket_trial_unavailable' => 'The free selling trial is not available for this schedule. Upgrade to Pro to sell paid tickets.',
     'ticket_trial_days_left' => '{1} Your paid ticket selling trial ends in 1 day.|[2,*] Your paid ticket selling trial ends in :count days.',
     'ticket_trial_ending_subject' => 'Paid ticket selling on the ":schedule" schedule ends on :date',
     'ticket_trial_ending_body' => 'Your free trial of paid ticket selling on the ":schedule" schedule ends on :date. After that, ticket types with a price stop selling until you upgrade to Pro. Free registration and free tickets keep working.',
@@ -4170,7 +4164,7 @@ return [
 
     // The Plan tab explainer: what this plan carries, next to what the paid one adds.
     'plan_overview_title' => 'Your plan',
-    'plan_overview_body' => 'Free includes :types appointment type, unlimited events and schedules, and unlimited free registration and RSVP. Pro adds:',
+    'plan_overview_body' => 'Free includes :types appointment type, unlimited events, and unlimited free registration and RSVP. Each schedule has its own plan. Pro adds:',
 
     // Three separate Pro lines: how many types there may be, charging for a booking, and the
     // advanced scheduling fields. The free type itself books normally.
@@ -7976,4 +7970,30 @@ return [
     'settings_payment_url_about' => 'Send buyers to your own payment page',
     'backup_export_summary' => 'Download a backup of your schedules',
     'backup_import_summary' => 'Restore schedules from a backup',
+
+    // One trial per login, what a plan covers, payouts (2026-10-20)
+    'subscribe_covers_one_schedule' => 'This plan covers the ":name" schedule only. Your other schedules each have their own plan.',
+    'subscribe_trial_charge_line' => 'Free until :date, then :amount. Cancel before then and you pay nothing.',
+    'subscribe_trial_used_on' => 'You already used your free trial on the ":name" schedule, so you pay :amount today.',
+    'subscribe_trial_used' => 'This login has already used its free trial, so you pay :amount today.',
+    'subscribe_trial_used_here' => 'The ":name" schedule has already had a plan, so you pay :amount today.',
+    'subscribe_pay_amount' => 'Pay :amount and subscribe',
+    'subscription_trial_started' => 'Your free trial has started. Nothing is charged today. Your first payment of :amount is on :date.',
+    'subscription_charged_today' => 'Your :plan has started, and :amount was charged today.',
+    'subscription_event_can_sell' => 'Tickets on this event can sell now.',
+    'plan_trial_charge_line' => 'Nothing charged yet. Your card ending :last4 is charged :amount on :date unless you cancel.',
+    'plan_trial_charge_line_no_card' => 'Nothing charged yet. :amount is due on :date unless you cancel.',
+    'plan_trial_cancelled_line' => 'Cancelled during the free trial. Nothing will be charged.',
+    'save_and_start_free_trial' => 'Save and start free trial',
+    'save_and_upgrade' => 'Save and upgrade',
+    'tickets_need_pro_other_schedule' => 'This event belongs to the ":this" schedule, which is on Free. Your plan covers the ":pro" schedule only. Create the event from ":pro" to sell tickets without another plan.',
+    'new_schedule_plan_note' => 'Each schedule has its own plan, so this one starts on Free. To sell tickets at another venue or date, add the event to the ":name" schedule instead.',
+    'new_schedule_plan_note_venue' => 'Each schedule has its own plan, so this one starts on Free. Selling paid tickets here needs its own plan.',
+    'payout_note_stripe' => 'Ticket money goes straight to your Stripe account, and Stripe pays it out to your bank, usually within a few business days. Your first payout can take 7 to 14 days.',
+    'payout_note_paypal' => 'Ticket money arrives in your PayPal balance right away. Transfer it to your bank from PayPal.',
+    'payout_note_settlement' => 'Ticket money goes straight to your :provider account, and :provider pays it out to your bank on its own settlement schedule.',
+    'payout_note_invoiceninja' => 'Ticket money is paid to you through Invoice Ninja, on the payment terms you have set there.',
+    'payout_link' => 'See your payouts in :provider',
+    'stripe_connected_first_payout' => 'Stripe connected. Your first payout usually arrives 7 to 14 days after your first sale.',
+    'sales_payouts_lead' => 'Ticket money goes straight to your own payment account, which pays it out to your bank.',
 ];

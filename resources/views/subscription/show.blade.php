@@ -140,6 +140,11 @@
     </x-slot>
 
     @php
+        // Handed over by SubscriptionController::show(); worked out here for any other caller.
+        $trialEnd = $trialEnd ?? $role->checkoutTrialEnd();
+        $trialUsedOn = $trialUsedOn ?? null;
+        $trialUsedHere = $trialUsedHere ?? false;
+
         // The yearly saving is derived from the two configured amounts, never written down. It
         // used to be a literal "Save 17%" string in all twelve locales, correct only by
         // coincidence, and it would have gone quietly wrong the next time either amount moved.
@@ -169,7 +174,7 @@
     @endphp
 
     <div class="page-shell page-col is-narrow" id="subscribe-page">
-        <x-page-header :title="__('messages.upgrade')" :lead="__('messages.subscribe_page_lead', ['tab' => __('messages.plan')])"
+        <x-page-header :title="__('messages.upgrade')" :lead="__('messages.subscribe_page_lead', ['tab' => __('messages.plan')]).' '.__('messages.subscribe_covers_one_schedule', ['name' => $role->getDisplayName(false)])"
                        :back="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan'])"
                        :back-label="$role->getDisplayName(false)"
                        :image="$role->profile_image_url" />
@@ -179,14 +184,14 @@
         <x-page-flash :keys="['error' => 'error']" class="mb-4" />
 
         <div class="page-stack">
-            {{-- The trial: nothing is charged today --}}
-            @if ($role->isEligibleForTrial())
+            {{-- The trial: nothing is charged today. The answer store() also reads
+                 (RoleBillable::checkoutTrialEnd()), so the page never promises a trial the
+                 checkout does not give. The count only when it is the plan's own length: a
+                 selling trial carried over can have a day or two left, and "1 Tage" reads badly
+                 in most languages; the date beside the button says it either way. --}}
+            @if ($trialEnd && $role->checkoutTrialDays() === (int) config('app.trial_days', 7))
             <x-page-notice tone="success">
-                {{ __('messages.free_trial_badge') }} - {{ __('messages.you_wont_be_charged_until', ['date' => now()->addDays(config('app.trial_days'))->translatedFormat('F j, Y')]) }}
-            </x-page-notice>
-            @elseif ($role->calculateRemainingTrialDays() > 0)
-            <x-page-notice tone="info">
-                {{ __('messages.trial_days_remaining_info', ['days' => $role->calculateRemainingTrialDays()]) }}
+                {{ __('messages.free_trial_badge', ['days' => $role->checkoutTrialDays()]) }}
             </x-page-notice>
             @endif
 
@@ -272,6 +277,9 @@
                     @if ($checkoutSource ?? null)
                         <input type="hidden" name="source" value="{{ $checkoutSource }}">
                     @endif
+                    @if ($returnEvent ?? null)
+                        <input type="hidden" name="event" value="{{ \App\Utils\UrlUtils::encodeId($returnEvent->id) }}">
+                    @endif
 
                     <h2 class="page-card-title plan-heading">{{ __('messages.payment_details') }}</h2>
 
@@ -289,12 +297,32 @@
 
                     </div>
 
+                    {{-- What pressing the button does, beside the button: entering a card read as
+                         paying when it was not, and as a trial when it was not. The amount follows
+                         the choice above (paintChoice()). --}}
+                    @php
+                        // One whole sentence per case, so each language orders it its own way;
+                        // the script swaps in the amount for the plan and term chosen above. The
+                        // stand-in is random, because a schedule's name could hold ":amount".
+                        $amountToken = '[['.\Illuminate\Support\Str::random(12).']]';
+                        $chargeTemplate = $trialEnd
+                            ? __('messages.subscribe_trial_charge_line', ['date' => $trialEnd->translatedFormat('F j, Y'), 'amount' => $amountToken])
+                            : ($trialUsedHere
+                                ? __('messages.subscribe_trial_used_here', ['name' => $role->getDisplayName(false), 'amount' => $amountToken])
+                                : ($trialUsedOn
+                                    ? __('messages.subscribe_trial_used_on', ['name' => $trialUsedOn->getDisplayName(false), 'amount' => $amountToken])
+                                    : __('messages.subscribe_trial_used', ['amount' => $amountToken])));
+                        $openingPrice = $planPrices[$selectedTier === 'enterprise' ? 'enterprise' : 'pro']['monthly'];
+                        $openingAmount = $trialEnd ? $openingPrice.'/'.__('messages.month') : $openingPrice;
+                    @endphp
+                    <p class="mt-4 text-sm font-medium text-gray-700 dark:text-gray-300" id="charge-line" data-template="{{ $chargeTemplate }}">{{ str_replace($amountToken, $openingAmount, $chargeTemplate) }}</p>
+
                     <div class="page-form-actions">
                         <x-secondary-link :href="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan'])" class="js-cancel-btn">
                             {{ __('messages.cancel') }}
                         </x-secondary-link>
                         <x-brand-button type="submit" id="submit-button">
-                            <span id="button-text">{{ __('messages.subscribe') }}</span>
+                            <span id="button-text">{{ $trialEnd ? __('messages.start_free_trial') : __('messages.subscribe_pay_amount', ['amount' => $openingPrice]) }}</span>
                             <span id="button-spinner" class="hidden ms-2">
                                 <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -308,6 +336,16 @@
         </div>
     </div>
 
+    @php
+        // Built here and handed to @json bare: the directive splits its argument on commas.
+        $checkoutScript = [
+            'trial' => (bool) $trialEnd,
+            'amountToken' => $amountToken,
+            'payLabel' => __('messages.subscribe_pay_amount', ['amount' => ':amount']),
+            'periods' => ['monthly' => __('messages.month'), 'yearly' => __('messages.year')],
+            'buttonLabel' => $trialEnd ? __('messages.start_free_trial') : __('messages.subscribe_pay_amount', ['amount' => $openingPrice]),
+        ];
+    @endphp
     <script {!! nonce_attr() !!}>
         const stripe = Stripe('{{ config('cashier.key') }}');
         const elements = stripe.elements();
@@ -344,6 +382,19 @@
         // the prices shown, the saving, and the two fields the form sends. Plain script on the
         // radios themselves; this page was the last one here driven by Alpine.
         const prices = @json($planPrices);
+        // When checkout charges today the button names the price chosen: it is where the
+        // commitment is made, so it says what it costs.
+        const trialAtCheckout = @json($checkoutScript['trial']);
+        const payLabel = @json($checkoutScript['payLabel']);
+        const periodWords = @json($checkoutScript['periods']);
+        const chargeLine = document.getElementById('charge-line');
+        const amountToken = @json($checkoutScript['amountToken']);
+        let buttonLabel = @json($checkoutScript['buttonLabel']);
+        const form = document.getElementById('payment-form');
+        const submitButton = document.getElementById('submit-button');
+        const buttonText = document.getElementById('button-text');
+        const buttonSpinner = document.getElementById('button-spinner');
+        const cardHolderName = document.getElementById('card-holder-name');
         const selectedPlanInput = document.getElementById('selected-plan');
         const selectedTierInput = document.getElementById('selected-tier');
         const saveBadge = document.getElementById('plan-save');
@@ -371,6 +422,14 @@
             });
             saveBadge.textContent = prices[tier].saveLabel;
             saveBadge.hidden = ! (prices[tier].savePercent > 0);
+            chargeLine.textContent = chargeLine.dataset.template.split(amountToken).join(
+                trialAtCheckout ? prices[tier][plan] + '/' + periodWords[plan] : prices[tier][plan]);
+            if (! trialAtCheckout) {
+                buttonLabel = payLabel.split(':amount').join(prices[tier][plan]);
+                if (! submitButton.disabled) {
+                    buttonText.textContent = buttonLabel;
+                }
+            }
         }
 
         document.querySelectorAll('input[name="tier_radio"], input[name="plan_radio"]').forEach(function(radio) {
@@ -381,11 +440,6 @@
         paintChoice();
 
         // Form submission
-        const form = document.getElementById('payment-form');
-        const submitButton = document.getElementById('submit-button');
-        const buttonText = document.getElementById('button-text');
-        const buttonSpinner = document.getElementById('button-spinner');
-        const cardHolderName = document.getElementById('card-holder-name');
 
         form.addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -410,7 +464,7 @@
                 const displayError = document.getElementById('card-errors');
                 displayError.textContent = error.message;
                 submitButton.disabled = false;
-                buttonText.textContent = @json(__('messages.subscribe'));
+                buttonText.textContent = buttonLabel;
                 buttonSpinner.classList.add('hidden');
             } else {
                 document.getElementById('payment-method').value = setupIntent.payment_method;

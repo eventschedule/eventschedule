@@ -881,20 +881,22 @@ class ActivationNudgeTest extends TestCase
     }
 
     /**
-     * The free-plan copy offers the card-free selling trial, which an owner who has already had it
-     * cannot start. Promising it only for the paywall to refuse is worse than not mentioning it.
+     * The free-plan copy mentions Pro's free trial, which a login that has already had one cannot
+     * have again: checkout would charge it today. Promising it is worse than not mentioning it.
      */
     public function test_the_free_copy_only_offers_the_trial_to_owners_who_can_start_it(): void
     {
-        $trialLine = 'free for 7 days';
+        $trialLine = 'Pro comes with a 7-day free trial';
 
         $firstTimer = $this->createFreeRole($this->owner());
-        $html = (new ActivationNudge($firstTimer, 'no_ticket_type_free'))->render();
+        $firstTimer->forceFill(['plan_expires' => null])->save();
+        $html = (new ActivationNudge($firstTimer->fresh(), 'no_ticket_type_free'))->render();
         $this->assertStringContainsString($trialLine, $html);
 
         $owner = $this->owner();
-        $this->createFreeRole($owner)->forceFill(['ticket_trial_ends_at' => now()->subMonth()])->save();
+        $owner->forceFill(['ticket_trial_used_at' => now()->subMonth()])->save();
         $second = $this->createFreeRole($owner);
+        $second->forceFill(['plan_expires' => null])->save();
         $html = (new ActivationNudge($second->fresh(), 'no_ticket_type_free'))->render();
         $this->assertStringNotContainsString($trialLine, $html);
         $this->assertStringContainsString('no way to sign up', $html);

@@ -32,6 +32,7 @@ class ScheduleNamedInMailTest extends TestCase
         'email_settings_failed_email_subject',
         'gift_card_sale_notification_subject', 'gift_card_sale_notification_intro',
         'ticket_trial_ending_subject', 'ticket_trial_ending_body',
+        'subscription_trial_ending_subject', 'subscription_trial_ending_subject_no_card',
         'activation_nudge_subject_no_event', 'activation_nudge_body_no_event',
         'activation_nudge_subject_no_ticket_type', 'activation_nudge_body_no_ticket_type',
         'activation_nudge_subject_no_ticket_type_free', 'activation_nudge_body_no_ticket_type_free',

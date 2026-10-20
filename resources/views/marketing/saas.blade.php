@@ -1273,7 +1273,7 @@
                 <div data-reveal>
                     <span class="sk-module-no">Branding</span>
                     <h3 class="sk-h3">White-label branding</h3>
-                    <p class="sk-p">Your light and dark logos, your domain, your marketing site behind the free-tier footer. Customers see your brand, and one small credit of ours in the corner of public pages.</p>
+                    <p class="sk-p">Your light and dark logos, your domain, your marketing site behind every link the app builds. Customers see your brand, and one small credit of ours in the corner of public pages.</p>
                 </div>
 
                 <div class="sk-stg" data-reveal="panel" aria-hidden="true">
@@ -1335,7 +1335,7 @@
                                 <span class="hp-ico"><svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg></span>
                                 <div>
                                     <h4 class="sk-h4">A small backlink</h4>
-                                    <p>Public schedule pages carry a small, discreet link back to eventschedule.com, on every tier you sell, the paid ones included. Your free tier carries your own footer strip in its place, so no page shows two credits. That link is how the project grows, which keeps the software maintained for everyone.</p>
+                                    <p>Every public schedule page carries a small, discreet link back to eventschedule.com in its bottom corner, on every tier, free and paid alike. That link is how the project grows, which keeps the software maintained for everyone.</p>
                                 </div>
                             </div>
                         </div>
@@ -1362,7 +1362,7 @@
                     </div>
 
                     <figure class="sk-atsize" data-sk-loupe>
-                        <p class="sr-only">A mock of the bottom corner of a paying customer's public page: three events, and in the corner a small pill reading Event Schedule, drawn at the size it has on a real page.</p>
+                        <p class="sr-only">A mock of the bottom corner of a customer's public page: three events, and in the corner a small pill reading Event Schedule, drawn at the size it has on a real page.</p>
                         <div class="sk-corner" aria-hidden="true">
                             <div class="sk-corner-in">
                                 <div class="sk-corner-head">
@@ -1382,14 +1382,13 @@
                             </div>
                             {{-- The real attribution shown on public schedule pages (see
                                  layouts/app-guest.blade.php), drawn with that layout's own sizes.
-                                 This tenant has to stay a PAID one, and the $22/$15 ticket
-                                 prices above are what say so. Role::creditChipReason() stands
-                                 the chip down wherever the footer strip renders, so a free
-                                 tenant here would show the operator's strip and no chip. --}}
+                                 On an operator's platform Role::creditChipReason() answers
+                                 'saas' for every tenant, whatever its tier, so this corner is
+                                 the truth for any customer. --}}
                             <div class="sk-corner-foot"><span class="sk-chip" data-sk-chip><i>ES</i>Event Schedule</span></div>
                         </div>
                         <div class="sk-loupe" aria-hidden="true"><div data-sk-lens></div></div>
-                        <figcaption>Shown at actual size. That is the whole catch.<small>The corner of a paying customer's page. <span class="sk-by-pointer">Move the glass to check.</span><span class="sk-by-finger">Tap it to move the glass.</span></small></figcaption>
+                        <figcaption>Shown at actual size. That is the whole catch.<small>The corner of any customer's page, free or paid. <span class="sk-by-pointer">Move the glass to check.</span><span class="sk-by-finger">Tap it to move the glass.</span></small></figcaption>
                     </figure>
                 </div>
             </div>
@@ -1989,7 +1988,7 @@
             ],
             [
                 'q' => 'How does the free white-label license work?',
-                'a' => 'Event Schedule is open source under the Attribution Assurance License (AAL). You can run it commercially at no cost as long as you keep the attribution, which appears as a small link on public schedule pages, on the tiers you charge for. There are no license fees, no revenue share, and no per-ticket fees.',
+                'a' => 'Event Schedule is open source under the Attribution Assurance License (AAL). You can run it commercially at no cost as long as you keep the attribution, which appears as a small link in the corner of every public schedule page. There are no license fees, no revenue share, and no per-ticket fees.',
             ],
             [
                 'q' => 'Can I set my own subscription prices?',

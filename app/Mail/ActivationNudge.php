@@ -93,13 +93,13 @@ class ActivationNudge extends Mailable
     }
 
     /**
-     * The body's translation key. no_ticket_type_free offers the card-free selling trial, which
-     * a past subscriber or an owner who has already had it cannot start - telling them they can
-     * only for the paywall to refuse is worse than not mentioning it.
+     * The body's translation key. no_ticket_type_free mentions the plan's free trial, which a
+     * login that has already had one cannot start - telling them they can only for checkout to
+     * charge them today is worse than not mentioning it.
      */
     private function bodyKey(): string
     {
-        if ($this->nudgeKey === 'no_ticket_type_free' && ! $this->role->isEligibleForTicketTrial()) {
+        if ($this->nudgeKey === 'no_ticket_type_free' && ! $this->role->isEligibleForTrial()) {
             return 'messages.activation_nudge_body_no_ticket_type_free_no_trial';
         }
 

@@ -127,12 +127,13 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">On a Free schedule the paid rows of an event do not go on sale, whichever payment method they are set to: free registration and free ticket tiers keep working, and an event with nothing left to sell falls back to an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> button rather than a dead buy button. The Tickets tab says so as soon as a price is typed, in a banner titled <em>Selling paid tickets is a Pro feature</em>. Subscribing opens the paid rows immediately, with no re-publishing and no change to the event.</p>
 
-        <h3 id="selling-trial" class="doc-subheading">Try selling free for 7 days</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">On eventschedule.com, that banner offers a <strong class="text-gray-900 dark:text-white">7-day selling trial</strong>: press <strong class="text-gray-900 dark:text-white">Sell tickets free for 7 days</strong>, there or on the schedule's <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">Plan tab</a>. It needs no card and changes nothing about your plan: for seven days the schedule's priced tickets go on sale as if it were on Pro, so you can take your first real sales before deciding. It covers paid tickets only. Passes, installments, add-ons and the other Pro features stay on Pro.</p>
+        <h3 id="selling-trial" class="doc-subheading">Start with a free trial</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On eventschedule.com, that banner has a <strong class="text-gray-900 dark:text-white">Save and start free trial</strong> button. It saves the event, takes you to checkout for the schedule, and brings you back to the event once you have subscribed, with its priced tickets on sale. Pro starts with a <strong class="text-gray-900 dark:text-white">7-day free trial</strong>: your card is saved, nothing is charged until the trial ends, and cancelling before then costs nothing.</p>
         <ul class="doc-list mb-6">
-            <li>Only the schedule owner can start it, and each account gets one, on one schedule</li>
-            <li>The Tickets tab and the Plan tab show the days left, and you get an email 3 days before it ends and on the last day</li>
-            <li>When it ends, priced tickets stop selling until you subscribe. Everyone who bought keeps their ticket, check-in keeps working, and you can still refund any sale</li>
+            <li>Each account gets one free trial, whichever schedule it is used on. A second schedule has its own plan, and checkout says beside its button that it is charged that day</li>
+            <li>A plan covers one schedule. To sell tickets at another venue or on another date, add the event to the schedule you already pay for rather than making a new one</li>
+            <li>Checkout and the schedule's <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">Plan tab</a> both say the date of the first charge and the amount, and you get an email the day before it</li>
+            <li>Only the schedule owner can subscribe. A team member sees the banner with a note to ask the owner</li>
         </ul>
 
         <h3 id="plan-table" class="doc-subheading">What each plan includes</h3>
@@ -160,7 +161,7 @@
                     </tr>
                     <tr>
                         <td>Ticket types with a price</td>
-                        <td>Not included, except during the <a href="#selling-trial" class="doc-link">selling trial</a></td>
+                        <td>Not included (Pro starts with a <a href="#selling-trial" class="doc-link">free trial</a>)</td>
                         <td>Unlimited</td>
                     </tr>
                     <tr>
@@ -180,7 +181,7 @@
                     </tr>
                     <tr>
                         <td><a href="#refunds" class="doc-link">Refunds</a> from the Sales page, full or partial</td>
-                        <td>Only for sales taken while on Pro or on the selling trial</td>
+                        <td>Only for sales taken while on Pro</td>
                         <td>Yes</td>
                     </tr>
                     <tr>
@@ -1728,7 +1729,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payout Schedule</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Stripe pays out on a rolling basis (typically 2 business days in the US, varies by country). View your payout schedule and history in your Stripe Dashboard. Invoice Ninja follows your configured payment terms.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">We never hold ticket money: each payment provider pays you out on its own schedule. Stripe pays out on a rolling basis (typically 2 business days in the US, varies by country, and a new account's first payout can take 7 to 14 days), PayPal holds it in your PayPal balance, and Invoice Ninja follows your configured payment terms. See <a href="{{ route('marketing.docs.account_settings') }}#payouts" class="doc-link">When you are paid</a> for every method.</p>
             </div>
         </div>
 

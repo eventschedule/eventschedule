@@ -18,6 +18,7 @@
             <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
             <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
             <x-doc-nav-link href="#razorpay">Razorpay</x-doc-nav-link>
+            <x-doc-nav-link href="#payouts">When You Are Paid</x-doc-nav-link>
         </x-doc-nav-group>
         {{-- The four entries below hold several sections each on the settings page, so each is
              a group here, named as the page's sidebar names it. --}}
@@ -255,7 +256,7 @@
         </p>
         <div class="doc-callout doc-callout-plan mb-6">
             <div class="doc-callout-title">Selling priced tickets needs Pro <x-doc-badge plan="pro" /></div>
-            <p>Taking money for a ticket is the Pro plan, and it comes with all six methods. A free schedule sells nothing priced, apart from during a <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">selling trial</a>, so until then it needs none of them.</p>
+            <p>Taking money for a ticket is the Pro plan, and it comes with all six methods. A free schedule sells nothing priced, so until it is on Pro (which starts with a <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">free trial</a>) it needs none of them.</p>
         </div>
 
         <h3 id="stripe" class="doc-subheading">Stripe</h3>
@@ -413,6 +414,29 @@
             <div class="doc-callout-title">Which method to choose</div>
             <p>One payment method is enough. Stripe, PayPal, Payfast and Razorpay all confirm payment and deliver the ticket without any manual step, so pick whichever of them works where you are. Invoice Ninja marks the sale paid once the invoice is paid, through the webhook it registers when you connect. With a payment link, you mark each sale paid yourself.</p>
             <p class="mt-3">Refunds differ too. A Stripe, PayPal or Razorpay sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. For every other method, <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> records a refund you have made yourself. See <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Managing Sales</a>.</p>
+        </div>
+
+        <h3 id="payouts" class="doc-subheading">When you are paid</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Event Schedule never holds ticket money. A buyer pays your own account with the provider, and the provider pays it out to your bank on its own schedule, so that is where to look when you need to know when money will arrive, for example to pay the people working an event. Under its row in Payment Methods, each account you connect says where its money goes, with a link to the provider's payouts where it has a page for them.
+        </p>
+        <div class="doc-fields mb-6">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Stripe pays out to your bank on a rolling basis, usually within a few business days of a sale, depending on your country. A new account's first payout often takes 7 to 14 days while Stripe checks it. Your payout dates and history are under <strong class="text-gray-900 dark:text-white">Balance &gt; Payouts</strong> in your Stripe dashboard.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">PayPal</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A payment lands in your PayPal balance as soon as the buyer pays. Moving it to your bank is a transfer you make from PayPal.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Razorpay and Payfast</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each settles to your bank on its own settlement schedule, which its dashboard shows.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice Ninja, a payment link and cash</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The money reaches you however that method pays you: the payment terms set in Invoice Ninja, the service behind your payment link, or in hand at the door.</p>
+            </div>
         </div>
     </section>
 

@@ -194,6 +194,15 @@ class SubscriptionWebhookController extends WebhookController
             }
         }
 
+        // One trial per login (RoleBillable::isEligibleForTrial()). The checkout stamps it when the
+        // subscription is created; one that needed a 3DS step was incomplete then, and starts here.
+        // Only on that move out of incomplete: any other update (a cancel, a renewal) can arrive
+        // after a transfer has handed the schedule to someone whose trial it must not spend.
+        if ($role?->user_id && ($previous['status'] ?? null) === 'incomplete'
+            && in_array($data['status'] ?? null, ['trialing', 'active', 'past_due'], true)) {
+            \DB::table('users')->where('id', $role->user_id)->whereNull('trial_used_at')->update(['trial_used_at' => now()]);
+        }
+
         if ($role) {
             // Update the plan type and term based on the price
             $currentPrice = $data['items']['data'][0]['price']['id'] ?? null;

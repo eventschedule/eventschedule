@@ -1119,6 +1119,13 @@ class EventController extends Controller
                 ? __('messages.saved_without_notifying')
                 : __('messages.event_updated'));
 
+        // Only a save that went through whole: the layout toasts one message, and a refused flyer
+        // or gallery is said on the schedule page below.
+        if (! $this->eventRepo->aiImageRejected && ! GalleryUtils::errorMessage($gallery)
+            && ($checkout = $this->subscribeAfterSave($request, $event))) {
+            return $checkout->with('message', $message);
+        }
+
         $redirect = redirect(route('role.view_admin', $data));
         $this->flashGalleryPublished($redirect, $gallery, $event, $subdomain);
 
@@ -1134,6 +1141,39 @@ class EventController extends Controller
         }
 
         return $redirect->with('message', $message);
+    }
+
+    /**
+     * The paywall's "Save and start free trial" (then_subscribe): once the event is saved, go on
+     * to checkout for the schedule whose plan decides its tickets, carrying the event so checkout
+     * comes back to it (SubscriptionController::returnEvent()). Null, and the usual redirect, for
+     * anyone who cannot check out there (only its owner can) or a schedule that already sells.
+     */
+    private function subscribeAfterSave(Request $request, Event $event): ?\Illuminate\Http\RedirectResponse
+    {
+        if (! $request->boolean('then_subscribe') || ! config('app.hosted') || ! config('cashier.key')) {
+            return null;
+        }
+
+        $event->unsetRelation('creatorRole');
+        $selling = $event->ticketingRole();
+
+        if (! $selling || $selling->user_id !== $request->user()->id || $selling->canSellPaidTickets() || is_demo_role($selling)) {
+            return null;
+        }
+
+        // The flag rides in a hidden field, so a price taken off after the button was pressed
+        // must not still send the save to checkout.
+        if (! $event->tickets_enabled || ! $event->tickets()->where('price', '>', 0)->where('is_addon', false)->exists()) {
+            return null;
+        }
+
+        return redirect()->route('role.subscribe', [
+            'subdomain' => $selling->subdomain,
+            'tier' => 'pro',
+            'source' => 'tickets',
+            'event' => UrlUtils::encodeId($event->id),
+        ]);
     }
 
     /**
@@ -1702,6 +1742,10 @@ class EventController extends Controller
             $this->eventRepo->aiImageRejected ? __('messages.ai_image_not_applied') : null,
             $agendaImageRejected ? __('messages.agenda_image_not_applied') : null,
         ]);
+
+        if (! $refused && ! GalleryUtils::errorMessage($gallery) && ($checkout = $this->subscribeAfterSave($request, $event))) {
+            return $checkout->with('message', __('messages.event_created'));
+        }
 
         $redirect = redirect(route('role.view_admin', $data));
         $this->flashGalleryPublished($redirect, $gallery, $event, $subdomain);

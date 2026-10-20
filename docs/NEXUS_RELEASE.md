@@ -1032,7 +1032,9 @@ and a retention row for this record: it joins the notice of changes listed under
   invitation (Reply-To `support_email`) and a sign-off. Replies to stages 2 and 3 land in the
   support inbox;
 - the paid-ticket paywall shown as a price is typed, and counted (`hit_ticket_paywall`);
-- a card-free 7-day selling trial (`roles.ticket_trial_ends_at`, paid selling only, not Pro);
+- a card-free 7-day selling trial (`roles.ticket_trial_ends_at`, paid selling only, not Pro). Retired
+  on 2026-10-20 for one trial per account at checkout (`users.trial_used_at`, migration
+  `2026_10_20_000000`, which backfills it from started subscriptions);
 - cancellation reasons (`subscription_cancellations`), from the plan tab and the Stripe webhooks;
 - two owner emails that start sending on their own: the activation nudges and the weekly digest.
 

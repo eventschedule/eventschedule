@@ -413,7 +413,7 @@
     {{-- Orders across every schedule this person runs. The Sales list has seven columns, so the
          page takes more than the 64rem column the portal's other lists keep to. --}}
     <div class="page-shell sales-shell">
-        <x-page-header :title="__('messages.sales')" :lead="__('messages.sales_lead')">
+        <x-page-header :title="__('messages.sales')" :lead="__('messages.sales_lead').' '.__('messages.sales_payouts_lead')">
             <x-slot name="actions">
                 {{-- Import and the check-in DASHBOARD are Pro, and are hidden rather than shown
                      locked: greyed-out buttons dominating the head of the page is a poor first

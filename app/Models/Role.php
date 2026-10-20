@@ -3896,6 +3896,11 @@ class Role extends Model implements MustVerifyEmail
     /**
      * A card-free trial of paid ticket selling is running. Not a Pro trial: it opens
      * canSellPaidTickets() and nothing else. See the 2026_09_28_000001 migration for why.
+     *
+     * Retired on 2026-10-20 (one trial per login, at checkout: RoleBillable::checkoutTrialEnd()).
+     * Nothing starts one any more; this, ticketTrialRunning(), the Plan tab's card and the
+     * ending reminders stay only for the trials already running, and can go once the last
+     * ticket_trial_ends_at has passed (2026-10-27 at the latest).
      */
     public function onTicketTrial(): bool
     {
@@ -3943,34 +3948,6 @@ class Role extends Model implements MustVerifyEmail
 
         return $query->where(fn ($q) => $q->wherePro()
             ->orWhere('ticket_trial_ends_at', '>', now()));
-    }
-
-    /**
-     * Whether the owner may start a selling trial on this schedule.
-     *
-     * Once per OWNER, not per schedule: isEligibleForTrial() is per schedule, so a second
-     * schedule would be a second trial. Every schedule the owner has, deleted ones included, is
-     * checked for an earlier selling trial or any subscription at all, since someone who has
-     * already paid for Pro has nothing left to try.
-     */
-    public function isEligibleForTicketTrial(): bool
-    {
-        if (! config('app.hosted') || $this->isPro() || is_demo_role($this) || ! $this->user_id) {
-            return false;
-        }
-
-        // users.ticket_trial_used_at first: deleting a schedule removes its row outright, so the
-        // schedule stamp alone let trial, delete, recreate grant it again.
-        if (User::whereKey($this->user_id)->whereNotNull('ticket_trial_used_at')->exists()) {
-            return false;
-        }
-
-        // A subscription that never started (a declined card, an abandoned 3DS) is not "has
-        // already paid", the same line the growth funnel draws.
-        return ! static::where('user_id', $this->user_id)
-            ->where(fn ($q) => $q->whereNotNull('ticket_trial_ends_at')
-                ->orWhereHas('subscriptions', fn ($sub) => $sub->whereNotIn('stripe_status', ['incomplete', 'incomplete_expired'])))
-            ->exists();
     }
 
     /**
@@ -4060,39 +4037,19 @@ class Role extends Model implements MustVerifyEmail
     public function showBranding()
     {
         // The free-tier fact every free-tier surface reads: the event-page card, both embed
-        // snippet lines, the ticket-embed frame and the newsletter footer. Which credit the page
-        // itself carries is split between showFooterStrip() and creditChipReason().
+        // snippet lines, the ticket-embed frame and the newsletter footer. The credit the page
+        // itself carries is creditChipReason()'s alone.
         //
         // A single-tenant install has no tiers - actualPlanTier() short-circuits to
         // 'enterprise' - and those surfaces are a hosted platform's growth CTAs, so they have
         // nothing to say there. Selfhost attribution is the credit chip instead; see
         // creditChipReason(). This branch used to read `! $this->isWhiteLabeled()`, which
         // was unconditionally false when unhosted, so the behaviour is unchanged.
-        //
-        // showFooterStrip() builds on this, and creditChipReason() stands down on that, so the
-        // strip wins wherever it renders and the chip fills in elsewhere. Keep this branch
-        // answering false: it is what stops a selfhost from being read as a strip-bearing
-        // install and losing its attribution.
         if (! config('app.hosted')) {
             return false;
         }
 
         return $this->actualPlanTier() === 'free';
-    }
-
-    /**
-     * Whether this schedule's guest pages end with the dark footer strip, "Create your free
-     * schedule at ..." linking marketing_url().
-     *
-     * The strip is the growth CTA of whoever runs the platform, so it is a free-tier thing on an
-     * operator's own platform and nowhere else. eventschedule.com credits its free tier with the
-     * small corner chip instead (creditChipReason() answers 'free_plan'), which is why this is
-     * false on the nexus whatever the plan. It is the strip's one predicate: the layout gates on
-     * it and creditChipReason() stands down on it, so a page never carries both credits.
-     */
-    public function showFooterStrip(): bool
-    {
-        return ! config('app.is_nexus') && $this->showBranding();
     }
 
     /**
@@ -4116,31 +4073,39 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * The words that say who the credit chip credits: its tooltip, and the ticket frame's line.
+     * They come from the translations for the visitor's language, but a translation can be
+     * overridden at /admin/translations, and an operator renamed the chip's tooltip to their own
+     * brand that way while the link still went to eventschedule.com. It is the license
+     * attribution and not the operator's to rebrand (docs/BRANDING_MATRIX.md rule 1), so any
+     * wording that drops the name falls back to the English line.
+     */
+    public static function creditChipTitle(): string
+    {
+        $title = __('messages.powered_by_event_schedule');
+
+        return is_string($title) && str_contains($title, 'Event Schedule') ? $title : 'Powered by Event Schedule';
+    }
+
+    /**
      * Why this schedule's guest pages carry the small "Event Schedule" credit chip, or null when
-     * they do not - either because none is owed, or because the footer strip is already carrying
-     * one:
+     * they do not:
      *
      *  - 'selfhost'     the Attribution Assurance License credit on a single-tenant install.
-     *  - 'saas'         the same credit on an operator's own multi-tenant platform.
-     *  - 'free_plan'    a free schedule on eventschedule.com. The nexus runs no footer strip, so
-     *                   the chip is its free tier's page credit, and a paid plan takes it off.
+     *  - 'saas'         the same credit on an operator's own multi-tenant platform, on every
+     *                   tenant whatever its tier.
+     *  - 'free_plan'    a free schedule on eventschedule.com, where a paid plan takes it off.
      *  - 'granted_plan' an Enterprise plan a nexus admin handed out by hand. Customers paying
      *                   through Stripe buy white-label and never carry it, and neither do
      *                   plans earned through the referral programme.
      *
-     * Off the nexus it is keyed on the deployment rather than the plan, then stood down wherever
-     * the footer strip already renders. The two predicates start from different questions: the
-     * strip is a growth CTA that belongs to whoever runs the platform, so it turns on the
-     * tenant's tier; this chip is the license credit, owed by whoever redistributes the software,
-     * so it turns on the deployment. An operator's paying tenant is as much a part of that
-     * redistribution as their free one, and the tenant's subscription is between them and the
-     * operator. What the two share is a page, and a page carries one credit: where
-     * showFooterStrip() has already put the strip there, this answers null.
-     *
-     * On an operator's platform that lands the chip on the tiers they charge for and leaves their
-     * free tier showing their own strip alone. Two consequences that read like bugs and are not:
-     * upgrading a tenant there ADDS the chip rather than removing it, and an operator's free tier
-     * carries no Event Schedule attribution at all, because their strip links marketing_url().
+     * Off the nexus it is keyed on the deployment rather than the plan: the chip is the license
+     * credit, owed by whoever redistributes the software, and an operator's tenant is part of
+     * that redistribution on every tier, the free one and the ones they charge for alike. The
+     * tenant's subscription is between them and the operator. Operators once had a dark footer
+     * strip on their free tier, linking their own marketing_url(), and the chip stood down
+     * wherever it rendered, so a free tenant there carried no Event Schedule credit at all; the
+     * strip was removed on 2026-10-20 and the chip now sits on every page there.
      * eventschedule.com is still the one install that sells white-label, so it is the one install
      * where the chip turns on the plan: its free tier carries it, a paid plan takes it off, and an
      * admin-granted one keeps it.
@@ -4161,21 +4126,11 @@ class Role extends Model implements MustVerifyEmail
             return 'selfhost';
         }
 
-        // The strip is already crediting this page, and the two are alternatives rather than a
-        // pair - see docs/BRANDING_MATRIX.md rule 2. Deliberately below the selfhost branch:
-        // showFooterStrip() is false when unhosted, so today either order behaves the same and
-        // no test can tell them apart, but if that ever changes, this order is what keeps the
-        // attribution on an install that is meant to always carry it.
-        if ($this->showFooterStrip()) {
-            return null;
-        }
-
         if (! config('app.is_nexus')) {
             return 'saas';
         }
 
-        // The nexus's free tier. There is no strip here to defer to, so the chip takes the
-        // strip's place. Ahead of the granted-plan test, though the order is not load-bearing:
+        // The nexus's free tier. Ahead of the granted-plan test, though the order is not load-bearing:
         // that one needs the Enterprise tier, so a lapsed grant - plan_source still 'admin', tier
         // now free - lands here either way.
         if ($this->showBranding()) {
@@ -4193,7 +4148,7 @@ class Role extends Model implements MustVerifyEmail
      * Whether this schedule's public pages are monetized (ads / paid promotions).
      *
      * Mirrors showBranding(): a free-tier schedule carries them, a paying one does not,
-     * so removing ads is a concrete Pro benefit alongside removing the branding footer.
+     * so removing ads is a concrete Pro benefit alongside removing the free-tier branding.
      *
      * Gated on actualPlanTier() rather than config('app.hosted') on purpose. Selfhost
      * already resolves to 'enterprise' there, so a single-tenant install is never

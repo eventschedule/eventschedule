@@ -63,7 +63,7 @@
 
         {{-- The upgrade case for ads, shown only where it is actually true: this instance
              runs ads, and this schedule is on the tier that carries them. Removing them is a
-             concrete Pro benefit alongside removing the branding footer. --}}
+             concrete Pro benefit alongside removing the free-tier branding. --}}
         @if ($planTier === 'free' && $role->showAds())
         <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
             <p class="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-200">
@@ -139,6 +139,28 @@
                     {{ $subscription->trial_ends_at->format('F j, Y') }}
                 </span>
             </div>
+            {{-- Entering a card read as paying, and the status said only "Trial": one owner
+                 thought they had paid and been put on a second trial. Say that nothing has been
+                 charged, what will be and when. --}}
+            @php
+                // The price this subscription is on when it is one config names, else today's: a
+                // trial that began before a STRIPE_PRICE_* repoint is the one case that differs.
+                $trialPrice = \App\Utils\PlanPriceUtils::amountFor($subscription->stripe_price)
+                    ?: \App\Utils\PlatformPricing::amount(
+                        $planTier === 'enterprise' ? 'enterprise' : 'pro',
+                        $role->currentPlanTerm() === 'yearly' ? 'yearly' : 'monthly'
+                    );
+                $trialAmount = plan_price($trialPrice);
+            @endphp
+            <p class="text-sm text-gray-600 dark:text-gray-400" data-trial-charge>
+                @if ($subscription->canceled())
+                    {{ __('messages.plan_trial_cancelled_line') }}
+                @elseif ($role->pm_last_four)
+                    {{ __('messages.plan_trial_charge_line', ['last4' => $role->pm_last_four, 'amount' => $trialAmount, 'date' => $subscription->trial_ends_at->translatedFormat('F j, Y')]) }}
+                @else
+                    {{ __('messages.plan_trial_charge_line_no_card', ['amount' => $trialAmount, 'date' => $subscription->trial_ends_at->translatedFormat('F j, Y')]) }}
+                @endif
+            </p>
             @endif
 
             {{-- Subscription End Date (for cancelled subscriptions) --}}

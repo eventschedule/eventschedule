@@ -242,7 +242,7 @@ class PricingPageTest extends TestCase
 
         $this->assertSame(2, substr_count($markup, '<p class="pr-trial">9-day free trial</p>'));
         $this->assertStringContainsString('9 days free, then', $markup);
-        $this->assertStringContainsString('you get a 9-day free trial, once per schedule', $markup);
+        $this->assertStringContainsString('you get a 9-day free trial, once per account rather than once per schedule', $markup);
         $this->assertStringContainsString('9 days to try a plan.', $markup);
         preg_match('/<section id="top".*<section id="claim".*?<\/section>/s', $markup, $own);
         $this->assertDoesNotMatchRegularExpression('/\b7[- ]days?\b/i', $own[0] ?? $markup, 'a trial length is typed into the page');

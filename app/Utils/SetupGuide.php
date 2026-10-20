@@ -756,7 +756,7 @@ class SetupGuide
             // Asked while the step is skipped too: the row still names itself ("Tickets or free
             // entry?" or the sign-up wording), and Undo reopens the question in the same words.
             'can_sell' => $asksTickets && ! $hasTickets
-                ? ($role->canSellPaidTickets() || $role->isEligibleForTicketTrial())
+                ? $role->canSellPaidTickets()
                 : false,
             'urls' => [
                 'endpoint' => route('home.setup_guide'),

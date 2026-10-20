@@ -5,18 +5,19 @@ namespace Tests\Feature;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\TicketTrialEnding;
 use App\Models\Role;
-use App\Services\DemoService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
  * The card-free selling trial (roles.ticket_trial_ends_at), started from the event editor's
- * paid-ticket paywall.
+ * paid-ticket paywall until it was retired on 2026-10-20 for one trial per login, at checkout
+ * (RoleBillable::checkoutTrialEnd(), TrialOncePerLoginTest). Nothing starts one now; what is
+ * pinned here is that the trials already running keep working until they end, and do not add
+ * a second trial on top when their owner subscribes.
  *
  * It is deliberately NOT a Pro trial. roles.trial_ends_at would make isPro() true and unlock every
  * Pro extra, and some of those outlive a trial in a buyer's hands: a pass stops booking and an
@@ -34,9 +35,11 @@ class TicketTrialTest extends TestCase
         config(['app.hosted' => true, 'app.trial_days' => 7]);
     }
 
-    private function start(Role $role)
+    /** A selling trial as one started before the retirement left it. */
+    private function start(Role $role): void
     {
-        return $this->postJson(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]));
+        $role->forceFill(['ticket_trial_ends_at' => now()->addDays(7)])->save();
+        DB::table('users')->where('id', $role->user_id)->update(['ticket_trial_used_at' => now()]);
     }
 
     /** A free schedule with an event carrying one priced row. */
@@ -60,8 +63,7 @@ class TicketTrialTest extends TestCase
 
         $this->assertFalse($ticket->fresh()->isSellable(), 'sanity: a free schedule cannot sell it');
 
-        $this->actingAs($owner);
-        $this->start($role)->assertOk()->assertJson(['ok' => true]);
+        $this->start($role);
 
         $role->refresh();
         $this->assertTrue($role->onTicketTrial());
@@ -79,8 +81,7 @@ class TicketTrialTest extends TestCase
         $role = $this->createFreeRole($owner);
         [$event] = $this->pricedEvent($role);
 
-        $this->actingAs($owner);
-        $this->start($role)->assertOk();
+        $this->start($role);
 
         $role->refresh();
         $this->assertFalse($role->isPro(), 'passes, installments, add-ons and the rest stay on isPro()');
@@ -95,8 +96,7 @@ class TicketTrialTest extends TestCase
         $role = $this->createFreeRole($owner);
         [, $ticket] = $this->pricedEvent($role);
 
-        $this->actingAs($owner);
-        $this->start($role)->assertOk();
+        $this->start($role);
 
         $this->travel(8)->days();
 
@@ -105,68 +105,41 @@ class TicketTrialTest extends TestCase
             'no grandfathering: a seven-day trial must not become permanent selling on the event');
     }
 
-    /** Once per OWNER. isEligibleForTrial() is per schedule, so a second schedule was a second trial. */
-    public function test_a_second_schedule_does_not_get_a_second_trial(): void
+    /** Nothing starts one any more: the route is gone, and with it every way in. */
+    public function test_nothing_starts_a_selling_trial_any_more(): void
     {
-        $owner = $this->createOwner();
-        $first = $this->createFreeRole($owner);
-        $second = $this->createFreeRole($owner);
-
-        $this->actingAs($owner);
-        $this->start($first)->assertOk();
-        $this->start($second)->assertStatus(422)->assertJson(['ok' => false]);
-
-        $this->assertNull($second->fresh()->ticket_trial_ends_at);
-    }
-
-    /** Nor does the same schedule once its trial has run out. */
-    public function test_an_ended_trial_cannot_be_restarted(): void
-    {
-        $owner = $this->createOwner();
-        $role = $this->createFreeRole($owner);
-
-        $this->actingAs($owner);
-        $this->start($role)->assertOk();
-        $this->travel(8)->days();
-
-        $this->start($role)->assertStatus(422);
-        $this->assertFalse($role->fresh()->onTicketTrial());
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('subscription.ticket_trial'));
+        $this->assertFalse(method_exists(Role::class, 'isEligibleForTicketTrial'));
     }
 
     /**
-     * Deleting a schedule removes its row outright (Role has no soft deletes), so a stamp kept
-     * only on the schedule let trial, delete, recreate grant it again, forever.
+     * Subscribing while a selling trial runs keeps its end date: the plan's first charge is the
+     * day the selling trial ends, never a fresh trial week on top of it (the "I paid and got
+     * another trial" an owner wrote in about).
      */
-    public function test_deleting_the_trialled_schedule_does_not_reset_the_trial(): void
-    {
-        $owner = $this->createOwner();
-        $first = $this->createFreeRole($owner);
-
-        $this->actingAs($owner);
-        $this->start($first)->assertOk();
-        $this->assertNotNull($owner->fresh()->ticket_trial_used_at);
-
-        $first->delete();
-        $second = $this->createFreeRole($owner);
-
-        $this->assertFalse($second->fresh()->isEligibleForTicketTrial());
-        $this->start($second)->assertStatus(422);
-    }
-
-    /** A declined card or abandoned 3DS leaves an incomplete row; that is not "has paid". */
-    public function test_a_failed_checkout_does_not_block_the_trial(): void
+    public function test_checkout_during_a_running_selling_trial_ends_with_it(): void
     {
         $owner = $this->createOwner();
         $role = $this->createFreeRole($owner);
-        $role->subscriptions()->create([
-            'type' => 'default',
-            'stripe_id' => 'sub_'.Str::random(14),
-            'stripe_status' => 'incomplete_expired',
-            'stripe_price' => 'price_test_monthly',
-            'quantity' => 1,
-        ]);
+        $this->start($role);
+        $role->refresh();
 
-        $this->assertTrue($role->fresh()->isEligibleForTicketTrial());
+        $this->assertFalse($role->isEligibleForTrial(), 'the login has had its trial');
+        $this->assertSame($role->ticket_trial_ends_at->toDateTimeString(), $role->checkoutTrialEnd()?->toDateTimeString());
+    }
+
+    /** Once it has ended, checkout charges today, on this schedule and on any other. */
+    public function test_an_ended_selling_trial_means_checkout_charges_today(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $this->start($role);
+        $other = $this->createFreeRole($owner);
+
+        $this->travel(8)->days();
+
+        $this->assertNull($role->fresh()->checkoutTrialEnd());
+        $this->assertNull($other->fresh()->checkoutTrialEnd());
     }
 
     /**
@@ -188,58 +161,12 @@ class TicketTrialTest extends TestCase
             ->assertDontSee(__('messages.ticket_trial_title'));
     }
 
-    /** Someone who has already had a subscription has nothing left to try. */
-    public function test_a_past_subscriber_is_not_offered_the_trial(): void
+    /** The paywall saves the event and goes on to checkout, which comes back to it. */
+    public function test_the_editor_offers_save_and_start_free_trial(): void
     {
         $owner = $this->createOwner();
         $role = $this->createFreeRole($owner);
-        $role->subscriptions()->create([
-            'type' => 'default',
-            'stripe_id' => 'sub_'.Str::random(14),
-            'stripe_status' => 'canceled',
-            'stripe_price' => 'price_test_monthly',
-            'quantity' => 1,
-            'ends_at' => now()->subMonth(),
-        ]);
-
-        $this->assertFalse($role->fresh()->isEligibleForTicketTrial());
-
-        $this->actingAs($owner);
-        $this->start($role)->assertStatus(422);
-    }
-
-    /** Checkout is owner-only, and so is this. */
-    public function test_an_editor_who_is_not_the_owner_cannot_start_it(): void
-    {
-        $role = $this->createFreeRole();
-        $editor = $this->createOwner();
-        $role->users()->attach($editor->id, ['level' => 'admin']);
-
-        $this->actingAs($editor);
-        $this->start($role)->assertForbidden();
-
-        $this->assertNull($role->fresh()->ticket_trial_ends_at);
-    }
-
-    /** The demo schedule already sells; it is never offered anything to buy or try. */
-    public function test_the_demo_schedule_is_not_eligible(): void
-    {
-        $owner = $this->createOwner();
-        $role = $this->createFreeRole($owner, 'venue', ['subdomain' => DemoService::DEMO_ROLE_SUBDOMAIN]);
-
-        $this->assertFalse($role->isEligibleForTicketTrial());
-    }
-
-    /** A Pro schedule can already sell. */
-    public function test_a_pro_schedule_is_not_eligible(): void
-    {
-        $this->assertFalse($this->createRole($this->createOwner())->isEligibleForTicketTrial());
-    }
-
-    public function test_the_editor_offers_the_trial_to_an_eligible_owner(): void
-    {
-        $owner = $this->createOwner();
-        $role = $this->createFreeRole($owner);
+        $role->forceFill(['plan_expires' => null])->save();
         [$event] = $this->pricedEvent($role);
 
         $html = $this->actingAs($owner)
@@ -247,16 +174,19 @@ class TicketTrialTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString(__('messages.ticket_trial_start', ['days' => 7]), $html);
-        $this->assertStringContainsString('startTicketTrial', $html);
+        $this->assertStringContainsString(__('messages.save_and_start_free_trial'), $html);
+        $this->assertStringContainsString('saveThenSubscribe', $html);
+        $this->assertStringNotContainsString('startTicketTrial', $html);
     }
 
-    public function test_the_editor_does_not_offer_it_twice(): void
+    /** A login that has had its trial is not offered one it would be charged for. */
+    public function test_the_editor_does_not_offer_a_trial_twice(): void
     {
         $owner = $this->createOwner();
         $role = $this->createFreeRole($owner);
         [$event] = $this->pricedEvent($role);
         $role->forceFill(['ticket_trial_ends_at' => now()->subDay()])->save();
+        $owner->forceFill(['ticket_trial_used_at' => now()->subDays(8)])->save();
 
         $html = $this->actingAs($owner)
             ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
@@ -264,7 +194,8 @@ class TicketTrialTest extends TestCase
             ->getContent();
 
         $this->assertStringContainsString(__('messages.tickets_need_pro_title'), $html);
-        $this->assertStringNotContainsString(__('messages.ticket_trial_start', ['days' => 7]), $html);
+        $this->assertStringContainsString(__('messages.save_and_upgrade'), $html);
+        $this->assertStringNotContainsString(__('messages.save_and_start_free_trial'), $html);
     }
 
     /** While the trial runs the editor has nothing to block, and says how long is left. */
@@ -284,32 +215,21 @@ class TicketTrialTest extends TestCase
         $this->assertStringContainsString(trans_choice('messages.ticket_trial_days_left', 4, ['count' => 4]), $html);
     }
 
-    /**
-     * The dashboard's "paid tickets cannot be sold" to-do links to the plan tab, so the trial has
-     * to be on offer there too. A plain form: nothing unsaved to lose on that page.
-     */
-    public function test_the_plan_tab_offers_the_trial_and_starts_it_with_a_redirect(): void
+    /** The Plan tab offers the plan and its trial, and no second, card-free one. */
+    public function test_the_plan_tab_no_longer_offers_the_card_free_trial(): void
     {
         $owner = $this->createOwner();
+        // createFreeRole() leaves an expired legacy plan_expires, which rules a trial out.
         $role = $this->createFreeRole($owner);
-        $planUrl = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']);
+        $role->forceFill(['plan_expires' => null])->save();
 
-        $this->actingAs($owner)->get($planUrl)->assertOk()
-            ->assertSee(__('messages.ticket_trial_start', ['days' => 7]))
-            ->assertSee(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]), false)
-            ->assertSee('name="source" value="plan"', false);
+        $html = $this->actingAs($owner)
+            ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']))
+            ->assertOk()
+            ->getContent();
 
-        $this->from($planUrl)
-            // What the plan tab's form posts, hidden input included.
-            ->post(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]), ['source' => 'plan'])
-            ->assertRedirect($planUrl)
-            ->assertSessionHas('message', __('messages.ticket_trial_started', ['days' => 7]));
-
-        $this->assertTrue($role->fresh()->onTicketTrial());
-
-        // Where it was started, for the export: the plan tab, not the editor's paywall.
-        $trials = app(\App\Services\GrowthExportService::class)->build(now()->subDays(30), now(), now()->subDays(60), now()->subDays(31))['monetization']['ticket_trials'];
-        $this->assertSame(['plan' => 1], $trials['started_from']);
+        $this->assertStringNotContainsString('/ticket-trial', $html);
+        $this->assertStringContainsString(e(__('messages.plan_trial_note', ['days' => 7])), $html);
     }
 
     /** The dashboard to-do "these paid tickets cannot be sold" is false while the trial runs. */
@@ -415,7 +335,7 @@ class TicketTrialTest extends TestCase
     /** Every language has its own copy, not the English fallback __() would silently render. */
     public function test_every_language_translates_the_trial_copy(): void
     {
-        $keys = ['ticket_trial_start', 'ticket_trial_started', 'ticket_trial_unavailable', 'ticket_trial_days_left',
+        $keys = ['ticket_trial_days_left',
             'ticket_trial_title', 'ticket_trial_ending_subject', 'ticket_trial_ending_body', 'ticket_trial_ending_buyers',
             'plan_gate_ask_owner', 'audit_ticket_trial_started', 'funnel_stage_hit_ticket_paywall'];
         $english = require base_path('resources/lang/en/messages.php');

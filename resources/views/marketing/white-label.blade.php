@@ -41,10 +41,10 @@
              - The corner chip: layouts/app-guest.blade.php, gated on
                Role::creditChipReason(), which answers 'free_plan' on
                the nexus wherever $role->showBranding() is true. The
-               nexus has run no footer strip since 2026-09-11
-               (Role::showFooterStrip() is false there), and the strip's
-               "Supported by Invoice Ninja" credit went with it. An
-               operator's free tier still carries their own strip.
+               nexus has run no footer strip since 2026-09-11, and the
+               strip's "Supported by Invoice Ninja" credit went with it.
+               Operators lost theirs on 2026-10-20 (Role::showFooterStrip()
+               is gone), so no install draws a strip now.
              - The embed snippet's line: $embedBrandingLine in
                components/embed-modal.blade.php - baked into the HTML
                you paste, which is why the page tells you to re-copy it.
@@ -85,15 +85,13 @@
            the install is a plain selfhost ('selfhost') or an operator's
            own platform ('saas'), because the Attribution Assurance
            License credit is owed by whoever redistributes the software,
-           not by the tenant who happens to be paying. ONE
-           QUALIFICATION, added when the double credit came out: the
-           chip stands down wherever Role::showFooterStrip() puts an
-           operator's footer strip on the page, so an operator's free
-           tier shows their strip and no chip, and the chip lands on the
-           tiers they charge for. Section 03's closing line, section 05,
-           and BOTH the selfhost FAQ and the operator FAQ have to keep
-           saying so - a page selling white-label that overclaims gets
-           found out on day one.
+           not by the tenant who happens to be paying. Off the nexus it
+           is on EVERY tenant's pages, free and paid: until 2026-10-20 it
+           stood down for an operator's free tier, which carried the
+           operator's own footer strip instead, and that strip is gone.
+           Section 03's closing line, section 05, and BOTH the selfhost
+           FAQ and the operator FAQ have to keep saying so - a page
+           selling white-label that overclaims gets found out on day one.
            TWO MORE STAY OFF THE PAGE, and section 03 has a card for
            each: AbstractEventDesign::renderBranding() stamps
            "eventschedule.com" in the bottom-right corner of every
@@ -631,7 +629,7 @@
             ],
             [
                 'q' => 'I run my own platform on this software. Are my customers white-labeled?',
-                'a' => 'Nearly. Your paid tiers lose everything a paid schedule here loses except one thing: the small corner credit, which sits on the tiers you charge for. The licence asks for the attribution from whoever redistributes the software, and your customer\'s subscription is an arrangement between the two of you, so upgrading them is not ours to be paid by. Your free tier differs from ours: where a free schedule here carries that chip, yours carries a footer strip pointing at your marketing site, because it is your growth CTA rather than ours, and a page shows one credit or the other, never both. The chip itself is small, it links to us rather than to anything of yours, and it is the whole of what running the platform for free costs you.',
+                'a' => 'Nearly. Your paid tiers lose everything a paid schedule here loses except one thing: the small corner credit, which stays on every tier, the ones you charge for included. The licence asks for the attribution from whoever redistributes the software, and your customer\'s subscription is an arrangement between the two of you, so upgrading them is not ours to be paid by. Your free tier carries the same chip, as a free schedule here does. The chip itself is small, it links to us rather than to anything of yours, and it is the whole of what running the platform for free costs you.',
             ],
             [
                 'q' => 'Can I put my own branding in the space?',
@@ -1043,10 +1041,8 @@
                     That is the end of the list for a schedule hosted here. Run the software somewhere
                     else and the chip above stops being an exception: on any install that is not
                     eventschedule.com, whether you selfhost for yourself or run a platform of your own
-                    for other people, it sits in the corner of the public pages. On a selfhost that is
-                    every page. On a platform of your own it is every page you charge for, because a
-                    free schedule there is already carrying your own footer strip and the two are never
-                    shown at once. The licence puts the chip there rather than the plan, so there is
+                    for other people, it sits in the corner of the public pages. On a selfhost or a
+                    platform of your own, that is every page, whatever the schedule's plan. The licence puts the chip there rather than the plan, so there is
                     nothing to upgrade past - section 05 has the detail. One thing beside all of it: mail leaves our server
                     unless you point the schedule at your own SMTP settings, which any plan can do.
                     If any of it matters for your case,
@@ -1239,8 +1235,8 @@
                     A selfhosted installation is white-labeled by default. There is no plan to buy,
                     and every schedule on it behaves like a paid one, bar one thing: the corner chip
                     a free schedule carries here stays, because the licence asks for it. Turn the
-                    install into a platform for other people and it stays on every schedule you
-                    charge for, while a free one carries your own footer strip in its place.
+                    install into a platform for other people and it stays on every schedule there,
+                    free and paid alike.
                 </p>
             </div>
 
@@ -1250,7 +1246,7 @@
                 @foreach ([
                     ['Six of the seven, gone','The branding check answers no on a single-tenant install, so the event-page card, both embed lines, the newsletter line and ads are never rendered in the first place, and an uploaded logo takes over the tab icon.', ''],
                     ['The seventh: one credit, one corner', 'The first row of the register is the one that stays: the same small "Event Schedule" chip a free schedule carries here sits in the corner of your public pages. It is the Attribution Assurance License credit - the licence gives you the whole application and asks for the mention in return - so it is not gated on a plan and there is no setting that removes it. Nothing else on the page, and nothing in your email or your embeds, carries our name.', ''],
-                    ['Running it for other people, one credit a page', 'Switch the same install into multi-tenant mode and every schedule you charge for carries that one corner chip. The credit is owed by whoever redistributes the software, and what your customers pay you is between you and them. Your free tier keeps a footer strip instead, pointed at your marketing site rather than ours: a page shows one credit or the other, never both.', ''],
+                    ['Running it for other people, one credit a page', 'Switch the same install into multi-tenant mode and every schedule on it carries that one corner chip, on your free tier and on every tier you charge for. The credit is owed by whoever redistributes the software, and what your customers pay you is between you and them.', ''],
                     ['Every feature, not just this one', 'A selfhosted install resolves to the Enterprise tier throughout, so Custom CSS, custom labels and the banner come with it. The AI style generator is there too, but it calls an AI provider, so it stays hidden until you put your own API key in the environment file.', ''],
                     ['Your servers, your data', 'Run it on your own hardware for a client, a festival or a chain of rooms. The source is open, so the branding check and everything around it is there to read.', 'md:col-span-2'],
                 ] as [$t, $d, $span])

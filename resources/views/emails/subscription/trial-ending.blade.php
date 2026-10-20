@@ -1,7 +1,7 @@
 @php
     $theme = \App\Utils\EmailTheme::owner($role);
     $windDown = $windDown ?? false;
-    $subject = __($hasCard ? 'messages.subscription_trial_ending_subject' : 'messages.subscription_trial_ending_subject_no_card');
+    $subject = __($hasCard ? 'messages.subscription_trial_ending_subject' : 'messages.subscription_trial_ending_subject_no_card', ['schedule' => $role->name]);
     $body = __($windDown ? 'messages.subscription_winddown_body' : ($hasCard ? 'messages.subscription_trial_ending_body' : 'messages.subscription_trial_ending_body_no_card'), ['schedule' => $role->name, 'plan' => $planLabel, 'date' => $trialEndDate, 'amount' => $amount]);
 @endphp
 <x-email.layout :theme="$theme" :title="$subject" :preheader="$body">

@@ -3254,7 +3254,20 @@
                                         && $event->tickets->contains(fn ($t) => ! $t->is_addon && (float) $t->price > 0);
                                     // $sellingRole is set above the ticket-mode hint.
                                     $ownsSellingRole = $sellingRole->user_id === $user->id;
-                                    $offerTicketTrial = $cannotSellPaid && $ownsSellingRole && $sellingRole->isEligibleForTicketTrial();
+                                    // A plan covers one schedule, and an owner with a paid one was
+                                    // asked to pay again here without being told why. Named only
+                                    // when moving the event there can work: a venue schedule pins
+                                    // an event's location to itself.
+                                    $paidElsewhere = $cannotSellPaid && $ownsSellingRole
+                                        ? $user->createdRoles()
+                                            ->where('is_deleted', false)
+                                            ->where('id', '!=', $sellingRole->id)
+                                            ->whereIn('type', ['talent', 'curator'])
+                                            ->wherePro()
+                                            ->orderBy('name')
+                                            ->first()
+                                        : null;
+                                    $offerCheckout = $cannotSellPaid && $ownsSellingRole && config('cashier.key') && ! is_demo_role($sellingRole);
                                 @endphp
                                 @if ($cannotSellPaid)
                                 <x-plan-gate
@@ -3270,28 +3283,24 @@
                                     :style="$ticketsNeedProOnLoad ? null : 'display: none'"
                                     v-show="ticketsNeedPro">
                                     {{ __('messages.tickets_need_pro_body') }}
-                                    @if ($offerTicketTrial)
-                                    {{-- Started in place with fetch rather than a form: this banner
-                                         sits inside the event form, so a nested form would submit
-                                         the event instead, and a redirect would lose the unsaved
-                                         price the organizer just typed. Forward action last. --}}
+                                    @if ($paidElsewhere)
+                                    <span class="mt-1 block" v-pre>{{ __('messages.tickets_need_pro_other_schedule', ['this' => $sellingRole->getDisplayName(false), 'pro' => $paidElsewhere->getDisplayName(false)]) }}</span>
+                                    @endif
+                                    @if ($offerCheckout)
+                                    {{-- Saves the event first and then goes to checkout in this tab
+                                         (EventController::subscribeAfterSave()), and checkout comes
+                                         back here: a new tab left this one showing the locked banner,
+                                         and leaving would lose the price just typed. The banner sits
+                                         inside the event form, so it is a button that submits it. --}}
                                     <x-slot:actions>
-                                        <a href="{{ route('role.subscribe', ['subdomain' => $sellingRole->subdomain, 'tier' => 'pro', 'source' => 'tickets']) }}"
-                                           class="text-sm font-medium text-amber-900 dark:text-amber-100 underline">{{ __('messages.upgrade_to_pro_plan') }}</a>
-                                        <button type="button" @click="startTicketTrial" :disabled="ticketTrialStarting"
+                                        <input type="hidden" name="then_subscribe" :value="thenSubscribe ? 1 : ''">
+                                        <button type="button" @click="saveThenSubscribe" :disabled="isSaving"
                                             class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-60">
-                                            {{ __('messages.ticket_trial_start', ['days' => (int) config('app.trial_days', 7)]) }}
+                                            {{ $sellingRole->checkoutTrialDays() ? __('messages.save_and_start_free_trial') : __('messages.save_and_upgrade') }}
                                         </button>
-                                        <p v-show="ticketTrialError" style="display: none" class="w-full text-sm text-red-700 dark:text-red-400" role="alert">@{{ ticketTrialError }}</p>
                                     </x-slot:actions>
                                     @endif
                                 </x-plan-gate>
-                                @if ($offerTicketTrial)
-                                <div v-show="ticketTrialMessage" style="display: none" role="status"
-                                    class="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3 text-sm text-green-800 dark:text-green-200">
-                                    @{{ ticketTrialMessage }}
-                                </div>
-                                @endif
                                 @endif
 
                                 {{-- The embed, separately, because it is the one thing a grandfather
@@ -6801,10 +6810,8 @@
         cannotSellPaid: @json($cannotSellPaid ?? false),
         paywallSeenUrl: @json(route('subscription.paywall_seen', ['subdomain' => $subdomain])),
         paywallSeenSent: false,
-        ticketTrialUrl: @json(isset($sellingRole) ? route('subscription.ticket_trial', ['subdomain' => $sellingRole->subdomain]) : null),
-        ticketTrialStarting: false,
-        ticketTrialMessage: '',
-        ticketTrialError: '',
+        // Set by the paywall's save-then-checkout button: the save goes on to checkout.
+        thenSubscribe: false,
         tickets: @json($ticketsNow).map((ticket, i) => ({
           uid: i,
           ...ticket,
@@ -7031,39 +7038,15 @@
       }
     },
     methods: {
-      // The card-free selling trial, started from the paywall banner. On success the schedule can
-      // sell, so the banner goes (cannotSellPaid) and the price the organizer typed stays put.
-      startTicketTrial() {
-        if (this.ticketTrialStarting || ! this.ticketTrialUrl) {
+      // The paywall's save-then-checkout button: the same save as the Save button, which then
+      // goes on to checkout (then_subscribe). A save the form refuses stays on the page, and the
+      // next Save carries on to checkout as asked.
+      saveThenSubscribe() {
+        if (this.isSaving) {
           return;
         }
-        this.ticketTrialStarting = true;
-        this.ticketTrialError = '';
-        const failed = @json(__('messages.something_went_wrong'));
-        fetch(this.ticketTrialUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': @json(csrf_token()),
-          },
-          body: JSON.stringify({ source: 'tickets' }),
-        })
-          .then(response => response.json().then(data => ({ ok: response.ok && data.ok, data })))
-          .then(({ ok, data }) => {
-            if (ok) {
-              this.cannotSellPaid = false;
-              this.ticketTrialMessage = data.message;
-            } else {
-              this.ticketTrialError = data.message || failed;
-            }
-          })
-          .catch(() => {
-            this.ticketTrialError = failed;
-          })
-          .finally(() => {
-            this.ticketTrialStarting = false;
-          });
+        this.thenSubscribe = true;
+        this.$nextTick(() => document.getElementById('edit-form').requestSubmit());
       },
       /** "Stalls (72 seats)" - the band select was names alone, so bands were priced blind. */
       bandOptionLabel(band) {
@@ -10315,6 +10298,11 @@
       ticketsNeedPro: {
         immediate: true,
         handler(shown) {
+          // The banner's save-then-checkout button was pressed and the save refused: once nothing
+          // needs the plan any more, the next Save is an ordinary one.
+          if (! shown) {
+            this.thenSubscribe = false;
+          }
           if (! shown || this.paywallSeenSent) {
             return;
           }

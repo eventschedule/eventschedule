@@ -1,4 +1,4 @@
-{{ __($hasCard ? 'messages.subscription_trial_ending_subject' : 'messages.subscription_trial_ending_subject_no_card') }}
+{{ __($hasCard ? 'messages.subscription_trial_ending_subject' : 'messages.subscription_trial_ending_subject_no_card', ['schedule' => $role->name]) }}
 
 {{ __('messages.hello') }} {{ $role->user?->name ?? '' }},
 

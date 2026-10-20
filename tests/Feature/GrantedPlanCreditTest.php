@@ -35,8 +35,8 @@ class GrantedPlanCreditTest extends TestCase
     private const ANY_CHIP = 'utm_medium=footer';
 
     /**
-     * The dark footer strip. The nexus renders it on no tier, so here it is only ever asserted
-     * absent: a guard against it coming back.
+     * The dark footer strip, removed from every install on 2026-10-20, so here it is only ever
+     * asserted absent: a guard against it coming back.
      */
     private const STRIP = 'Create your free schedule at';
 

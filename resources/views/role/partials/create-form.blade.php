@@ -17,6 +17,15 @@
     // store() sends a first own schedule, and every guest-submit one, on to the event form. The
     // button says so, because nothing else on this page does.
     $leadsToEventForm = session('pending_request') || $ownsNoSchedule;
+
+    // A plan covers one schedule, and nothing here said so: an owner who made a second schedule
+    // for an event at another venue was asked to pay again and could not see why. Said only to
+    // an owner who already has a plan, and only where plans are sold.
+    $paidSchedules = config('app.hosted') && ! is_demo_mode() && ! $ownsNoSchedule
+        ? auth()->user()->createdRoles()->where('is_deleted', false)->wherePro()->orderBy('name')->get(['id', 'name', 'type', 'subdomain'])
+        : collect();
+    // A talent or curator schedule can take an event at any venue; a venue pins its events to itself.
+    $paidMovable = $paidSchedules->first(fn ($schedule) => in_array($schedule->type, ['talent', 'curator'], true));
 @endphp
 
     <div class="flex flex-col items-center px-4 pt-8 pb-12 sm:px-6 lg:px-8">
@@ -189,6 +198,14 @@
                     <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                         {{ __('messages.note_all_schedules_are_publicly_listed') }}
                     </p>
+
+                    @if ($paidSchedules->isNotEmpty())
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" data-plan-note v-pre>
+                        {{ $paidMovable
+                            ? __('messages.new_schedule_plan_note', ['name' => $paidMovable->name])
+                            : __('messages.new_schedule_plan_note_venue') }}
+                    </p>
+                    @endif
 
                     <div class="mt-6 flex items-center justify-end gap-3">
                         {{-- Always an exit. It used to be gated on being new, so a returning user

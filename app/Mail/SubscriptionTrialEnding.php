@@ -46,8 +46,8 @@ class SubscriptionTrialEnding extends Mailable
     {
         return new Envelope(
             subject: $this->hasCard && ! $this->windDown
-                ? __('messages.subscription_trial_ending_subject')
-                : __('messages.subscription_trial_ending_subject_no_card'),
+                ? __('messages.subscription_trial_ending_subject', ['schedule' => $this->role->name])
+                : __('messages.subscription_trial_ending_subject_no_card', ['schedule' => $this->role->name]),
         );
     }
 

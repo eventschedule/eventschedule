@@ -167,7 +167,7 @@
                     <tr>
                         <td><code class="doc-inline-code">APP_MARKETING_URL</code></td>
                         <td><code class="doc-inline-code">https://eventschedule.com</code></td>
-                        <td>Your own marketing site, and the base of every link the app builds to a page it does not serve itself: the footer strip on your free tier's public pages, the logo in the admin portal's sidebar and on the sign-in pages, the <strong>Help</strong> button (<code class="doc-inline-code">/docs/...</code>), the <strong>Learn more</strong> and <strong>Compare plans</strong> links on upgrade prompts (<code class="doc-inline-code">/features/...</code>, <code class="doc-inline-code">/pricing</code>), and the privacy policy and terms (<code class="doc-inline-code">/privacy</code>, <code class="doc-inline-code">/terms-of-service</code>) until you <a href="#legal-pages" class="doc-link">publish your own</a>. Point it at your site rather than leaving the default, and have your site answer or redirect those paths.</td>
+                        <td>Your own marketing site, and the base of every link the app builds to a page it does not serve itself: the <strong>Create your own</strong> card on your free tier's event pages, the logo in the admin portal's sidebar and on the sign-in pages, the <strong>Help</strong> button (<code class="doc-inline-code">/docs/...</code>), the <strong>Learn more</strong> and <strong>Compare plans</strong> links on upgrade prompts (<code class="doc-inline-code">/features/...</code>, <code class="doc-inline-code">/pricing</code>), and the privacy policy and terms (<code class="doc-inline-code">/privacy</code>, <code class="doc-inline-code">/terms-of-service</code>) until you <a href="#legal-pages" class="doc-link">publish your own</a>. Point it at your site rather than leaving the default, and have your site answer or redirect those paths.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">IS_NEXUS</code></td>
@@ -228,14 +228,14 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">One credit a page</div>
-            <p>Your sender name, logos and domain make the platform yours, and your free tier's footer
-            strip points at your <code class="doc-inline-code">APP_MARKETING_URL</code> rather than
-            ours. One thing is not yours to repoint: a small "Event Schedule" chip in the corner of
-            the public pages of every customer you charge. It is the
+            <p>Your sender name, logos and domain make the platform yours, and your free tier's
+            <strong>Create your own</strong> card points at your <code class="doc-inline-code">APP_MARKETING_URL</code>
+            rather than ours. One thing is not yours to repoint: a small "Event Schedule" chip in the
+            corner of every customer's public pages, on every plan. It is the
             attribution the <a href="https://github.com/eventschedule/eventschedule/blob/main/LICENSE" target="_blank" rel="noopener" class="doc-link">Attribution Assurance License</a>
             asks for in return for the software, so it links to eventschedule.com and
-            <code class="doc-inline-code">APP_MARKETING_URL</code> does not change it. A free schedule
-            shows your footer strip instead of the chip, so no page carries two credits.</p>
+            <code class="doc-inline-code">APP_MARKETING_URL</code> does not change it, and neither does
+            overriding its wording at <strong>Admin &gt; Translations</strong>.</p>
         </div>
 
         <h3 id="legal-pages" class="doc-subheading">Legal Pages</h3>
@@ -300,38 +300,15 @@
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A new schedule starts on the <strong>Free</strong> plan. Nothing grants it Pro automatically, so the free tier is what every customer sees first. Two different trials read <code class="doc-inline-code">TRIAL_DAYS</code>:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A new schedule starts on the <strong>Free</strong> plan. Nothing grants it Pro automatically, so the free tier is what every customer sees first. <code class="doc-inline-code">TRIAL_DAYS</code> sets the length of the one free trial, which starts when the owner subscribes, from <strong>Upgrade to Pro</strong> on the <strong>Plan</strong> tab, the event form's <strong>Save and start free trial</strong>, or any upgrade prompt. A card is entered, nothing is charged, and Stripe takes the first payment when the trial ends.</p>
 
-        <div class="doc-table-wrap">
-            <table class="doc-table">
-                <thead>
-                    <tr>
-                        <th>Trial</th>
-                        <th>Where it starts</th>
-                        <th>What it opens</th>
-                        <th>Who gets it</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Subscription trial</strong></td>
-                        <td>When the owner subscribes, from <strong>Upgrade to Pro</strong> on the <strong>Plan</strong> tab or any upgrade prompt. A card is entered, and Stripe takes the first payment when the trial ends.</td>
-                        <td>The whole plan they subscribed to</td>
-                        <td>A schedule that has never had a plan or a subscription. A schedule that still has days left on a plan with an expiry date, such as one you granted by hand, gets those remaining days as its trial instead.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Selling trial</strong></td>
-                        <td><strong>Sell tickets free for <em>N</em> days</strong>, on the event form's <strong>Tickets</strong> tab and on the <strong>Plan</strong> tab. No card is asked for, and it is offered whether or not your Stripe keys are set.</td>
-                        <td>Selling tickets that carry a price, and nothing else. The schedule stays on Free, and other Pro features stay locked.</td>
-                        <td>An owner once, across all their schedules, and never one who has had a subscription. A reminder email goes out three days before it ends and again one day before.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <ul class="doc-list mb-6">
+            <li><strong>Once per account.</strong> An owner who has had a trial, or paid for a plan, on any schedule is charged at checkout on the next one, and checkout says so before the card is entered. It is recorded on the account, so deleting the schedule that had it gives nothing back.</li>
+            <li><strong>A schedule with a dated plan</strong>, such as one you granted by hand, gets the days it has left as its trial instead.</li>
+            <li><strong>The card-free selling trial</strong> that opened priced tickets alone was retired on 2026-10-20. A schedule still on one when it subscribes keeps that trial's end date as the first charge, rather than a new trial on top.</li>
+        </ul>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A schedule that qualifies for the subscription trial sees a free-trial notice beside <strong>Upgrade to Pro</strong> and at the top of the subscribe page, with the date of the first charge. The notice's label is fixed at "7-day free trial" whatever <code class="doc-inline-code">TRIAL_DAYS</code> holds, so if you use another length, change that string (<code class="doc-inline-code">free_trial_badge</code>) with <a href="#translations" class="doc-link">custom translations</a>.</p>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-4">What a subscriber is charged after a trial comes from the Price objects in your Stripe dashboard. The app only stores the Price IDs, plus separate display amounts (see <a href="#stripe" class="doc-link">Stripe Subscription Setup</a>). The customer's side of the selling trial is in <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">Selling Tickets</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The trial's notice (<code class="doc-inline-code">free_trial_badge</code>) and the line beside the checkout button name the length and the date of the first charge from <code class="doc-inline-code">TRIAL_DAYS</code> itself. What a subscriber is charged after a trial comes from the Price objects in your Stripe dashboard. The app only stores the Price IDs, plus separate display amounts (see <a href="#stripe" class="doc-link">Stripe Subscription Setup</a>). The customer's side is in <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">Selling Tickets</a>.</p>
 
         <h3 id="push-notifications" class="doc-subheading">Push Notifications (Optional)</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can send web push notifications that mirror its email notifications using <a href="https://onesignal.com" target="_blank" rel="noopener noreferrer" class="doc-link">OneSignal</a>. This is a Pro feature and is <strong>off by default</strong>: with no configuration, no push SDK loads and no calls are made to OneSignal. To enable it platform-wide, create a OneSignal app (Web platform) and set:</p>
@@ -570,7 +547,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             <li>A customer creates a schedule. It starts on the Free plan</li>
             <li>They open the schedule and select its <strong>Plan</strong> tab, the last of the schedule's tabs, which shows the current plan, its status, and how much of the newsletter email and photo allowances is used</li>
             <li>The schedule's owner clicks <strong>Upgrade to Pro</strong> and pays. The button only appears once <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> is set, and only for the owner: other team members see the plan but none of its actions</li>
-            <li>Pro features unlock for that schedule, and the free-tier footer strip and ad slot come off its public pages</li>
+            <li>Pro features unlock for that schedule, and the free-tier <strong>Create your own</strong> card and ad slot come off its public pages</li>
             <li>An active Pro subscriber can then use <strong>Upgrade to Enterprise</strong>, or <strong>Switch to Yearly</strong> and <strong>Switch to Monthly</strong>, from the same tab. <strong>Manage Subscription</strong> opens the Stripe billing portal, and <strong>Cancel Subscription</strong> asks for an optional reason and keeps the plan until the end of the paid period</li>
             <li>Subscriptions are per schedule, not per user: a customer with three schedules pays for each one they upgrade</li>
         </ol>
@@ -681,7 +658,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             <li>Signed in as the schedule's owner, open the schedule and select its <strong>Plan</strong> tab</li>
             <li>Click <strong>Upgrade to Pro</strong>. If the button is missing, <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> is not set</li>
             <li>Complete checkout with the test card <code class="doc-inline-code">4242 4242 4242 4242</code>, which only works while your keys are the <code class="doc-inline-code">sk_test_</code> / <code class="doc-inline-code">pk_test_</code> pair</li>
-            <li>Confirm the Plan tab now reports Pro, and that the free-tier footer strip has gone from the schedule's public page</li>
+            <li>Confirm the Plan tab now reports Pro, and that the free-tier <strong>Create your own</strong> card has gone from the schedule's event pages</li>
             <li>Cancel from the Stripe dashboard and confirm the Plan tab picks it up, which proves the subscription webhook is wired correctly</li>
         </ol>
     </section>

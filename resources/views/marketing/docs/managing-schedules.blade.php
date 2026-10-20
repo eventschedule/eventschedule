@@ -874,7 +874,7 @@
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Three more things appear when they apply. While a trial has 30 days or fewer to run, the owner sees a notice at the top with the days left and a prompt to add a payment method. While a <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">selling trial</a> is running, a <strong class="text-gray-900 dark:text-white">Paid ticket selling trial</strong> card says how many days it has left; it is not a plan, so the plan still reads Free. And a free schedule gets a <strong class="text-gray-900 dark:text-white">Your plan</strong> panel that lists what Free includes and what Pro adds, with the price.
+            Three more things appear when they apply. While a trial has 30 days or fewer to run, the owner sees a notice at the top with the days left and a prompt to add a payment method. While a plan's <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">free trial</a> runs, a line under its end date says that nothing has been charged yet, and which card is charged how much on which day. And a free schedule gets a <strong class="text-gray-900 dark:text-white">Your plan</strong> panel that lists what Free includes and what Pro adds, with the price.
         </p>
 
         <div class="doc-callout doc-callout-info mb-6">
@@ -897,11 +897,7 @@
                 <tbody>
                     <tr>
                         <td><strong>Upgrade to Pro</strong></td>
-                        <td>Opens the page where you choose a paid plan. A free trial is offered beside the button if this schedule has not used one</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Sell tickets free for {{ (int) config('app.trial_days', 7) }} days</strong></td>
-                        <td>Starts the selling trial: priced tickets go on sale with no card and no change to your plan. Offered once, to an owner who has had neither the trial nor a subscription</td>
+                        <td>Opens the page where you choose a paid plan. A free trial is offered beside the button if your account has not had one, on this schedule or any other. Each schedule has its own plan, so a second schedule is charged from the day it subscribes</td>
                     </tr>
                     <tr>
                         <td><strong>Upgrade to Enterprise</strong></td>

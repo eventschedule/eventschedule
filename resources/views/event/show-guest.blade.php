@@ -2599,8 +2599,8 @@
          only with the card: empty, it was a blank 2.5rem at the end of every paid schedule's
          event page. --}}
     {{-- Create your own card. Keyed off THIS schedule's tier, the same fact that decides
-           the page's free-tier credit (the corner chip on eventschedule.com, an operator's
-           footer strip on their own platform), so the two cannot disagree. It used to read
+           the free-tier credit on eventschedule.com (the corner chip), so the two cannot
+           disagree. It used to read
            `! $event->isPro()`, which is true when any schedule on the bill is paid - so a
            free curator's page dropped this card while still carrying the free-tier credit. --}}
     @if ($role->showBranding())

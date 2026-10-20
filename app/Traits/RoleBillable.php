@@ -100,7 +100,16 @@ trait RoleBillable
 
     /**
      * Check if the role is eligible for a free trial.
-     * Eligible if they haven't had a subscription before.
+     *
+     * Once per LOGIN, not per schedule: an owner who had a trial on one schedule is charged at
+     * checkout on the next. Until 2026-10 it was per schedule and ignored the card-free selling
+     * trial, so an owner whose selling trial had just ended entered a card and was put on a
+     * second trial week, which read as "I paid and got another trial".
+     *
+     * The login half is users.trial_used_at (or ticket_trial_used_at, from the selling trial
+     * retired on 2026-10-20), backfilled for history by the 2026_10_20 migration. Other
+     * schedules are deliberately not queried: one transferred in (ScheduleTransferService)
+     * keeps its own subscription rows, and must not spend its new owner's trial.
      *
      * @return bool
      */
@@ -110,7 +119,58 @@ trait RoleBillable
             return false;
         }
 
-        return ! $this->stripe_id || ! $this->subscriptions()->exists();
+        if ($this->stripe_id && $this->subscriptions()->exists()) {
+            return false;
+        }
+
+        if (! config('app.hosted') || is_demo_role($this) || ! $this->user_id) {
+            return false;
+        }
+
+        // Memoized per instance: the plan gate asks several times on one page.
+        return $this->trialUnusedMemo[$this->user_id] ??= ! \App\Models\User::whereKey($this->user_id)
+            ->where(fn ($q) => $q->whereNotNull('trial_used_at')->orWhereNotNull('ticket_trial_used_at'))
+            ->exists();
+    }
+
+    /** @var array<int, bool> */
+    private array $trialUnusedMemo = [];
+
+    /**
+     * When a subscription started now would first be charged, or null for "today". The one
+     * answer checkout's store(), the checkout page and the upgrade prompts all read, so what
+     * the page promises is what is charged.
+     *
+     * - A card-free selling trial still running on THIS schedule (one started before it was
+     *   retired): the plan's trial ends when it does, so the two never add up.
+     * - A legacy plan_expires with days left: those days, as before.
+     * - A login that has not had a trial: config('app.trial_days').
+     */
+    public function checkoutTrialEnd(): ?\Carbon\Carbon
+    {
+        if ($this->onTicketTrial()) {
+            return $this->ticket_trial_ends_at->copy();
+        }
+
+        if ($this->plan_expires) {
+            $days = $this->calculateRemainingTrialDays();
+
+            return $days > 0 ? now()->addDays($days) : null;
+        }
+
+        if ($this->isEligibleForTrial()) {
+            return now()->addDays((int) config('app.trial_days', 7));
+        }
+
+        return null;
+    }
+
+    /** checkoutTrialEnd() in whole days, for "7-day free trial"; null when checkout charges today. */
+    public function checkoutTrialDays(): ?int
+    {
+        $end = $this->checkoutTrialEnd();
+
+        return $end ? max(1, (int) ceil(now()->floatDiffInDays($end))) : null;
     }
 
     /**

@@ -46,8 +46,8 @@
         </ul>
         <p>
             Paid schedules never carry either, so removing ads becomes a concrete reason for your
-            customers to upgrade, alongside removing the footer strip that promotes your own
-            marketing site to their visitors.
+            customers to upgrade, alongside removing the <strong>Create your own</strong> card that
+            promotes your own marketing site to their visitors.
         </p>
         <p>
             A third earner, the <a href="#accommodation" class="doc-link">accommodation affiliate</a>,
@@ -91,11 +91,8 @@
             <div class="doc-callout-title">One credit is not an upsell</div>
             <p>The small "Event Schedule" chip in the corner of public pages is the Attribution
             Assurance License credit, and on any install other than eventschedule.com it stays on
-            every schedule you charge for. Do not sell its removal as a paid feature: there is no
-            setting that takes it off, and upgrading a customer does not either. Worth knowing which
-            way round it runs: a free schedule shows your footer strip and no chip, so an upgrade
-            swaps your strip for our chip rather than clearing the page. Say so on your own pricing
-            page before a customer finds it.</p>
+            every schedule, free and paid. Do not sell its removal as a paid feature: there is no
+            setting that takes it off, and upgrading a customer does not either. Say so on your own pricing page before a customer finds it.</p>
         </div>
     </section>
 

@@ -27,6 +27,7 @@
                     @else
                         @include('profile.partials.payments.credentials', ['gateway' => $gateway, 'gatewayKey' => $gatewayKey])
                     @endif
+                    @include('profile.partials.payments.payout-note')
                 </div>
             </div>
         @endforeach
