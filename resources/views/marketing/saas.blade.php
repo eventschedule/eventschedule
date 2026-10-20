@@ -1335,7 +1335,7 @@
                                 <span class="hp-ico"><svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg></span>
                                 <div>
                                     <h4 class="sk-h4">A small backlink</h4>
-                                    <p>Every public schedule page carries a small, discreet link back to eventschedule.com in its bottom corner, on every tier, free and paid alike. That link is how the project grows, which keeps the software maintained for everyone.</p>
+                                    <p>Every public schedule page carries a small, discreet link back to eventschedule.com in its bottom corner. That link is how the project grows, which keeps the software maintained for everyone.</p>
                                 </div>
                             </div>
                         </div>
@@ -1388,7 +1388,7 @@
                             <div class="sk-corner-foot"><span class="sk-chip" data-sk-chip><i>ES</i>Event Schedule</span></div>
                         </div>
                         <div class="sk-loupe" aria-hidden="true"><div data-sk-lens></div></div>
-                        <figcaption>Shown at actual size. That is the whole catch.<small>The corner of any customer's page, free or paid. <span class="sk-by-pointer">Move the glass to check.</span><span class="sk-by-finger">Tap it to move the glass.</span></small></figcaption>
+                        <figcaption>Shown at actual size. That is the whole catch.<small>The corner of any customer's page. <span class="sk-by-pointer">Move the glass to check.</span><span class="sk-by-finger">Tap it to move the glass.</span></small></figcaption>
                     </figure>
                 </div>
             </div>
