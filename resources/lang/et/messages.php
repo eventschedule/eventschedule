@@ -4232,6 +4232,7 @@ return [
     'admin_alert_domains_pending' => '{1} :count kohandatud domeen on veel seadistamisel|[2,*] :count kohandatud domeeni on veel seadistamisel',
     'admin_alert_translations_unshared' => '{1} :count veel jagamata tõlge|[2,*] :count veel jagamata tõlget',
     'admin_alert_php_vulnerable' => '{1} Uuenda PHP-d: selles versioonis on kriitiline turvaviga (PHP2Shell)|[2,*] Uuenda PHP-d: selles versioonis on kriitiline turvaviga (PHP2Shell)',
+    'admin_alert_php_mitigated' => 'leevendatud, uuenda siiski',
     'admin_alert_app_update_available' => '{1} :count uuendus saadaval|[2,*] :count uuendust saadaval',
     'admin_alert_privacy_policy_missing' => '{1} Avalda oma privaatsuspoliitika|[2,*] Avalda oma privaatsuspoliitika',
     'pending_action_show_more' => 'Näita veel :count',

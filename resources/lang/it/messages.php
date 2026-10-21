@@ -4234,6 +4234,7 @@ return [
     'admin_alert_domains_pending' => '{1} :count dominio personalizzato ancora in configurazione|[2,*] :count domini personalizzati ancora in configurazione',
     'admin_alert_translations_unshared' => '{1} :count traduzione non ancora condivisa|[2,*] :count traduzioni non ancora condivise',
     'admin_alert_php_vulnerable' => '{1} Aggiorna PHP: questa versione ha una vulnerabilità di sicurezza critica (PHP2Shell)|[2,*] Aggiorna PHP: questa versione ha una vulnerabilità di sicurezza critica (PHP2Shell)',
+    'admin_alert_php_mitigated' => 'mitigato, aggiorna comunque',
     'admin_alert_app_update_available' => '{1} :count aggiornamento disponibile|[2,*] :count aggiornamenti disponibili',
     'admin_alert_privacy_policy_missing' => '{1} Pubblica la tua informativa sulla privacy|[2,*] Pubblica la tua informativa sulla privacy',
     'pending_action_show_more' => 'Mostra altri :count',

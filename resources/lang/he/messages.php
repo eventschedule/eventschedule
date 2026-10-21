@@ -4292,6 +4292,7 @@ return [
     'admin_alert_domains_pending' => '{1} :count דומיין מותאם אישית עדיין בהגדרה|[2,*] :count דומיינים מותאמים אישית עדיין בהגדרה',
     'admin_alert_translations_unshared' => '{1} :count תרגום שטרם שותף|[2,*] :count תרגומים שטרם שותפו',
     'admin_alert_php_vulnerable' => '{1} יש לעדכן את PHP: בגרסה זו יש פרצת אבטחה חמורה (PHP2Shell)|[2,*] יש לעדכן את PHP: בגרסה זו יש פרצת אבטחה חמורה (PHP2Shell)',
+    'admin_alert_php_mitigated' => 'הסיכון הופחת, עדיין יש לעדכן',
     'admin_alert_app_update_available' => '{1} עדכון אחד זמין|[2,*] :count עדכונים זמינים',
     'admin_alert_privacy_policy_missing' => '{1} פרסום מדיניות פרטיות משלכם|[2,*] פרסום מדיניות פרטיות משלכם',
     'pending_action_show_more' => 'הצג :count נוספים',

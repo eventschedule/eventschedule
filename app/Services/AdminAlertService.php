@@ -523,6 +523,15 @@ class AdminAlertService
         return $fixed === null || version_compare($version, $fixed, '<');
     }
 
+    /**
+     * Both PHP2Shell stopgaps are on: upload progress off and no PHP memory limit to bail out on.
+     */
+    public static function phpIsMitigated(): bool
+    {
+        return ! filter_var(ini_get('session.upload_progress.enabled'), FILTER_VALIDATE_BOOLEAN)
+            && (string) ini_get('memory_limit') === '-1';
+    }
+
     private static function schedulerIsStalled(): bool
     {
         return self::$schedulerStalled ??= SchedulerHealth::isStalled();
@@ -613,7 +622,9 @@ class AdminAlertService
     {
         [$nav, $tab, $name, $params, $fragment, $color, $subtitle] = match ($type) {
             'scheduler_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
-            'php_vulnerable' => ['system', 'queue', 'admin.queue', [], '', 'red', 'PHP '.PHP_VERSION],
+            // The subtitle says whether deploy/php-fpm.conf's stopgap is in effect for this request,
+            // which is how an operator checks it took after a deploy.
+            'php_vulnerable' => ['system', 'queue', 'admin.queue', [], '', 'red', 'PHP '.PHP_VERSION.(self::phpIsMitigated() ? ' - '.__('messages.admin_alert_php_mitigated') : '')],
             'jobs_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'realtime_prune_stalled' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],

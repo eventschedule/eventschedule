@@ -603,6 +603,7 @@ class AdminAlertsTest extends TestCase
             $this->assertFalse(AdminAlertService::phpIsVulnerable($version), $version);
         }
 
+        $this->assertIsBool(AdminAlertService::phpIsMitigated());
         $this->assertNotEmpty(trans_choice('messages.admin_alert_php_vulnerable', 1));
         $this->assertNotSame('messages.admin_alert_php_vulnerable', trans_choice('messages.admin_alert_php_vulnerable', 1));
     }
