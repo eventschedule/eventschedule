@@ -592,4 +592,18 @@ class AdminAlertsTest extends TestCase
         $this->actingAs($user)->get(route('admin.dashboard'))
             ->assertRedirect();
     }
+
+    public function test_a_php_without_the_php2shell_fixes_is_flagged(): void
+    {
+        foreach (['7.4.33', '8.1.31', '8.2.34', '8.3.11', '8.3.35', '8.4.26', '8.5.11'] as $version) {
+            $this->assertTrue(AdminAlertService::phpIsVulnerable($version), $version);
+        }
+
+        foreach (['8.2.35', '8.3.36', '8.3.40', '8.4.27', '8.5.12', '8.6.0', '9.0.0'] as $version) {
+            $this->assertFalse(AdminAlertService::phpIsVulnerable($version), $version);
+        }
+
+        $this->assertNotEmpty(trans_choice('messages.admin_alert_php_vulnerable', 1));
+        $this->assertNotSame('messages.admin_alert_php_vulnerable', trans_choice('messages.admin_alert_php_vulnerable', 1));
+    }
 }

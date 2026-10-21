@@ -4752,6 +4752,7 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campaign with a disapproved ad|[2,*] :count campaigns with disapproved ads',
     'admin_alert_domains_pending' => '{1} :count custom domain still provisioning|[2,*] :count custom domains still provisioning',
     'admin_alert_translations_unshared' => '{1} :count translation not shared yet|[2,*] :count translations not shared yet',
+    'admin_alert_php_vulnerable' => '{1} Upgrade PHP: this version has a critical security flaw (PHP2Shell)|[2,*] Upgrade PHP: this version has a critical security flaw (PHP2Shell)',
     'admin_alert_app_update_available' => '{1} :count update available|[2,*] :count updates available',
     'admin_alert_privacy_policy_missing' => '{1} Publish your own privacy policy|[2,*] Publish your own privacy policy',
     'event_templates' => 'Event Templates',

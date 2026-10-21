@@ -4235,6 +4235,7 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campagne avec une annonce refusée|[2,*] :count campagnes avec des annonces refusées',
     'admin_alert_domains_pending' => '{1} :count domaine personnalisé en cours de configuration|[2,*] :count domaines personnalisés en cours de configuration',
     'admin_alert_translations_unshared' => '{1} :count traduction pas encore partagée|[2,*] :count traductions pas encore partagées',
+    'admin_alert_php_vulnerable' => '{1} Mettez à jour PHP : cette version a une faille de sécurité critique (PHP2Shell)|[2,*] Mettez à jour PHP : cette version a une faille de sécurité critique (PHP2Shell)',
     'admin_alert_app_update_available' => '{1} :count mise à jour disponible|[2,*] :count mises à jour disponibles',
     'admin_alert_privacy_policy_missing' => '{1} Publiez votre propre politique de confidentialité|[2,*] Publiez votre propre politique de confidentialité',
     'pending_action_show_more' => 'Afficher :count de plus',

@@ -4253,6 +4253,7 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campanie cu un anunț respins|[2,*] :count campanii cu anunțuri respinse',
     'admin_alert_domains_pending' => '{1} :count domeniu personalizat încă în configurare|[2,*] :count domenii personalizate încă în configurare',
     'admin_alert_translations_unshared' => '{1} :count traducere încă nepartajată|[2,*] :count traduceri încă nepartajate',
+    'admin_alert_php_vulnerable' => '{1} Actualizați PHP: această versiune are o vulnerabilitate de securitate critică (PHP2Shell)|[2,*] Actualizați PHP: această versiune are o vulnerabilitate de securitate critică (PHP2Shell)',
     'admin_alert_app_update_available' => '{1} :count actualizare disponibilă|[2,*] :count actualizări disponibile',
     'admin_alert_privacy_policy_missing' => '{1} Publică propria politică de confidențialitate|[2,*] Publică propria politică de confidențialitate',
     'pending_action_show_more' => 'Afișează încă :count',

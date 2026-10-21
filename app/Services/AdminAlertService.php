@@ -47,6 +47,10 @@ class AdminAlertService
         // sends every reminder, charges every installment and syncs every calendar - is not
         // running at all.
         'scheduler_stalled',
+        // Red, beside it: the PHP this install runs on has a known remote code execution flaw
+        // (PHP2Shell, CVE-2026-109618 and CVE-2026-109619). Nothing in the app can fix it; the
+        // operator upgrades PHP and the row goes away.
+        'php_vulnerable',
         // Above jobs_failed: a queue that has stopped draining is a worse condition than one job
         // that broke, and it is the failure the /admin/queue banner already warns about without
         // ever reaching the dashboard panel or the nav badge.
@@ -144,6 +148,12 @@ class AdminAlertService
     private const SEVERITY = ['red' => 3, 'amber' => 2, 'blue' => 1];
 
     /**
+     * The first release of each PHP branch with the PHP2Shell fixes (2026-10-21). A branch
+     * not listed (7.x, 8.0, 8.1) has no fixed release and counts as vulnerable.
+     */
+    private const PHP_FIXED_RELEASES = ['8.2' => '8.2.35', '8.3' => '8.3.36', '8.4' => '8.4.27', '8.5' => '8.5.12'];
+
+    /**
      * Memoized for the request: the nav composer and the dashboard controller both
      * ask for this, and it is a dozen COUNT queries.
      */
@@ -189,6 +199,10 @@ class AdminAlertService
 
                 return self::schedulerIsStalled() ? 1 : 0;
             },
+
+            // Suppressed under APP_TESTING for the same reason as the row above: a developer's own
+            // PHP decides it, so it would break every assertion that the panel is empty.
+            'php_vulnerable' => fn () => (! config('app.is_testing') && self::phpIsVulnerable(PHP_VERSION)) ? 1 : 0,
 
             // Jobs that are DUE and still waiting. available_at, not created_at: a delayed
             // dispatch (ReconcileBoostCampaign is +24h) is written with created_at = now, so
@@ -496,6 +510,19 @@ class AdminAlertService
      * called twice, now() advances between them and the cascade could otherwise disagree with
      * itself within a single render.
      */
+    public static function phpIsVulnerable(string $version): bool
+    {
+        $branch = implode('.', array_slice(explode('.', $version), 0, 2));
+
+        if (version_compare($branch, '8.5', '>')) {
+            return false;
+        }
+
+        $fixed = self::PHP_FIXED_RELEASES[$branch] ?? null;
+
+        return $fixed === null || version_compare($version, $fixed, '<');
+    }
+
     private static function schedulerIsStalled(): bool
     {
         return self::$schedulerStalled ??= SchedulerHealth::isStalled();
@@ -586,6 +613,7 @@ class AdminAlertService
     {
         [$nav, $tab, $name, $params, $fragment, $color, $subtitle] = match ($type) {
             'scheduler_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
+            'php_vulnerable' => ['system', 'queue', 'admin.queue', [], '', 'red', 'PHP '.PHP_VERSION],
             'jobs_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'realtime_prune_stalled' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],

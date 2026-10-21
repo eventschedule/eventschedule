@@ -4294,6 +4294,7 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count кампания с отклонённым объявлением|[2,*] :count кампаний с отклонёнными объявлениями',
     'admin_alert_domains_pending' => '{1} :count свой домен ещё настраивается|[2,*] :count своих доменов ещё настраиваются',
     'admin_alert_translations_unshared' => '{1} :count ещё не отправленный перевод|[2,*] :count ещё не отправленных переводов',
+    'admin_alert_php_vulnerable' => '{1} Обновите PHP: в этой версии есть критическая уязвимость (PHP2Shell)|[2,*] Обновите PHP: в этой версии есть критическая уязвимость (PHP2Shell)',
     'admin_alert_app_update_available' => '{1} :count обновление доступно|[2,*] :count обновлений доступно',
     'admin_alert_privacy_policy_missing' => '{1} Опубликуйте собственную политику конфиденциальности|[2,*] Опубликуйте собственную политику конфиденциальности',
     'pending_action_show_more' => 'Показать ещё :count',

@@ -4295,6 +4295,7 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count حملة بإعلان مرفوض|[2,*] :count حملات بإعلانات مرفوضة',
     'admin_alert_domains_pending' => '{1} :count نطاق مخصص قيد الإعداد|[2,*] :count نطاقات مخصصة قيد الإعداد',
     'admin_alert_translations_unshared' => '{1} :count ترجمة لم تتم مشاركتها بعد|[2,*] :count ترجمات لم تتم مشاركتها بعد',
+    'admin_alert_php_vulnerable' => '{1} حدّث PHP: هذا الإصدار به ثغرة أمنية حرجة (PHP2Shell)|[2,*] حدّث PHP: هذا الإصدار به ثغرة أمنية حرجة (PHP2Shell)',
     'admin_alert_app_update_available' => '{1} تحديث واحد متاح|[2,*] :count تحديثات متاحة',
     'admin_alert_privacy_policy_missing' => '{1} انشر سياسة الخصوصية الخاصة بك|[2,*] انشر سياسة الخصوصية الخاصة بك',
     'pending_action_show_more' => 'عرض :count إضافية',
