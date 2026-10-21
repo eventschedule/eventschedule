@@ -622,9 +622,7 @@ class AdminAlertService
     {
         [$nav, $tab, $name, $params, $fragment, $color, $subtitle] = match ($type) {
             'scheduler_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
-            // The subtitle says whether deploy/php-fpm.conf's stopgap is in effect for this request,
-            // which is how an operator checks it took after a deploy.
-            'php_vulnerable' => ['system', 'queue', 'admin.queue', [], '', 'red', 'PHP '.PHP_VERSION.(self::phpIsMitigated() ? ' - '.__('messages.admin_alert_php_mitigated') : '')],
+            'php_vulnerable' => ['system', 'queue', 'admin.queue', [], '', 'red', 'PHP '.PHP_VERSION],
             'jobs_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'realtime_prune_stalled' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],
@@ -672,10 +670,18 @@ class AdminAlertService
             return null;
         }
 
+        $title = trans_choice("messages.admin_alert_{$type}", $count, ['count' => $count]);
+
+        // Said in the title, which the dashboard's chips show (a subtitle there is only a tooltip):
+        // it is how an operator checks deploy/php-fpm.conf's stopgap took after a deploy.
+        if ($type === 'php_vulnerable' && self::phpIsMitigated()) {
+            $title .= ' - '.__('messages.admin_alert_php_mitigated');
+        }
+
         return [
             'type' => $type,
             'count' => $count,
-            'title' => trans_choice("messages.admin_alert_{$type}", $count, ['count' => $count]),
+            'title' => $title,
             'subtitle' => $subtitle,
             'url' => route($name, $params).$fragment,
             'color' => $color,
