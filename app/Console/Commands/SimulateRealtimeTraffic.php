@@ -176,6 +176,12 @@ class SimulateRealtimeTraffic extends Command
             return ['surface' => 'auth', 'path' => random_int(0, 1) ? '/sign_up' : '/login'];
         }
 
+        // Only the nexus has a marketing site. Elsewhere those visitors are on a schedule's page:
+        // filed under gp with no schedule, /features and /pricing were listed as schedule pages.
+        if (! config('app.is_nexus') && $roles->isNotEmpty()) {
+            return ['surface' => 'gp', 'path' => '/', 'role_id' => $roles->random()->id];
+        }
+
         [$path, $title] = self::MARKETING[array_rand(self::MARKETING)];
 
         return ['surface' => config('app.is_nexus') ? 'wp' : 'gp', 'path' => $path, 'title' => $title];

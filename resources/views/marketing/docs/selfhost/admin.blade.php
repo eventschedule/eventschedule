@@ -370,7 +370,7 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The top of the <a href="#dashboard" class="doc-link">dashboard</a> shows who is on the site right now: the marketing site, schedule and event pages (custom domains included), the signed-in app, and the sign-up and log-in pages. It is the Realtime setting, switched on and off at <a href="#settings-realtime" class="doc-link">Settings</a>; it starts on for eventschedule.com and off on every other install. While it is off, the dashboard opens on one card that says what would be recorded, with a <strong>Turn on in settings</strong> button, and the cards below it are there as usual.</p>
 
-        <x-doc-screenshot id="selfhost-admin--realtime" alt="The top of the admin dashboard on a selfhost install: visitors right now with page views per minute, where they are (marketing site, schedule pages, the app, sign-up and log-in), then Sign-ups beside the Activity rail" />
+        <x-doc-screenshot id="selfhost-admin--realtime" alt="The top of the admin dashboard on a selfhost install: visitors right now with page views per minute, where they are (schedule pages, the app, sign-up and log-in), then Sign-ups beside the Activity rail" />
         <p class="text-gray-600 dark:text-gray-300 mb-6">The live view updates itself every ten seconds and slows to once a minute while its tab is hidden; a dot at the top says <strong>Live</strong> or <strong>Reconnecting</strong>. If your <a href="#accessing" class="doc-link">password confirmation</a> lapses while it is open, it stops and asks you to confirm again. From top to bottom:</p>
         <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
