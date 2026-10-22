@@ -409,7 +409,7 @@ class GraphicController extends Controller
 
         // Base query builder for future/ongoing events belonging to this schedule
         $baseQuery = function () use ($role, $request) {
-            return Event::with(['roles', 'tickets', 'venue'])
+            return Event::with(['roles', 'tickets', 'venue', 'creatorRole'])
                 ->whereHas('roles', function ($query) use ($role) {
                     $query->where('role_id', $role->id)->where('is_accepted', true);
                 })

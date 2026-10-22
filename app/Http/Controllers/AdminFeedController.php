@@ -30,7 +30,8 @@ class AdminFeedController extends Controller
             return redirect()->route('admin.dashboard')->with('error', __('messages.feeds_admin_not_ready'));
         }
 
-        $query = EventFeed::query()->with('role')->whereHas('role', fn ($role) => $role->where('is_deleted', false));
+        // role.subscriptions: each row says whether its schedule's plan still includes feeds.
+        $query = EventFeed::query()->with('role.subscriptions')->whereHas('role', fn ($role) => $role->where('is_deleted', false));
 
         if ($search = trim((string) $request->input('search'))) {
             $like = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $search).'%';

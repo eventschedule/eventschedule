@@ -426,7 +426,8 @@ class EmailService
             }
 
             if ($event->individual_tickets && $sale->group_id && $sale->isPrimarySale()) {
-                $groupedSales = Sale::where('group_id', $sale->id)->get();
+                // A group is one leg's tickets, so every row is this event's.
+                $groupedSales = Sale::where('group_id', $sale->id)->get()->each->setRelation('event', $event);
                 foreach ($groupedSales as $groupSale) {
                     $this->sendTicketEmail($groupSale, $role);
                 }

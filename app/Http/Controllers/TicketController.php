@@ -1174,7 +1174,7 @@ class TicketController extends Controller
                 ->keys()
                 ->map(fn ($hash) => $event->tickets->firstWhere('id', UrlUtils::decodeId($hash)))
                 ->filter()
-                ->contains(fn ($ticket) => ! $ticket->isSellable());
+                ->contains(fn ($ticket) => ! $ticket->setRelation('event', $event)->isSellable());
 
             $unsellable = $unsellable || collect($leg['addons'] ?? [])
                 ->filter(fn ($quantity) => (int) $quantity > 0)
@@ -3077,7 +3077,7 @@ class TicketController extends Controller
 
         // installmentPlan is eager-loaded for the wallet badge's gate: canOffer() calls
         // isInstallmentDelinquent() per row, which would otherwise be one query per leg.
-        $sales = Sale::with('event', 'installmentPlan')
+        $sales = Sale::with('event.creatorRole', 'installmentPlan')
             ->where('order_id', $primary->order_id)
             ->where('is_deleted', false)
             // Guest rows are per-attendee copies of a leg, not separate events; the buyer wants one

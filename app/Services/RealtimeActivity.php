@@ -566,7 +566,7 @@ class RealtimeActivity
             ->merge($sales->pluck('event_id'))
             ->merge($boosts->pluck('event_id'))
             ->filter()->unique()->values();
-        $events = $publicEventIds->isEmpty() ? collect() : Event::with('roles')->whereIn('id', $publicEventIds)->get()->keyBy('id');
+        $events = $publicEventIds->isEmpty() ? collect() : Event::with(['roles', 'creatorRole'])->whereIn('id', $publicEventIds)->get()->keyBy('id');
 
         $nowTs = now()->getTimestamp();
         $this->deletedNames = $deletedNames;

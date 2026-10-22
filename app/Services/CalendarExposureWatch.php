@@ -241,8 +241,9 @@ class CalendarExposureWatch
         return $rows
             ->filter(fn (CalendarExposure $row) => $row->event && (int) $row->event->creator_role_id === (int) $role->id)
             ->filter(fn (CalendarExposure $row) => ! $publicOnly || ! $row->event->is_draft)
-            ->map(function (CalendarExposure $row) {
-                $event = $row->event;
+            ->map(function (CalendarExposure $row) use ($role) {
+                // The filter above kept only this schedule's own events: its timezone dates them.
+                $event = $row->event->setRelation('creatorRole', $role);
                 $findings = CalendarPrivacy::findings($event->name, $event->description, self::locationOf($event));
 
                 return ['event' => $event, 'kinds' => CalendarPrivacy::flags($findings), 'findings' => $findings];

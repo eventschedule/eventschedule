@@ -386,7 +386,7 @@ class RealtimeDashboard
         }
 
         if ($eventIds) {
-            $found = Event::with('roles')->whereIn('id', array_keys($eventIds))->get()->keyBy('id')->all();
+            $found = Event::with(['roles', 'creatorRole'])->whereIn('id', array_keys($eventIds))->get()->keyBy('id')->all();
             foreach (array_keys($eventIds) as $id) {
                 $this->events[$id] = $found[$id] ?? null;
             }

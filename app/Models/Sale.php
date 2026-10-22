@@ -230,6 +230,11 @@ class Sale extends Model
                             // ReleaseTickets cron: seats handed back, gift-card share re-credited,
                             // no refund, and the revenue left on the books.
                             ->when($sale->status === 'expired', fn ($query) => $query->where('status', 'unpaid'))
+                            // What each sibling's save reads in the branch above, loaded once for
+                            // the order. Safe to read ahead: updateSold() and updateRsvpSold()
+                            // re-read their row under a lock, and cancelFromSale() skips an event
+                            // an earlier leg already cancelled.
+                            ->with(['installmentPlan', 'event', 'saleTickets.ticket'])
                             ->get();
                         foreach ($affected as $sibling) {
                             $sibling->status = $sale->status;
@@ -428,6 +433,9 @@ class Sale extends Model
             ->when(! $includeDeleted, fn ($query) => $query->where('is_deleted', false))
             ->where(fn ($query) => $query->whereNull('group_id')->orWhereColumn('group_id', 'id'))
             ->orderBy('id')
+            // Every per-event side effect reads the leg's event, and its link and dates read the
+            // event's owning schedule, so both come in one query each.
+            ->with('event.creatorRole')
             ->get();
     }
 
@@ -685,6 +693,8 @@ class Sale extends Model
 
     public function calculateTotal()
     {
+        $this->loadMissing('saleTickets.ticket');
+
         return $this->saleTickets->sum(function ($saleTicket) {
             return $saleTicket->ticket->price * $saleTicket->quantity;
         });

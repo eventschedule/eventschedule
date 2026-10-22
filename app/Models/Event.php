@@ -1696,6 +1696,12 @@ class Event extends Model
 
     public function isPro()
     {
+        // One query for every schedule's subscription, not one per schedule. Hosted only: a
+        // selfhost schedule is Pro without one.
+        if (config('app.hosted')) {
+            $this->roles->loadMissing('subscriptions');
+        }
+
         foreach ($this->roles as $role) {
             if ($role->isPro()) {
                 return true;
@@ -5033,7 +5039,7 @@ class Event extends Model
                 // one, nor that the seats must be picked rather than counted.
                 if ($ticket->seating_band) {
                     $row['seating_band'] = $ticket->seating_band;
-                    $row['is_allocated'] = $ticket->isAllocated();
+                    $row['is_allocated'] = $ticket->setRelation('event', $this)->isAllocated();
                 }
 
                 if ($ticket->is_pass) {

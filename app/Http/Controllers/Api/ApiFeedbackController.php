@@ -170,7 +170,8 @@ class ApiFeedbackController extends Controller
         $total = 0;
 
         foreach ($models as $model) {
-            $query = $model::with(['event'])
+            // user: submitterName() reads it for every row.
+            $query = $model::with(['event', 'user'])
                 ->where('is_approved', $isApproved)
                 ->whereHas('event.roles', fn ($q) => $q->whereIn('roles.id', $roleIds));
 

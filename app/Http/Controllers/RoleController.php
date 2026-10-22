@@ -2590,7 +2590,7 @@ class RoleController extends Controller
             // those events out (GraphicController), and so do the past events fetched below for
             // this same view.
             if ($role->isCurator()) {
-                $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+                $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
                     ->inMonth($startOfGridUtc, $endOfGridUtc)
                     ->whereIn('id', function ($query) use ($role) {
                         $query->select('event_id')
@@ -2603,7 +2603,7 @@ class RoleController extends Controller
                     ->orderBy('starts_at')
                     ->get();
             } else {
-                $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+                $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
                     ->inMonth($startOfGridUtc, $endOfGridUtc)
                     ->where(function ($query) use ($role) {
                         $query->whereHas('roles', function ($query) use ($role) {
@@ -2643,7 +2643,7 @@ class RoleController extends Controller
         $hasMorePastEvents = false;
         if (request()->graphic && ! $role->hide_past_events) {
             if ($role->isCurator()) {
-                $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+                $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
                     ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereIn('id', function ($query) use ($role) {
@@ -2658,7 +2658,7 @@ class RoleController extends Controller
                     ->limit(51)
                     ->get();
             } else {
-                $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+                $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
                     ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
@@ -3031,7 +3031,7 @@ class RoleController extends Controller
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
         if ($role->isCurator()) {
-            $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+            $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
                 ->fullyPast($beforeDate)
                 ->whereNull('days_of_week')
                 ->whereIn('id', function ($query) use ($role) {
@@ -3054,7 +3054,7 @@ class RoleController extends Controller
                 ->limit(51)
                 ->get();
         } else {
-            $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+            $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
                 ->fullyPast($beforeDate)
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
@@ -8410,7 +8410,7 @@ class RoleController extends Controller
         // First, let's try a very basic search to see if we can get any events at all
         if ($role->isCurator()) {
             // For curators, get events they're associated with
-            $events = Event::with('roles')
+            $events = Event::with(['roles', 'creatorRole'])
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -8434,7 +8434,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             // For venues/talents
-            $baseQuery = Event::with('roles');
+            $baseQuery = Event::with(['roles', 'creatorRole']);
 
             $baseQuery->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)

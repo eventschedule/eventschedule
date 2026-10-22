@@ -56,10 +56,13 @@ class SyncGoogleCalendars extends Command
         if ($roleId) {
             $roles = Role::where('id', $roleId)
                 ->whereIn('sync_direction', ['from', 'both'])
+                ->with('user')
                 ->get();
         } else {
+            // The owner's token syncs each one.
             $roles = Role::whereIn('sync_direction', ['from', 'both'])
                 ->where('is_deleted', false)
+                ->with('user')
                 ->get();
         }
 

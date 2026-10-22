@@ -262,7 +262,10 @@
   // add-on and the coupon and payment text regardless, so a curator's staff who were refused the
   // panel could read all of it in the page source. $eventForPage is what data() spreads; the
   // model itself is untouched, because the rest of this view still reads it.
-  $canSeeTicketData = ! $event->exists || $user->canViewEventData($event);
+  // Asked once: it walks the event's schedules with a query each, and the sidebar link and the
+  // phone header below need the same answer.
+  $viewsEventData = $user->canViewEventData($event);
+  $canSeeTicketData = ! $event->exists || $viewsEventData;
   $eventForPage = $canSeeTicketData ? $event : (clone $event)
       ->unsetRelation('tickets')->unsetRelation('promoCodes')->unsetRelation('addons')
       ->makeHidden(array_merge(\App\Repos\EventRepo::TICKET_PANEL_FIELDS, ['payment_instructions_html', 'ticket_notes_html']));
@@ -2300,7 +2303,7 @@
                                  `$event->user_id == $user->id`, which is creator identity
                                  rather than permission, so an Enterprise team admin saw no
                                  Tickets tab at all on their own schedule's events. --}}
-                            @if ($user->canViewEventData($event))
+                            @if ($viewsEventData)
                             <a href="#section-tickets" class="section-nav-link" data-section="section-tickets">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
@@ -3034,7 +3037,7 @@
                 </div>
                 @endif
                     {{-- Same predicate as the sidebar link above; the two must not diverge. --}}
-                    @if ($user->canViewEventData($event))
+                    @if ($viewsEventData)
                     <button type="button" class="mobile-section-header" data-section="section-tickets">
                         <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

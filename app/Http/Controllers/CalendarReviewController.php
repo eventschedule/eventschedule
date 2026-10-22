@@ -51,7 +51,7 @@ class CalendarReviewController extends Controller
 
         $holds = self::query($role, $show)
             ->when($search !== '', fn ($q) => $q->whereHas('event', fn ($e) => $e->where('name', 'like', '%'.addcslashes($search, '\\%_').'%')))
-            ->with('event.roles')
+            ->with(['event.roles', 'event.creatorRole'])
             ->join('events', 'events.id', '=', 'calendar_import_holds.event_id')
             ->orderBy('events.starts_at')
             ->select('calendar_import_holds.*')

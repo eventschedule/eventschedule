@@ -1016,6 +1016,11 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        // planAllowsTeamAccess() asks each schedule's plan, which only hosted reads from billing.
+        if (config('app.hosted')) {
+            $event->roles->loadMissing('subscriptions');
+        }
+
         foreach ($event->roles as $role) {
             // A schedule that said no to the event sees nothing of it, its buyers least of all.
             if ($event->creator_role_id != $role->id && self::declined($role)) {

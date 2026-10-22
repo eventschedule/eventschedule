@@ -447,6 +447,9 @@ class FeedImporter
 
         $feed->held_leaving = null;
 
+        // Cancelling or removing one pushes it to the calendars of every schedule it is on.
+        (new \Illuminate\Database\Eloquent\Collection($fresh->all()))->loadMissing('event.roles.user');
+
         foreach ($fresh as $item) {
             $this->gone($feed, $item);
         }

@@ -470,6 +470,11 @@ class FeedEventWriter
 
     private function apply(EventFeed $feed, Event $event, array $values): void
     {
+        // A feed's events are its schedule's own, and the start below is read in its timezone.
+        if ((int) $event->creator_role_id === (int) $feed->role_id) {
+            $event->setRelation('creatorRole', $feed->loadMissing('role')->role);
+        }
+
         foreach ($values as $field => $value) {
             match ($field) {
                 'name' => $event->name = $value,

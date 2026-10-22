@@ -197,7 +197,7 @@ class PassBookingService
      */
     private function bandTicketsFor(Event $event, string $date, Ticket $passTicket): \Illuminate\Support\Collection
     {
-        $allocated = $event->tickets->filter(fn (Ticket $t) => $t->isAllocated($date));
+        $allocated = $event->tickets->filter(fn (Ticket $t) => $t->setRelation('event', $event)->isAllocated($date));
 
         if ($passTicket->seating_band) {
             return $allocated->where('seating_band', $passTicket->seating_band)->values();

@@ -421,6 +421,8 @@ class SaleRefundService
             ->whereDoesntHave('refunds', fn ($q) => $q->whereIn('status', SaleRefund::CLAIMING_STATUSES))
             ->orderBy('sequence')
             ->get();
+        // Each leg's refund reads its plan's currency, and they are all this plan's.
+        $legs->each->setRelation('plan', $plan);
 
         if ($legs->isEmpty()) {
             // Every collected leg is already claimed, so the money is back and only the status is

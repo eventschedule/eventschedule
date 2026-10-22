@@ -2110,7 +2110,8 @@ class EventController extends Controller
 
         $removed = 0;
         $kept = 0;
-        foreach ($this->importedEvents($role, $request->user(), $batch)->get() as $event) {
+        // Deleting one reads its schedules, its parts and its owner for the webhook and the calendars.
+        foreach ($this->importedEvents($role, $request->user(), $batch)->with(['roles', 'parts', 'creatorRole'])->get() as $event) {
             // The same two refusals as deleting one by hand.
             if ($request->user()->cannot('delete', $event) || $event->appointment_type_id || $event->sales()->exists()) {
                 $kept++;
@@ -4861,7 +4862,7 @@ class EventController extends Controller
         }
 
         // Load all recent events for manual selection
-        $events = Event::with('creatorRole')->whereHas('roles', function ($query) use ($role) {
+        $events = Event::with(['creatorRole', 'roles'])->whereHas('roles', function ($query) use ($role) {
             $query->where('role_id', $role->id);
         })
             ->whereDoesntHave('parts')

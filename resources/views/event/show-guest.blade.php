@@ -251,6 +251,8 @@
           // something to show keeps its card; the rest become one compact list below.
           $allMembers = $event->members();
           $talentMembers = $allMembers->filter(fn($m) => $m->isClaimed() || $m->getFirstVideoUrl() || $m->profile_image_url || $m->description);
+          // Each card asks is_demo_role() of its act, which reads the act's owner.
+          $talentMembers->loadMissing('user');
           $bareTalent = $allMembers->reject(fn($m) => $talentMembers->contains('id', $m->id));
           // Follows the widened list, and must. This gates the big square hero fallback below,
           // whose whole job is to supply an image when no talent card carries one - and an

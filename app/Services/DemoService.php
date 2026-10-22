@@ -2864,7 +2864,7 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
         $followedRoles = Role::whereIn('subdomain', $followedSubdomains)->where('user_id', $user->id)->get();
 
         foreach ($followedRoles as $role) {
-            $events = $role->events()->where('events.creator_role_id', $role->id)->get();
+            $events = $role->events()->where('events.creator_role_id', $role->id)->with('tickets')->get();
 
             foreach ($events as $event) {
                 // 70% chance of having purchased tickets to each event
@@ -3007,7 +3007,7 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
     protected function createEventAnalyticsData(Role $role, Collection $demoRoleIds): void
     {
         $now = Carbon::now();
-        $events = $role->events()->whereIn('events.creator_role_id', $demoRoleIds)->get();
+        $events = $role->events()->whereIn('events.creator_role_id', $demoRoleIds)->with('tickets')->get();
 
         foreach ($events as $event) {
             $eventDate = Carbon::parse($event->starts_at);

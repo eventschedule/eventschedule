@@ -153,7 +153,8 @@ class ChargeInstallments extends Command
             // plan is an abandoned Stripe session, and reminding those people about "your payment
             // of X is due in 2 days" is dunning someone who never bought anything.
             ->whereHas('plan', fn ($q) => $q->where('status', 'active')->whereNotNull('stripe_payment_method_id'))
-            ->with(['plan.sale.event.creatorRole'])
+            // installments: the organizer's digest says how far along each plan is.
+            ->with(['plan.sale.event.creatorRole', 'plan.installments'])
             ->get();
 
         $digest = [];
