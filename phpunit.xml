@@ -12,6 +12,11 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+    <extensions>
+        <!-- N+1 queries: the end-of-run report, the baseline's ratchet and its writer.
+             See tests/Support/QueryGuard.php. -->
+        <bootstrap class="Tests\Support\QueryGuardExtension"/>
+    </extensions>
     <source>
         <include>
             <directory>app</directory>

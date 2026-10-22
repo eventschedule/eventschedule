@@ -464,7 +464,9 @@ class TicketController extends Controller
         // PaymentGatewayDriver::referenceUrl() once per row, and PayPal's is the first that has to
         // read the OWNER (for the sandbox flag, which decides whether the deep link points at
         // paypal.com or sandbox.paypal.com). Without this it lazy-loads the owner per row.
-        $query = Sale::with('event.creatorRole', 'event.user', 'saleTickets.ticket', 'promoCode', 'feedback', 'refunds', 'installmentPlan')
+        // event.roles: a row names its event's venue and links its page, and Event::venue and the
+        // guest URL each load the event's schedules when they are not there (PageQueryScalingTest).
+        $query = Sale::with('event.creatorRole', 'event.user', 'event.roles', 'saleTickets.ticket', 'promoCode', 'feedback', 'refunds', 'installmentPlan')
             ->where('is_deleted', false)
             ->whereHas('event', fn ($query) => $query->managedBy($user));
 

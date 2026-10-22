@@ -688,7 +688,8 @@ class HomeController extends Controller
         // $roleIds is already $user->editor(), i.e. owner and admin only, the same input
         // getPendingActionItems() trusts. A viewer cannot act on any of these steps and never
         // reaches here.
-        $roles = Role::whereIn('id', $roleIds)->where('is_deleted', false)->get();
+        // subscriptions: each schedule's plan is asked below (isPro() reads subscription('default')).
+        $roles = Role::whereIn('id', $roleIds)->where('is_deleted', false)->with('subscriptions')->get();
 
         if ($roles->isEmpty()) {
             return $items;

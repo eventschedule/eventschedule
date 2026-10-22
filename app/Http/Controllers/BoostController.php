@@ -32,7 +32,8 @@ class BoostController extends Controller
 
     protected function getRoles()
     {
-        return auth()->user()->roles()->wherePivot('level', '!=', 'follower')->get();
+        // subscriptions: each one's plan decides whether it can boost (isPro()).
+        return auth()->user()->roles()->wherePivot('level', '!=', 'follower')->with('subscriptions')->get();
     }
 
     protected function getRole(Request $request)

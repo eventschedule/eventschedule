@@ -2,8 +2,19 @@
 
 namespace Tests;
 
+use Illuminate\Console\Events\CommandFinished;
+use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Queue\Events\JobExceptionOccurred;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Testing\TestResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Tests\Support\QueryGuard;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -43,10 +54,21 @@ abstract class TestCase extends BaseTestCase
 
         // Memoizes whether scheduled_task_runs exists; RefreshDatabase rebuilds the schema under it.
         \App\Services\ScheduledTaskRecorder::flush();
+
+        // N+1 queries, counted in everything this test runs (tests/Support/QueryGuard.php). The
+        // handler only records: its return value is ignored and the relation still loads
+        // (HasAttributes::getRelationValue), so the app behaves exactly as it does without it.
+        Model::preventLazyLoading();
+        Model::handleLazyLoadingViolationUsing(static fn (Model $model, string $relation) => QueryGuard::lazyLoad($model, $relation));
+        QueryGuard::beginTest(static::class.'::'.$this->name());
     }
 
     protected function tearDown(): void
     {
+        // What the test body, a command or a job found outside a request. A request's findings
+        // fail at the request itself (call() below).
+        $found = QueryGuard::endTest();
+
         // A controller's set_time_limit() is meant for one web request, but here it lasts as long as
         // the PHPUnit process and starts a new timer. /translate_data sets 900 seconds, and CI died
         // that many CPU seconds later in an unrelated test. Go back to the CLI's default of no limit.
@@ -54,6 +76,141 @@ abstract class TestCase extends BaseTestCase
         set_time_limit(0);
 
         parent::tearDown();
+
+        if ($found && QueryGuard::enforcing() && $this->status()->isSuccess()) {
+            $this->fail(QueryGuard::describe($found));
+        }
+    }
+
+    /**
+     * Every HTTP request a test makes, measured on its own by QueryGuard.
+     *
+     * A stack, not one recorder: followingRedirects() calls get() from inside parent::call(), and a
+     * test without exception handling throws out of it, so the scope is closed in `finally` or the
+     * test's own assertions would be counted as the request's. A streamed response does its work
+     * when its content is read, which a test does after this returns, so it is read here, inside
+     * the request (TestResponse keeps the content for the test's own read).
+     */
+    public function call($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null)
+    {
+        $from = count(QueryGuard::pending());
+        $id = QueryGuard::push('request', $method.' '.$uri);
+
+        try {
+            $response = parent::call($method, $uri, $parameters, $cookies, $files, $server, $content);
+
+            $route = $response->baseRequest?->route();
+            if ($route instanceof Route) {
+                QueryGuard::requested($route->getName());
+                QueryGuard::relabel($id, $method.' '.($route->getName() ?: '/'.ltrim($route->uri(), '/')));
+            }
+
+            if ($response->baseResponse instanceof StreamedResponse) {
+                $this->readStreamInsideRequest($response);
+            }
+        } finally {
+            QueryGuard::pop($id);
+        }
+
+        if (QueryGuard::enforcing() && ($found = QueryGuard::takePendingSince($from))) {
+            $this->fail(QueryGuard::describe($found));
+        }
+
+        return $response;
+    }
+
+    /**
+     * Assert a request asks the database no more as the data behind it grows: the N+1 check.
+     *
+     * $grow(int $n) brings the fixture up to $n of everything the page lists; $request() makes the
+     * request (and asserts what it must). Each measured request is cold: the userRoles singleton,
+     * the cache and the signed-in user are dropped first, because a warm request inherits
+     * relations and cached values that hide exactly the growth this measures. One unmeasured
+     * request first warms what lives for the whole process, so both sizes start equal.
+     *
+     * @param  array{0: int, 1: int}  $sizes  both below any cap the page puts on a list
+     * @return array{0: int, 1: int} the two counts
+     */
+    protected function assertQueriesDoNotGrow(callable $grow, callable $request, array $sizes = [2, 5], int $slack = 0, ?int $budget = null, string $label = ''): array
+    {
+        [$small, $large] = $sizes;
+
+        $grow($small);
+        $request();
+        [$smallCount, $smallSql] = $this->countQueries($request);
+
+        $grow($large);
+        [$largeCount, $largeSql] = $this->countQueries($request);
+
+        $grew = [];
+        foreach ($largeSql as $sql => $count) {
+            $more = $count - ($smallSql[$sql] ?? 0);
+            if ($more > 0) {
+                $grew[$sql] = $more;
+            }
+        }
+        arsort($grew);
+        $why = '';
+        foreach (array_slice($grew, 0, 5, true) as $sql => $more) {
+            $why .= "\n  +{$more}  ".mb_strimwidth($sql, 0, 240, '...');
+        }
+
+        $this->assertLessThanOrEqual(
+            $smallCount + $slack,
+            $largeCount,
+            trim("{$label} asks more as the data grows: {$smallCount} queries for {$small} of everything, {$largeCount} for {$large}.")
+                ."\nThe queries that grew:{$why}"
+                ."\nEager load what the page reads per row, or count it in one query.",
+        );
+
+        if ($budget !== null) {
+            $this->assertLessThanOrEqual($budget, $largeCount, trim("{$label} ran {$largeCount} queries, over its budget of {$budget}.")
+                .' If the new ones are needed, raise the budget beside the page in the same change and say why in the commit.');
+        }
+
+        return [$smallCount, $largeCount];
+    }
+
+    /** @return array{0: int, 1: array<string, int>} */
+    private function countQueries(callable $request): array
+    {
+        $this->app->forgetInstance('userRoles');
+        \Illuminate\Support\Facades\Cache::flush();
+        \Illuminate\Support\Facades\Auth::forgetGuards();
+
+        $sql = [];
+        $total = 0;
+        $listening = true;
+        \Illuminate\Support\Facades\DB::listen(function ($query) use (&$sql, &$total, &$listening) {
+            if ($listening) {
+                $total++;
+                $key = QueryGuard::normalize($query->sql);
+                $sql[$key] = ($sql[$key] ?? 0) + 1;
+            }
+        });
+
+        try {
+            $request();
+        } finally {
+            $listening = false;
+        }
+
+        return [$total, $sql];
+    }
+
+    private function readStreamInsideRequest(TestResponse $response): void
+    {
+        $level = ob_get_level();
+
+        try {
+            $response->streamedContent();
+        } catch (\Throwable) {
+            // Leave a stream that throws to the test that reads it.
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
+            \Closure::bind(fn () => $this->streamedContent = null, $response, TestResponse::class)();
+        }
     }
 
     /**
@@ -75,6 +232,17 @@ abstract class TestCase extends BaseTestCase
         parent::refreshApplication();
 
         $this->withoutVite();
+
+        // Here and not in setUp(): a test that rebuilds the app mid-body (ForcesEnvironment) gets a
+        // new event dispatcher, and a listener on the old one would hear nothing after that.
+        $events = $this->app['events'];
+        $events->listen(QueryExecuted::class, [QueryGuard::class, 'query']);
+        $events->listen(JobProcessing::class, fn (JobProcessing $e) => QueryGuard::push('job', 'job '.$e->job->resolveName()));
+        $events->listen(JobProcessed::class, fn () => QueryGuard::popKind('job'));
+        $events->listen(JobExceptionOccurred::class, fn () => QueryGuard::popKind('job'));
+        $events->listen(CommandStarting::class, fn (CommandStarting $e) => QueryGuard::push('command', 'artisan '.$e->command));
+        $events->listen(CommandFinished::class, fn () => QueryGuard::popKind('command'));
+        QueryGuard::rememberRoutes($this->app['router']->getRoutes());
     }
 
     /**

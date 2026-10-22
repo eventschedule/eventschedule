@@ -36,8 +36,9 @@ class ApiScheduleController extends Controller
             self::MAX_PER_PAGE
         );
 
+        // subscriptions: each schedule's data says what its plan includes (isPro()).
         $schedules = auth()->user()->roles()
-            ->with('groups')
+            ->with(['groups', 'subscriptions'])
             ->wherePivotIn('level', ['owner', 'admin'])
             ->where('is_deleted', false)
             ->wherePro();

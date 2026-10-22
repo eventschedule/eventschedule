@@ -5395,10 +5395,16 @@
                 @endif
 
                 @php
-                    $schedules = $user->availableEventSchedules();
+                    // Each box below reads its schedule's sub-schedules and asks whether that schedule
+                    // takes this person's events without a request; both are loaded here once, not
+                    // asked per box (PageQueryScalingTest). autoAcceptsEventFrom() starts with
+                    // isMember(), a query, so membership is read from one list and the rest of the
+                    // rule is asked without the person.
+                    $schedules = $user->availableEventSchedules()->load('groups');
                     $schedules = $schedules->filter(function($schedule) use ($subdomain) {
                         return $schedule->subdomain !== $subdomain;
                     });
+                    $memberScheduleIds = $user->member()->pluck('roles.id')->all();
                 @endphp
 
                 @if ($detailsShown)
@@ -5617,7 +5623,7 @@
                                     </label>
                                     {{-- Only where it is true: a schedule you belong to, or one that takes
                                          events without review, lists it at once. --}}
-                                    @if (! $schedule->autoAcceptsEventFrom($user, $role))
+                                    @if (! in_array($schedule->id, $memberScheduleIds, true) && ! $schedule->autoAcceptsEventFrom(null, $role))
                                     <span class="event-list-sub ms-2 flex-shrink-0">{{ __('messages.needs_approval') }}</span>
                                     @endif
                                     <div class="ms-2 flex-shrink-0">

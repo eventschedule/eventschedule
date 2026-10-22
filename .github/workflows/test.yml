@@ -147,8 +147,25 @@ jobs:
             exit 1
           fi
 
+      # QUERY_GUARD_STRICT: tests/Support/QueryGuard.php finds N+1 queries in every request the
+      # suite makes and fails the test on one that tests/query-baseline.php does not list. Strict
+      # adds the ratchet at the end of a complete run: a listed N+1 that no test hit any more, in a
+      # file this push changed, fails the build so it comes off the list (QueryGuardExtension).
+      # QUERY_GUARD_BASE is what "changed in this push" is measured from. QueryGuardTest fails CI
+      # if strict is missing.
       - name: Run Feature & Unit tests
+        env:
+          QUERY_GUARD_STRICT: '1'
+          QUERY_GUARD_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: php artisan test
+
+      - name: Upload the query report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: query-guard-report
+          path: storage/logs/query-guard.txt
+          if-no-files-found: ignore
 
       # The suite above runs token-less, so it never reaches the half of
       # tests/TestDatabase.php that connects, creates and drops schemas. This does.

@@ -69,7 +69,9 @@ class ApiEventController extends Controller
             self::MAX_PER_PAGE
         );
 
-        $events = Event::with(['roles', 'tickets', 'addons', 'parts'])
+        // Each row's URL picks a home schedule and asks its plan (Event::getGuestUrlData(),
+        // Role::isPro()), so the schedules' subscriptions and the owning schedule come with the page.
+        $events = Event::with(['roles.subscriptions', 'creatorRole.subscriptions', 'tickets', 'addons', 'parts'])
             ->whereNull('appointment_type_id') // appointment bookings are not real events
             ->whereHas('roles', function ($q) {
                 $q->whereIn('roles.id', auth()->user()->roles()

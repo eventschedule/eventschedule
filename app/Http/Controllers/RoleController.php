@@ -4660,6 +4660,13 @@ class RoleController extends Controller
         $roles = $query->orderBy($sortBy, $sortDir)->get();
 
         // Get member calendar sync status for followed roles
+        // Which of these the person may edit, asked once for the list: User::isEditor() is a query,
+        // and the table asked it on every row. Same rule: an owner or admin place, while the plan
+        // allows a team (planAllowsTeamAccess() reads subscription('default'), hence the eager load).
+        $editableRoleIds = $user->editor()->whereIn('roles.id', $roleIds)->with('subscriptions')->get()
+            ->filter(fn ($role) => $user->planAllowsTeamAccess($role))
+            ->pluck('id')->all();
+
         $memberSyncCalendarIds = \App\Models\RoleUser::where('user_id', $user->id)
             ->whereIn('role_id', $roleIds)
             ->whereNotNull('google_calendar_id')
@@ -4685,6 +4692,7 @@ class RoleController extends Controller
             'sortBy' => $sortBy,
             'sortDir' => $sortDir,
             'memberSyncCalendarIds' => $memberSyncCalendarIds,
+            'editableRoleIds' => $editableRoleIds,
             'duplicateVenueCount' => $duplicateVenueCount,
         ];
 

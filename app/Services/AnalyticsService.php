@@ -31,6 +31,9 @@ class AnalyticsService
     /** ownedEventIdsForRoles(), by viewer and schedules, for the life of the service. */
     private array $ownedEventIds = [];
 
+    /** getUserRoleIds() per user: one page load asks it some seventeen times. */
+    private array $userRoleIds = [];
+
     /**
      * Record a page view (returns false if bot detected)
      */
@@ -560,9 +563,10 @@ class AnalyticsService
     {
         $cutoff = now()->subDays(30)->startOfDay();
 
-        // creatorRole: the top-events list renders getShortDateRangeDisplay() per row.
+        // creatorRole: the top-events list renders getShortDateRangeDisplay() per row; roles: each
+        // row's picture falls back to its performer's (Event::role()).
         $query = Event::query()
-            ->with('creatorRole')
+            ->with(['creatorRole', 'roles'])
             ->where('is_draft', false)
             ->where(function ($q) use ($cutoff) {
                 $q->where('starts_at', '>=', $cutoff)
@@ -621,7 +625,7 @@ class AnalyticsService
      */
     protected function getUserRoleIds(User $user): Collection
     {
-        return $user->editor()->pluck('roles.id');
+        return $this->userRoleIds[$user->id] ??= $user->editor()->pluck('roles.id');
     }
 
     /**

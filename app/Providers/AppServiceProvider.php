@@ -109,7 +109,11 @@ class AppServiceProvider extends ServiceProvider
             return collect();
         });
 
-        if (config('app.is_testing')) {
+        // One line per request, for the app served to the Dusk job (CI uploads the file when a
+        // journey fails). Not under PHPUnit: there the log ran from app boot to the end of a test, so
+        // each line counted the test's own fixtures too, and the file grew past 500 MB. The suite's
+        // per-request counts are tests/Support/QueryGuard.php.
+        if (config('app.is_testing') && ! $this->app->runningInConsole()) {
             DB::enableQueryLog();
 
             $this->app->terminating(function () {

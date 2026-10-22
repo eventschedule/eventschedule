@@ -79,7 +79,7 @@
                             </svg>
                         </button>
                         <div id="{{ $menuId }}" class="ap-dropdown pop-up-menu hidden absolute z-10 mt-2 w-56 divide-y divide-gray-100 dark:divide-white/[0.06] rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu" aria-orientation="vertical">
-                            @if (auth()->user()->isEditor($role->subdomain))
+                            @if (in_array($role->id, $editableRoleIds ?? [], true))
                             <div class="py-1" data-popup-target="{{ $menuId }}">
                                 <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="{{ $menuItem }}" role="menuitem">
                                     <svg class="{{ $menuIcon }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
