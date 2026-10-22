@@ -4235,7 +4235,6 @@ return [
     'admin_alert_domains_pending' => '{1} :count eigen domein wordt nog ingesteld|[2,*] :count eigen domeinen worden nog ingesteld',
     'admin_alert_translations_unshared' => '{1} :count nog niet gedeelde vertaling|[2,*] :count nog niet gedeelde vertalingen',
     'admin_alert_php_vulnerable' => '{1} Werk PHP bij: deze versie heeft een kritiek beveiligingslek (PHP2Shell)|[2,*] Werk PHP bij: deze versie heeft een kritiek beveiligingslek (PHP2Shell)',
-    'admin_alert_php_mitigated' => 'beperkt, werk toch bij',
     'admin_alert_app_update_available' => '{1} :count update beschikbaar|[2,*] :count updates beschikbaar',
     'admin_alert_privacy_policy_missing' => '{1} Publiceer je eigen privacybeleid|[2,*] Publiceer je eigen privacybeleid',
     'pending_action_show_more' => 'Toon :count meer',

@@ -523,17 +523,6 @@ class AdminAlertService
         return $fixed === null || version_compare($version, $fixed, '<');
     }
 
-    /**
-     * Every PHP2Shell stopgap is on: upload progress off, no PHP memory limit to bail out on and,
-     * on PHP 8.5, no fatal error backtraces.
-     */
-    public static function phpIsMitigated(): bool
-    {
-        return ! filter_var(ini_get('session.upload_progress.enabled'), FILTER_VALIDATE_BOOLEAN)
-            && (string) ini_get('memory_limit') === '-1'
-            && (PHP_VERSION_ID < 80500 || ! filter_var(ini_get('fatal_error_backtraces'), FILTER_VALIDATE_BOOLEAN));
-    }
-
     private static function schedulerIsStalled(): bool
     {
         return self::$schedulerStalled ??= SchedulerHealth::isStalled();
@@ -672,18 +661,10 @@ class AdminAlertService
             return null;
         }
 
-        $title = trans_choice("messages.admin_alert_{$type}", $count, ['count' => $count]);
-
-        // Said in the title, which the dashboard's chips show (a subtitle there is only a tooltip):
-        // it is how an operator checks deploy/php-fpm.conf's stopgap took after a deploy.
-        if ($type === 'php_vulnerable' && self::phpIsMitigated()) {
-            $title .= ' - '.__('messages.admin_alert_php_mitigated');
-        }
-
         return [
             'type' => $type,
             'count' => $count,
-            'title' => $title,
+            'title' => trans_choice("messages.admin_alert_{$type}", $count, ['count' => $count]),
             'subtitle' => $subtitle,
             'url' => route($name, $params).$fragment,
             'color' => $color,

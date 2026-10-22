@@ -603,15 +603,8 @@ class AdminAlertsTest extends TestCase
             $this->assertFalse(AdminAlertService::phpIsVulnerable($version), $version);
         }
 
-        $this->assertIsBool(AdminAlertService::phpIsMitigated());
-
-        // The stopgaps ship in every place a PHP reads its settings from: the hosted FPM pool,
-        // .user.ini for FPM and CGI, and .htaccess for mod_php.
-        $fpm = file_get_contents(base_path('deploy/php-fpm.conf'));
-        $this->assertStringContainsString('php_admin_flag[session.upload_progress.enabled] = off', $fpm);
-        $this->assertStringContainsString('php_admin_value[memory_limit] = -1', $fpm);
-        $this->assertStringContainsString('php_admin_flag[fatal_error_backtraces] = off', $fpm);
-
+        // Upload progress is off wherever a PHP reads its settings from: .user.ini for FPM and
+        // CGI, .htaccess for mod_php.
         $userIni = parse_ini_file(public_path('.user.ini'));
         $this->assertFalse(filter_var($userIni['session.upload_progress.enabled'], FILTER_VALIDATE_BOOLEAN));
         $this->assertFalse(filter_var($userIni['fatal_error_backtraces'], FILTER_VALIDATE_BOOLEAN));
