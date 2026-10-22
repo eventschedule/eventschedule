@@ -209,6 +209,7 @@ class AppServiceProvider extends ServiceProvider
             \App\Utils\PlatformCurrency::flush();
             \App\Utils\PlatformPricing::flush();
             \App\Models\LegalDocument::flush();
+            \App\Models\CustomDomainSetting::flush();
         });
 
         // Unsubscribe limiters keyed on the TOKEN, not the IP.

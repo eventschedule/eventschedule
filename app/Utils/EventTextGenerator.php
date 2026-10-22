@@ -36,8 +36,8 @@ class EventTextGenerator
             $lang = $forceEnglish ? 'en' : strtolower($role->language_code ?? 'en');
             $message = trans('messages.want_to_see_your_event_here', [], $lang);
 
-            if ($role->custom_domain && ($role->custom_domain_mode !== 'direct' || $role->custom_domain_status === 'active')) {
-                $url = $role->custom_domain.'/request';
+            if ($domain = $role->handedOutCustomDomain()) {
+                $url = $domain.'/request';
             } else {
                 $url = route('role.request', ['subdomain' => $role->subdomain]);
             }

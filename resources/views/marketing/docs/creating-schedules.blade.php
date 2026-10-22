@@ -954,6 +954,9 @@
         </ol>
         <p class="text-gray-600 dark:text-gray-300 mb-6">While a Direct domain is being set up, a status sits beside the Schedule URL: <strong class="text-gray-900 dark:text-white">Setting up...</strong>, then nothing once it is live, or <strong class="text-gray-900 dark:text-white">Setup failed</strong>. Until the domain is live, the address shown at the top of the form and of the schedule's pages stays the eventschedule.com one, because that is the one that answers.</p>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Once the domain is live, the form asks which address is the <strong class="text-gray-900 dark:text-white">Main address</strong>: your domain (the default) or your <code class="doc-inline-code">eventschedule.com</code> subdomain. Both keep serving every page. The main address is the one search engines are told to index, the one listed in the sitemap, and the one used in emails, shared links, the QR code and the address shown at the top of the form, where a line underneath names the other one. Choose the subdomain if it already ranks well in search results and you want to keep that.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Search results take a few weeks to move to a new main address, and switching back and forth starts that again each time. Redirect mode, below, sends the strongest signal for the subdomain, if you would rather your domain only forwarded to it.</p>
+
         <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Redirect Mode (Cloudflare)</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Your custom domain redirects visitors to your <code class="doc-inline-code">eventschedule.com</code> URL. Use this if your domain's DNS is managed by Cloudflare. Cloudflare's free plan is sufficient.

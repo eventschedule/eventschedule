@@ -393,7 +393,7 @@
             // roots at the schedule rather than at marketing_url(). Google discards a breadcrumb
             // whose first item sits on a different domain, which is what the marketing root was on
             // every custom domain. Same predicate the canonical uses, so the two always agree.
-            $breadcrumbRootsAtSchedule = $role->servesOnCustomDomain();
+            $breadcrumbRootsAtSchedule = $role->mainAddressIsCustomDomain();
             // Crumbs in order; positions are numbered from the list, so dropping the marketing
             // root on a custom domain cannot leave a gap or a duplicate.
             $breadcrumbCrumbs = [];

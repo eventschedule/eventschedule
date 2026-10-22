@@ -930,9 +930,10 @@ if (! function_exists('sitemap_url')) {
     /**
      * The sitemap that applies to the host the current request arrived on.
      *
-     * A custom domain gets its own. The global sitemap may not carry a third-party host's URLs -
-     * Google reports every one as "URL not allowed" and discards it - so pointing a custom domain
-     * at the global sitemap advertises one containing none of that host's pages. Every other host
+     * A custom domain that is its schedule's main address gets its own. The global sitemap may not
+     * carry a third-party host's URLs - Google reports every one as "URL not allowed" and discards
+     * it - so pointing such a domain at the global sitemap advertises one containing none of that
+     * host's pages. Every other host
      * keeps the global sitemap, which on tenant subdomains is also the cross-submission grant that
      * keeps their URLs legal inside it.
      *
@@ -941,7 +942,12 @@ if (! function_exists('sitemap_url')) {
      */
     function sitemap_url(): string
     {
-        $customDomainHost = request()->attributes->get('custom_domain_host');
+        // A custom domain whose schedule made its subdomain the main address has no sitemap of its
+        // own (SitemapController::schedule() answers for the canonical host only): its pages are
+        // in the global sitemap, at subdomain URLs, so it points there like the subdomain does.
+        $customDomainHost = request()->attributes->get('custom_domain_subdomain_is_main')
+            ? null
+            : request()->attributes->get('custom_domain_host');
         $base = $customDomainHost ? 'https://'.$customDomainHost : config('app.url');
 
         // Relative form, so the path stays tied to the route definition. It ignores the route's

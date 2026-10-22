@@ -6746,6 +6746,17 @@ class RoleController extends Controller
             Aurora::saveFromRequest($role, $request);
         }
 
+        // The main address of a schedule served directly on its own domain, which lives beside
+        // the schedule (custom_domain_settings) as Aurora's settings do. Only on a save that drew
+        // the choice, for Direct mode, and on Enterprise, where every custom domain field is
+        // frozen otherwise (the guard above).
+        if ($request->boolean('custom_domain_main_address_submitted')
+            && $role->isEnterprise()
+            && $role->custom_domain_mode === 'direct'
+            && in_array($request->input('custom_domain_main_address'), \App\Models\CustomDomainSetting::VALUES, true)) {
+            \App\Models\CustomDomainSetting::store($role, $request->input('custom_domain_main_address'));
+        }
+
         // A venue map that has not had its first pass: note its venues' addresses now, and give
         // them a head start from the queue (a dozen or so, a second apart). The timer does the
         // rest at four a minute, so a map of thirty venues is on the page in about five minutes.

@@ -80,7 +80,7 @@
                 <tbody>
                     <tr>
                         <td>Canonical URL and sitemap</td>
-                        <td>The custom domain becomes the SEO canonical for that schedule's guest portal, and the schedule serves its own <code class="doc-inline-code">/sitemap.xml</code> on that host. Your platform's global sitemap never lists custom-domain URLs. In Redirect mode the subdomain stays canonical, because the custom domain only 301s away from itself.</td>
+                        <td>The custom domain becomes the SEO canonical for that schedule's guest portal, and the schedule serves its own <code class="doc-inline-code">/sitemap.xml</code> on that host. Your platform's global sitemap never lists custom-domain URLs. An owner can instead keep the subdomain as the main address: the custom domain still serves every page, while the canonical, structured data, emails and shared links name the subdomain, and its pages are listed in the global sitemap. In Redirect mode the subdomain stays canonical, because the custom domain only 301s away from itself.</td>
                     </tr>
                     <tr>
                         <td>Ads</td>
@@ -249,7 +249,7 @@
                     <tr>
                         <td><code class="doc-inline-code">active</code></td>
                         <td>Active</td>
-                        <td>Live. This is the only state in which the custom domain serves the schedule and becomes its canonical URL.</td>
+                        <td>Live. This is the only state in which the custom domain serves the schedule, and becomes its canonical URL unless the owner keeps the subdomain as the main address.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">failed</code></td>

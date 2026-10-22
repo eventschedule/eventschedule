@@ -199,6 +199,9 @@ class RoleUpdateRequest extends FormRequest
                     }
                 },
             ],
+            // Which address a directly served domain's schedule calls its main one
+            // (custom_domain_settings, saved by RoleController::update()).
+            'custom_domain_main_address' => ['nullable', 'string', 'in:'.implode(',', \App\Models\CustomDomainSetting::VALUES)],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
             // What `roles.background` can hold: anything else used to reach the ENUM and fail the

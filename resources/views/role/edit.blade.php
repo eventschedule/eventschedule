@@ -818,7 +818,9 @@
     </x-slot>
 
     @php
-        $scheduleUrl = $role->custom_domain ?: $role->getGuestUrl();
+        // The address the schedule hands out: its domain only when that is the main address, and
+        // never one that is still pending or failed.
+        $scheduleUrl = $role->getGuestUrl(true);
         // Split by hand: parse_url() mangles a non-ASCII host on macOS.
         $scheduleLinkText = $scheduleUrl ? \App\Utils\UrlUtils::clean($scheduleUrl) : '';
         $scheduleLinkSlash = strpos($scheduleLinkText, '/');
@@ -4594,7 +4596,7 @@
                         <div class="mb-6" id="url-display">
                             <x-input-label :value="__('messages.schedule_url')" />
                             <p class="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                                <x-link href="{{ $scheduleUrl }}" target="_blank" class="min-w-0 break-all">
+                                <x-link href="{{ $scheduleUrl }}" target="_blank" class="min-w-0 break-all" dir="ltr">
                                     {{ \App\Utils\UrlUtils::clean($scheduleUrl) }}
                                 </x-link>
                                 <button type="button" data-action="copy-role-url" data-setup-share="link" class="event-icon-btn flex-shrink-0" title="{{ __('messages.copy_url') }}">
@@ -4621,10 +4623,22 @@
                                 <button type="button" data-action="toggle-subdomain-edit" class="event-link flex-shrink-0">{{ __('messages.edit') }}</button>
                                 @endif
                             </p>
+                            {{-- The address above is what Copy, View and the QR code hand out; when the
+                                 owner made the subdomain the main address, the domain still works. --}}
+                            @if ($role->servesOnCustomDomain() && ! $role->mainAddressIsCustomDomain())
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_also_at') }} <bdi dir="ltr">{{ \App\Utils\UrlUtils::clean($role->custom_domain) }}</bdi></p>
+                            @endif
                         </div>
                         @if (!is_demo_mode())
-                        <div class="hidden" id="subdomain-edit" data-domain="{{ old('custom_domain', $role->custom_domain) }}" data-mode="{{ old('custom_domain_mode', $role->custom_domain_mode) ?: 'subdomain' }}" x-data="{ domain: $el.dataset.domain, mode: $el.dataset.mode }">
-                            <input type="hidden" name="custom_domain_mode" :value="mode === 'subdomain' ? '' : mode">
+                        {{-- Plain script, not Alpine or Vue: the schedule form is server-rendered and wired by
+                             element id (see partials/form-kit-script), and a Vue mount here would compile
+                             the block as a template. syncDomainEditor() shows each part for the mode, the
+                             domain typed and the main address chosen ([data-domain-part]). --}}
+                        @php
+                            $domainMode = old('custom_domain_mode', $role->custom_domain_mode) ?: 'subdomain';
+                        @endphp
+                        <div class="hidden" id="subdomain-edit">
+                            <input type="hidden" name="custom_domain_mode" id="custom_domain_mode" value="{{ $domainMode === 'subdomain' ? '' : $domainMode }}">
 
                             {{-- Mode radios (hosted only) --}}
                             @if (config('app.hosted'))
@@ -4633,8 +4647,7 @@
                                 <div class="mt-2 space-y-2">
                                     {{-- Subdomain (always enabled) --}}
                                     <label class="flex items-start gap-3 cursor-pointer">
-                                        <input type="radio" value="subdomain" x-model="mode"
-                                            x-on:change="domain = ''"
+                                        <input type="radio" name="custom_domain_mode_choice" value="subdomain" data-domain-mode {{ $domainMode === 'subdomain' ? 'checked' : '' }}
                                             class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                         <div>
                                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('messages.custom_domain_mode_subdomain') }}</span>
@@ -4643,7 +4656,7 @@
                                     </label>
                                     {{-- Redirect (Enterprise-gated) --}}
                                     <label class="flex items-start gap-3{{ $role->isEnterprise() ? ' cursor-pointer' : '' }}">
-                                        <input type="radio" value="redirect" x-model="mode"
+                                        <input type="radio" name="custom_domain_mode_choice" value="redirect" data-domain-mode {{ $domainMode === 'redirect' ? 'checked' : '' }}
                                             class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                             {{ !$role->isEnterprise() ? 'disabled' : '' }}>
                                         <div>
@@ -4651,7 +4664,7 @@
                                             <p class="text-xs text-gray-500 dark:text-gray-400{{ !$role->isEnterprise() ? ' opacity-50' : '' }}">{{ __('messages.custom_domain_mode_redirect_desc') }}</p>
                                             @if (!$role->isEnterprise())
                                             <div class="text-xs pt-1">
-                                                <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
+                                                <button type="button" data-action="open-modal" data-modal="upgrade-custom-domain"
                                                     class="text-[var(--brand-blue)] hover:underline font-medium">
                                                     {{ __('messages.upgrade_enterprise_custom_domain') }}
                                                 </button>
@@ -4662,7 +4675,7 @@
                                     {{-- Direct (Enterprise-gated, DO config required) --}}
                                     @if (config('services.digitalocean.app_hostname'))
                                     <label class="flex items-start gap-3{{ $role->isEnterprise() ? ' cursor-pointer' : '' }}">
-                                        <input type="radio" value="direct" x-model="mode"
+                                        <input type="radio" name="custom_domain_mode_choice" value="direct" data-domain-mode {{ $domainMode === 'direct' ? 'checked' : '' }}
                                             class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                             {{ !$role->isEnterprise() ? 'disabled' : '' }}>
                                         <div>
@@ -4670,7 +4683,7 @@
                                             <p class="text-xs text-gray-500 dark:text-gray-400{{ !$role->isEnterprise() ? ' opacity-50' : '' }}">{{ __('messages.custom_domain_mode_direct_desc') }}</p>
                                             @if (!$role->isEnterprise())
                                             <div class="text-xs pt-1">
-                                                <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
+                                                <button type="button" data-action="open-modal" data-modal="upgrade-custom-domain"
                                                     class="text-[var(--brand-blue)] hover:underline font-medium">
                                                     {{ __('messages.upgrade_enterprise_custom_domain') }}
                                                 </button>
@@ -4684,16 +4697,16 @@
                             @endif
 
                             {{-- Custom domain (shown for redirect/direct modes) --}}
-                            <div class="mb-6" x-show="mode === 'redirect' || mode === 'direct'" x-cloak>
+                            <div class="mb-6" data-domain-part="custom" hidden>
                                 <x-input-label for="custom_domain" :value="__('messages.custom_domain')" />
                                 @if ($role->isEnterprise())
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
-                                    :value="old('custom_domain', $role->custom_domain)" x-model="domain" />
+                                    :value="old('custom_domain', $role->custom_domain)" />
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
 
                                 {{-- CNAME instructions and status --}}
-                                <div class="mt-3" x-show="domain" x-cloak>
-                                    <div x-show="mode === 'direct'" x-cloak class="mt-3">
+                                <div class="mt-3" data-domain-part="typed" hidden>
+                                    <div data-domain-part="direct" hidden class="mt-3">
                                         @if (config('services.digitalocean.app_hostname'))
                                         <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
 
@@ -4736,21 +4749,52 @@
                                             @endif
                                         </div>
                                         @endif
+
+                                        {{-- Which address is the main one: what search engines, mail and every
+                                             link the app hands out name (Role::mainAddressIsCustomDomain()).
+                                             Both keep serving the pages. --}}
+                                        @php
+                                            $mainAddress = old('custom_domain_main_address', \App\Models\CustomDomainSetting::mainAddressOf($role));
+                                        @endphp
+                                        <fieldset class="mt-5">
+                                            <input type="hidden" name="custom_domain_main_address_submitted" value="1">
+                                            <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.custom_domain_main_address') }}</legend>
+                                            <div class="mt-2 space-y-2">
+                                                <label class="flex items-start gap-3 cursor-pointer min-w-0">
+                                                    <input type="radio" name="custom_domain_main_address" value="custom" data-main-address {{ $mainAddress !== 'subdomain' ? 'checked' : '' }}
+                                                        class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                                    <div class="min-w-0">
+                                                        <bdi dir="ltr" class="block text-sm font-medium text-gray-900 dark:text-white break-all" data-domain-typed>{{ \App\Utils\UrlUtils::clean(old('custom_domain', $role->custom_domain)) }}</bdi>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_main_address_custom_desc') }}</p>
+                                                    </div>
+                                                </label>
+                                                <label class="flex items-start gap-3 cursor-pointer min-w-0">
+                                                    <input type="radio" name="custom_domain_main_address" value="subdomain" data-main-address {{ $mainAddress === 'subdomain' ? 'checked' : '' }}
+                                                        class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                                    <div class="min-w-0">
+                                                        <bdi dir="ltr" class="block text-sm font-medium text-gray-900 dark:text-white break-all">{{ \App\Utils\UrlUtils::clean(route('role.view_guest', ['subdomain' => $role->subdomain])) }}</bdi>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_main_address_subdomain_desc') }}</p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_main_address_help') }}</p>
+                                            <x-input-error class="mt-2" :messages="$errors->get('custom_domain_main_address')" />
+                                        </fieldset>
                                     </div>
                                 </div>
                                 @endif
                             </div>
 
                             {{-- Subdomain/Path field --}}
-                            <div class="mb-6" x-show="mode !== 'direct'" x-cloak>
+                            <div class="mb-6" data-domain-part="subdomain-field">
                                 <x-input-label for="new_subdomain" :value="config('app.hosted') ? __('messages.subdomain') : __('messages.path')" />
                                 <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
-                                    :value="old('new_subdomain', $role->subdomain)" x-bind:required="mode !== 'direct'" minlength="4" maxlength="50"
+                                    :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50"
                                     pattern="[a-z0-9\-]+" data-action="subdomain-sanitize" />
                                 <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
                             </div>
 
-                            <div x-show="mode === 'redirect' || mode === 'direct'" x-cloak class="mb-3">
+                            <div data-domain-part="custom" hidden class="mb-3">
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
                                     <x-link href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-sm">
                                         {{ __('messages.custom_domain_setup_guide') }}
@@ -6518,6 +6562,71 @@ function copyRoleUrl(button) {
         }, 2000);
     }).catch(() => {});
 }
+
+/**
+ * The custom domain editor: which parts show for the mode chosen, the domain typed and the main
+ * address picked. The subdomain field shows unless the domain is served directly as the main
+ * address, because an owner who makes the subdomain main must be able to see and fix it.
+ */
+function syncDomainEditor() {
+    const editor = document.getElementById('subdomain-edit');
+    if (! editor) {
+        return;
+    }
+
+    const checked = editor.querySelector('[data-domain-mode]:checked');
+    const mode = checked ? checked.value : (document.getElementById('custom_domain_mode').value || 'subdomain');
+    const domainInput = document.getElementById('custom_domain');
+    const domain = domainInput ? domainInput.value.trim() : '';
+    const mainChoice = editor.querySelector('[data-main-address]:checked');
+    const subdomainIsMain = mode === 'direct' && mainChoice && mainChoice.value === 'subdomain';
+
+    document.getElementById('custom_domain_mode').value = mode === 'subdomain' ? '' : mode;
+
+    const shown = {
+        custom: mode === 'redirect' || mode === 'direct',
+        typed: domain !== '',
+        direct: mode === 'direct',
+        'subdomain-field': mode !== 'direct' || subdomainIsMain,
+    };
+    editor.querySelectorAll('[data-domain-part]').forEach(function (part) {
+        part.hidden = ! shown[part.dataset.domainPart];
+    });
+
+    const subdomainInput = document.getElementById('new_subdomain');
+    if (subdomainInput) {
+        subdomainInput.required = shown['subdomain-field'];
+    }
+
+    const typed = editor.querySelector('[data-domain-typed]');
+    if (typed) {
+        typed.textContent = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const editor = document.getElementById('subdomain-edit');
+    if (! editor) {
+        return;
+    }
+
+    editor.addEventListener('change', function (e) {
+        // Choosing the subdomain mode drops the domain, as it always has.
+        if (e.target.matches('[data-domain-mode]') && e.target.value === 'subdomain') {
+            const domainInput = document.getElementById('custom_domain');
+            if (domainInput) {
+                domainInput.value = '';
+            }
+        }
+        syncDomainEditor();
+    });
+    editor.addEventListener('input', function (e) {
+        if (e.target.id === 'custom_domain') {
+            syncDomainEditor();
+        }
+    });
+    syncDomainEditor();
+});
 
 function toggleSubdomainEdit() {
     const urlDisplay = document.getElementById('url-display');
@@ -10062,6 +10171,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'toggle-subdomain-edit':
                 toggleSubdomainEdit();
+                break;
+            case 'open-modal':
+                // components/modal listens for this on window.
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: btn.dataset.modal }));
                 break;
             case 'toggle-group-slug':
                 toggleGroupSlugEdit(btn.dataset.groupId);

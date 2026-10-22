@@ -494,7 +494,7 @@
             ['Where pages are served', 'On your domain. The request is matched to your schedule and served by the same routes as before.', 'On your eventschedule.com URL. Cloudflare forwards the request with a 301.'],
             ['HTTPS', 'A certificate is issued for you once the DNS record resolves.', 'Included free through Cloudflare\'s free plan.'],
             ['DNS you add', 'One CNAME record at your registrar.', 'Cloudflare nameservers, two proxied A records, and a 301 forwarding rule.'],
-            ['Canonical URL for search', 'Your domain, once the status reads Active.', 'Your eventschedule.com URL. The redirect points at it, so it stays the address of record.'],
+            ['Canonical URL for search', 'Your domain, once the status reads Active, unless you keep your eventschedule.com URL as the main address.', 'Your eventschedule.com URL. The redirect points at it, so it stays the address of record.'],
         ];
 
         // Direct mode, exactly the four steps the settings panel lists.
@@ -558,7 +558,7 @@
             ],
             [
                 'q' => 'Does a custom domain change how search engines see my schedule?',
-                'a' => 'In Direct mode, yes, and that is the point: once the status reads Active, your domain is the canonical URL for the schedule and its event pages, and the sitemap is generated on your host. Redirect mode is different. It sends a 301 to your eventschedule.com URL, so that URL stays the address of record and the custom domain is a doorway to it.',
+                'a' => 'In Direct mode, yes, and that is the point: once the status reads Active, your domain is the canonical URL for the schedule and its event pages, and the sitemap is generated on your host. You can also keep your eventschedule.com URL as the main address: your domain still serves every page, while search engines, emails and shared links use the eventschedule.com URL. Redirect mode is different. It sends a 301 to your eventschedule.com URL, so that URL stays the address of record and the custom domain is a doorway to it.',
             ],
             [
                 'q' => 'Do emails, calendar feeds and social links use my custom domain?',
@@ -1003,7 +1003,7 @@
                     <div class="es-tilt-inner es-plate-card relative flex h-full flex-col overflow-hidden p-7 lg:p-9">
                         <p class="es-plate-tag mb-4">Search</p>
                         <h3 class="es-plate-ink mb-3 text-2xl font-bold lg:text-3xl">One address, recorded once</h3>
-                        <p class="es-plate-muted mb-6 text-lg leading-relaxed">Two hosts serving the same listings is the classic way to split your own search results. Event Schedule picks one and states it: in Direct mode, once the status is Active, your domain is the canonical URL for the schedule and its events, and the sitemap is generated on your host. In Redirect mode the 301 points at your eventschedule.com URL, so that one stays canonical and your domain is a doorway.</p>
+                        <p class="es-plate-muted mb-6 text-lg leading-relaxed">Two hosts serving the same listings is the classic way to split your own search results. Event Schedule picks one and states it: in Direct mode, once the status is Active, your domain is the canonical URL for the schedule and its events, and the sitemap is generated on your host, unless you choose your eventschedule.com URL as the main address, in which case that URL is the canonical one and your domain keeps serving the pages. In Redirect mode the 301 points at your eventschedule.com URL, so that one stays canonical and your domain is a doorway.</p>
                         <div class="mt-auto flex flex-wrap gap-2">
                             <span class="es-plate-chip">Canonical tag</span>
                             <span class="es-plate-chip">Sitemap</span>

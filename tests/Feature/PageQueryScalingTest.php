@@ -126,7 +126,16 @@ class PageQueryScalingTest extends TestCase
         $this->owner = $this->createOwner();
         $this->admin = $this->createOwner(true);
         $this->venue = $this->createRole($this->owner, 'venue', ['name' => 'Harbor Hall', 'accept_requests' => true]);
-        $this->talent = $this->createRole($this->owner, 'talent', ['name' => 'The Harbor Band']);
+        // Served on its own domain with the subdomain as the main address, so every list that
+        // names one of its events asks which address is main (CustomDomainSetting): once a page.
+        $this->talent = $this->createRole($this->owner, 'talent', [
+            'name' => 'The Harbor Band',
+            'custom_domain' => 'https://harbor-band.test',
+            'custom_domain_host' => 'harbor-band.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ]);
+        \App\Models\CustomDomainSetting::store($this->talent, \App\Models\CustomDomainSetting::SUBDOMAIN);
         $this->curator = $this->createCurator($this->owner, ['name' => 'Harbor Guide']);
 
         $raw = 'testapikey_'.Str::random(24);

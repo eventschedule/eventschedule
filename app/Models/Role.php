@@ -3526,20 +3526,41 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        if ($useCustomDomain && $this->custom_domain) {
-            if ($this->custom_domain_mode !== 'direct' || $this->custom_domain_status === 'active') {
-                return $this->custom_domain;
-            }
+        if ($useCustomDomain && ($domain = $this->handedOutCustomDomain())) {
+            return $domain;
         }
 
         return route('role.view_guest', ['subdomain' => $this->subdomain]);
     }
 
     /**
+     * The custom domain the app hands out for this schedule (mail, shares, the QR code, the admin's
+     * copy button, generated text), or null when it hands out the subdomain. The one rule behind
+     * getGuestUrl(true), Event::getGuestUrl(..., true), EventTextGenerator and the event graphics.
+     *
+     * Redirect mode keeps handing out its domain, which forwards to the subdomain. Direct mode does
+     * once the domain is active, unless the owner made the subdomain the main address
+     * (mainAddressIsCustomDomain()).
+     */
+    public function handedOutCustomDomain(): ?string
+    {
+        if (! $this->custom_domain) {
+            return null;
+        }
+
+        if ($this->custom_domain_mode === 'direct') {
+            return $this->mainAddressIsCustomDomain() ? $this->custom_domain : null;
+        }
+
+        return $this->custom_domain;
+    }
+
+    /**
      * Whether the schedule is served directly on its custom domain (DigitalOcean direct mode,
      * provisioned and active). This is the only mode where the custom domain renders the page
-     * itself, so it is the only mode whose URL should be used as the SEO canonical. Redirect
-     * mode 301s the custom domain to the subdomain, so the subdomain stays canonical there.
+     * itself, so it is the only mode whose URL may be the SEO canonical, and it is, unless the
+     * owner made the subdomain the main address (mainAddressIsCustomDomain()). Redirect mode 301s
+     * the custom domain to the subdomain, so the subdomain stays canonical there.
      */
     public function servesOnCustomDomain(): bool
     {
@@ -3549,13 +3570,27 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
-     * The schedule's canonical guest URL: the custom domain when served directly on it, else the
-     * subdomain route. Passing the strict result as the flag means getGuestUrl's broad gate is
-     * only ever reached in the direct+active case, where both gates agree.
+     * Whether the custom domain is this schedule's MAIN address: served directly on it, and the
+     * owner has not made the subdomain the main one (CustomDomainSetting). servesOnCustomDomain()
+     * still answers where the pages are served, which routing, cookies, allow-lists and gateway
+     * return URLs ask; this answers what the canonical, the sitemaps and every handed-out link name.
+     *
+     * Read once per request for every schedule (CustomDomainSetting::subdomainFirstIds()), and only
+     * reached for one served on an active domain, so a list of a thousand events costs no query.
+     */
+    public function mainAddressIsCustomDomain(): bool
+    {
+        return $this->servesOnCustomDomain()
+            && CustomDomainSetting::mainAddressOf($this) === CustomDomainSetting::CUSTOM;
+    }
+
+    /**
+     * The schedule's canonical guest URL: the custom domain when it is the main address
+     * (mainAddressIsCustomDomain()), else the subdomain route.
      */
     public function getCanonicalUrl()
     {
-        return $this->getGuestUrl($this->servesOnCustomDomain());
+        return $this->getGuestUrl($this->mainAddressIsCustomDomain());
     }
 
     /**

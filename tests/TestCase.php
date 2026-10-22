@@ -55,6 +55,9 @@ abstract class TestCase extends BaseTestCase
         // Memoizes whether scheduled_task_runs exists; RefreshDatabase rebuilds the schema under it.
         \App\Services\ScheduledTaskRecorder::flush();
 
+        // Which schedules made their subdomain the main address, read once per request.
+        \App\Models\CustomDomainSetting::flush();
+
         // N+1 queries, counted in everything this test runs (tests/Support/QueryGuard.php). The
         // handler only records: its return value is ignored and the relation still loads
         // (HasAttributes::getRelationValue), so the app behaves exactly as it does without it.

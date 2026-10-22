@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\CustomDomainSetting;
 use App\Models\Role;
 use Closure;
 use Illuminate\Http\Request;
@@ -10,6 +11,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ResolveCustomDomain
 {
+    /**
+     * What names the page for search engines: the canonical, the hreflang alternates, og:url and
+     * the structured data. Spared the body rewrite when the schedule's main address is its
+     * subdomain, so they keep naming it while every link a visitor follows stays on this host.
+     * Lookaheads, because the attributes come in any order and a JSON-LD script carries a nonce.
+     */
+    private const SEO_PARTS = '#<link\b(?=[^>]*\brel="canonical")[^>]*>'
+        .'|<link\b(?=[^>]*\bhreflang=)[^>]*>'
+        .'|<meta\b(?=[^>]*\bproperty="og:url")[^>]*>'
+        .'|<script\b(?=[^>]*\btype="application/ld\+json")[^>]*>.*?</script>#si';
+
     public function handle(Request $request, Closure $next): Response
     {
         // Only applies in hosted mode
@@ -56,6 +68,12 @@ class ResolveCustomDomain
         $request->attributes->set('custom_domain_host', $host);
         $request->attributes->set('custom_domain_subdomain', $role->subdomain);
 
+        // Whether the owner made the subdomain the main address (Role::mainAddressIsCustomDomain()).
+        // Asked here rather than kept in the cached lookup above, so a change shows on the next
+        // request. sitemap_url() reads it to point this host's crawlers at the global sitemap.
+        $subdomainIsMain = CustomDomainSetting::mainAddressOf($role) === CustomDomainSetting::SUBDOMAIN;
+        $request->attributes->set('custom_domain_subdomain_is_main', $subdomainIsMain);
+
         // Rewrite the host headers so Laravel's subdomain routing matches
         $newHost = $role->subdomain.'.'.$baseDomain;
         $request->headers->set('HOST', $newHost);
@@ -86,17 +104,35 @@ class ResolveCustomDomain
         if ($this->isHtmlResponse($response) && ! $request->attributes->get('skip_body_rewrite')) {
             $content = $response->getContent();
             if ($content) {
+                $kept = [];
+                if ($subdomainIsMain) {
+                    $masked = preg_replace_callback(self::SEO_PARTS, function ($m) use (&$kept) {
+                        $kept[] = $m[0];
+
+                        return "\0es-seo-".(count($kept) - 1)."\0";
+                    }, $content);
+
+                    if ($masked === null) {
+                        // A PCRE limit on an unusual page: rewrite it whole, as for any schedule.
+                        report(new \RuntimeException('ResolveCustomDomain could not mask the SEO tags: '.preg_last_error_msg()));
+                        $kept = [];
+                    } else {
+                        $content = $masked;
+                    }
+                }
+
                 $content = str_replace($subdomainUrl, $customDomainUrl, $content);
 
                 // Also replace protocol-relative and http variants
                 $content = str_replace("http://{$role->subdomain}.{$baseDomain}", $customDomainUrl, $content);
                 $content = str_replace("//{$role->subdomain}.{$baseDomain}", "//{$host}", $content);
 
-                // Canonical, og:url, and hreflang are left as the custom domain
-                // (the body rewrite above already points them at it): when a
-                // schedule has an active custom domain, that domain is the SEO
-                // primary for its guest portal, so self-referential URLs on the
-                // page served here should be the custom domain, not the subdomain.
+                // The canonical, og:url, hreflang and structured data: when the domain is the main
+                // address they name it already (Role::getCanonicalUrl()) or are pointed at it by the
+                // rewrite above; when the subdomain is, they were masked and name the subdomain.
+                if ($kept) {
+                    $content = preg_replace_callback('/\0es-seo-(\d+)\0/', fn ($m) => $kept[(int) $m[1]], $content);
+                }
 
                 $response->setContent($content);
             }

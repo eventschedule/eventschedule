@@ -4047,13 +4047,8 @@ class Event extends Model
             return $role->subdomain == $data['subdomain'];
         });
 
-        if ($role && $role->custom_domain && $useCustomDomain) {
-            if ($role->custom_domain_mode !== 'direct' || $role->custom_domain_status === 'active') {
-                $url = route($routeName, $data, false);
-                $url = $role->custom_domain.$url;
-
-                return $url;
-            }
+        if ($role && $useCustomDomain && ($domain = $role->handedOutCustomDomain())) {
+            return $domain.route($routeName, $data, false);
         }
 
         return route($routeName, $data);
@@ -4155,8 +4150,9 @@ class Event extends Model
      * no schedule for at all. The URL comes from getGuestUrlData(), whose venue/performer slug
      * rule is exactly what that schedule's own calendar links to; the id resolves it either way.
      *
-     * The custom domain is used only when the home schedule is served directly on it (direct +
-     * active); redirect mode keeps the subdomain canonical. getGuestUrl() is deliberately not
+     * The custom domain is used only when it is the home schedule's main address (served directly
+     * on it, and the owner has not made the subdomain the main one: Role::mainAddressIsCustomDomain());
+     * redirect mode keeps the subdomain canonical. getGuestUrl() is deliberately not
      * this: email, graphics and every in-app link go through it and keep their dates, and one
      * that names its schedule keeps that host. One that names no schedule goes to a schedule
      * that serves the event, the same servingHome() choice as above.
@@ -4178,14 +4174,14 @@ class Event extends Model
             : null;
 
         if ($picked && self::servesGuestPage($picked)) {
-            return [$this->buildGuestUrl($data, $picked->servesOnCustomDomain()), $picked];
+            return [$this->buildGuestUrl($data, $picked->mainAddressIsCustomDomain()), $picked];
         }
 
         $home = $this->servingHome();
 
         if ($home) {
             return [
-                $this->buildGuestUrl($this->getGuestUrlData($home->subdomain, $date), $home->servesOnCustomDomain()),
+                $this->buildGuestUrl($this->getGuestUrlData($home->subdomain, $date), $home->mainAddressIsCustomDomain()),
                 $home,
             ];
         }
@@ -4194,7 +4190,7 @@ class Event extends Model
             return [null, null];
         }
 
-        return [$this->buildGuestUrl($data, $picked && $picked->servesOnCustomDomain()), null];
+        return [$this->buildGuestUrl($data, $picked && $picked->mainAddressIsCustomDomain()), null];
     }
 
     /**

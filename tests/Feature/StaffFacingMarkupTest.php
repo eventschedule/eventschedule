@@ -60,9 +60,12 @@ class StaffFacingMarkupTest extends TestCase
             $this->assertStringNotContainsString("$('#".$id."').val('", $html, $id);
         }
         $this->assertStringNotContainsString("var storedBgColors = '", $html);
+        // The custom domain editor is plain script now: its tag carries no expression at all, and
+        // the saved address reaches the page as escaped text and attribute values only.
         $this->assertSame(1, preg_match('/<div[^>]*id="subdomain-edit"[^>]*>/', $html, $tag));
-        $this->assertStringContainsString('$el.dataset.domain', $tag[0]);
-        $this->assertStringNotContainsString("domain: '", $tag[0], 'the saved address is not part of the expression');
+        $this->assertStringNotContainsString('x-data', $tag[0]);
+        $this->assertStringNotContainsString("a.example.org/it's", $html, 'the saved address is escaped wherever it is printed');
+        $this->assertStringContainsString('a.example.org/it&#039;s', $html, 'fixture: the address is on the page');
     }
 
     public function test_the_import_dialog_and_the_seating_report_escape_what_they_are_given(): void

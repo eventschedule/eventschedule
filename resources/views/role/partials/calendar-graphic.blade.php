@@ -96,15 +96,18 @@
             @endforeach
         </div>
 
-        @if($role->website || $role->custom_domain)
+        @php
+            // The address the schedule hands out (Role::handedOutCustomDomain()), the subdomain when a
+            // domain it is served on is not its main address, else its own website.
+            $graphicAddress = $role->handedOutCustomDomain()
+                ?? ($role->servesOnCustomDomain() ? $role->getGuestUrl() : null)
+                ?? $role->website;
+        @endphp
+        @if($graphicAddress)
             <div class="text-center pt-10">
                 <div class="flex items-center justify-center gap-4">
                     <p class="text-white dark:text-gray-100 text-2xl font-bold">
-                        @if ($role->custom_domain)
-                            {{ \App\Utils\UrlUtils::clean($role->custom_domain) }}
-                        @else
-                            {{ \App\Utils\UrlUtils::clean($role->website) }}
-                        @endif
+                        {{ \App\Utils\UrlUtils::clean($graphicAddress) }}
                     </p>
                 </div>
             </div>
