@@ -110,7 +110,7 @@
             ],
             [
                 'q' => 'Can I put my own logo and wording on it?',
-                'a' => 'Yes. Upload a header image and it runs across the top of every graphic at full width. Add header text for a headline and footer text for a sign-off of up to two lines, both of which accept variables like {schedule_name}, {month_name} and {first_event_date}. You can also switch on the date strip over each flyer and give it your own short template instead of the date. The background, the accent colour on the numbered badges and the colour of your header and footer wording all come from your schedule\'s appearance settings, so the graphic already looks like you.',
+                'a' => 'Yes. Upload a header image and it runs across the top of every graphic at full width, and switch on your schedule\'s profile image to put your logo centered below it. Add header text for a headline and footer text for a sign-off of up to two lines, both of which accept variables like {schedule_name}, {month_name} and {first_event_date}. You can also switch on the date strip over each flyer and give it your own short template instead of the date. The background, the accent colour on the numbered badges and the colour of your header and footer wording all come from your schedule\'s appearance settings, so the graphic already looks like you.',
             ],
             [
                 'q' => 'Does the graphic carry Event Schedule branding?',

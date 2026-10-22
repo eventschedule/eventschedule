@@ -123,6 +123,7 @@ class GraphicEmailService
                 'image_size' => $settings['image_size'] ?? null,
                 'overlay_text' => $overlayText,
                 'header_image_url' => $settings['header_image_url'] ?? null,
+                'profile_image' => (bool) ($settings['profile_image'] ?? false),
                 'header_text' => $settings['header_text'] ?? '',
                 'footer_text' => $settings['footer_text'] ?? '',
                 'number_events' => $numberEvents,

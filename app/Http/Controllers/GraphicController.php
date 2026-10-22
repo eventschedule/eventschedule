@@ -120,6 +120,7 @@ class GraphicController extends Controller
             'date_position' => in_array($saved['date_position'] ?? '', ['overlay', 'above'], true) ? $saved['date_position'] : '',
             'overlay_text' => (string) ($saved['overlay_text'] ?? ''),
             'number_events' => (bool) ($saved['number_events'] ?? false),
+            'profile_image' => (bool) ($saved['profile_image'] ?? false),
             'header_text' => (string) ($saved['header_text'] ?? ''),
             'footer_text' => (string) ($saved['footer_text'] ?? ''),
             // The wording the page shows is the wording it previews and saves, as it always has.
@@ -203,6 +204,7 @@ class GraphicController extends Controller
             'max_per_schedule' => 'nullable|integer|min:1|max:20',
             'image_size' => 'nullable|in:auto,square,portrait,story,landscape',
             'overlay_text' => 'nullable|string|max:200',
+            'profile_image' => 'boolean',
             'header_text' => 'nullable|string|max:200',
             'footer_text' => 'nullable|string|max:300',
             'url_include_https' => 'boolean',
@@ -385,6 +387,11 @@ class GraphicController extends Controller
             ? $request->get('footer_text', '')
             : ($graphicSettings['footer_text'] ?? '');
 
+        // Get profile_image from request or settings
+        $profileImage = $request->has('profile_image')
+            ? $request->boolean('profile_image')
+            : (bool) ($graphicSettings['profile_image'] ?? false);
+
         // Get number_events from request or settings
         $numberEvents = $request->has('number_events')
             ? $request->boolean('number_events')
@@ -457,6 +464,7 @@ class GraphicController extends Controller
             'image_size' => $imageSize,
             'overlay_text' => $overlayText,
             'header_image_url' => $graphicSettings['header_image_url'] ?? null,
+            'profile_image' => $profileImage,
             'header_text' => $headerText,
             'footer_text' => $footerText,
             'number_events' => $numberEvents,
@@ -819,6 +827,7 @@ class GraphicController extends Controller
             'image_size' => $imageSize,
             'overlay_text' => $overlayText,
             'header_image_url' => $graphicSettings['header_image_url'] ?? null,
+            'profile_image' => (bool) ($graphicSettings['profile_image'] ?? false),
             'header_text' => $graphicSettings['header_text'] ?? '',
             'footer_text' => $graphicSettings['footer_text'] ?? '',
             'number_events' => $numberEvents,

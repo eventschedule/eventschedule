@@ -233,6 +233,24 @@ class GraphicPageTest extends TestCase
             ->assertStatus(403)->assertJsonPath('error', __('messages.not_authorized'));
     }
 
+    public function test_the_profile_image_switch_is_offered_only_with_a_profile_image_and_survives_a_reload(): void
+    {
+        $owner = $this->createOwner();
+        $without = $this->createRole($owner, 'venue');
+        $with = $this->createRole($owner, 'venue', ['profile_image_url' => 'demo_profile_donuts.jpg']);
+
+        $html = $this->actingAs($owner)->get($this->pageUrl($without))->assertOk()->getContent();
+        $this->assertStringNotContainsString('v-model="s.profile_image"', $html);
+        $this->assertStringContainsString(__('messages.graphic_profile_image_missing'), $html);
+
+        $this->actingAs($owner)->postJson($this->saveUrl($with), ['profile_image' => true])->assertOk();
+
+        $html = $this->actingAs($owner)->get($this->pageUrl($with))->assertOk()->getContent();
+        $this->assertStringContainsString('v-model="s.profile_image"', $html);
+        $this->assertStringNotContainsString(__('messages.graphic_profile_image_missing'), $html);
+        $this->assertTrue($this->bootSettings($html)['profile_image']);
+    }
+
     public function test_nobodys_text_is_compiled_by_the_pages_own_mount(): void
     {
         $owner = $this->createOwner();

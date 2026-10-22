@@ -35,14 +35,31 @@ abstract class AbstractEventDesign
 
     protected const QR_CODE_MARGIN = 2;
 
-    // Header image configuration
-    protected const HEADER_PADDING = 20;
-
+    // Header image configuration. The header runs edge to edge from the top of the canvas;
+    // $headerHeight is everything above the content past the usual top MARGIN (the header,
+    // and the profile image with its padding), which is what the designs offset by.
     protected const MAX_HEADER_HEIGHT = 200;
 
     protected int $headerHeight = 0;
 
     protected $headerImageResource = null;
+
+    // Rendered height of the edge-to-edge header (0 without one): the band fitIntoFormat()
+    // must not stretch into the letterbox, since it is picture rather than background.
+    protected int $headerImageHeight = 0;
+
+    // Profile image, centered below the header with padding above and below.
+    protected const PROFILE_IMAGE_MAX_HEIGHT = 120;
+
+    protected const PROFILE_IMAGE_MAX_WIDTH = 360;
+
+    protected const PROFILE_IMAGE_PADDING = 24;
+
+    protected $profileImageResource = null;
+
+    protected int $profileImageWidth = 0;
+
+    protected int $profileImageHeight = 0;
 
     // Footer configuration
     protected const FOOTER_HEIGHT = 70;
@@ -136,8 +153,10 @@ abstract class AbstractEventDesign
         // Calculate dimensions based on design type
         $this->calculateDimensions();
 
-        // Prepare header image (uses totalWidth, adds to totalHeight)
+        // Prepare header image and profile image (use totalWidth, add to totalHeight)
         $this->prepareHeaderImage();
+        $this->prepareProfileImage();
+        $this->reserveTopBand();
 
         // Prepare optional header text band (rendered below image if both present)
         $this->prepareHeaderText();
@@ -165,6 +184,9 @@ abstract class AbstractEventDesign
         if ($this->headerImageResource) {
             imagedestroy($this->headerImageResource);
         }
+        if ($this->profileImageResource) {
+            imagedestroy($this->profileImageResource);
+        }
     }
 
     public function generate(): string
@@ -172,8 +194,9 @@ abstract class AbstractEventDesign
         // Apply background based on role's style
         $this->applyBackground();
 
-        // Render header image after background
+        // Render header image and profile image after background
         $this->renderHeaderImage();
+        $this->renderProfileImage();
 
         // Render header text band (sits below header image, above events)
         $this->renderHeaderText();
@@ -247,9 +270,13 @@ abstract class AbstractEventDesign
         // schedule's gradient/solid/image backdrop with no seam. Re-painting the
         // background at the target size would misalign a gradient/image against the
         // baked-in one. With min-scale exactly one axis is padded, so only one branch
-        // runs; the bands tile the full canvas, so no black shows.
+        // runs; the bands tile the full canvas, so no black shows. An edge-to-edge
+        // header is picture, not background: the edge is read from the first row below
+        // it, and beside it the pad is that row's flat colour (on a gradient, a close
+        // match rather than a seamless one), so the picture is not smeared sideways.
+        $bleed = min($this->headerImageHeight, $srcHeight - 1);
         if ($dstY > 0) {
-            imagecopyresampled($canvas, $native, 0, 0, 0, 0, $targetWidth, $dstY, $srcWidth, 1);
+            imagecopyresampled($canvas, $native, 0, 0, 0, $bleed, $targetWidth, $dstY, $srcWidth, 1);
             $below = $dstY + $drawHeight;
             imagecopyresampled($canvas, $native, 0, $below, 0, $srcHeight - 1, $targetWidth, $targetHeight - $below, $srcWidth, 1);
         }
@@ -257,6 +284,11 @@ abstract class AbstractEventDesign
             imagecopyresampled($canvas, $native, 0, 0, 0, 0, $dstX, $targetHeight, 1, $srcHeight);
             $right = $dstX + $drawWidth;
             imagecopyresampled($canvas, $native, $right, 0, $srcWidth - 1, 0, $targetWidth - $right, $targetHeight, 1, $srcHeight);
+            if ($bleed > 0) {
+                $band = (int) ceil($bleed * $scale);
+                imagecopyresampled($canvas, $native, 0, $dstY, 0, $bleed, $dstX, $band, 1, 1);
+                imagecopyresampled($canvas, $native, $right, $dstY, $srcWidth - 1, $bleed, $targetWidth - $right, $band, 1, 1);
+            }
         }
 
         // Draw the graphic itself, centered.
@@ -313,8 +345,9 @@ abstract class AbstractEventDesign
     }
 
     /**
-     * Prepare header image - fetch and measure before canvas creation
-     * This adds headerHeight to totalHeight after calculateDimensions()
+     * Prepare header image - fetch and measure before canvas creation.
+     * The header runs the full width of the canvas with no padding around it;
+     * reserveTopBand() adds the space it takes to totalHeight.
      */
     protected function prepareHeaderImage(): void
     {
@@ -344,23 +377,17 @@ abstract class AbstractEventDesign
             return;
         }
 
-        // Calculate rendered height (full width, maintain aspect ratio, cap at max)
+        // Full width, aspect ratio kept, capped at the max height (renderHeaderImage()
+        // crops a taller picture rather than squashing it).
         $srcWidth = imagesx($this->headerImageResource);
         $srcHeight = imagesy($this->headerImageResource);
 
-        $targetWidth = $this->totalWidth - (self::MARGIN * 2);
-        $scaleFactor = $targetWidth / $srcWidth;
-        $targetHeight = (int) ($srcHeight * $scaleFactor);
-
-        // Store the header height (including padding below header)
-        $this->headerHeight = min($targetHeight, self::MAX_HEADER_HEIGHT) + self::HEADER_PADDING;
-
-        // Add header height to total canvas height
-        $this->totalHeight += $this->headerHeight;
+        $this->headerImageHeight = max(1, min((int) ($srcHeight * $this->totalWidth / $srcWidth), self::MAX_HEADER_HEIGHT));
     }
 
     /**
-     * Render header image onto the canvas
+     * Render header image onto the canvas, edge to edge from the top. A picture taller
+     * than the cap is cropped around its middle, never squashed.
      */
     protected function renderHeaderImage(): void
     {
@@ -371,23 +398,92 @@ abstract class AbstractEventDesign
         $srcWidth = imagesx($this->headerImageResource);
         $srcHeight = imagesy($this->headerImageResource);
 
-        $targetWidth = $this->totalWidth - (self::MARGIN * 2);
-        $scaleFactor = $targetWidth / $srcWidth;
-        $targetHeight = min((int) ($srcHeight * $scaleFactor), self::MAX_HEADER_HEIGHT);
-
-        // Position at top with margin
-        $x = self::MARGIN;
-        $y = self::MARGIN;
+        // Under the cap the whole picture is used; over it, the middle band that fills the cap.
+        $cropHeight = (int) ($srcHeight * $this->totalWidth / $srcWidth) <= self::MAX_HEADER_HEIGHT
+            ? $srcHeight
+            : min($srcHeight, max(1, (int) round($this->headerImageHeight * $srcWidth / $this->totalWidth)));
+        $srcY = (int) (($srcHeight - $cropHeight) / 2);
 
         imagecopyresampled(
             $this->im, $this->headerImageResource,
-            $x, $y, 0, 0,
-            $targetWidth, $targetHeight,
-            $srcWidth, $srcHeight
+            0, 0, 0, $srcY,
+            $this->totalWidth, $this->headerImageHeight,
+            $srcWidth, $cropHeight
         );
 
         imagedestroy($this->headerImageResource);
         $this->headerImageResource = null;
+    }
+
+    /**
+     * Prepare the schedule's profile image (option 'profile_image'), fetched and measured
+     * before canvas creation. It is contain-scaled, so a wide logo keeps its shape.
+     */
+    protected function prepareProfileImage(): void
+    {
+        if (! $this->getOption('profile_image')) {
+            return;
+        }
+
+        $url = $this->role->getProfileImageUrl(ImageUtils::VARIANT_WIDTH);
+        if ($url === '') {
+            return;
+        }
+
+        $imageData = $this->fetchImageData($url);
+        if (! $imageData) {
+            return;
+        }
+
+        $this->profileImageResource = $this->safeImageCreateFromString($imageData);
+        if (! $this->profileImageResource) {
+            return;
+        }
+
+        $srcWidth = imagesx($this->profileImageResource);
+        $srcHeight = imagesy($this->profileImageResource);
+        $maxWidth = min(self::PROFILE_IMAGE_MAX_WIDTH, $this->totalWidth - (self::MARGIN * 2));
+        $scale = min($maxWidth / $srcWidth, self::PROFILE_IMAGE_MAX_HEIGHT / $srcHeight);
+
+        $this->profileImageWidth = max(1, (int) round($srcWidth * $scale));
+        $this->profileImageHeight = max(1, (int) round($srcHeight * $scale));
+    }
+
+    /**
+     * Render the profile image, centered, below the header (or at the top without one).
+     */
+    protected function renderProfileImage(): void
+    {
+        if (! $this->profileImageResource) {
+            return;
+        }
+
+        imagecopyresampled(
+            $this->im, $this->profileImageResource,
+            (int) (($this->totalWidth - $this->profileImageWidth) / 2), $this->headerImageHeight + self::PROFILE_IMAGE_PADDING,
+            0, 0,
+            $this->profileImageWidth, $this->profileImageHeight,
+            imagesx($this->profileImageResource), imagesy($this->profileImageResource)
+        );
+
+        imagedestroy($this->profileImageResource);
+        $this->profileImageResource = null;
+    }
+
+    /**
+     * Reserve the space the header and profile image take above the content. The content
+     * starts at MARGIN + headerHeight: past the header, the usual top margin follows it,
+     * and a profile image brings its own padding above and below instead.
+     */
+    protected function reserveTopBand(): void
+    {
+        $top = $this->headerImageHeight;
+        $top += $this->profileImageResource
+            ? (self::PROFILE_IMAGE_PADDING * 2) + $this->profileImageHeight
+            : self::MARGIN;
+
+        $this->headerHeight = $top - self::MARGIN;
+        $this->totalHeight += $this->headerHeight;
     }
 
     /**

@@ -619,6 +619,7 @@
             'settings' => $settings,
             'defaultTemplate' => $defaultTemplate,
             'headerUrl' => $headerImagePreviewUrl,
+            'hasProfile' => (bool) $role->profile_image_url,
             'canEdit' => $canEdit,
             'enterprise' => (bool) $isEnterprise,
             'aiReady' => (bool) $aiReady,
@@ -676,6 +677,7 @@
                 'none' => __('messages.graphic_none'),
                 'banner' => __('messages.graphic_sum_banner'),
                 'headline' => __('messages.graphic_sum_headline'),
+                'profile' => __('messages.graphic_sum_profile'),
                 'signoff' => __('messages.graphic_sum_signoff'),
                 'default' => __('messages.graphic_sum_default'),
                 'on_list' => __('messages.graphic_sum_on_list'),
@@ -899,6 +901,19 @@
                             <p class="gfx-error" v-if="header.error" role="alert" v-text="header.error"></p>
                             <p class="gfx-hint">{{ __('messages.graphic_header_image_help') }} <span v-if="saved.enabled && enterprise">{{ __('messages.graphic_header_image_email') }}</span></p>
                         </div>
+                        @if ($role->profile_image_url)
+                        <div class="gfx-field">
+                            <div class="gfx-switch">
+                                <x-toggle name="profile_image" :label="__('messages.graphic_profile_image')" v-model="s.profile_image" />
+                            </div>
+                            <p class="gfx-hint">{{ __('messages.graphic_profile_image_help') }}</p>
+                        </div>
+                        @else
+                        <div class="gfx-field">
+                            <span class="gfx-label">{{ __('messages.profile_image') }}</span>
+                            <p class="gfx-hint">{{ __('messages.graphic_profile_image_missing') }}@if ($canEdit) <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#profile_image_tile">{{ __('messages.edit_schedule') }}</a>@endif</p>
+                        </div>
+                        @endif
                         <div class="gfx-field">
                             <label class="gfx-label" for="header_text">{{ __('messages.graphic_headline') }}</label>
                             <input type="text" id="header_text" v-model="s.header_text" maxlength="200" dir="{{ $contentDir }}" placeholder="{{ __('messages.graphic_header_text_placeholder') }}">
@@ -1307,7 +1322,7 @@
             look: ['layout', 'image_size', 'max_per_row'],
             events: ['event_count', 'max_per_schedule', 'exclude_recurring'],
             flyers: ['date_position', 'overlay_text', 'number_events'],
-            header: ['header_text', 'footer_text'],
+            header: ['profile_image', 'header_text', 'footer_text'],
             caption: ['text_template', 'text_show_all', 'force_english', 'url_include_https', 'url_include_id', 'ai_prompt'],
             email: ['enabled', 'frequency', 'send_days', 'send_day', 'send_hour', 'recipient_emails'],
         };
@@ -1373,7 +1388,7 @@
                 imageKey: function () {
                     var s = this.s;
                     return JSON.stringify([s.layout, s.image_size, this.flyerOptions ? [s.date_position, s.max_per_row, s.date_position ? s.overlay_text : ''] : 0, s.number_events,
-                        s.header_text, s.footer_text, s.event_count, s.max_per_schedule, s.exclude_recurring, s.force_english, this.header.url]);
+                        s.header_text, s.footer_text, s.event_count, s.max_per_schedule, s.exclude_recurring, s.force_english, this.header.url, s.profile_image]);
                 },
                 textKey: function () {
                     var s = this.s;
@@ -1436,6 +1451,7 @@
                     if (! flyers.length) { flyers.push(words.not_used); }
                     var header = [];
                     if (this.header.url) { header.push(words.banner); }
+                    if (s.profile_image && boot.hasProfile) { header.push(header.length ? words.profile : words.profile.charAt(0).toUpperCase() + words.profile.slice(1)); }
                     if (s.header_text) { header.push(header.length ? words.headline : words.headline.charAt(0).toUpperCase() + words.headline.slice(1)); }
                     if (s.footer_text) { header.push(header.length ? words.signoff : words.signoff.charAt(0).toUpperCase() + words.signoff.slice(1)); }
                     var caption = [s.text_template === this.defaultTemplate ? words.default : words.own];
@@ -1496,6 +1512,7 @@
                     if (s.event_count) { q.set('event_count', s.event_count); }
                     if (s.max_per_schedule) { q.set('max_per_schedule', s.max_per_schedule); }
                     if (s.image_size !== 'auto') { q.set('image_size', s.image_size); }
+                    q.set('profile_image', s.profile_image ? '1' : '0');
                     q.set('header_text', s.header_text);
                     q.set('footer_text', s.footer_text);
                     q.set('number_events', s.number_events ? '1' : '0');
@@ -1718,7 +1735,7 @@
                         layout: s.layout, image_size: s.image_size, max_per_row: s.max_per_row ? parseInt(s.max_per_row, 10) : null,
                         event_count: s.event_count ? parseInt(s.event_count, 10) : null, max_per_schedule: s.max_per_schedule ? parseInt(s.max_per_schedule, 10) : null,
                         exclude_recurring: s.exclude_recurring, date_position: s.date_position || null, overlay_text: s.overlay_text, number_events: s.number_events,
-                        header_text: s.header_text, footer_text: s.footer_text, text_template: s.text_template, text_show_all: s.text_show_all,
+                        profile_image: s.profile_image, header_text: s.header_text, footer_text: s.footer_text, text_template: s.text_template, text_show_all: s.text_show_all,
                         force_english: s.force_english, url_include_https: s.url_include_https, url_include_id: s.url_include_id,
                     };
                     // Only what this plan shows is sent: a part that is locked keeps what it holds.

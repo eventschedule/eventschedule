@@ -207,12 +207,16 @@
             Header &amp; Footer Text
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong>Header and footer</strong> row brands the image itself. Its three settings are all optional, and all three are drawn in your schedule's own colors and reading direction.
+            The <strong>Header and footer</strong> row brands the image itself. Its settings are all optional, and the text is drawn in your schedule's own colors and reading direction.
         </p>
         <div class="doc-fields mb-6">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Header Image</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Upload a JPG, PNG, GIF or WebP to run across the top of the graphic. It is scaled to the full width of the image and capped at 200 pixels tall, so a wide, short logo band works better than a tall one. Upload a new file to replace it, or remove it to go back to no header. Unlike the other settings it is saved the moment you choose it, without pressing Save, and the scheduled email uses it from the next send.</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Upload a JPG, PNG, GIF or WebP to run across the top of the graphic, edge to edge with no border around it. It is scaled to the full width of the image and capped at 200 pixels tall; a taller picture is cropped around its middle, so a wide, short band works better than a tall one. Upload a new file to replace it, or remove it to go back to no header. Unlike the other settings it is saved the moment you choose it, without pressing Save, and the scheduled email uses it from the next send.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Profile Image</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Turn on <strong>Show the profile image</strong> to put your schedule's profile image at the top, centered below the header image and above the events, with space above and below it. It keeps its own shape, up to 120 pixels tall and 360 wide; without a header image it sits at the very top. The switch is offered once the schedule has a profile image, which is set in the schedule's settings.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Header Text</h4>
@@ -224,7 +228,7 @@
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Header image and header text work together: the image sits at the top and the text lands directly below it, which gives you a logo with a tagline under it.
+            The pieces stack in order: the header image at the very top, then the profile image, then the header text, then the events. A banner with your logo under it and a tagline below that takes all three.
         </p>
 
         <h3 class="doc-subheading">Schedule Variables</h3>
