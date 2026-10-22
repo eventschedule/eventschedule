@@ -903,7 +903,7 @@ return [
     'sponsors_hidden' => 'Ausgeblendet',
     'venue_map' => 'Karte der Veranstaltungsorte',
     'show_venues_map' => 'Karte der Veranstaltungsorte anzeigen',
-    'show_venues_map_help' => 'Fügt Ihrer Zeitplanseite eine Karte mit den Orten Ihrer Veranstaltungen hinzu. Deren Adressen werden an :provider gesendet, um jede Position zu ermitteln.',
+    'show_venues_map_help' => 'Fügt Ihrer Zeitplanseite eine Karte mit den Orten Ihrer Veranstaltungen hinzu.',
     'venues_map_open' => 'Karte beim Aufruf öffnen',
     'venues_map_open_help' => 'Nur auf größeren Bildschirmen und nur für Besucher, die Cookies für „Marketing und eingebettete Inhalte“ erlaubt haben. Auf dem Handy ist die Karte zu Beginn immer geschlossen.',
     'venue_map_starts_open' => 'Zu Beginn geöffnet',

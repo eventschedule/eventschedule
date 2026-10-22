@@ -153,7 +153,7 @@ return [
     'sponsors_hidden' => 'Hidden',
     'venue_map' => 'Venue map',
     'show_venues_map' => 'Show a map of venues',
-    'show_venues_map_help' => 'Adds a map of the venues of your events to your schedule page. Their addresses are sent to :provider to find each position.',
+    'show_venues_map_help' => 'Adds a map of the venues of your events to your schedule page.',
     'venues_map_open' => 'Open the map on arrival',
     'venues_map_open_help' => 'Larger screens only, and only for visitors who have allowed cookies for "Marketing and embedded content". On a phone the map always starts closed.',
     'venue_map_starts_open' => 'Starts open',

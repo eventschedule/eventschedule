@@ -154,7 +154,7 @@ return [
     'sponsors_hidden' => 'Peidetud',
     'venue_map' => 'Toimumiskohtade kaart',
     'show_venues_map' => 'Kuva toimumiskohtade kaart',
-    'show_venues_map_help' => 'Lisab teie ajakava lehele kaardi teie sündmuste toimumiskohtadega. Nende aadressid saadetakse teenusele :provider, et leida iga koha asukoht.',
+    'show_venues_map_help' => 'Lisab teie ajakava lehele kaardi teie sündmuste toimumiskohtadega.',
     'venues_map_open' => 'Ava kaart lehele saabumisel',
     'venues_map_open_help' => 'Ainult suurematel ekraanidel ja ainult külastajatele, kes on lubanud küpsised kategoorias „Turundus ja manustatud sisu“. Telefonis on kaart alguses alati suletud.',
     'venue_map_starts_open' => 'Alguses avatud',

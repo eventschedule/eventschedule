@@ -153,7 +153,7 @@ return [
     'sponsors_hidden' => 'Nascosti',
     'venue_map' => 'Mappa dei luoghi',
     'show_venues_map' => 'Mostra una mappa dei luoghi',
-    'show_venues_map_help' => 'Aggiunge alla pagina del tuo programma una mappa dei luoghi dei tuoi eventi. I loro indirizzi vengono inviati a :provider per trovare ogni posizione.',
+    'show_venues_map_help' => 'Aggiunge alla pagina del tuo programma una mappa dei luoghi dei tuoi eventi.',
     'venues_map_open' => 'Apri la mappa all\'arrivo',
     'venues_map_open_help' => 'Solo su schermi grandi e solo per i visitatori che hanno consentito i cookie di «Marketing e contenuti incorporati». Su un telefono la mappa parte sempre chiusa.',
     'venue_map_starts_open' => 'Parte aperta',

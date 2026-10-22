@@ -153,7 +153,7 @@ return [
     'sponsors_hidden' => 'Ocultos',
     'venue_map' => 'Mapa de locais',
     'show_venues_map' => 'Mostrar um mapa de locais',
-    'show_venues_map_help' => 'Adiciona à página da sua agenda um mapa dos locais dos seus eventos. Os endereços são enviados para :provider para encontrar cada posição.',
+    'show_venues_map_help' => 'Adiciona à página da sua agenda um mapa dos locais dos seus eventos.',
     'venues_map_open' => 'Abrir o mapa à chegada',
     'venues_map_open_help' => 'Apenas em ecrãs maiores e apenas para visitantes que permitiram os cookies de «Marketing e conteúdo incorporado». Num telemóvel o mapa começa sempre fechado.',
     'venue_map_starts_open' => 'Começa aberto',

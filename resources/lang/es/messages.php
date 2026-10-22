@@ -150,7 +150,7 @@ return [
     'sponsors_hidden' => 'Ocultos',
     'venue_map' => 'Mapa de lugares',
     'show_venues_map' => 'Mostrar un mapa de lugares',
-    'show_venues_map_help' => 'Añade a la página de tu horario un mapa con los lugares de tus eventos. Sus direcciones se envían a :provider para encontrar cada posición.',
+    'show_venues_map_help' => 'Añade a la página de tu horario un mapa con los lugares de tus eventos.',
     'venues_map_open' => 'Abrir el mapa al llegar',
     'venues_map_open_help' => 'Solo en pantallas grandes y solo para visitantes que han permitido las cookies de «Marketing y contenido incrustado». En el móvil el mapa siempre empieza cerrado.',
     'venue_map_starts_open' => 'Empieza abierto',

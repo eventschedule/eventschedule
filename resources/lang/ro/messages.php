@@ -154,7 +154,7 @@ return [
     'sponsors_hidden' => 'Ascunși',
     'venue_map' => 'Harta locațiilor',
     'show_venues_map' => 'Afișează o hartă a locațiilor',
-    'show_venues_map_help' => 'Adaugă pe pagina programului tău o hartă cu locațiile evenimentelor tale. Adresele lor sunt trimise către :provider pentru a găsi fiecare poziție.',
+    'show_venues_map_help' => 'Adaugă pe pagina programului tău o hartă cu locațiile evenimentelor tale.',
     'venues_map_open' => 'Deschide harta la sosire',
     'venues_map_open_help' => 'Doar pe ecrane mai mari și doar pentru vizitatorii care au permis cookie-urile pentru „Marketing și conținut încorporat”. Pe telefon harta pornește întotdeauna închisă.',
     'venue_map_starts_open' => 'Pornește deschisă',

@@ -211,7 +211,7 @@ class VenueMapPageTest extends TestCase
         $this->assertMatchesRegularExpression('/<div id="page-tab-map" class="event-subrow-body[^"]*"[^>]* hidden>/', $html, 'the pane starts closed');
         $this->assertStringContainsString('data-summary="page:map"', $html);
         $this->assertMatchesRegularExpression('/<input type="checkbox"[^>]*name="show_venues_map"/', $html);
-        $this->assertStringContainsString('lookup.test', $html, 'the switch says where the addresses go');
+        $this->assertStringNotContainsString('lookup.test', $html, 'the switch does not name the search: the privacy policy does');
 
         $this->assertStringNotContainsString('id="page-tab-map"', $form($venue), 'a venue schedule is one place');
 

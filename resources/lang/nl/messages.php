@@ -153,7 +153,7 @@ return [
     'sponsors_hidden' => 'Verborgen',
     'venue_map' => 'Locatiekaart',
     'show_venues_map' => 'Een kaart met locaties tonen',
-    'show_venues_map_help' => 'Voegt aan uw schemapagina een kaart toe met de locaties van uw evenementen. Hun adressen worden naar :provider gestuurd om elke positie te vinden.',
+    'show_venues_map_help' => 'Voegt aan uw schemapagina een kaart toe met de locaties van uw evenementen.',
     'venues_map_open' => 'De kaart openen bij aankomst',
     'venues_map_open_help' => 'Alleen op grotere schermen en alleen voor bezoekers die cookies voor "Marketing en ingesloten inhoud" hebben toegestaan. Op een telefoon begint de kaart altijd gesloten.',
     'venue_map_starts_open' => 'Begint open',

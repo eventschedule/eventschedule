@@ -154,7 +154,7 @@ return [
     'sponsors_hidden' => 'Masqués',
     'venue_map' => 'Carte des lieux',
     'show_venues_map' => 'Afficher une carte des lieux',
-    'show_venues_map_help' => 'Ajoute à la page de votre planning une carte des lieux de vos événements. Leurs adresses sont envoyées à :provider pour trouver chaque position.',
+    'show_venues_map_help' => 'Ajoute à la page de votre planning une carte des lieux de vos événements.',
     'venues_map_open' => 'Ouvrir la carte à l\'arrivée',
     'venues_map_open_help' => 'Sur les grands écrans uniquement, et seulement pour les visiteurs qui ont autorisé les cookies « Marketing et contenu intégré ». Sur un téléphone, la carte est toujours fermée au départ.',
     'venue_map_starts_open' => 'Ouverte au départ',

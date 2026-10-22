@@ -3154,7 +3154,7 @@
                             <x-toggle name="show_venues_map"
                                 label="{{ __('messages.show_venues_map') }}"
                                 checked="{{ $venueMapOn }}"
-                                help="{{ __('messages.show_venues_map_help', ['provider' => e(map_lookup()['name'])]) }}" />
+                                help="{{ __('messages.show_venues_map_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('show_venues_map')" />
                         </div>
 
