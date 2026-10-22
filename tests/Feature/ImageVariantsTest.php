@@ -431,6 +431,38 @@ class ImageVariantsTest extends TestCase
         }
     }
 
+    /**
+     * The background's 3840 is a wider picture or nothing: an original that cannot fill it
+     * records the 1920 file again under the wider key, so no copy of the same picture is written
+     * and the guest page, comparing the two names, prints no 2x (partials/guest-background-css).
+     */
+    public function test_the_widest_background_width_is_only_written_when_the_original_is_wider(): void
+    {
+        $this->storeFlyer('background_narrow.png', 1800, 1200);
+        $narrow = ImageUtils::generateStoredVariants('background_narrow.png', ImageUtils::PAGE_VARIANT_WIDTHS);
+
+        $this->assertTrue($narrow[3840]['ok']);
+        $this->assertSame('background_narrow_w1920.webp', $narrow[3840]['filename'], 'the 1920 picture, recorded again');
+        Storage::assertMissing(ImageUtils::storagePathFor('background_narrow_w3840.webp'));
+
+        $this->storeFlyer('background_wide.png', 2600, 1400);
+        $wide = ImageUtils::generateStoredVariants('background_wide.png', ImageUtils::PAGE_VARIANT_WIDTHS);
+
+        $this->assertSame('background_wide_w3840.webp', $wide[3840]['filename']);
+        [$width] = $this->variantSize('background_wide_w3840.webp');
+        $this->assertSame(2600, $width, 'never enlarged past the original');
+        [$width] = $this->variantSize('background_wide_w1920.webp');
+        $this->assertSame(1920, $width);
+    }
+
+    public function test_only_the_background_asks_for_the_widest_width(): void
+    {
+        $role = new \App\Models\Role;
+
+        $this->assertSame([960, 1920, 3840], $role->imageVariantWidths('background'));
+        $this->assertSame([960, 1920], $role->imageVariantWidths('header'));
+    }
+
     public function test_the_derivative_is_much_smaller_than_the_original(): void
     {
         $this->storeFlyer('flyer_big.png');
@@ -2050,10 +2082,12 @@ class ImageVariantsTest extends TestCase
             ['w960' => 'header_abc_w960.webp', 'w1920' => 'header_abc_w1920.webp', 'src' => ['w' => 2400, 'h' => 1200]],
             $fresh->header_image_variants
         );
+        // The background's widest width holds the 1920 file again: the original cannot fill it.
         $this->assertVariants(
-            ['w960' => 'background_abc_w960.webp', 'w1920' => 'background_abc_w1920.webp', 'src' => ['w' => 1200, 'h' => 1600]],
+            ['w960' => 'background_abc_w960.webp', 'w1920' => 'background_abc_w1920.webp', 'w3840' => 'background_abc_w1920.webp', 'src' => ['w' => 1200, 'h' => 1600]],
             $fresh->background_image_variants
         );
+        Storage::assertMissing('public/background_abc_w3840.webp');
         $this->assertNull($fresh->image_variants, 'The profile slot is not touched');
 
         $this->assertSame([960, 480, IMAGETYPE_WEBP], $this->variantSize('header_abc_w960.webp'));
@@ -2185,16 +2219,16 @@ class ImageVariantsTest extends TestCase
      */
     public function test_deleting_derivatives_covers_every_width_of_every_slot(): void
     {
-        $this->assertSame([480, 960, 1920], ImageUtils::allVariantWidths());
+        $this->assertSame([480, 960, 1920, 3840], ImageUtils::allVariantWidths());
 
-        foreach ([480, 960, 1920] as $width) {
+        foreach ([480, 960, 1920, 3840] as $width) {
             Storage::put(ImageUtils::storagePathFor("header_abc_w{$width}.webp"), 'webp');
             Storage::put(ImageUtils::storagePathFor("flyer_abc_w{$width}.webp"), 'webp');
         }
 
         ImageUtils::deleteStoredVariants('header_abc.png');
 
-        foreach ([480, 960, 1920] as $width) {
+        foreach ([480, 960, 1920, 3840] as $width) {
             Storage::assertMissing("public/header_abc_w{$width}.webp");
         }
 
@@ -2273,10 +2307,10 @@ class ImageVariantsTest extends TestCase
 
         $fresh = $role->fresh();
         $this->assertStringContainsString('Pass: schedule backgrounds', $output);
-        $this->assertStringContainsString('Target widths: 960px, 1920px WebP', $output);
-        $this->assertStringContainsString('[schedule '.$role->id.' background] background_abc_w960.webp, background_abc_w1920.webp', $output);
+        $this->assertStringContainsString('Target widths: 960px, 1920px, 3840px WebP', $output);
+        $this->assertStringContainsString('[schedule '.$role->id.' background] background_abc_w960.webp, background_abc_w1920.webp'."\n", $output);
         $this->assertVariants(
-            ['w960' => 'background_abc_w960.webp', 'w1920' => 'background_abc_w1920.webp', 'src' => ['w' => 900, 'h' => 1200]],
+            ['w960' => 'background_abc_w960.webp', 'w1920' => 'background_abc_w1920.webp', 'w3840' => 'background_abc_w1920.webp', 'src' => ['w' => 900, 'h' => 1200]],
             $fresh->background_image_variants
         );
         $this->assertNull($fresh->header_image_variants, '--slot=background builds the background only');

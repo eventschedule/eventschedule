@@ -61,6 +61,15 @@ class RoleCreateRequest extends FormRequest
             'custom_domain' => ['nullable', 'string', 'url', 'max:255'],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
+            // What `roles.background` can hold: anything else used to reach the ENUM and fail the
+            // save there. Aurora's own fields go to aurora_settings (App\Utils\Aurora).
+            'background' => ['sometimes', 'string', Rule::in(\App\Models\Role::BACKGROUNDS)],
+            'aurora_palette' => ['nullable', 'string', Rule::in(array_merge(array_keys(\App\Utils\Aurora::PALETTES), \App\Utils\Aurora::SPECIAL_PALETTES))],
+            'aurora_seed' => ['nullable', 'integer', 'min:0', 'max:65535'],
+            'aurora_color1' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'aurora_color2' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'aurora_color3' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'aurora_motion' => ['nullable', 'boolean'],
             'header_image_url' => ['image', 'max:2500'],
             'custom_css' => ['nullable', 'string', 'max:10000'],
             // Must be a plain hex color: it is interpolated into Vue :style expressions on

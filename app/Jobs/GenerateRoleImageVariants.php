@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Role;
+use App\Utils\Aurora;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -44,6 +45,31 @@ class GenerateRoleImageVariants extends GenerateImageVariants
     public function __construct(public int $roleId, public string $profileImage, string $slot = 'default')
     {
         $this->slot = $slot;
+    }
+
+    /**
+     * The variants, then, for a new header, the colours of a schedule whose Aurora matches its
+     * header: sampled from the 960 derivative this run just made rather than from the original
+     * the form had to read (App\Utils\Aurora::refreshHeaderColors()).
+     */
+    public function handle(): void
+    {
+        parent::handle();
+
+        // Swallowed like every failure here: on the `sync` queue this runs inside the save that
+        // changed the header, and a light that keeps its old colours is not worth failing it.
+        // Not when the run handed itself back to the queue to try again: the retry samples.
+        if ($this->job && $this->job->isReleased()) {
+            return;
+        }
+
+        try {
+            if ($this->slot === 'header' && ($role = Role::find($this->roleId))) {
+                Aurora::refreshHeaderColors($role);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     protected function findModel(): ?Model

@@ -1197,3 +1197,113 @@
         --st-pad: 2rem;
     }
 }
+
+{{-- Aurora in the preview: the layer under the drawing of the page, in the preview's own light or
+     dark (the colours ride in on the layer itself, never from the admin's .dark). A new
+     arrangement fades in over the old one. --}}
+#section-style .st-pv > .gp-aurora {
+    z-index: 0;
+}
+#section-style .st-pv > .st-pv-page,
+#section-style .st-pv > .st-pv-fade {
+    position: relative;
+    z-index: 2;
+}
+#section-style .st-pv > .st-pv-fade {
+    position: absolute;
+}
+{{-- The new layer fades in OVER the old one, which stays as it is until it has: fading both at
+     once let the ground show through halfway. --}}
+#section-style .st-pv > .gp-aurora.st-aur-fade-enter-active {
+    z-index: 1;
+    transition: opacity 0.25s;
+}
+#section-style .st-pv > .gp-aurora.st-aur-fade-enter-from {
+    opacity: 0;
+}
+#section-style .st-pv > .gp-aurora.st-aur-fade-leave-active {
+    transition: opacity 0.25s steps(1, end);
+}
+@media (prefers-reduced-motion: reduce) {
+    #section-style .st-pv > .gp-aurora.st-aur-fade-enter-active,
+    #section-style .st-pv > .gp-aurora.st-aur-fade-leave-active {
+        transition: none;
+    }
+}
+
+{{-- Aurora's palettes: a still frame of each, in the arrangement chosen, as wide swatches. --}}
+#section-style .vue-style-aurora {
+    display: block;
+    margin-top: 0.375rem;
+}
+#section-style .st-aur-box {
+    border: 1px solid rgb(var(--ap-border));
+    border-radius: 0.75rem;
+    background: rgb(var(--ap-surface));
+}
+#section-style .st-aur-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.25rem, 1fr));
+    gap: 0.5rem;
+    padding: 0.625rem;
+}
+#section-style button.st-aur-sw {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border: 0;
+    padding: 0;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+    transition: transform 0.12s;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+#section-style button.st-aur-sw:hover {
+    transform: scale(1.05);
+    z-index: 1;
+}
+#section-style button.st-aur-sw.is-on {
+    box-shadow: 0 0 0 2px rgb(var(--ap-surface)), 0 0 0 4px var(--brand-blue);
+    z-index: 1;
+}
+#section-style button.st-aur-sw svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    filter: drop-shadow(0 0 2px rgb(0 0 0 / 0.55));
+}
+#section-style .st-aur-tools {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+#section-style .st-aur-tools button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+#section-style .st-aur-tools button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+#section-style .st-aur-tools svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+{{-- A note that suggests something, in the portal's amber panel. --}}
+#section-style .st-advice {
+    display: flex;
+    gap: 0.625rem;
+    align-items: flex-start;
+    margin-top: 0.75rem;
+}
+#section-style .st-advice svg {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+

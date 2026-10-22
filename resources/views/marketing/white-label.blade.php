@@ -633,7 +633,7 @@
             ],
             [
                 'q' => 'Can I put my own branding in the space?',
-                'a' => 'Yes, and most of it is free: a profile image, a header image, an accent colour, a font, and a solid, gradient or image background. On Pro you can also rename the words on the page with custom labels, add your own banner, and write Custom CSS. AI style generation, which produces a matching set of images, colour and font, is on Enterprise.',
+                'a' => 'Yes, and most of it is free: a profile image, a header image, an accent colour, a font, and an Aurora, solid, gradient or image background. On Pro you can also rename the words on the page with custom labels, add your own banner, and write Custom CSS. AI style generation, which produces a matching set of images, colour and font, is on Enterprise.',
             ],
             [
                 'q' => 'Is a custom domain part of white label?',

@@ -2539,14 +2539,94 @@ class Role extends Model implements MustVerifyEmail
             });
     }
 
+    /** Every value of `roles.background`. Aurora's own settings are in `aurora_settings`. */
+    public const BACKGROUNDS = ['aurora', 'gradient', 'solid', 'image'];
+
     public function hasConfiguredBackground(): bool
     {
         return match ($this->background) {
             'gradient' => filled($this->background_colors),
             'solid' => filled($this->background_color),
             'image' => filled($this->background_image) || filled($this->background_image_url),
+            // Drawn from the schedule's colours, so there is always something to draw.
+            'aurora' => true,
             default => false,
         };
+    }
+
+    /**
+     * Whether the owner's custom CSS styles the page's own background, on `html`, `body` or
+     * `:root`, as marketing/custom-css told Pro owners to do before the background was drawn on
+     * a layer of its own (partials/guest-background). Such a page keeps the old rule on `body`
+     * for a gradient or a picture, so the owner's override still lands; Aurora draws its layer
+     * whatever the CSS says, and the Style tab says so.
+     *
+     * Only for a schedule whose custom CSS is printed at all (the same gate as layouts/app-guest).
+     */
+    public function customCssStylesPageBackground(): bool
+    {
+        $css = (string) $this->custom_css;
+
+        if ($css === '' || ! $this->isPro()) {
+            return false;
+        }
+
+        // Comments out first, so a commented-out rule does not count. Walked, not matched: a
+        // lazy pattern over comments that never close took quadratic time. One left open runs
+        // to the end, as it does in a browser.
+        $plain = '';
+        $at = 0;
+        while (($start = strpos($css, '/*', $at)) !== false) {
+            $plain .= substr($css, $at, $start - $at);
+            $end = strpos($css, '*/', $start + 2);
+            if ($end === false) {
+                $at = strlen($css);
+                break;
+            }
+            $at = $end + 2;
+        }
+        $css = $plain.substr($css, $at);
+
+        // One walk over the text, rule by rule: a selector list that names html, body or :root
+        // anywhere (html body, body.x, .dark body), and a block that sets background or one of
+        // its longhands. Not one pattern over the whole text, which backtracked through a long
+        // selector list for seconds on every view of the page.
+        $at = 0;
+        $length = strlen($css);
+        while ($at < $length && ($open = strpos($css, '{', $at)) !== false) {
+            $selector = substr($css, $at, $open - $at);
+            $selector = substr($selector, max(strrpos($selector, '}') ?: 0, strrpos($selector, ';') ?: 0));
+            $close = strpos($css, '}', $open);
+            $block = substr($css, $open + 1, ($close === false ? $length : $close) - $open - 1);
+
+            // A block that holds rules of its own (@media) is entered rather than read.
+            if (! str_contains($block, '{')
+                && self::selectsThePage($selector)
+                && preg_match('~(?<![\w-])background(?:-[a-z]+)?\s*:~i', $block) === 1) {
+                return true;
+            }
+
+            $at = str_contains($block, '{') ? $open + 1 : ($close === false ? $length : $close + 1);
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether a selector list names the page itself: one of its selectors ENDS on html, body or
+     * :root (html body, .dark body, body.x). "body .card" styles a card, and ".body" a class.
+     */
+    private static function selectsThePage(string $selectors): bool
+    {
+        foreach (explode(',', $selectors) as $selector) {
+            $parts = preg_split('#[\s>+~]+#', trim($selector), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $last = end($parts);
+            if (is_string($last) && preg_match('~^(?:html|body|:root)(?![\w-])~i', $last) === 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /*
@@ -2727,7 +2807,7 @@ class Role extends Model implements MustVerifyEmail
         return [
             'default' => ['profile_image_url', 'image_variants', ImageUtils::VARIANT_WIDTHS],
             'header' => ['header_image_url', 'header_image_variants', ImageUtils::BANNER_VARIANT_WIDTHS],
-            'background' => ['background_image_url', 'background_image_variants', ImageUtils::BANNER_VARIANT_WIDTHS],
+            'background' => ['background_image_url', 'background_image_variants', ImageUtils::PAGE_VARIANT_WIDTHS],
         ];
     }
 
@@ -4382,6 +4462,15 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $value;
+    }
+
+    /**
+     * The schedule's Aurora background settings (App\Utils\Aurora). No row reads as Aurora from
+     * the accent, arranged by the schedule's id, moving.
+     */
+    public function auroraSetting()
+    {
+        return $this->hasOne(AuroraSetting::class)->withDefault(['palette' => 'accent', 'colors' => null, 'seed' => null, 'motion' => true]);
     }
 
     /**

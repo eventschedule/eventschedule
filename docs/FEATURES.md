@@ -38,6 +38,7 @@ All users get these features with no subscription required.
 | Unlimited events and schedules | No cap on event count. Schedules are capped at 50 owned per account on hosted (`RoleController::create()`, `messages.schedule_limit`); selfhost has no cap |
 | Event visibility (Public & Draft) | Publish events publicly or keep them members-only as a Draft; set a per-schedule default for new events |
 | Mobile-optimized, professional design | Responsive layout |
+| Aurora background | Soft drifting lights drawn from the schedule's colors (palettes, Match header, Custom, Shuffle, motion switch); the default for new schedules. No plan check (`App\Utils\Aurora`, `aurora_settings`; `AuroraBackgroundTest`) |
 | Custom schedule URLs | Subdomain-based URLs |
 | Team collaboration (single member) | One team member per schedule |
 | Schedule ownership transfer | Hand a schedule and everything on it to another account (`ScheduleTransferService`). The recipient accepts by signing in as the invited address; `events.user_id` re-points so ticket revenue follows, and on hosted the previous owner's subscription is cancelled at the end of the period already paid for |

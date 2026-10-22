@@ -490,7 +490,7 @@
         // ?layout= overrides it for that frame.
         $travels = [
             ['Every event you publish', 'The frame loads live, so a date you move this afternoon is already right on your site. You never re-paste the tag.'],
-            ['Your schedule\'s own look', 'Background, colours and font come from your Appearance settings. Custom CSS, on Pro, applies inside the frame too.'],
+            ['Your schedule\'s own look', 'Background, colours and font come from your Appearance settings, with an Aurora background held still inside the frame so it never distracts from your own page. Custom CSS, on Pro, applies inside the frame too.'],
             ['Your layout choice', 'Month calendar or list view, whichever your schedule is set to, or pinned per frame with ?layout=.'],
             ['Sub-schedules and their colours', 'Colour-coded on the calendar, and filterable down to one strand with a URL parameter.'],
             ['RSVP and ticket links', 'A click inside the frame opens in a new tab, so your own page is never replaced by an event page.'],

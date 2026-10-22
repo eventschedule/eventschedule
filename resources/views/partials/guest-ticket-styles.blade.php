@@ -45,6 +45,11 @@
             radial-gradient(75% 46% at 10% 0%, rgb(var(--es-glow) / .34), transparent 72%),
             radial-gradient(65% 42% at 100% 100%, rgb(var(--es-glow) / .18), transparent 72%);
     }
+    {{-- A schedule on Aurora carries it onto its tickets: one still frame of the dark lights,
+         where the ticket otherwise has the glow above. Still, because a ticket is read at a door. --}}
+    @if (($themeRole ?? null) && $themeRole->background === 'aurora')
+    .gk-tkpage::before { background: {{ \App\Utils\Aurora::for($themeRole)->staticGradient('dark') }}; }
+    @endif
     .gk-tkpage :focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; border-radius: .375rem; }
     .gk-tk-wrap { display: grid; gap: .875rem; justify-items: start; width: 100%; max-width: 26rem; margin: 0 auto; }
     .gk-tk-wrap > * { min-width: 0; max-width: 100%; }

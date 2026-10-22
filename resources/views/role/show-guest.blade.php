@@ -79,6 +79,8 @@ html[data-es-view="list"] #gp-calendar {
       border: none !important;
       padding: 0 !important;
   }
+  {{-- Only the old background on body reads these (partials/guest-background-legacy, kept for an
+       owner's custom CSS): every other page draws its background on a fixed layer. --}}
   html[data-es-view="list"] body { background-attachment: fixed !important; }
   html[data-es-view="calendar"] body { background-attachment: scroll !important; }
   </style>

@@ -480,7 +480,9 @@ class BackfillImageVariants extends Command
         }
 
         $this->generated++;
-        $this->line("  [{$tag}] ".implode(', ', $written).$moves);
+        // array_unique: a width the original cannot fill records the narrower file again
+        // (ImageUtils::PAGE_VARIANT_WIDTHS), which is one file, not two.
+        $this->line("  [{$tag}] ".implode(', ', array_unique($written)).$moves);
     }
 
     /**

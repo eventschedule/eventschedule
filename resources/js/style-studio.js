@@ -8,7 +8,9 @@ import StyleFontPicker from './components/StyleFontPicker.vue';
 import StyleGradientPicker from './components/StyleGradientPicker.vue';
 import StylePictureWall from './components/StylePictureWall.vue';
 import StyleColorField from './components/StyleColorField.vue';
-import { state, read, readFonts, theme, backgroundCss, headerPicture, cssUrl, bringIntoRoom } from './style/state.js';
+import StyleAurora from './components/StyleAurora.vue';
+import { state, read, readFonts, theme, backgroundCss, headerPicture, cssUrl, bringIntoRoom, auroraConfig } from './style/state.js';
+import * as AuroraEngine from './style/aurora.js';
 
 const ISLANDS = [
     ['.vue-style-preview', StylePreview],
@@ -16,6 +18,7 @@ const ISLANDS = [
     ['.vue-style-gradient', StyleGradientPicker],
     ['.vue-style-wall', StylePictureWall],
     ['.vue-style-color', StyleColorField],
+    ['.vue-style-aurora', StyleAurora],
 ];
 
 function start() {
@@ -98,6 +101,15 @@ function start() {
         state,
         read,
         theme,
+        // Aurora's colours for an accent, a palette and a seed, in one mode: what the browser test
+        // compares with App\Utils\Aurora.
+        aurora: (accent, palette, colors, seed, mode) => {
+            const data = auroraConfig();
+            const sources = AuroraEngine.sources(palette, accent, colors || [], seed, data.palettes, data.compositions.length);
+            const t = AuroraEngine.tokens(sources, AuroraEngine.hex(accent) || '#4e81fa', mode);
+
+            return { ground: AuroraEngine.triplet(t.ground), lights: t.lights.map(AuroraEngine.triplet) };
+        },
         backgroundChip: () => backgroundCss(),
         headerChip: () => {
             const picture = headerPicture();

@@ -35,6 +35,7 @@ use App\Models\SeatingSection;
 use App\Models\SeatingTable;
 use App\Models\Ticket;
 use App\Models\TicketWaitlist;
+use App\Utils\Aurora;
 use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
 use App\Utils\GalleryUtils;
@@ -207,6 +208,16 @@ class BackupService
             $roleData[$field] = $role->getAttributes()[$field] ?? null;
         }
         $roleData['subdomain'] = $role->subdomain;
+        // Aurora lives beside the schedule (aurora_settings). The seed is the one the page draws,
+        // even with no row: without a row it comes from the schedule's id, and a restored schedule
+        // has a new one, which would rearrange its page.
+        $aurora = Aurora::for($role);
+        $roleData['aurora_settings'] = [
+            'palette' => $aurora->palette,
+            'colors' => $role->auroraSetting->colors,
+            'seed' => $aurora->seed,
+            'motion' => $aurora->moves(),
+        ];
 
         if ($includeImages) {
             $this->collectRoleImages($role, $roleData, $imageFiles);
@@ -1794,6 +1805,11 @@ class BackupService
         // "banner" style) so the model's "compact" default doesn't change a restored
         // schedule's appearance.
         $role->header_style = $data['header_style'] ?? null;
+        // `background` is an ENUM: a value this install does not know (a hand-edited file, or a
+        // type added after this release) would fail the INSERT and abort the whole restore.
+        if (! in_array($role->getAttributes()['background'] ?? null, Role::BACKGROUNDS, true)) {
+            $role->background = 'gradient';
+        }
         // Import assigns without validation, so a hand-edited backup could carry any string;
         // keep only a design this install knows, or an over-long value would fail the INSERT
         // and abort the whole restore.
@@ -1875,6 +1891,19 @@ class BackupService
 
         // Attach user as owner
         $role->users()->attach($userId, ['level' => 'owner']);
+
+        // Aurora's palette, arrangement and motion, through the same door the form uses, which
+        // keeps only what it understands.
+        if (is_array($data['aurora_settings'] ?? null)) {
+            $aurora = $data['aurora_settings'];
+            Aurora::saveSettings(
+                $role,
+                is_string($aurora['palette'] ?? null) ? $aurora['palette'] : 'accent',
+                is_string($aurora['colors'] ?? null) ? $aurora['colors'] : null,
+                is_numeric($aurora['seed'] ?? null) ? (int) $aurora['seed'] : null,
+                ! array_key_exists('motion', $aurora) || (bool) $aurora['motion'],
+            );
+        }
 
         return $role;
     }

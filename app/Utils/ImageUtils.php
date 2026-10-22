@@ -184,6 +184,22 @@ class ImageUtils
      */
     public const BANNER_VARIANT_WIDTHS = [960, 1920];
 
+    /**
+     * The background's widths: the banner's two and 3840, which a retina desktop asks for
+     * (Role::imageVariantSlots()). The background covers the whole window, so on a 1440px laptop
+     * at 2x the 1920 derivative was enlarged 1.5x, and the original was never an option: it can
+     * be a 2.5MB PNG.
+     *
+     * The width past 1920 is only ever a WIDER picture. An original that cannot fill it, or one
+     * this process has no memory to resample at that size, records the largest picture it did
+     * make under that width instead (generateStoredVariants()), so the page compares the two
+     * filenames and prints the 2x only when they differ.
+     */
+    public const PAGE_VARIANT_WIDTHS = [960, 1920, 3840];
+
+    /** The widest derivative every slot can afford unmeasured: past it, generateStoredVariants() asks first. */
+    public const UNMEASURED_VARIANT_WIDTH = 1920;
+
     public const VARIANT_QUALITY = 80;
 
     /**
@@ -201,7 +217,7 @@ class ImageUtils
      */
     public static function allVariantWidths(): array
     {
-        $widths = array_values(array_unique(array_merge(self::VARIANT_WIDTHS, self::BANNER_VARIANT_WIDTHS)));
+        $widths = array_values(array_unique(array_merge(self::VARIANT_WIDTHS, self::BANNER_VARIANT_WIDTHS, self::PAGE_VARIANT_WIDTHS)));
         sort($widths);
 
         return $widths;
@@ -865,6 +881,8 @@ class ImageUtils
         int $ceilingBytes = self::IMAGE_MEMORY_CEILING_BYTES
     ): array {
         $widths = array_values(array_unique(array_map('intval', $widths)));
+        // Smallest first: a width past UNMEASURED_VARIANT_WIDTH may stand on the one before it.
+        sort($widths);
 
         // `detail` is display only: it reaches the console line and the log, never the recorded
         // `skipped` value, which stays the bare token the reason vocabulary is matched on.
@@ -1013,10 +1031,40 @@ class ImageUtils
             $src = ['w' => $srcWidth, 'h' => $srcHeight];
 
             $results = [];
+            // The last width written, and what writing it returned.
+            $written = null;
 
             foreach ($widths as $width) {
+                // A width past what every slot could always afford is only worth a file when it
+                // is a wider picture than the last one. An original that is no wider than that
+                // one, or a resample this process cannot afford (the output alone is up to 44MB
+                // at 3840, beside the decoded original), records that last picture again: the
+                // same file under the wider key, which the page reads as "nothing wider" rather
+                // than as a skip that would mark the whole row.
+                if ($width > self::UNMEASURED_VARIANT_WIDTH) {
+                    $destWidth = min($width, $srcWidth);
+                    $destPixels = $destWidth * max(1, (int) round($srcHeight * ($destWidth / $srcWidth)));
+                    $narrower = $written !== null && $written[1]['ok'] ? $written[1] : null;
+
+                    if ($narrower && $written[0] >= $srcWidth) {
+                        $results[$width] = $narrower;
+
+                        continue;
+                    }
+
+                    // Always measured, whatever happened to the narrower one: with nothing to
+                    // stand in for it, a resample this process cannot afford is a skip, never a
+                    // fatal out-of-memory error inside the save that queued this on `sync`.
+                    if (! self::canDecodePixels($destPixels, $ceilingBytes, 0)) {
+                        $results[$width] = $narrower ?? ['ok' => false, 'filename' => null, 'reason' => 'too_large', 'src' => $src, 'animated' => $animated];
+
+                        continue;
+                    }
+                }
+
                 $results[$width] = self::writeStoredVariant($sourceImage, $storedName, $width, $srcWidth, $srcHeight, $tempOut)
                     + ['src' => $src, 'animated' => $animated];
+                $written = [$width, $results[$width]];
             }
 
             return $results;

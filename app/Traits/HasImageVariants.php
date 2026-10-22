@@ -195,6 +195,7 @@ trait HasImageVariants
 
         $widths = $this->imageVariantWidths($slot);
         $parts = [];
+        $previous = null;
 
         foreach ($widths as $width) {
             $filename = $this->imageVariantFilename($width, $slot);
@@ -202,6 +203,14 @@ trait HasImageVariants
             if (! $filename) {
                 return null;
             }
+
+            // A width the original could not fill holds the narrower file again
+            // (ImageUtils::PAGE_VARIANT_WIDTHS): offered under the wider width, a browser would
+            // take a small picture for a large one.
+            if ($filename === $previous) {
+                continue;
+            }
+            $previous = $filename;
 
             $parts[] = ImageUtils::variantUrl($filename).' '.$width.'w';
         }

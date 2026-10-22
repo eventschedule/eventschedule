@@ -156,7 +156,7 @@ class GuestImagePerformanceTest extends TestCase
         $html = $this->page($this->guestEventUrl($role, $event));
 
         $this->assertMatchesRegularExpression(
-            '#url\("'.preg_quote(url('/storage/background_abc_w960.webp'), '#').'"\);\s*@media \(min-width: 768px\) \{\s*background-image:\s*url\("'.preg_quote(url('/storage/background_abc_w1920.webp'), '#').'"\);#',
+            '#\.gp-bg \{ background-image: url\("'.preg_quote(url('/storage/background_abc_w960.webp'), '#').'"\); \}\s*@media \(min-width: 768px\) \{\s*\.gp-bg \{\s*background-image: url\("'.preg_quote(url('/storage/background_abc_w1920.webp'), '#').'"\);#',
             $html
         );
     }
@@ -625,7 +625,7 @@ class GuestImagePerformanceTest extends TestCase
             ['role' => $venue->fresh(), 'event' => $event->fresh(), 'otherRole' => $act->fresh()]
         );
 
-        $this->assertMatchesRegularExpression('#@media \(min-width: 768px\) \{\s*background-image: url\("'.preg_quote($original, '#').'"\);#', $html);
+        $this->assertMatchesRegularExpression('#@media \(min-width: 768px\) \{\s*\.gp-bg \{\s*background-image: url\("'.preg_quote($original, '#').'"\);#', $html);
         $this->assertStringNotContainsString('background_anim_w', $html);
     }
 }

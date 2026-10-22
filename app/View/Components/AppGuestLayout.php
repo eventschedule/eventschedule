@@ -107,6 +107,12 @@ class AppGuestLayout extends Component
          * when it shows none, and the event's own image stands in.
          */
         public ?string $galleryImage = null,
+        /**
+         * Whether the page draws the schedule's background on its own layer
+         * (partials/guest-background). False for a page whose ground must stay see-through: the
+         * subscribe embed sets html and body transparent, which a layer of its own would ignore.
+         */
+        public bool $paintBackground = true,
     ) {}
 
     /**

@@ -25,7 +25,12 @@
                       still posts its companion hidden 0, and every schedule made through that
                       form started out refusing requests. Stating it here keeps the two forms
                       producing the same row.
-      - background / background_colors  create() picks 'image' plus a random gradient; the column
+      - accent_color / aurora_*  create() starts a schedule on an Aurora with a random palette, and
+                      the accent is that palette's (Aurora::randomStart()). The column default is
+                      #007bff, so without the hidden accent every new schedule's buttons would be
+                      blue on a teal or ember page, and without the aurora_* fields its Aurora
+                      would be the accent's, arranged by its id, not the one create() chose.
+      - background / background_colors  create() picks 'aurora' plus a random gradient; the column
                       defaults are 'gradient' and NULL. And store() has
                       `if (! $request->background_colors) { ... custom_color1.', '.custom_color2 }`,
                       so with all three absent it writes the literal string ", " - which
@@ -35,7 +40,7 @@
                       Hebrew organizer's first schedule would silently be English.
 
     Safe to omit, because the column default and create()'s prefill agree: event_layout,
-    announce_new_events, show_subscribe_panel, show_sponsors, accent_color, font_family, font_color, header_style,
+    announce_new_events, show_subscribe_panel, show_sponsors, font_family, font_color, header_style,
     list_animation (NULL and the edit form's 'none' both resolve to no animation).
 
     tests/Feature/FirstScheduleFormTest.php compares a schedule saved from here against one saved

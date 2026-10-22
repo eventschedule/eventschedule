@@ -201,6 +201,15 @@ class RoleUpdateRequest extends FormRequest
             ],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
+            // What `roles.background` can hold: anything else used to reach the ENUM and fail the
+            // save there. Aurora's own fields go to aurora_settings (App\Utils\Aurora).
+            'background' => ['sometimes', 'string', Rule::in(\App\Models\Role::BACKGROUNDS)],
+            'aurora_palette' => ['nullable', 'string', Rule::in(array_merge(array_keys(\App\Utils\Aurora::PALETTES), \App\Utils\Aurora::SPECIAL_PALETTES))],
+            'aurora_seed' => ['nullable', 'integer', 'min:0', 'max:65535'],
+            'aurora_color1' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'aurora_color2' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'aurora_color3' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'aurora_motion' => ['nullable', 'boolean'],
             'header_image_url' => ['image', 'max:2500'],
             'email_settings.host' => ['nullable', 'string', 'max:255'],
             'email_settings.port' => ['nullable', 'integer', 'min:1', 'max:65535'],

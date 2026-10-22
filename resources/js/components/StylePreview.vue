@@ -3,12 +3,12 @@
         <span class="st-pv-title">{{ labels.preview }}</span>
         <span class="st-pv-tools">
             <span class="st-seg" role="group">
-                <button type="button" :title="labels.light" :aria-label="labels.light" :aria-pressed="mode === 'light' ? 'true' : 'false'" @click="chosenMode = 'light'">
+                <button type="button" :title="labels.light" :aria-label="labels.light" :aria-pressed="mode === 'light' ? 'true' : 'false'" @click="state.previewMode = 'light'">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
                     </svg>
                 </button>
-                <button type="button" :title="labels.dark" :aria-label="labels.dark" :aria-pressed="mode === 'dark' ? 'true' : 'false'" @click="chosenMode = 'dark'">
+                <button type="button" :title="labels.dark" :aria-label="labels.dark" :aria-pressed="mode === 'dark' ? 'true' : 'false'" @click="state.previewMode = 'dark'">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
                     </svg>
@@ -33,6 +33,19 @@
         :data-open="opened ? 'true' : 'false'"
         :style="{ background: ground }"
     >
+        <Transition :name="'st-aur-fade'">
+            <div
+                v-if="state.background === 'aurora' && aurora"
+                :key="auroraKey"
+                class="gp-aurora"
+                :data-aurora-mirror="aurora.mirror"
+                :data-aurora-motion="state.auroraMotion ? 'on' : 'off'"
+                :style="aurora.vars"
+            >
+                <div class="gp-aurora-m"><i v-for="(light, index) in aurora.lights" :key="index" :style="light"></i></div>
+                <div class="gp-aurora-grain"></div>
+            </div>
+        </Transition>
         <div class="st-pv-page" :dir="rtl ? 'rtl' : 'ltr'">
             <div v-if="state.headerStyle !== 'banner'" class="st-pv-bar st-pv-first">
                 <img v-if="state.logo" class="st-pv-logo" :src="state.logo" alt="" />
@@ -101,8 +114,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { state, theme, cssUrl, fontStack, backgroundCss, headerPicture, toRgb, config } from '../style/state.js';
+import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
+import { state, theme, cssUrl, fontStack, backgroundCss, headerPicture, toRgb, config, auroraConfig, auroraTokens, previewMode } from '../style/state.js';
+import { auroraVars, lightStyles, writeKeyframes, triplet, decode } from '../style/aurora.js';
 
 // The Style tab's preview: a small drawing of the schedule's public page as the fields on the
 // tab have it now. The header (the banner card with its picture, accent wash or logo wall, or
@@ -124,12 +138,12 @@ const props = defineProps({
     labels: { type: Object, required: true },
 });
 
-// Which theme the drawing is in: the admin's own until one is chosen here.
-const chosenMode = ref('');
 // Under 1280px the preview is a strip; this opens the whole of it.
 const opened = ref(false);
 
-const mode = computed(() => chosenMode.value || (state.dark ? 'dark' : 'light'));
+// Which theme the drawing is in: the admin's own until one is chosen here (state.previewMode, which
+// the Aurora swatches are drawn in too).
+const mode = computed(() => previewMode());
 const rtl = computed(() => state.lang === 'he' || state.lang === 'ar');
 const name = computed(() => state.name || props.labels.preview);
 const nameFont = computed(() => fontStack(state.fontLabel));
@@ -158,9 +172,79 @@ const picture = computed(() => headerPicture());
 // An empty wall draws no header at all, as on the page.
 const wall = computed(() => (state.headerStyle === 'banner' && state.headerImage === 'logos' && ! picture.value ? state.logoWall : []));
 
+// Aurora, drawn as the page draws it (partials/aurora-layer), in the preview's own mode. A drift
+// of a minute looks still in a box this size, so for six seconds after the row opens or the drift
+// is switched on it runs eight times as fast, then settles; never for a visitor who asked their
+// system for less motion.
+// The speed is the running animations' own rate, so a light carries on from where it is rather
+// than jumping to where a new duration would put it.
+const speed = ref(1);
+let settle = null;
+
+function applySpeed() {
+    nextTick(() => {
+        document.querySelectorAll('#style-preview > .gp-aurora .gp-aurora-m > i').forEach((light) => {
+            if (light.getAnimations) {
+                light.getAnimations().forEach((animation) => {
+                    animation.playbackRate = speed.value;
+                });
+            }
+        });
+    });
+}
+
+function showDrift() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+    speed.value = 8;
+    applySpeed();
+    window.clearTimeout(settle);
+    settle = window.setTimeout(() => {
+        speed.value = 1;
+        applySpeed();
+    }, 6000);
+}
+
+watch(() => state.background === 'aurora' && state.openRow === 'background', (open) => {
+    if (open) {
+        showDrift();
+    }
+});
+watch(() => state.auroraMotion, (moving) => {
+    if (moving && state.background === 'aurora') {
+        showDrift();
+    }
+});
+onBeforeUnmount(() => window.clearTimeout(settle));
+
+const aurora = computed(() => {
+    const compositions = auroraConfig().compositions;
+    if (state.background !== 'aurora' || ! compositions.length) {
+        return null;
+    }
+    writeKeyframes(compositions);
+    const t = auroraTokens(state.auroraPalette, mode.value);
+
+    return {
+        ground: 'rgb(' + triplet(t.ground) + ')',
+        vars: auroraVars(t),
+        lights: lightStyles(state.auroraSeed, compositions),
+        mirror: String(decode(state.auroraSeed, compositions.length).mirror),
+    };
+});
+
+// A new arrangement fades in over the old one; a change of colour is simply drawn. The new layer
+// starts at normal speed, or at the quick one while that is showing.
+const auroraKey = computed(() => 'aurora-' + state.auroraSeed);
+watch(auroraKey, applySpeed);
+
 // The ground the page stands on. A built-in picture is drawn from its small copy at once, with
 // the full one over it when that has arrived: the small one alone is soft at this size.
 const ground = computed(() => {
+    if (aurora.value) {
+        return aurora.value.ground;
+    }
     if (state.background === 'image' && state.backgroundImage) {
         const full = config('backgroundThumbs').replace(/\/thumbs$/, '') + '/' + state.backgroundImage + '.webp';
 

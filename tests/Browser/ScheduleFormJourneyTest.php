@@ -731,7 +731,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
 
             $this->assertSame($value, $browser->value('#background_colors'));
             $this->assertSame(__('messages.gradient').' · '.$name, $this->summary($browser, 'style:background'));
-            $this->assertSame($name, trim($this->js($browser, 'document.querySelector("#style-content-background .st-grad-foot b").textContent')));
+            $this->assertSame($name, trim($this->js($browser, 'document.querySelector("#style_background_gradient .st-grad-foot b").textContent')));
             $this->assertStringContainsString('gradient', $this->js($browser, 'getComputedStyle(document.querySelector(\'[data-summary="style:background"] .event-row-chip\')).backgroundImage'));
             $this->assertStringContainsString('gradient', $this->js($browser, 'getComputedStyle(document.getElementById("style-preview")).backgroundImage'));
             $this->assertFalse((bool) $this->js($browser, 'document.getElementById("custom_colors").offsetParent !== null'), 'the two colours are only for a gradient of your own');
@@ -887,6 +887,63 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $this->assertSame($admin, (bool) $this->js($browser, 'document.documentElement.classList.contains("dark")'), 'the preview\'s switch is the preview\'s alone');
             $this->assertSame(__('messages.unsaved').': '.__('messages.schedule_style'), $this->barText($browser));
         });
+    }
+
+    /**
+     * Aurora's preview and swatches are drawn by a port of App\Utils\Aurora's colour arithmetic
+     * (resources/js/style/aurora.js). Both are held to tests/fixtures/aurora.json; this asks the
+     * port in the browser, as the page runs it.
+     */
+    public function test_the_aurora_preview_takes_the_colours_the_page_takes(): void
+    {
+        $cases = json_decode(file_get_contents(base_path('tests/fixtures/aurora.json')), true);
+
+        $this->browse(function (Browser $browser) use ($cases) {
+            $this->openStyle($browser);
+
+            $worked = json_decode($this->js($browser, 'JSON.stringify('.json_encode($cases).'.map(function (c) { var own = c.colors ? c.colors.split(",").map(function (s) { return s.trim(); }) : []; return ["light", "dark"].map(function (m) { return window.StyleStudio.aurora(c.accent, c.palette, own, c.seed, m); }); }))'), true);
+            foreach ($cases as $index => $case) {
+                foreach (['light', 'dark'] as $at => $mode) {
+                    $this->assertSame($case[$mode], $worked[$index][$at], "{$case['palette']} {$case['accent']} {$mode}");
+                }
+            }
+        });
+    }
+
+    /** Aurora is chosen by its pill, a palette by its swatch, and Shuffle is a change Back undoes. */
+    public function test_aurora_is_chosen_shuffled_and_saved(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->openStyle($browser);
+            $this->press($browser, '#style-tab-background');
+            $browser->click('label[for="background_type_aurora"]')->pause(300);
+            $browser->waitFor('#style_background_aurora .st-aur-sw[data-value="ember"]', 5);
+            $this->assertTrue((bool) $this->js($browser, '!! document.querySelector("#style-preview > .gp-aurora")'), 'the preview draws the lights');
+
+            $browser->click('#style_background_aurora .st-aur-sw[data-value="ember"]')->pause(300);
+            $this->assertSame('ember', $browser->value('#aurora_palette'));
+            $this->assertStringStartsWith(__('messages.aurora').' · '.__('messages.aurora_palette_ember'), $this->summary($browser, 'style:background'));
+
+            $seed = $browser->value('#aurora_seed');
+            $browser->click('#style_background_aurora .st-aur-tools button:nth-of-type(1)')->pause(400);
+            $this->assertNotSame($seed, $browser->value('#aurora_seed'), 'Shuffle chose another arrangement');
+            $this->assertSame(__('messages.unsaved').': '.__('messages.schedule_style'), $this->barText($browser));
+            $browser->click('#style_background_aurora .st-aur-tools button:nth-of-type(2)')->pause(300);
+            $this->assertSame($seed, $browser->value('#aurora_seed'), 'Back returns to it');
+
+            // Custom asks for three colours, and only Custom does.
+            $this->assertFalse((bool) $this->js($browser, 'document.getElementById("aurora_custom_colors").offsetParent !== null'));
+            $browser->click('#style_background_aurora .st-aur-sw[data-value="custom"]')->pause(300);
+            $this->assertTrue((bool) $this->js($browser, 'document.getElementById("aurora_custom_colors").offsetParent !== null'));
+            $browser->click('#style_background_aurora .st-aur-sw[data-value="ember"]')->pause(300);
+
+            $browser->script('window._skipUnsavedWarning = true; document.getElementById("edit-form").requestSubmit();');
+            $browser->waitForLocation('/journeyquartet/schedule', 30);
+        });
+
+        $talent = $this->talent->fresh();
+        $this->assertSame('aurora', $talent->background);
+        $this->assertSame('ember', $talent->auroraSetting->palette);
     }
 
     /** The old preview was built by joining strings and written with html(). */

@@ -78,6 +78,13 @@
                     <input type="hidden" name="background_colors" value="{{ $role->background_colors }}">
                     <input type="hidden" name="background_image" value="{{ $role->background_image }}">
                     <input type="hidden" name="background_rotation" value="{{ $role->background_rotation }}">
+                    {{-- The Aurora create() chose: its palette and arrangement, and the palette's
+                         accent, which the buttons take so the two match. --}}
+                    <input type="hidden" name="accent_color" value="{{ $role->accent_color }}">
+                    <input type="hidden" name="aurora_submitted" value="1">
+                    <input type="hidden" name="aurora_palette" value="{{ $role->auroraSetting->palette }}">
+                    <input type="hidden" name="aurora_seed" value="{{ $role->auroraSetting->seed }}">
+                    <input type="hidden" name="aurora_motion" value="1">
 
                     @if ($errors->any())
                     <div role="alert" class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3">

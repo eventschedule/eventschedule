@@ -549,8 +549,9 @@
         // Every rule the guest layout already writes for the surfaces you are
         // restyling, and whether it sits above or below your block.
         // Source: the <style> block in resources/views/layouts/app-guest.blade.php
-        // (rows 1-8 above your block, row 9 the language switcher after it) and
-        // the later block in resources/views/role/show-guest.blade.php (row 10).
+        // and partials/guest-background-css (rows 1-9 above your block, row 10 the
+        // language switcher after it) and the later block in
+        // resources/views/role/show-guest.blade.php (row 11).
         $ledger = [
             [
                 'rule' => 'main { height: 100%; }',
@@ -583,10 +584,10 @@
                 'beat' => 'Repeat the !important. You can restyle the type, but you cannot load a new font.',
             ],
             [
-                'rule' => 'body { background-image: linear-gradient(...); }',
+                'rule' => '.gp-bg { background-image: linear-gradient(...); }',
                 'from' => 'Background set to Gradient',
                 'order' => 'above',
-                'beat' => 'A plain override.',
+                'beat' => 'A plain override. .gp-bg is the layer behind the page, fixed to the window.',
             ],
             [
                 'rule' => 'body { background-color: #hex !important; }',
@@ -595,10 +596,16 @@
                 'beat' => 'Repeat the !important.',
             ],
             [
-                'rule' => 'body { background-image: url(...); background-size: cover; }',
+                'rule' => '.gp-bg { background-image: url(...); background-size: cover; }',
                 'from' => 'Background set to Image',
                 'order' => 'above',
                 'beat' => 'A plain override. On your schedule page this one is written for wide screens only.',
+            ],
+            [
+                'rule' => '.gp-bg .gp-aurora { ... }',
+                'from' => 'Background set to Aurora',
+                'order' => 'above',
+                'beat' => 'A plain override. Its colours are custom properties on .gp-bg, one set for light mode and one under .dark.',
             ],
             [
                 'rule' => '.gp-lang-switcher { background-color: #f3f4f6; }',
@@ -700,7 +707,7 @@
             ],
             [
                 'q' => 'Which plan includes Custom CSS?',
-                'a' => 'Pro, and every schedule on a selfhosted install. Free plans keep the whole visual styling suite: accent colour, typeface, solid, gradient or image backgrounds, header style and the list or calendar layout. If a hosted schedule stops being Pro, the CSS stays saved and stops rendering until the plan is active again.',
+                'a' => 'Pro, and every schedule on a selfhosted install. Free plans keep the whole visual styling suite: accent colour, typeface, Aurora, solid, gradient or image backgrounds, header style and the list or calendar layout. If a hosted schedule stops being Pro, the CSS stays saved and stops rendering until the plan is active again.',
             ],
         ];
 
@@ -1054,7 +1061,7 @@
                                 <h3 class="es-sheet2-ink text-xl font-bold">The visual settings do the heavy lifting first</h3>
                                 <span class="es-sheet2-plan">Free</span>
                             </div>
-                            <p class="es-sheet2-muted mb-4">Accent colour, typeface, a solid or gradient or image background, the header style and whether events show as a calendar or a list are all free and all ungated. They are what write the rules above your block.</p>
+                            <p class="es-sheet2-muted mb-4">Accent colour, typeface, an Aurora, solid, gradient or image background, the header style and whether events show as a calendar or a list are all free and all ungated. They are what write the rules above your block.</p>
                             <p class="es-sheet2-muted text-sm">Which means the sensible order is: get as far as you can with the controls, then spend your CSS on the things they do not reach.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

@@ -83,6 +83,17 @@
         // series page is about every occurrence (GuestSeo::eventDescription()). The password gate
         // and the gallery keep their own tags below, and a draft's page carries the schedule's,
         // matching the branches of the meta slot.
+        // Whose background the page wears: on an event page, the venue's or performer's when it
+        // has one and somebody runs it (the same rule GuestTheme::lookRole() reads), else this
+        // schedule's. Drawn on a layer of its own (partials/guest-background), unless the owner's
+        // custom CSS styles the page background itself, which keeps the rule on body it was
+        // written against (Role::customCssStylesPageBackground()); Aurora draws its layer either
+        // way. A solid colour is a colour on body, with no layer.
+        $bg = ($event && $otherRole && $otherRole->isClaimed() && $otherRole->hasConfiguredBackground()) ? $otherRole : $role;
+        $bgLegacy = ! $paintBackground || (in_array($bg->background, ['gradient', 'image'], true) && $role->customCssStylesPageBackground());
+        $bgAurora = ($paintBackground && $bg->background === 'aurora') ? \App\Utils\Aurora::for($bg) : null;
+        $bgLayer = $bgAurora !== null || (! $bgLegacy && in_array($bg->background, ['gradient', 'image'], true));
+
         $guestMetaDescription = match (true) {
             ($passwordGate ?? false) || $galleryMode => '',
             $event && $event->exists && ! $event->is_draft => \App\Utils\GuestSeo::eventDescription($event, $occurrenceDate, $guestLang, $role),
@@ -280,6 +291,9 @@
              owner's custom CSS, which must be able to overrule both. --}}
         @include('partials.guest-theme')
         @include('partials.guest-kit-styles')
+        @if ($bgAurora)
+        @include('partials.aurora-styles')
+        @endif
         {{-- The month's kit, on a page that draws a calendar (role/partials/calendar says so). --}}
         @if (request()->attributes->get('month_kit'))
         @include('partials.month-kit-styles')
@@ -310,104 +324,18 @@
             }
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
             min-height: 100vh;
-            background-attachment: {{ (($event && !request()->embed && !request()->graphic) || $role->activeEventLayout() === 'list') ? 'fixed' : 'scroll' }};
             display: flex;
             flex-direction: column;
-            @if ($event && $otherRole && $otherRole->isClaimed() && $otherRole->hasConfiguredBackground())
-                @if ($otherRole->background == 'gradient')
-                    background-image: linear-gradient({{ $otherRole->background_rotation }}deg, {{ $otherRole->background_colors }});
-                @elseif ($otherRole->background == 'solid')
-                    background-color: {{ $otherRole->background_color }} !important;
-                @elseif ($otherRole->background == 'image')
-                    @if (!$showMobileBackground)
-                    @media (min-width: 768px) {
-                    @endif
-                        @if ($otherRole->background_image)
-                            background-image: url("{{ css_url(asset('images/backgrounds/' . $otherRole->background_image . '.webp')) }}");
-                            background-image: image-set(
-                                url("{{ css_url(asset('images/backgrounds/' . $otherRole->background_image . '.webp')) }}") type("image/webp"),
-                                url("{{ css_url(asset('images/backgrounds/' . $otherRole->background_image . '.png')) }}") type("image/png")
-                            );
-                        @elseif ($showMobileBackground)
-                            {{-- An upload, painted at every width here: a phone's derivative, and the
-                                 desktop one from md up. Both fall back to the original until the
-                                 derivatives exist, so the rule is never an empty url(). An animated
-                                 upload is always the original (pageWidth): the derivatives are
-                                 stills of its first frame. --}}
-                            background-image: url("{{ css_url($otherRole->backgroundImageUrl(960, pageWidth: true)) }}");
-                            @media (min-width: 768px) {
-                                background-image: url("{{ css_url($otherRole->backgroundImageUrl(1920, pageWidth: true)) }}");
-                            }
-                        @else
-                            background-image: url("{{ css_url($otherRole->backgroundImageUrl(1920, pageWidth: true)) }}");
-                        @endif
-                        background-size: cover;
-                        background-position: center;
-                        height: 100%;
-                        margin: 0;
-                    @if (!$showMobileBackground)
-                    }
-                    @endif
-                @endif
-            @else
-                @if ($role->background == 'gradient')
-                    background-image: linear-gradient({{ $role->background_rotation }}deg, {{ $role->background_colors }});
-                @elseif ($role->background == 'solid')
-                    background-color: {{ $role->background_color }} !important;
-                @elseif ($role->background == 'image')
-                    @if (!$showMobileBackground)
-                    @media (min-width: 768px) {
-                    @endif
-                        @if ($role->background_image)
-                            background-image:
-                                @if (request()->graphic)
-                                    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-                                @endif
-                            url("{{ css_url(asset('images/backgrounds/' . $role->background_image . '.webp')) }}");
-                            background-image:
-                                @if (request()->graphic)
-                                    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-                                @endif
-                            image-set(
-                                url("{{ css_url(asset('images/backgrounds/' . $role->background_image . '.webp')) }}") type("image/webp"),
-                                url("{{ css_url(asset('images/backgrounds/' . $role->background_image . '.png')) }}") type("image/png")
-                            );
-                        @elseif ($showMobileBackground)
-                            {{-- An upload, painted at every width here: a phone's derivative, and the
-                                 desktop one from md up. On the schedule page this rule is desktop
-                                 only (the @media above) and role/show-guest paints the phone's
-                                 banner itself. Both fall back to the original until the derivatives
-                                 exist, so the rule is never an empty url(). An animated upload is
-                                 always the original (pageWidth). --}}
-                            background-image:
-                                @if (request()->graphic)
-                                    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-                                @endif
-                            url("{{ css_url($role->backgroundImageUrl(960, pageWidth: true)) }}");
-                            @media (min-width: 768px) {
-                                background-image:
-                                    @if (request()->graphic)
-                                        linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-                                    @endif
-                                url("{{ css_url($role->backgroundImageUrl(1920, pageWidth: true)) }}");
-                            }
-                        @else
-                            background-image:
-                                @if (request()->graphic)
-                                    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-                                @endif
-                            url("{{ css_url($role->backgroundImageUrl(1920, pageWidth: true)) }}");
-                        @endif
-                        background-size: cover;
-                        background-position: center;
-                        height: 100%;
-                        margin: 0;
-                    @if (!$showMobileBackground)
-                    }
-                    @endif
-                @endif
+            @if ($bg->background == 'solid')
+                background-color: {{ $bg->background_color }} !important;
+            @elseif ($bgLegacy)
+                @include('partials.guest-background-legacy')
             @endif
         }
+
+        @if ($bgLayer)
+        @include('partials.guest-background-css')
+        @endif
 
         @if ($role->custom_css && $role->isPro())
         {!! strip_tags($role->custom_css) !!}
@@ -593,6 +521,10 @@
         $isRoleRtl = in_array($role->language_code, ['ar', 'he']);
     @endphp
 
+    @if ($bgLayer)
+        @include('partials.guest-background')
+    @endif
+
     <div id="main-content" tabindex="-1" class="flex-grow relative">
         {{-- The owner's announcement bar, full-bleed against the top edge so it reads as a
              page-level notice. Sitting above the language switcher also means the switcher's
@@ -701,11 +633,11 @@
          chip's own padding was the only room under it. --}}
     @if (! request()->embed && ! request()->graphic)
     <nav aria-label="{{ __('messages.privacy_policy') }}" data-privacy-pill class="flex justify-center px-4 pt-6 {{ $creditReason ? '' : 'pb-8' }}">
-        <p class="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur">
-            <a href="{{ policy_url('privacy') }}" class="hover:text-gray-900 hover:underline">{{ __('messages.privacy_policy') }}</a>
+        <p class="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-gray-900/80 dark:text-gray-300 dark:ring-white/10">
+            <a href="{{ policy_url('privacy') }}" class="hover:text-gray-900 hover:underline dark:hover:text-white">{{ __('messages.privacy_policy') }}</a>
             @if (cookie_banner_visible())
                 <span aria-hidden="true">&middot;</span>
-                <button type="button" data-cookie-consent-reopen class="hover:text-gray-900 hover:underline">{{ __('messages.cookie_consent_manage') }}</button>
+                <button type="button" data-cookie-consent-reopen class="hover:text-gray-900 hover:underline dark:hover:text-white">{{ __('messages.cookie_consent_manage') }}</button>
             @endif
         </p>
     </nav>
@@ -716,7 +648,7 @@
     <div class="es-credit-chip flex justify-{{ $isRtl ? 'start' : 'end' }} p-4 {{ $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
         {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
         <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}"
-           class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white hover:text-gray-900">
+           class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white hover:text-gray-900 dark:bg-gray-900/80 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-gray-900 dark:hover:text-white">
             <span aria-hidden="true" class="flex h-4 w-4 items-center justify-center rounded-[5px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[8px] font-black leading-none text-white">ES</span>
             <span>Event Schedule</span>
         </a>

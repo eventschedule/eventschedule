@@ -52,6 +52,7 @@ use App\Services\SmsService;
 use App\Services\TicketPresets;
 use App\Services\UsageTrackingService;
 use App\Utils\AiImageIssuance;
+use App\Utils\Aurora;
 use App\Utils\ColorUtils;
 use App\Utils\CustomFieldUtils;
 use App\Utils\DateUtils;
@@ -4753,8 +4754,14 @@ class RoleController extends Controller
         $role->show_sponsors = true;
         $role->font_family = 'Roboto';
         $role->font_color = '#ffffff';
-        $role->accent_color = '#007BFF';
-        $role->background = 'image';
+        // A new schedule's page is an Aurora, on a random palette whose accent the buttons take,
+        // so the two match (Aurora::randomStart()). The gradient and the built-in picture are
+        // still chosen, so switching the type later lands on something. role/partials/create-form
+        // carries all of these, the accent included, as hidden fields.
+        $auroraStart = Aurora::randomStart();
+        $role->accent_color = $auroraStart['accent'];
+        $role->background = 'aurora';
+        $role->setRelation('auroraSetting', new \App\Models\AuroraSetting(['palette' => $auroraStart['palette'], 'colors' => null, 'seed' => $auroraStart['seed'], 'motion' => true]));
         $role->background_color = '#888888';
         $role->background_colors = ColorUtils::randomGradient();
         $role->background_image = ColorUtils::randomBackgroundImage();
@@ -5148,6 +5155,13 @@ class RoleController extends Controller
             $role->background_image_url = $filename;
 
             $role->save();
+        }
+
+        // Aurora's own settings, which live beside the schedule (aurora_settings) and need its id.
+        // The first-schedule form posts a random palette and arrangement as hidden fields
+        // (role/partials/create-form); the full form posts what its Background row shows.
+        if ($request->boolean('aurora_submitted')) {
+            Aurora::saveFromRequest($role, $request);
         }
 
         if (! $role->email_verified_at) {
@@ -6714,6 +6728,14 @@ class RoleController extends Controller
                 'url' => $role->getGuestUrl() ? $role->getGuestUrl().'#gp-gallery' : null,
                 'edit_url' => route('role.edit', ['subdomain' => $role->subdomain]).'#page-tab-gallery',
             ]);
+        }
+
+        // Aurora's palette, arrangement and motion, which live beside the schedule
+        // (aurora_settings) as the map's switches below do. Only on a save whose form drew the
+        // Background row (aurora_submitted), and after the header pictures above, so Match header
+        // samples the header this save leaves the schedule with.
+        if ($request->boolean('aurora_submitted')) {
+            Aurora::saveFromRequest($role, $request);
         }
 
         // A venue map that has not had its first pass: note its venues' addresses now, and give

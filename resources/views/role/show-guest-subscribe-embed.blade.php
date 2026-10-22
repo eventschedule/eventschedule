@@ -6,7 +6,7 @@
     throttle bail alike, so all three draw the same frame. Expects $role, $subscribeEmbedState,
     $accentColor and $contrastColor.
 --}}
-<x-app-guest-layout :role="$role" :fonts="array_values(array_filter([$role->font_family]))">
+<x-app-guest-layout :role="$role" :fonts="array_values(array_filter([$role->font_family]))" :paint-background="false">
 
     {{-- Transparent, so the card sits on the owner's website rather than on the schedule's own
          background, which cropped into a few hundred pixels only looks broken. After the layout's

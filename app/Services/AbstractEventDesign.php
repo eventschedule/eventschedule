@@ -1166,10 +1166,42 @@ abstract class AbstractEventDesign
             case 'image':
                 $this->applyImageBackground();
                 break;
+            case 'aurora':
+                $this->applyAuroraBackground();
+                break;
             default:
                 // Default to a subtle gradient
                 $this->applyDefaultBackground();
                 break;
+        }
+    }
+
+    /**
+     * Aurora is drawn by the browser and moves, so a picture takes its two strongest lights as a
+     * plain gradient: the same colours a visitor sees, in light mode.
+     */
+    protected function applyAuroraBackground(): void
+    {
+        [$top, $bottom] = \App\Utils\Aurora::for($this->role)->graphicColors();
+
+        $topColor = $this->hexToColor($top);
+        $bottomColor = $this->hexToColor($bottom);
+        $from = imagecolorsforindex($this->im, $topColor);
+        $to = imagecolorsforindex($this->im, $bottomColor);
+        $height = imagesy($this->im);
+
+        for ($y = 0; $y < $height; $y++) {
+            $ratio = $y / $height;
+            $color = imagecolorallocate(
+                $this->im,
+                (int) ((1 - $ratio) * $from['red'] + $ratio * $to['red']),
+                (int) ((1 - $ratio) * $from['green'] + $ratio * $to['green']),
+                (int) ((1 - $ratio) * $from['blue'] + $ratio * $to['blue'])
+            );
+
+            if ($color !== false) {
+                imageline($this->im, 0, $y, imagesx($this->im), $y, $color);
+            }
         }
     }
 

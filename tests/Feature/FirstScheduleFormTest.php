@@ -33,7 +33,9 @@ class FirstScheduleFormTest extends TestCase
         // background_colors is deliberately absent: create() picks a RANDOM gradient per call, so
         // the two arms differ by design. That it is a usable gradient at all - rather than the
         // literal ", " store() writes when the colour fields are missing - is asserted on its own
-        // below, which is the part that can actually break.
+        // below, which is the part that can actually break. accent_color and the Aurora settings
+        // are absent for the same reason (a random palette and its accent, Aurora::randomStart()),
+        // and asserted below too.
         'language_code',
         'use_24_hour_time',
         'event_layout',
@@ -154,7 +156,7 @@ class FirstScheduleFormTest extends TestCase
                 'address1' => '1 Test St',
                 'require_account' => $type === 'curator' ? 1 : 0,
                 'accept_requests' => 1,
-                'background' => 'image',
+                'background' => 'aurora',
                 'background_colors' => '#111111, #222222',
                 'event_layout' => 'list',
                 'announce_new_events' => 1,
@@ -187,6 +189,27 @@ class FirstScheduleFormTest extends TestCase
         // Raw: Role's accessor reads ", " as no colours at all.
         $this->assertNotSame(', ', $role->getRawOriginal('background_colors'));
         $this->assertNotEmpty(trim(str_replace(',', '', (string) $role->background_colors)));
+    }
+
+    /**
+     * A new schedule's page is an Aurora on the palette create() chose, and its buttons take that
+     * palette's accent. The accent rides in a hidden field: without it store()'s fill() kept the
+     * column default, blue on whatever palette was picked.
+     */
+    public function test_a_new_schedule_starts_on_an_aurora_with_its_palettes_accent(): void
+    {
+        $role = $this->submitCreateForm('venue', ['name' => 'Aurora Test', 'address1' => '1 Test St']);
+
+        $this->assertSame('aurora', $role->background);
+        $setting = \App\Models\AuroraSetting::where('role_id', $role->id)->firstOrFail();
+        $this->assertArrayHasKey($setting->palette, \App\Utils\Aurora::PALETTES);
+        $this->assertNotNull($setting->seed);
+        $this->assertTrue($setting->motion);
+        $this->assertSame(
+            strtolower(\App\Utils\Aurora::PALETTES[$setting->palette]['accent']),
+            strtolower($role->accent_color),
+            'the buttons take the palette\'s accent'
+        );
     }
 
     /** Guests may submit to a new talent or venue without being made to create an account. */

@@ -33,6 +33,9 @@
 
     <x-slot name="head">
 
+        {{-- Aurora, as the guest pages draw it, for the Style tab's preview. --}}
+        @include('partials.aurora-styles')
+
         <style {!! nonce_attr() !!}>
         /* "Event list wording" (Style, Events): the schedule's next events as the list's phone
            cards would say them, small, in the portal's own tokens. */
@@ -278,6 +281,7 @@
             updateFontOptions();
 
             onChangeBackground();
+            onChangeAuroraPalette();
             onChangeCountry();
             toggleCustomImageInput();
             toggleCustomHeaderInput();
@@ -406,6 +410,15 @@
                 filenameSpan.textContent = '';
             }
             forgetAiPicture(inputId);
+            // What was said about the picture goes with it.
+            if (inputId === 'background_image_url') {
+                const refused = document.getElementById('background_image_size_warning');
+                if (refused) {
+                    refused.textContent = '';
+                    refused.style.display = 'none';
+                }
+                measureBackgroundPicture();
+            }
             updatePreview();
         }
 
@@ -483,6 +496,10 @@
                         warningMessage += @json(__('messages.image_not_square'), JSON_UNESCAPED_UNICODE);
                     }
 
+                    if (previewId == 'background_image_preview') {
+                        checkBackgroundResolution(width, height);
+                    }
+
                     if (warningElement) {
                         if (warningMessage) {
                             warningElement.textContent = warningMessage;
@@ -517,20 +534,61 @@
             }
         }
 
+        // The Background row shows the pane of the type chosen. Plain DOM, no jQuery.
         function onChangeBackground() {
-            var background = $('input[name="background"]:checked').val();
+            var checked = document.querySelector('input[name="background"]:checked');
+            var background = checked ? checked.value : '';
 
-            $('#style_background_image').hide();
-            $('#style_background_gradient').hide();
-            $('#style_background_solid').hide();
-            
-            if (background == 'image') {
-                $('#style_background_image').show();
-            } else if (background == 'gradient') {
-                $('#style_background_gradient').show();
-            } else if (background == 'solid') {
-                $('#style_background_solid').show();
+            ['aurora', 'image', 'gradient', 'solid'].forEach(function (type) {
+                var pane = document.getElementById('style_background_' + type);
+                if (pane) {
+                    pane.style.display = type === background ? '' : 'none';
+                }
+            });
+        }
+
+        // Aurora's own three colours are asked for only on Custom.
+        function onChangeAuroraPalette() {
+            var select = document.getElementById('aurora_palette');
+            var custom = document.getElementById('aurora_custom_colors');
+            if (select && custom) {
+                custom.hidden = select.value !== 'custom';
             }
+        }
+
+        // "Try Aurora", beside the built-in pictures and under a picture too small for a wide
+        // window: chooses the type, as pressing its pill would. Nothing is saved until Save.
+        function tryAurora() {
+            var pill = document.getElementById('background_type_aurora');
+            if (pill && ! pill.checked) {
+                pill.checked = true;
+                pill.dispatchEvent(new Event('input', { bubbles: true }));
+                pill.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            onChangeBackground();
+            if (pill) {
+                pill.focus();
+            }
+        }
+
+        // An uploaded background too small to cover a wide window sharply: at least 1920 pixels
+        // wide is asked for (a 2.5MB file, as WebP, holds far more), and a picture that stands up
+        // is cut down to a band on a wide screen. Said for the file just chosen and for the stored
+        // one, from the picture's own size.
+        function checkBackgroundResolution(width, height) {
+            var note = document.getElementById('background_image_resolution_note');
+            if (! note) {
+                return;
+            }
+            var lines = [];
+            if (width && width < 1920) {
+                lines.push(@json(__('messages.background_too_narrow'), JSON_UNESCAPED_UNICODE).replace(':width', width));
+            }
+            if (width && height && height > width) {
+                lines.push(@json(__('messages.background_portrait'), JSON_UNESCAPED_UNICODE));
+            }
+            note.querySelector('[data-resolution-text]').textContent = lines.join(' ');
+            note.hidden = lines.length === 0;
         }
 
         // The Header Image choices that name no picture (Role::HEADER_IMAGE_KEYWORDS): anything
@@ -681,6 +739,40 @@
 
             const hasExistingImage = existingImg && existingImg.style.display !== 'none';
             customInput.style.display = (isCustom && !hasExistingImage) ? 'block' : 'none';
+
+            // The note on the built-in pictures, beside them only.
+            const builtInNote = document.getElementById('background_builtin_note');
+            if (builtInNote) {
+                builtInNote.hidden = isCustom;
+            }
+
+            measureBackgroundPicture();
+        }
+
+        // The resolution note describes the picture the background will have: one just chosen
+        // and waiting for Save, else the stored one, else none (a built-in, or nothing at all).
+        // Measured where it is drawn; a picture still on its way is measured when it arrives.
+        function measureBackgroundPicture() {
+            const select = document.getElementById('background_image');
+            const pendingBox = document.getElementById('background_image_preview_clear');
+            const pending = pendingBox && pendingBox.style.display !== 'none' ? document.getElementById('background_image_preview') : null;
+            const existing = document.getElementById('background_image_existing');
+            const stored = existing && existing.style.display !== 'none' ? existing.querySelector('img') : null;
+            const picture = select && select.value === '' ? (pending && pending.getAttribute('src') ? pending : stored) : null;
+
+            if (! picture) {
+                checkBackgroundResolution(0, 0);
+                return;
+            }
+            const measure = function () {
+                checkBackgroundResolution(picture.naturalWidth, picture.naturalHeight);
+            };
+            if (picture.complete && picture.naturalWidth) {
+                measure();
+            } else {
+                // Asked again on arrival: by then another picture may be the one in use.
+                picture.addEventListener('load', measureBackgroundPicture, { once: true });
+            }
         }
 
         function toggleCustomHeaderInput() {
@@ -755,6 +847,7 @@
 
         // The words the tabs' and rows' one-line summaries are made of (see the page script).
         $summaryWords = [
+            'aurora_still' => __('messages.aurora_still'),
             'none' => __('messages.none'),
             'comments' => __('messages.fan_comments_enabled'),
             'photos' => __('messages.fan_photos_enabled'),
@@ -1771,6 +1864,32 @@
                     $effectiveHeaderImage = array_key_exists('header_image', $styleOld) ? $styleScalar($styleOld['header_image']) : (string) $role->header_image;
                     $headerImageIsNone = $effectiveHeaderImage === 'none' || ($effectiveHeaderImage === '' && ! $role->header_image_url);
                     $effectiveBackgroundImage = array_key_exists('background_image', $styleOld) ? $styleScalar($styleOld['background_image']) : (string) $role->background_image;
+                    // Aurora (App\Utils\Aurora): what the stored schedule draws, and what a refused
+                    // save had chosen. A schedule with no stored seed shows the one its id gives it,
+                    // so the arrangement on the page and in the preview is the same one.
+                    $auroraNow = \App\Utils\Aurora::for($role);
+                    $auroraSetting = $role->auroraSetting;
+                    $auroraPalette = $styleScalar(old('aurora_palette', $auroraSetting->palette ?: 'accent'));
+                    $auroraSeed = $styleScalar(old('aurora_seed', (string) $auroraNow->seed));
+                    $auroraOwn = \App\Utils\Aurora::colorList($auroraSetting->palette === 'custom' ? $auroraSetting->colors : null);
+                    $auroraCustom = [
+                        $styleScalar(old('aurora_color1', $auroraOwn[0] ?? '#14b8a6')),
+                        $styleScalar(old('aurora_color2', $auroraOwn[1] ?? '#0ea5e9')),
+                        $styleScalar(old('aurora_color3', $auroraOwn[2] ?? '#a855f7')),
+                    ];
+                    $auroraMotion = old('aurora_submitted') ? (bool) old('aurora_motion') : (bool) $auroraSetting->motion;
+                    $auroraPaletteChoices = array_merge(
+                        ['accent' => __('messages.aurora_from_accent'), 'header' => __('messages.aurora_match_header')],
+                        collect(\App\Utils\Aurora::PALETTES)->mapWithKeys(fn ($palette, $key) => [$key => __('messages.aurora_palette_'.$key)])->all(),
+                        ['custom' => __('messages.custom')],
+                    );
+                    $auroraData = $styleProps([
+                        'palettes' => \App\Utils\Aurora::PALETTES,
+                        'compositions' => \App\Utils\Aurora::COMPOSITIONS,
+                        // The header picture's colours as the server reads them (the CDN will not
+                        // let the page's canvas read an upload), so Match header previews true.
+                        'headerColors' => $role->exists ? (\App\Utils\Aurora::cachedHeaderColors($role) ?? []) : [],
+                    ]);
                 @endphp
                 {{-- The pickers of this tab (the font list, the gradients, the two walls of pictures,
                      the hex fields, the preview) are small Vue islands on EMPTY elements
@@ -1782,7 +1901,8 @@
                 <div id="section-style" class="section-content lg:mt-0 st-js"
                     data-font-base="{{ asset('vendor/fonts') }}"
                     data-header-thumbs="{{ asset('images/headers/thumbs') }}"
-                    data-background-thumbs="{{ asset('images/backgrounds/thumbs') }}">
+                    data-background-thumbs="{{ asset('images/backgrounds/thumbs') }}"
+                    data-aurora="{{ $auroraData }}">
                     <div>
 
                     <div class="st-wrap">
@@ -2002,7 +2122,7 @@
                                 <div class="st-native">
                                 <div id="custom_header_input" style="display:none" class="mt-4">
                                     <input id="header_image_url" name="header_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" data-file-trigger="header_image_url" data-filename-target="header_image_url_filename" data-preview-target="header_image_url_preview" />
+                                        accept="image/png, image/jpeg, image/webp, image/gif" data-file-trigger="header_image_url" data-filename-target="header_image_url_filename" data-preview-target="header_image_url_preview" />
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" data-trigger-file-input="header_image_url" class="event-link">{{ __('messages.choose_file') }}</button>
                                         <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
@@ -2042,7 +2162,7 @@
                                 <x-input-label :value="__('messages.background_type')" />
                                 {{-- old(): a refused save used to come back on the stored type. --}}
                                 <div class="mt-2 event-pills flex-wrap">
-                                    @foreach(['gradient', 'solid', 'image'] as $background)
+                                    @foreach(\App\Models\Role::BACKGROUNDS as $background)
                                     <label class="event-pill" for="background_type_{{ $background }}">
                                         <input type="radio"
                                             id="background_type_{{ $background }}"
@@ -2056,6 +2176,59 @@
                                     @endforeach
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('background')" />
+                            </div>
+
+                            {{-- Says that this save's form drew the Background row, so Aurora's
+                                 settings are saved from it (absent means "leave them"): outside
+                                 the panes, so they are kept whichever type is chosen. --}}
+                            <input type="hidden" name="aurora_submitted" value="1">
+
+                            <div class="mb-6" id="style_background_aurora" style="display:none">
+                                <x-input-label for="aurora_palette" :value="__('messages.palette')" />
+                                <select id="aurora_palette" name="aurora_palette" data-action="aurora-palette-input"
+                                    class="st-native mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    @foreach ($auroraPaletteChoices as $paletteKey => $paletteName)
+                                    <option value="{{ $paletteKey }}" {{ $auroraPalette === $paletteKey ? 'selected' : '' }}>{{ $paletteName }}</option>
+                                    @endforeach
+                                </select>
+                                <input type="hidden" id="aurora_seed" name="aurora_seed" value="{{ $auroraSeed }}">
+                                <div class="vue-style-aurora" data-props="{{ $styleProps([
+                                    'palettes' => collect($auroraPaletteChoices)->map(fn ($name, $key) => ['key' => $key, 'name' => $name])->values()->all(),
+                                    'labels' => [
+                                        'palette' => __('messages.palette'),
+                                        'shuffle' => __('messages.aurora_shuffle'),
+                                        'back' => __('messages.back'),
+                                        'shuffled' => __('messages.aurora_shuffled'),
+                                        'backDone' => __('messages.aurora_previous'),
+                                    ],
+                                ]) }}"></div>
+                                <x-input-error class="mt-2" :messages="array_merge($errors->get('aurora_palette'), $errors->get('aurora_seed'))" />
+
+                                {{-- The owner's own three colours, for Custom. The hidden attribute, so
+                                     FormKit.reveal() can show a refused one. --}}
+                                <div id="aurora_custom_colors" class="mt-4" @if ($auroraPalette !== 'custom') hidden @endif>
+                                    <div class="st-custom">
+                                        @foreach ([1, 2, 3] as $auroraIndex)
+                                        <div class="st-color">
+                                            <x-input-label for="aurora_color{{ $auroraIndex }}" :value="__('messages.color').' '.$auroraIndex" class="sr-only" />
+                                            <x-text-input id="aurora_color{{ $auroraIndex }}" name="aurora_color{{ $auroraIndex }}" type="color" class="st-well"
+                                                :value="$auroraCustom[$auroraIndex - 1]" data-action="update-preview-on-input" />
+                                            <div class="vue-style-color" data-props="{{ $styleProps(['field' => 'aurora_color'.$auroraIndex, 'label' => __('messages.color').' '.$auroraIndex]) }}"></div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    <x-input-error class="mt-2" :messages="array_merge($errors->get('aurora_color1'), $errors->get('aurora_color2'), $errors->get('aurora_color3'))" />
+                                </div>
+
+                                <div class="mt-5">
+                                    <x-toggle name="aurora_motion" :checked="$auroraMotion"
+                                        label="{{ __('messages.aurora_slow_drift') }}"
+                                        help="{{ __('messages.aurora_slow_drift_help') }}" />
+                                </div>
+                                <p class="st-note mt-4">{{ __('messages.aurora_follows_mode') }}</p>
+                                @if ($role->exists && $role->customCssStylesPageBackground())
+                                <p class="st-note mt-2">{{ __('messages.aurora_custom_css_note') }}</p>
+                                @endif
                             </div>
 
                             <div class="mb-6" id="style_background_solid" style="display:none">
@@ -2086,12 +2259,23 @@
                                     'labels' => $styleLabels,
                                 ]) }}"></div>
 
+                                {{-- The built-in pictures are 928 pixels wide and stand up, so a wide
+                                     window enlarges them: said beside them, with the way to a
+                                     background that is sharp at any size. Checks nothing until Save. --}}
+                                <div id="background_builtin_note" class="st-advice bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3" @if (! $effectiveBackgroundImage) hidden @endif>
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                    <p class="text-sm text-amber-800 dark:text-amber-200">
+                                        {{ __('messages.aurora_builtin_note') }}
+                                        <button type="button" class="event-link" data-action="try-aurora">{{ __('messages.aurora_try') }}</button>
+                                    </p>
+                                </div>
+
                                 {{-- As under the header's wall: pressed by the wall, shown only if the
                                      islands never start. --}}
                                 <div class="st-native">
                                 <div id="custom_image_input" style="display:none" class="mt-4">
                                     <input id="background_image_url" name="background_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" data-file-trigger="background_image_url" data-filename-target="background_image_url_filename" data-preview-target="background_image_preview" />
+                                        accept="image/png, image/jpeg, image/webp, image/gif" data-file-trigger="background_image_url" data-filename-target="background_image_url_filename" data-preview-target="background_image_preview" />
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" data-trigger-file-input="background_image_url" class="event-link">{{ __('messages.choose_file') }}</button>
                                         <span id="background_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
@@ -2114,9 +2298,20 @@
 
                                 {{-- A refused upload has somewhere to say so: this field had no line for it. --}}
                                 <x-input-error class="mt-2" :messages="$errors->get('background_image_url')" />
-                                <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                {{-- A refusal, not a warning: the server turns away a file over 2.5MB. --}}
+                                <p id="background_image_size_warning" role="alert" class="mt-2 text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3" style="display: none;">
                                     {{ __('messages.image_size_warning') }}
                                 </p>
+                                {{-- An upload too narrow (or too tall) to cover a wide window sharply.
+                                     Filled in by checkBackgroundResolution() from the picture's own
+                                     size, for a file just chosen and for the stored one. --}}
+                                <div id="background_image_resolution_note" class="st-advice bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3" hidden>
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                    <p class="text-sm text-amber-800 dark:text-amber-200">
+                                        <span data-resolution-text></span>
+                                        <button type="button" class="event-link" data-action="try-aurora">{{ __('messages.aurora_try') }}</button>
+                                    </p>
+                                </div>
                             </div>
 
                             <div id="style_background_gradient" style="display:none">
@@ -7741,7 +7936,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function backgroundSummary() {
         var type = kit.radio('background');
         var text = radioLabel('background');
-        if (type === 'gradient') {
+        if (type === 'aurora') {
+            text = kit.join([text, kit.chosen('#aurora_palette'), kit.on('aurora_motion') ? '' : words.aurora_still]);
+        } else if (type === 'gradient') {
             text = kit.join([text, kit.chosen('#background_colors')]);
         } else if (type === 'image') {
             text = kit.join([text, kit.chosen('#background_image')]);
@@ -9961,6 +10158,10 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'background-colors-input':
                 updatePreview();
                 break;
+            case 'aurora-palette-input':
+                onChangeAuroraPalette();
+                updatePreview();
+                break;
             case 'rotation-input':
                 updatePreview();
                 document.getElementById('rotation_value').textContent = el.value + '\u00B0';
@@ -9971,6 +10172,16 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'sponsor-background-change':
                 updateSponsorBackground();
                 break;
+        }
+    });
+
+    // "Try Aurora", beside the background pictures.
+    document.addEventListener('click', function(e) {
+        var el = e.target.closest('[data-action="try-aurora"]');
+        if (el) {
+            e.preventDefault();
+            tryAurora();
+            updatePreview();
         }
     });
 
@@ -10020,6 +10231,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 updatePreview();
                 break;
             case 'background-colors-input':
+                updatePreview();
+                break;
+            case 'aurora-palette-input':
+                onChangeAuroraPalette();
                 updatePreview();
                 break;
             case 'language-change':

@@ -64,7 +64,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Background</span></td>
-                        <td><a href="#backgrounds" class="doc-link">Background Type</a> (Gradient, Solid or Image) and the controls for whichever you pick: gradient colors and rotation, a solid color, or a background image</td>
+                        <td><a href="#backgrounds" class="doc-link">Background Type</a> (Aurora, Gradient, Solid or Image) and the controls for whichever you pick: Aurora's palette and arrangement, gradient colors and rotation, a solid color, or a background image</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Events</span></td>
@@ -238,7 +238,29 @@
             </svg>
             Background
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Background</strong> row starts with a <strong class="text-gray-900 dark:text-white">Background Type</strong> choice of Gradient, Solid or Image. Picking one shows its own controls and puts the others away. The row's line names your choice beside a small swatch of it, so you can see it with the row closed.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Background</strong> row starts with a <strong class="text-gray-900 dark:text-white">Background Type</strong> choice of Aurora, Gradient, Solid or Image. Picking one shows its own controls and puts the others away. The row's line names your choice beside a small swatch of it, so you can see it with the row closed.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Whichever you pick, the background fills the visitor's window and stays in place while your events scroll over it, in the calendar as well as the list, so a picture is never stretched to the length of the page.</p>
+
+        <h3 id="aurora" class="doc-subheading">Aurora</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Soft lights in your schedule's colors that drift slowly behind your page, with a fine grain. Aurora is drawn by the visitor's browser rather than being a picture, so it is sharp on any screen, from a phone to a large monitor, and adds almost nothing to the page's weight. It follows each visitor's light or dark mode: pale lights on a bright page in light mode, glowing color on a deep one in dark mode. New schedules start on Aurora, with a palette picked at random and an accent color to match it.</p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Palette</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each palette is a swatch drawn as your page would look, in light or dark as the preview is. <strong class="text-gray-900 dark:text-white">From accent</strong> builds the lights from your accent color and two colors beside it. <strong class="text-gray-900 dark:text-white">Match header</strong> takes its colors from your header picture, and follows it when you change the picture; it is offered while the Banner header shows a picture. While a palette brought your accent color, picking another palette brings that palette's accent too; an accent you chose yourself is left alone. Ten ready-made palettes follow, from Lagoon to Graphite, and <strong class="text-gray-900 dark:text-white">Custom</strong> takes three colors of your own.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Shuffle</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Arranges the lights differently, and each press looks different from the last. <strong class="text-gray-900 dark:text-white">Back</strong> returns to the last ten arrangements you tried, until you leave the page.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Slow drift</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The lights drift slowly, each one taking about a minute to cross its path. Turn it off for a still background. Visitors who ask their device for less motion, or use the accessibility widget's reduce motion, always see it still, and so does a schedule embedded on another website or turned into a picture.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Light and dark</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Use the sun and moon above the preview to see both. Text that sits straight on the page, such as the dates in your event list, stays easy to read on every palette.</p>
+            </div>
+        </div>
 
         <h3 class="doc-subheading">Gradient</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Every gradient is a swatch under <strong class="text-gray-900 dark:text-white">Colors</strong>: click one and the preview takes it. The first swatch, marked with a plus, is <strong class="text-gray-900 dark:text-white">Custom</strong>, for two colors of your own.</p>
@@ -264,11 +286,11 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">37 preset backgrounds</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ready-made backgrounds shown as thumbnails, including Abstract Sunrise, Bookshelf, Desert Retreat, Flower Field, Greyscale, River of Dreams and Stormy Night. Click one to choose it. The first two lines are on the page and <strong class="text-gray-900 dark:text-white">Show All</strong> opens the rest.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ready-made backgrounds shown as thumbnails, including Abstract Sunrise, Bookshelf, Desert Retreat, Flower Field, Greyscale, River of Dreams and Stormy Night. Click one to choose it. The first two lines are on the page and <strong class="text-gray-900 dark:text-white">Show All</strong> opens the rest. They are sized for phones, so on a large screen they can look soft; <a href="#aurora" class="doc-link">Aurora</a> stays sharp at any size.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom upload</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Upload Image</strong>, above the thumbnails, to use your own. Once a picture is there the tile shows it, with <strong class="text-gray-900 dark:text-white">Change</strong> and <strong class="text-gray-900 dark:text-white">Remove</strong> under it. PNG or JPG, under 2.5 MB. Dark, low-contrast images work best, because your event cards and text sit on top of them.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Upload Image</strong>, above the thumbnails, to use your own. Once a picture is there the tile shows it, with <strong class="text-gray-900 dark:text-white">Change</strong> and <strong class="text-gray-900 dark:text-white">Remove</strong> under it. PNG, JPG, WebP or GIF, under 2.5 MB. For a sharp background on a large screen, use a picture at least 1920 pixels wide, and wider than it is tall; the form tells you when yours is smaller. Your page sends a phone a smaller copy, and a high-resolution screen a larger one when your picture is wider than 1920 pixels. Dark, low-contrast images work best, because your event cards and text sit on top of them.</p>
             </div>
         </div>
     </section>
@@ -410,6 +432,7 @@
             <li>Add your own animations and effects</li>
             <li>Up to 10,000 characters per schedule</li>
         </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">To change the page's background with CSS, aim at <code class="doc-inline-code">.gp-bg</code>, the layer the background is drawn on, and at <code class="doc-inline-code">.gp-aurora</code> inside it for Aurora. For example, <code class="doc-inline-code">.gp-bg { background-position: top; }</code> moves a picture up. If your CSS already styles the background on <code class="doc-inline-code">body</code> or <code class="doc-inline-code">html</code>, a gradient or picture background is still drawn on <code class="doc-inline-code">body</code> for you, so those rules keep working; Aurora is drawn over them.</p>
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">What the sanitizer strips</div>
             <p>Saved CSS is cleaned before it is stored, so a few constructs are silently removed rather than rejected with an error. Do not rely on <code class="doc-inline-code">@import</code>, <code class="doc-inline-code">@font-face</code>, <code class="doc-inline-code">@charset</code>, <code class="doc-inline-code">expression()</code>, <code class="doc-inline-code">javascript:</code> URLs, <code class="doc-inline-code">behavior</code> or <code class="doc-inline-code">binding</code>, or any <code class="doc-inline-code">url()</code> pointing at an <code class="doc-inline-code">http:</code>, <code class="doc-inline-code">https:</code> or <code class="doc-inline-code">data:</code> address. Everything else, including modern layout and animation properties, is kept as written. If a rule seems to vanish after saving, check it against that list first.</p>
@@ -678,7 +701,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Set Background and Colors",
-                    "text": "Choose a gradient by its swatch from over 380 presets, a solid color, or a background image. Set your accent color for buttons and links.",
+                    "text": "Choose Aurora, soft drifting lights drawn from your colors, a gradient by its swatch from over 380 presets, a solid color, or a background image. Set your accent color for buttons and links.",
                     "url": "{{ url(route('marketing.docs.schedule_styling')) }}#backgrounds"
                 },
                 {

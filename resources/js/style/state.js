@@ -15,6 +15,7 @@
 //    whenever the page says `style:sync`.
 
 import { reactive } from 'vue';
+import * as Aurora from './aurora.js';
 
 export const DEFAULT_ACCENT = '#4e81fa';
 
@@ -42,6 +43,16 @@ export const state = reactive({
     backgroundImage: '',
     backgroundImageLabel: '',
     backgroundUpload: '',
+    auroraPalette: 'accent',
+    auroraColors: [],
+    auroraSeed: 0,
+    auroraMotion: true,
+    // The header's colours for Match header: sampled in the browser from a picture it may read,
+    // the saved ones otherwise (the server samples whatever Save leaves).
+    auroraHeaderColors: [],
+    // The light or dark the preview is drawn in: the admin's own until the preview's switch is
+    // pressed. The palette swatches and the row's chip are drawn in it too.
+    previewMode: '',
     headerStyle: 'banner',
     headerImage: 'none',
     headerImageLabel: '',
@@ -133,6 +144,11 @@ export function read() {
     state.backgroundImageLabel = chosen('background_image');
     state.backgroundUpload = pending('background_image_preview_clear', 'background_image_preview')
         || source(document.querySelector('#background_image_existing img'));
+    state.auroraPalette = value('aurora_palette') || 'accent';
+    state.auroraColors = ['aurora_color1', 'aurora_color2', 'aurora_color3'].map((id) => normalizeHex(value(id)) || '#000000');
+    state.auroraSeed = parseInt(value('aurora_seed'), 10) || 0;
+    const motion = byId('aurora_motion');
+    state.auroraMotion = motion ? motion.checked : true;
     state.headerStyle = radio('header_style') || 'banner';
     state.headerImage = value('header_image');
     state.headerImageLabel = chosen('header_image');
@@ -148,6 +164,63 @@ export function read() {
     state.dirty = !! (window.FormKit && window.FormKit.dirtySections().indexOf('section-style') !== -1);
 
     loadFont(state.font);
+    readHeaderColors();
+}
+
+// What the server handed the tab about Aurora: the palettes, the compositions and the header's
+// saved colours (#section-style's data-aurora).
+let auroraData = null;
+
+export function auroraConfig() {
+    if (auroraData === null) {
+        try {
+            auroraData = JSON.parse(config('aurora') || '{}');
+        } catch (error) {
+            auroraData = {};
+        }
+        auroraData.palettes = auroraData.palettes || {};
+        auroraData.compositions = auroraData.compositions || [];
+        auroraData.headerColors = auroraData.headerColors || [];
+    }
+
+    return auroraData;
+}
+
+// The header picture the Match header colours were last read from, and its colours.
+let sampledFrom = null;
+
+function readHeaderColors() {
+    const picture = headerPicture();
+    if (picture === sampledFrom) {
+        return;
+    }
+    sampledFrom = picture;
+    state.auroraHeaderColors = auroraConfig().headerColors;
+    if (! picture) {
+        return;
+    }
+    Aurora.sampleImage(picture).then((colors) => {
+        if (colors && sampledFrom === picture) {
+            state.auroraHeaderColors = colors;
+        }
+    });
+}
+
+export function previewMode() {
+    return state.previewMode || (state.dark ? 'dark' : 'light');
+}
+
+// The colours of an Aurora on a palette, in a mode: the swatches ask for every palette, the
+// preview for the chosen one.
+export function auroraTokens(palette, mode) {
+    const data = auroraConfig();
+    // Match header with no picture to read stands on the accent, as Aurora::fromParts() does.
+    const own = palette === 'custom' ? state.auroraColors : (palette === 'header' && headerPicture() !== '' ? state.auroraHeaderColors : []);
+    // The fourth light is the schedule's accent on every palette, as on the page.
+    const accent = state.accent;
+    const srcs = Aurora.sources(palette, accent, own, state.auroraSeed, data.palettes, data.compositions.length);
+
+    return Aurora.tokens(srcs, Aurora.hex(accent) || DEFAULT_ACCENT, mode || previewMode());
 }
 
 // Set a field as a person would have: the value, then `input` and `change`. Nothing happens (and
@@ -198,6 +271,13 @@ export function backgroundCss() {
         const picture = state.backgroundImage ? backgroundThumb(state.backgroundImage) : state.backgroundUpload;
 
         return picture ? cssUrl(picture) + ' center / cover no-repeat' : '#8a8f98';
+    }
+    if (state.background === 'aurora') {
+        const data = auroraConfig();
+
+        return data.compositions.length
+            ? Aurora.staticGradient(auroraTokens(state.auroraPalette), state.auroraSeed, data.compositions)
+            : '#8a8f98';
     }
 
     return state.backgroundColor;

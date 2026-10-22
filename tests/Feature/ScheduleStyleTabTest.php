@@ -290,7 +290,7 @@ class ScheduleStyleTabTest extends TestCase
     public function test_the_islands_keep_their_typing_and_their_buttons_to_themselves(): void
     {
         $components = glob(resource_path('js/components/Style*.vue'));
-        $this->assertCount(5, $components);
+        $this->assertCount(6, $components);
 
         foreach ($components as $path) {
             $name = basename($path);
