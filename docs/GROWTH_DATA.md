@@ -485,7 +485,7 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `features` | Settings switched on: `gcal` (a Google sync direction is set; before schema 12 it read a column nothing wrote), `mscal`, `caldav`, `custom_domain` (working, not failed or pending), `custom_css`, `custom_fields`, `banner`, `feedback`, `carpool`, `gift_cards` (enabled), `accept_requests` (on for nearly everyone by default), `sponsors`, `own_smtp`, `event_interest`, `no_subscribe_panel`, `stay22`, `federation`, `announce_events`, `fan_content`; on the owner's account: `api_key`, `webhooks`; and features actually used: `passes`, `seating`, `promo_codes`, `waitlist`, `sub_schedules`, `newsletter_sent`, `gift_cards_sold`, `gallery`, `boost`, `ai_import`, `team` (anyone but the owner has access) |
 | `days_to_upgrade` | Creation to first real subscription, days; null = never |
 | `country` | ISO country code, or `(other)` when fewer than 5 schedules share it |
-| `gateways` | Payment gateways on the owner's account: `stripe` (Connect onboarding completed), `paypal`, `payfast`, `razorpay`, `invoiceninja` |
+| `gateways` | Payment gateways on the owner's account: `stripe` (Connect onboarding completed), `paypal`, `payfast`, `razorpay`, `invoiceninja`, `payment_url` (a payment link the owner pasted in). Empty means the owner cannot take money online, the same test as the event form's "connect a gateway" notice and the `no_gateway` nudge (`payment_gateways()->connectedFor()`); cash is never listed |
 | `stripe_connected_month` | Month the owner completed Stripe Connect (the only gateway that records when) |
 | `dismissed_steps` | Dashboard next steps dismissed for this schedule (`tickets`, `payments`, ...) |
 | `events_by_source` | Of its listed events: `created` by it, from `other_schedules`, `guest` submissions, linked to a `google` entry by the owner's sync (in either direction), synced from `caldav`, `auto_sourced` (curator rules). These overlap; they do not sum to `events_total`. From schema 12 also `imported` and one `imported_{source}` per import source. See below |
@@ -616,6 +616,10 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **23** (2026-10-22)
+  - **`schedules.gateways` can hold `payment_url`**, an owner taking money through a pasted
+    payment link. Before this such an owner read as having no gateway while selling (one billing
+    curator in the 2026-10-22 pull). Do not count "no gateway" across this version.
 - **22** (2026-10-22)
   - **`hero_test.phase` can be `baseline`**: the homepage runs one headline, which is counted the
     same way and never locks. Nothing else changed shape.

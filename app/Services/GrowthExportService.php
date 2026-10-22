@@ -33,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 22;
+    public const SCHEMA_VERSION = 23;
 
     /** How far ahead the schedule rows look for events on sale (upcoming_*). */
     public const UPCOMING_DAYS = 60;
@@ -1569,9 +1569,9 @@ class GrowthExportService
         $owners = DB::table('users')
             ->where(fn ($q) => $q->whereNotNull('stripe_completed_at')->orWhereNotNull('paypal_client_id')
                 ->orWhereNotNull('payfast_merchant_id')->orWhereNotNull('razorpay_key_id')->orWhereNotNull('invoiceninja_api_key')
-                ->orWhereNotNull('api_key_hash'))
+                ->orWhereNotNull('payment_url')->orWhereNotNull('api_key_hash'))
             ->get(['id', 'stripe_account_id', 'stripe_completed_at', 'paypal_client_id',
-                'payfast_merchant_id', 'razorpay_key_id', 'invoiceninja_api_key', 'api_key_hash'])
+                'payfast_merchant_id', 'razorpay_key_id', 'invoiceninja_api_key', 'payment_url', 'api_key_hash'])
             ->keyBy('id');
         $webhookOwners = DB::table('webhooks')->where('is_active', true)->distinct()->pluck('user_id')->flip();
 
@@ -2262,6 +2262,9 @@ class GrowthExportService
             'payfast' => (bool) $owner->payfast_merchant_id,
             'razorpay' => (bool) $owner->razorpay_key_id,
             'invoiceninja' => (bool) $owner->invoiceninja_api_key,
+            // A payment link the owner pastes in (PaymentUrlGateway). Counted by
+            // payment_gateways()->connectedFor(), so an owner selling through one is not "no gateway".
+            'payment_url' => (bool) $owner->payment_url,
         ]));
     }
 
