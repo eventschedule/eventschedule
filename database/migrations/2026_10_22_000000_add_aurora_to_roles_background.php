@@ -19,7 +19,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE `roles` MODIFY `background` ENUM('gradient', 'solid', 'image', 'aurora') NOT NULL");
+        // A short lock wait: `roles` is the busiest table, and an ALTER waiting behind a long
+        // transaction holds every query on it in line behind itself. Safe to run again: the
+        // statement only restates the column.
+        $previous = DB::selectOne('SELECT @@SESSION.lock_wait_timeout AS value')->value;
+        DB::statement('SET SESSION lock_wait_timeout = 10');
+
+        try {
+            DB::statement("ALTER TABLE `roles` MODIFY `background` ENUM('gradient', 'solid', 'image', 'aurora') NOT NULL");
+        } finally {
+            DB::statement('SET SESSION lock_wait_timeout = '.(int) $previous);
+        }
     }
 
     public function down(): void

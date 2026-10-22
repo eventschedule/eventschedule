@@ -916,26 +916,28 @@ class ScheduleFormJourneyTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $this->openStyle($browser);
             $this->press($browser, '#style-tab-background');
-            $browser->click('label[for="background_type_aurora"]')->pause(300);
+            $browser->click('label[for="background_type_aurora"]');
             $browser->waitFor('#style_background_aurora .st-aur-sw[data-value="ember"]', 5);
-            $this->assertTrue((bool) $this->js($browser, '!! document.querySelector("#style-preview > .gp-aurora")'), 'the preview draws the lights');
+            $browser->waitUntil('!! document.querySelector("#style-preview > .gp-aurora")', 5);
 
-            $browser->click('#style_background_aurora .st-aur-sw[data-value="ember"]')->pause(300);
-            $this->assertSame('ember', $browser->value('#aurora_palette'));
+            $browser->click('#style_background_aurora .st-aur-sw[data-value="ember"]');
+            $browser->waitUntil('document.getElementById("aurora_palette").value === "ember"', 5);
             $this->assertStringStartsWith(__('messages.aurora').' · '.__('messages.aurora_palette_ember'), $this->summary($browser, 'style:background'));
 
             $seed = $browser->value('#aurora_seed');
-            $browser->click('#style_background_aurora .st-aur-tools button:nth-of-type(1)')->pause(400);
-            $this->assertNotSame($seed, $browser->value('#aurora_seed'), 'Shuffle chose another arrangement');
+            $browser->click('#style_background_aurora .st-aur-tools button:nth-of-type(1)');
+            $browser->waitUntil('document.getElementById("aurora_seed").value !== '.json_encode($seed), 5);
+            $browser->waitUntil('(document.getElementById("form-save-bar") || {}).textContent.indexOf('.json_encode(__('messages.schedule_style')).') !== -1', 5);
             $this->assertSame(__('messages.unsaved').': '.__('messages.schedule_style'), $this->barText($browser));
-            $browser->click('#style_background_aurora .st-aur-tools button:nth-of-type(2)')->pause(300);
-            $this->assertSame($seed, $browser->value('#aurora_seed'), 'Back returns to it');
+            $browser->click('#style_background_aurora .st-aur-tools button:nth-of-type(2)');
+            $browser->waitUntil('document.getElementById("aurora_seed").value === '.json_encode($seed), 5);
 
             // Custom asks for three colours, and only Custom does.
             $this->assertFalse((bool) $this->js($browser, 'document.getElementById("aurora_custom_colors").offsetParent !== null'));
-            $browser->click('#style_background_aurora .st-aur-sw[data-value="custom"]')->pause(300);
-            $this->assertTrue((bool) $this->js($browser, 'document.getElementById("aurora_custom_colors").offsetParent !== null'));
-            $browser->click('#style_background_aurora .st-aur-sw[data-value="ember"]')->pause(300);
+            $browser->click('#style_background_aurora .st-aur-sw[data-value="custom"]');
+            $browser->waitUntil('document.getElementById("aurora_custom_colors").offsetParent !== null', 5);
+            $browser->click('#style_background_aurora .st-aur-sw[data-value="ember"]');
+            $browser->waitUntil('document.getElementById("aurora_palette").value === "ember"', 5);
 
             $browser->script('window._skipUnsavedWarning = true; document.getElementById("edit-form").requestSubmit();');
             $browser->waitForLocation('/journeyquartet/schedule', 30);

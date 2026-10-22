@@ -239,10 +239,10 @@
             Background
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Background</strong> row starts with a <strong class="text-gray-900 dark:text-white">Background Type</strong> choice of Aurora, Gradient, Solid or Image. Picking one shows its own controls and puts the others away. The row's line names your choice beside a small swatch of it, so you can see it with the row closed.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Whichever you pick, the background fills the visitor's window and stays in place while your events scroll over it, in the calendar as well as the list, so a picture is never stretched to the length of the page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Whichever you pick, the background fills the visitor's window and stays in place while your events scroll over it, in the calendar as well as the list, so a picture is never stretched to the length of the page. On a phone your schedule page shows a picture behind its header, as before.</p>
 
         <h3 id="aurora" class="doc-subheading">Aurora</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Soft lights in your schedule's colors that drift slowly behind your page, with a fine grain. Aurora is drawn by the visitor's browser rather than being a picture, so it is sharp on any screen, from a phone to a large monitor, and adds almost nothing to the page's weight. It follows each visitor's light or dark mode: pale lights on a bright page in light mode, glowing color on a deep one in dark mode. New schedules start on Aurora, with a palette picked at random and an accent color to match it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Soft lights in your schedule's colors that drift slowly behind your page, with a fine grain. Aurora is drawn by the visitor's browser rather than being a picture, so it is sharp on any screen, from a phone to a large monitor, and adds almost nothing to the page's weight. It follows each visitor's light or dark mode: pale lights on a bright page in light mode, glowing color on a deep one in dark mode. Schedules you create start on Aurora, with a palette picked at random and an accent color to match it.</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Palette</h4>

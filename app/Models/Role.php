@@ -2571,42 +2571,72 @@ class Role extends Model implements MustVerifyEmail
             return false;
         }
 
-        // Comments out first, so a commented-out rule does not count. Walked, not matched: a
-        // lazy pattern over comments that never close took quadratic time. One left open runs
-        // to the end, as it does in a browser.
-        $plain = '';
-        $at = 0;
-        while (($start = strpos($css, '/*', $at)) !== false) {
-            $plain .= substr($css, $at, $start - $at);
-            $end = strpos($css, '*/', $start + 2);
-            if ($end === false) {
-                $at = strlen($css);
-                break;
-            }
-            $at = $end + 2;
-        }
-        $css = $plain.substr($css, $at);
-
-        // One walk over the text, rule by rule: a selector list that names html, body or :root
-        // anywhere (html body, body.x, .dark body), and a block that sets background or one of
-        // its longhands. Not one pattern over the whole text, which backtracked through a long
-        // selector list for seconds on every view of the page.
-        $at = 0;
+        // One pass over the text, a character at a time, so it is linear whatever it is given
+        // (the first version was one pattern that backtracked for seconds on a long selector
+        // list, on every view of the page). Strings and url() are read past whole, so a brace or
+        // a "/*" inside one is not taken for CSS; a comment is dropped, one left open running to
+        // the end as in a browser. Each block is opened under its selector, nested rules (&)
+        // resolved against their parent, and every declaration is asked whether it sets a
+        // background while its rule names the page.
         $length = strlen($css);
-        while ($at < $length && ($open = strpos($css, '{', $at)) !== false) {
-            $selector = substr($css, $at, $open - $at);
-            $selector = substr($selector, max(strrpos($selector, '}') ?: 0, strrpos($selector, ';') ?: 0));
-            $close = strpos($css, '}', $open);
-            $block = substr($css, $open + 1, ($close === false ? $length : $close) - $open - 1);
+        $stack = [];
+        $buffer = '';
+        $i = 0;
 
-            // A block that holds rules of its own (@media) is entered rather than read.
-            if (! str_contains($block, '{')
-                && self::selectsThePage($selector)
-                && preg_match('~(?<![\w-])background(?:-[a-z]+)?\s*:~i', $block) === 1) {
-                return true;
+        while ($i < $length) {
+            $c = $css[$i];
+
+            if ($c === '/' && ($css[$i + 1] ?? '') === '*') {
+                $end = strpos($css, '*/', $i + 2);
+                $i = $end === false ? $length : $end + 2;
+
+                continue;
             }
 
-            $at = str_contains($block, '{') ? $open + 1 : ($close === false ? $length : $close + 1);
+            if ($c === '"' || $c === "'") {
+                $j = $i + 1;
+                while ($j < $length && $css[$j] !== $c) {
+                    $j += $css[$j] === '\\' ? 2 : 1;
+                }
+                $buffer .= '""';
+                $i = $j + 1;
+
+                continue;
+            }
+
+            if (($c === 'u' || $c === 'U') && strncasecmp(substr($css, $i, 4), 'url(', 4) === 0) {
+                $close = strpos($css, ')', $i + 4);
+                $buffer .= 'url()';
+                $i = $close === false ? $length : $close + 1;
+
+                continue;
+            }
+
+            if ($c === '{') {
+                $selector = trim($buffer);
+                $parent = end($stack) ?: null;
+                if ($parent !== null && $parent[0] !== '@' && $selector !== '' && $selector[0] !== '@') {
+                    // A nested rule: & is its parent, and no & means somewhere inside it.
+                    $selector = str_contains($selector, '&') ? str_replace('&', $parent, $selector) : $parent.' '.$selector;
+                }
+                $stack[] = $selector;
+                $buffer = '';
+            } elseif ($c === ';' || $c === '}') {
+                $rule = end($stack);
+                if (is_string($rule) && $rule !== '' && $rule[0] !== '@'
+                    && preg_match('~^\s*(?:-(?:webkit|moz)-)?background(?:-[a-z]+)*\s*:~i', $buffer) === 1
+                    && self::selectsThePage($rule)) {
+                    return true;
+                }
+                $buffer = '';
+                if ($c === '}') {
+                    array_pop($stack);
+                }
+            } else {
+                $buffer .= $c;
+            }
+
+            $i++;
         }
 
         return false;
@@ -2615,10 +2645,24 @@ class Role extends Model implements MustVerifyEmail
     /**
      * Whether a selector list names the page itself: one of its selectors ENDS on html, body or
      * :root (html body, .dark body, body.x). "body .card" styles a card, and ".body" a class.
+     * Split on the commas between selectors only, never those inside :not() or :is().
      */
     private static function selectsThePage(string $selectors): bool
     {
-        foreach (explode(',', $selectors) as $selector) {
+        $depth = 0;
+        $start = 0;
+        $list = [];
+        for ($i = 0, $n = strlen($selectors); $i < $n; $i++) {
+            $c = $selectors[$i];
+            $depth += $c === '(' ? 1 : ($c === ')' ? -1 : 0);
+            if ($c === ',' && $depth <= 0) {
+                $list[] = substr($selectors, $start, $i - $start);
+                $start = $i + 1;
+            }
+        }
+        $list[] = substr($selectors, $start);
+
+        foreach ($list as $selector) {
             $parts = preg_split('#[\s>+~]+#', trim($selector), -1, PREG_SPLIT_NO_EMPTY) ?: [];
             $last = end($parts);
             if (is_string($last) && preg_match('~^(?:html|body|:root)(?![\w-])~i', $last) === 1) {

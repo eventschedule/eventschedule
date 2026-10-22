@@ -66,7 +66,7 @@ class AuroraBackgroundTest extends TestCase
         $html = $this->page('/'.$role->subdomain);
 
         $this->assertStringContainsString('<div class="gp-bg" aria-hidden="true">', $html);
-        $this->assertStringContainsString('<div class="gp-aurora"  data-aurora-comp="3"  data-aurora-mirror="0"  data-aurora-motion="on" >', $html);
+        $this->assertMatchesRegularExpression('/<div class="gp-aurora"\s+data-aurora-comp="3"\s+data-aurora-mirror="0"\s+data-aurora-motion="on"\s*>/', $html);
         $this->assertSame(count(Aurora::COMPOSITIONS[3]), substr_count($html, '<i style="--x:'));
         $this->assertStringContainsString('.gp-bg{--aurora-ground:', $html);
         $this->assertStringContainsString(':where(.dark) .gp-bg{--aurora-ground:', $html);

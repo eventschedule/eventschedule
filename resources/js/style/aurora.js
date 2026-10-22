@@ -5,6 +5,7 @@
 // the two equal: change a number here and change it there.
 
 const GREY_BELOW = 0.08;
+const MUTED_BELOW = 0.2;
 const PEAK = { light: 0.9, dark: 0.82 };
 const GRAIN = { light: 0.07, dark: 0.11 };
 const INK_LIGHT = [0x33, 0x38, 0x3c];
@@ -131,10 +132,13 @@ export function harmonise(accent, harmony) {
 }
 
 function relight(hex, mode, i, ground, alpha) {
-    let [h, s] = toHsl(rgb(hex));
+    const source = rgb(hex);
+    let [h, s] = toHsl(source);
     const grey = s < GREY_BELOW;
+    // As Aurora::relight(): a source with little colour (chroma) stays muted.
+    const muted = (Math.max(...source) - Math.min(...source)) / 255 < MUTED_BELOW;
     if (mode === 'light') {
-        s = grey ? 0 : Math.max(0.7, Math.min(0.95, s));
+        s = grey ? 0 : (muted ? Math.min(s, 0.3) : Math.max(0.7, Math.min(0.95, s)));
         let l = [0.56, 0.60, 0.64, 0.54][i];
         let c = fromHsl([h, s, l]);
         for (let n = 0; n < 40 && contrast(over(c, alpha, ground), INK_LIGHT) < 4.5; n++) {
@@ -144,7 +148,7 @@ function relight(hex, mode, i, ground, alpha) {
 
         return c;
     }
-    s = grey ? 0 : Math.max(0.6, Math.min(0.9, s));
+    s = grey ? 0 : (muted ? Math.min(s, 0.3) : Math.max(0.6, Math.min(0.9, s)));
     let l = [0.50, 0.46, 0.42, 0.56][i];
     let c = fromHsl([h, s, l]);
     for (let n = 0; n < 50 && contrast(over(c, alpha, ground), INK_DARK) < 4.5; n++) {

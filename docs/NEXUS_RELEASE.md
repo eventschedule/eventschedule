@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-backgrounds-on-a-window-sized-layer-and-aurora-2026-10-22) | not yet | Two migrations (in the start command); after: optionally the background backfill in batches, then look at three schedule pages |
 | [Unreleased](#unreleased-the-admin-dashboard-is-the-live-view-2026-10-22) | not yet | Nothing; open `/admin` and scroll |
 | [Unreleased](#unreleased-boost-partners-appointment-hosts-and-the-appointment-api-2026-10-15) | not yet | Confirm the Meta token is a system user's, add `META_BUSINESS_ID`, `META_SYSTEM_USER_ID` and `APP_COMMIT`, check the Stripe platform webhook; after: the scheduler entry, then the pilot partner's setup |
 | [v1.0.134](#v10134) | live (as v1.0.135 from 2026-10-08; past `b9777e3d9` by 2026-10-17) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN`; [GDPR](#gdpr-2026-10-04): 2FA on every admin first, then the policy-change notice |
@@ -95,6 +96,50 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: backgrounds on a window-sized layer, and Aurora (2026-10-22)
+
+**What ships:**
+- A schedule's gradient or picture background is drawn on a layer fixed to the window
+  (`.gp-bg`, `partials/guest-background`) instead of on `body`, so the calendar no longer enlarges
+  a picture to the length of the page; the background stays put while events scroll, in the
+  calendar as in the list. A Pro schedule whose custom CSS styles the page background on `html`,
+  `body` or `:root` keeps the old rule on `body` (`Role::customCssStylesPageBackground()`).
+- Uploaded backgrounds gain a 3840 derivative (`ImageUtils::PAGE_VARIANT_WIDTHS`), used from a
+  1280px window on a retina screen when the original is wider than 1920. Never the original.
+- A new background type, Aurora (`App\Utils\Aurora`, table `aurora_settings`): lights drawn by
+  the browser from the schedule's colours. New schedules (the form and the API) start on it with
+  a random palette and that palette's accent; existing schedules are unchanged. A partner that
+  creates schedules through the API now gets that too, a random accent instead of `#007bff`.
+- The schedule form's Style tab samples the header picture on the server for Match header
+  (cached a month per picture), so the first open of each schedule's form after the deploy reads
+  its header once.
+
+**Migrations** (the start command runs them):
+- `2026_10_22_000000_add_aurora_to_roles_background` appends `aurora` to `roles.background`
+  (metadata only, waits at most 10 seconds for its lock, safe to re-run). Its `down()` does
+  nothing on purpose.
+- `2026_10_22_000001_create_aurora_settings_table` (waits at most 10 seconds, safe to re-run).
+  Its `down()` drops the table; Aurora schedules then draw from their accent.
+
+While the web container migrates, the scheduler worker already runs the new code: a header
+variants job or a backup export in those seconds can report a missing `aurora_settings` table to
+Sentry once and is retried. Noise only.
+
+**After the deploy:**
+1. Optional, any time: `php artisan images:backfill-variants --roles --slot=background --limit=50`
+   in batches on the console container until it reports nothing left. Every uploaded background
+   is selected (each lacks `w3840`), and each row re-encodes 960, 1920 and 3840. Until a row is
+   done its page uses the 1920 file, so nothing waits on this.
+2. Look at three schedule pages: one on a built-in picture in the calendar view (the picture
+   holds still and is far less enlarged), one on an uploaded picture, and a new schedule (Aurora,
+   in light and in dark mode).
+
+**Undo:** a rollback in the console leaves Aurora schedules on the layout's plain ground (old
+code has no `aurora` branch) until they are switched back to another type; nothing errors.
+
+**Selfhost:** a backup taken after this release that holds an Aurora schedule cannot be restored
+on an older install (the enum value is missing). Update first.
 
 ## Unreleased: the admin Dashboard is the live view (2026-10-22)
 

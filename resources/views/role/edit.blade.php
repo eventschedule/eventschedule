@@ -749,16 +749,17 @@
             measureBackgroundPicture();
         }
 
-        // The resolution note describes the picture the background will have: one just chosen
-        // and waiting for Save, else the stored one, else none (a built-in, or nothing at all).
-        // Measured where it is drawn; a picture still on its way is measured when it arrives.
+        // The resolution note is said about a picture the owner has just chosen from their own
+        // files and not saved yet: when it can still be swapped for a larger one. Not about the
+        // stored one, every visit, nor about one the AI generator made (it draws at 16:9, under
+        // 1920 wide), which the owner did not pick a size for. Measured where it is drawn; a
+        // picture still on its way is measured when it arrives.
         function measureBackgroundPicture() {
             const select = document.getElementById('background_image');
-            const pendingBox = document.getElementById('background_image_preview_clear');
-            const pending = pendingBox && pendingBox.style.display !== 'none' ? document.getElementById('background_image_preview') : null;
-            const existing = document.getElementById('background_image_existing');
-            const stored = existing && existing.style.display !== 'none' ? existing.querySelector('img') : null;
-            const picture = select && select.value === '' ? (pending && pending.getAttribute('src') ? pending : stored) : null;
+            const input = document.getElementById('background_image_url');
+            const chosen = input && input.files && input.files.length > 0 && ! document.getElementById('ai_background_image');
+            const pending = chosen ? document.getElementById('background_image_preview') : null;
+            const picture = select && select.value === '' && pending && pending.getAttribute('src') ? pending : null;
 
             if (! picture) {
                 checkBackgroundResolution(0, 0);

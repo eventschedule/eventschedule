@@ -103,6 +103,9 @@ final class Aurora
     /** Below this HSL saturation a source is a grey, and its light stays grey. */
     private const GREY_BELOW = .08;
 
+    /** Below this chroma (0 to 1) a source is muted, and its light keeps its own quiet colour. */
+    private const MUTED_BELOW = .2;
+
     /**
      * @param  string[]  $sources  three #rrggbb
      */
@@ -400,7 +403,9 @@ final class Aurora
      */
     public static function saveFromRequest(Role $role, Request $request): void
     {
-        $palette = (string) $request->input('aurora_palette', 'accent');
+        // What the post did not carry is kept, as every other part of a schedule save keeps it.
+        $stored = $role->auroraSetting;
+        $palette = $request->has('aurora_palette') ? (string) $request->input('aurora_palette') : ($stored->palette ?: 'accent');
         $palette = self::isPalette($palette) ? $palette : 'accent';
 
         $colors = null;
@@ -416,9 +421,15 @@ final class Aurora
 
         $seed = $request->filled('aurora_seed') && is_numeric($request->input('aurora_seed'))
             ? (int) $request->input('aurora_seed')
-            : $role->auroraSetting->seed;
+            : $stored->seed;
+        $motion = $request->has('aurora_motion') ? $request->boolean('aurora_motion') : (bool) ($stored->motion ?? true);
 
-        self::saveSettings($role, $palette, $colors, $seed, $request->boolean('aurora_motion'));
+        // Custom posted without its colours keeps the stored ones.
+        if ($palette === 'custom' && count(self::colorList($colors)) !== 3 && $stored->palette === 'custom') {
+            $colors = $stored->colors;
+        }
+
+        self::saveSettings($role, $palette, $colors, $seed, $motion);
     }
 
     /**
@@ -518,9 +529,11 @@ final class Aurora
                 return $cached ?: null;
             }
 
-            // A miss is kept for minutes, not the month: it may be a disk that did not answer.
+            // A miss is kept for an hour, not the month: it may be a disk that did not answer. Not
+            // for minutes either: a picture too large to decode would be fetched (up to 2.5MB)
+            // again on nearly every visit to the form.
             $colors = self::headerColors($role);
-            Cache::put($key, $colors ?? [], $colors ? now()->addDays(30) : now()->addMinutes(5));
+            Cache::put($key, $colors ?? [], $colors ? now()->addDays(30) : now()->addHour());
 
             return $colors;
         } catch (\Throwable $e) {
@@ -643,11 +656,16 @@ final class Aurora
      */
     private static function relight(string $hex, string $mode, int $i, array $ground, float $alpha): array
     {
-        [$h, $s] = self::toHsl(self::rgb($hex));
+        $rgb = self::rgb($hex);
+        [$h, $s] = self::toHsl($rgb);
         $grey = $s < self::GREY_BELOW;
+        // A source with little colour in it (a slate, a charcoal) stays muted: lifting its
+        // saturation turned Graphite's greys into a bright blue. Chroma, not saturation, says
+        // how much colour there is: a near-black navy has a high saturation and almost none.
+        $muted = (max($rgb) - min($rgb)) / 255 < self::MUTED_BELOW;
 
         if ($mode === 'light') {
-            $s = $grey ? 0 : max(.7, min(.95, $s));
+            $s = $grey ? 0 : ($muted ? min($s, .3) : max(.7, min(.95, $s)));
             $l = [.56, .60, .64, .54][$i];
             $c = self::fromHsl([$h, $s, $l]);
             $ink = self::rgb(self::INK_LIGHT);
@@ -659,7 +677,7 @@ final class Aurora
             return $c;
         }
 
-        $s = $grey ? 0 : max(.6, min(.9, $s));
+        $s = $grey ? 0 : ($muted ? min($s, .3) : max(.6, min(.9, $s)));
         $l = [.50, .46, .42, .56][$i];
         $c = self::fromHsl([$h, $s, $l]);
         $ink = self::rgb(self::INK_DARK);

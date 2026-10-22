@@ -115,6 +115,16 @@ class GuestBackgroundLayerTest extends TestCase
             "html body {\n  background: #000;\n}",
             '.x{color:red} :root { background-position: top; }',
             '@media (min-width: 1px) { body.gp { background-image: none; } }',
+            'body { -webkit-background-size: contain; }',
+            'body { background-position-x: 20%; }',
+            // Minified, after an at-rule or a string, nested.
+            '@media(max-width:600px){.x{color:red}}body{background:red}',
+            '@charset "utf-8";body{background:red}',
+            '.x::after{content:"}"}html{background:red}',
+            'body{background:#000; .card{color:red}}',
+            'body{ &.dark{background:#000} }',
+            '.x::before{content:"/*"} body{background:red}',
+            '.a{background:url(img/*.png)} body{background:red}',
         ] as $css) {
             $role = $this->schedule(['background' => 'image', 'background_image' => 'Calm', 'custom_css' => $css]);
             $this->assertTrue($role->customCssStylesPageBackground(), $css);
@@ -128,6 +138,7 @@ class GuestBackgroundLayerTest extends TestCase
             '.gk-body { background: red; }', '/* body { background: red; } */', 'body { color: red; }', 'tbody { background: red; }',
             // A selector that only starts at body styles something inside the page.
             'body .gk-panel { background: red; }', '.body { background: red; }', 'body:not(.x) .card { background: red; }',
+            'body:not(.a, .b) .card { background: red; }', 'body { .card { background: #000; } }',
             // A comment left open runs to the end, and is read quickly.
             str_repeat('/*a', 3000).'body { background: red; }',
         ] as $css) {
@@ -153,6 +164,28 @@ class GuestBackgroundLayerTest extends TestCase
 
         $this->assertStringContainsString(self::LAYER, $html);
         $this->assertStringContainsString('linear-gradient(150deg, #aa0000, #00aa00)', $html);
+    }
+
+    /**
+     * A page whose own custom CSS styles its background keeps it on its event pages: another
+     * schedule's Aurora would be drawn over it.
+     */
+    public function test_another_schedules_aurora_does_not_cover_an_owners_css_background(): void
+    {
+        $owner = $this->createOwner();
+        $act = $this->createRole($owner, 'talent', ['name' => 'The Act', 'background' => 'aurora']);
+        $venue = $this->createRole($owner, 'venue', [
+            'name' => 'Blue Room', 'background' => 'gradient', 'background_colors' => '#112233, #445566',
+            'custom_css' => 'body { background-image: none; background-color: #101010; }',
+        ]);
+        $event = $this->createEvent($venue, ['name' => 'Autumn Session', 'creator_role_id' => $venue->id]);
+        $event->roles()->attach($act->id, ['is_accepted' => true]);
+
+        $html = $this->page($event->fresh()->getGuestUrl($venue->subdomain));
+
+        $this->assertStringNotContainsString('class="gp-aurora"', $html);
+        $this->assertStringNotContainsString(self::LAYER, $html);
+        $this->assertStringContainsString('linear-gradient(150deg, #112233, #445566)', $html, 'the page wears its own background, on body');
     }
 
     /**

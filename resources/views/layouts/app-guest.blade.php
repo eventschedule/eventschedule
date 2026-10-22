@@ -90,6 +90,11 @@
         // written against (Role::customCssStylesPageBackground()); Aurora draws its layer either
         // way. A solid colour is a colour on body, with no layer.
         $bg = ($event && $otherRole && $otherRole->isClaimed() && $otherRole->hasConfiguredBackground()) ? $otherRole : $role;
+        // Another schedule's Aurora would be drawn over this one's own CSS background: its
+        // owner's page wears its own background instead, as it did before Aurora.
+        if ($bg !== $role && $bg->background === 'aurora' && $role->customCssStylesPageBackground()) {
+            $bg = $role;
+        }
         $bgLegacy = ! $paintBackground || (in_array($bg->background, ['gradient', 'image'], true) && $role->customCssStylesPageBackground());
         $bgAurora = ($paintBackground && $bg->background === 'aurora') ? \App\Utils\Aurora::for($bg) : null;
         $bgLayer = $bgAurora !== null || (! $bgLegacy && in_array($bg->background, ['gradient', 'image'], true));
