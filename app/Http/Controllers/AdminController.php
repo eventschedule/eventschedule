@@ -25,7 +25,6 @@ use App\Models\UsageDaily;
 use App\Models\User;
 use App\Services\ActiveDays;
 use App\Services\AdminAlertService;
-use App\Services\AdminDashboard;
 use App\Services\AdminPlanCounts;
 use App\Services\AppUpdateService;
 use App\Services\AuditService;
@@ -120,62 +119,6 @@ class AdminController extends Controller
         );
 
         return redirect()->intended(route('admin.dashboard', absolute: false));
-    }
-
-    /**
-     * The admin dashboard. What each card counts, and why its windows are fixed rather than chosen
-     * with the date-range select the other admin pages have, is AdminDashboard's to say.
-     */
-    public function dashboard(Request $request)
-    {
-        if (! auth()->user()->isAdmin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
-        // ?sample=1 renders invented data for the documentation screenshot, which must not publish
-        // the developer's real schedules and people. Local and testing only: in production the
-        // parameter does nothing.
-        $sample = $request->boolean('sample') && app()->environment('local', 'testing');
-        $builder = app(AdminDashboard::class);
-        $dashboard = $sample ? AdminDashboard::sample() : $builder->build();
-
-        // The same figure the growth page reports as MRR, from the same class, read off the
-        // revenue card. Zero where there is no card: an install with no billing, and a card whose
-        // query failed. Not a second RecurringRevenue call: build() has just caught and reported
-        // that failure so the rest of the page stands, and asking again here, outside its guard,
-        // turned one missing card back into a 500.
-        $recurring = $dashboard['revenue']['totals'] ?? ['arr' => 0.0, 'trialing_count' => 0];
-
-        // What the page reads besides its cards is timed too, and the lot goes out as a
-        // Server-Timing header (AdminDashboard::serverTiming()).
-        $also = [];
-        $timed = function (string $name, callable $read) use (&$also) {
-            $started = hrtime(true);
-            $value = $read();
-            $also[$name] = (hrtime(true) - $started) / 1e6;
-
-            return $value;
-        };
-
-        // Everything across /admin that is waiting on an admin, as one to-do list.
-        $adminAlerts = $timed('alerts', fn () => AdminAlertService::items());
-        // The line beside the alerts; null when realtime is off.
-        $realtimeRecentViews = $timed('realtime', fn () => \App\Services\RealtimeDashboard::recentViews());
-
-        $response = $timed('render', fn () => response()->view('admin.dashboard', [
-            'dashboard' => $dashboard,
-            'arr' => $recurring['arr'],
-            'arrTrialingCount' => $recurring['trialing_count'],
-            'adminAlerts' => $adminAlerts,
-            'realtimeRecentViews' => $realtimeRecentViews,
-        ]));
-
-        // Not for the invented data of the docs screenshot: nothing was read to make it.
-        if (! $sample) {
-            $response->header('Server-Timing', $builder->serverTiming($also));
-        }
-
-        return $response;
     }
 
     /**
@@ -1433,8 +1376,7 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        // The two scopes the plan cards share, and the counts the admin dashboard also shows:
-        // AdminPlanCounts owns them so the dashboard's line and this page cannot disagree.
+        // The two scopes the plan cards share, and their counts, are AdminPlanCounts'.
         $validSubscriptionScope = AdminPlanCounts::validSubscription();
 
         // Plan statistics (excluding demo roles) using actualPlanTier() for accurate counts

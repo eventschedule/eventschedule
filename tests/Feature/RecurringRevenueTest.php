@@ -135,14 +135,17 @@ class RecurringRevenueTest extends TestCase
     {
         $arr = $this->seedEveryCase();
 
+        // The dashboard's Revenue card, which is billing and so hosted only.
+        config(['app.hosted' => true]);
         $admin = $this->createOwner(true);
-        $response = $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+        $card = $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
             ->actingAs($admin)
-            ->get(route('admin.dashboard'))
+            ->getJson(route('admin.dashboard.revenue'))
             ->assertOk()
-            ->assertViewHas('arr', $arr)
-            ->assertViewHas('arrTrialingCount', 1);
-        $response->assertSee(__('messages.recurring_revenue_excludes_trials', ['count' => 1]));
+            ->assertJsonPath('arr', plan_price($arr))
+            ->assertJsonPath('trialing_count', 1);
+        // JSON writes 560.0 as 560.
+        $this->assertSame($arr, (float) $card->json('arr_value'));
 
         $money = app(GrowthExportService::class)
             ->build(now()->subDays(30), now(), now()->subDays(60), now()->subDays(31))['monetization'];

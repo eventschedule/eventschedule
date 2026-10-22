@@ -19,7 +19,7 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * The refreshed /admin/realtime: the Right now board, and the Trends card with the hourly counts
+ * The live part of /admin/dashboard: the Right now board, and the Trends card with the hourly counts
  * behind it (RealtimeRollup, RealtimeTrends).
  *
  * What is held: every page view is counted once, in the hour it started, whichever path prunes it
@@ -280,11 +280,13 @@ class RealtimeTrendsTest extends TestCase
     public function test_the_page_draws_the_board_and_the_trends(): void
     {
         $html = $this->withSession(['admin_password_confirmed_at' => now()->timestamp])->actingAs($this->createOwner(true))
-            ->get('/admin/realtime?trend=7d')->assertOk()->getContent();
+            ->get('/admin/dashboard?trend=7d')->assertOk()->getContent();
 
         $this->assertStringContainsString('id="realtime-now"', $html);
         $this->assertStringContainsString('aria-labelledby="realtime-trends-heading"', $html);
-        $this->assertStringContainsString('"range":"7d"', $html, 'the range in the address opens the card on it');
+        // The figures are asked for as the card nears the screen; the range comes from the address.
+        $this->assertStringContainsString('"trend":"7d"', $html, 'the range in the address opens the card on it');
+        $this->assertStringNotContainsString('"buckets"', $html, 'the figures are not in the page');
     }
 
     private function hourly(): array

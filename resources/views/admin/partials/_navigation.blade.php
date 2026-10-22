@@ -1,19 +1,19 @@
-{{-- The platform admin's navigation: five tabs, and under them every page of the group you are in.
+{{-- The platform admin's navigation: four tabs, and under them every page of the group you are in.
 
      The three groups (Insights, Manage, System) used to be menus hanging from their tab and
      nothing else: on any page inside one, nothing on screen said WHICH page it was (only "System"
      was lit). So a group's tab leads to its first page and the second row names them all, the
      current one pressed in. The menu is back beside that as a shortcut, never instead of it:
      pointing at a group's tab (or ArrowDown on it) lists its pages, so any page is one press from
-     any other. A phone gets the whole section as one dropdown, grouped, because five tabs and
+     any other. A phone gets the whole section as one dropdown, grouped, because four tabs and
      nine pages do not fit across it.
 
      ONE list ($adminNav) feeds the strip, the menus, the second row and the dropdown: a page added
      to one alone is missing for half the visitors. It also carries the page's h1, which no admin
      page has of its own. Plain DOM script: the old menus were the last Alpine on these pages.
 
-     $active is the page's key, passed by each page as before. A page that updates itself (Realtime)
-     passes 'refresh' => false, and the Refresh button is left out there. --}}
+     $active is the page's key, passed by each page as before. A page that updates itself (the
+     Dashboard) passes 'refresh' => false, and the Refresh button is left out there. --}}
 @props(['active' => 'dashboard'])
 
 @php
@@ -29,10 +29,10 @@
     // machinery; the blog is the marketing site's, so nexus-only. App update is selfhost only:
     // eventschedule.com deploys from git, so there is nothing there to update.
     $adminNav = [
+        // The live view and the cards under it (Realtime was a tab of its own until 2026-10). A
+        // plain tab, label only: badges mean "needs attention", so a live count here would read
+        // as an alert.
         'dashboard' => ['label' => __('messages.dashboard'), 'href' => route('admin.dashboard')],
-        // A plain tab, label only: badges mean "needs attention", so a live count here would
-        // read as an alert.
-        'realtime' => ['label' => __('messages.realtime'), 'href' => route('admin.realtime')],
         'insights' => ['label' => __('messages.insights'), 'pages' => array_filter([
             'users' => ['label' => __('messages.users'), 'href' => route('admin.users')],
             'revenue' => ['label' => __('messages.revenue'), 'href' => route('admin.revenue')],

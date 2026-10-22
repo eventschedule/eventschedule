@@ -14,7 +14,9 @@
         <span v-if="status === 'reconnecting'" class="text-amber-700 dark:text-amber-400">@{{ lastUpdatedText }}</span>
     </div>
 
-    <div v-if="filterChips.length" class="flex flex-wrap items-center gap-2">
+    {{-- Not while the first poll is out: until it answers, a chip has the address's raw key
+         (e:AbC123) where the page's name goes. --}}
+    <div v-if="filterChips.length && p.state !== 'loading'" class="flex flex-wrap items-center gap-2">
         <span v-for="chip in filterChips" :key="chip.key"
               class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 dark:bg-gray-700 ps-3 pe-1 py-1 text-sm">
             <span class="text-gray-500 dark:text-gray-400">@{{ chip.type }}</span>

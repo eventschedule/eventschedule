@@ -6,10 +6,9 @@ use App\Models\Role;
 use Closure;
 
 /**
- * The schedules that have a paid plan's features without a subscription paying for them, counted
- * once for the two pages that show them: the cards on /admin/schedules and the "Outside Stripe"
- * line on the admin dashboard, which links there. One class so the line and the page it opens
- * cannot disagree.
+ * The schedules that have a paid plan's features without a subscription paying for them, as the
+ * cards on /admin/schedules count them. (The admin dashboard's "Outside Stripe" line read them
+ * here too until 2026-10, when that card was cut down to its two totals.)
  *
  * None of these is revenue. What is being billed is RecurringRevenue's to say.
  */
@@ -74,23 +73,6 @@ class AdminPlanCounts
         return Role::where(self::verifiedNonDemo())
             ->whereNotNull('trial_ends_at')
             ->where('trial_ends_at', '>', now())
-            ->count();
-    }
-
-    /**
-     * A free schedule trying paid ticket selling: the query form of Role::onTicketTrial(). Not a
-     * plan, so these are on neither of the counts above; a schedule that has since become Pro has
-     * stopped being on this trial even though its date is never cleared.
-     */
-    public static function sellingTrials(): int
-    {
-        if (! config('app.hosted')) {
-            return 0;
-        }
-
-        return Role::where(self::verifiedNonDemo())
-            ->where('ticket_trial_ends_at', '>', now())
-            ->whereNot(fn ($query) => $query->wherePro())
             ->count();
     }
 }

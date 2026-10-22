@@ -163,6 +163,8 @@
                                         <bdi v-else>@{{ entry.label }}</bdi>
                                         <span class="text-xs text-gray-500 dark:text-gray-400"> · @{{ entry.surface_label }}</span>
                                     </span>
+                                    {{-- A schedule's page: the schedule in the admin. --}}
+                                    <x-admin-page-link v-if="entry.admin_url" v-bind:href="entry.admin_url" v-bind:aria-label="fill(msg.openInAdmin, entry.admin_label)" v-bind:title="fill(msg.openInAdmin, entry.admin_label)" class="-my-1" />
                                     <span class="shrink-0 text-xs tabular-nums" :class="entry.current ? 'text-green-700 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'">@{{ entry.current ? msg.now : duration(entry.secs) }}</span>
                                 </template>
                             </li>

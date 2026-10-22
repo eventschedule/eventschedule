@@ -173,48 +173,10 @@ class AdminDashboardSignupsTest extends TestCase
             'ip_address' => '203.0.113.9', 'user_agent' => 'Mozilla/5.0', 'created_at' => now()->subMinutes(5),
         ]);
 
-        $onDashboard = (new AdminDashboard)->signups()['latest'][0]['source'];
+        $onDashboard = collect((new AdminDashboard)->signups()['sources']['channels'])->firstWhere('count', '>', 0);
         $onRealtime = (new RealtimeActivity)->build(true)['signups']['rows'][0]['source'];
 
         $this->assertSame('campaign', $onDashboard['channel']);
-        $this->assertSame($onDashboard, $onRealtime);
-    }
-
-    /**
-     * How far each of the newest organizers has got, by the rules /admin/realtime uses for the
-     * same people. Mutation: count a guest submission as their own event, or an add-on as a
-     * ticket, or forget a schedule once it is deleted.
-     */
-    public function test_the_latest_organizers_and_the_step_each_reached(): void
-    {
-        $people = [];
-        foreach (range(0, 6) as $index) {
-            $people[] = $this->account(['created_at' => now()->subMinutes($index + 1)] + ($index === 0 ? ['name' => ''] : []));
-        }
-        // Newer than all of them, and not an organizer: never in this list.
-        $this->account(['created_at' => now(), 'signup_intent' => 'ticket']);
-
-        // 0: an account and nothing else.
-        // 1: a schedule.
-        $room = $this->createRole($people[1], 'venue', ['name' => 'First Room']);
-        // 2: an event.
-        $this->createEvent($this->createRole($people[2]));
-        // 3: a ticket type.
-        $this->createTicket($this->createEvent($this->createRole($people[3])));
-        // 4: an add-on is not a ticket.
-        $this->createTicket($this->createEvent($this->createRole($people[4])), ['is_addon' => true]);
-        // 5: an event submitted to somebody else's schedule is not their own.
-        $this->createEvent($room, ['user_id' => $people[5]->id, 'is_guest_submission' => true]);
-        // 6: a schedule since deleted was still made, and has no page to link to.
-        $this->createRole($people[6], 'venue', ['is_deleted' => true]);
-
-        $latest = (new AdminDashboard)->signups()['latest'];
-
-        $this->assertSame([0, 1, 2, 3, 2, 0, 1], array_column($latest, 'stage'));
-        $this->assertSame('First Room', $latest[1]['schedule']['name']);
-        $this->assertNull($latest[0]['schedule']);
-        $this->assertNull($latest[6]['schedule']);
-        // A person with no name is listed by their address.
-        $this->assertSame($people[0]->email, $latest[0]['name']);
+        $this->assertSame($onDashboard['channel'], $onRealtime['channel']);
     }
 }

@@ -394,7 +394,9 @@ class RouteLoadTest extends TestCase
 
         $this->assertRoutesLoad([
             '/admin/dashboard',
-            '/admin/realtime',
+            '/admin/dashboard/panels/recent',
+            '/admin/dashboard/panels/growth',
+            '/admin/dashboard/panels/platform',
             '/admin/realtime/data',
             '/admin/users',
             '/admin/revenue',

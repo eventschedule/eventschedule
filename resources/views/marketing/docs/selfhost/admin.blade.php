@@ -7,8 +7,10 @@
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
         <x-doc-nav-link href="#accessing">Accessing /admin</x-doc-nav-link>
-        <x-doc-nav-link href="#dashboard">Dashboard</x-doc-nav-link>
-        <x-doc-nav-link href="#realtime">Realtime</x-doc-nav-link>
+        <x-doc-nav-group label="Dashboard" href="#dashboard" expanded>
+            <x-doc-nav-link href="#needs-attention">Needs attention</x-doc-nav-link>
+            <x-doc-nav-link href="#realtime">Live view</x-doc-nav-link>
+        </x-doc-nav-group>
         {{-- The three groups are the admin panel's own three tabs, and the pages inside each are
              in the order its second row lists them (admin/partials/_navigation: $adminNav). --}}
         <x-doc-nav-group label="Insights" expanded>
@@ -53,7 +55,7 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">The admin panel gives the operator of an installation platform-wide visibility and a small set of platform-wide controls. It lives at <code class="doc-inline-code">/admin</code>, opens from the <strong class="text-gray-900 dark:text-white">Admin</strong> entry of the sidebar, and is only there for <a href="#accessing" class="doc-link">accounts marked as admin</a>: it has nothing to do with plans. It is separate from a schedule owner's own admin portal, and nothing here is scoped to one schedule.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The navigation is five tabs. <strong class="text-gray-900 dark:text-white">Dashboard</strong> and <strong class="text-gray-900 dark:text-white">Realtime</strong> are each a page; <strong class="text-gray-900 dark:text-white">Insights</strong>, <strong class="text-gray-900 dark:text-white">Manage</strong> and <strong class="text-gray-900 dark:text-white">System</strong> each hold several, and which of those appear depends on how the install is configured. This guide follows the same order.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The navigation is four tabs. <strong class="text-gray-900 dark:text-white">Dashboard</strong> is a page of its own; <strong class="text-gray-900 dark:text-white">Insights</strong>, <strong class="text-gray-900 dark:text-white">Manage</strong> and <strong class="text-gray-900 dark:text-white">System</strong> each hold several, and which of those appear depends on how the install is configured. This guide follows the same order.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -67,13 +69,8 @@
                 <tbody>
                     <tr>
                         <td>Dashboard</td>
-                        <td><a href="#dashboard" class="doc-link">The page itself</a>: the headline numbers, what is new, and the Needs attention list</td>
-                        <td>Every install</td>
-                    </tr>
-                    <tr>
-                        <td>Realtime</td>
-                        <td><a href="#realtime" class="doc-link">The page itself</a>: who is on the site right now, and the last 24 hours of sign-ups and orders</td>
-                        <td>Every install has the tab. Recording starts switched off, except on eventschedule.com</td>
+                        <td><a href="#dashboard" class="doc-link">The page itself</a>: the Needs attention list, <a href="#realtime" class="doc-link">who is on the site right now</a> and the last 24 hours, revenue, and what is new</td>
+                        <td>Every install. The live view starts switched off, except on eventschedule.com, and Revenue is only there when <code class="doc-inline-code">IS_HOSTED=true</code></td>
                     </tr>
                     <tr>
                         <td>Insights</td>
@@ -96,11 +93,11 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">The tabs run across the top of every admin page. A tab that holds several pages opens its first one, and a second row under the tabs lists them all, with the page you are on marked. On a phone the whole section is one dropdown, grouped the same way. A number beside a tab or a page counts what is waiting on you there; see <a href="#needs-attention" class="doc-link">Needs attention</a>.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">A <strong class="text-gray-900 dark:text-white">Refresh</strong> button sits at the end of the navigation row and reloads the page. Realtime has none, because it updates itself, and Support checks for new messages on its own; every other page shows its numbers as of the last page load.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A <strong class="text-gray-900 dark:text-white">Refresh</strong> button sits at the end of the navigation row and reloads the page. The Dashboard has none, because it updates itself, and Support checks for new messages on its own; every other page shows its numbers as of the last page load.</p>
 
         <h3 id="date-range" class="doc-subheading">Date range</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Six pages carry a date-range selector, at the end of the line that says what the page shows: Users, Revenue, Analytics, Usage, Growth and Boost. The choices are fixed: <strong class="text-gray-900 dark:text-white">Last 7 Days</strong>, <strong class="text-gray-900 dark:text-white">Last 30 Days</strong> (the default), <strong class="text-gray-900 dark:text-white">Last 90 Days</strong> and <strong class="text-gray-900 dark:text-white">All Time</strong>. There is no custom start and end date. Where a page shows a change percentage, it compares against the immediately preceding window of the same length. All Time has no preceding window, so read its change figures as noise: with nothing to compare against, every one of them reports +100%.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Dashboard has no selector: its windows are fixed at the last 24 hours, the last 30 days and the last 12 weeks. The Audit Log has its own From and To date filter instead, and the remaining pages are not date filtered at all.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Dashboard has no selector: its cards' windows are fixed at the last 24 hours, the last 30 days and the last 12 weeks, and its <a href="#realtime" class="doc-link">Trends</a> card has a choice of its own. The Audit Log has its own From and To date filter instead, and the remaining pages are not date filtered at all.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Why the totals look low</div>
@@ -166,23 +163,23 @@
             </svg>
             Dashboard
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The dashboard is the landing page of the admin panel and is read-only. Its windows are fixed: the last 24 hours, the last 30 days and the last 12 weeks. An install with no schedule, no event and no account but yours shows the headline numbers and a single card until there is something to report. From top to bottom it shows:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The dashboard is the landing page of the admin panel and is read-only. Its top is the <a href="#realtime" class="doc-link">live view</a> of who is on the site, which was a page of its own called Realtime (its old address, <code class="doc-inline-code">/admin/realtime</code>, opens the dashboard with any filters it carried). The cards under it are the slower figures. The page opens before any of them is counted: the live view fills in a moment after, and each group of cards is counted only when you scroll near it, so a card you never reach costs nothing. From top to bottom:</p>
         <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h4>Needs attention</h4>
-                <p>Everything waiting on an admin, as a row of links, when there is anything (see <a href="#needs-attention" class="doc-link">below</a>). While <a href="#realtime" class="doc-link">Realtime</a> is on, a line in the same place gives the number of page views in the last 5 minutes, with a <strong>View realtime</strong> link. It is a count as of the page load, not a live figure.</p>
+                <p>Everything waiting on an admin, as a row of links, when there is anything (see <a href="#needs-attention" class="doc-link">below</a>).</p>
             </div>
             <div class="doc-field">
-                <h4>Four headline numbers</h4>
-                <p>New organizers in the last 24 hours and the last 30 days, active users in the last 7 days, monthly recurring revenue, and upcoming events. A selfhost has no billing, so its third number is the events added in 30 days. Each number jumps to the card that explains it, once those cards are on the page.</p>
+                <h4>Visitors right now, and Revenue beside it</h4>
+                <p>The <a href="#realtime" class="doc-link">live view</a>: who is on the site, Activity and Sign-ups for the last 24 hours, Trends, and the visitors themselves. On a hosted install the top corner holds <strong>Revenue</strong>: what Stripe is billing as MRR and ARR, how many are paying, the subscriptions still in their trial and the MRR they would add, and how much of the MRR is at risk (past due or cancelling) when any is. <strong>Details</strong> opens the <a href="#insights-revenue" class="doc-link">Revenue</a> page, where the boost markup is too. Paid plans nobody is billed for (granted by an admin or a referral, a Pro trial without a card) are counted on <a href="#manage-plans" class="doc-link">Schedules</a>. A plain selfhost has no billing, so the live view takes the whole width there.</p>
             </div>
             <div class="doc-field">
                 <h4>Recent schedules and Recent events</h4>
-                <p>The twenty newest of each, eight shown until you choose <strong>Show more</strong>, with the schedule's photo or the event's flyer. Unlisted events and appointment bookings are left out. A draft, a guest submission and an imported event carry a flag, and a burst of events from one schedule is a single row. Rows added since your last visit in this browser are marked. A name with an arrow beside it opens the public page in a new tab; a draft, or an event no schedule shows yet, opens its edit page instead.</p>
+                <p>The twenty newest of each, eight shown until you choose <strong>Show more</strong>, with the schedule's photo or the event's flyer. Unlisted events and appointment bookings are left out. A draft, a guest submission and an imported event carry a flag, and a burst of events from one schedule is a single row. Rows added since you last scrolled down to them in this browser are marked. A schedule's name opens it in the admin panel, and the arrow beside it opens its public page in a new tab. An event's name opens its public page (a draft, or an event no schedule shows yet, opens its edit page instead), and the schedule under it opens in the admin panel. An install with no schedule, no event and no account but yours shows a single card here until there is something to report.</p>
             </div>
             <div class="doc-field">
                 <h4>Sign-ups</h4>
-                <p>One bar a day for 30 days, against the 30 days before. The headline counts organizers: accounts created to run a schedule. Accounts created by following a schedule, buying a ticket or submitting an event are counted beside them.</p>
+                <p>One bar a day for 30 days, against the 30 days before. The figure counts organizers: accounts created to run a schedule. Accounts created by following a schedule, buying a ticket or submitting an event are counted beside them.</p>
             </div>
             <div class="doc-field">
                 <h4>Active users</h4>
@@ -191,14 +188,6 @@
             <div class="doc-field">
                 <h4>Where sign-ups came from</h4>
                 <p>The organizers' channel (search, AI assistants, social, the referral program, email, paid, a campaign, another website, direct) with its most common sources, and the first page they saw. Not recorded means no referrer or campaign was stored: a first visit to a marketing page is stored only with cookie consent.</p>
-            </div>
-            <div class="doc-field">
-                <h4>Latest sign-ups</h4>
-                <p>The eight newest organizers of the last 30 days, where each came from, and how far each has got: a schedule, an event, a ticket type. The schedule's name opens it in the admin panel, and the arrow beside it opens its public page.</p>
-            </div>
-            <div class="doc-field">
-                <h4>Revenue</h4>
-                <p>Hosted installs only. What Stripe is billing, as MRR and ARR, by plan, with the subscriptions still in their trial counted beside it and what they would add. At risk is the part of MRR that is past due or cancelling. Outside Stripe counts paid plans nobody is billed for: a plan granted by an admin or a referral, a Pro trial started without a card, and a selling trial. Boost markup revenue for the last 30 days closes the card. A plain selfhost has no subscriptions and charges no markup, so this card is left out there.</p>
             </div>
             <div class="doc-field">
                 <h4>Upcoming events</h4>
@@ -213,7 +202,7 @@
                 <p>One line at the foot of the page: jobs waiting and failed, and the number of accounts, with custom domains beside them on a hosted install. Use the <a href="#system-queue" class="doc-link">Queue</a> page to act on a failed job.</p>
             </div>
         </div>
-        <x-doc-screenshot id="selfhost-admin--dashboard" alt="Admin dashboard on a selfhost install showing new organizers, active users, events added, upcoming events and the newest schedules and events" />
+        <x-doc-screenshot id="selfhost-admin--dashboard" alt="The cards under the live view of the admin dashboard: the newest schedules and events, sign-ups, active users, where sign-ups came from and upcoming events" />
 
         <div class="doc-callout doc-callout-info mt-6">
             <div class="doc-callout-title">Selfhost: update your privacy policy</div>
@@ -221,7 +210,7 @@
         </div>
 
         <h3 id="needs-attention" class="doc-subheading">Needs attention</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Above the metrics sits <strong class="text-gray-900 dark:text-white">Needs attention</strong>: every queue in the admin panel that is waiting on a person, as a row of links, each going straight to the page where you deal with it. The first four are shown and the rest open from the last link. It is only rendered when there is something in it, so a dashboard without it means nothing needs you.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">At the top of the dashboard sits <strong class="text-gray-900 dark:text-white">Needs attention</strong>: every queue in the admin panel that is waiting on a person, as a row of links, each going straight to the page where you deal with it. The first four are shown and the rest open from the last link. It is only rendered when there is something in it, so a dashboard without it means nothing needs you.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Rows are listed in the order below: breakage and held-up money first, then review queues, then rows that are informational. A row with a count of zero is omitted, and a row whose page does not exist on this install can never appear.</p>
 
         <div class="doc-table-wrap">
@@ -371,23 +360,23 @@
         </div>
     </section>
 
-    <!-- Realtime -->
+    <!-- Live view (the Realtime setting) -->
     <section id="realtime" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.008H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
             </svg>
-            Realtime
+            Live view
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Realtime shows who is on the site right now: the marketing site, schedule and event pages (custom domains included), the signed-in app, and the sign-up and log-in pages. It is switched on and off at <a href="#settings-realtime" class="doc-link">Settings</a>; it starts on for eventschedule.com and off on every other install. While it is off, the tab holds one card that says what would be recorded, with a <strong>Turn on in settings</strong> button.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The top of the <a href="#dashboard" class="doc-link">dashboard</a> shows who is on the site right now: the marketing site, schedule and event pages (custom domains included), the signed-in app, and the sign-up and log-in pages. It is the Realtime setting, switched on and off at <a href="#settings-realtime" class="doc-link">Settings</a>; it starts on for eventschedule.com and off on every other install. While it is off, the dashboard opens on one card that says what would be recorded, with a <strong>Turn on in settings</strong> button, and the cards below it are there as usual.</p>
 
-        <x-doc-screenshot id="selfhost-admin--realtime" alt="The admin Realtime page: visitors right now by where they are (marketing site, schedule pages, the app, sign-up and log-in) with page views per minute, then Sign-ups beside the Activity rail" />
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The page updates itself every ten seconds and slows to once a minute while its tab is hidden; a dot at the top says <strong>Live</strong> or <strong>Reconnecting</strong>. If your <a href="#accessing" class="doc-link">password confirmation</a> lapses while it is open, it stops and asks you to confirm again. From top to bottom:</p>
+        <x-doc-screenshot id="selfhost-admin--realtime" alt="The top of the admin dashboard on a selfhost install: visitors right now with page views per minute, where they are (marketing site, schedule pages, the app, sign-up and log-in), then Sign-ups beside the Activity rail" />
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The live view updates itself every ten seconds and slows to once a minute while its tab is hidden; a dot at the top says <strong>Live</strong> or <strong>Reconnecting</strong>. If your <a href="#accessing" class="doc-link">password confirmation</a> lapses while it is open, it stops and asks you to confirm again. From top to bottom:</p>
         <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h4>Visitors right now</h4>
                 <p>People with a page open and visible in the last couple of minutes, split into signed in and not signed in, and where each of them is. Only visitors who accepted cookies can be counted this way, so beside the number a bar and a line say how many page views the last 30 minutes had and what share came from visitors who have not accepted cookies, with page views per minute in the same two colours. A green dot above a minute marks a sign-up; point at that minute to see who.</p>
-                <p>Under it there is a column for each area: the marketing site, schedule pages and the app, with the sign-up and log-in pages under the app while someone is there. Each area has its own colour and icon wherever a person or a page appears on this page. A column lists the pages people are on, busiest first, with how many are on each and who: a signed-in person's initials, or the flag of an anonymous visitor's country. Click an area's name to filter the page to it (the other areas stay, dimmed), a page's name to filter to that page, a face to open that person's row under Visitors, and the arrow to open the page itself. Views of calendars embedded on other websites are counted in a line at the bottom of the card.</p>
+                <p>Under it there is a column for each area: the marketing site, schedule pages and the app, with the sign-up and log-in pages under the app while someone is there. Each area has its own colour and icon wherever a person or a page appears on this page. A column lists the pages people are on, busiest first, with how many are on each and who: a signed-in person's initials, or the flag of an anonymous visitor's country. Click an area's name to filter the page to it (the other areas stay, dimmed), a page's name to filter to that page, a face to open that person's row under Visitors, and the arrow to open the page itself. Beside a schedule's or an event's page, the sliders open that schedule in the admin panel. Views of calendars embedded on other websites are counted in a line at the bottom of the card.</p>
             </div>
             <div class="doc-field">
                 <h4>Activity</h4>
@@ -399,16 +388,16 @@
             </div>
             <div class="doc-field">
                 <h4>Trends</h4>
-                <p>The last 24 hours by the hour, or the last 7 or 30 days by the day, each figure against the same span just before it, cut at the same time of day, all in the time zone of your own <a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">account settings</a>, the one every time on the page uses. Page views and visits are drawn by area. Sign-ups, new schedules, new events and orders are counted as Activity counts them, from the audit log; over 24 hours they are the same live numbers as the Activity chips, for the same rolling day. Click a figure to draw it in the chart. The bar for the hour or day still under way is drawn lighter.</p>
+                <p>Counted when you scroll down to it. The last 24 hours by the hour, or the last 7 or 30 days by the day, each figure against the same span just before it, cut at the same time of day, all in the time zone of your own <a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">account settings</a>, the one every time on the page uses. Page views and visits are drawn by area. Sign-ups, new schedules, new events and orders are counted as Activity counts them, from the audit log; over 24 hours they are the same live numbers as the Activity chips, for the same rolling day. Click a figure to draw it in the chart. The bar for the hour or day still under way is drawn lighter.</p>
                 <p>Page views and visits are hourly totals, kept for about two months, that start counting on the day this version is installed. Until a range is covered the card says when counting began, and it shows a comparison only where it has the span before. Visitors are not added up across hours: telling one person seen in two hours from two people would mean keeping who they were. Admins are never counted in Trends, and neither is an embedded calendar.</p>
             </div>
             <div class="doc-field">
                 <h4>Top pages, Sources, Countries</h4>
-                <p>The last 30 minutes. Click any row to filter the page to it. The filters in force are listed as chips at the top, and they stay in the address, so a filtered view can be bookmarked. Activity, Sign-ups and Trends cover the whole install whatever the filters, and say <strong>Not filtered</strong> while one is on. The arrow beside a top page opens that page in a new tab.</p>
+                <p>The last 30 minutes. Click any row to filter the page to it. The filters in force are listed as chips at the top, and they stay in the address, so a filtered view can be bookmarked. Activity, Sign-ups and Trends cover the whole install whatever the filters, and say <strong>Not filtered</strong> while one is on. The arrow beside a top page opens that page in a new tab, and for a schedule's or an event's page the sliders open the schedule in the admin panel.</p>
             </div>
             <div class="doc-field">
                 <h4>Visitors</h4>
-                <p>Everyone who accepted cookies in the last 30 minutes, one row per person, right now first, each with the icon of the area their page is in. Click a row for their last hour: each page in order with its area, how long they stayed, and for a signed-in visitor their schedules, an email link and their support chat. A brand-new user who has spent ten minutes in the app without creating an event is marked, so you can offer help. Admins are left out of the whole page unless you turn on <strong>Show admins</strong>, the switch at the top.</p>
+                <p>Everyone who accepted cookies in the last 30 minutes, one row per person, right now first, each with the icon of the area their page is in. Click a row for their last hour: each page in order with its area (a schedule's or an event's page with the sliders that open the schedule in the admin panel), how long they stayed, and for a signed-in visitor their schedules, an email link and their support chat. A brand-new user who has spent ten minutes in the app without creating an event is marked, so you can offer help. Admins are left out of the whole live view unless you turn on <strong>Show admins</strong>, the switch at the top.</p>
             </div>
         </div>
 
@@ -578,7 +567,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">What is not here</div>
-            <p>Page views here are counted per day and per device, not per visitor, so there is no unique-visitor figure and no per-visitor location. The nearest thing to a geographic view is the <strong class="text-gray-900 dark:text-white">In person, by country</strong> list under Upcoming events on the dashboard, which is based on the venue's country rather than the visitor's. For visitors and countries over the last 30 minutes, see <a href="#realtime" class="doc-link">Realtime</a>.</p>
+            <p>Page views here are counted per day and per device, not per visitor, so there is no unique-visitor figure and no per-visitor location. The nearest thing to a geographic view is the <strong class="text-gray-900 dark:text-white">In person, by country</strong> list under Upcoming events on the dashboard, which is based on the venue's country rather than the visitor's. For visitors and countries over the last 30 minutes, see the dashboard's <a href="#realtime" class="doc-link">live view</a>.</p>
         </div>
     </section>
 
@@ -855,7 +844,7 @@
             <li>The account can no longer sign in, by password, Google or Facebook, or use its API key. Anyone signed in to it is signed out on their next page</li>
             <li>Every schedule it owns goes offline and its subdomain is released, exactly as <strong class="text-gray-900 dark:text-white">Delete</strong> on the Schedules page does. A paid plan on one of them is cancelled, and a newsletter waiting to be sent goes back to a draft</li>
             <li>Its email address goes on the list, so it cannot sign up again</li>
-            <li>It leaves the lists and counts on the <a href="#dashboard" class="doc-link">Dashboard</a> and the <a href="#realtime" class="doc-link">Realtime</a> page: its sign-up, its schedules and every event it made or they own, even one it put on somebody else's venue. On Realtime its signed-in visits, anyone's views of its pages and what happened on its schedules go too. A few figures still include it, because they are history or work for you: Active users, revenue, the Federation card (an event of its on another schedule is still shared), custom domains, Needs attention and the Insights pages</li>
+            <li>It leaves the lists and counts on the <a href="#dashboard" class="doc-link">Dashboard</a> and in its <a href="#realtime" class="doc-link">live view</a>: its sign-up, its schedules and every event it made or they own, even one it put on somebody else's venue. In the live view its signed-in visits, anyone's views of its pages and what happened on its schedules go too. A few figures still include it, because they are history or work for you: Active users, revenue, the Federation card (an event of its on another schedule is still shared), custom domains, Needs attention and the Insights pages</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Two switches add more to the list, and both are off until you turn them on. <strong class="text-gray-900 dark:text-white">Also refuse new accounts from the address</strong> adds the network address the account signed up from (for an IPv6 address, the /64 it sits in). <strong class="text-gray-900 dark:text-white">Also refuse new accounts at the domain</strong> adds its email domain. Beside each is the number of other accounts that share it: a large number means an office, a mobile network or a mail provider that ordinary people use, and it should stay off.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">An administrator cannot be blocked, and you cannot block yourself. Schedules the account is only a member of are not touched.</p>

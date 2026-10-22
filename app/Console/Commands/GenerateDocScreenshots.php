@@ -460,10 +460,14 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'referral-history', 'route' => '/referrals', 'script' => "(document.getElementById('referral-history') || document.getElementById('referral-dashboard')).scrollIntoView({block: 'start'})"],
             ],
             'selfhost-admin' => [
-                // ?sample=1: invented data (AdminDashboardSample). The real page lists people,
-                // schedules and events by name, and leaves demo content out.
-                ['id' => 'selfhost-admin--dashboard', 'route' => '/admin/dashboard?sample=1', 'pause' => 3000],
-                ['id' => 'selfhost-admin--realtime', 'route' => '/admin/realtime', 'pause' => 4000],
+                // The cards under the live part. ?sample=1: invented data (AdminDashboardSample),
+                // which the page passes on to each panel it fetches as it nears the screen. The real
+                // cards list people, schedules and events by name, and leave demo content out.
+                ['id' => 'selfhost-admin--dashboard', 'route' => '/admin/dashboard?sample=1', 'pause' => 4000, 'script' => "document.getElementById('admin-dashboard').scrollIntoView({block: 'start'})"],
+                // The top of the same page, the live part (Realtime until 2026-10), over invented
+                // traffic (realtime:simulate, see handle()). This server runs as a selfhost, so
+                // there is no Revenue card in the corner.
+                ['id' => 'selfhost-admin--realtime', 'route' => '/admin/dashboard?sample=1', 'pause' => 4000],
                 ['id' => 'selfhost-admin--users', 'route' => '/admin/users', 'pause' => 2000],
                 ['id' => 'selfhost-admin--revenue', 'route' => '/admin/revenue', 'pause' => 2000],
                 ['id' => 'selfhost-admin--analytics', 'route' => '/admin/analytics', 'pause' => 2000],

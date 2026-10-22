@@ -12,11 +12,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
 
 /**
- * /admin/realtime: the page, its polled JSON, and the install-wide switches (Realtime itself, and
- * whether schedule owners get the part about their own pages, which RealtimeController serves).
+ * The live part of /admin/dashboard, which was /admin/realtime until 2026-10 (the page itself is
+ * AdminDashboardController's): its polled JSON, its Trends card, and the install-wide switches
+ * (Realtime itself, and whether schedule owners get the part about their own pages, which
+ * RealtimeController serves).
  *
  * Inside the `admin` middleware like /admin/translations: a lapsed re-auth window answers the poll
  * with 423, which the page turns into a "confirm your password to keep it live" panel, and
@@ -24,22 +25,6 @@ use Illuminate\View\View;
  */
 class AdminRealtimeController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
-    {
-        if (! $request->user()->isAdmin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
-        RealtimeTracker::pruneIfDue();
-
-        return view('admin.realtime', [
-            'payload' => RealtimeDashboard::fromRequest($request)->payload(),
-            // In the page, so the card does not open empty; null while tracking is off, when the
-            // page shows how to turn it on instead.
-            'trends' => RealtimeTracker::enabled() ? (new RealtimeTrends(RealtimeTrends::range($request->query('trend')), null, $request->user()->timezone))->cached() : null,
-        ]);
-    }
-
     public function data(Request $request): JsonResponse
     {
         abort_unless($request->user()->isAdmin(), 403);

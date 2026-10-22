@@ -1568,8 +1568,8 @@
                             <div class="sh-browser-body">
                                 <p class="sh-wait" dir="ltr" aria-hidden="true">next: sign in at <b class="sh-dom" data-sh-domain>{{ $placeDomain }}</b></p>
                                 <div class="sh-shot">
-                                    <img class="is-day" src="{{ url('/images/docs/selfhost-admin--dashboard.webp') }}" width="1280" height="757" loading="lazy" decoding="async" alt="The admin dashboard of a selfhosted install: new organizers, active users, events added, upcoming events, recent schedules and recent events.">
-                                    <img class="is-night" src="{{ url('/images/docs/selfhost-admin--dashboard-dark.webp') }}" width="1280" height="757" loading="lazy" decoding="async" alt="The admin dashboard of a selfhosted install: new organizers, active users, events added, upcoming events, recent schedules and recent events.">
+                                    <img class="is-day" src="{{ url('/images/docs/selfhost-admin--dashboard.webp') }}" width="1280" height="757" loading="lazy" decoding="async" alt="The admin dashboard of a selfhosted install: the newest schedules and events, sign-ups, active users and upcoming events.">
+                                    <img class="is-night" src="{{ url('/images/docs/selfhost-admin--dashboard-dark.webp') }}" width="1280" height="757" loading="lazy" decoding="async" alt="The admin dashboard of a selfhosted install: the newest schedules and events, sign-ups, active users and upcoming events.">
                                 </div>
                             </div>
                         </div>
@@ -1953,15 +1953,16 @@
     @php
         // Real screens from the user guide (public/images/docs, light and dark). Each line is
         // the screen's own lead, so the page says what the app says. Only screens that show the
-        // thing working are here (the guide's Logs screen is an empty log), and the dashboard is
-        // left out because the install stage above ends on it.
+        // thing working are here (the guide's Logs screen is an empty log), and the dashboard's
+        // cards are left out because the install stage above ends on the dashboard; its live view,
+        // which was a page of its own (Realtime), is the third screen.
         // The last three numbers are for a phone, where the frame shows 496px of the 1280px
         // picture: where that cut starts (x, y), and which edge it is cut on mid-content and so
         // fades. Queue is cut from the right so that "last tick" is in it.
         $roomScreens = [
             ['queue', 'Queue', '/admin/queue', 'Whether the scheduler is running, how much work it still has to get through, and the jobs in the queue. This is where you see your cron entry tick.', 'The Queue screen: a Scheduler card reading last tick 1 minute ago, and the work waiting.', 768, 272, 'left'],
             ['audit-log', 'Audit log', '/admin/audit-log', 'Sign-ins, changes and payments across the installation, and who made them, newest first.', 'The Audit Log screen: totals, filters and a table of sign-ins by time, user, action and IP address.', 304, 250, 'right'],
-            ['realtime', 'Realtime', '/admin/realtime', 'Who is on your install right now and the page views by the minute. Off until you switch it on in Settings.', 'The Realtime screen: visitors right now, where they are, and page views per minute.', 304, 200, 'right'],
+            ['realtime', 'Live view', '/admin/dashboard', 'The top of the dashboard: who is on your install right now and the page views by the minute. Off until you switch it on in Settings.', 'The live view at the top of the dashboard: visitors right now, where they are, and page views per minute.', 304, 200, 'right'],
         ];
     @endphp
     <section id="demo" class="hp-sec hp-alt">

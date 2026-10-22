@@ -21,9 +21,9 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * Once an account is blocked, /admin/dashboard and /admin/realtime leave out everything that is
- * its (App\Services\BlockedAccounts): the account, the schedules it owns, and the events it made
- * or those schedules own.
+ * Once an account is blocked, /admin/dashboard (its cards and its live part) leaves out everything
+ * that is its (App\Services\BlockedAccounts): the account, the schedules it owns, and the events it
+ * made or those schedules own.
  *
  * The block takes the schedules down, which the pages already honoured; what they did not was
  * the rest. The sign-up stayed in the counts and the newest organizers, an event the account had
@@ -113,7 +113,7 @@ class BlockedAccountsHiddenTest extends TestCase
     // ---------------------------------------------------------------- /admin/dashboard
 
     /** Mutation: drop the blocked line from signups(), or from the previous window. */
-    public function test_a_blocked_sign_up_leaves_the_dashboards_counts_and_its_newest_organizers(): void
+    public function test_a_blocked_sign_up_leaves_the_dashboards_counts(): void
     {
         $this->seedSpammer();
 
@@ -128,8 +128,6 @@ class BlockedAccountsHiddenTest extends TestCase
 
         $signups = (new AdminDashboard)->signups();
 
-        $this->assertNotContains('Sam Spammer', array_column($signups['latest'], 'name'));
-        $this->assertContains('Hana Honest', array_column($signups['latest'], 'name'));
         // The admin, Hana and the team member; not Sam.
         $this->assertSame(3, $signups['organizers']['last_30d']);
         $this->assertSame(1, $signups['organizers']['previous_30d'], 'the window it is compared with leaves its blocked accounts out too');
@@ -261,7 +259,7 @@ class BlockedAccountsHiddenTest extends TestCase
 
     /**
      * Mutation: drop any of the three tests in BlockedAccounts::withoutTheirHits(), its call in
-     * fetchRows(), expanded() or recentViews(), or the blocked keys in people() or expanded().
+     * fetchRows() or expanded(), or the blocked keys in people() or expanded().
      */
     public function test_a_blocked_account_and_the_views_of_its_pages_leave_the_visitors_and_the_figures(): void
     {
@@ -305,8 +303,6 @@ class BlockedAccountsHiddenTest extends TestCase
         DB::table('role_user')->where('role_id', $placed->id)->update(['level' => 'follower']);
         $this->hit(['visitor_key' => '6666666666666666', 'surface' => 'gp', 'role_id' => $placed->id]);
 
-        $this->assertSame(6, RealtimeDashboard::recentViews(), 'the six schedule pages of the last five minutes');
-
         $this->block();
 
         $payload = (new RealtimeDashboard)->payload();
@@ -342,7 +338,6 @@ class BlockedAccountsHiddenTest extends TestCase
         $this->assertSame(['Pricing'], $pages('v:'.$visitorKey));
 
         $this->assertSame(['Later home'], $pages($laterId));
-        $this->assertSame(2, RealtimeDashboard::recentViews(), 'the dashboard\'s line leaves out the views of the account\'s pages too');
     }
 
     /**

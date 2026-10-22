@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-the-admin-dashboard-is-the-live-view-2026-10-22) | not yet | Nothing; open `/admin` and scroll |
 | [Unreleased](#unreleased-boost-partners-appointment-hosts-and-the-appointment-api-2026-10-15) | not yet | Confirm the Meta token is a system user's, add `META_BUSINESS_ID`, `META_SYSTEM_USER_ID` and `APP_COMMIT`, check the Stripe platform webhook; after: the scheduler entry, then the pilot partner's setup |
 | [v1.0.134](#v10134) | live (as v1.0.135 from 2026-10-08; past `b9777e3d9` by 2026-10-17) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN`; [GDPR](#gdpr-2026-10-04): 2FA on every admin first, then the policy-change notice |
 | [v1.0.133](#v10133) | 2026-09-25 | Four read-only queries, the image backfill, a sitemap cache key, a Cloudflare purge |
@@ -94,6 +95,32 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: the admin Dashboard is the live view (2026-10-22)
+
+**What ships:**
+- `/admin/dashboard` is what `/admin/realtime` was (the live view), with a short Revenue card in
+  its top corner (MRR, ARR, paying, in trial, at risk) and the old dashboard's cards under it:
+  newest schedules and events, sign-ups, active users, sources, upcoming events, federation and
+  the system line. The headline tiles, Latest sign-ups, the five-minute views line and the full
+  revenue card are gone: the MRR by plan and the "Outside Stripe" line are no longer shown
+  anywhere (the boost markup is on `/admin/revenue`, the granted and trial plans on
+  `/admin/schedules`). The Realtime tab is gone; `/admin/realtime` redirects to the dashboard
+  with its query string, filters included.
+- The page sends nothing that takes time: the live part polls `/admin/realtime/data` as before,
+  Revenue is `/admin/dashboard/revenue`, and the cards are three panels
+  (`/admin/dashboard/panels/{recent,growth,platform}`) fetched as they near the screen. Each
+  panel and Revenue sends a `Server-Timing` header for its own cards.
+- A schedule's page on the board, in Top pages and in a visitor's timeline has a link to the
+  schedule in the admin beside the arrow to its public page; a recent schedule's name opens it in
+  the admin.
+
+**After the deploy:**
+1. Open `/admin` (password confirmation first): the page should draw at once, the live view a
+   moment later, and Revenue in the corner. Scroll: each group of cards fills as it comes up.
+2. In the network panel, the three `panels/*` requests and `revenue` each carry `Server-Timing`.
+
+No migration, no env var.
 
 ## Unreleased: homepage pass, one headline (2026-10-22)
 

@@ -80,6 +80,31 @@
         .realtime-now-consent { order: 2; }
         .realtime-now-chart { order: 1; }
     }
+    /* The top: the Now card, and on hosted the Revenue card in the corner. From xl they take the
+       Today grid's three columns, so the corner card stands over the Activity rail; below xl the
+       corner card follows the Now card. */
+    @media (min-width: 1280px) {
+        .realtime-top[data-corner] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .realtime-top[data-corner] > :not(.realtime-corner) { grid-column: 1 / span 2; grid-row: 1; }
+        .realtime-top[data-corner] > .realtime-corner { grid-column: 3; grid-row: 1; }
+    }
+    /* In those two thirds the Now card's head has room for its three parts only once the frame is
+       near its full width: below that the chart was squeezed to a sliver between the number and
+       the consent line, which goes under the two instead. */
+    @media (min-width: 1280px) and (max-width: 1599.98px) {
+        .realtime-top[data-corner] .realtime-now-head { grid-template-columns: auto minmax(0, 1fr); }
+        .realtime-top[data-corner] .realtime-now-consent { grid-column: 1 / -1; }
+    }
+    /* What stands in a card's place until its numbers arrive. */
+    .realtime-skeleton { background: var(--ap-tint-sunken); }
+    .realtime-skeleton-card { min-height: 100%; }
+    @media (prefers-reduced-motion: no-preference) {
+        .realtime-skeleton, .realtime-skeleton-card { animation: realtime-wait 1.6s ease-in-out infinite; }
+    }
+    @keyframes realtime-wait { 50% { opacity: 0.55; } }
+    /* A first poll that was refused never fills the skeleton: the banner above says why, and the
+       skeleton stops saying it is on its way. */
+    .realtime-now-skeleton.is-still .realtime-skeleton { animation: none; }
     /* Today: Activity first in one column; from xl, Sign-ups over two columns and Activity the
        rail beside it, as tall as Sign-ups. */
     @media (min-width: 1280px) {
@@ -131,7 +156,6 @@
         var MSG = @json($realtimeMsg);
         var CONFIG = @json($realtimeConfig);
         var INITIAL = @json($payload);
-        var TRENDS = @json($trends);
         var BASE_TITLE = document.title;
         var LOCALE = CONFIG.locale;
 
@@ -199,7 +223,7 @@
                     chartTries: 0,
                     freshTimer: null,
                     activityAll: false,
-                    feed: (INITIAL.activity && INITIAL.activity.feed) || null,
+                    feed: (INITIAL.activity && INITIAL.activity.feed) || INITIAL.feed || null,
                     signupsAll: false,
                     bumped: {},
                     expandedCards: { pages: false, sources: false, countries: false },
@@ -216,8 +240,14 @@
                     debounce: null,
                     titleDot: false,
                     seenCursor: INITIAL.activity ? INITIAL.activity.cursor : null,
-                    trends: TRENDS,
-                    trendRange: (TRENDS && TRENDS.range) || '24h',
+                    // Asked the first time the card nears the screen (watchTrends), never with the page.
+                    trends: null,
+                    trendRange: CONFIG.trend || '24h',
+                    trendsWatched: false,
+                    // The card has come near the screen and been asked for (watchTrends).
+                    trendsAsked: false,
+                    // The corner card's figures (hosted): null until they arrive.
+                    revenue: null,
                     trendMetric: 'views',
                     trendsLoading: false,
                     trendTries: 0,
@@ -762,12 +792,15 @@
                         }
                     }
 
+                    var first = this.p.state === 'loading';
                     this.p = data;
                     this.fresh = fresh;
                     clearTimeout(this.freshTimer);
                     this.freshTimer = setTimeout(function () { self.fresh = {}; }, 2100);
                     this.$nextTick(function () {
                         self.measureOverflow();
+                        self.watchTrends();
+                        if (first) self.announceDrawn();
                         if (self.$refs.trendChart && (!self.trendChart || self.trendChart.canvas !== self.$refs.trendChart)) self.initTrendChart();
                         // The canvas exists only while tracking is on: build the chart the first time
                         // it appears, and again if switching off and on replaced the element.
@@ -816,6 +849,46 @@
                         // has lost its connection.
                     }).finally(function () {
                         if (range === self.trendRange) self.trendsLoading = false;
+                    });
+                },
+                // The cards under the live part wait for it to be drawn (admin/dashboard/_cards-script):
+                // while it is a skeleton the page is short, and every panel looked near the screen.
+                announceDrawn: function () {
+                    window.adminDashboardLiveDrawn = true;
+                    window.dispatchEvent(new CustomEvent('admin-dashboard:live-drawn'));
+                },
+                // Trends is asked the first time its card comes near the viewport,
+                // not with the page: the card exists once the first poll has answered, so this
+                // runs after each one until it has an observer to hand the card to.
+                watchTrends: function () {
+                    var self = this, card = this.$refs.trendsCard;
+                    if (this.trendsWatched || !card) return;
+                    this.trendsWatched = true;
+                    if (!('IntersectionObserver' in window)) { this.trendsAsked = true; this.fetchTrends(); return; }
+                    var observer = new IntersectionObserver(function (entries) {
+                        if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
+                        observer.disconnect();
+                        self.trendsAsked = true;
+                        self.fetchTrends();
+                    }, { rootMargin: '0px 0px 200px 0px' });
+                    observer.observe(card);
+                },
+                // The corner card (hosted). A failure keeps what it had, or says so if it had nothing.
+                fetchRevenue: function () {
+                    var self = this;
+                    if (!CONFIG.revenueUrl) return;
+                    fetch(CONFIG.revenueUrl, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                        credentials: 'same-origin',
+                    }).then(function (r) {
+                        if (!r.ok) throw r;
+                        return r.json();
+                    }).then(function (data) {
+                        // A refresh that could not be read keeps the figures already shown.
+                        if (data && data.failed && self.revenue && !self.revenue.failed) return;
+                        self.revenue = data;
+                    }).catch(function () {
+                        if (!self.revenue) self.revenue = { failed: true };
                     });
                 },
                 trendColors: function () {
@@ -944,7 +1017,8 @@
                     var self = this;
                     if (typeof Chart === 'undefined' || !this.$refs.chart) {
                         // Bounded: if chart.min.js never loads, stop asking after five seconds.
-                        if (this.p.state !== 'off' && this.chartTries++ < 100) setTimeout(this.initChart, 50);
+                        // While the first poll is out there is no canvas yet; apply() builds it.
+                        if (this.p.state !== 'off' && this.p.state !== 'loading' && this.chartTries++ < 100) setTimeout(this.initChart, 50);
                         return;
                     }
                     var colors = chartColors();
@@ -1064,9 +1138,11 @@
             mounted: function () {
                 var self = this;
                 this.initChart();
-                this.initTrendChart();
                 this.updateTitle();
-                this.schedule();
+                this.fetchRevenue();
+                // The live part is not in the page: ask for it at once, then every ten seconds.
+                // With tracking off there is nothing to ask, and the page is drawn already.
+                if (this.p.state === 'loading') this.poll(); else { this.schedule(); this.$nextTick(this.announceDrawn); }
                 this.$nextTick(function () { self.measureOverflow(); });
                 window.addEventListener('resize', function () { self.measureOverflow(); });
                 this.$watch('activityAll', function () { self.$nextTick(function () { self.measureOverflow(); }); });
@@ -1074,7 +1150,11 @@
 
                 setInterval(function () { self.nowMs = Date.now(); }, 5000);
                 setInterval(function () {
-                    if (!document.hidden && self.status === 'live' && self.trends) self.fetchTrends(true);
+                    if (document.hidden || self.status !== 'live') return;
+                    // A card asked once and refused (a 429, a blip) is asked again here, or it would
+                    // stay a skeleton until somebody pressed a range.
+                    if (self.trends || self.trendsAsked) self.fetchTrends(!!self.trends);
+                    self.fetchRevenue();
                 }, 300000);
 
                 document.addEventListener('visibilitychange', function () {

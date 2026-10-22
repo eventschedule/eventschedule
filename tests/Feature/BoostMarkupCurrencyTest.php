@@ -134,29 +134,9 @@ class BoostMarkupCurrencyTest extends TestCase
     }
 
     /**
-     * The symptom, on the page the report named.
-     *
-     * A regex over the rendered tile rather than assertSee: the page is full of other money, so
-     * "contains R0" would pass on an unrelated figure while the tile still said $0.
+     * The symptom. The report named the dashboard, whose Revenue card no longer carries the boost
+     * markup: the figure is /admin/revenue's, where it is read the same way.
      */
-    public function test_the_admin_dashboard_tile_reads_the_platform_currency(): void
-    {
-        $this->useCurrency('ZAR');
-        $this->adminActing();
-        // The revenue card is not on the new-install page (no schedule, no event, no account but
-        // the admin's), so the install needs one schedule for there to be a figure to read.
-        $this->createRole($this->createOwner());
-
-        $html = $this->get(route('admin.dashboard'))->assertOk()->getContent();
-
-        $this->assertMatchesRegularExpression(
-            '~boost_markup_revenue|Boost markup revenue~i',
-            str_replace('&nbsp;', ' ', $html),
-            'the tile is missing entirely, so this test proves nothing'
-        );
-        $this->assertStringContainsString('R0', $this->tileValueAfter($html, __('messages.boost_markup_revenue')));
-    }
-
     public function test_the_admin_revenue_tiles_read_the_platform_currency(): void
     {
         $this->useCurrency('ZAR');

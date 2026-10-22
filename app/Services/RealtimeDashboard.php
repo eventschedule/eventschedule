@@ -149,6 +149,24 @@ class RealtimeDashboard
         );
     }
 
+    /**
+     * What the address asked for, checked as fromRequest() checks it and with nothing read: the
+     * dashboard is sent before any visit is, and its first poll must ask for the same view, or a
+     * bookmarked filter (or the old /admin/realtime address, which keeps its query) opens
+     * unfiltered.
+     */
+    public function requestState(): array
+    {
+        return [
+            'filters' => (object) $this->filters,
+            'filtered' => $this->filters !== [],
+            'who' => $this->who,
+            'all' => $this->all,
+            'admins' => $this->admins,
+            'feed' => $this->feed,
+        ];
+    }
+
     public function payload(): array
     {
         if (! RealtimeTracker::enabled()) {
@@ -228,33 +246,6 @@ class RealtimeDashboard
         ];
 
         return $payload;
-    }
-
-    /**
-     * The dashboard teaser: page views in the last five minutes, both consent tiers, no admins.
-     * Page views rather than visitors so it never overstates who can be seen.
-     */
-    public static function recentViews(): ?int
-    {
-        try {
-            if (! RealtimeTracker::enabled()) {
-                return null;
-            }
-
-            $since = RealtimeTracker::ts(RealtimeTracker::now()->subMinutes(5));
-
-            // The last_seen_at bound is what lets the index do the work (started_at has none);
-            // it never drops a row, because last_seen_at is never earlier than started_at.
-            return (new BlockedAccounts)->withoutTheirHits(DB::table('realtime_hits'))
-                ->where('last_seen_at', '>=', $since)
-                ->where('started_at', '>=', $since)
-                ->whereNotNull('engaged_at')
-                ->where('surface', '!=', 'embed')
-                ->where('is_admin', false)
-                ->count();
-        } catch (Throwable) {
-            return null;
-        }
     }
 
     private function fetchRows(): Collection
@@ -549,12 +540,18 @@ class RealtimeDashboard
     {
         $label = null;
         $url = null;
+        $adminUrl = null;
+        $adminLabel = null;
 
         if (in_array($row->surface, ['gp', 'embed'], true)) {
             $event = $row->event_id ? ($this->events[$row->event_id] ?? null) : null;
             $role = $row->role_id ? ($this->roles[$row->role_id] ?? null) : null;
             $label = $event?->name ?: $role?->name;
             $url = $this->guestUrl($role, $event);
+            // The schedule the page is on, in the admin: an event's page leads to its schedule.
+            // Not for a deleted one, as the guest page is not.
+            $adminUrl = $role && ! $role->is_deleted ? route('admin.schedules.edit', ['role' => UrlUtils::encodeId($role->id)]) : null;
+            $adminLabel = $adminUrl ? $role->name : null;
         } elseif ($row->surface === 'auth') {
             $label = $this->authLabel($row->path);
         } else {
@@ -570,6 +567,9 @@ class RealtimeDashboard
             'surface' => $row->surface,
             'surface_label' => __('messages.realtime_surface_'.$row->surface),
             'url' => $url,
+            'admin_url' => $adminUrl,
+            // What the admin link opens, which for an event's page is its schedule.
+            'admin_label' => $adminLabel,
         ];
     }
 
@@ -793,6 +793,8 @@ class RealtimeDashboard
                 'sub' => $page['surface_label'],
                 'icon' => $first->surface,
                 'url' => $page['url'],
+                'admin_url' => $page['admin_url'],
+                'admin_label' => $page['admin_label'],
                 'views' => $entry['views'],
                 'now' => $nowByKey[$key] ?? 0,
                 'filterable' => true,
@@ -900,6 +902,8 @@ class RealtimeDashboard
                         'key' => $key,
                         'label' => $page['label'],
                         'url' => $page['url'],
+                        'admin_url' => $page['admin_url'],
+                        'admin_label' => $page['admin_label'],
                         'count' => $group->count(),
                         'people' => $faces->map(fn ($person) => [
                             'id' => $person['id'],
@@ -1078,6 +1082,8 @@ class RealtimeDashboard
                 'surface' => $row->surface,
                 'surface_label' => $page['surface_label'],
                 'url' => in_array($row->surface, ['wp', 'gp'], true) ? $page['url'] : null,
+                'admin_url' => $row->surface === 'gp' ? $page['admin_url'] : null,
+                'admin_label' => $row->surface === 'gp' ? $page['admin_label'] : null,
                 'secs' => max(0, $end - $row->started),
                 'current' => (bool) $row->is_now,
                 'marker' => null,

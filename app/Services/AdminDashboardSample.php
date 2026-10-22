@@ -66,23 +66,6 @@ class AdminDashboardSample
                         ['path' => '/luma-alternative', 'count' => 4],
                     ],
                 ],
-                'latest' => array_map(fn ($row) => [
-                    'name' => $row[0],
-                    'initials' => RealtimeDashboard::initials($row[0]),
-                    'source' => $row[1] ? ['primary' => $row[1], 'secondary' => $row[2], 'channel' => 'other'] : null,
-                    'stage' => $row[3],
-                    'schedule' => $row[4] ? ['name' => $row[4], 'url' => '#', 'public_url' => '#'] : null,
-                    'created_at' => Carbon::instance($now->subMinutes($row[5])),
-                ], [
-                    ['Tomas Aguilar', 'chatgpt.com', '/features/embed-calendar', 0, null, 35],
-                    ['Jonas Reiter', 'google.com', '/luma-alternative', 3, 'Kulturhaus Linz', 120],
-                    ['Priya Nair', null, null, 2, 'The Vinyl Room', 300],
-                    ['Marta Soler', 'instagram.com', null, 2, 'Marta Soler Trio', 540],
-                    ['Dana Whitlock', 'google.com', '/pricing', 1, 'Riverside Bowl', 840],
-                    ['Sem de Vries', __('messages.realtime_referred_by', ['name' => 'Li Wei']), null, 3, 'Open Stage Utrecht', 1500],
-                    ['Li Wei', 'chatgpt.com', null, 2, 'Science After Dark', 1700],
-                    ['Aoife Brennan', null, null, 1, 'Back Room Comedy', 2900],
-                ]),
             ],
             'active' => self::active($now),
             'revenue' => $hosted ? self::revenue() : null,
@@ -117,7 +100,6 @@ class AdminDashboardSample
                 'days' => self::days($now, array_fill(0, 30, 0), array_fill(0, 30, 0)),
                 'methods' => ['email' => 0, 'google' => 0, 'both' => 0, 'other' => 0],
                 'sources' => ['total' => 0, 'unrecorded' => 0, 'channels' => [], 'landing' => []],
-                'latest' => [],
             ],
             'active' => ['available' => true, 'active_7d' => 1, 'active_30d' => 1, 'organizers_7d' => 1, 'previous_7d' => null,
                 'change' => null, 'exact' => false, 'exact_30d' => false, 'exact_from' => null, 'exact_from_label' => null, 'series' => []],
@@ -190,8 +172,6 @@ class AdminDashboardSample
                 'mrr' => 192.5, 'arr' => 2310.0, 'billing_count' => 29, 'trialing_count' => 5, 'unrecognized_count' => 0,
                 'trial_mrr' => 34.17, 'past_due_count' => 2, 'cancelling_count' => 1, 'at_risk_count' => 3, 'at_risk_mrr' => 15.0,
             ],
-            'outside' => ['granted' => 11, 'trial' => 3, 'selling' => 6],
-            'boost' => ['markup' => 42.0, 'currency' => \App\Utils\PlatformCurrency::code()],
         ];
     }
 
@@ -228,7 +208,7 @@ class AdminDashboardSample
 
         return array_map(fn ($row) => [
             'name' => $row[0], 'type' => $row[1], 'place' => $row[2], 'owner' => $row[3], 'events' => $row[4],
-            'plan' => $hosted ? $row[5] : null, 'url' => '#', 'image' => $image($row[7]),
+            'plan' => $hosted ? $row[5] : null, 'admin_url' => '#', 'url' => '#', 'image' => $image($row[7]),
             'created_at' => Carbon::instance($now->subMinutes($row[6])),
         ], [
             ['Kulturhaus Linz', 'venue', 'Linz, AT', 'Jonas Reiter', 14, 'pro', 120, 'theater'],
@@ -251,7 +231,7 @@ class AdminDashboardSample
         $image = fn (?string $name) => $name ? asset('images/demo/demo_'.$name.'.jpg') : null;
 
         return array_map(fn ($row) => [
-            'name' => $row[0], 'schedule' => $row[1], 'series' => $row[2] === null, 'when' => $row[2], 'mode' => $row[3],
+            'name' => $row[0], 'schedule' => $row[1], 'schedule_admin_url' => '#', 'series' => $row[2] === null, 'when' => $row[2], 'mode' => $row[3],
             'flag' => $row[5], 'more' => $row[6], 'url' => '#', 'public' => $row[5] !== 'draft', 'image' => $image($row[7]),
             'created_at' => Carbon::instance($now->subMinutes($row[4])),
         ], [

@@ -50,6 +50,8 @@
                 </svg>
             </component>
             <template v-if="card.id === 'pages'">
+                <x-admin-page-link v-if="row.admin_url" v-bind:href="row.admin_url" v-bind:aria-label="fill(msg.openInAdmin, row.admin_label)" v-bind:title="fill(msg.openInAdmin, row.admin_label)" class="ms-1" />
+                <span v-else-if="row.icon === 'gp'" class="w-6 h-6 ms-1 shrink-0" aria-hidden="true"></span>
                 <x-public-page-link v-if="row.url" v-bind:href="row.url" v-bind:aria-label="fill(msg.openPublicPage, rowLabel(card, row))" v-bind:title="fill(msg.openPublicPage, rowLabel(card, row))" class="ms-1" />
                 <span v-else class="w-6 h-6 ms-1 shrink-0" aria-hidden="true"></span>
             </template>

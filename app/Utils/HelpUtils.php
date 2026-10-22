@@ -293,8 +293,8 @@ class HelpUtils
         'sales.import' => '/docs/tickets#importing-attendees',
         // The signed-in dashboard.
         'dashboard' => '/docs/getting-started#dashboard',
-        // Realtime is the second tab here: a schedule owner's own live view (not /admin/realtime,
-        // which is the operator's and has its own entry below).
+        // Realtime is the second tab here: a schedule owner's own live view (not the live part of
+        // /admin/dashboard, which is the operator's and has its own entry below).
         'analytics' => [
             'doc' => '/docs/analytics',
             'anchors' => [
@@ -314,8 +314,10 @@ class HelpUtils
         'checkin' => '/docs/tickets#checkin-dashboard',
         'waitlist' => '/docs/tickets#waitlist',
         'referrals' => '/docs/referral-program',
+        // The live view and the cards under it. Realtime was a page of its own until 2026-10;
+        // its old address redirects here.
         'admin/dashboard*' => '/docs/selfhost/admin#dashboard',
-        'admin/realtime*' => '/docs/selfhost/admin#realtime',
+        'admin/realtime*' => '/docs/selfhost/admin#dashboard',
         // The pages of the Insights, Manage and System tabs, in the navigation's own order
         // (admin/partials/_navigation). Each one opened the guide's front page until 2026-10.
         'admin/users*' => '/docs/selfhost/admin#insights-users',

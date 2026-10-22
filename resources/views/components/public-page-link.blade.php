@@ -1,6 +1,6 @@
 @props(['href' => null, 'label' => null])
 {{--
-    The small arrow beside a schedule's or an event's name on /admin/dashboard and /admin/realtime
+    The small arrow beside a schedule's or an event's name on /admin/dashboard
     that opens its guest page in a new tab (App\Utils\PublicPageUrl). Where the name itself already
     leads there, the same arrow is drawn inside the name's link instead (components/public-page-icon).
 

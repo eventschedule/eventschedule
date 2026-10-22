@@ -42,12 +42,12 @@
 
                     <div class="min-w-0 flex-1">
                         <p class="flex items-center gap-2 min-w-0">
+                            {{-- The name opens the schedule in the admin, the arrow its guest page in a new tab
+                                 (components/public-page-link), as on the live part of the page. --}}
+                            <a href="{{ $row['admin_url'] }}" title="{{ __('messages.admin_open_in_admin', ['label' => $row['name']]) }}"
+                               class="truncate min-w-0 text-sm font-medium text-gray-900 dark:text-white hover:underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]"><bdi>{{ $row['name'] }}</bdi></a>
                             @if ($row['url'])
-                                {{-- The guest page, in a new tab: the arrow says so (components/public-page-link). --}}
-                                <a href="{{ $row['url'] }}" target="_blank" rel="noopener noreferrer" title="{{ __('messages.admin_open_public_page', ['label' => $row['name']]) }}"
-                                   class="public-page-name group inline-flex items-center gap-1 min-w-0 text-sm font-medium text-gray-900 dark:text-white rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]"><span class="truncate group-hover:underline"><bdi>{{ $row['name'] }}</bdi></span><x-public-page-icon class="public-page-icon text-gray-500 dark:text-gray-400 transition-all duration-200" /></a>
-                            @else
-                                <span class="truncate text-sm font-medium text-gray-900 dark:text-white"><bdi>{{ $row['name'] }}</bdi></span>
+                                <x-public-page-link :href="$row['url']" :label="$row['name']" class="-my-1 -ms-1" />
                             @endif
                             @if ($row['plan'])
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-medium leading-4 whitespace-nowrap {{ $planTones[$row['plan']] }}">{{ __('messages.'.$row['plan']) }}</span>

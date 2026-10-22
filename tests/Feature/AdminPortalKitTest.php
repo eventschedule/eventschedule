@@ -113,9 +113,9 @@ class AdminPortalKitTest extends TestCase
         $this->assertSame(1, preg_match('/<h1 class="sr-only">([^<]*)<\/h1>/', $html, $h1), 'the page has a name');
         $this->assertStringContainsString(__('messages.audit_log'), $h1[1]);
 
-        // Five tabs; the group this page is in is the lit one.
+        // Four tabs (Dashboard, Insights, Manage, System); the group this page is in is the lit one.
         $this->assertSame(1, preg_match('/<nav class="ap-tabs" id="admin-nav"[^>]*>(.*?)<\/nav>/s', $html, $nav));
-        $this->assertSame(5, substr_count($nav[1], 'class="ap-tab"'));
+        $this->assertSame(4, substr_count($nav[1], 'class="ap-tab"'));
         $this->assertSame(1, substr_count($nav[1], 'aria-current='));
         $this->assertSame(1, preg_match('/data-admin-group="system"\s+aria-current="true"/', $nav[1]));
 
@@ -528,9 +528,9 @@ class AdminPortalKitTest extends TestCase
     {
         // The navigation is ahead of the page's stack on every admin page. Inside the stack, as
         // its second child after the hidden heading, it took the stack's gap, and the tabs
-        // jumped 16px between Dashboard or Realtime and any other page.
+        // jumped 16px between the Dashboard and any other page.
         $this->adminActing();
-        foreach (['/admin/dashboard', '/admin/realtime', '/admin/users'] as $url) {
+        foreach (['/admin/dashboard', '/admin/users'] as $url) {
             $html = $this->get($url)->assertOk()->getContent();
             $nav = strpos($html, '<div class="admin-nav">');
             $this->assertNotFalse($nav, $url);

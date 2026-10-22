@@ -56,7 +56,7 @@ class AdminRealtimeTest extends TestCase
         $admin = $this->admin();
         $this->hit(['visitor_key' => 'aaaaaaaaaaaaaaaa', 'path' => '/pricing', 'title' => 'Pricing']);
 
-        $this->actingAsAdmin($admin)->get('/admin/realtime')
+        $this->actingAsAdmin($admin)->get('/admin/dashboard')
             ->assertOk()
             ->assertSee('id="realtime-app"', false);
 
@@ -69,7 +69,7 @@ class AdminRealtimeTest extends TestCase
 
     public function test_the_admin_page_itself_never_carries_the_beacon(): void
     {
-        $this->actingAsAdmin($this->admin())->get('/admin/realtime')
+        $this->actingAsAdmin($this->admin())->get('/admin/dashboard')
             ->assertOk()
             ->assertDontSee('api\/realtime', false);
     }
@@ -78,7 +78,7 @@ class AdminRealtimeTest extends TestCase
     {
         $user = $this->createOwner();
 
-        $this->actingAs($user)->get('/admin/realtime')->assertRedirect();
+        $this->actingAs($user)->get('/admin/dashboard')->assertRedirect();
         $this->actingAs($user)->getJson('/admin/realtime/data')->assertStatus(403);
 
         // Nor switch it off (which would also purge every row).
@@ -91,7 +91,7 @@ class AdminRealtimeTest extends TestCase
         $this->actingAs($this->admin())->getJson('/admin/realtime/data')->assertStatus(423);
 
         // The page itself sends the admin to confirm their password, not to the dashboard.
-        $this->actingAs($this->admin())->get('/admin/realtime')->assertRedirect(route('admin.password.confirm.show'));
+        $this->actingAs($this->admin())->get('/admin/dashboard')->assertRedirect(route('admin.password.confirm.show'));
     }
 
     public function test_invalid_filter_values_are_dropped_not_refused(): void
@@ -214,25 +214,85 @@ class AdminRealtimeTest extends TestCase
     }
 
     /**
-     * Mutation: give the page the Refresh button again, or put Trends back above Activity.
+     * Mutation: give the page the Refresh button again, put Trends back above Activity, or the
+     * old dashboard's cards back above the live part.
      */
-    public function test_the_page_runs_now_today_history_then_the_lists_without_a_refresh_button(): void
+    public function test_the_page_runs_now_today_history_then_the_lists_then_the_cards_without_a_refresh_button(): void
     {
         $admin = $this->admin();
         $admin->forceFill(['timezone' => 'Asia/Jerusalem'])->save();
 
-        $html = $this->actingAsAdmin($admin)->get('/admin/realtime')->assertOk()->getContent();
+        $html = $this->actingAsAdmin($admin)->get('/admin/dashboard')->assertOk()->getContent();
 
         $at = fn (string $needle) => strpos($html, $needle);
         $this->assertNotFalse($at('id="realtime-now"'));
         $this->assertLessThan($at('aria-labelledby="realtime-activity-heading"'), $at('id="realtime-now"'));
         $this->assertLessThan($at('aria-labelledby="realtime-trends-heading"'), $at('aria-labelledby="realtime-signups-heading"'));
         $this->assertLessThan($at('id="realtime-visitors"'), $at('aria-labelledby="realtime-trends-heading"'));
+        $this->assertLessThan($at('data-dash-panel="recent"'), $at('id="realtime-visitors"'));
+        $this->assertLessThan($at('data-dash-panel="growth"'), $at('data-dash-panel="recent"'));
+        $this->assertLessThan($at('data-dash-panel="platform"'), $at('data-dash-panel="growth"'));
         $this->assertFalse($at('realtime-last30-heading'), 'the Last 30 minutes card is part of the Now card');
         $this->assertFalse($at('id="admin-nav-refresh-btn"'), 'the page updates itself');
         $this->assertStringContainsString('"timezone":"Asia\/Jerusalem"', $html, 'one clock for the page, the admin\'s own');
 
         $this->assertStringContainsString('id="admin-nav-refresh-btn"', $this->actingAsAdmin($admin)->get('/admin/users')->assertOk()->getContent());
+    }
+
+    /**
+     * Mutation: put the payload or the Trends figures back into the page. Both are fetched once
+     * the page is up, so the first response reads no visits at all.
+     */
+    public function test_the_page_reads_no_visits_before_it_is_sent(): void
+    {
+        $admin = $this->admin();
+        $this->hit(['visitor_key' => 'aaaaaaaaaaaaaaaa', 'path' => '/pricing', 'title' => 'Pricing']);
+        $this->actingAsAdmin($admin)->get('/admin/users')->assertOk();
+
+        \Illuminate\Support\Facades\DB::flushQueryLog();
+        \Illuminate\Support\Facades\DB::enableQueryLog();
+        $html = $this->actingAsAdmin($admin)->get('/admin/dashboard')->assertOk()->getContent();
+        $queries = collect(\Illuminate\Support\Facades\DB::getQueryLog())->pluck('query');
+        \Illuminate\Support\Facades\DB::disableQueryLog();
+
+        $this->assertFalse($queries->contains(fn ($sql) => str_contains($sql, 'realtime_hits') || str_contains($sql, 'realtime_hourly')), $queries->implode("\n"));
+        $this->assertStringContainsString('"state":"loading"', $html);
+        $this->assertStringNotContainsString('Pricing', $html, 'no visitor is in the page itself');
+    }
+
+    /**
+     * The page reads no visits, but it does read the address: the first poll asks for the view a
+     * bookmark names. Mutation: send the bare state again, as the first version did, and every
+     * filtered bookmark (and the old address's query) opened unfiltered.
+     */
+    public function test_the_filters_in_the_address_reach_the_first_poll(): void
+    {
+        $html = $this->actingAsAdmin($this->admin())
+            ->get('/admin/dashboard?surface=gp&who=signed_in&admins=1&feed=signup&country=nope')
+            ->assertOk()->getContent();
+
+        preg_match('/var INITIAL = (\{.*?\});/', $html, $initial);
+        $state = json_decode($initial[1] ?? 'null', true);
+
+        $this->assertSame('loading', $state['state']);
+        $this->assertSame(['surface' => 'gp'], $state['filters'], 'checked as the poll checks it: the bad country is dropped');
+        $this->assertSame('signed_in', $state['who']);
+        $this->assertTrue($state['admins']);
+        $this->assertSame('signup', $state['feed']);
+
+        // No filter is an object, not a list, so the page reads it the same way.
+        $this->assertStringContainsString('"filters":{}', $this->actingAsAdmin($this->admin())->get('/admin/dashboard')->getContent());
+    }
+
+    /**
+     * Realtime was a page of its own until 2026-10; its address, filters and range are bookmarked.
+     */
+    public function test_the_old_address_lands_on_the_dashboard_with_its_query(): void
+    {
+        $this->actingAsAdmin($this->admin())->get('/admin/realtime?surface=gp&trend=7d')
+            ->assertRedirect(route('admin.dashboard').'?surface=gp&trend=7d');
+
+        $this->actingAsAdmin($this->admin())->get('/admin/realtime')->assertRedirect(route('admin.dashboard'));
     }
 
     public function test_a_new_users_pre_sign_up_pages_join_their_account_but_an_admins_private_window_does_not(): void
@@ -701,15 +761,14 @@ class AdminRealtimeTest extends TestCase
         $this->assertSame(['After sign-out'], $labels('v:'.$key));
     }
 
-    public function test_the_dashboard_teaser_shows_only_when_tracking_is_on(): void
+    public function test_the_page_starts_in_the_off_state_when_tracking_is_off(): void
     {
         $admin = $this->admin();
-        $this->hit(['visitor_key' => '9999999999999999']);
 
-        $this->actingAsAdmin($admin)->get('/admin/dashboard')->assertSee('1 page view in the last 5 minutes');
+        $this->actingAsAdmin($admin)->get('/admin/dashboard')->assertOk()->assertSee('"state":"loading"', false);
 
         Setting::set('realtime_enabled', '0');
-        $this->actingAsAdmin($admin)->get('/admin/dashboard')->assertOk()->assertDontSee('in the last 5 minutes');
+        $this->actingAsAdmin($admin)->get('/admin/dashboard')->assertOk()->assertSee('"state":"off"', false);
     }
 
     public function test_deleting_an_account_deletes_its_realtime_rows(): void

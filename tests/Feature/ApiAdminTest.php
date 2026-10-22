@@ -212,12 +212,16 @@ class ApiAdminTest extends TestCase
     {
         $admin = $this->createOwner(true);
         // An install with no schedule, no event and no account but the admin's gets the
-        // new-install page, which has the headline numbers and none of the cards
-        // (AdminDashboardPageTest holds that). One schedule makes this the ordinary page.
+        // new-install card and none of the others (AdminDashboardPageTest holds that). One
+        // schedule makes this the ordinary page.
         $this->createRole($this->createOwner());
 
         $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
             ->actingAs($admin)->get(route('admin.dashboard'))
+            ->assertOk();
+        // The cards are a panel the page fetches.
+        $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->actingAs($admin)->get(route('admin.dashboard.panel', ['panel' => 'growth']))
             ->assertOk()
             ->assertSee(__('messages.active_users_7_days'));
     }

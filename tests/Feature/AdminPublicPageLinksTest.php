@@ -19,7 +19,7 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * The arrow beside a schedule's or an event's name on /admin/dashboard and /admin/realtime that
+ * The arrow beside a schedule's or an event's name on /admin/dashboard that
  * opens its guest page (App\Utils\PublicPageUrl, components/public-page-link).
  *
  * What is held: every place that names one carries the address, the address is a page that
@@ -90,37 +90,48 @@ class AdminPublicPageLinksTest extends TestCase
         $this->assertSame(route('event.edit_admin', ['hash' => UrlUtils::encodeId(Event::where('name', 'Draft Night')->value('id'))]), $events['Draft Night']['url'],
             'a draft opens its edit page, as it did');
 
+        $admin = route('admin.schedules.edit', ['role' => UrlUtils::encodeId($venue->id)]);
+        $this->assertSame($admin, $dashboard->recentSchedules()['rows'][0]['admin_url']);
+        $this->assertSame($admin, $events['Jazz Night']['schedule_admin_url'], 'an event\'s schedule opens in the admin');
+
         $this->assertOpens($events['Jazz Night']['url']);
     }
 
-    /** Mutation: drop public_url from latestSignups(), or the claimed test from PublicPageUrl::schedule(). */
-    public function test_a_latest_sign_up_carries_its_schedules_guest_page_beside_its_admin_page(): void
+    /**
+     * A recent schedule's name opens it in the admin and the arrow beside it its guest page.
+     * Mutation: link the name to the guest page again, or drop the claimed test from
+     * PublicPageUrl::schedule().
+     */
+    public function test_a_recent_schedule_opens_in_the_admin_by_its_name_and_on_its_guest_page_by_the_arrow(): void
     {
         $claimed = $this->createOwner();
-        $claimed->forceFill(['name' => 'Cara Claimed'])->save();
         $venue = $this->createRole($claimed, 'venue', ['name' => 'Cara Hall']);
+        $unclaimed = $this->createRole($this->createOwner(), 'venue', ['name' => 'Una Hall', 'email_verified_at' => null]);
 
-        $unclaimed = $this->createOwner();
-        $unclaimed->forceFill(['name' => 'Una Unclaimed'])->save();
-        $this->createRole($unclaimed, 'venue', ['name' => 'Una Hall', 'email_verified_at' => null]);
+        $rows = collect((new AdminDashboard)->recentSchedules()['rows'])->keyBy('name');
+        $this->assertSame($this->guestPage($venue), $rows['Cara Hall']['url']);
+        $this->assertSame(route('admin.schedules.edit', ['role' => UrlUtils::encodeId($venue->id)]), $rows['Cara Hall']['admin_url']);
 
-        $latest = collect((new AdminDashboard)->signups()['latest'])->keyBy('name');
-
-        $this->assertSame($this->guestPage($venue), $latest['Cara Claimed']['schedule']['public_url']);
-        $this->assertStringContainsString('/admin/schedules/', $latest['Cara Claimed']['schedule']['url'], 'the name still opens the admin');
-        $this->assertNull($latest['Una Unclaimed']['schedule']['public_url'], 'an unclaimed schedule has no guest page to open');
-
-        $html = $this->asAdmin()->get('/admin/dashboard')->assertOk()->getContent();
+        $html = $this->asAdmin()->get('/admin/dashboard/panels/recent')->assertOk()->getContent();
+        $this->assertMatchesRegularExpression(
+            '~<a href="'.preg_quote($rows['Cara Hall']['admin_url'], '~').'" title="'.preg_quote(e(__('messages.admin_open_in_admin', ['label' => 'Cara Hall'])), '~').'"~',
+            $html,
+            'the name opens the admin',
+        );
         $this->assertMatchesRegularExpression(
             '~<a\s[^>]*href="'.preg_quote($this->guestPage($venue), '~').'"[^>]*target="_blank"[^>]*aria-label="'.preg_quote(e(__('messages.admin_open_public_page', ['label' => 'Cara Hall'])), '~').'"~',
             $html,
             'the arrow in the list, with the name in what it says',
         );
 
-        $this->assertOpens($latest['Cara Claimed']['schedule']['public_url']);
+        // The list holds claimed schedules only; one that is not has no guest page to point at.
+        $this->assertArrayNotHasKey('Una Hall', $rows);
+        $this->assertNull(\App\Utils\PublicPageUrl::schedule($unclaimed), 'an unclaimed schedule has no guest page to open');
+
+        $this->assertOpens($rows['Cara Hall']['url']);
     }
 
-    // ---------------------------------------------------------------- /admin/realtime
+    // ---------------------------------------------------------------- the live part of /admin/dashboard
 
     /**
      * Mutation: drop the event or the schedule arm of the public link in RealtimeActivity::render(),
@@ -202,19 +213,32 @@ class AdminPublicPageLinksTest extends TestCase
         $this->assertNull($pages['Gone Hall']['url']);
         $this->assertNull($pages['Home']['url'], 'the admin panel is not a guest page');
 
+        // Beside the arrow, the schedule in the admin: an event's page names its schedule.
+        $admin = route('admin.schedules.edit', ['role' => UrlUtils::encodeId($venue->id)]);
+        $this->assertSame($admin, $pages['Jazz Hall']['admin_url']);
+        $this->assertSame($admin, $pages['Draft Night']['admin_url'], 'a draft has no guest page, and still a schedule');
+        $this->assertSame('Jazz Hall', $pages['Jazz Night']['admin_label']);
+        $this->assertNull($pages['Gone Hall']['admin_url']);
+        $this->assertNull($pages['Home']['admin_url']);
+
         $this->assertOpens($pages['Jazz Night']['url']);
     }
 
-    public function test_the_realtime_page_draws_the_arrow_from_the_payload(): void
+    public function test_the_live_part_draws_the_arrow_and_the_admin_link_from_the_payload(): void
     {
-        $html = $this->asAdmin()->get('/admin/realtime')->assertOk()->getContent();
+        $html = $this->asAdmin()->get('/admin/dashboard')->assertOk()->getContent();
 
         // Four places: the activity feed, the sign-ups card, an expanded visitor, a top page.
         foreach (['item.public_url', 'row.schedule.public_url', 'schedule.public_url', 'row.url'] as $field) {
             $this->assertMatchesRegularExpression('~<a\s[^>]*target="_blank"[^>]*v-if="'.preg_quote($field).'"\s+v-bind:href="'.preg_quote($field).'"~', $html);
         }
-        // The label is filled in by the page, from a string it is handed raw.
+        // Three places open a schedule in the admin: the board, a top page, a visitor's page.
+        foreach (['page.admin_url', 'row.admin_url', 'entry.admin_url'] as $field) {
+            $this->assertMatchesRegularExpression('~<a\s(?:(?!target=)[^>])*v-if="'.preg_quote($field).'"\s+v-bind:href="'.preg_quote($field).'"~', $html, 'in the same tab');
+        }
+        // The labels are filled in by the page, from strings it is handed raw.
         $this->assertStringContainsString(json_encode(__('messages.admin_open_public_page')), $html);
+        $this->assertStringContainsString(json_encode(__('messages.admin_open_in_admin')), $html);
     }
 
     private function hit(array $attributes): void

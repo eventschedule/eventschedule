@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\BoostBillingRecord;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Setting;
@@ -19,7 +18,8 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 
 /**
- * Everything /admin/dashboard shows, one method per card.
+ * The cards of /admin/dashboard, one method per card. The live part above them is
+ * RealtimeDashboard's.
  *
  * The windows are fixed, which is why the page has no date-range select: "24 hours" is rolling,
  * "30 days" is thirty calendar days including today in the app timezone, and "previous" is the same
@@ -33,9 +33,7 @@ use Throwable;
  *   ticket buyer, someone submitting an event to another schedule - are counted beside them.
  * - Demo content is Role::constrainDemoContent(), the predicate RecurringRevenue and the growth
  *   payload use, on every query written here. Not the `demo-%` subdomain shape the page used to
- *   test. The one exception is the "Outside Stripe" line of the revenue card: those three counts
- *   are AdminPlanCounts, which keeps the older test because /admin/schedules, the page they come
- *   from, uses it everywhere. Which schedules are demo is read ONCE (demoRoleIds()) and handed to
+ *   test. Which schedules are demo is read ONCE (demoRoleIds()) and handed to
  *   each query as ids: asked inside the query, it was answered again for every event.
  * - An event belongs to the page while one of its schedules is not deleted. Deleting a schedule
  *   keeps its events (ScheduleDeletionService), and they are on no page anyone can open.
@@ -92,8 +90,6 @@ class AdminDashboard
     /** Events one schedule creates within this many seconds of each other are one row. */
     private const BURST_SECONDS = 600;
 
-    private const LATEST_SIGNUPS = 8;
-
     private CarbonImmutable $now;
 
     private CarbonImmutable $start;
@@ -115,27 +111,53 @@ class AdminDashboard
 
     /**
      * Every card, or null for one that failed (reported, and the page renders without it).
+     *
+     * $only builds the named cards and no others: the dashboard loads its cards in three panels,
+     * each its own request (AdminDashboardController::PANELS), and a panel must not pay for the
+     * cards of the other two. A card left out is absent from the result, not null, which is what
+     * a failed card is. firstRun is there only when the three cards it is decided from are.
+     *
+     * @param  array<int, string>|null  $only
      */
-    public function build(): array
+    public function build(?array $only = null): array
     {
-        $hosted = (bool) config('app.hosted');
-
-        $data = [
-            'signups' => $this->card('signups', fn () => $this->signups()),
-            'active' => $this->card('active', fn () => $this->activeUsers()),
-            'revenue' => $hosted ? $this->card('revenue', fn () => $this->revenue()) : null,
-            'events' => $this->card('events', fn () => $this->events()),
-            'federation' => $this->card('federation', fn () => $this->federation()),
-            'schedules' => $this->card('schedules', fn () => $this->recentSchedules()),
-            'recentEvents' => $this->card('recentEvents', fn () => $this->recentEvents()),
-            'system' => $this->card('system', fn () => $this->system()),
+        $cards = [
+            'signups' => fn () => $this->signups(),
+            'active' => fn () => $this->activeUsers(),
+            // What Stripe is billing, for the Revenue card in the dashboard's corner, which shows
+            // its totals.
+            'revenue' => fn () => RecurringRevenue::breakdown(),
+            // A panel that shows the upcoming events does not show the totals, which the Recent
+            // panel reads on its own.
+            'events' => fn () => $this->events(withCounts: $only === null),
+            // The two totals of events() without its pass over every upcoming event.
+            'eventCounts' => fn () => $this->eventCounts(),
+            'federation' => fn () => $this->federation(),
+            'schedules' => fn () => $this->recentSchedules(),
+            'recentEvents' => fn () => $this->recentEvents(),
+            'system' => fn () => $this->system(),
         ];
 
-        // A new install: no schedule, no event, and nobody but the person looking. Their own
-        // account is a sign-up from this week, so "no sign-ups" would never be true on day one.
-        $data['firstRun'] = ($data['schedules']['total'] ?? 1) === 0
-            && ($data['events']['all_time'] ?? 1) === 0
-            && ($data['system']['accounts'] ?? 2) <= 1;
+        // eventCounts is inside events(), so a full build never reads it twice.
+        $names = $only ?? array_diff(array_keys($cards), ['eventCounts']);
+
+        $data = [];
+        foreach (array_intersect($names, array_keys($cards)) as $name) {
+            // Revenue is billing, which only the hosted install has.
+            $data[$name] = $name === 'revenue' && ! config('app.hosted') ? null : $this->card($name, $cards[$name]);
+        }
+
+        $events = $data['eventCounts'] ?? $data['events'] ?? null;
+
+        if (array_key_exists('schedules', $data) && isset($events['all_time'])) {
+            // A new install: no schedule, no event, and nobody but the person looking. Their own
+            // account is a sign-up from this week, so "no sign-ups" would never be true on day one.
+            // The accounts are counted only when the first two hold, which on a live install they
+            // never do.
+            $data['firstRun'] = ($data['schedules']['total'] ?? 1) === 0
+                && $events['all_time'] === 0
+                && ($data['system']['accounts'] ?? rescue(fn () => $this->accounts(), 2)) <= 1;
+        }
 
         return $data;
     }
@@ -278,7 +300,6 @@ class AdminDashboard
                 'other' => $organizers->filter(fn ($row) => ! $row->has_google && ! $row->has_password)->count(),
             ],
             'sources' => $this->sources($organizers),
-            'latest' => $this->latestSignups($organizers->take(self::LATEST_SIGNUPS)),
         ];
     }
 
@@ -325,60 +346,6 @@ class AdminDashboard
     }
 
     /**
-     * The newest organizers and the step each has reached, by the rules RealtimeActivity and
-     * GrowthExportService::signupRows() use so the pages cannot disagree about one person: a
-     * deleted schedule still counts as made, a guest submission is not their own event, and an
-     * add-on is not a ticket. Cumulative: 0 account, 1 schedule, 2 event, 3 ticket type.
-     */
-    private function latestSignups(Collection $rows): array
-    {
-        if ($rows->isEmpty()) {
-            return [];
-        }
-
-        $ids = $rows->pluck('id')->all();
-
-        // Models, for the guest page's address; every column PublicPageUrl::schedule() reads.
-        $schedules = Role::whereIn('user_id', $ids)->orderBy('id')
-            ->get(['id', 'user_id', 'name', 'subdomain', 'is_deleted', 'email_verified_at', 'phone_verified_at'])->groupBy('user_id');
-        $events = DB::table('events')->whereIn('user_id', $ids)->where('is_guest_submission', false)
-            ->distinct()->pluck('user_id')->flip();
-        $tickets = DB::table('events')->join('tickets', 'tickets.event_id', '=', 'events.id')
-            ->whereIn('events.user_id', $ids)
-            ->where('tickets.is_deleted', false)
-            ->where('tickets.is_addon', false)
-            ->distinct()->pluck('events.user_id')->flip();
-
-        $referrerIds = $rows->pluck('referred_by_user_id')->filter()->unique()->all();
-        $referrers = $referrerIds ? DB::table('users')->whereIn('id', $referrerIds)->pluck('name', 'id') : collect();
-
-        return $rows->map(function ($row) use ($schedules, $events, $tickets, $referrers) {
-            $stage = match (true) {
-                $tickets->has($row->id) => 3,
-                $events->has($row->id) => 2,
-                $schedules->has($row->id) => 1,
-                default => 0,
-            };
-            $schedule = ($schedules->get($row->id) ?? collect())->firstWhere('is_deleted', 0);
-            // A person with no name is known by their address; admins may see it.
-            $name = $row->name ?: $row->email;
-
-            return [
-                'name' => $name,
-                'initials' => RealtimeDashboard::initials((string) $name),
-                'source' => SignupSource::display($row, $row->referred_by_user_id ? ($referrers[$row->referred_by_user_id] ?? null) : null),
-                'stage' => $stage,
-                'schedule' => $schedule ? [
-                    'name' => $schedule->name,
-                    'url' => route('admin.schedules.edit', ['role' => UrlUtils::encodeId($schedule->id)]),
-                    'public_url' => PublicPageUrl::schedule($schedule),
-                ] : null,
-                'created_at' => Carbon::parse($row->created_at),
-            ];
-        })->values()->all();
-    }
-
-    /**
      * ActiveDays::stats(), with a label for each point of the chart.
      */
     public function activeUsers(): array
@@ -394,30 +361,6 @@ class AdminDashboard
     }
 
     /**
-     * Hosted only. RecurringRevenue::breakdown() as it is, the plans that are not being billed
-     * (AdminPlanCounts, the numbers /admin/schedules shows), and the boost markup of the window.
-     */
-    public function revenue(): array
-    {
-        return RecurringRevenue::breakdown() + [
-            'outside' => [
-                'granted' => AdminPlanCounts::manual(),
-                'trial' => AdminPlanCounts::trial(),
-                'selling' => AdminPlanCounts::sellingTrials(),
-            ],
-            'boost' => [
-                'markup' => (float) BoostBillingRecord::where('type', 'charge')
-                    ->where('status', 'completed')
-                    ->whereBetween('created_at', [$this->start, $this->now])
-                    ->sum('markup_amount'),
-                // Off the campaigns, not off the Meta ad account's currency: that config defaults
-                // to USD and printed "$0" on every selfhost whatever the operator had picked.
-                'currency' => BoostBillingService::markupCurrency($this->start, $this->now),
-            ],
-        ];
-    }
-
-    /**
      * Upcoming events by how people attend, the countries the in-person ones are in, how soon the
      * dated ones start, and the all-time totals.
      *
@@ -426,7 +369,7 @@ class AdminDashboard
      * is 24 hours and not "today", because a day belongs to a schedule's timezone and this is a
      * count across all of them: an evening show in New York is tomorrow on a UTC clock.
      */
-    public function events(): array
+    public function events(bool $withCounts = true): array
     {
         $utc = $this->now->utc();
         $horizons = [
@@ -488,6 +431,31 @@ class AdminDashboard
         arsort($byCountry);
         $countries = array_slice($byCountry, 0, 5, true);
 
+        return [
+            'total' => $count['total'],
+            'in_person' => $count['in_person'],
+            'online' => $count['online'],
+            'hybrid' => $count['hybrid'],
+            'no_location' => $count['no_location'],
+            'one_off' => $count['total'] - $count['recurring'],
+            'recurring' => $count['recurring'],
+            'next_24h' => $count['next_24h'],
+            'next_7' => $count['next_7'],
+            'next_30' => $count['next_30'],
+            'countries' => array_map(fn ($code, $events) => [
+                'code' => (string) $code,
+                'name' => CountryUtils::getName((string) $code),
+                'count' => $events,
+            ], array_keys($countries), $countries),
+        ] + ($withCounts ? $this->eventCounts() : []);
+    }
+
+    /**
+     * Every event on a live page, and the ones added in the window against the window before.
+     * The Recent events card's header, and what tells a new install, without events()' pass.
+     */
+    public function eventCounts(): array
+    {
         // Two reads where there was one, so that neither opens every event. The total names no
         // column but the id and appointment_type_id, which that column's index holds between
         // them; the two windows are bounded by created_at, so they read sixty days of events.
@@ -515,21 +483,6 @@ class AdminDashboard
         $previous = (int) $added->previous_30d;
 
         return [
-            'total' => $count['total'],
-            'in_person' => $count['in_person'],
-            'online' => $count['online'],
-            'hybrid' => $count['hybrid'],
-            'no_location' => $count['no_location'],
-            'one_off' => $count['total'] - $count['recurring'],
-            'recurring' => $count['recurring'],
-            'next_24h' => $count['next_24h'],
-            'next_7' => $count['next_7'],
-            'next_30' => $count['next_30'],
-            'countries' => array_map(fn ($code, $events) => [
-                'code' => (string) $code,
-                'name' => CountryUtils::getName((string) $code),
-                'count' => $events,
-            ], array_keys($countries), $countries),
             'all_time' => $allTime,
             'new_30d' => $new,
             'new_change' => $previous > 0 ? round((($new - $previous) / $previous) * 100, 1) : null,
@@ -657,7 +610,8 @@ class AdminDashboard
                     'events' => (int) ($eventCounts[$role->id] ?? 0),
                     // A plan is only a fact on hosted: a selfhost schedule reads "enterprise".
                     'plan' => $tier === 'free' ? null : ($role->isOnTrial() ? 'trial' : $tier),
-                    // The guest page: the name links there, with the arrow that says so.
+                    // The name opens the schedule in the admin, the arrow its guest page.
+                    'admin_url' => route('admin.schedules.edit', ['role' => UrlUtils::encodeId($role->id)]),
                     'url' => PublicPageUrl::schedule($role),
                     'image' => $role->getProfileImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
                     'created_at' => $role->created_at,
@@ -756,6 +710,9 @@ class AdminDashboard
             $rows[] = [
                 'name' => $event->name,
                 'schedule' => $shownOn?->name,
+                // The schedule's name opens it in the admin. Not for a deleted one, which the
+                // admin page would only show as taken down.
+                'schedule_admin_url' => $shownOn && ! $shownOn->is_deleted ? route('admin.schedules.edit', ['role' => UrlUtils::encodeId($shownOn->id)]) : null,
                 'series' => $series,
                 'when' => $start ? $start->translatedFormat('D, M j').' · '.$start->format($use24 ? 'H:i' : 'g:i A') : null,
                 'mode' => match ($event->getSchemaAttendanceMode()) {
@@ -805,8 +762,14 @@ class AdminDashboard
             'jobs_waiting' => DB::table('jobs')->count(),
             'jobs_failed' => DB::table('failed_jobs')->count(),
             'domains' => $domains,
-            'accounts' => User::whereNotNull('email_verified_at')->where('email', '!=', DemoService::DEMO_EMAIL)
-                ->whereNotIn('id', $this->blocked->userIds())->count(),
+            'accounts' => $this->accounts(),
         ];
+    }
+
+    /** Verified accounts, not the demo's and not a blocked one. */
+    private function accounts(): int
+    {
+        return User::whereNotNull('email_verified_at')->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotIn('id', $this->blocked->userIds())->count();
     }
 }

@@ -79,7 +79,10 @@
                             @endif
                         </p>
                         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
-                            @if ($row['schedule'])
+                            @if ($row['schedule'] && ($row['schedule_admin_url'] ?? null))
+                                {{-- The schedule, opened in the admin (the event's own name leads to its page). --}}
+                                <a href="{{ $row['schedule_admin_url'] }}" title="{{ __('messages.admin_open_in_admin', ['label' => $row['schedule']]) }}" class="rounded hover:underline hover:text-gray-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]"><bdi>{{ $row['schedule'] }}</bdi></a>
+                            @elseif ($row['schedule'])
                                 <bdi>{{ $row['schedule'] }}</bdi>
                             @endif
                             <span class="hidden sm:inline">

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminBlockController;
 use App\Http\Controllers\AdminCalendarPrivacyController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminFederationController;
 use App\Http\Controllers\AdminFeedController;
 use App\Http\Controllers\AdminLegalController;
@@ -1098,11 +1099,17 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
 
     // Admin routes (only for admin users) - protected by admin middleware for defense-in-depth
     Route::middleware(['admin', 'throttle:30,1'])->group(function () {
-        Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        // The dashboard is the live view (Realtime) with the slower cards under it. On every
+        // install: tracking is off by default off the nexus, and the page explains how to turn it
+        // on rather than disappearing. Its cards load after the page, each from its own address.
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/admin/dashboard/revenue', [AdminDashboardController::class, 'revenue'])->name('admin.dashboard.revenue');
+        Route::get('/admin/dashboard/panels/{panel}', [AdminDashboardController::class, 'panel'])
+            ->whereIn('panel', AdminDashboardController::PANELS)->name('admin.dashboard.panel');
         Route::redirect('/admin', '/admin/dashboard');
-        // Realtime. On every install: tracking is off by default off the nexus, and the page
-        // explains how to turn it on rather than disappearing.
-        Route::get('/admin/realtime', [AdminRealtimeController::class, 'index'])->name('admin.realtime');
+        // Realtime was a page of its own until 2026-10. Its filters and ?trend= are bookmarked,
+        // which Route::redirect() would drop.
+        Route::get('/admin/realtime', fn (\Illuminate\Http\Request $request) => redirect()->to(route('admin.dashboard').($request->getQueryString() ? '?'.$request->getQueryString() : '')))->name('admin.realtime');
         Route::get('/admin/realtime/data', [AdminRealtimeController::class, 'data'])->name('admin.realtime.data');
         Route::get('/admin/realtime/trends', [AdminRealtimeController::class, 'trends'])->name('admin.realtime.trends');
         Route::post('/admin/settings/realtime', [AdminRealtimeController::class, 'updateSettings'])->name('admin.settings.update_realtime');

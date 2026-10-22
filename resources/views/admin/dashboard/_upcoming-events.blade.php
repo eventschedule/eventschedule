@@ -1,8 +1,6 @@
-{{-- Events with something still to come, by how people attend. $wide lays the three blocks out
-     in a row for an install with no revenue card beside this one. Colour is on the bar and the
+{{-- Events with something still to come, by how people attend. Colour is on the bar and the
      dots; the words stay in the page's ink. --}}
 @php
-    $wide = $wide ?? false;
     $modes = [
         ['in_person', __('messages.in_person'), 'bg-cyan-600'],
         ['online', __('messages.online'), 'bg-purple-600 dark:bg-purple-500'],
@@ -47,7 +45,7 @@
             @endif
         </div>
 
-        <div class="px-2 sm:px-3 mt-3 grid sm:grid-cols-2 {{ $wide ? 'lg:grid-cols-3' : '' }} gap-x-6 gap-y-4 pb-4">
+        <div class="px-2 sm:px-3 mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-4 pb-4">
             <div>
                 <p class="{{ $sub }}">@lang('messages.admin_dash_how_attend')</p>
                 <dl>
@@ -82,9 +80,9 @@
 
             {{-- One-off events only: a series is known to be running, not when it next happens.
                  All three run from now; "today" would be somebody's day and not everybody's. --}}
-            <div class="sm:col-span-2 {{ $wide ? 'lg:col-span-1' : '' }}">
+            <div class="sm:col-span-2">
                 <p class="{{ $sub }}">@lang('messages.admin_dash_one_off_by_start')</p>
-                <div class="grid grid-cols-3 {{ $wide ? 'lg:grid-cols-1' : '' }} gap-2">
+                <div class="grid grid-cols-3 gap-2">
                     @foreach ([[__('messages.admin_dash_next_24_hours'), $events['next_24h']], [__('messages.admin_dash_next_7_days'), $events['next_7']], [__('messages.admin_dash_next_30_days'), $events['next_30']]] as [$label, $value])
                         <div class="rounded-xl px-3 py-2.5" style="background: var(--ap-tint-sunken)">
                             <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $label }}</p>

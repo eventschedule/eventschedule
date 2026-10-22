@@ -8,7 +8,7 @@
     'href' => null,
 ])
 
-{{-- One headline number of the admin dashboard, in the AP's stat-panel shape (CLAUDE.md,
+{{-- One headline number of a platform admin page, in the AP's stat-panel shape (CLAUDE.md,
      "Dashboard-style stat panels").
 
      The number hangs from a header of reserved height, and the footer is pinned to the bottom, so

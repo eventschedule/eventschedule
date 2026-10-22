@@ -14,13 +14,14 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * /admin/dashboard as a page: which cards each kind of install gets, what a new install sees, and
- * what the page costs to load.
+ * /admin/dashboard as a page: the shell that is sent at once, the three panels of cards it fetches
+ * as they near the screen (AdminDashboardController::PANELS), the Revenue card in its corner,
+ * which cards each kind of install gets, what a new install sees, and what each request costs.
  *
- * What each number means is held by the tests of the thing that counts it (AdminDashboardSignupsTest,
- * AdminDashboardEventsTest, AdminDashboardRecentTest, AdminDashboardFederationTest, ActiveDaysTest,
- * RecurringRevenueTest). AdminInstallKindTest, AdminAlertsTest and BoostMarkupCurrencyTest read
- * this page too.
+ * The live part of the page is AdminRealtimeTest's. What each number means is held by the tests of
+ * the thing that counts it (AdminDashboardSignupsTest, AdminDashboardEventsTest,
+ * AdminDashboardRecentTest, AdminDashboardFederationTest, ActiveDaysTest, RecurringRevenueTest).
+ * AdminInstallKindTest and AdminAlertsTest read this page too.
  */
 class AdminDashboardPageTest extends TestCase
 {
@@ -28,8 +29,8 @@ class AdminDashboardPageTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * The old page ran about a hundred queries and this one about forty. The ceiling sits between
-     * the two: it is there to catch a query per row, not to forbid another card.
+     * The old page ran about a hundred queries for every card at once. A panel is a third of the
+     * cards: the ceiling is there to catch a query per row, not to forbid another card.
      */
     private const QUERY_CEILING = 50;
 
@@ -42,13 +43,33 @@ class AdminDashboardPageTest extends TestCase
         $this->admin = $this->createOwner(true);
     }
 
-    private function page(string $query = ''): TestResponse
+    private function fetch(string $path): TestResponse
     {
         // EnsureUserIsAdmin gates every /admin route on a confirmed password this session.
         return $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
             ->actingAs($this->admin)
-            ->get('/admin/dashboard'.$query)
-            ->assertOk();
+            ->get($path);
+    }
+
+    private function page(string $query = ''): TestResponse
+    {
+        return $this->fetch('/admin/dashboard'.$query)->assertOk();
+    }
+
+    private function panel(string $panel, string $query = ''): TestResponse
+    {
+        return $this->fetch('/admin/dashboard/panels/'.$panel.$query)->assertOk();
+    }
+
+    /** Every panel's HTML, in the page's order. */
+    private function cards(string $query = ''): string
+    {
+        return collect(['recent', 'growth', 'platform'])->map(fn ($panel) => $this->panel($panel, $query)->getContent())->implode("\n");
+    }
+
+    private function revenue(string $query = ''): TestResponse
+    {
+        return $this->fetch('/admin/dashboard/revenue'.$query);
     }
 
     private function seedSomething(string $schedule = 'The Room'): void
@@ -58,27 +79,72 @@ class AdminDashboardPageTest extends TestCase
     }
 
     /**
-     * No schedule, no event and nobody but the person looking: the numbers and one card, not a
-     * column of cards each saying "nothing yet". The admin's own account is a sign-up from today,
-     * which is why "no sign-ups" is not the test. Mutation: require an empty sign-up window.
+     * The page is sent before any card is built: each panel, and Revenue, is its own request.
+     * Mutation: build the cards in index() again.
      */
-    public function test_a_new_install_gets_the_numbers_and_one_card(): void
+    public function test_the_page_builds_no_card_and_names_the_three_panels(): void
+    {
+        config(['app.hosted' => true, 'app.is_nexus' => true]);
+        $this->seedSomething();
+
+        $this->app->bind(AdminDashboard::class, fn () => throw new \RuntimeException('the page built a card'));
+
+        $html = $this->page()->getContent();
+        foreach (['recent', 'growth', 'platform'] as $panel) {
+            $this->assertStringContainsString('data-dash-panel="'.$panel.'"', $html);
+        }
+        $this->assertStringContainsString('data-panel-url="'.route('admin.dashboard.panel', ['panel' => '__panel__']).'"', $html);
+        $this->assertStringNotContainsString('The Room', $html);
+
+        $this->fetch('/admin/dashboard/panels/nope')->assertNotFound();
+    }
+
+    /**
+     * The panels are fetched with the headers the page's script sends. Asked as a page, a lapsed
+     * password confirmation answered with a redirect to the form, which fetch followed and the
+     * script put where the panel goes. Mutation: send Accept: text/html from the script.
+     */
+    public function test_a_lapsed_password_confirmation_answers_a_panel_with_423(): void
+    {
+        $script = file_get_contents(resource_path('views/admin/dashboard/_cards-script.blade.php'));
+        $this->assertStringContainsString("'Accept': '*/*'", $script);
+
+        $this->actingAs($this->admin)
+            ->get('/admin/dashboard/panels/recent', ['Accept' => '*/*', 'X-Requested-With' => 'XMLHttpRequest'])
+            ->assertStatus(423);
+    }
+
+    public function test_a_non_admin_gets_no_panel_and_no_revenue(): void
+    {
+        config(['app.hosted' => true]);
+        $owner = $this->createOwner();
+
+        // The admin middleware sends a page request away, and refuses one the script makes.
+        $this->actingAs($owner)->get('/admin/dashboard/panels/recent')->assertRedirect();
+        $this->actingAs($owner)->getJson('/admin/dashboard/panels/recent')->assertStatus(403);
+        $this->actingAs($owner)->getJson('/admin/dashboard/revenue')->assertStatus(403);
+    }
+
+    /**
+     * No schedule, no event and nobody but the person looking: one card, not a column of cards
+     * each saying "nothing yet". The admin's own account is a sign-up from today, which is why
+     * "no sign-ups" is not the test. Mutation: require an empty sign-up window.
+     */
+    public function test_a_new_install_gets_one_card(): void
     {
         config(['app.hosted' => false, 'app.is_nexus' => false]);
 
-        $this->page()
+        $this->panel('recent')
             ->assertViewHas('dashboard', fn (array $dashboard) => $dashboard['firstRun'] === true)
+            ->assertSee('data-first-run', false)
             ->assertSee(__('messages.admin_dash_first_run_title'))
-            ->assertSee(__('messages.admin_dash_new_organizers'))
-            ->assertDontSee(__('messages.admin_dash_recent_schedules'))
-            ->assertDontSee(__('messages.admin_dash_latest_signups'))
-            // The cards a tile would jump to are not on this page, so no tile is a link.
-            ->assertDontSee('href="#dash-', false);
+            ->assertDontSee(__('messages.admin_dash_recent_schedules'));
 
         $this->seedSomething();
 
-        $this->page()
+        $this->panel('recent')
             ->assertViewHas('dashboard', fn (array $dashboard) => $dashboard['firstRun'] === false)
+            ->assertDontSee('data-first-run', false)
             ->assertDontSee(__('messages.admin_dash_first_run_title'))
             ->assertSee(__('messages.admin_dash_recent_schedules'))
             ->assertSee('The Room')
@@ -86,9 +152,9 @@ class AdminDashboardPageTest extends TestCase
     }
 
     /**
-     * Revenue where there is billing; the hub's numbers on eventschedule.com and this install's
-     * own sharing anywhere else. Both halves of each, so a gate that hides a card everywhere
-     * fails too.
+     * Revenue where there is billing, in the corner; the hub's numbers on eventschedule.com and
+     * this install's own sharing anywhere else. Both halves of each, so a gate that hides a card
+     * everywhere fails too.
      */
     public function test_each_kind_of_install_gets_the_cards_it_can_act_on(): void
     {
@@ -104,45 +170,24 @@ class AdminDashboardPageTest extends TestCase
         ])->save();
 
         config(['app.hosted' => false, 'app.is_nexus' => false]);
-        $this->page()
-            ->assertSee(__('messages.admin_dash_events_added'))
-            ->assertDontSee(__('messages.admin_dash_outside_stripe'))
+        $corner = '/<div class="realtime-top[^"]*"\s+data-corner/';
+        $this->assertDoesNotMatchRegularExpression($corner, $this->page()->assertDontSee('id="dash-revenue"', false)->getContent());
+        $this->revenue()->assertNotFound();
+        $this->panel('platform')
             ->assertSee(__('messages.admin_dash_fed_off'))
             ->assertDontSee(__('messages.admin_dash_clicks_sent'));
 
         config(['app.hosted' => true, 'app.is_nexus' => false]);
-        $this->page()
-            ->assertDontSee(__('messages.admin_dash_events_added'))
-            ->assertSee(__('messages.admin_dash_outside_stripe'))
+        $this->assertMatchesRegularExpression($corner, $this->page()->assertSee('id="dash-revenue"', false)->getContent());
+        $this->revenue()->assertOk()->assertJsonPath('failed', false);
+        $this->panel('platform')
             ->assertSee(__('messages.admin_dash_fed_off'))
             ->assertDontSee(__('messages.admin_dash_clicks_sent'));
 
         config(['app.hosted' => true, 'app.is_nexus' => true]);
-        $this->page()
-            ->assertSee(__('messages.admin_dash_outside_stripe'))
+        $this->panel('platform')
             ->assertDontSee(__('messages.admin_dash_fed_off'))
             ->assertSee(__('messages.admin_dash_clicks_sent'));
-    }
-
-    /**
-     * Each headline number jumps to the card that explains it. Mutation: rename a card's id, or
-     * leave a tile pointing at a card this kind of install does not get.
-     */
-    public function test_every_headline_number_leads_to_a_card_on_the_page(): void
-    {
-        $this->seedSomething();
-
-        foreach ([true, false] as $hosted) {
-            config(['app.hosted' => $hosted, 'app.is_nexus' => false]);
-
-            $html = $this->page()->getContent();
-            preg_match_all('/href="#(dash-[a-z-]+)"/', $html, $links);
-
-            $this->assertGreaterThanOrEqual(4, count(array_unique($links[1])), 'the tiles are not links any more, so this test proves nothing');
-            foreach (array_unique($links[1]) as $anchor) {
-                $this->assertStringContainsString('id="'.$anchor.'"', $html, ($hosted ? 'hosted' : 'selfhost').": nothing on the page is #{$anchor}");
-            }
-        }
     }
 
     /**
@@ -155,7 +200,7 @@ class AdminDashboardPageTest extends TestCase
         $this->seedSomething();
 
         foreach (['', '?range=last_7_days', '?range=all_time'] as $query) {
-            $this->page($query)
+            $this->panel('growth', $query)
                 ->assertViewHas('dashboard', fn (array $dashboard) => count($dashboard['signups']['days']) === 30)
                 ->assertDontSee('id="date-range"', false)
                 // The label this figure has always had on the page.
@@ -166,7 +211,8 @@ class AdminDashboardPageTest extends TestCase
     /**
      * ?sample=1 renders invented data for the documentation screenshot, which must not publish a
      * developer's real schedules and people. It is for local and test installs: in production
-     * the parameter does nothing. Mutation: drop the environment test.
+     * the parameter does nothing, on the page (which passes it on to the panels) or the panels.
+     * Mutation: drop the environment test.
      */
     public function test_sample_data_is_never_served_in_production(): void
     {
@@ -174,20 +220,24 @@ class AdminDashboardPageTest extends TestCase
         $this->seedSomething('Zebra Crossing Hall');
         $sampleSchedule = AdminDashboard::sample()['schedules']['rows'][0]['name'];
 
-        $this->page('?sample=1')->assertSee($sampleSchedule)->assertDontSee('Zebra Crossing Hall');
-        $this->page()->assertDontSee($sampleSchedule)->assertSee('Zebra Crossing Hall');
+        $sampled = '/id="admin-dashboard"[^>]*\sdata-sample[\s>]/';
+        $this->assertMatchesRegularExpression($sampled, $this->page('?sample=1')->getContent());
+        $this->panel('recent', '?sample=1')->assertSee($sampleSchedule)->assertDontSee('Zebra Crossing Hall');
+        $this->panel('recent')->assertDontSee($sampleSchedule)->assertSee('Zebra Crossing Hall');
+        $this->assertSame(plan_price(AdminDashboard::sample()['revenue']['totals']['mrr']), $this->revenue('?sample=1')->json('mrr'));
 
         $this->app['env'] = 'production';
 
-        $this->page('?sample=1')->assertDontSee($sampleSchedule)->assertSee('Zebra Crossing Hall');
+        $this->assertDoesNotMatchRegularExpression($sampled, $this->page('?sample=1')->getContent());
+        $this->panel('recent', '?sample=1')->assertDontSee($sampleSchedule)->assertSee('Zebra Crossing Hall');
     }
 
     /**
-     * The service, and then the page that prints it, each asked twice: once with a few rows and
-     * once with four times as many. Mutation: read an owner, a subscription or a flyer per row,
-     * in AdminDashboard or in any partial.
+     * Each panel's cards, and then the panel that prints them, each asked twice: once with a few
+     * rows and once with four times as many. Mutation: read an owner, a subscription or a flyer
+     * per row, in AdminDashboard or in any partial.
      */
-    public function test_the_page_costs_the_same_however_much_there_is_to_show(): void
+    public function test_each_panel_costs_the_same_however_much_there_is_to_show(): void
     {
         config(['app.hosted' => true, 'app.is_nexus' => true]);
 
@@ -198,71 +248,76 @@ class AdminDashboardPageTest extends TestCase
                 $this->createTicket($this->createEvent($role, ['creator_role_id' => $role->id]));
             }
         };
-        $measure = function (): int {
+        $count = function (callable $run): int {
             DB::flushQueryLog();
             DB::enableQueryLog();
-            (new AdminDashboard)->build();
+            $run();
             $count = count(DB::getQueryLog());
             DB::disableQueryLog();
 
             return $count;
         };
-
-        $measurePage = function (): int {
-            DB::flushQueryLog();
-            DB::enableQueryLog();
-            $this->page();
-            $count = count(DB::getQueryLog());
-            DB::disableQueryLog();
-
-            return $count;
-        };
+        $measure = fn () => [
+            $count(fn () => (new AdminDashboard)->build()),
+            $count(fn () => $this->panel('recent')),
+            $count(fn () => $this->panel('growth')),
+            $count(fn () => $this->panel('platform')),
+            $count(fn () => $this->revenue()->assertOk()),
+        ];
 
         $seed(3);
         // Once, unmeasured: what is looked up once per process or per session (whether a table
         // exists, the platform currency, the alerts, today's active-day mark) is paid for here
         // and not counted against either side.
-        (new AdminDashboard)->build();
-        $this->page();
-        $few = [$measure(), $measurePage()];
+        $measure();
+        $few = $measure();
 
         $seed(9);
-        $many = [$measure(), $measurePage()];
+        $many = $measure();
 
         $this->assertSame($few, $many);
         $this->assertLessThanOrEqual(self::QUERY_CEILING, $many[0]);
     }
 
     /**
-     * The page says how long each card took, in a Server-Timing header. Production's database
-     * cannot be reached from a developer's machine, so the browser's network panel is where a
-     * slow card is found: the first production run of this page took longer than the request was
-     * allowed, and nothing said which card. Mutation: build a card outside card(), or drop the
-     * header.
+     * Each panel says how long each of its cards took, in a Server-Timing header, and builds no
+     * card of another panel. Production's database cannot be reached from a developer's machine,
+     * so the browser's network panel is where a slow card is found. Mutation: build a card outside
+     * card(), drop the header, or build every card for every panel.
      */
-    public function test_the_page_says_how_long_each_card_took(): void
+    public function test_each_panel_says_how_long_each_card_took_and_builds_only_its_own(): void
     {
         config(['app.hosted' => true, 'app.is_nexus' => true]);
         $this->seedSomething();
 
-        $header = (string) $this->page()->headers->get('Server-Timing');
+        $panels = [
+            'recent' => ['schedules', 'recentEvents', 'eventCounts'],
+            'growth' => ['signups', 'active', 'events'],
+            'platform' => ['federation', 'system'],
+        ];
+        $all = ['signups', 'active', 'revenue', 'events', 'eventCounts', 'federation', 'schedules', 'recentEvents', 'system'];
 
-        foreach (['signups', 'active', 'revenue', 'events', 'federation', 'schedules', 'recentEvents', 'system', 'alerts', 'realtime'] as $name) {
-            $this->assertMatchesRegularExpression('/(^|, )'.$name.';dur=\d+(\.\d+)?(,|$)/', $header, $name);
+        foreach ($panels as $panel => $cards) {
+            $header = (string) $this->panel($panel)->headers->get('Server-Timing');
+            foreach ($all as $name) {
+                $pattern = '/(^|, )'.$name.';dur=\d+(\.\d+)?(,|$)/';
+                in_array($name, $cards, true)
+                    ? $this->assertMatchesRegularExpression($pattern, $header, "{$panel}: {$name}")
+                    : $this->assertDoesNotMatchRegularExpression($pattern, $header, "{$panel} built {$name}");
+            }
         }
 
+        $this->assertMatchesRegularExpression('/^revenue;dur=/', (string) $this->revenue()->headers->get('Server-Timing'));
+
         // Invented data is not timed: nothing was read to make it.
-        $this->assertFalse($this->page('?sample=1')->headers->has('Server-Timing'));
+        $this->assertFalse($this->panel('recent', '?sample=1')->headers->has('Server-Timing'));
     }
 
     /**
      * A card whose query failed costs that card and nothing else: build() reports it and hands
-     * the page null in its place. Every card in turn, on the install that has all of them, so a
-     * partial that reads a figure without asking whether its card is there fails here.
-     *
-     * The revenue card is the one that used to take the page with it: the controller answered a
-     * missing card by asking RecurringRevenue again, outside build()'s guard. Mutation: put that
-     * second call back, and the page reports the 60 a year the failed card could not.
+     * the panel null in its place. Every card in turn, so a partial that reads a figure without
+     * asking whether its card is there fails here. Revenue says it failed rather than showing a
+     * zero. Mutation: read a failed card's figure anyway.
      */
     public function test_a_card_that_failed_costs_one_card(): void
     {
@@ -278,9 +333,19 @@ class AdminDashboardPageTest extends TestCase
             'stripe_price' => 'price_pro_m', 'quantity' => 1,
         ]);
 
-        $this->page()->assertViewHas('arr', 60.0)->assertDontSee(__('messages.admin_dash_card_failed'));
+        $this->assertStringNotContainsString(__('messages.admin_dash_card_failed'), $this->cards());
+        $this->revenue()->assertJsonPath('failed', false)->assertJsonPath('arr_value', 60);
 
-        foreach (['signups', 'active', 'revenue', 'events', 'federation', 'schedules', 'recentEvents', 'system'] as $card) {
+        // A card of the same panel that does not read the failed one.
+        $siblings = [
+            'signups' => ['dash-active', 'dash-upcoming'], 'active' => ['dash-signups', 'dash-upcoming'],
+            'events' => ['dash-signups', 'dash-active'], 'federation' => [], 'system' => [],
+            'schedules' => ['dash-recent-events'], 'recentEvents' => ['dash-recent'],
+            'eventCounts' => ['dash-recent', 'dash-recent-events'],
+        ];
+        $panelOf = ['signups' => 'growth', 'active' => 'growth', 'events' => 'growth', 'federation' => 'platform', 'schedules' => 'recent', 'recentEvents' => 'recent', 'eventCounts' => 'recent', 'system' => 'platform'];
+
+        foreach (['signups', 'active', 'revenue', 'events', 'eventCounts', 'federation', 'schedules', 'recentEvents', 'system'] as $card) {
             $this->app->bind(AdminDashboard::class, fn () => new class($card) extends AdminDashboard
             {
                 public function __construct(private string $failed)
@@ -288,20 +353,29 @@ class AdminDashboardPageTest extends TestCase
                     parent::__construct();
                 }
 
-                public function build(): array
+                public function build(?array $only = null): array
                 {
-                    return [$this->failed => null] + parent::build();
+                    $data = parent::build($only);
+
+                    return array_key_exists($this->failed, $data) ? [$this->failed => null] + $data : $data;
                 }
             });
 
-            $response = $this->page();
-
-            // The foot of the page is one quiet line with nothing to put a notice in.
-            if ($card !== 'system') {
-                $response->assertSee(__('messages.admin_dash_card_failed'));
-            }
             if ($card === 'revenue') {
-                $response->assertViewHas('arr', 0.0);
+                $this->revenue()->assertOk()->assertExactJson(['failed' => true]);
+
+                continue;
+            }
+
+            $html = $this->panel($panelOf[$card])->getContent();
+            // The foot of the page is one quiet line with nothing to put a notice in, and the two
+            // event totals are a line in the Recent events header, which leaves them out.
+            if (! in_array($card, ['system', 'eventCounts'], true)) {
+                $this->assertStringContainsString(__('messages.admin_dash_card_failed'), $html, $card);
+            }
+            // The cards beside it in the same panel still stand.
+            foreach ($siblings[$card] as $id) {
+                $this->assertStringContainsString('id="'.$id.'"', $html, "{$card} took {$id} with it");
             }
         }
     }
@@ -326,7 +400,7 @@ class AdminDashboardPageTest extends TestCase
         (new \ReflectionProperty(ActiveDays::class, 'tableExists'))->setValue(null, false);
 
         $users()->assertDontSee(__('messages.admin_dash_estimate'));
-        $this->page()->assertSee(__('messages.admin_dash_active_unavailable'));
+        $this->panel('growth')->assertSee(__('messages.admin_dash_active_unavailable'));
 
         ActiveDays::flush();
     }

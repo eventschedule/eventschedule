@@ -43,9 +43,10 @@ class AdminInstallKindTest extends TestCase
     {
         config(['app.hosted' => false, 'app.is_nexus' => false]);
 
-        $this->page('/admin/dashboard')
-            ->assertDontSee(__('messages.admin_dash_outside_stripe'))
-            ->assertDontSee(__('messages.boost_markup_revenue'));
+        // No billing, so no Revenue card in the dashboard's corner, and nothing to ask for one.
+        $this->page('/admin/dashboard')->assertDontSee('id="dash-revenue"', false);
+        $this->withSession(['admin_password_confirmed_at' => now()->timestamp])->actingAs($this->admin)
+            ->getJson('/admin/dashboard/revenue')->assertNotFound();
 
         $this->page('/admin/users')
             ->assertDontSee(__('messages.funnel_stage_hit_ticket_paywall'))
@@ -77,7 +78,7 @@ class AdminInstallKindTest extends TestCase
 
         $this->page('/admin/newsletter-segments')->assertDontSee('value="plan_tier"', false);
 
-        $this->page('/admin/realtime')->assertSee(__('messages.realtime_waiting_body_app'));
+        $this->page('/admin/dashboard')->assertSee(__('messages.realtime_waiting_body_app'));
     }
 
     public function test_a_plain_selfhost_refuses_the_billing_actions(): void
@@ -114,9 +115,7 @@ class AdminInstallKindTest extends TestCase
     {
         config(['app.hosted' => true, 'app.is_nexus' => true]);
 
-        $this->page('/admin/dashboard')
-            ->assertSee(__('messages.admin_dash_outside_stripe'))
-            ->assertSee(__('messages.boost_markup_revenue'));
+        $this->page('/admin/dashboard')->assertSee('id="dash-revenue"', false);
 
         $this->page('/admin/users')
             ->assertSee(__('messages.funnel_stage_subscribed'))
@@ -141,7 +140,7 @@ class AdminInstallKindTest extends TestCase
 
         $this->page('/admin/newsletter-segments')->assertSee('value="plan_tier"', false);
 
-        $this->page('/admin/realtime')->assertSee(__('messages.realtime_waiting_body'));
+        $this->page('/admin/dashboard')->assertSee(__('messages.realtime_waiting_body'));
     }
 
     /**
@@ -159,7 +158,7 @@ class AdminInstallKindTest extends TestCase
 
         $this->page('/admin/schedules')->assertSee('name="plan_type"', false);
 
-        $this->page('/admin/realtime')->assertSee(__('messages.realtime_waiting_body_app'));
+        $this->page('/admin/dashboard')->assertSee(__('messages.realtime_waiting_body_app'));
     }
 
     private function admin(): self
