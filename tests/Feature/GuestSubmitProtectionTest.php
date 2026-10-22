@@ -121,6 +121,42 @@ class GuestSubmitProtectionTest extends TestCase
             ->assertOk()->assertJsonPath('success', true);
     }
 
+    // ---- an account that is waiting for its owner -------------------------------------------
+
+    public function test_a_selfhost_submission_does_not_take_over_an_invited_account(): void
+    {
+        config(['app.hosted' => false, 'app.allow_registration' => true]);
+        Mail::fake();
+        $curator = $this->curator();
+        $invited = User::factory()->create(['email' => 'invited.person@gmail.com', 'password' => null, 'email_verified_at' => null]);
+        $curator->users()->attach($invited->id, ['level' => 'admin']);
+        $this->assertTrue($invited->fresh()->isStub(), 'sanity check: invited, with no password yet');
+
+        $this->submit($curator, ['account_email' => 'invited.person@gmail.com', 'account_name' => 'Somebody Else'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['account_email' => __('messages.login_no_password_yet')]);
+
+        $this->assertGuest();
+        $this->assertNull($invited->fresh()->password);
+        $this->assertNotSame('Somebody Else', $invited->fresh()->name);
+        $this->assertSame(0, Event::count());
+        Mail::assertSent(\App\Mail\SetPassword::class, fn ($mail) => $mail->hasTo('invited.person@gmail.com'));
+    }
+
+    public function test_on_hosted_the_emailed_code_lets_a_waiting_account_finish(): void
+    {
+        // The code step is the proof there (skipped under test), so the account is the person's.
+        config(['app.hosted' => true]);
+        $curator = $this->curator();
+        $waiting = User::factory()->create(['email' => 'past.buyer@gmail.com', 'password' => null, 'email_verified_at' => null]);
+
+        $this->submit($curator, ['account_email' => 'past.buyer@gmail.com'])
+            ->assertOk()->assertJsonPath('success', true);
+
+        $this->assertAuthenticatedAs($waiting->fresh());
+        $this->assertNotNull($waiting->fresh()->password);
+    }
+
     public function test_someone_signing_in_is_not_asked_for_the_terms_again(): void
     {
         config(['app.hosted' => true]);
