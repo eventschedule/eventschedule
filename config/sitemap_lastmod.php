@@ -20,7 +20,7 @@
  */
 
 return [
-    '/' => '2026-10-19',
+    '/' => '2026-10-22',
     '/about' => '2026-10-15',
     '/accelevents-alternative' => '2026-10-20',
     '/accessibility' => '2026-10-08',
@@ -83,7 +83,7 @@ return [
     '/examples' => '2026-10-09',
     '/facebook-events-alternative' => '2026-10-20',
     '/faq' => '2026-10-15',
-    '/features' => '2026-10-15',
+    '/features' => '2026-10-22',
     '/features/ai' => '2026-10-09',
     '/features/allocated-seating' => '2026-10-15',
     '/features/analytics' => '2026-10-09',
@@ -167,7 +167,7 @@ return [
     '/google-sheets-replacement' => '2026-10-15',
     '/hi-events-alternative' => '2026-10-20',
     '/humanitix-alternative' => '2026-10-20',
-    '/invoiceninja' => '2026-10-15',
+    '/invoiceninja' => '2026-10-22',
     '/linktree-replacement' => '2026-10-15',
     '/luma-alternative' => '2026-10-20',
     '/mailchimp-replacement' => '2026-10-15',

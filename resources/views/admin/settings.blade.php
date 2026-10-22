@@ -667,6 +667,72 @@
             </form>
         </x-page-card>
 
+        {{-- The homepage's quotes (App\Utils\HomeQuotes). Nexus only: it serves the homepage they
+             are printed on. A quote is shown with its schedule's own picture and page, under the
+             person's name when the operator gives one (with their permission). --}}
+        @if ($homeQuotesAvailable)
+        <x-page-card beside id="home-quotes" class="scroll-mt-24" :title="__('messages.home_quotes_title')" :lead="__('messages.home_quotes_description')">
+            <form method="POST" action="{{ route('admin.settings.update_home_quotes') }}" class="{{ $formClass }}">
+                @csrf
+
+                <div class="page-form-fields">
+                    @foreach ($homeQuoteRows as $i => $quoteRow)
+                        <fieldset class="space-y-3 {{ $i > 0 ? 'border-t border-gray-200 pt-5 dark:border-gray-700' : '' }}">
+                            <legend class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.home_quotes_row', ['number' => $i + 1]) }}</legend>
+                            {{-- Which stored quote this row is, so a quote whose schedule was taken
+                                 down since keeps it (and comes back if it is restored) when the
+                                 subdomain box is left empty. --}}
+                            <input type="hidden" name="quotes[{{ $i }}][role_id]" value="{{ $quoteRow['role_id'] }}">
+                            <div>
+                                <x-input-label :for="'home_quote_subdomain_'.$i" :value="__('messages.home_quotes_schedule')" />
+                                <x-text-input :id="'home_quote_subdomain_'.$i" :name="'quotes['.$i.'][subdomain]'" type="text" dir="ltr"
+                                    class="mt-1 block w-full sm:max-w-sm font-mono text-sm"
+                                    :value="old('quotes.'.$i.'.subdomain', $quoteRow['subdomain'])"
+                                    :disabled="$demo" />
+                                <p class="sys-help">{{ __('messages.home_quotes_schedule_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('quotes.'.$i.'.subdomain')" />
+                            </div>
+                            <div>
+                                <x-input-label :for="'home_quote_quote_'.$i" :value="__('messages.home_quotes_quote')" />
+                                <textarea id="home_quote_quote_{{ $i }}" name="quotes[{{ $i }}][quote]" rows="5" dir="auto" maxlength="{{ \App\Utils\HomeQuotes::QUOTE_MAX }}" {{ $demo ? 'disabled' : '' }}
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">{{ old('quotes.'.$i.'.quote', $quoteRow['quote']) }}</textarea>
+                                <x-input-error class="mt-2" :messages="$errors->get('quotes.'.$i.'.quote')" />
+                            </div>
+                            <div>
+                                <x-input-label :for="'home_quote_name_'.$i" :value="__('messages.home_quotes_name')" />
+                                <x-text-input :id="'home_quote_name_'.$i" :name="'quotes['.$i.'][name]'" type="text"
+                                    class="mt-1 block w-full sm:max-w-sm text-sm" maxlength="{{ \App\Utils\HomeQuotes::NAME_MAX }}"
+                                    :value="old('quotes.'.$i.'.name', $quoteRow['name'])"
+                                    :disabled="$demo" />
+                                <p class="sys-help">{{ __('messages.home_quotes_name_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('quotes.'.$i.'.name')" />
+                            </div>
+                            <div>
+                                <x-input-label :for="'home_quote_title_'.$i" :value="__('messages.home_quotes_about')" />
+                                <x-text-input :id="'home_quote_title_'.$i" :name="'quotes['.$i.'][title]'" type="text"
+                                    class="mt-1 block w-full sm:max-w-sm text-sm" maxlength="{{ \App\Utils\HomeQuotes::TITLE_MAX }}"
+                                    :placeholder="__('messages.home_quotes_about_placeholder')"
+                                    :value="old('quotes.'.$i.'.title', $quoteRow['title'])"
+                                    :disabled="$demo" />
+                                <x-input-error class="mt-2" :messages="$errors->get('quotes.'.$i.'.title')" />
+                            </div>
+                        </fieldset>
+                    @endforeach
+
+                    <p class="sys-help">{{ __('messages.home_quotes_hidden_note') }}</p>
+
+                    @if ($demo)
+                    <x-page-notice tone="warn">{{ __('messages.demo_mode_settings_disabled') }}</x-page-notice>
+                    @endif
+                </div>
+
+                <div class="page-form-actions">
+                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                </div>
+            </form>
+        </x-page-card>
+        @endif
+
         {{-- Deliberately its own card and its own endpoint rather than part of the
              monetization card above. updateAdsSettings() hard-returns unless
              ADS_ENABLED && hosted && ! nexus, which would make this field unreachable in the

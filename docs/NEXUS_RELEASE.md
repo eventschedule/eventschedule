@@ -95,6 +95,37 @@ included.
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
 
+## Unreleased: homepage pass, one headline (2026-10-22)
+
+**What ships:**
+- **One headline.** The homepage test serves `promote_sell` ("Promote and sell / from your event
+  calendar") alone. `plan_sell` and `plan_sell_short` are retired; their counts stay under their
+  keys. A single headline never becomes a candidate or a winner, so the picker, the beacons and
+  the `?hero=` sign-up credit keep running, and `/admin/growth` and the growth pull show the phase
+  `baseline`.
+- **The page under it changed too:** shorter act bands and night, the money section retitled
+  ("Event ticketing with zero platform fees") with Pro's price beside it, comparison links, a
+  "Switching from Eventbrite?" line, two new FAQ answers, the poster wall in more of its colour
+  with a "Coming up on Event Schedule" label once most of its 25 posters are real events, and on phones a bar at
+  the foot of the screen with the sign-up button.
+- **Homepage quotes** at `/admin/settings#home-quotes` (nexus only). Nothing shows until a quote
+  is saved. Each is credited to a schedule (its picture and page) and, optionally, to the person
+  who said it. Names live in the setting only, never in the repo.
+
+**After the deploy:**
+1. **Do not reset the headline stats.** `promote_sell` keeps its counts. But the page under the
+   headline and the phone bar both change the click rate from the deploy day, so read
+   `hero_test.daily` split at that date, never the totals across it.
+2. The homepage's social card (`public/images/social/home.jpg`) was regenerated with the new
+   headline and ships in this change (`php artisan app:generate-social-images --page=home --force`
+   stamps the default). Its URL carries no version, so re-scrape it in the Facebook debugger and
+   the LinkedIn inspector.
+3. Enter the first quote at `/admin/settings#home-quotes`: the schedule's subdomain, the quote as
+   the customer wrote it, their role, and their name only with their permission. The section
+   appears on the homepage within the edge's 10 minutes.
+4. View-source on the signed-out homepage after the edge copy expires (about 20 minutes, up to 2
+   hours, `docs/CACHING.md`): the picker's `var variants` should hold `promote_sell` alone.
+
 ## Unreleased: calendar syncs that published a private calendar (2026-10-18)
 
 A standing Google, Outlook or CalDAV sync put everything it read straight onto a schedule's

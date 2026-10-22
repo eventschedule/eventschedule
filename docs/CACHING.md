@@ -428,7 +428,8 @@ and the homepage has picked a headline, that one key is merged in and everything
 ### 3. The homepage headline test
 
 The homepage headline and subtitle are an A/B test that allocates its own traffic and locks
-its own winner (`App\Utils\HeroExperiment`). The variant is **picked in the browser**, and it
+its own winner (`App\Utils\HeroExperiment`). From 2026-10-22 it holds a single headline, a baseline
+that is still picked, beaconed and credited the same way, and never locks. The variant is **picked in the browser**, and it
 has to stay that way:
 
 - The server renders the default copy (or the locked winner), every variant, and the current
@@ -467,7 +468,11 @@ has to stay that way:
 Everyone served the same cached copy shares one nonce for up to 10 minutes. Marketing pages
 contain no user-controlled content - every inline script on them is authored in the repo -
 and nothing that renders visitor-supplied content is cacheable, so a shared nonce cannot be
-reused against a page an attacker can write into. The reasoning is repeated in
+reused against a page an attacker can write into. The homepage's quotes (`App\Utils\HomeQuotes`,
+from 2026-10-22) are the one exception to "authored in the repo": the platform operator types
+them in at `/admin/settings`, and a quote's schedule name comes from that schedule. They are
+printed escaped, as text, and never inside a script, and they are the same for every visitor, so
+the reasoning holds. The reasoning is repeated in
 `SecurityHeaders.php` where the nonce is generated.
 
 ## What to watch after deploy

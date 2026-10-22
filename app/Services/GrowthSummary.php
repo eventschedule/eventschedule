@@ -114,8 +114,9 @@ class GrowthSummary
             return null;
         }
 
-        // The same four sentences the /admin/growth card shows.
+        // The same five states the /admin/growth card shows, in the pull's own English.
         $status = match ($test['phase'] ?? null) {
+            'baseline' => 'One headline, nothing being tested: its numbers are the baseline for the next round.',
             'winner' => sprintf('Winner: %s, since %s.', $test['winner']['key'] ?? '?', $test['winner']['date'] ?? '?'),
             'candidate' => sprintf('%s is leading, and becomes the winner on %s if it keeps the lead.', $test['candidate']['key'] ?? '?', $test['lock_date'] ?? '?'),
             'clicks' => 'Learning: traffic follows sign-up clicks until enough signups come in.',
@@ -134,7 +135,8 @@ class GrowthSummary
                 self::show($row['visitors'] ?? null),
                 self::show($row['clicks'] ?? null),
                 self::show($row['signups'] ?? null),
-                self::percent($row['p_best'] ?? null),
+                // One headline races nobody: its "chance best" is 100% by definition, so it is not shown.
+                ($test['phase'] ?? null) === 'baseline' ? '-' : self::percent($row['p_best'] ?? null),
             ], $test['rows']),
         ];
     }

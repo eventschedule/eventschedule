@@ -132,8 +132,9 @@ class GrowthDataEndpointTest extends TestCase
     {
         Cache::flush();
 
-        // Any variant but the default, wherever VARIANTS lists it: the default is asserted at zero below.
-        $variant = array_key_last(array_diff_key(HeroExperiment::VARIANTS, [HeroExperiment::DEFAULT => true]));
+        // The site runs one headline since 2026-10-22 (a baseline, see HeroExperiment::VARIANTS),
+        // so the counts belong to it; per-variant splitting is HeroExperimentTest's.
+        $variant = HeroExperiment::DEFAULT;
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'click');
@@ -152,8 +153,8 @@ class GrowthDataEndpointTest extends TestCase
         $this->assertSame(2, $rows[$variant]['visitors']);
         $this->assertSame(1, $rows[$variant]['clicks']);
         $this->assertSame(1, $rows[$variant]['signups']);
-        $this->assertSame(0, $rows[HeroExperiment::DEFAULT]['visitors'], 'the counts are per variant');
-        $this->assertTrue($rows[HeroExperiment::DEFAULT]['is_default']);
+        $this->assertTrue($rows[$variant]['is_default']);
+        $this->assertSame('baseline', $payload['hero_test']['phase']);
 
         // By day too (schema 21), and the days add up to the totals.
         $days = collect($payload['hero_test']['daily'])->where('variant', $variant);

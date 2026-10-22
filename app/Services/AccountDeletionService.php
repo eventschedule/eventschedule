@@ -80,6 +80,9 @@ class AccountDeletionService
         // The venue map's address search keeps a venue's address and where it is, keyed by the
         // address itself and linked to nothing (place_lookups). A venue is often somebody's home.
         $this->attempt(fn () => \App\Services\PlaceLookupService::forget(Role::whereIn('id', $ownedRoleIds ?: [0])->where('type', 'venue')->get()));
+        // A quote on the marketing homepage, and the name of the person who said it, are kept in
+        // a Setting keyed to the schedule: they go with the schedules the account owned.
+        $this->attempt(fn () => \App\Utils\HomeQuotes::forget($ownedRoleIds));
         $this->attempt(fn () => $this->purgePhotos($user, $cascadingEventIds));
         $this->attempt(fn () => $this->forgetAccountRows($user));
         if ($this->addressIsProven($user)) {

@@ -61,7 +61,7 @@ final class HeroExperiment
     public const EXPERIMENT = 'home_hero';
 
     /** Rendered by the server while the test runs, and to visitors without JS. */
-    public const DEFAULT = 'plan_sell';
+    public const DEFAULT = 'promote_sell';
 
     /**
      * line1/line2 must each fit the 24-character .es-mask budget (see the h1 in
@@ -69,33 +69,26 @@ final class HeroExperiment
      * say "event calendar", say it takes bookings, name no paid plan. HeroExperimentTest
      * checks each one.
      *
-     * Round three (from 2026-10-04): 'plan_sell' is the control, and each challenger changes ONE
-     * thing about it, so a win says which change earned it. Round two ran 'plan' against two
-     * one-change challengers the same way.
+     * ONE ARM (from 2026-10-22): 'promote_sell' is the only headline. With a single variant there
+     * is nothing to test, so evaluate() never names a candidate or a winner and report() calls the
+     * phase 'baseline'; the picker, the beacons and the ?hero= sign-up credit keep running, so its
+     * numbers carry on as the baseline the next round is measured against. A round with two or
+     * more variants starts the test again by itself.
      */
     public const VARIANTS = [
-        // Picked by hand as the winner of round two (against 'plan' and 'plan_fees'), before the
-        // test's own lock rules were met. Round two's headline challenger: "sell" in the H1 instead
-        // of "share", since selling is what turns sign-ups into paying customers.
-        'plan_sell' => [
-            'line1' => 'Plan, promote, and sell',
-            'line2' => 'from your event calendar',
-            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
-        ],
-        // Headline only: drops "Plan," so the money verb is one of two, not lost in a list of
-        // three. Same subtitle as 'plan_sell'.
+        // Headline only: "Promote and sell" rather than the round-three control's "Plan, promote,
+        // and sell", so the money verb is one of two, not lost in a list of three. Picked by hand
+        // on 2026-10-22, before the test's own lock rules were met.
         'promote_sell' => [
             'line1' => 'Promote and sell',
             'line2' => 'from your event calendar',
             'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
         ],
-        // Subtitle only: drops the door-scanning clause, so it is shorter and ends on the zero-fee
-        // point. Same headline as 'plan_sell'.
-        'plan_sell_short' => [
-            'line1' => 'Plan, promote, and sell',
-            'line2' => 'from your event calendar',
-            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees.',
-        ],
+        // Retired 2026-10-22, when 'promote_sell' was made the only headline, after round three
+        // (from 2026-10-04) had it ahead on signups per visitor from 2026-10-08 on, and with most
+        // of its signups going on to save a schedule: 'plan_sell' ("Plan, promote, and sell / from
+        // your event calendar", the round-three control, with the subtitle above) and
+        // 'plan_sell_short' (the same headline, the subtitle without its door-scanning clause).
         // Retired 2026-10-04 when 'plan_sell' was picked as the winner of round two: 'plan' ("Plan,
         // promote, and share your event calendar", the round-two control and round-one winner) and
         // 'plan_fees' (the same headline, with the subtitle reordered to open on zero platform
@@ -162,9 +155,42 @@ final class HeroExperiment
      */
     public const SESSION_KEY = 'hero_variant';
 
+    /**
+     * Set by useVariants() only, so the test of the multi-variant machinery (the split, the
+     * candidate and its lock) can run while the site itself has a single variant.
+     *
+     * @var array{variants: array, default: string}|null
+     */
+    private static ?array $override = null;
+
+    /**
+     * The variant set in force. Everything here reads it through this, never VARIANTS directly.
+     *
+     * @return array<string, array{line1: string, line2: string, subtitle: string}>
+     */
+    public static function variants(): array
+    {
+        return self::$override['variants'] ?? self::VARIANTS;
+    }
+
+    public static function defaultKey(): string
+    {
+        return self::$override['default'] ?? self::DEFAULT;
+    }
+
+    /**
+     * Tests only: run everything on another variant set, or back on VARIANTS with null.
+     *
+     * @internal
+     */
+    public static function useVariants(?array $variants, ?string $default = null): void
+    {
+        self::$override = $variants === null ? null : ['variants' => $variants, 'default' => $default ?? array_key_first($variants)];
+    }
+
     public static function isVariant(mixed $key): bool
     {
-        return is_string($key) && array_key_exists($key, self::VARIANTS);
+        return is_string($key) && array_key_exists($key, self::variants());
     }
 
     /**
@@ -173,7 +199,7 @@ final class HeroExperiment
      */
     public static function setHash(): string
     {
-        return substr(md5(json_encode(self::VARIANTS)), 0, 12);
+        return substr(md5(json_encode(self::variants())), 0, 12);
     }
 
     /**
@@ -186,7 +212,7 @@ final class HeroExperiment
     {
         $idle = [
             'running' => false,
-            'default' => self::VARIANTS[self::DEFAULT],
+            'default' => self::variants()[self::defaultKey()],
             'variants' => [],
             'weights' => [],
         ];
@@ -202,13 +228,13 @@ final class HeroExperiment
         }
 
         if ($state['winner'] !== null) {
-            return array_merge($idle, ['default' => self::VARIANTS[$state['winner']['key']]]);
+            return array_merge($idle, ['default' => self::variants()[$state['winner']['key']]]);
         }
 
         return [
             'running' => true,
-            'default' => self::VARIANTS[self::DEFAULT],
-            'variants' => self::VARIANTS,
+            'default' => self::variants()[self::defaultKey()],
+            'variants' => self::variants(),
             'weights' => $state['weights'],
         ];
     }
@@ -268,7 +294,7 @@ final class HeroExperiment
      */
     public static function stats(): array
     {
-        $keys = array_keys(self::VARIANTS);
+        $keys = array_keys(self::variants());
         $since = self::resetAt();
 
         // By day: reset() deletes the reset day's rows, so the first day counted here holds only
@@ -311,7 +337,7 @@ final class HeroExperiment
      */
     public static function daily(): array
     {
-        $keys = array_keys(self::VARIANTS);
+        $keys = array_keys(self::variants());
         $since = self::resetAt();
 
         $days = [];
@@ -398,6 +424,24 @@ final class HeroExperiment
      */
     public static function evaluate(array $stats): array
     {
+        // A single variant is a baseline, not a test: it would always be "best" with probability 1,
+        // so the candidate rules below would lock it as the winner after WIN_HOLD_DAYS, and a
+        // winner turns the picker off, taking the beacons and the sign-up credit with it. It keeps
+        // all the traffic and never becomes a candidate.
+        if (count($stats) < 2) {
+            $ones = array_fill_keys(array_keys($stats), 1.0);
+
+            return [
+                'stats' => $stats,
+                'weights' => $ones,
+                'p_clicks' => $ones,
+                'p_signups' => $ones,
+                'click_share' => (float) max(0, 1 - array_sum(array_column($stats, 'signups')) / self::SIGNUP_HANDOFF),
+                'candidate' => null,
+                'winner' => null,
+            ];
+        }
+
         $hash = self::setHash();
         $winner = self::readSetting(self::WINNER_SETTING, $hash);
 
@@ -650,9 +694,9 @@ final class HeroExperiment
         foreach ($state['stats'] as $key => $row) {
             $rows[] = [
                 'key' => $key,
-                'headline' => self::VARIANTS[$key]['line1'].' '.self::VARIANTS[$key]['line2'],
-                'subtitle' => self::VARIANTS[$key]['subtitle'],
-                'is_default' => $key === self::DEFAULT,
+                'headline' => self::variants()[$key]['line1'].' '.self::variants()[$key]['line2'],
+                'subtitle' => self::variants()[$key]['subtitle'],
+                'is_default' => $key === self::defaultKey(),
                 'share' => $state['weights'][$key],
                 'visitors' => $row['visitors'],
                 'clicks' => $row['clicks'],
@@ -666,7 +710,9 @@ final class HeroExperiment
 
         usort($rows, fn ($a, $b) => $b['share'] <=> $a['share']);
 
-        if ($state['winner'] !== null) {
+        if (count($state['stats']) < 2) {
+            $phase = 'baseline';
+        } elseif ($state['winner'] !== null) {
             $phase = 'winner';
         } elseif ($state['candidate'] !== null) {
             $phase = 'candidate';

@@ -13,6 +13,7 @@ use App\Utils\BrowseWall;
 use App\Utils\DiscoveryUtils;
 use App\Utils\DocsUtils;
 use App\Utils\HeroExperiment;
+use App\Utils\HomeQuotes;
 use App\Utils\PlatformPricing;
 use App\Utils\TicketFees;
 use App\Utils\UrlUtils;
@@ -80,6 +81,8 @@ class MarketingController extends Controller
             'steps' => $this->getSteps(),
             'discoverEvents' => $this->discoverWallEvents(),
             'hero' => HeroExperiment::forPage(),
+            // The operator's quotes, nexus only: the homepage elsewhere is a selfhost's own.
+            'homeQuotes' => config('app.is_nexus') ? HomeQuotes::forPage() : [],
         ]);
     }
 

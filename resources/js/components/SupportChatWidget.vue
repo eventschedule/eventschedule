@@ -414,12 +414,14 @@ export default {
       now: Date.now(),
       isMobile: window.innerWidth < 640,
       bannerOffset: 0,
+      ctaOffset: 0,
       pollTimer: null,
       greetingTimer: null,
       clockTimer: null,
       flashTimer: null,
       originalTitle: document.title,
       bannerObserver: null,
+      ctaObserver: null,
     };
   },
   computed: {
@@ -436,7 +438,7 @@ export default {
       return this.available || !!this.token;
     },
     launcherBottom() {
-      return (this.isMobile ? 16 : 24) + this.bannerOffset;
+      return (this.isMobile ? 16 : 24) + this.ctaOffset + this.bannerOffset;
     },
     allMessages() {
       const server = this.messages.map((m) => ({ ...m, key: 's' + m.id }));
@@ -518,6 +520,7 @@ export default {
     requestAnimationFrame(() => { this.entered = true; });
 
     this.watchCookieBanner();
+    this.watchCtaBar();
     window.addEventListener('resize', this.onResize);
     document.addEventListener('visibilitychange', this.onVisibility);
     window.addEventListener('focus', this.stopFlash);
@@ -542,6 +545,9 @@ export default {
     clearTimeout(this.greetingTimer);
     clearInterval(this.clockTimer);
     this.stopFlash();
+    if (this.ctaObserver) {
+      this.ctaObserver.disconnect();
+    }
     if (this.bannerObserver) {
       this.bannerObserver.disconnect();
     }
@@ -884,6 +890,20 @@ export default {
 
     // ── Layout ──
 
+    // A bar a page fixes to the foot of the screen (the homepage's phone dock) says so the way the
+    // event page's buy bar does for the accessibility widget: es-a11y-cta-offset on <html>, with
+    // its height in --es-a11y-cta-clearance. The launcher stands on it.
+    watchCtaBar() {
+      const root = document.documentElement;
+      const update = () => {
+        this.ctaOffset = root.classList.contains('es-a11y-cta-offset')
+          ? parseFloat(getComputedStyle(root).getPropertyValue('--es-a11y-cta-clearance')) || 0
+          : 0;
+      };
+      update();
+      this.ctaObserver = new MutationObserver(update);
+      this.ctaObserver.observe(root, { attributes: true, attributeFilter: ['class', 'style'] });
+    },
     watchCookieBanner() {
       const banner = document.querySelector('[data-cookie-consent]');
       if (!banner) {

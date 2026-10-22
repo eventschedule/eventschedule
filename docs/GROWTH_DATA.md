@@ -362,6 +362,9 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
 - `hero_test`: the homepage headline A/B test (`App\Utils\HeroExperiment`), as the `/admin/growth`
   card shows it. Null off the nexus, and null if the test could not be evaluated.
   - `phase` is where the test stands:
+    - `baseline`: one headline only (from 2026-10-22), so nothing is being tested. It takes all
+      the traffic, never becomes a candidate or a winner, and its `p_best` and `p_best_clicks`
+      are 1 by definition; its counts are the baseline the next round is measured against;
     - `clicks`: learning, the traffic split still follows sign-up clicks;
     - `signups`: enough signups have come in to decide on them alone;
     - `candidate`: one variant is leading and waiting out its hold;
@@ -613,6 +616,9 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **22** (2026-10-22)
+  - **`hero_test.phase` can be `baseline`**: the homepage runs one headline, which is counted the
+    same way and never locks. Nothing else changed shape.
 - **21** (2026-10-18)
   - **Additive: nothing earlier changed meaning.** So a review can answer from the pull what it
     used to ask of the server.

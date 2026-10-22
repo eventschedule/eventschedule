@@ -38,12 +38,17 @@
             ];
         }
         $wallCards = $wallEventCards;
+        // The wall is called what it is ("Coming up on Event Schedule") only when most of it is real:
+        // a label over three events and twenty-two demo flyers would be claiming the flyers.
+        $hpWallIsReal = count($wallEventCards) > intdiv($wallTarget, 2);
         $wallDemoFlyers = ['jazz', 'party', 'rock', 'dj', 'comedy', 'openmic', 'special'];
         $wallDemoIndex = 0;
         while (count($wallCards) < $wallTarget) {
             $wallCards[] = [
                 'url' => null,
-                'img' => asset('images/demo/demo_flyer_' . $wallDemoFlyers[$wallDemoIndex % count($wallDemoFlyers)] . '.webp'),
+                // The card crop (360x480, the 3:4 a card shows of the 4:3 flyer): the 800x600
+                // originals were up to 80 KB each for a slot 208 CSS px wide.
+                'img' => asset('images/demo/demo_flyer_' . $wallDemoFlyers[$wallDemoIndex % count($wallDemoFlyers)] . '-card.webp'),
                 'name' => null,
                 'date' => null,
             ];
@@ -140,8 +145,9 @@
     {{-- Every note in this stylesheet is a Blade comment, so none of them is sent to a visitor. --}}
     <style {!! nonce_attr() !!}>
         {{-- ==============================================================
-           The homepage. One show, told in the film's three verbs (which
-           are the headline's own, in its control arm): the hero stands
+           The homepage. One show, told in the film's three verbs (the
+           headline names the two that make money, promote and sell, and
+           the acts below tell all three): the hero stands
            between two walls of real posters, the features are that show's
            three acts (plan, promote, sell), and the page goes dark for the
            night of the show itself.
@@ -226,7 +232,8 @@
             .hp-wrap.is-hung .hp-run::before,
             html.es-anim .hp-wrap.is-hung .hp-run::after { inset-inline-start: calc(var(--hp-tile) / 2); }
         }
-        .hp-sec { position: relative; padding-block: clamp(4.5rem, 9vw, 8.5rem); }
+        {{-- About a fifth less than the house kit's: this page is the longest on the site. --}}
+        .hp-sec { position: relative; padding-block: clamp(3.75rem, 7vw, 6.75rem); }
         #hp section[id] { scroll-margin-top: 4.5rem; }
         .hp-alt { background: var(--hp-bg-2); }
         .dark .hp-alt { background: var(--hp-bg-3); }
@@ -420,7 +427,8 @@
         }
         .hp-hero-copy a,
         .hp-hero-copy .es-claim,
-        .hp-hero-copy .hp-strip { pointer-events: auto; }
+        .hp-hero-copy .hp-strip,
+        .hp-hero-copy .hp-claim-label { pointer-events: auto; }
 
         #hp .es-hero-eyebrow { font-family: var(--hp-display); font-variation-settings: normal; letter-spacing: normal; }
         .hp-eyebrow {
@@ -480,6 +488,20 @@
             gap: 0.75rem;
             max-width: 38rem;
             margin: clamp(1.6rem, 3.4vh, 2.3rem) auto 0;
+        }
+        {{-- The hero's box says what it is for. Its label used to be for screen readers only, and
+           a name typed flush against the fixed ending read as a finished address, not a field.
+           The typed text stays right-aligned so the name and the ending read as one address. --}}
+        .hp-claimwrap { max-width: 38rem; margin: clamp(1.6rem, 3.4vh, 2.3rem) auto 0; }
+        .hp-claimwrap .hp-claimrow { margin-top: 0; }
+        .hp-claim-label {
+            display: block;
+            margin: 0 0 0.5rem;
+            text-align: start;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: -0.005em;
+            color: var(--hp-ink-2);
         }
         @media (min-width: 640px) {
             .hp-claimrow { flex-direction: row; }
@@ -723,13 +745,15 @@
             box-shadow: 0 22px 46px -22px rgba(10, 16, 32, 0.6);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        {{-- The wall rests washed back toward the page (half its colour by day, grey by night). A
+        {{-- The wall rests a little washed back toward the page (most of its colour by day, some by
+           night: until 2026-10-22 it was half by day and grey by night, and the real events on it
+           read as texture rather than as proof that people use this). A
            poster comes fully up while a light is on it (the page's script switches .is-lit as
            the two lights move) and while it is pointed at. Each picture carries its own wash: one
            veil over the whole wall with a hole cut for the light only worked in Chrome, and had
            to be repainted on every frame. --}}
-        #hp .es-wall-card img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; opacity: 0.52; filter: grayscale(0.55) contrast(0.95); transition: filter 0.6s ease, opacity 0.6s ease; }
-        .dark #hp .es-wall-card img { opacity: 0.4; filter: grayscale(1) contrast(0.92); }
+        #hp .es-wall-card img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; opacity: 0.8; filter: grayscale(0.15) contrast(0.97); transition: filter 0.6s ease, opacity 0.6s ease; }
+        .dark #hp .es-wall-card img { opacity: 0.66; filter: grayscale(0.35) contrast(0.95); }
         #hp .es-wall-card.is-lit img,
         #hp a.es-wall-card:hover img { opacity: 1; filter: none; }
         #hp .es-wall-card.is-lit .hp-wall-cap { opacity: 1; }
@@ -755,6 +779,34 @@
                could run under them. --}}
             #hp .hp-wall-cap { display: none; }
         }
+        {{-- Says what the wall is, only when it is mostly real events ($hpWallIsReal). Not "this
+           week": the wall takes any upcoming date, and recurring events. --}}
+        .hp-wall-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--hp-line-2);
+            border-radius: 999px;
+            background: var(--hp-bg-2);
+            box-shadow: var(--hp-card-shadow);
+            font-family: var(--hp-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--hp-ink-2);
+            white-space: nowrap;
+        }
+        .hp-wall-label i { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: #22c55e; }
+        .es-wall > .hp-wall-label { position: absolute; z-index: 3; top: 5.25rem; inset-inline-end: 1.5rem; }
+        {{-- Below a wide window the right wall stands close enough to the words that the label
+           reached into the column the headline reads in. --}}
+        @media (max-width: 1399px) {
+            .es-wall > .hp-wall-label { display: none; }
+        }
+        .hp-strip > .hp-wall-label { margin: 0 auto 0.75rem; }
+        .hp-strip:has(> .hp-wall-label) { text-align: center; }
 
         #hp .hp-hero::after {
             content: "";
@@ -830,6 +882,9 @@
             transition: color 0.2s ease;
         }
         .hp-act:hover { color: var(--hp-blue); }
+        {{-- The showreel's pause button is drawn small in the browser bar; its target is 44px. --}}
+        #hp [data-showreel-toggle] { position: relative; }
+        #hp [data-showreel-toggle]::after { content: ""; position: absolute; inset: -6px; }
         .hp-act i { flex: none; width: 0.3em; height: 0.3em; border-radius: 999px; }
         [data-marquee="-1"] .hp-act { color: var(--hp-ink-3); font-variation-settings: 'wght' 560; }
         [data-marquee="-1"] .hp-act:hover { color: var(--hp-blue); }
@@ -909,11 +964,10 @@
             #hp .hp-stub-body { padding-inline-start: 1.9rem; }
         }
         @media (min-width: 1024px) {
-            .hp-meet { grid-template-columns: minmax(0, 1fr) minmax(0, min(var(--hp-show, 37rem), 55%)); grid-template-areas: "head casts" "head show" "head note"; align-items: start; column-gap: clamp(2.25rem, 4.6vw, 5rem); }
+            .hp-meet { grid-template-columns: minmax(0, 1fr) minmax(0, min(var(--hp-show, 37rem), 55%)); grid-template-areas: "head casts" "head show"; align-items: start; column-gap: clamp(2.25rem, 4.6vw, 5rem); }
             .hp-meet > .hp-head { grid-area: head; align-self: center; }
             .hp-meet > .hp-casts { grid-area: casts; }
             .hp-meet > .hp-show { grid-area: show; max-width: none; }
-            .hp-meet > .hp-meet-note { grid-area: note; }
             .hp-meet .hp-casts button { min-height: 2.9rem; padding: 0 1.05rem; font-size: 1rem; }
         }
         @media (min-width: 1024px) and (max-width: 1359px) {
@@ -975,9 +1029,9 @@
             grid-template-columns: minmax(0, 1fr);
             grid-template-rows: auto auto minmax(1.5rem, 1fr) auto;
             grid-template-areas: "ix" "bars" "." "word";
-            min-height: clamp(13rem, 30vh, 17rem);
-            min-height: clamp(13rem, 30svh, 17rem);
-            padding-block: clamp(2rem, 4.5vw, 3.5rem) clamp(1.4rem, 3.4vw, 2.6rem);
+            min-height: clamp(11rem, 24vh, 14rem);
+            min-height: clamp(11rem, 24svh, 14rem);
+            padding-block: clamp(1.75rem, 3.6vw, 2.75rem) clamp(1.2rem, 2.8vw, 2.1rem);
         }
         {{-- The wall's seven columns, drawn on the card's own width (so none of them stands just
            past the end of the bars) and fading toward the word. There is no line on the card's
@@ -1022,7 +1076,9 @@
             letter-spacing: -0.055em;
         }
         @supports (width: 1cqi) {
-            .hp-vcard-word { font-size: clamp(4rem, var(--hp-verb-size), 13.75rem); }
+            {{-- Capped at 8.5rem: at 13.75rem each act opened on a screen of one word, three times
+               on the way to the price. --}}
+            .hp-vcard-word { font-size: clamp(4rem, var(--hp-verb-size), 8.5rem); }
         }
         .hp-verb:last-child .hp-vcard-word { margin-inline-start: -0.008em; }
         .hp-vcard-word .hp-ink-grad { display: inline-block; padding-block-end: 0.05em; }
@@ -1049,14 +1105,14 @@
                 grid-template-columns: minmax(0, 1fr) auto;
                 grid-template-areas: "ix ix" "bars bars" ". ." "word has";
                 column-gap: 2.5rem;
-                {{-- Tall as a card on a wide window, never taller than a third of its width: a
-                   tablet held upright would otherwise get a band that is mostly air. --}}
-                min-height: clamp(17rem, min(44vh, 34vw), 30rem);
-                min-height: clamp(17rem, min(44svh, 34vw), 30rem);
+                {{-- A band, not a screen: until 2026-10-22 it stood up to 30rem tall (44% of the
+                   window), and the three of them were most of what came before the price. --}}
+                min-height: clamp(11rem, min(24vh, 18vw), 15rem);
+                min-height: clamp(11rem, min(24svh, 18vw), 15rem);
             }
             {{-- The longest verb is 4.2 times its own size wide; the list is given its room first. --}}
             .hp-vcard > * { --hp-verb-size: calc((100cqi - var(--hp-has-room)) / 4.2); }
-            .hp-vcard-has { grid-area: has; align-self: end; display: grid; justify-items: end; padding-bottom: calc(clamp(4rem, var(--hp-verb-size), 13.75rem) * 0.14 - 0.65rem); }
+            .hp-vcard-has { grid-area: has; align-self: end; display: grid; justify-items: end; padding-bottom: calc(clamp(4rem, var(--hp-verb-size), 8.5rem) * 0.14 - 0.65rem); }
         }
         @media (min-width: 1280px) {
             .hp-vcard > * { --hp-has-room: 19.5rem; }
@@ -1088,7 +1144,8 @@
             display: grid;
             grid-template-columns: minmax(0, 1fr);
             gap: 1.75rem;
-            padding-block: clamp(2.25rem, 5vw, 4.5rem);
+            {{-- Seven features stand on this padding, so a little here is a screen over the page. --}}
+            padding-block: clamp(1.9rem, 3.8vw, 3.4rem);
             scroll-margin-top: 5rem;
         }
         .hp-beat + .hp-beat { border-top: 1px solid var(--hp-line); }
@@ -1118,7 +1175,7 @@
             }
             .hp-step,
             .hp-objwrap { position: sticky; top: 6.25rem; }
-            .hp-run > .hp-step { margin-top: clamp(2.25rem, 5vw, 4.5rem); }
+            .hp-run > .hp-step { margin-top: clamp(1.9rem, 3.8vw, 3.4rem); }
         }
         @media (min-width: 1280px) {
             .hp-beat { grid-template-columns: minmax(0, 25rem) minmax(0, 1fr); }
@@ -1276,6 +1333,9 @@
             color: var(--hp-ink-3);
         }
         .hp-paid svg { flex: none; width: 1.1rem; height: 1.1rem; margin-top: 0.2rem; }
+        {{-- Under the line above, its text in line with that line's words (past the lock). --}}
+        #hp .hp-paid-plan { margin-top: 0.5rem; padding-inline-start: 1.7rem; font-size: 0.92rem; font-weight: 700; color: var(--hp-ink-2); }
+        html:not(.dark) #hp .hp-eve .hp-beat-copy > .hp-paid-plan { color: #eef2ff; }
 
         {{-- The stage each feature's object stands on. Its wrapper is a container, so what stands on the
            stage is laid out from the room the stage has, not from the window. --}}
@@ -1702,7 +1762,9 @@
             {{-- One pixel over the evening's foot, for the same reason as the line above. The
                door's own scene brings the room it needs above it. --}}
             margin-block: -1px 0;
-            padding-block: 0 clamp(23.5rem, 23vw + 15.5rem, 31rem);
+            {{-- Room for the room of lights and the dawn under it, and little more: at 31rem the band
+               ended on most of a screen of dark. --}}
+            padding-block: 0 clamp(22rem, 12vw + 15rem, 26rem);
             {{-- The dark stops two pixels short of the band's bottom edge. The band rarely ends
                on a whole pixel, and a browser that draws the dark and then the dawn over it, each
                softened at that edge, leaves a grey hairline the width of the window. --}}
@@ -1746,7 +1808,7 @@
         :is(.hp-night, html:not(.dark) .hp-eve) .hp-step .hp-vbars i.is-done::after { background: #04101f; opacity: 0.55; }
         :is(.hp-night, html:not(.dark) .hp-eve) .hp-step .hp-vbars i.is-now::after { background: #04101f; }
         {{-- The room under the band is not the tile's to ride over: it lets go with the words. --}}
-        .hp-night .hp-run > .hp-step { margin-bottom: clamp(8rem, 14vw, 15rem); }
+        .hp-night .hp-run > .hp-step { margin-bottom: clamp(5rem, 9vw, 9rem); }
         .hp-night .hp-more { color: #a9c3ff; }
         .hp-night .hp-ink-grad { background-image: linear-gradient(100deg, #7da5ff 0%, #38bdf8 55%, #67e8f9 100%); }
         .hp-doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; margin-top: 1.75rem; }
@@ -1934,6 +1996,53 @@
         }
 
         {{-- ---------------------------------------------------------------
+           Quotes (only when the operator has added some)
+           --------------------------------------------------------------- --}}
+
+        #hp .hp-quotes-sec { padding-bottom: 0; }
+        .hp-quotes { display: grid; gap: 1rem; margin-top: clamp(2rem, 4vw, 3rem); }
+        .hp-quotes.is-1 { max-width: 44rem; margin-inline: auto; }
+        .hp-quotes.is-2 { max-width: 64rem; margin-inline: auto; }
+        @media (min-width: 768px) {
+            .hp-quotes.is-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (min-width: 1024px) {
+            .hp-quotes.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        .hp-quote {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: clamp(1.5rem, 3vw, 2.1rem);
+            border: 1px solid var(--hp-line);
+            border-radius: 1.5rem;
+            background: var(--hp-bg-2);
+            box-shadow: var(--hp-card-shadow);
+        }
+        .hp-quote blockquote { margin: 0; }
+        .hp-quote blockquote p { margin: 0; white-space: pre-line; font-size: 1.12rem; font-weight: 600; line-height: 1.55; letter-spacing: -0.01em; color: var(--hp-ink); text-wrap: pretty; overflow-wrap: anywhere; }
+        .hp-quotes.is-1 .hp-quote { padding: clamp(1.75rem, 4vw, 2.75rem); text-align: center; }
+        .hp-quotes.is-1 .hp-quote blockquote p { font-size: clamp(1.3rem, 1vw + 1.05rem, 1.7rem); line-height: 1.45; }
+        .hp-quotes.is-1 .hp-quote.is-long blockquote p { font-size: clamp(1.12rem, 0.6vw + 1rem, 1.38rem); line-height: 1.55; }
+        .hp-quotes.is-1:has(.is-long) { max-width: 52rem; }
+        .hp-quote.is-long blockquote p { font-size: 1.02rem; }
+        @media (max-width: 767px) {
+            {{-- A paragraph centred on a phone is a ragged column to read down; it starts on the edge. --}}
+            .hp-quotes.is-1 .hp-quote.is-long { text-align: start; }
+            .hp-quotes.is-1 .hp-quote.is-long figcaption { justify-content: flex-start; }
+        }
+        .hp-quote figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 0.9rem; margin-top: auto; padding-top: 1.5rem; }
+        .hp-quotes.is-1 .hp-quote figcaption { justify-content: center; }
+        .hp-quote figcaption img,
+        .hp-quote-initial { flex: none; width: 3rem; height: 3rem; border-radius: 999px; object-fit: cover; }
+        .hp-quote-initial { display: grid; place-items: center; background: linear-gradient(135deg, #4e81fa, #22d3ee); font-weight: 700; color: #fff; }
+        .hp-quote-who { display: flex; flex-direction: column; min-width: 0; text-align: start; }
+        .hp-quote-who b { font-weight: 700; color: var(--hp-ink); overflow-wrap: anywhere; }
+        .hp-quote-who i { font-style: normal; font-size: 0.88rem; color: var(--hp-ink-3); overflow-wrap: anywhere; }
+        .hp-quote figcaption .hp-more { flex-basis: 100%; font-size: 0.95rem; }
+        .hp-quotes.is-1 .hp-quote figcaption .hp-more { flex-basis: auto; }
+
+        {{-- ---------------------------------------------------------------
            5. Everything else
            --------------------------------------------------------------- --}}
 
@@ -1956,6 +2065,27 @@
         .hp-bill-name { display: block; font-size: 1.2rem; font-weight: 700; font-variation-settings: 'wght' 860; letter-spacing: -0.03em; line-height: 1.15; text-transform: uppercase; color: var(--hp-ink); transition: color 0.2s ease; }
         .hp-bill-desc { display: block; margin-top: 0.35rem; font-size: 0.95rem; line-height: 1.5; color: var(--hp-ink-2); }
         .hp-bill-list a:hover .hp-bill-name { color: var(--hp-blue); }
+        .hp-bill-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.5rem; margin-top: 1.25rem; }
+        .hp-bill-more {
+            min-height: 2.75rem;
+            padding: 0 1.1rem;
+            border: 1px solid var(--hp-line-2);
+            border-radius: 999px;
+            background: var(--hp-bg);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--hp-ink);
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        .hp-bill-more:hover { border-color: var(--hp-blue); color: var(--hp-blue); }
+        .hp-bill-more:focus-visible { outline: 2px solid var(--hp-blue); outline-offset: 2px; }
+        @media not all and (hover: hover) and (min-width: 768px) {
+            .hp-bill-list.is-folded > li[data-fold] { display: none; }
+        }
+        @media (hover: hover) and (min-width: 768px) {
+            #hp .hp-bill-more { display: none; }
+            .hp-bill-foot { justify-content: center; margin-top: 0.5rem; }
+        }
         {{-- Where there is a pointer and the room: the names set as a bill, in three sizes, and the
            sentence of the one being pointed at standing in one place under them. --}}
         @media (hover: hover) and (min-width: 768px) {
@@ -2135,6 +2265,28 @@
         .hp-figs-links { display: flex; flex-direction: column; align-items: center; gap: 1.1rem; margin-top: 2.25rem; }
         .hp-figs-note { max-width: 40rem; margin: clamp(1.5rem, 3vw, 2.25rem) auto 0; font-size: 1.05rem; color: var(--hp-ink-2); text-align: center; text-wrap: balance; }
         .hp-figs-more { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.75rem; }
+        .hp-switch {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem 0.8rem;
+            padding: 0.85rem 1.35rem;
+            border: 1px solid var(--hp-line-2);
+            border-radius: 999px;
+            background: var(--hp-bg);
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: var(--hp-ink);
+            text-align: center;
+        }
+        .dark .hp-switch { background: var(--hp-bg-2); }
+        .hp-switch small { padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--hp-bg-3); font-size: 0.78rem; font-weight: 700; color: var(--hp-ink-2); }
+        .dark .hp-switch small { background: rgba(125, 165, 255, 0.16); color: #cfe0ff; }
+        .hp-figs-compare { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0.3rem 1.1rem; font-size: 0.92rem; color: var(--hp-ink-3); }
+        .hp-figs-compare > span { font-family: var(--hp-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+        .hp-figs-compare a { color: var(--hp-ink-2); text-decoration: underline; text-decoration-color: var(--hp-line-2); text-underline-offset: 0.2em; transition: color 0.2s ease; }
+        .hp-figs-compare a:hover { color: var(--hp-blue); text-decoration-color: currentColor; }
 
         {{-- ---------------------------------------------------------------
            7. Discover: the pinned rail of real events
@@ -2145,6 +2297,8 @@
         .es-gallery-pin { padding-block: clamp(3.5rem, 7vw, 5.5rem); }
         .hp-discover-band { position: relative; border-radius: 2.5rem; background: var(--hp-bg-2); box-shadow: var(--hp-card-shadow), 0 0 0 1px var(--hp-line); }
         .hp-discover-foot { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin-top: 2rem; padding-inline: 1rem; color: var(--hp-ink-3); }
+        .hp-discover-ask { margin: 0; font-size: 1.02rem; font-weight: 700; color: var(--hp-ink); text-align: center; }
+        .hp-discover-browse { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem 0.6rem; }
         .hp-discover-foot a.hp-plain { display: inline-flex; align-items: center; min-height: 1.75rem; font-size: 0.92rem; color: var(--hp-ink-3); text-decoration: underline; text-underline-offset: 0.2em; }
 
         {{-- A platform admin's note after a discovery pill (Hide schedule, Hide event): it sits
@@ -2249,6 +2403,8 @@
             .hp-plug-logo { width: 1.7rem; height: 1.7rem; }
         }
         .hp-plugs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+        {{-- An odd one out in a pair of columns takes the row (the payments are three). --}}
+        .hp-plugs > li:last-child:nth-child(odd) { grid-column: 1 / -1; }
         .hp-plug {
             display: flex;
             align-items: center;
@@ -2401,12 +2557,49 @@
         .hp-finale .hp-h2 { max-width: 16em; margin-inline: auto; font-size: clamp(2.3rem, 3.4vw + 0.8rem, 4.2rem); }
         .hp-finale .hp-ink-grad { background-image: linear-gradient(100deg, #7da5ff 0%, #38bdf8 55%, #67e8f9 100%); }
         .hp-finale .hp-lead { max-width: 40rem; margin-top: 1.4rem; margin-inline: auto; color: #c5cde2; }
+        {{-- The phone's dock (see the markup after the finale). Off screen and out of reach until
+           the script raises it; never drawn from a tablet up. --}}
+        .hp-dock {
+            position: fixed;
+            inset-inline: 0;
+            bottom: 0;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.7rem 1rem max(0.7rem, env(safe-area-inset-bottom));
+            border-top: 1px solid var(--hp-line-2);
+            background: var(--hp-bg-2);
+            box-shadow: 0 -12px 30px -18px rgba(10, 16, 32, 0.45);
+            transform: translateY(110%);
+            visibility: hidden;
+            transition: transform 0.25s ease, visibility 0s linear 0.25s;
+        }
+        .hp-dock.is-on { transform: none; visibility: visible; transition: transform 0.25s ease, visibility 0s; }
+        .hp-dock .hp-btn { flex: 1 1 auto; min-height: 3.1rem; padding: 0 1.1rem; font-size: 1rem; }
+        .hp-dock .hp-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .hp-dock-note { flex: none; font-size: 0.74rem; font-weight: 600; line-height: 1.35; color: var(--hp-ink-3); }
+        @media (min-width: 768px) {
+            .hp-dock { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .hp-dock, .hp-dock.is-on { transition: none; }
+        }
+        {{-- What else lives at the foot of the screen stands on the dock while it is up. --}}
+        html.hp-dock-on [data-cookie-consent] { bottom: calc(var(--hp-dock-h, 4.5rem) + 0.75rem); }
+        {{-- The calculator's footnote, folded to two lines on a phone by the script. --}}
+        .hp-calc-note-open { display: none; }
+        @media (max-width: 767px) {
+            #hp .hp-calc-note.is-folded { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+            .hp-calc-note-open { display: inline-flex; align-items: center; min-height: 2.75rem; margin-top: 0.25rem; padding: 0; background: none; border: 0; font-size: 0.9rem; font-weight: 700; color: var(--hp-blue); text-decoration: underline; text-underline-offset: 0.2em; }
+            .hp-calc-note-open[hidden] { display: none; }
+        }
         #hp .hp-finale .hp-claim { border-color: rgba(125, 165, 255, 0.4); background: #101831; box-shadow: none; }
         #hp .hp-finale .hp-claim input { color: #fff; }
         #hp .hp-finale .hp-claim input::placeholder,
         .hp-finale .hp-claim-suffix { color: #b9c6e6; }
         .hp-finale .hp-btn-primary { background: linear-gradient(100deg, #3a6df0, #1f8fe0); }
-        .hp-finale-foot { margin-top: 1.4rem; font-size: 0.92rem; color: #b9c6e6; }
+        .hp-finale-foot { margin-top: 1.4rem; font-size: 0.92rem; color: #d3dcf2; }
         .dark .hp-finale { box-shadow: 0 0 0 1px rgba(125, 165, 255, 0.22), 0 40px 100px -40px rgba(47, 102, 234, 0.7); }
         @media (min-width: 900px) {
             .hp-finale { grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr); text-align: start; }
@@ -2453,14 +2646,14 @@
     <x-slot name="structuredData">
     {{-- The product node ({site}/#software) is emitted once by the layout for every marketing page:
          SeoUtils::softwareApplication(). --}}
-    <x-seo.howto-schema
-        name="How to share your event schedule"
-        description="Get your event schedule live and shared with your audience in three simple steps."
-        :steps="[
-            ['name' => 'Create your schedule', 'text' => 'Sign up free, then fill it however suits you: type an event in, connect a calendar, or paste a poster and let the AI read the details off it.'],
-            ['name' => 'Share your link', 'text' => 'You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, embed the calendar in your own site, or let guests subscribe to it from their own calendar app.'],
-            ['name' => 'Grow your audience', 'text' => 'Visitors leave an email address and get a digest automatically when you publish new events. Write a newsletter yourself whenever there is more to say.'],
-        ]"
+    {{-- The page itself, by @id about the product node. A HowTo stood here until 2026-10-22:
+         Google stopped showing HowTo results in 2023, so it was bytes with no result behind it. --}}
+    <x-seo.webpage
+        :name="__('marketing.home_title')"
+        :description="__('marketing.home_description')"
+        audience="Event organizers, venues, performers and community curators"
+        keywords="event calendar, event ticketing, sell tickets online, zero platform fees, event management software, eventbrite alternative"
+        :mentions="['Eventbrite', 'Luma', 'TicketLeap']"
     />
     {{-- FAQ JSON-LD is emitted alongside the visible FAQ section near the end of the page, driven by one $homeFaqs array so the markup always matches the rendered content. --}}
     {{-- Structured data: list the publicly visible events in the rail --}}
@@ -2550,6 +2743,11 @@
         $hpShowPriceText = '$'.$hpShowPrice;
         $hpShowGrossText = '$'.number_format($hpShowTickets * $hpShowPrice);
         $hpFeePlatforms = ['eventschedule', 'eventbrite', 'luma', 'ticketleap'];
+        // One sentence, printed under the three numerals and in the FAQ's answer about selling, so
+        // the two cannot come to say different things. It names Pro's price where "Free forever"
+        // and the calculator's monthly figure meet.
+        $hpProMonthlyText = plan_price(\App\Utils\PlatformPricing::proMonthly());
+        $hpPricedTicketNote = 'A ticket that carries a price needs the Pro plan, '.$hpProMonthlyText.' a month, while free registration stays unlimited on every plan.';
 
         $hpCasts = [
             'jazz' => ['label' => 'a jazz club', 'initial' => 'B', 'venue' => 'The Blue Note', 'slug' => 'blue-note', 'tagline' => 'Live jazz, five nights a week', 'event' => 'Jazz Night', 'line1' => 'Jazz', 'line2' => 'Night', 'tag' => 'Live', 'tier2' => 'VIP', 'tier2note' => 'Early entry', 'addon' => 'Parking', 'verb' => 'Doors', 'time' => '8:00 PM', 'next1' => 'Open Mic', 'next1time' => '7:30 PM', 'next2' => 'Blues & Brews', 'next2time' => '9:00 PM', 'appt' => 'Private hire viewing', 'img' => asset('images/demo/demo_flyer_jazz.webp')],
@@ -2587,12 +2785,13 @@
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim" data-hero="l2">{{ $hero['default']['line2'] }}</span></span></span>
             </h1>
 
-            {{-- The headline and this subtitle are an A/B test that runs itself: the copy for every
-                 variant, and the reasoning behind each constraint on it, lives in
-                 App\Utils\HeroExperiment. The server renders the default (or the winner, once one is
-                 locked); the script below picks a variant in the browser, because this page is
-                 edge-cached on its URL alone and a server-side pick would be served to everyone
-                 (docs/CACHING.md).
+            {{-- The headline and this subtitle come from App\Utils\HeroExperiment, the A/B test that
+                 runs itself, with the copy for every variant and the reasoning behind each
+                 constraint on it. Since 2026-10-22 it holds one headline, a baseline that is still
+                 counted; a later round adds variants there. The server renders the default (or the
+                 winner, once one is locked); the script below picks a variant in the browser,
+                 because this page is edge-cached on its URL alone and a server-side pick would be
+                 served to everyone (docs/CACHING.md).
 
                  The rules every variant must keep, which HeroExperimentTest checks:
                  - 24 characters per headline line (see the note above the h1).
@@ -2746,16 +2945,18 @@
             {{-- The name box that used to wait at the foot of the page. A name typed here rides
                  into sign-up (?schedule=, see initClaim() in marketing-home.js), and the same
                  name shows in the box in the finale. --}}
-            <div class="es-fade-up es-d-3 hp-claimrow">
-                <label for="es-claim-hero" class="sr-only">Your schedule name</label>
-                <div dir="ltr" class="es-claim hp-claim">
-                    <input id="es-claim-hero" type="text" placeholder="your-name" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="30">
-                    <span class="hp-claim-suffix">{{ $claimSuffix }}</span>
+            <div class="es-fade-up es-d-3 hp-claimwrap">
+                <label for="es-claim-hero" class="hp-claim-label">Pick your link</label>
+                <div class="hp-claimrow">
+                    <div dir="ltr" class="es-claim hp-claim">
+                        <input id="es-claim-hero" type="text" placeholder="your-name" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="30">
+                        <span class="hp-claim-suffix">{{ $claimSuffix }}</span>
+                    </div>
+                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary">
+                        Claim it free
+                        {!! $hpArrow !!}
+                    </a>
                 </div>
-                <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary">
-                    Claim it free
-                    {!! $hpArrow !!}
-                </a>
             </div>
 
             {{-- No capability chip row here. A row of four named features under the CTAs turns the
@@ -2783,6 +2984,9 @@
 
             {{-- Compact clickable poster strip (mobile and tablets) --}}
             <div class="es-fade-up es-d-5 hp-strip lg:hidden">
+                @if ($hpWallIsReal)
+                    <p class="hp-wall-label"><i aria-hidden="true"></i>Coming up on Event Schedule</p>
+                @endif
                 <div class="es-marquee-mask">
                     <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
@@ -2856,7 +3060,11 @@
                     @endphp
                     <div class="relative aspect-video" style="background: var(--hp-bg);">
                         @foreach ($showreelCuts as $cut => $reel)
+                            {{-- WebP at three widths for the frame's 1152 CSS px at most; the JPG is the
+                                 fallback src and what the film's own tools write. --}}
                             <img data-showreel-poster="{{ $cut }}" src="{{ asset('videos/' . $reel . '-poster.jpg') }}?v={{ $showreelV }}" alt=""
+                                 srcset="{{ asset('videos/' . $reel . '-poster-960.webp') }}?v={{ $showreelV }} 960w, {{ asset('videos/' . $reel . '-poster-1440.webp') }}?v={{ $showreelV }} 1440w, {{ asset('videos/' . $reel . '-poster-1920.webp') }}?v={{ $showreelV }} 1920w"
+                                 sizes="(min-width: 1280px) 1152px, 92vw"
                                  width="1920" height="1080" loading="lazy" decoding="async"
                                  class="absolute inset-0 h-full w-full object-cover {{ $cut === 'light' ? 'dark:hidden' : 'hidden dark:block' }}">
                         @endforeach
@@ -2891,7 +3099,7 @@
                     <div class="es-frame-glow" aria-hidden="true"></div>
                 </div>
             <div class="hp-stage-cap">
-                <h2 class="hp-h2" data-reveal>See it in action</h2>
+                <h2 class="hp-h2" data-reveal>See Event Schedule in action</h2>
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.1s;">From first event to sold-out show, in one short tour.</p>
             </div>
         </div>
@@ -2902,6 +3110,9 @@
              the same events stand still in the Discover rail, and all of them are behind
              Browse all events. --}}
         <div class="es-wall absolute inset-0 hidden lg:block" data-clip-ok aria-hidden="true">
+            @if ($hpWallIsReal)
+                <p class="hp-wall-label"><i></i>Coming up on Event Schedule</p>
+            @endif
             <div class="es-wall-tilt">
                 {{-- The visitor's own poster, pasted over the others. It stands in the left wall's
                      plane but outside its fade, shows faintly until a name is typed in the claim
@@ -2962,7 +3173,7 @@
                 ['Food Trucks', 'bg-cyan-500', marketing_url('/for-food-trucks-and-vendors')],
                 ['Theaters', 'bg-amber-500', marketing_url('/for-theaters')],
                 ['Bands', 'bg-emerald-500', marketing_url('/for-live-concerts')],
-                ['Festivals', 'bg-rose-500', marketing_url('/use-cases')],
+                ['Festivals', 'bg-rose-500', marketing_url('/for-festivals')],
             ],
             [
                 ['Comedians', 'bg-amber-500', marketing_url('/for-comedians')],
@@ -3048,7 +3259,9 @@
                 </div>
                 </div>
             </div>
-            <p class="hp-meet-note" data-reveal style="--reveal-delay: 0.3s;">The three acts below follow this one show, from its poster to its door.</p>
+            {{-- Said to a screen reader only: the show beside it is drawn (aria-hidden), and on screen
+                 the switch and the acts already say it, so the line was a third row of height. --}}
+            <p class="hp-meet-note sr-only">The three acts below follow this one show, from its poster to its door.</p>
         </div>
 
         <!-- Act one of three: plan -->
@@ -3084,7 +3297,7 @@
                                         <div>
                                             <h5>AI-Powered</h5>
                                             <p>Paste a poster, a press release or a screenshot and get a filled-in event back. Generate flyers, descriptions and a whole brand style, and publish in 12 languages.</p>
-                                            <a href="{{ marketing_url('/features/ai') }}" class="hp-more" aria-label="Learn more about AI-powered features">Learn more {!! $hpArrow !!}</a>
+                                            <a href="{{ marketing_url('/features/ai') }}" class="hp-more">More about AI-powered features {!! $hpArrow !!}</a>
                                         </div>
                                     </div>
                                     <div class="hp-blurb">
@@ -3092,7 +3305,7 @@
                                         <div>
                                             <h5>Calendar Sync</h5>
                                             <p>Two-way sync with Google Calendar, Microsoft 365 and any CalDAV server. Edit an event in either place and the other follows.</p>
-                                            <a href="{{ marketing_url('/features/calendar-sync') }}" class="hp-more" aria-label="Learn more about calendar sync">Learn more {!! $hpArrow !!}</a>
+                                            <a href="{{ marketing_url('/features/calendar-sync') }}" class="hp-more">More about calendar sync {!! $hpArrow !!}</a>
                                         </div>
                                     </div>
                                 </div>
@@ -3165,7 +3378,7 @@
                                     <li><span class="hp-ok">{!! $hpCheck !!}</span><span>Never double-booked against your synced calendars</span></li>
                                 </ul>
                                 <p style="margin-top: 1.5rem;">
-                                    <a href="{{ route('marketing.appointments') }}" class="hp-more">Learn more<span class="sr-only"> about appointments</span> {!! $hpArrow !!}</a>
+                                    <a href="{{ route('marketing.appointments') }}" class="hp-more">More about appointments {!! $hpArrow !!}</a>
                                 </p>
                             </div>
                             <div class="hp-objwrap"><div class="hp-obj hp-obj-book" data-reveal="panel" aria-hidden="true">
@@ -3237,7 +3450,7 @@
                                 <h4 class="hp-h3"><span class="hp-kicker">Share your link<span class="sr-only">: </span></span>One link. <span class="hp-soft">Everywhere.</span></h4>
                                 <p>You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, embed the calendar in your own site, or let guests subscribe to it from their own calendar app.</p>
                                 <div class="hp-actions">
-                                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Claim it free">Claim it free</span> {!! $hpArrow !!}</a>
+                                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Claim your link free">Claim your link free</span> {!! $hpArrow !!}</a>
                                 </div>
                                 <div class="hp-blurbs">
                                     <div class="hp-blurb">
@@ -3246,7 +3459,7 @@
                                             <h5>Newsletters</h5>
                                             <p>Send branded emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
                                             <p class="hp-fine">Templates · Audience segments · A/B testing</p>
-                                            <a href="{{ route('marketing.newsletters') }}" class="hp-more" aria-label="Learn more about newsletters">Learn more {!! $hpArrow !!}</a>
+                                            <a href="{{ route('marketing.newsletters') }}" class="hp-more">More about newsletters {!! $hpArrow !!}</a>
                                         </div>
                                     </div>
                                     <div class="hp-blurb">
@@ -3254,7 +3467,7 @@
                                         <div>
                                             <h5>Boost</h5>
                                             <p>Turn any event into a Facebook or Instagram ad in minutes. Set your budget, pick your audience, and launch with no ad experience needed.</p>
-                                            <a href="{{ route('marketing.boost') }}" class="hp-more" aria-label="Learn more about Boost">Learn more {!! $hpArrow !!}</a>
+                                            <a href="{{ route('marketing.boost') }}" class="hp-more">More about Boost {!! $hpArrow !!}</a>
                                         </div>
                                     </div>
                                 </div>
@@ -3338,7 +3551,7 @@
                                         <div>
                                             <h5>Built-in Analytics</h5>
                                             <p>Page views, traffic sources, devices, check-ins and revenue per event, on three tabs. Built in and first-party, so no Google Analytics account is required.</p>
-                                            <a href="{{ route('marketing.analytics') }}" class="hp-more" aria-label="Learn more about built-in analytics">Learn more {!! $hpArrow !!}</a>
+                                            <a href="{{ route('marketing.analytics') }}" class="hp-more">More about built-in analytics {!! $hpArrow !!}</a>
                                         </div>
                                     </div>
                                 </div>
@@ -3427,8 +3640,11 @@
                                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['lock'] !!}</svg>
                                     Get paid by Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a payment link or cash
                                 </p>
+                                {{-- What a priced ticket needs, said where selling is, not first in the FAQ. Kept
+                                     out of the fold: the hero names no paid plan (MarketingHeroClaimTest). --}}
+                                <p class="hp-paid-plan">Paid tickets on Pro, {{ $hpProMonthlyText }} a month. Free registration on every plan.</p>
                                 <div class="hp-actions">
-                                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Get started">Get started</span> {!! $hpArrow !!}</a>
+                                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Start for free">Start for free</span> {!! $hpArrow !!}</a>
                                     <a href="#fees" class="hp-more">Compare the fees {!! $hpArrow !!}</a>
                                 </div>
                             </div>
@@ -3487,7 +3703,7 @@
                                     <p>Every ticket carries a QR code you scan at the door, on any plan, with zero platform fees.</p>
                                     <p class="hp-doors" aria-hidden="true"><span><span data-cast="verb">Doors</span><b data-cast="time">8:00 PM</b></span><span>Checked in<b data-count-to="142">142</b></span><span>Tickets<b>150</b></span></p>
                                     <p style="margin-top: 1.5rem;">
-                                        <a href="{{ marketing_url('/features/ticketing') }}" class="hp-more" aria-label="Learn more about ticketing and QR check-ins">Learn more {!! $hpArrow !!}</a>
+                                        <a href="{{ marketing_url('/features/ticketing') }}" class="hp-more">More about ticketing {!! $hpArrow !!}</a>
                                     </p>
                                 </div>
                                 <div class="hp-objwrap"><div class="hp-obj hp-obj-door" data-reveal="panel" aria-hidden="true">
@@ -3542,8 +3758,11 @@
         <div class="hp-wrap">
             <div class="hp-head is-center">
                 <span class="hp-kicker" data-reveal>What it costs</span>
+                {{-- Leads with the money, which is what this section is for. It said "Free and open
+                     source. Forever." until 2026-10-22, three lines above a Pro price. Not "Free event
+                     ticketing": a ticket that carries a price needs Pro (see the note above $homeFaqs). --}}
                 <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
-                    Free and open source. <span class="hp-ink-grad">Forever.</span>
+                    Event ticketing with <span class="hp-ink-grad">zero platform fees.</span>
                 </h2>
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
                     No hidden fees. No per-ticket charges. Past your payment provider's own fee, every sale is yours.
@@ -3574,7 +3793,7 @@
             {{-- The FAQ's own sentence, word for word. It stands between "Free forever" and a
                  calculator whose first card is a monthly price, so the two do not contradict
                  each other. --}}
-            <p class="hp-figs-note" data-reveal>A ticket that carries a price needs the Pro plan, while free registration stays unlimited on every plan.</p>
+            <p class="hp-figs-note" data-reveal>{{ $hpPricedTicketNote }}</p>
 
             <div id="fees" class="hp-keep" data-reveal>
                 <div class="hp-keep-head">
@@ -3618,14 +3837,72 @@
             </div>
 
             <div class="hp-figs-links" data-reveal style="--reveal-delay: 0.2s;">
+                {{-- Right under the bars, where somebody has just seen what Eventbrite takes. The
+                     import is Pro (docs/FEATURES.md), and the line says so. --}}
+                <p class="hp-switch">
+                    <span>Switching from Eventbrite?</span>
+                    <a href="{{ route('marketing.switch_from_eventbrite') }}" class="hp-more">Bring your events over {!! $hpArrow !!}</a>
+                    <small>Import on Pro</small>
+                </p>
                 <span class="hp-figs-more">
                     <a href="{{ marketing_url('/pricing') }}" class="hp-more">See the plans {!! $hpArrow !!}</a>
                     <a href="{{ marketing_url('/open-source') }}" class="hp-more">Read the licence and the code {!! $hpArrow !!}</a>
                     <a href="{{ marketing_url('/selfhost') }}" class="hp-more">Install it on your own server {!! $hpArrow !!}</a>
                 </span>
+                <nav class="hp-figs-compare" aria-label="Compare Event Schedule">
+                    <span>Compare</span>
+                    <a href="{{ route('marketing.compare_eventbrite') }}">Eventbrite alternative</a>
+                    <a href="{{ route('marketing.compare_luma') }}">Luma alternative</a>
+                    <a href="{{ route('marketing.compare') }}">All comparisons</a>
+                </nav>
             </div>
         </div>
     </section>
+
+    {{-- What schedules on the platform say, as the operator typed it in (App\Utils\HomeQuotes):
+         each quote is the schedule's, under its own name, picture and page, so a reader can go and
+         look. Nothing is printed until there is a quote. One is a pull quote, two stand side by
+         side, three are a row. --}}
+    @if (! empty($homeQuotes))
+        <section id="quotes" class="hp-sec hp-quotes-sec" aria-labelledby="hp-quotes-title">
+            <div class="hp-wrap">
+                <div class="hp-head is-center">
+                    <span class="hp-kicker" data-reveal>In their words</span>
+                    <h2 class="hp-h2" id="hp-quotes-title" data-reveal style="--reveal-delay: 0.08s;">
+                        Organizers on Event Schedule
+                    </h2>
+                </div>
+                <div class="hp-quotes is-{{ count($homeQuotes) }}" data-reveal-group="120">
+                    @foreach ($homeQuotes as $homeQuote)
+                        {{-- Said by a person when the operator named one (their name first, then what
+                             they do); otherwise by the schedule. A long quote is set smaller, so a
+                             customer's whole paragraph reads as a quote and not as a wall. --}}
+                        @php
+                            $quoteBy = $homeQuote['person'] !== '' ? $homeQuote['person'] : $homeQuote['name'];
+                            $quoteAs = $homeQuote['title'] !== '' ? $homeQuote['title'] : ($homeQuote['person'] !== '' ? $homeQuote['name'] : '');
+                        @endphp
+                        <figure @class(['hp-quote', 'is-long' => mb_strlen($homeQuote['quote']) > 240]) data-reveal>
+                            <blockquote><p><bdi>&ldquo;{{ $homeQuote['quote'] }}&rdquo;</bdi></p></blockquote>
+                            <figcaption>
+                                @if ($homeQuote['image'])
+                                    <img src="{{ $homeQuote['image'] }}" alt="" width="48" height="48" loading="lazy" decoding="async">
+                                @else
+                                    <span class="hp-quote-initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($homeQuote['name'], 0, 1)) }}</span>
+                                @endif
+                                <span class="hp-quote-who">
+                                    <b><bdi>{{ $quoteBy }}</bdi></b>
+                                    @if ($quoteAs !== '')
+                                        <i><bdi>{{ $quoteAs }}</bdi></i>
+                                    @endif
+                                </span>
+                                <a href="{{ $homeQuote['url'] }}" class="hp-more">See their schedule<span class="sr-only">: {{ $homeQuote['name'] }}</span> {!! $hpArrow !!}</a>
+                            </figcaption>
+                        </figure>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 
     <!-- ============================================================ -->
     <!-- 6. Everything else                                           -->
@@ -3763,10 +4040,14 @@
                  pointed at. --}}
             <div class="hp-bill" data-reveal="panel">
                 <p class="hp-bill-top" aria-hidden="true"><span>Also on the bill</span><span>Twelve more</span></p>
-                <h2 class="hp-h2">And everything else you'd expect</h2>
-                <ul class="hp-bill-list" data-hint="Point at a name">
+                <h2 class="hp-h2">More event management features</h2>
+                {{-- Where the names are a list (a phone, or no pointer), the first six stand and the
+                     rest wait behind "Show all": twelve names with a sentence each ran to three
+                     screens on a phone. The script folds the list, so without it all twelve show,
+                     and folded or not every name is in the page. --}}
+                <ul class="hp-bill-list" id="hp-bill-list" data-hint="Point at a name" data-bill>
                     @foreach ($moreFeatures as $feature)
-                        <li>
+                        <li @if ($loop->index >= 6) data-fold @endif>
                             <a href="{{ $feature['href'] }}">
                                 <span class="hp-bill-name">{{ $feature['title'] }}</span>
                                 <span class="hp-bill-desc">{{ $feature['desc'] }}</span>
@@ -3778,6 +4059,10 @@
                         @endif
                     @endforeach
                 </ul>
+                <div class="hp-bill-foot">
+                    <button type="button" class="hp-bill-more" data-bill-more aria-controls="hp-bill-list" aria-expanded="false" hidden>Show all {{ count($moreFeatures) }}</button>
+                    <a href="{{ marketing_url('/features') }}" class="hp-more">See all features {!! $hpArrow !!}</a>
+                </div>
             </div>
         </div>
     </section>
@@ -3828,21 +4113,22 @@
                     </div>
                 </div>
 
-                <div class="hp-discover-foot">
-                    <a href="{{ marketing_url('/browse') }}" class="hp-btn hp-btn-ghost">Browse all events {!! $hpArrow !!}</a>
-                    <a href="{{ marketing_url('/search') }}" class="hp-plain">or search for something specific</a>
-                </div>
-            @else
-                {{-- No events yet: still offer a way in --}}
-                <div class="hp-discover-foot">
-                    <a href="{{ marketing_url('/browse') }}" class="hp-btn hp-btn-primary">Browse all events {!! $hpArrow !!}</a>
-                </div>
             @endif
 
-            <p class="hp-discover-foot" style="margin-top: 1.25rem; padding-bottom: 0.5rem; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 0.4rem;">
-                Run events of your own?
-                <a href="{{ app_url('/sign_up') }}" class="hp-more" data-claim-link>Get discovered in community search {!! $hpArrow !!}</a>
-            </p>
+            {{-- The button is the organizer's way in, and browsing is the quieter link: the strong
+                 "Browse all events" button sent the people this page is for away to read other
+                 people's events. --}}
+            <div class="hp-discover-foot" style="padding-bottom: 0.5rem;">
+                <p class="hp-discover-ask">Run events of your own? They can be on this list too.</p>
+                <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary" data-claim-link><span data-claim-label="Get your events discovered">Get your events discovered</span> {!! $hpArrow !!}</a>
+                <span class="hp-discover-browse">
+                    <a href="{{ marketing_url('/browse') }}" class="hp-plain">Browse all events</a>
+                    @if ($discoverEvents->count() > 0)
+                        <span aria-hidden="true">·</span>
+                        <a href="{{ marketing_url('/search') }}" class="hp-plain">search for something specific</a>
+                    @endif
+                </span>
+            </div>
             </div>
         </div>
     </section>
@@ -3851,8 +4137,9 @@
     <!-- 8. Integrations: the orbit                                   -->
     <!-- ============================================================ -->
     @php
-        // The same six names and links as ever, in the two groups the sentence beside them
-        // already speaks of: the calendars, and where the money goes.
+        // The names and links in the two groups the sentence beside them speaks of: the calendars,
+        // and where the money goes. PayPal joined Stripe on 2026-10-22: the sentence named both and
+        // the diagram showed one.
         $hpPlugs = [
             'in' => [
                 ['name' => 'google', 'label' => 'Google Calendar', 'href' => marketing_url('/google-calendar')],
@@ -3862,6 +4149,7 @@
             ],
             'out' => [
                 ['name' => 'stripe', 'label' => 'Stripe', 'href' => marketing_url('/stripe')],
+                ['name' => 'paypal', 'label' => 'PayPal', 'href' => route('marketing.paypal')],
                 ['name' => 'invoiceninja', 'label' => 'Invoice Ninja', 'href' => marketing_url('/invoiceninja')],
             ],
         ];
@@ -3869,7 +4157,7 @@
     <section id="integrations" class="hp-sec hp-alt">
         <div class="hp-wrap hp-plug-grid">
             <div class="hp-head">
-                <span class="hp-kicker" data-reveal>Integrates with</span>
+                <span class="hp-kicker" data-reveal>Integrations: calendars and payments</span>
                 <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
                     The tools you already use
                 </h2>
@@ -3950,14 +4238,21 @@
             // The interest list (EventInterestController) carries no plan check either. CalDAV has no inbound
             // delete sync - applyInboundDeletion() is called only by the Google and Microsoft
             // services - so the deletion choice is stated for those two only.
-            ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events, unlimited schedules and unlimited free registration. Pro and Enterprise plans add paid ticket sales, event boosting, custom branding, and AI image generation.'],
-            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees. A ticket that carries a price needs the Pro plan, while free registration stays unlimited on every plan. Create as many ticket types as you need and scan the QR code on every ticket at the door, on any plan. Pro also adds extras like parking or merchandise, promo codes and a waitlist for sold-out tickets.'],
+            ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events, unlimited schedules and unlimited free registration. Pro ('.$hpProMonthlyText.' a month) and Enterprise plans add paid ticket sales, event boosting, custom branding, and AI image generation.'],
+            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees. '.$hpPricedTicketNote.' Create as many ticket types as you need and scan the QR code on every ticket at the door, on any plan. Pro also adds extras like parking or merchandise, promo codes and a waitlist for sold-out tickets.'],
+            // Nothing is added at checkout: TicketFees and the calculator above work from the price
+            // the organizer sets, with the processor's fee coming out of it.
+            ['q' => 'Do my buyers pay extra fees?', 'a' => 'No. Event Schedule adds no fee at checkout, so your buyers pay the price you set. Your payment provider takes its own processing fee out of the payment, as it would anywhere, and the rest lands in your account.'],
             ['q' => 'Can people get notified when tickets go on sale?', 'a' => 'Yes, on every plan. Switch on the "Notify me" card and, until tickets go on sale, an event page offers "Tell me when tickets go on sale". A visitor leaves an email address, with no account, and gets one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Every email has a one-click unsubscribe, and the event editor shows you how many people are waiting.'],
             ['q' => 'How do I get paid?', 'a' => 'Straight into your own account. You connect your Stripe or PayPal account and payments land there directly, so we never hold your money and never take a cut. Payfast (for events priced in South African rand), Razorpay (for events priced in Indian rupees), Invoice Ninja, a payment link of your own and cash at the door work too. Taking money for a ticket is the Pro plan, and it opens all seven.'],
+            // The Eventbrite import is Pro (EventbriteController, docs/FEATURES.md). No figure for
+            // Eventbrite's own fee here: the calculator above prints it from TicketFees.
+            ['q' => 'How is Event Schedule different from Eventbrite?', 'a' => 'Eventbrite adds its own fee to every paid ticket. Event Schedule takes no platform fee, and payments go straight to your own Stripe or PayPal account. Your events live on a calendar of your own that people can follow, with newsletters and appointment booking built in, and the code is open source, so you can run it on your own server. On Pro you can bring your events over from Eventbrite with the built-in import.'],
             ['q' => 'Can I refund a ticket?', 'a' => 'Yes, in full or in part, from the Sales page. Refunds come with paid ticketing on Pro, because that is where the money is taken in the first place. Refund a Stripe, PayPal or Razorpay sale and the money goes back to the buyer through that provider. A partial refund leaves the tickets valid, and a full refund puts them back on sale. A sale paid any other way, cash included, can be marked as refunded so your records match.'],
             ['q' => 'Does Event Schedule sync with my calendar?', 'a' => 'Yes. Google Calendar and Microsoft 365 both sync two ways, with webhook updates so a change made in either place shows up in the other, and you choose whether an event deleted there is kept, marked cancelled or deleted here. Any CalDAV server works as well. Guests can add a single event to Apple, Google or Outlook from the event page, or subscribe to your whole schedule as a live calendar feed that updates itself when a date changes.'],
             ['q' => 'Can I use my own domain?', 'a' => 'Yes. Every schedule gets a free subdomain such as yourname.eventschedule.com, and Enterprise schedules can serve the whole guest portal from a domain you own, with the certificate issued automatically. Selfhosted installs run on your own domain from day one.'],
-            ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. Selfhost it on your own server for full control over your data and every paid feature is included, or use the hosted platform at eventschedule.com.'],
+            // Backup & restore is on every plan; the sales CSV is Pro (docs/FEATURES.md).
+            ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. Selfhost it on your own server for full control over your data and every paid feature is included, or use the hosted platform at eventschedule.com. Either way your data stays yours: back up a schedule with its events and images on any plan, and restore it on another install.'],
             ['q' => 'Who is Event Schedule for?', 'a' => 'Anyone who keeps a schedule other people need to see: musicians, DJs, comedians, venues, bars, theaters, galleries, studios, markets, libraries and the curators who list them all in one place.'],
             // EventRepo::saveEvent() creates a Role for a typed-in act or venue; RoleController
             // renders it through role/show-guest-unclaimed (noindex) until User::claimSchedule(),
@@ -4015,8 +4310,11 @@
                 </div>
                 </div>
                 <div class="hp-finale-copy">
+                {{-- The outcome, not the step: "Ready to share your schedule?" was the page's old
+                     "share" headline. "Event", not "show": the line-up above names yoga studios
+                     and food trucks too. --}}
                 <h2 class="hp-h2">
-                    Ready to share <span class="hp-ink-grad">your schedule?</span>
+                    Your next event, <span class="hp-ink-grad">on sale today.</span>
                 </h2>
                 <p class="hp-lead">
                     Create your event page, sell tickets with zero platform fees, and email your audience directly. All in one free platform.
@@ -4031,11 +4329,164 @@
                     <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary">Claim it free {!! $hpArrow !!}</a>
                 </div>
 
-                <p class="hp-finale-foot">No credit card required. Free forever.</p>
+                <p class="hp-finale-foot">No credit card. Zero platform fees.</p>
                 </div>
             </div>
         </div>
     </section>
+
+    {{-- The phone's way in, wherever the reader is: a bar at the foot of the screen with the one
+         button, from the moment the hero's claim box has scrolled away until the finale's comes
+         into view. A button and no field: a field fixed to the foot of the screen jumps when a
+         phone's keyboard opens. It carries data-claim-link, so a name typed in the hero rides
+         along and the label becomes "Claim <name>". Signed-in visitors never see it (the page is
+         edge-cached for them too, so the layout hides .es-auth-guest). --}}
+    <div class="hp-dock es-auth-guest" data-hp-dock>
+        <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary" data-claim-link><span data-claim-label="Claim it free">Claim it free</span> {!! $hpArrow !!}</a>
+        <span class="hp-dock-note">No credit card.<br>Zero platform fees.</span>
+    </div>
+
+    {{-- Three more behaviours, on phones mostly.
+
+         1. The dock above shows and hides. While it is up it lifts what shares the foot of the
+            screen: the cookie notice (hp-dock-on), the accessibility widget (the layout's own
+            es-a11y-cta-offset and --es-a11y-cta-clearance, as the event page's buy bar does) and
+            the support chat launcher, which reads the same two. It steps aside while a field or
+            a slider is in use, so it never sits over the thumb or a keyboard.
+         2. "More event management features" folds its list to six where it is a list (a phone, or
+            no pointer), with a button for the rest. Without this script all twelve show.
+         3. The calculator's footnote folds to two lines on a phone, with a button that opens it.
+            The component is shared with /compare and is not changed: its last paragraph is found
+            by its place. --}}
+    <script {!! nonce_attr() !!}>
+        (function () {
+            var root = document.documentElement;
+
+            var dock = document.querySelector('[data-hp-dock]');
+            var claim = document.querySelector('#top .hp-claimwrap');
+            if (dock && claim && 'IntersectionObserver' in window) {
+                var phone = window.matchMedia('(max-width: 767px)');
+                var past = false;
+                var ends = [];
+                var field = null;
+                var up = false;
+                var measure = function () {
+                    var h = Math.ceil(dock.getBoundingClientRect().height);
+                    root.style.setProperty('--hp-dock-h', h + 'px');
+                    root.style.setProperty('--es-a11y-cta-clearance', h + 'px');
+                };
+                {{-- A field counts while it is focused AND on screen: a phone's Back closes the
+                     keyboard and leaves the focus where it was, and the dock must come back once
+                     that field has scrolled away. --}}
+                var inUse = function () {
+                    if (!field || document.activeElement !== field) {
+                        return false;
+                    }
+                    var r = field.getBoundingClientRect();
+                    return r.bottom > 0 && r.top < window.innerHeight;
+                };
+                var update = function () {
+                    var busy = inUse();
+                    {{-- Signed-in visitors are served this page too, with the dock hidden by the
+                         layout (.es-auth-guest): then nothing may be lifted for it. --}}
+                    var on = phone.matches && past && ends.length === 0 && !busy && getComputedStyle(dock).display !== 'none';
+                    if (on === up) {
+                        return;
+                    }
+                    up = on;
+                    dock.classList.toggle('is-on', on);
+                    root.classList.toggle('hp-dock-on', on);
+                    if (on) {
+                        measure();
+                        root.classList.add('es-a11y-cta-offset');
+                    } else {
+                        root.classList.remove('es-a11y-cta-offset');
+                    }
+                };
+                new IntersectionObserver(function (entries) {
+                    var e = entries[entries.length - 1];
+                    past = !e.isIntersecting && e.boundingClientRect.top < 0;
+                    update();
+                }).observe(claim);
+                var endObserver = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) {
+                        var at = ends.indexOf(e.target);
+                        if (e.isIntersecting && at === -1) {
+                            ends.push(e.target);
+                        } else if (!e.isIntersecting && at !== -1) {
+                            ends.splice(at, 1);
+                        }
+                    });
+                    update();
+                });
+                [document.getElementById('claim'), document.querySelector('footer')].forEach(function (el) {
+                    if (el) {
+                        endObserver.observe(el);
+                    }
+                });
+                var focus = function () {
+                    var el = document.activeElement;
+                    field = el && el !== document.body && !dock.contains(el) && el.matches && el.matches('input, textarea, select') ? el : null;
+                    update();
+                };
+                document.addEventListener('focusin', focus);
+                document.addEventListener('focusout', function () { setTimeout(focus, 0); });
+                var queued = false;
+                window.addEventListener('scroll', function () {
+                    if (!field || queued) {
+                        return;
+                    }
+                    queued = true;
+                    requestAnimationFrame(function () { queued = false; update(); });
+                }, { passive: true });
+                window.addEventListener('resize', function () {
+                    update();
+                    if (up) {
+                        measure();
+                    }
+                });
+                if (phone.addEventListener) {
+                    phone.addEventListener('change', update);
+                }
+            }
+
+            var bill = document.querySelector('[data-bill]');
+            var more = document.querySelector('[data-bill-more]');
+            if (bill && more) {
+                bill.classList.add('is-folded');
+                more.hidden = false;
+                more.addEventListener('click', function () {
+                    bill.classList.remove('is-folded');
+                    more.setAttribute('aria-expanded', 'true');
+                    more.hidden = true;
+                    var next = bill.querySelector('li[data-fold] a');
+                    if (next) {
+                        next.focus({ preventScroll: true });
+                    }
+                });
+            }
+
+            var calc = document.querySelector('#hp .hp-calc > div:last-child');
+            var paras = calc ? calc.querySelectorAll(':scope > p') : [];
+            var note = paras.length > 1 ? paras[paras.length - 1] : null;
+            if (note) {
+                note.id = 'hp-calc-note';
+                note.classList.add('hp-calc-note', 'is-folded');
+                var open = document.createElement('button');
+                open.type = 'button';
+                open.className = 'hp-calc-note-open';
+                open.textContent = 'How we worked these out';
+                open.setAttribute('aria-controls', 'hp-calc-note');
+                open.setAttribute('aria-expanded', 'false');
+                open.addEventListener('click', function () {
+                    note.classList.remove('is-folded');
+                    open.setAttribute('aria-expanded', 'true');
+                    open.hidden = true;
+                });
+                note.insertAdjacentElement('afterend', open);
+            }
+        })();
+    </script>
 
     </div>
 

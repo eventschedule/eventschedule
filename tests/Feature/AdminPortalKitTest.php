@@ -559,7 +559,7 @@ class AdminPortalKitTest extends TestCase
 
         // One size of Save on Platform settings: each card's Save is that card's one action.
         $settings = file_get_contents(resource_path('views/admin/settings.blade.php'));
-        $this->assertSame(7, preg_match_all('/<x-brand-button type="submit">\{\{ __\(\'messages\.save\'\) \}\}<\/x-brand-button>/', $settings));
+        $this->assertSame(8, preg_match_all('/<x-brand-button type="submit">\{\{ __\(\'messages\.save\'\) \}\}<\/x-brand-button>/', $settings));
         $this->assertSame(0, preg_match_all('/<x-brand-button[^>]*size="sm"/', $settings));
     }
 }

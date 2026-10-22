@@ -136,6 +136,22 @@ class HeroExperimentTest extends TestCase
         $this->assertGreaterThan($late['promote_sell'], $late['plan_sell']);
     }
 
+    /**
+     * One headline is a baseline: all of the traffic, and never a candidate or a winner, however
+     * far past the lock thresholds it is. A winner would switch the picker off and take the
+     * beacons and the sign-up credit with it.
+     */
+    public function test_a_single_variant_keeps_all_the_traffic_and_never_locks(): void
+    {
+        $state = HeroExperiment::evaluate([
+            'promote_sell' => ['visitors' => HeroExperiment::WIN_MIN_VISITORS * 10, 'clicks' => 900, 'signups' => HeroExperiment::WIN_MIN_SIGNUPS * 10],
+        ]);
+
+        $this->assertSame(['promote_sell' => 1.0], $state['weights']);
+        $this->assertNull($state['candidate']);
+        $this->assertNull($state['winner']);
+    }
+
     public function test_more_successes_than_visitors_does_not_break_the_sampler(): void
     {
         $stats = $this->stats(visitors: 5, clicks: 50);
@@ -155,11 +171,15 @@ class HeroExperimentTest extends TestCase
         );
     }
 
+    /**
+     * Three arms whatever the site runs today: the maths is for the rounds with more than one, and
+     * the keys are round three's, so the tests read as they did when it ran.
+     */
     private function stats(int $visitors = 0, int $clicks = 0, int $signups = 0): array
     {
-        return array_map(
-            fn () => ['visitors' => $visitors, 'clicks' => $clicks, 'signups' => $signups],
-            HeroExperiment::VARIANTS
+        return array_fill_keys(
+            ['plan_sell', 'promote_sell', 'plan_sell_short'],
+            ['visitors' => $visitors, 'clicks' => $clicks, 'signups' => $signups]
         );
     }
 }

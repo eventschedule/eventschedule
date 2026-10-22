@@ -21,6 +21,30 @@ class HeroExperimentTest extends TestCase
 
     private const REAL_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36';
 
+    /**
+     * Round three's arms. Since 2026-10-22 the site runs a single headline, which is a baseline
+     * and never decides anything, so the machinery a round with several arms needs (the split,
+     * the beacons per variant, the candidate and its lock) is tested on this set. The tests at
+     * the end of the file run on the real one.
+     */
+    private const ROUND_THREE = [
+        'plan_sell' => [
+            'line1' => 'Plan, promote, and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
+        ],
+        'promote_sell' => [
+            'line1' => 'Promote and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
+        ],
+        'plan_sell_short' => [
+            'line1' => 'Plan, promote, and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees.',
+        ],
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -28,11 +52,19 @@ class HeroExperimentTest extends TestCase
         config(['app.is_nexus' => true]);
         Cache::flush();
         mt_srand(20260928);
+        HeroExperiment::useVariants(self::ROUND_THREE, 'plan_sell');
+    }
+
+    protected function tearDown(): void
+    {
+        HeroExperiment::useVariants(null);
+
+        parent::tearDown();
     }
 
     public function test_a_guest_homepage_ships_every_variant_and_renders_the_default(): void
     {
-        $default = HeroExperiment::VARIANTS[HeroExperiment::DEFAULT];
+        $default = HeroExperiment::variants()[HeroExperiment::defaultKey()];
 
         $response = $this->get('/')->assertOk();
 
@@ -41,7 +73,7 @@ class HeroExperimentTest extends TestCase
         $response->assertSee('var variants =', false);
 
         // Subtitles too: a challenger can share the control's headline and differ only below it.
-        foreach (HeroExperiment::VARIANTS as $copy) {
+        foreach (HeroExperiment::variants() as $copy) {
             $response->assertSee(json_encode($copy['line1']), false);
             $response->assertSee(json_encode($copy['subtitle']), false);
         }
@@ -65,7 +97,7 @@ class HeroExperimentTest extends TestCase
 
         $response = $this->get('/')->assertOk();
 
-        $response->assertSee('data-hero="l1">'.e(HeroExperiment::VARIANTS['promote_sell']['line1']).'<', false);
+        $response->assertSee('data-hero="l1">'.e(HeroExperiment::variants()['promote_sell']['line1']).'<', false);
         $response->assertDontSee('var variants =', false);
     }
 
@@ -79,7 +111,7 @@ class HeroExperimentTest extends TestCase
     public function test_the_search_result_is_its_own_text_and_not_the_headline(): void
     {
         $result = $this->searchResult($this->get('/')->assertOk()->getContent());
-        $copy = HeroExperiment::VARIANTS[HeroExperiment::DEFAULT];
+        $copy = HeroExperiment::variants()[HeroExperiment::defaultKey()];
 
         $this->assertSame(__('marketing.home_title'), $result['title']);
         $this->assertSame(__('marketing.home_description'), $result['description']);
@@ -100,7 +132,7 @@ class HeroExperimentTest extends TestCase
 
         // The winner did reach the page, so the unchanged search result below is not an accident
         // of the lock being ignored.
-        $response->assertSee('data-hero="l1">'.e(HeroExperiment::VARIANTS['promote_sell']['line1']).'<', false);
+        $response->assertSee('data-hero="l1">'.e(HeroExperiment::variants()['promote_sell']['line1']).'<', false);
         $this->assertSame($before, $this->searchResult($response->getContent()));
     }
 
@@ -599,7 +631,7 @@ class HeroExperimentTest extends TestCase
             ->get('/admin/growth')
             ->assertOk()
             ->assertSee(__('messages.hero_test'))
-            ->assertSee(HeroExperiment::VARIANTS['plan_sell']['line1'])
+            ->assertSee(HeroExperiment::variants()['plan_sell']['line1'])
             ->assertSee(__('messages.hero_test_reset'))
             ->assertDontSee(__('messages.hero_test_since', ['date' => now()->toDateString()]));
     }
@@ -682,6 +714,80 @@ class HeroExperimentTest extends TestCase
         $this->assertSame(1, MarketingExperimentStat::count());
     }
 
+    /**
+     * The site as it ships: one headline, 'promote_sell', served by the server and still put
+     * through the picker, so its visitors, clicks and signups keep being counted.
+     */
+    public function test_the_site_serves_promote_sell_alone_and_keeps_counting(): void
+    {
+        HeroExperiment::useVariants(null);
+
+        $this->assertSame(['promote_sell'], array_keys(HeroExperiment::VARIANTS));
+        $this->assertSame('promote_sell', HeroExperiment::DEFAULT);
+
+        $response = $this->get('/')->assertOk();
+
+        $response->assertSee('data-hero="l1">'.e(HeroExperiment::VARIANTS['promote_sell']['line1']).'<', false);
+        $response->assertSee('var variants =', false);
+        $response->assertDontSee('Plan, promote, and sell');
+        $this->assertSame(['promote_sell' => 1.0], HeroExperiment::forPage()['weights']);
+
+        $this->beacon(['variant' => 'promote_sell', 'event' => 'view'])->assertNoContent();
+        $this->assertSame(1, MarketingExperimentStat::where('variant', 'promote_sell')->value('visitors'));
+    }
+
+    /** A retired headline is neither counted nor carried into sign-up. */
+    public function test_a_retired_headline_is_not_counted(): void
+    {
+        HeroExperiment::useVariants(null);
+
+        $this->beacon(['variant' => 'plan_sell', 'event' => 'view'])->assertStatus(422);
+
+        $this->get('/sign_up?hero=plan_sell', $this->fromOurSite());
+        $this->assertNull(session(HeroExperiment::SESSION_KEY));
+    }
+
+    /**
+     * Far past every lock threshold and the hold period, the one headline is still a baseline:
+     * a winner would turn the picker off and stop the counting.
+     */
+    public function test_a_single_headline_never_becomes_the_winner(): void
+    {
+        HeroExperiment::useVariants(null);
+
+        $this->travelTo('2026-11-01 12:00:00');
+        MarketingExperimentStat::create(['experiment' => HeroExperiment::EXPERIMENT, 'variant' => 'promote_sell', 'date' => '2026-10-20', 'visitors' => HeroExperiment::WIN_MIN_VISITORS * 5, 'clicks' => 400]);
+        User::factory()->count(HeroExperiment::WIN_MIN_SIGNUPS + 5)->create(['hero_variant' => 'promote_sell']);
+
+        foreach (['2026-11-01', '2026-11-05', '2026-11-12'] as $day) {
+            $this->travelTo($day.' 12:00:00');
+            Cache::flush();
+
+            $this->assertTrue(HeroExperiment::forPage()['running'], "the picker stopped on {$day}");
+        }
+
+        $this->assertNull(Setting::get(HeroExperiment::CANDIDATE_SETTING));
+        $this->assertNull(Setting::get(HeroExperiment::WINNER_SETTING));
+        $this->assertSame('baseline', HeroExperiment::report()['phase']);
+    }
+
+    public function test_the_growth_page_shows_a_single_headline_as_a_baseline(): void
+    {
+        HeroExperiment::useVariants(null);
+        config(['app.hosted' => true]);
+
+        $admin = User::factory()->create(['email_verified_at' => now()]);
+        $admin->forceFill(['is_admin' => true])->save();
+
+        $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->actingAs($admin)
+            ->get('/admin/growth')
+            ->assertOk()
+            ->assertSee(__('messages.hero_test_phase_baseline'))
+            ->assertSee(HeroExperiment::VARIANTS['promote_sell']['line1'])
+            ->assertDontSee(__('messages.hero_test_chance_best'));
+    }
+
     private function resetAsAdmin(array $data = [], bool $hosted = true)
     {
         config(['app.hosted' => $hosted]);
@@ -716,7 +822,7 @@ class HeroExperimentTest extends TestCase
     {
         return array_map(
             fn () => ['visitors' => $visitors, 'clicks' => $clicks, 'signups' => $signups],
-            HeroExperiment::VARIANTS
+            HeroExperiment::variants()
         );
     }
 }

@@ -26,6 +26,16 @@
         </svg>
         @break
 
+    @case('paypal')
+        {{-- PayPal, as a tile in its two blues with the double P set as type (like the "31" on the
+             Google Calendar tile): no official mark is bundled, and a redrawn one would be wrong. --}}
+        <svg class="{{ $iconClass }}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5" fill="#003087"/>
+            <text x="13.4" y="17.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" font-style="italic" fill="#009CDE">P</text>
+            <text x="11.4" y="16" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" font-style="italic" fill="#fff">P</text>
+        </svg>
+        @break
+
     @case('invoiceninja')
         {{-- Invoice Ninja (official envelope-ninja mark; first subpath is the black tile,
              the face renders as winding holes over the white underlay rect) --}}

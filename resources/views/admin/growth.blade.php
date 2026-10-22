@@ -268,10 +268,14 @@
                         // Challengers can share the control's headline, so the key is what tells them apart.
                         $heroHeadline = fn ($key) => (collect($heroTest['rows'])->firstWhere('key', $key)['headline'] ?? $key).' ('.$key.')';
                         $heroPct = fn ($value) => $value === null ? __('messages.funnel_na') : $ltr(round($value * 100, 1).'%');
+                        // One headline races nobody, so its "chance best" would only ever read 100%.
+                        $heroRace = $heroTest['phase'] !== 'baseline';
                     @endphp
                     <div class="insight-pad">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">
-                            @if ($heroTest['phase'] === 'winner')
+                            @if ($heroTest['phase'] === 'baseline')
+                                @lang('messages.hero_test_phase_baseline')
+                            @elseif ($heroTest['phase'] === 'winner')
                                 {{ __('messages.hero_test_phase_winner', ['variant' => $heroHeadline($heroTest['winner']['key']), 'date' => $heroTest['winner']['date']]) }}
                             @elseif ($heroTest['phase'] === 'candidate')
                                 {{ __('messages.hero_test_phase_candidate', ['variant' => $heroHeadline($heroTest['candidate']['key']), 'date' => $heroTest['lock_date']]) }}
@@ -296,8 +300,10 @@
                                     <th scope="col" class="c-num">@lang('messages.click_rate')</th>
                                     <th scope="col" class="c-num">@lang('messages.growth_signups')</th>
                                     <th scope="col" class="c-num">@lang('messages.hero_test_signup_rate')</th>
-                                    <th scope="col" class="c-num">@lang('messages.hero_test_chance_best_clicks')</th>
-                                    <th scope="col" class="c-num">@lang('messages.hero_test_chance_best')</th>
+                                    @if ($heroRace)
+                                        <th scope="col" class="c-num">@lang('messages.hero_test_chance_best_clicks')</th>
+                                        <th scope="col" class="c-num">@lang('messages.hero_test_chance_best')</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -320,8 +326,10 @@
                                         <td class="c-num" data-label="{{ __('messages.click_rate') }}">{{ $heroPct($row['click_rate']) }}</td>
                                         <td class="c-num" data-label="{{ __('messages.growth_signups') }}">{{ number_format($row['signups']) }}</td>
                                         <td class="c-num" data-label="{{ __('messages.hero_test_signup_rate') }}">{{ $heroPct($row['signup_rate']) }}</td>
-                                        <td class="c-num" data-label="{{ __('messages.hero_test_chance_best_clicks') }}">{{ $heroPct($row['p_best_clicks']) }}</td>
-                                        <td class="c-num" data-label="{{ __('messages.hero_test_chance_best') }}">{{ $heroPct($row['p_best']) }}</td>
+                                        @if ($heroRace)
+                                            <td class="c-num" data-label="{{ __('messages.hero_test_chance_best_clicks') }}">{{ $heroPct($row['p_best_clicks']) }}</td>
+                                            <td class="c-num" data-label="{{ __('messages.hero_test_chance_best') }}">{{ $heroPct($row['p_best']) }}</td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>

@@ -301,6 +301,10 @@ class GrowthSummaryTest extends TestCase
 
         $won = GrowthSummary::heroTest(['hero_test' => ['phase' => 'winner', 'winner' => ['key' => 'plan_sell', 'date' => '2026-10-17'], 'reset_at' => null] + $test]);
         $this->assertSame('Winner: plan_sell, since 2026-10-17.', $won['status']);
+
+        $baseline = GrowthSummary::heroTest(['hero_test' => ['phase' => 'baseline', 'reset_at' => null] + $test]);
+        $this->assertSame('One headline, nothing being tested: its numbers are the baseline for the next round.', $baseline['status']);
+        $this->assertSame('-', $baseline['rows'][0][5], 'a single headline has no chance of being best to report');
     }
 
     /** No test in the pull - an older schema, or an install off the nexus - is nothing to print. */

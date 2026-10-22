@@ -10,8 +10,8 @@ use Tests\TestCase;
 
 /**
  * The marketing homepage, as rebuilt in 2026-10 ("one show, start to finish"). Its features were
- * the days of that show's week at first; they are the three verbs of the headline and of the film
- * (plan, promote, sell) since later the same month, and since the round after that the acts are
+ * the days of that show's week at first; they are the three verbs of the film (plan, promote,
+ * sell; the headline names the last two since 2026-10-22) since later the same month, and since the round after that the acts are
  * lit as one day: the show is introduced beside the switch, Sell's first scene stands under an
  * evening sky, and the calculator is drawn as the show's takings and one bar to a platform.
  *
@@ -153,7 +153,7 @@ class HomepageTest extends TestCase
     // ------------------------------------------------------------- the three acts
 
     /**
-     * The features are the three verbs of the headline and of the film, in the film's order, two
+     * The features are the three verbs of the film, in the film's order, two
      * features to an act. The card an act opens on, its tile in the margin and the links on the
      * card are three copies of the same facts, written by hand, so each is read back here.
      */
@@ -499,8 +499,12 @@ class HomepageTest extends TestCase
         $this->assertSame('eventschedule', $x->query('.//*[@data-fee-bar]', $cards->item(0))->item(0)->getAttribute('data-fee-bar'));
     }
 
-    /** The six names stand in two groups around the schedule, each group named by a caption a reader is given. */
-    public function test_the_six_integrations_are_wired_to_the_schedule_in_two_groups(): void
+    /**
+     * The seven names stand in two groups around the schedule, each group named by a caption a
+     * reader is given. PayPal joined the payments side on 2026-10-22: the sentence beside the
+     * diagram named it and the diagram did not.
+     */
+    public function test_the_seven_integrations_are_wired_to_the_schedule_in_two_groups(): void
     {
         $x = $this->xpath($this->html());
         $lists = $x->query('//section[@id="integrations"]//ul['.$this->has('hp-plugs').']');
@@ -513,7 +517,8 @@ class HomepageTest extends TestCase
             $this->assertNotSame('', $this->text($caption->item(0)));
             $counts[] = $x->query('./li/a['.$this->has('hp-plug').']', $list)->length;
         }
-        $this->assertSame([4, 2], $counts, 'four calendars and two ways to be paid');
+        $this->assertSame([4, 3], $counts, 'four calendars and three ways to be paid');
+        $this->assertSame(1, $x->query('//section[@id="integrations"]//a['.$this->has('hp-plug').'][contains(., "PayPal")]')->length);
 
         $hub = $x->query('//section[@id="integrations"]//div['.$this->has('hp-hub').']');
         $this->assertSame(1, $hub->length);
@@ -806,33 +811,118 @@ class HomepageTest extends TestCase
         $this->assertSame(2, $x->query('//ul['.$this->has('hp-bill-list').']/li['.$this->has('hp-bill-break').']')->length,
             'three sizes of name need two breaks');
 
-        $this->assertSame(6, $x->query('//a['.$this->has('hp-plug').']')->length);
+        $this->assertSame(7, $x->query('//a['.$this->has('hp-plug').']')->length);
     }
 
-    /** Structured data may only describe what a visitor can read on the page. */
-    public function test_the_how_to_steps_are_features_a_visitor_can_read(): void
+    /**
+     * The page describes itself as a WebPage about the product, and carries no HowTo: Google
+     * stopped showing HowTo results in 2023, so until 2026-10-22 that block was bytes with
+     * nothing behind it.
+     */
+    public function test_the_page_describes_itself_and_carries_no_how_to(): void
     {
-        $html = $this->html();
-        $steps = [];
-
-        preg_match_all('#<script[^>]*application/ld\+json[^>]*>(.*?)</script>#s', $html, $blocks);
+        $nodes = [];
+        preg_match_all('#<script[^>]*application/ld\+json[^>]*>(.*?)</script>#s', $this->html(), $blocks);
         foreach ($blocks[1] as $block) {
             $data = json_decode($block, true);
+            $this->assertIsArray($data, 'a JSON-LD block does not parse');
             foreach (($data['@graph'] ?? [$data]) as $node) {
-                if (($node['@type'] ?? null) === 'HowTo') {
-                    $steps = $node['step'];
-                }
+                $nodes[] = $node;
             }
         }
-        $this->assertCount(3, $steps);
 
-        $body = preg_replace('#<(script|style)\b[^>]*>.*?</\1>#s', '', $html);
-        $body = html_entity_decode(trim(preg_replace('/\s+/u', ' ', strip_tags($body))), ENT_QUOTES | ENT_HTML5);
+        $types = array_map(fn ($node) => $node['@type'] ?? null, $nodes);
+        $this->assertNotContains('HowTo', $types);
 
-        foreach ($steps as $step) {
-            $this->assertStringContainsString($step['name'], $body);
-            $this->assertStringContainsString($step['text'], $body);
+        $pages = array_values(array_filter($nodes, fn ($node) => ($node['@type'] ?? null) === 'WebPage'));
+        $this->assertCount(1, $pages);
+        $this->assertStringEndsWith('/#software', $pages[0]['about']['@id']);
+        $this->assertSame(__('marketing.home_title'), $pages[0]['name']);
+    }
+
+    // ------------------------------------------------------------- the pass of 2026-10-22
+
+    /**
+     * The wall is called "Coming up on Event Schedule" only when most of its 25 posters are real
+     * events: over a few events and a wall of stock flyers the label would be claiming the flyers.
+     */
+    public function test_the_wall_says_what_it_is_only_when_it_is_mostly_real(): void
+    {
+        $made = 0;
+        foreach ([[0, false], [12, false], [13, true]] as [$wanted, $labelled]) {
+            while ($made < $wanted) {
+                $made++;
+                $role = $this->createRole($this->createOwner(), 'talent', ['name' => 'Wall Room '.$made]);
+                $this->createEvent($role, ['name' => 'Wall Session '.$made, 'flyer_image_url' => 'flyer_wall'.$made.'.png']);
+            }
+
+            $this->assertSame($labelled ? 2 : 0, substr_count($this->html(), 'Coming up on Event Schedule'),
+                "with {$wanted} real events the wall label is ".($labelled ? 'missing' : 'claiming stock flyers'));
         }
+    }
+
+    /** Every stock flyer the wall falls back to has its card crop on disk: they are not built. */
+    public function test_the_flyer_card_crops_exist(): void
+    {
+        $x = $this->xpath($this->html());
+        $srcs = [];
+        foreach ($x->query('//div['.$this->has('es-wall-card').']/img') as $img) {
+            $srcs[] = parse_url($img->getAttribute('src'), PHP_URL_PATH);
+        }
+        $srcs = array_unique($srcs);
+
+        $this->assertCount(7, $srcs, 'the empty wall deals all seven stock flyers');
+        foreach ($srcs as $src) {
+            $this->assertStringEndsWith('-card.webp', $src);
+            $this->assertFileExists(public_path(ltrim($src, '/')));
+        }
+    }
+
+    /**
+     * The phone's dock is a sign-up link that carries the typed name, and it is hidden from
+     * signed-in visitors by the layout, because they are served the same cached page.
+     */
+    public function test_the_phone_dock_is_a_guest_sign_up_that_carries_the_name(): void
+    {
+        $x = $this->xpath($this->html());
+        $dock = $x->query('//div[@data-hp-dock]');
+
+        $this->assertSame(1, $dock->length);
+        $this->assertStringContainsString('es-auth-guest', $dock->item(0)->getAttribute('class'));
+        $link = $x->query('.//a[@data-claim-link]', $dock->item(0));
+        $this->assertSame(1, $link->length);
+        $this->assertStringContainsString('/sign_up', $link->item(0)->getAttribute('href'));
+    }
+
+    /**
+     * The money section leads with the money, says what a priced ticket costs, and links to the
+     * comparison pages and the Eventbrite switch.
+     */
+    public function test_the_money_section_names_the_price_and_the_comparisons(): void
+    {
+        $x = $this->xpath($this->html());
+        $section = $x->query('//section[@id="open-source"]')->item(0);
+
+        $this->assertSame('Event ticketing with zero platform fees.', $this->text($x->query('.//h2', $section)->item(0)));
+        $this->assertStringContainsString(plan_price(\App\Utils\PlatformPricing::proMonthly()).' a month', $this->text($x->query('.//p['.$this->has('hp-figs-note').']', $section)->item(0)));
+
+        foreach (['marketing.compare_eventbrite', 'marketing.compare_luma', 'marketing.compare', 'marketing.switch_from_eventbrite'] as $route) {
+            $this->assertSame(1, $x->query('.//a[@href="'.route($route).'"]', $section)->length, "{$route} is not linked from the money section");
+        }
+    }
+
+    /** The FAQ answers the two questions a switcher asks, and stays a list a reader can take in. */
+    public function test_the_faq_answers_a_switchers_questions(): void
+    {
+        $x = $this->xpath($this->html());
+        $questions = [];
+        foreach ($x->query('//details['.$this->has('hp-faq').']//h3') as $h3) {
+            $questions[] = $this->text($h3);
+        }
+
+        $this->assertContains('Do my buyers pay extra fees?', $questions);
+        $this->assertContains('How is Event Schedule different from Eventbrite?', $questions);
+        $this->assertLessThanOrEqual(12, count($questions));
     }
 
     public function test_the_typeface_that_is_preloaded_is_one_that_exists(): void
