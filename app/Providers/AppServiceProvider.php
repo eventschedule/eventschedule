@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Policies\EventPolicy;
 use App\Policies\RolePolicy;
 use App\Services\ScheduledTaskRecorder;
+use App\Support\BladeJson;
 use App\Support\SafeTranslationLoader;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Events\CommandFinished;
@@ -17,6 +18,7 @@ use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event as EventFacade;
@@ -90,6 +92,9 @@ class AppServiceProvider extends ServiceProvider
         }
 
         static::defaultHostedSessionDomain();
+
+        // Laravel's own @json splits on every comma; see BladeJson.
+        Blade::directive('json', fn ($expression) => BladeJson::compile($expression));
 
         // Register authorization policies
         Gate::policy(Event::class, EventPolicy::class);

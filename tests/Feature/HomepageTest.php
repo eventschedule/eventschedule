@@ -585,44 +585,6 @@ class HomepageTest extends TestCase
         $this->assertSame(['jazz' => 'true', 'comedy' => 'false', 'yoga' => 'false', 'festival' => 'false'], $picks);
     }
 
-    /**
-     * CLAUDE.md: @json splits its argument on commas, and the default escaping is lost with the
-     * second one. Every call in this view takes one value.
-     */
-    public function test_no_json_directive_is_handed_a_comma(): void
-    {
-        $source = $this->source();
-
-        $this->assertStringContainsString('@json($hpCasts)', $source);
-
-        $offset = 0;
-        $calls = 0;
-        while (($at = strpos($source, '@json(', $offset)) !== false) {
-            $depth = 0;
-            $argument = '';
-            for ($i = $at + 5; $i < strlen($source); $i++) {
-                $char = $source[$i];
-                if ($char === '(') {
-                    $depth++;
-                    if ($depth === 1) {
-                        continue;
-                    }
-                } elseif ($char === ')') {
-                    $depth--;
-                    if ($depth === 0) {
-                        break;
-                    }
-                }
-                $argument .= $char;
-            }
-            $this->assertStringNotContainsString(',', $argument, "@json({$argument}) is handed more than one argument");
-            $offset = $at + 6;
-            $calls++;
-        }
-
-        $this->assertGreaterThan(0, $calls);
-    }
-
     // ------------------------------------------------------------- the walls and the room
 
     public function test_the_poster_wall_is_for_a_pointer_only(): void
