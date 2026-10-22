@@ -519,6 +519,10 @@
                 <p>A chart over the selected range.</p>
             </div>
             <div class="doc-field">
+                <h4>MRR by plan</h4>
+                <p>What Stripe is billing today, as monthly recurring revenue, for Pro and Enterprise on each term, with the subscriptions still in their trial counted beside it and what they would add if they convert. At risk is the part of MRR that is past due or cancelling. Outside Stripe counts paid plans nobody is billed for: a plan granted by an admin or a referral, and a Pro trial started without a card; it links to the Schedules page, which lists them. A subscription on a price your configuration no longer names gets a row of its own. Only rendered when <code class="doc-inline-code">IS_HOSTED=true</code>.</p>
+            </div>
+            <div class="doc-field">
                 <h4>Subscription Health</h4>
                 <p>Active, trialing, past-due and canceled subscriptions, schedules on a free trial, how many converted, and expired trials with no subscription. This whole card is only rendered when <code class="doc-inline-code">IS_HOSTED=true</code>.</p>
             </div>

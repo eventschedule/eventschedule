@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Services\DemoService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -105,5 +106,55 @@ class AdminRevenueTest extends TestCase
         $this->assertSame(1, substr_count($html, e(\App\Utils\MoneyUtils::format(40, 'EUR'))), 'euros named once, beside the total');
         $this->assertSame(1, substr_count($html, e(\App\Utils\MoneyUtils::format(100, 'ILS'))));
         $this->assertSame(1, substr_count($html, e(\App\Utils\MoneyUtils::format(15, 'EUR'))), 'and the unpaid euros beside what is pending');
+    }
+
+    /**
+     * What Stripe bills, plan by plan, with the trials beside it and the at-risk part inside it.
+     * It was the admin dashboard's until 2026-10, when that card was cut to its totals; it lives
+     * here now, on the page about money.
+     */
+    public function test_mrr_is_broken_down_by_plan_with_the_trials_beside_it(): void
+    {
+        config([
+            'services.stripe_platform.price_monthly' => 'price_pro_m',
+            'services.stripe_platform.price_monthly_amount' => '7',
+            'services.stripe_platform.enterprise_price_monthly' => 'price_ent_m',
+            'services.stripe_platform.enterprise_price_monthly_amount' => '21',
+        ]);
+
+        $subscribe = function (string $price, string $status, array $attrs = []) {
+            $role = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'free', 'plan_expires' => null, 'plan_source' => null]);
+            $role->subscriptions()->create(array_merge([
+                'type' => 'default', 'stripe_id' => 'sub_'.Str::random(14), 'stripe_status' => $status,
+                'stripe_price' => $price, 'quantity' => 1,
+            ], $attrs));
+        };
+        $subscribe('price_pro_m', 'active');
+        $subscribe('price_pro_m', 'past_due');
+        $subscribe('price_ent_m', 'trialing', ['trial_ends_at' => now()->addDays(5)]);
+
+        $response = $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->actingAs($this->createOwner(true))
+            ->get('/admin/revenue')
+            ->assertOk()
+            ->assertSee(__('messages.admin_mrr_by_plan'))
+            ->assertSee(__('messages.admin_dash_outside_stripe'));
+        $html = $response->getContent();
+
+        $this->assertEquals(14, $response->viewData('recurring')['totals']['mrr']);
+        $this->assertStringContainsString(plan_price(14), $html);
+        $this->assertStringContainsString('+'.plan_price(21), $html, 'the trial is what it would add');
+        $this->assertStringContainsString(__('messages.admin_dash_of_mrr', ['amount' => plan_price(7)]), $html, 'the past-due renewal is the part at risk');
+    }
+
+    public function test_selfhost_has_no_mrr_card(): void
+    {
+        config(['app.hosted' => false]);
+
+        $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->actingAs($this->createOwner(true))
+            ->get('/admin/revenue')
+            ->assertOk()
+            ->assertDontSee(__('messages.admin_mrr_by_plan'));
     }
 }

@@ -447,6 +447,12 @@ class AdminController extends Controller
                 ->count();
         }
 
+        // What Stripe is billing, plan by plan, and the paid plans nobody is billed for. Hosted
+        // only, where there is billing. Moved here from the admin dashboard, whose corner card
+        // keeps the totals alone.
+        $recurring = config('app.hosted') ? RecurringRevenue::breakdown() : null;
+        $outsideStripe = config('app.hosted') ? ['granted' => AdminPlanCounts::manual(), 'trial' => AdminPlanCounts::trial()] : null;
+
         // Revenue trends
         $trendData = $this->getTrendData($startDate, $endDate);
 
@@ -558,7 +564,9 @@ class AdminController extends Controller
             'mismatchBoosts',
             'unconfirmedRefunds',
             'unrecognizedSubscriptions',
-            'orphanedSubscriptions'
+            'orphanedSubscriptions',
+            'recurring',
+            'outsideStripe'
         ));
     }
 

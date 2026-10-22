@@ -296,6 +296,89 @@
             </div>
         </x-page-card>
 
+        {{-- What Stripe is billing (RecurringRevenue), plan by plan, with what the trials would add
+             beside it and never inside it. "Trial" here is a Stripe trial with a card on file; a Pro
+             trial started without one is under Outside Stripe, with the plans an admin granted. --}}
+        @if ($recurring)
+        @php($terms = ['month' => __('messages.monthly'), 'year' => __('messages.yearly')])
+        @php($mrrLead = __('messages.admin_dash_mrr_note').($recurring['totals']['trialing_count'] > 0 ? ' '.__('messages.recurring_revenue_excludes_trials', ['count' => number_format($recurring['totals']['trialing_count'])]) : ''))
+        <x-page-card flush :title="__('messages.admin_mrr_by_plan')" :lead="$mrrLead" id="mrr-by-plan">
+            <div class="page-scroll">
+                <table class="page-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">@lang('messages.plan')</th>
+                            <th scope="col" class="c-num">@lang('messages.admin_dash_paying')</th>
+                            <th scope="col" class="c-num">MRR</th>
+                            <th scope="col" class="c-num">@lang('messages.trial')</th>
+                            <th scope="col" class="c-num">@lang('messages.admin_dash_would_add')</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($recurring['plans'] as $plan)
+                        <tr>
+                            <td class="c-main">{{ __('messages.'.$plan['tier']) }} <span class="c-sub">{{ $terms[$plan['term']] }}</span></td>
+                            <td class="c-num" data-label="{{ __('messages.admin_dash_paying') }}">{{ number_format($plan['billing_count']) }}</td>
+                            <td class="c-num c-strong" data-label="MRR">{{ plan_price($plan['mrr']) }}</td>
+                            <td class="c-num {{ $plan['trialing_count'] ? '' : 'c-quiet' }}" data-label="{{ __('messages.trial') }}">{{ number_format($plan['trialing_count']) }}</td>
+                            <td class="c-num c-quiet" data-label="{{ __('messages.admin_dash_would_add') }}">@if ($plan['trialing_count'])<span dir="ltr">+{{ plan_price($plan['trial_mrr']) }}</span>@else - @endif</td>
+                        </tr>
+                        @endforeach
+                        {{-- A subscription on a price config no longer names: a customer being charged,
+                             booked at zero until STRIPE_PRICE_* points at it again. --}}
+                        @if ($recurring['unrecognized']['billing_count'] + $recurring['unrecognized']['trialing_count'] > 0)
+                        <tr>
+                            <td class="c-main"><a href="#unrecognized-subscriptions" class="event-link">@lang('messages.admin_dash_unrecognized_price')</a></td>
+                            <td class="c-num" data-label="{{ __('messages.admin_dash_paying') }}">{{ number_format($recurring['unrecognized']['billing_count']) }}</td>
+                            <td class="c-num c-quiet" data-label="MRR">-</td>
+                            <td class="c-num" data-label="{{ __('messages.trial') }}">{{ number_format($recurring['unrecognized']['trialing_count']) }}</td>
+                            <td class="c-num c-quiet" data-label="{{ __('messages.admin_dash_would_add') }}">-</td>
+                        </tr>
+                        @endif
+                        <tr>
+                            <td class="c-main c-strong">@lang('messages.total')</td>
+                            <td class="c-num c-strong" data-label="{{ __('messages.admin_dash_paying') }}">{{ number_format($recurring['totals']['billing_count']) }}</td>
+                            <td class="c-num c-strong" data-label="MRR">{{ plan_price($recurring['totals']['mrr']) }}</td>
+                            <td class="c-num c-strong" data-label="{{ __('messages.trial') }}">{{ number_format($recurring['totals']['trialing_count']) }}</td>
+                            <td class="c-num" data-label="{{ __('messages.admin_dash_would_add') }}"><span dir="ltr">+{{ plan_price($recurring['totals']['trial_mrr']) }}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <x-slot:foot>
+                <dl class="page-kv">
+                    {{-- Inside the MRR above, not added to it: a renewal Stripe is retrying, or a
+                         subscription paid up to a date and then gone. One figure a pair: a value
+                         keeps to one line, and three on one ran off a phone. --}}
+                    <div>
+                        <dt>@lang('messages.admin_dash_at_risk')</dt>
+                        <dd>{{ __('messages.admin_dash_of_mrr', ['amount' => plan_price($recurring['totals']['at_risk_mrr'])]) }}</dd>
+                    </div>
+                    <div class="is-sub">
+                        <dt>@lang('messages.past_due')</dt>
+                        <dd>{{ number_format($recurring['totals']['past_due_count']) }}</dd>
+                    </div>
+                    <div class="is-sub">
+                        <dt>@lang('messages.admin_dash_cancelling')</dt>
+                        <dd>{{ number_format($recurring['totals']['cancelling_count']) }}</dd>
+                    </div>
+                    <div>
+                        <dt><a href="{{ route('admin.schedules') }}" class="event-link">@lang('messages.admin_dash_outside_stripe')</a></dt>
+                        <dd>{{ number_format($outsideStripe['granted'] + $outsideStripe['trial']) }}</dd>
+                    </div>
+                    <div class="is-sub">
+                        <dt>@lang('messages.admin_dash_pro_granted')</dt>
+                        <dd>{{ number_format($outsideStripe['granted']) }}</dd>
+                    </div>
+                    <div class="is-sub">
+                        <dt>@lang('messages.admin_dash_pro_trial_no_card')</dt>
+                        <dd>{{ number_format($outsideStripe['trial']) }}</dd>
+                    </div>
+                </dl>
+            </x-slot:foot>
+        </x-page-card>
+        @endif
+
         {{-- One strip for the seven figures that were two rows of boxes, the first four of them
              coloured for no reason a reader could name. Past due is the only one that asks for
              anything, so it is the only one that changes colour. --}}
