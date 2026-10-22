@@ -186,11 +186,13 @@ class UtmConsentCookieTest extends TestCase
         // as; RealtimeBeaconRenderTest covers that it brings the banner.
         \App\Models\Setting::set('realtime_enabled', '0');
 
-        $this->get('/')->assertOk()->assertDontSee('data-cookie-consent', false);
+        // The element, not the bare attribute: the homepage's own stylesheet names the attribute
+        // in a selector (it lifts the banner above the phone dock) whether or not a banner is drawn.
+        $this->get('/')->assertOk()->assertDontSee('<div data-cookie-consent', false);
 
         config(['app.cookie_consent_banner' => true]);
 
-        $this->get('/')->assertOk()->assertSee('data-cookie-consent', false);
+        $this->get('/')->assertOk()->assertSee('<div data-cookie-consent', false);
     }
 
     /**
@@ -253,7 +255,7 @@ class UtmConsentCookieTest extends TestCase
         \App\Models\Setting::set('realtime_enabled', '0');
 
         $this->get('/')->assertOk()
-            ->assertDontSee('data-cookie-consent', false)
+            ->assertDontSee('<div data-cookie-consent', false)
             ->assertSee('<meta name="cookie-domain" content=".eventschedule.com">', false);
     }
 

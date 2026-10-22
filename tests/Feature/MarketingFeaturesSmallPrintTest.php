@@ -57,6 +57,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Unlimited events and schedules' => [self::LEFT_OUT, 'the product itself: the hero and the first FAQ answer say it'],
         'Event visibility (Public & Draft)' => [self::LEFT_OUT, 'the baseline of the visibility banner, whose Enterprise half the plan line names'],
         'Mobile-optimized, professional design' => [self::LEFT_OUT, 'the product itself, not a feature to pick a plan for'],
+        'Aurora background' => [self::LEFT_OUT, 'a background choice of the schedule page, on every plan, like its header style and its layout'],
         'Custom schedule URLs' => [self::LEFT_OUT, 'the claim box at the foot of the page is this feature'],
         'Team collaboration (single member)' => [self::LEFT_OUT, 'the absence of the Enterprise feature, which the plan line names'],
         'Schedule ownership transfer' => [self::ROW, 'Schedule transfer'],

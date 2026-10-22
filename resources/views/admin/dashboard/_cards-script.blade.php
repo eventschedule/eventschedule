@@ -294,9 +294,11 @@
             /* Accept anything: with text/html the admin middleware takes this for a page and
                answers a lapsed password confirmation with a redirect to its form, which fetch
                follows, and the form's page was put where the panel goes. As a script's request it
-               gets the 423 the poll gets. */
+               gets the 423 the poll gets. X-Requested-With goes first: AdminJsFetchHeadersTest
+               strips comments before it looks, and reads the slash-star inside the Accept value
+               as one. */
             fetch(panelUrl.replace('__panel__', encodeURIComponent(name)) + (sample ? '?sample=1' : ''), {
-                headers: { 'Accept': '*/*', 'X-Requested-With': 'XMLHttpRequest' },
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': '*/*' },
                 credentials: 'same-origin'
             }).then(function (response) {
                 if (!response.ok || response.redirected) {
