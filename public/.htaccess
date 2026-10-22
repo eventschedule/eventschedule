@@ -26,6 +26,7 @@
 # PHP2Shell (CVE-2026-109619) mitigation for mod_php, which does not read .user.ini.
 <IfModule mod_php.c>
     php_flag session.upload_progress.enabled off
+    php_flag fatal_error_backtraces off
 </IfModule>
 
 <IfModule mod_rewrite.c>

@@ -524,12 +524,14 @@ class AdminAlertService
     }
 
     /**
-     * Both PHP2Shell stopgaps are on: upload progress off and no PHP memory limit to bail out on.
+     * Every PHP2Shell stopgap is on: upload progress off, no PHP memory limit to bail out on and,
+     * on PHP 8.5, no fatal error backtraces.
      */
     public static function phpIsMitigated(): bool
     {
         return ! filter_var(ini_get('session.upload_progress.enabled'), FILTER_VALIDATE_BOOLEAN)
-            && (string) ini_get('memory_limit') === '-1';
+            && (string) ini_get('memory_limit') === '-1'
+            && (PHP_VERSION_ID < 80500 || ! filter_var(ini_get('fatal_error_backtraces'), FILTER_VALIDATE_BOOLEAN));
     }
 
     private static function schedulerIsStalled(): bool

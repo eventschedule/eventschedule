@@ -69,7 +69,7 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">PHP</span></td>
                         <td>8.2+</td>
-                        <td>With required extensions (see below)</td>
+                        <td>With required extensions (see below), on a current patch release: 8.2.35, 8.3.36, 8.4.27, 8.5.12 or newer, which fix the PHP2Shell flaws (CVE-2026-109618 and CVE-2026-109619)</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">MySQL</span></td>
