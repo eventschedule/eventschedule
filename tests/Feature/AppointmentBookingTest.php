@@ -327,13 +327,15 @@ class AppointmentBookingTest extends TestCase
         ])->assertOk();
 
         $sale = Sale::whereNotNull('event_id')->latest('id')->firstOrFail();
-        $this->assertSame('Asia/Calcutta', $sale->guestTimezone(), 'the alias must survive to the render');
+        // Read as the name PHP lists, which every install can load: where PHP reads the system's tz
+        // database (Ubuntu, and so CI) Asia/Calcutta itself throws unless tzdata-legacy is installed.
+        $this->assertSame('Asia/Kolkata', $sale->guestTimezone(), 'the alias must survive to the render');
 
         // And it renders in the guest's own zone, not silently in the schedule's.
         $this->get(route('appointments.manage', [
             'event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id),
             'secret' => $sale->secret,
-        ]))->assertOk()->assertSee('Asia/Calcutta');
+        ]))->assertOk()->assertSee('Asia/Kolkata');
     }
 
     public function test_an_unusable_guest_timezone_is_neutralised_on_read_rather_than_blocking_the_booking(): void

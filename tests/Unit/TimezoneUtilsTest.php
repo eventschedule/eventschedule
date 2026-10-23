@@ -24,6 +24,8 @@ class TimezoneUtilsTest extends TestCase
             'Indiana' => ['America/Indianapolis', 'America/Indiana/Indianapolis'],
             'Linux desktops' => ['Etc/UTC', 'UTC'],
             'GMT' => ['GMT', 'UTC'],
+            // No slash, so ICU's fallback never sees it; a link to New York since tzdata 2024b.
+            'POSIX-style zone from Google Calendar' => ['EST5EDT', 'America/New_York'],
             // Not in the explicit map: ICU resolves these, and the result is listed.
             'US link' => ['US/Eastern', 'America/New_York'],
             'Canada link' => ['Canada/Pacific', 'America/Vancouver'],

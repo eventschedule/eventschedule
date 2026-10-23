@@ -287,6 +287,8 @@ class QueryGuardTest extends TestCase
         }
 
         $this->assertTrue(QueryGuard::flag('QUERY_GUARD_STRICT'), 'QUERY_GUARD_STRICT=1 is missing from the test step in .github/workflows/test.yml');
+        // setUp() turns enforcing off for this file's own fixtures; the environment is the question here.
+        QueryGuard::$enforce = null;
         $this->assertTrue(QueryGuard::enforcing(), 'CI must not run the guard in report or write mode');
     }
 }

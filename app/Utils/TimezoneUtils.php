@@ -16,7 +16,13 @@ class TimezoneUtils
      * Asia/Calcutta and Europe/Kyiv TO Europe/Kiev, the wrong direction for us. It covers exactly the
      * aliases the ICU fallback cannot resolve to a listed name (the rest, US/*, Canada/*, Australia/*
      * and so on, ICU does resolve). Etc/GMT+N, EST, CET and friends have no geographic canonical
-     * name, so they are deliberately absent and pass through unchanged.
+     * name, so they are deliberately absent and pass through unchanged. EST5EDT and its three
+     * siblings are not abbreviations: they carry daylight saving, tzdata has made each a link to its
+     * city since 2024b, and ICU's fallback below only reads names with a slash.
+     *
+     * The map matters most where PHP reads the system's tz database (Debian and Ubuntu packages,
+     * and the CI runner): there the old names live in a separate tzdata-legacy package that is not
+     * installed by default, and `new DateTimeZone('Asia/Calcutta')` throws.
      */
     public const ALIASES = [
         'Africa/Asmera' => 'Africa/Asmara',
@@ -37,6 +43,8 @@ class TimezoneUtils
         'Asia/Rangoon' => 'Asia/Yangon',
         'Asia/Saigon' => 'Asia/Ho_Chi_Minh',
         'Atlantic/Faeroe' => 'Atlantic/Faroe',
+        'CST6CDT' => 'America/Chicago',
+        'EST5EDT' => 'America/New_York',
         'Etc/GMT' => 'UTC',
         'Etc/GMT+0' => 'UTC',
         'Etc/GMT-0' => 'UTC',
@@ -54,6 +62,8 @@ class TimezoneUtils
         'GMT-0' => 'UTC',
         'GMT0' => 'UTC',
         'Greenwich' => 'UTC',
+        'MST7MDT' => 'America/Denver',
+        'PST8PDT' => 'America/Los_Angeles',
         'Pacific/Enderbury' => 'Pacific/Kanton',
         'Pacific/Ponape' => 'Pacific/Pohnpei',
         'Pacific/Truk' => 'Pacific/Chuuk',

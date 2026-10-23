@@ -143,10 +143,13 @@ class GoogleImportUtilsTest extends TestCase
         // 19:00 in Berlin on the 28th is 14:00 in New York, whatever the entry called its zone.
         $this->assertSame(['2026-10-28 14:00'], array_values(array_unique(array_column($rows, 'event_date_time'))));
 
-        $text = GoogleImportUtils::toCalendarText(array_map($at, ['GMT+02:00', '+02:00', 'EST5EDT']), 'Europe/Berlin');
+        $text = GoogleImportUtils::toCalendarText(array_map($at, ['GMT+02:00', '+02:00', 'EST5EDT', 'Asia/Calcutta']), 'Europe/Berlin');
         $this->assertStringNotContainsString('TZID=+02:00', $text);
         $this->assertSame(2, substr_count($text, 'DTSTART;TZID=Europe/Berlin:20261028T190000'));
-        $this->assertStringContainsString('DTSTART;TZID=EST5EDT:20261028T140000', $text);
+        $this->assertStringContainsString('DTSTART;TZID=America/New_York:20261028T140000', $text);
+        // Old names are written as their listed ones, which a system tz database without
+        // tzdata-legacy (Ubuntu's PHP, and so CI) can still load.
+        $this->assertStringContainsString('DTSTART;TZID=Asia/Kolkata:20261028T233000', $text);
     }
 
     public function test_a_repeating_entry_with_an_offset_for_a_zone_repeats_on_its_own_days(): void

@@ -64,26 +64,14 @@ class AppointmentTimeUtils
      * every time for those guests in the schedule's zone instead of their own.
      *
      * Constructibility is the exact property callers need, so this is both safer and more permissive.
+     * An alias comes back as the name PHP lists (Asia/Calcutta as Asia/Kolkata) through
+     * TimezoneUtils::canonicalize(), because where PHP reads the system's tz database (Debian and
+     * Ubuntu) the alias itself is not constructible unless tzdata-legacy is installed. canonicalize()
+     * memoises, which matters here: this is hit once per rendered time.
      */
     public static function resolveTimezone(?string $timezone): ?string
     {
-        if (! $timezone) {
-            return null;
-        }
-
-        // Guest-supplied and hit once per rendered time, so memoise both outcomes.
-        static $resolved = [];
-
-        if (! array_key_exists($timezone, $resolved)) {
-            try {
-                new \DateTimeZone($timezone);
-                $resolved[$timezone] = $timezone;
-            } catch (\Throwable $e) {
-                $resolved[$timezone] = null;
-            }
-        }
-
-        return $resolved[$timezone];
+        return TimezoneUtils::canonicalize($timezone);
     }
 
     /**
