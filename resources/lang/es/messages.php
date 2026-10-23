@@ -4253,7 +4253,7 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campaña con un anuncio rechazado|[2,*] :count campañas con anuncios rechazados',
     'admin_alert_domains_pending' => '{1} :count dominio personalizado aún configurándose|[2,*] :count dominios personalizados aún configurándose',
     'admin_alert_translations_unshared' => '{1} :count traducción sin compartir|[2,*] :count traducciones sin compartir',
-    'admin_alert_php_vulnerable' => '{1} Actualiza PHP: esta versión tiene una falla de seguridad crítica (PHP2Shell)|[2,*] Actualiza PHP: esta versión tiene una falla de seguridad crítica (PHP2Shell)',
+    'admin_alert_php_vulnerable' => '{1} Revisa PHP: esta versión puede tener una falla de seguridad crítica (PHP2Shell)|[2,*] Revisa PHP: esta versión puede tener una falla de seguridad crítica (PHP2Shell)',
     'admin_alert_app_update_available' => '{1} :count actualización disponible|[2,*] :count actualizaciones disponibles',
     'admin_alert_privacy_policy_missing' => '{1} Publica tu propia política de privacidad|[2,*] Publica tu propia política de privacidad',
     'pending_action_show_more' => 'Mostrar :count más',

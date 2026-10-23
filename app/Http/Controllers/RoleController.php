@@ -6233,6 +6233,17 @@ class RoleController extends Controller
 
         $role->save();
 
+        // ResolveCustomDomain keeps a custom host's row for ten minutes, subdomain included, and
+        // the custom domain block below forgets it only when the host or the mode changes. After a
+        // rename (the field is shown in Direct mode when the subdomain is the main address), the
+        // domain would route to the old name: a 404, or the schedule of whoever claims it next.
+        // After the save, so a request in between cannot cache the old row again.
+        if ($role->subdomain !== $storedSubdomain) {
+            foreach (array_unique(array_filter([$oldCustomDomainHost, $role->custom_domain_host])) as $host) {
+                \Illuminate\Support\Facades\Cache::forget("custom_domain:{$host}");
+            }
+        }
+
         // Tickets > Ticket presets, right after the schedule's own save and before the image
         // checks below can return early. Only from a page that showed the list, and only by whoever
         // may change it (the owner, or an editor while the team does not pick from presets); the

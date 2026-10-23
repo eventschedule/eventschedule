@@ -260,4 +260,26 @@ class CustomDomainMainAddressTest extends TestCase
         CustomDomainSetting::flush();
         $this->assertSame(CustomDomainSetting::SUBDOMAIN, CustomDomainSetting::mainAddressOf($this->role), 'off Enterprise the domain fields are frozen, this one with them');
     }
+
+    /**
+     * ResolveCustomDomain keeps the custom host's row, subdomain included, for ten minutes. With
+     * the subdomain as main the form shows the subdomain field in Direct mode, so a rename is an
+     * ordinary save, and it must forget that row: kept, the domain routed to the old name (a 404,
+     * or the schedule of whoever claimed it next).
+     * Mutation: drop the forget after $role->save() in RoleController::update().
+     */
+    public function test_a_rename_forgets_the_custom_hosts_cached_row(): void
+    {
+        $this->role->forceFill(['plan_type' => 'enterprise'])->save();
+        $key = 'custom_domain:'.self::HOST;
+        $prime = fn () => \Illuminate\Support\Facades\Cache::put($key, Role::where('custom_domain_host', self::HOST)->first(['id', 'subdomain', 'custom_domain_host']), 600);
+
+        $prime();
+        $this->save([])->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::has($key), 'a save that renames nothing keeps the row');
+
+        $this->save(['new_subdomain' => 'main-address-renamed'])->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame('main-address-renamed', $this->role->fresh()->subdomain, 'fixture: the save renamed the schedule');
+        $this->assertFalse(\Illuminate\Support\Facades\Cache::has($key), 'the rename forgot the row holding the old subdomain');
+    }
 }

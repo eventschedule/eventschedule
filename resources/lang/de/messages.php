@@ -4254,7 +4254,7 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count Kampagne mit abgelehnter Anzeige|[2,*] :count Kampagnen mit abgelehnten Anzeigen',
     'admin_alert_domains_pending' => '{1} :count eigene Domain wird noch eingerichtet|[2,*] :count eigene Domains werden noch eingerichtet',
     'admin_alert_translations_unshared' => '{1} :count noch nicht geteilte Übersetzung|[2,*] :count noch nicht geteilte Übersetzungen',
-    'admin_alert_php_vulnerable' => '{1} PHP aktualisieren: Diese Version hat eine kritische Sicherheitslücke (PHP2Shell)|[2,*] PHP aktualisieren: Diese Version hat eine kritische Sicherheitslücke (PHP2Shell)',
+    'admin_alert_php_vulnerable' => '{1} PHP prüfen: Diese Version hat möglicherweise eine kritische Sicherheitslücke (PHP2Shell)|[2,*] PHP prüfen: Diese Version hat möglicherweise eine kritische Sicherheitslücke (PHP2Shell)',
     'admin_alert_app_update_available' => '{1} :count Update verfügbar|[2,*] :count Updates verfügbar',
     'admin_alert_privacy_policy_missing' => '{1} Veröffentlichen Sie Ihre eigene Datenschutzerklärung|[2,*] Veröffentlichen Sie Ihre eigene Datenschutzerklärung',
     'event_templates' => 'Veranstaltungsvorlagen',

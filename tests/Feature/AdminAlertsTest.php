@@ -615,4 +615,18 @@ class AdminAlertsTest extends TestCase
         $this->assertNotEmpty(trans_choice('messages.admin_alert_php_vulnerable', 1));
         $this->assertNotSame('messages.admin_alert_php_vulnerable', trans_choice('messages.admin_alert_php_vulnerable', 1));
     }
+
+    /**
+     * Amber, not red: Debian and Ubuntu backport the fix and keep the old version number, so the
+     * row cannot tell a patched distro PHP from a vulnerable one and asks the operator to check.
+     * The row's count is held at zero under test (it reads the real PHP_VERSION), so its
+     * definition is read directly.
+     */
+    public function test_the_php2shell_row_is_amber(): void
+    {
+        $row = (new \ReflectionMethod(AdminAlertService::class, 'row'))->invoke(null, 'php_vulnerable', 1);
+
+        $this->assertSame('amber', $row['color']);
+        $this->assertSame('PHP '.PHP_VERSION, $row['subtitle']);
+    }
 }

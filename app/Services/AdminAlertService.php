@@ -47,15 +47,17 @@ class AdminAlertService
         // sends every reminder, charges every installment and syncs every calendar - is not
         // running at all.
         'scheduler_stalled',
-        // Red, beside it: the PHP this install runs on has a known remote code execution flaw
-        // (PHP2Shell, CVE-2026-109618 and CVE-2026-109619). Nothing in the app can fix it; the
-        // operator upgrades PHP and the row goes away.
-        'php_vulnerable',
         // Above jobs_failed: a queue that has stopped draining is a worse condition than one job
         // that broke, and it is the failure the /admin/queue banner already warns about without
         // ever reaching the dashboard panel or the nav badge.
         'jobs_stalled',
         'jobs_failed',
+        // Amber, first of the amber rows: the PHP this install runs on is older than the release
+        // that fixed PHP2Shell (CVE-2026-109618 and CVE-2026-109619), a remote code execution flaw.
+        // Amber and not red because a version number cannot see a fix a distribution backported
+        // (Debian and Ubuntu patch their packages and keep the old number), so on those the row
+        // asks the operator to check. Nothing in the app can fix it; upgrading PHP clears it.
+        'php_vulnerable',
         // Amber, beside the queue rows: nothing is broken for visitors, but the privacy policy
         // promises realtime page views are deleted about an hour after last activity, and rows
         // twice that old mean neither cron rail is running realtime:prune.
@@ -505,11 +507,7 @@ class AdminAlertService
         )->first();
     }
 
-    /**
-     * Shared by scheduler_stalled and jobs_stalled, memoized so the two rows read the same clock:
-     * called twice, now() advances between them and the cascade could otherwise disagree with
-     * itself within a single render.
-     */
+    /** Whether $version is older than the first release of its branch with the PHP2Shell fixes. */
     public static function phpIsVulnerable(string $version): bool
     {
         $branch = implode('.', array_slice(explode('.', $version), 0, 2));
@@ -523,6 +521,11 @@ class AdminAlertService
         return $fixed === null || version_compare($version, $fixed, '<');
     }
 
+    /**
+     * Shared by scheduler_stalled and jobs_stalled, memoized so the two rows read the same clock:
+     * called twice, now() advances between them and the cascade could otherwise disagree with
+     * itself within a single render.
+     */
     private static function schedulerIsStalled(): bool
     {
         return self::$schedulerStalled ??= SchedulerHealth::isStalled();
@@ -613,7 +616,7 @@ class AdminAlertService
     {
         [$nav, $tab, $name, $params, $fragment, $color, $subtitle] = match ($type) {
             'scheduler_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
-            'php_vulnerable' => ['system', 'queue', 'admin.queue', [], '', 'red', 'PHP '.PHP_VERSION],
+            'php_vulnerable' => ['system', 'queue', 'admin.queue', [], '', 'amber', 'PHP '.PHP_VERSION],
             'jobs_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'realtime_prune_stalled' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],

@@ -79,6 +79,8 @@ class PageQueryScalingTest extends TestCase
         'account settings' => 20, // 17
         'check-in stats' => 14, // 11
         'admin dashboard' => 9, // 6
+        'admin dashboard recent' => 18, // 15
+        'admin dashboard growth' => 15, // 12
         'admin schedules' => 20, // 17
         'admin revenue' => 37, // 33
         'admin queue' => 39, // 35
@@ -228,7 +230,7 @@ class PageQueryScalingTest extends TestCase
             'realtime data', 'realtime summary', 'realtime activity', 'newsletters', 'boost', 'account settings',
             'check-in stats',
             // The platform admin
-            'admin dashboard', 'admin schedules', 'admin revenue', 'admin queue', 'admin realtime data',
+            'admin dashboard', 'admin dashboard recent', 'admin dashboard growth', 'admin schedules', 'admin revenue', 'admin queue', 'admin realtime data',
             'admin realtime trends', 'admin blocked',
             // The API
             'api events', 'api schedules', 'api categories',
@@ -305,6 +307,10 @@ class PageQueryScalingTest extends TestCase
             'check-in stats' => $this->actingAs($owner)->getJson(route('checkin.stats', ['event_id' => UrlUtils::encodeId($event->id)])),
 
             'admin dashboard' => $asAdmin()->get(route('admin.dashboard')),
+            // The cards the dashboard fetches as they near the screen (newest schedules and events;
+            // sign-ups, sources and upcoming events), which are the parts of it that list things.
+            'admin dashboard recent' => $asAdmin()->get(route('admin.dashboard.panel', ['panel' => 'recent'])),
+            'admin dashboard growth' => $asAdmin()->get(route('admin.dashboard.panel', ['panel' => 'growth'])),
             'admin schedules' => $asAdmin()->get(route('admin.schedules')),
             'admin revenue' => $asAdmin()->get(route('admin.revenue')),
             'admin queue' => $asAdmin()->get(route('admin.queue')),

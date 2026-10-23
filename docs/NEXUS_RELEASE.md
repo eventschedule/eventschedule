@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-a-custom-domains-main-address-2026-10-22) | not yet | One migration (in the start command); after: one Direct domain set to its subdomain |
 | [Unreleased](#unreleased-backgrounds-on-a-window-sized-layer-and-aurora-2026-10-22) | not yet | Two migrations (in the start command); after: optionally the background backfill in batches, then look at three schedule pages |
 | [Unreleased](#unreleased-the-admin-dashboard-is-the-live-view-2026-10-22) | not yet | Nothing; open `/admin` and scroll |
 | [Unreleased](#unreleased-boost-partners-appointment-hosts-and-the-appointment-api-2026-10-15) | not yet | Confirm the Meta token is a system user's, add `META_BUSINESS_ID`, `META_SYSTEM_USER_ID` and `APP_COMMIT`, check the Stripe platform webhook; after: the scheduler entry, then the pilot partner's setup |
@@ -97,6 +98,34 @@ included.
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
 
+## Unreleased: a custom domain's main address (2026-10-22)
+
+**What ships:**
+- In Direct mode an owner picks the main address (Schedule > Settings, the custom domain block,
+  Enterprise only): the domain, which is every schedule's choice until it is changed, or the
+  subdomain. The custom domain keeps serving every page either way.
+- With the subdomain as main, the canonical, og:url, hreflang, breadcrumb and structured data
+  name it on both hosts, the global sitemap lists the schedule and its events, the custom host's
+  robots.txt points at the global sitemap (its own `/sitemap.xml` stays a 404), and mail, shared
+  links, the QR code, generated text, graphics and the admin's copy link use it.
+- The subdomain field shows in Direct mode once the subdomain is main, so a rename there is an
+  ordinary save. It forgets the custom host's cached lookup (`custom_domain:{host}`), or the
+  domain would route to the old name for ten minutes.
+
+**Migration** (the start command runs it):
+- `2026_10_22_000002_create_custom_domain_settings_table`: a new table, one row per schedule
+  whose owner chose. No row reads as the domain, so nothing changes until somebody chooses.
+
+While the web container migrates, the scheduler worker already runs the new code: a mail or
+graphic job for a Direct schedule in those seconds can report a missing `custom_domain_settings`
+table to Sentry once and is retried. Noise only.
+
+**After the deploy:** set one Direct schedule's main address to its subdomain. View-source on
+the custom domain: the canonical names `{subdomain}.eventschedule.com`, and the page and its
+links still answer on the custom domain. Then set it back if it was a test.
+
+**Undo:** a rollback leaves the table unread; every Direct domain is its own main address again.
+
 ## Unreleased: backgrounds on a window-sized layer, and Aurora (2026-10-22)
 
 **What ships:**
@@ -148,9 +177,8 @@ on an older install (the enum value is missing). Update first.
   its top corner (MRR, ARR, paying, in trial, at risk) and the old dashboard's cards under it:
   newest schedules and events, sign-ups, active users, sources, upcoming events, federation and
   the system line. The headline tiles, Latest sign-ups, the five-minute views line and the full
-  revenue card are gone: the MRR by plan and the "Outside Stripe" line are no longer shown
-  anywhere (the boost markup is on `/admin/revenue`, the granted and trial plans on
-  `/admin/schedules`). The Realtime tab is gone; `/admin/realtime` redirects to the dashboard
+  revenue card are gone from the dashboard: the MRR by plan and the "Outside Stripe" line are on
+  `/admin/revenue` (`#mrr-by-plan`), beside the boost markup. The Realtime tab is gone; `/admin/realtime` redirects to the dashboard
   with its query string, filters included.
 - The page sends nothing that takes time: the live part polls `/admin/realtime/data` as before,
   Revenue is `/admin/dashboard/revenue`, and the cards are three panels

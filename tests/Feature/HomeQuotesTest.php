@@ -100,6 +100,25 @@ class HomeQuotesTest extends TestCase
         $this->get('/')->assertOk()->assertDontSee('Nobody said this');
     }
 
+    /**
+     * Owned but not claimed: no verified contact (on hosted, any change of email clears it), so
+     * viewGuest() answers 404, and the homepage must not link to that page. Role::getGuestUrl()
+     * answers '' for such a schedule, and forPage() leaves a quote with no address off.
+     * Mutation: drop the `! $url` check in HomeQuotes::forPage().
+     */
+    public function test_a_quote_on_a_schedule_whose_page_is_not_public_is_left_off(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Unverified Hall']);
+        HomeQuotes::save([['role_id' => $role->id, 'quote' => 'Said before the address changed', 'title' => '']]);
+        $this->get('/')->assertOk()->assertSee('Said before the address changed');
+
+        \Illuminate\Support\Facades\DB::table('roles')->where('id', $role->id)->update(['email_verified_at' => null, 'phone_verified_at' => null]);
+        Cache::flush();
+
+        $this->get('/'.$role->subdomain)->assertNotFound();
+        $this->get('/')->assertOk()->assertDontSee('Said before the address changed');
+    }
+
     /** Erasing an account forgets the quotes on the schedules it owned, and the names with them. */
     public function test_erasing_an_account_forgets_its_quotes(): void
     {
