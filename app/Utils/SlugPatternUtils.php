@@ -165,7 +165,7 @@ class SlugPatternUtils
             '{city}' => $venue ? ($venue->translatedCity() ?? '') : '',
             '{address}' => $venue ? ($venue->address1 ?? '') : '',
             '{state}' => $venue ? ($venue->state ?? '') : '',
-            '{country}' => $venue ? ($venue->country ?? '') : '',
+            '{country}' => $venue ? ($venue->country_code ?? '') : '',
         ]);
 
         // Add ticket variables

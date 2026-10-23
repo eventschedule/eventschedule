@@ -266,7 +266,7 @@ return [
     'payment_links' => 'Linkuri de Plată',
     'are_you_sure' => 'Sunteți sigur?',
     'no_requests' => 'Nicio cerere',
-    'team_lead' => 'Administratorii se ocupă de program zi de zi. Vizualizatorii pot vedea totul, dar nu pot schimba nimic. Doar proprietarul schimbă rolurile, elimină membri și gestionează planul.',
+    'team_lead' => 'Administratorii se ocupă de program zi de zi. Vizualizatorii pot vedea totul și își pot marca propriile zile disponibile, dar nu pot schimba nimic altceva. Doar proprietarul schimbă rolurile, elimină membri și gestionează planul.',
     'requests_lead' => 'Evenimente și rezervări care așteaptă răspunsul tău. Dacă accepți una, este adăugată în programul tău.',
     'availability_lead' => 'Marchează zilele în care nu ești disponibil, apoi salvează. Fiecare membru își marchează propriile zile.',
     'resend_invite_sms' => 'Retrimite prin SMS',
@@ -630,6 +630,7 @@ return [
     'promo_share_link' => 'Link care aplică acest cod:',
     'order_fields_help' => 'Se cere o singură dată pentru întreaga comandă, nu pentru fiecare bilet.',
     'calendar_not_synced_draft' => 'Doar evenimentele pe care invitații le pot vedea sunt copiate în calendar.',
+    'calendar_not_synced_cancelled' => 'Un eveniment anulat nu este copiat în calendar. Va fi copiat din nou când îl restaurezi.',
     'saving_removes' => 'Salvarea elimină',
     'schedule_short_description_help' => 'Un rând afișat sub numele programului tău când stilul antetului este :style.',
     'schedule_description_help' => 'Apare în partea de sus a paginii programului tău.',
@@ -1371,7 +1372,7 @@ return [
     'from_google_calendar' => 'Din Google Calendar',
     'from_google_calendar_description' => 'Evenimentele din Google Calendar ajung aici. Dacă nu le publici automat, așteaptă ca ciorne.',
     'bidirectional_sync' => 'Sincronizare Bidirecțională',
-    'bidirectional_sync_description' => 'Evenimentele adăugate aici ajung în calendarul tău, iar evenimentele noi din calendarul tău ajung aici, ca ciorne dacă nu le publici automat (actualizările se sincronizează într-o singură direcție)',
+    'bidirectional_sync_description' => 'Evenimentele adăugate aici ajung în calendarul tău, iar evenimentele noi din calendarul tău ajung aici, ca ciorne dacă nu le publici automat (modificările făcute într-o parte sunt copiate în cealaltă)',
     'no_sync' => 'Fără Sincronizare',
     'no_sync_description' => 'Dezactivează sincronizarea cu Google Calendar',
     'sync_events' => 'Sincronizează Evenimente',
@@ -3841,6 +3842,7 @@ return [
 
     'individual_tickets' => 'Bilete individuale',
     'individual_tickets_description' => 'Fiecare participant primește propria confirmare și cod QR',
+    'individual_tickets_off_for_passes' => 'Dezactivat cât timp un tip de bilet este un abonament sau permis. Un abonament înseamnă un singur cod QR per comandă, așa că salvarea evenimentului dezactivează această opțiune.',
     'individual_ticket_fields' => 'Colectează câmpuri de bilet per invitat',
     'individual_ticket_fields_description' => 'Afișează câmpurile personalizate de bilet pentru fiecare invitat',
     'guest_information' => 'Informații despre oaspete',
@@ -5126,7 +5128,7 @@ return [
     'monetization_native_cpc' => 'Preț pe clic',
     'monetization_native_cpc_help' => 'Se percepe de la programul care promovează. Se aplică doar campaniilor noi.',
     'promotion_rate_not_configured' => 'Prețurile promovărilor nu au fost încă configurate pe acest site. Contactați administratorul.',
-    'promotion_credit_available' => 'Ai :amount credit pentru promovări. Orice depășește această sumă este taxat pe card.',
+    'promotion_credit_available' => 'Ai :amount credit pentru promovări, folosit doar pentru un buget pe care îl acoperă integral. Pentru acest buget, întreaga sumă este taxată pe card, iar creditul rămâne disponibil.',
 
     // Stay22 accommodation map (see docs/FEATURES.md, "Accommodation Affiliate")
     'accommodation' => 'Cazare',

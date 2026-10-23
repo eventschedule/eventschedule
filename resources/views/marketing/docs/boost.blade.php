@@ -94,6 +94,9 @@
         <p class="text-gray-600 dark:text-gray-300">
             The Facebook and Instagram channel offers two modes: <strong class="text-gray-900 dark:text-white">Quick Mode</strong>, which fills everything in for you, and <strong class="text-gray-900 dark:text-white">Advanced Mode</strong>, which exposes the budget type, schedule, audience and creative. On-network promotions have a single form and no advanced mode.
         </p>
+        <p class="text-gray-600 dark:text-gray-300 mt-4">
+            Amounts on this page are the defaults, in US dollars. A site can set its own minimums and its own currency for each channel, and the forms always show the figures that apply.
+        </p>
     </section>
 
     <!-- On-Network Promotions -->
@@ -116,7 +119,7 @@
         <h3 id="on-network-eligibility" class="doc-subheading">What you can promote</h3>
         <ul class="doc-list mb-6">
             <li>The schedule buying the promotion must be on a <strong class="text-gray-900 dark:text-white">Pro plan</strong> or higher, and you must be a member of it.</li>
-            <li>The event must be <strong class="text-gray-900 dark:text-white">publicly visible</strong>. Draft (internal) and unlisted events are rejected, because nobody clicking the card could open them.</li>
+            <li>The event must be <strong class="text-gray-900 dark:text-white">publicly visible</strong>. Draft, internal and unlisted events are rejected, because nobody clicking the card could open them.</li>
             <li>If another schedule added your schedule to their event, the invitation has to be accepted before you can promote it.</li>
             <li>You can run up to <strong class="text-gray-900 dark:text-white">2</strong> on-network campaigns at a time by default. This cap is separate from the Facebook and Instagram one, so neither channel uses up the other's slots.</li>
         </ul>
@@ -149,6 +152,9 @@
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             Start and end dates are optional. With no end date the campaign runs until the budget is exhausted or the event is over.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            If the schedule has boost credit that covers the whole budget, the promotion is paid from it and no card is asked for. If the credit is less than the budget, it is not used and the card pays all of it. See <a href="#billing" class="doc-link">How you pay</a>.
         </p>
 
         <h3 id="on-network-targeting" class="doc-subheading">Targeting</h3>
@@ -671,6 +677,9 @@
         </p>
 
         <h3 class="doc-subheading">How you pay</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Both channels are paid the same way:
+        </p>
         <ul class="doc-list mb-6">
             <li><strong>Card</strong> - paid through Stripe on the boost form. A card already saved on the schedule is offered so you do not have to re-enter it.</li>
             <li><strong>Boost credit</strong> - if the schedule's credit balance covers the entire total, the campaign is paid from it and no card step appears. A partial balance is not used; the whole purchase goes on the card instead.</li>
@@ -727,14 +736,7 @@
 
         <h3 class="doc-subheading" id="partners-setup">Setting up</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Open <strong class="text-gray-900 dark:text-white">Settings &gt; Boosts</strong> with the account that owns the schedules. There are two ways to connect your Page and ad account:
-        </p>
-        <ul class="doc-list mb-4">
-            <li><strong>Share with our Business.</strong> In Meta Business Settings, add our Business ID (shown on the page) as a partner on your ad account with "Manage campaigns" and on your Page with "Ads" access (create and manage ads). Both need to be in a Meta Business portfolio: an ad account that is only in a personal Facebook profile cannot be shared. Then enter the two IDs and press Save and check. Each check is shown with its result. We confirm the IDs once, and you are emailed when it is done.</li>
-            <li><strong>Sign in with Facebook.</strong> Where offered, approve the access on Facebook's own screen and choose the Page and ad account from your own.</li>
-        </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            On the same tab, write how your businesses pay you (a link or a contact, shown to them once you approve), and add the card our monthly fee is charged to.
+            The connection is made on the <strong class="text-gray-900 dark:text-white">Boosts</strong> tab of Settings, with the account that owns the schedules: share your ad account and Page with our Meta Business (or sign in with Facebook where that is offered), say how your businesses pay you, and add the card our fee is charged to. The steps are in <a href="{{ route('marketing.docs.account_settings') }}#boosts" class="doc-link">Account Settings, Boosts</a>.
         </p>
 
         <h3 class="doc-subheading" id="partners-requests">Every boost is a request</h3>

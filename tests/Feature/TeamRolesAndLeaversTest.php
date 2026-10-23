@@ -67,6 +67,36 @@ class TeamRolesAndLeaversTest extends TestCase
         }
     }
 
+    /**
+     * A viewer marks their OWN days on the Availability tab, and only their own: the save writes the
+     * caller's team row and nobody else's.
+     */
+    public function test_a_viewer_marks_their_own_days_and_nobody_elses(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $viewer = $this->createOwner();
+        $role->users()->attach($viewer->id, ['level' => 'viewer']);
+        $other = $this->createOwner();
+        $role->users()->attach($other->id, ['level' => 'admin', 'dates_unavailable' => json_encode(['2030-01-02'])]);
+
+        $page = $this->actingAs($viewer)->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'availability']))->assertOk()->getContent();
+        $this->assertStringContainsString('id="availability_form"', $page, 'the viewer is given the form');
+        $this->assertStringContainsString('id="saveButton"', $page);
+
+        $this->actingAs($viewer)->post(route('role.availability', ['subdomain' => $role->subdomain]), [
+            'unavailable_days' => json_encode(['2030-01-05']),
+            'available_days' => json_encode(['2030-01-02']),
+            'month' => 1,
+            'year' => 2030,
+        ])->assertRedirect();
+
+        $dates = fn (User $user) => json_decode((string) DB::table('role_user')->where('role_id', $role->id)->where('user_id', $user->id)->value('dates_unavailable'), true);
+        $this->assertSame(['2030-01-05'], $dates($viewer), 'the viewer\'s own day is saved');
+        $this->assertSame(['2030-01-02'], $dates($other), 'another member\'s day is not cleared by the viewer');
+        $this->assertNull(DB::table('role_user')->where('role_id', $role->id)->where('user_id', $owner->id)->value('dates_unavailable'));
+    }
+
     public function test_an_admin_still_reaches_both(): void
     {
         [, $role, $admin] = $this->team('admin');

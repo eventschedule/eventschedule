@@ -31,7 +31,7 @@
             Webhooks let you receive automatic POST notifications on your own server when something happens in your schedules: a ticket is sold or refunded, an event changes, a ticket is scanned at the door. Instead of polling the API, your application is notified as it happens.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Each delivery carries an HMAC-SHA256 signature so you can verify the payload really came from Event Schedule, and every delivery is written to a delivery log you can open beside the webhook. Webhooks are added and managed in the admin panel, under <strong class="text-gray-900 dark:text-white">Settings</strong>, on the <strong class="text-gray-900 dark:text-white">Developers</strong> tab.
+            Each delivery carries an HMAC-SHA256 signature so you can verify the payload really came from Event Schedule, and every delivery is written to a delivery log you can open beside the webhook. Webhooks are added and managed in your account's <strong class="text-gray-900 dark:text-white">Settings</strong>, on the <strong class="text-gray-900 dark:text-white">Developers</strong> tab.
         </p>
 
         <div class="doc-callout doc-callout-plan">
@@ -40,7 +40,7 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Webhooks belong to your <strong class="text-gray-900 dark:text-white">account</strong>, not to an individual schedule, and each delivery goes to the account that created the event. Events you create, in the admin panel or through the API, reach your endpoints whichever schedule they sit on, along with every sale on them. An event a teammate created goes to their webhooks instead of yours, and a guest's submission counts as the schedule owner's. The schedule is identifiable from the payload. Add more than one endpoint if you want to route different event types to different services.
+            Webhooks belong to your <strong class="text-gray-900 dark:text-white">account</strong>, not to an individual schedule, and each delivery goes to the account the event belongs to, which is usually the account that created it. Events you create, in the app or through the API, reach your endpoints whichever schedule they sit on, along with every sale on them. An event a teammate created goes to their webhooks instead of yours, with two exceptions that make it the schedule owner's: an event a team member creates while the owner's <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-presets" class="doc-link">ticket preset</a> switch binds them, and the events a team member made for the schedule once they leave its team or are made a viewer (unless the event has already taken money). A guest's submission counts as the schedule owner's too. The schedule is identifiable from the payload. Add more than one endpoint if you want to route different event types to different services.
         </p>
 
         <h3 class="doc-subheading">How a delivery works</h3>
@@ -67,7 +67,7 @@
                     </tr>
                     <tr>
                         <td>Retries</td>
-                        <td>Up to three attempts in all. A timeout, a connection error or a <code class="doc-inline-code">5xx</code> is sent again about 30 seconds later, and once more about a minute after that. A <code class="doc-inline-code">3xx</code> or <code class="doc-inline-code">4xx</code> is not retried, and neither is an address refused at send time. A retry is dropped if the webhook has been disabled or deleted in the meantime. An install on <code class="doc-inline-code">QUEUE_CONNECTION=sync</code>, the selfhost default, has no queue to retry from, so it makes one attempt. Reconcile against the API for anything you cannot afford to miss.</td>
+                        <td>Up to three attempts in all. A timeout, a connection error or a <code class="doc-inline-code">5xx</code> is sent again after 30 seconds or more, and once more a minute or more after that. Retries wait for the queue, which the scheduler drains once a minute, so each one can land up to a minute later than its delay. A <code class="doc-inline-code">3xx</code> or <code class="doc-inline-code">4xx</code> is not retried, and neither is an address refused at send time. A retry is dropped if the webhook has been disabled or deleted in the meantime. An install on <code class="doc-inline-code">QUEUE_CONNECTION=sync</code>, the selfhost default, has no queue to retry from, so it makes one attempt. Reconcile against the API for anything you cannot afford to miss.</td>
                     </tr>
                     <tr>
                         <td>What counts as delivered</td>
@@ -100,7 +100,7 @@
             Setup
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Webhooks are set up in the admin panel: open <strong class="text-gray-900 dark:text-white">Settings</strong>, choose the <strong class="text-gray-900 dark:text-white">Developers</strong> tab, and find <strong class="text-gray-900 dark:text-white">Webhooks</strong> under <strong class="text-gray-900 dark:text-white">API Settings</strong>. If none of your schedules is on Pro, the section says so at the top.
+            Webhooks are set up in your account settings: open <strong class="text-gray-900 dark:text-white">Settings</strong>, choose the <strong class="text-gray-900 dark:text-white">Developers</strong> tab, and find <strong class="text-gray-900 dark:text-white">Webhooks</strong> under <strong class="text-gray-900 dark:text-white">API Settings</strong>. If none of your schedules is on Pro, the section says so at the top.
         </p>
 
         <x-doc-screenshot id="account-settings--developers" alt="The Developers tab of Settings: API Settings, then Webhooks with the Add Webhook form" />
@@ -166,7 +166,7 @@
                     <tr><td class="font-mono text-sm">event.created</td><td>An event is published. Publishing an existing draft counts as a creation.</td></tr>
                     <tr><td class="font-mono text-sm">event.updated</td><td>A published event is saved, whether or not anything changed, an appointment is rescheduled, or a cancelled event is restored. Moving a published event back to draft sends nothing.</td></tr>
                     <tr><td class="font-mono text-sm">event.deleted</td><td>A published event is deleted. The payload is captured before the row is removed.</td></tr>
-                    <tr><td class="font-mono text-sm">event.cancelled</td><td>An event is cancelled rather than deleted, in the admin panel or through <a href="{{ route('marketing.docs.developer.api') }}#cancel-event" class="doc-link">Cancel Event</a>. Its payload has <code class="doc-inline-code">is_cancelled</code> set.</td></tr>
+                    <tr><td class="font-mono text-sm">event.cancelled</td><td>An event is cancelled rather than deleted, in the app or through <a href="{{ route('marketing.docs.developer.api') }}#cancel-event" class="doc-link">Cancel Event</a>. Its payload has <code class="doc-inline-code">is_cancelled</code> set.</td></tr>
                     <tr><td class="font-mono text-sm">ticket.scanned</td><td>A ticket or pass QR code is scanned and accepted at check-in.</td></tr>
                     <tr><td class="font-mono text-sm">ticket.booked</td><td>A pass holder reserves a place on a specific date in advance.</td></tr>
                     <tr><td class="font-mono text-sm">ticket.booking_cancelled</td><td>A pass holder releases a place they had reserved.</td></tr>

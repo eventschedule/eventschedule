@@ -145,7 +145,7 @@ return [
     'payment_links' => 'Zahlungslinks',
     'are_you_sure' => 'Sind Sie sicher?',
     'no_requests' => 'Keine Anfragen',
-    'team_lead' => 'Admins führen den Kalender im Alltag. Betrachter können alles ansehen, aber nichts ändern. Nur der Eigentümer ändert Rollen, entfernt Mitglieder und verwaltet den Plan.',
+    'team_lead' => 'Admins führen den Kalender im Alltag. Betrachter können alles ansehen und ihre eigenen verfügbaren Tage markieren, aber sonst nichts ändern. Nur der Eigentümer ändert Rollen, entfernt Mitglieder und verwaltet den Plan.',
     'requests_lead' => 'Veranstaltungen und Buchungen, die auf deine Antwort warten. Wenn du eine akzeptierst, kommt sie in deinen Kalender.',
     'availability_lead' => 'Markiere die Tage, an denen du nicht verfügbar bist, und speichere dann. Jedes Mitglied markiert seine eigenen Tage.',
     'resend_invite_sms' => 'Per SMS erneut senden',
@@ -502,6 +502,7 @@ return [
     'promo_share_link' => 'Link, der diesen Code anwendet:',
     'order_fields_help' => 'Wird einmal pro Bestellung abgefragt, nicht für jedes Ticket.',
     'calendar_not_synced_draft' => 'Nur Veranstaltungen, die Gäste sehen können, werden in den Kalender kopiert.',
+    'calendar_not_synced_cancelled' => 'Eine abgesagte Veranstaltung wird nicht in den Kalender kopiert. Sie wird wieder kopiert, wenn Sie sie wiederherstellen.',
     'saving_removes' => 'Beim Speichern wird entfernt',
     'schedule_short_description_help' => 'Eine Zeile unter dem Namen Ihres Zeitplans, wenn der Kopfzeilen-Stil :style ist.',
     'schedule_description_help' => 'Wird oben auf Ihrer Zeitplan-Seite angezeigt.',
@@ -1355,7 +1356,7 @@ return [
     'from_google_calendar' => 'Von Google Kalender',
     'from_google_calendar_description' => 'Veranstaltungen aus Google Kalender kommen hier an. Sofern Sie sie nicht automatisch veröffentlichen, warten sie als Entwürfe.',
     'bidirectional_sync' => 'Bidirektionale Synchronisation',
-    'bidirectional_sync_description' => 'Veranstaltungen, die Sie hier hinzufügen, gehen in Ihren Kalender, und neue Veranstaltungen aus Ihrem Kalender kommen hier an, als Entwürfe, sofern Sie sie nicht automatisch veröffentlichen (Aktualisierungen synchronisieren nur in eine Richtung)',
+    'bidirectional_sync_description' => 'Veranstaltungen, die Sie hier hinzufügen, gehen in Ihren Kalender, und neue Veranstaltungen aus Ihrem Kalender kommen hier an, als Entwürfe, sofern Sie sie nicht automatisch veröffentlichen (Änderungen auf einer Seite werden auf die andere übernommen)',
     'no_sync' => 'Keine Synchronisation',
     'no_sync_description' => 'Google Kalender Synchronisation deaktivieren',
     'sync_events' => 'Veranstaltungen synchronisieren',
@@ -3821,6 +3822,7 @@ return [
 
     'individual_tickets' => 'Einzeltickets',
     'individual_tickets_description' => 'Jeder Teilnehmer erhält eine eigene Bestätigung und einen eigenen QR-Code',
+    'individual_tickets_off_for_passes' => 'Aus, solange ein Tickettyp ein Pass oder Abonnement ist. Ein Pass ist ein QR-Code pro Bestellung, daher schaltet das Speichern der Veranstaltung dies aus.',
     'individual_ticket_fields' => 'Ticketfelder pro Gast erfassen',
     'individual_ticket_fields_description' => 'Benutzerdefinierte Ticketfelder für jeden Gast anzeigen',
     'guest_information' => 'Gastinformationen',
@@ -5106,7 +5108,7 @@ return [
     'monetization_native_cpc' => 'Preis pro Klick',
     'monetization_native_cpc_help' => 'Wird dem Werbetreibenden berechnet. Gilt nur für neue Kampagnen.',
     'promotion_rate_not_configured' => 'Die Preise für Werbekampagnen sind auf dieser Website noch nicht eingerichtet. Bitte wenden Sie sich an den Administrator.',
-    'promotion_credit_available' => 'Sie haben :amount Guthaben. Alles darüber hinaus wird Ihrer Karte belastet.',
+    'promotion_credit_available' => 'Sie haben :amount Guthaben. Es wird nur für ein Budget verwendet, das es vollständig abdeckt. Für dieses Budget wird der gesamte Betrag Ihrer Karte belastet, und Ihr Guthaben bleibt erhalten.',
 
     // Stay22 accommodation map (see docs/FEATURES.md, "Accommodation Affiliate")
     'accommodation' => 'Unterkünfte',

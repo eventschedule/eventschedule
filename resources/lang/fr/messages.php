@@ -260,7 +260,7 @@ return [
     'payment_links' => 'Liens de paiement',
     'are_you_sure' => 'Êtes-vous sûr ?',
     'no_requests' => 'Aucune demande',
-    'team_lead' => 'Les administrateurs gèrent le planning au quotidien. Les lecteurs peuvent tout consulter, sans rien modifier. Seul le propriétaire modifie les rôles, retire des membres et gère le plan.',
+    'team_lead' => 'Les administrateurs gèrent le planning au quotidien. Les lecteurs peuvent tout consulter et indiquer leurs propres jours disponibles, sans rien modifier d\'autre. Seul le propriétaire modifie les rôles, retire des membres et gère le plan.',
     'requests_lead' => 'Événements et réservations en attente de votre réponse. En accepter un l\'ajoute à votre planning.',
     'availability_lead' => 'Marquez les jours où vous n\'êtes pas disponible, puis enregistrez. Chaque membre marque ses propres jours.',
     'resend_invite_sms' => 'Renvoyer par SMS',
@@ -611,6 +611,7 @@ return [
     'promo_share_link' => 'Lien qui applique ce code :',
     'order_fields_help' => 'Demandé une fois pour toute la commande, pas pour chaque billet.',
     'calendar_not_synced_draft' => 'Seuls les événements visibles par les invités sont copiés dans le calendrier.',
+    'calendar_not_synced_cancelled' => 'Un événement annulé n\'est pas copié dans le calendrier. Il le sera de nouveau quand vous le rétablirez.',
     'saving_removes' => 'L\'enregistrement supprime',
     'schedule_short_description_help' => 'Une ligne affichée sous le nom de votre planning lorsque le style d\'en-tête est :style.',
     'schedule_description_help' => 'Affichée en haut de la page de votre planning.',
@@ -1359,7 +1360,7 @@ return [
     'from_google_calendar' => 'Depuis calendrier Google',
     'from_google_calendar_description' => 'Les événements de Google Agenda arrivent ici. Sauf si vous les publiez automatiquement, ils attendent en brouillon.',
     'bidirectional_sync' => 'Synchronisation bidirectionnelle',
-    'bidirectional_sync_description' => 'Les événements ajoutés ici vont dans votre calendrier, et les nouveaux événements de votre calendrier arrivent ici, en brouillon sauf si vous les publiez automatiquement (les mises à jour ne se synchronisent que dans un sens)',
+    'bidirectional_sync_description' => 'Les événements ajoutés ici vont dans votre calendrier, et les nouveaux événements de votre calendrier arrivent ici, en brouillon sauf si vous les publiez automatiquement (les modifications faites d\'un côté sont reportées de l\'autre)',
     'no_sync' => 'Aucune synchronisation',
     'no_sync_description' => 'Désactiver la synchronisation du calendrier Google',
     'sync_events' => 'Synchroniser les événements',
@@ -3822,6 +3823,7 @@ return [
 
     'individual_tickets' => 'Billets individuels',
     'individual_tickets_description' => 'Chaque participant reçoit sa propre confirmation et son propre code QR.',
+    'individual_tickets_off_for_passes' => 'Désactivé tant qu\'un type de billet est un pass ou un abonnement. Un pass est un seul code QR par commande, donc l\'enregistrement de l\'événement désactive cette option.',
     'individual_ticket_fields' => 'Collecter les champs de billet par invité',
     'individual_ticket_fields_description' => 'Afficher les champs personnalisés de billet pour chaque invité',
     'guest_information' => 'Informations sur l\'invité',
@@ -5111,7 +5113,7 @@ return [
     'monetization_native_cpc' => 'Prix par clic',
     'monetization_native_cpc_help' => 'Facturé à l\'annonceur. S\'applique uniquement aux nouvelles campagnes.',
     'promotion_rate_not_configured' => 'Les tarifs des mises en avant ne sont pas encore configurés sur ce site. Contactez l\'administrateur.',
-    'promotion_credit_available' => 'Vous disposez de :amount de crédit. Tout montant supérieur sera débité de votre carte.',
+    'promotion_credit_available' => 'Vous disposez de :amount de crédit, utilisé uniquement pour un budget qu\'il couvre entièrement. Pour ce budget, le montant total sera débité de votre carte et votre crédit est conservé.',
 
     // Stay22 accommodation map (see docs/FEATURES.md, "Accommodation Affiliate")
     'accommodation' => 'Hébergement',

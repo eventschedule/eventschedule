@@ -42,7 +42,7 @@
             <li>Click <strong class="text-gray-900 dark:text-white">Save</strong>, in the bar at the bottom of the page. Nothing is applied to your public page until you do.</li>
         </ol>
 
-        <x-doc-screenshot id="schedule-styling--section-style" alt="The Style section of the schedule form: Square Profile Image, Accent Color and Font Family, with the Preview of the page beside them" loading="eager" />
+        <x-doc-screenshot id="schedule-styling--section-style" alt="The Style section of the schedule form on an Aurora background: Square Profile Image, Accent Color and Font Family, with the Preview of the page beside them" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The Style section opens on its branding fields, with four rows under them that open in place. Each row says its current choice, so most never need opening. The rows follow your page from top to bottom, and this guide follows the rows:</p>
         <div class="doc-table-wrap">
@@ -124,7 +124,7 @@
             </svg>
             Accent Color
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">One <strong class="text-gray-900 dark:text-white">Accent Color</strong> at the top of the Style section drives every highlighted element on your public pages. Click the square to open your system's color picker, type a hex code into the box beside it (three or six digits, with or without the #), or start from one of the ten colors under it. New schedules start on a standard blue.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">One <strong class="text-gray-900 dark:text-white">Accent Color</strong> at the top of the Style section drives every highlighted element on your public pages. Click the square to open your system's color picker, type a hex code into the box beside it (three or six digits, with or without the #), or start from one of the ten colors under it. A new schedule starts on the accent of its <a href="#aurora" class="doc-link">Aurora</a> palette, which is picked at random, so it can be teal, blue, purple, pink, orange, red, yellow, green or near-black.</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Where it appears</h3>
@@ -217,7 +217,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Upload Image</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your own header. Click the tile to choose a file. Once a picture is there the tile shows it and reads <strong class="text-gray-900 dark:text-white">Custom</strong>, with <strong class="text-gray-900 dark:text-white">Change</strong> and <strong class="text-gray-900 dark:text-white">Remove</strong> under the tiles. Use a wide image, around 1200x400 pixels or a similar aspect ratio. PNG or JPG, under 2.5 MB. It is also the picture a shared link to your schedule shows, ahead of your profile image.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your own header. Click the tile to choose a file. Once a picture is there the tile shows it and reads <strong class="text-gray-900 dark:text-white">Custom</strong>, with <strong class="text-gray-900 dark:text-white">Change</strong> and <strong class="text-gray-900 dark:text-white">Remove</strong> under the tiles. Use a wide image, around 1200x400 pixels or a similar aspect ratio. PNG, JPG, WebP or GIF, under 2.5 MB. It is also the picture a shared link to your schedule shows, ahead of your profile image.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">31 preset headers</h4>
@@ -239,7 +239,7 @@
             Background
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Background</strong> row starts with a <strong class="text-gray-900 dark:text-white">Background Type</strong> choice of Aurora, Gradient, Solid or Image. Picking one shows its own controls and puts the others away. The row's line names your choice beside a small swatch of it, so you can see it with the row closed.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Whichever you pick, the background fills the visitor's window and stays in place while your events scroll over it, in the calendar as well as the list, so a picture is never stretched to the length of the page. On a phone your schedule page shows a picture behind its header, as before.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Whichever you pick, the background fills the visitor's window and stays in place while your events scroll over it, in the calendar as well as the list, so a picture is never stretched to the length of the page. One exception: with an Image background, a phone shows the picture behind your header only.</p>
 
         <h3 id="aurora" class="doc-subheading">Aurora</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Soft lights in your schedule's colors that drift slowly behind your page, with a fine grain. Aurora is drawn by the visitor's browser rather than being a picture, so it is sharp on any screen, from a phone to a large monitor, and adds almost nothing to the page's weight. It follows each visitor's light or dark mode: pale lights on a bright page in light mode, glowing color on a deep one in dark mode. Schedules you create start on Aurora, with a palette picked at random and an accent color to match it.</p>
@@ -286,7 +286,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">37 preset backgrounds</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ready-made backgrounds shown as thumbnails, including Abstract Sunrise, Bookshelf, Desert Retreat, Flower Field, Greyscale, River of Dreams and Stormy Night. Click one to choose it. The first two lines are on the page and <strong class="text-gray-900 dark:text-white">Show All</strong> opens the rest. They are sized for phones, so on a large screen they can look soft; <a href="#aurora" class="doc-link">Aurora</a> stays sharp at any size.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ready-made backgrounds shown as thumbnails, including Abstract Sunrise, Bookshelf, Desert Retreat, Flower Field, Greyscale, River of Dreams and Stormy Night. Click one to choose it. The first two lines are on the page and <strong class="text-gray-900 dark:text-white">Show All</strong> opens the rest. They are sized for phones, so on a large screen they can look soft; <a href="#aurora" class="doc-link">Aurora</a> stays sharp at any size. While a ready-made picture is chosen, a note in the row says so, with a <strong class="text-gray-900 dark:text-white">Try Aurora</strong> button that switches the background type.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom upload</h4>
@@ -423,7 +423,7 @@
         </h2>
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Pro feature</div>
-            <p><x-doc-badge plan="pro" /> The Custom CSS box is editable on <strong class="text-gray-900 dark:text-white">Pro</strong> and <strong class="text-gray-900 dark:text-white">Enterprise</strong>, and on <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> installs, which count as Enterprise. Below Pro the row carries a Pro badge and the box is shown read-only: CSS you saved earlier is kept, not deleted, but it is not applied to your pages until the schedule is back on Pro, when it also becomes editable again.</p>
+            <p><x-doc-badge plan="pro" /> The Custom CSS box is editable on <strong class="text-gray-900 dark:text-white">Pro</strong> and <strong class="text-gray-900 dark:text-white">Enterprise</strong>, and on <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> installs, which count as Enterprise. Below Pro the row carries a Pro badge. With no CSS saved it shows an upgrade line instead of the box. If you saved CSS before, the box is shown read-only: that CSS is kept, not deleted, but it is not applied to your pages until the schedule is back on Pro, when it also becomes editable again.</p>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">When the built-in controls do not reach far enough, write your own CSS under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Custom CSS</strong>, the last row of the Style section. The row shows the first line of what you have written, so you can tell with it closed that some is set. It is added to every public page drawn in your schedule's own style: your schedule page, event pages, embeds, and the pages visitors reach from them such as booking, event requests and gift cards. Ticket, order and installment payment pages use the app's standard layout, so your CSS does not reach them.</p>
         <ul class="doc-list mb-6">
@@ -632,7 +632,7 @@
         </div>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Selfhosted API keys</div>
-            <p>Selfhosted installs supply their own keys. The accent color and font need a <a href="https://ai.google.dev/" target="_blank" rel="noopener" class="doc-link">Gemini API key</a>. Image generation uses an <a href="https://platform.openai.com/" target="_blank" rel="noopener" class="doc-link">OpenAI API key</a> when one is set and falls back to Gemini when it is not, so a Gemini key alone is enough to use every part of the generator. The button does not appear at all until at least one key is configured. On the hosted platform, a schedule below Enterprise sees the button greyed out.</p>
+            <p>Selfhosted installs supply their own keys, and either a <a href="https://ai.google.dev/" target="_blank" rel="noopener" class="doc-link">Gemini API key</a> or an <a href="https://platform.openai.com/" target="_blank" rel="noopener" class="doc-link">OpenAI API key</a> is enough to use every part of the generator. The accent color and font use Gemini when its key is set and OpenAI when it is not, unless the operator chose OpenAI for AI text. Image generation uses OpenAI when its key is set, and Gemini otherwise. The button does not appear at all until at least one key is configured. On the hosted platform, a schedule below Enterprise sees the button greyed out.</p>
         </div>
     </section>
 

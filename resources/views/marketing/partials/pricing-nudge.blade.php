@@ -95,7 +95,7 @@
                         @if ($nudgeTier === 'Free')
                             No expiry, and no card asked for.
                         @elseif ($nudgeTier === 'Pro')
-                            7-day free trial, cancel any time.
+                            {{ config('app.trial_days') }}-day free trial, cancel any time.
                         @else
                             Included free on every selfhosted install.
                         @endif

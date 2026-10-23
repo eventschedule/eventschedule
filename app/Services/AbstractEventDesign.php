@@ -2248,7 +2248,7 @@ abstract class AbstractEventDesign
                 '{city}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishCity() : $event->venue->translatedCity()) ?? '') : '',
                 '{address}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
                 '{state}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',
-                '{country}' => $event->venue ? ($event->venue->country ?? '') : '',
+                '{country}' => $event->venue ? strtoupper((string) $event->venue->country_code) : '',
 
                 // Ticket variables
                 '{currency}' => $event->ticket_currency_code ?? '',

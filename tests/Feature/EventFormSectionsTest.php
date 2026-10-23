@@ -375,12 +375,16 @@ class EventFormSectionsTest extends TestCase
 
     /**
      * A calendar that has not been sent the event says why. The tab is only there when the
-     * schedule sends its events out, so the reasons are two.
+     * schedule sends its events out, so the reasons are three: members only, cancelled, or not
+     * saved since (EventFormPlacementTest renders each).
      */
     public function test_an_event_that_is_not_synced_says_why(): void
     {
         $view = file_get_contents(resource_path('views/event/edit.blade.php'));
-        $this->assertSame(2, substr_count($view, "{{ \$event->is_draft ? __('messages.calendar_not_synced_draft') : __('messages.calendar_not_synced_next_save') }}"));
+        $this->assertSame(2, substr_count($view, '<p class="event-list-sub">{{ $calendarNotSyncedLine }}</p>'));
+        foreach (['calendar_not_synced_cancelled', 'calendar_not_synced_draft', 'calendar_not_synced_next_save'] as $key) {
+            $this->assertStringContainsString("__('messages.{$key}')", $view);
+        }
         $this->assertStringNotContainsString('calendar_not_synced_manual', $view);
     }
 

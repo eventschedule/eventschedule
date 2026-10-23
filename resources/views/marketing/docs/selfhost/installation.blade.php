@@ -10,12 +10,13 @@
         <x-doc-nav-link href="#database">1. Set Up Database</x-doc-nav-link>
         <x-doc-nav-link href="#download">2. Download Application</x-doc-nav-link>
         <x-doc-nav-link href="#permissions">3. Set File Permissions</x-doc-nav-link>
-        <x-doc-nav-link href="#environment">4. Configure Environment</x-doc-nav-link>
+        <x-doc-nav-link href="#environment">4. Run the Setup Wizard</x-doc-nav-link>
         <x-doc-nav-link href="#cron">5. Set Up Cron Job</x-doc-nav-link>
         <x-doc-nav-link href="#verification">Verification</x-doc-nav-link>
         <x-doc-nav-link href="#updating">Updating</x-doc-nav-link>
         <x-doc-nav-link href="#push-notifications">Push notifications</x-doc-nav-link>
         <x-doc-nav-link href="#spam-protection">Spam protection</x-doc-nav-link>
+        <x-doc-nav-link href="#google-keys">Google keys</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
         <x-doc-nav-link href="#translations">Custom translations</x-doc-nav-link>
         <x-doc-nav-link href="#custom-links">Custom dashboard links</x-doc-nav-link>
@@ -117,6 +118,15 @@
             <div class="doc-callout-title">GD, not Imagick</div>
             <p>Image work (thumbnails, social images, event graphics) is done with GD, and generating an event graphic fails outright if GD is missing. Imagick is not used anywhere, so installing it is not a substitute.</p>
         </div>
+
+        <h3 id="php-settings" class="doc-subheading">PHP settings that ship with the app</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The release carries <code class="doc-inline-code">public/.user.ini</code>, which PHP-FPM and other CGI setups read. It sets these limits:</p>
+        <ul class="doc-list mb-4">
+            <li><code class="doc-inline-code">upload_max_filesize=5M</code> and <code class="doc-inline-code">post_max_size=20M</code>: the largest image a person can upload</li>
+            <li><code class="doc-inline-code">max_execution_time=90</code>: how long one web request may run, which is what can cut short the <a href="#updating" class="doc-link">Update button</a></li>
+            <li><code class="doc-inline-code">session.upload_progress.enabled=0</code> and <code class="doc-inline-code">fatal_error_backtraces=0</code>: stopgaps for the PHP2Shell flaws on an unpatched PHP</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Apache with mod_php does not read <code class="doc-inline-code">.user.ini</code>. There, <code class="doc-inline-code">public/.htaccess</code> sets the two PHP2Shell stopgaps, and the upload and time limits come from your <code class="doc-inline-code">php.ini</code>, so set them there.</p>
     </section>
 
     <!-- 1. Set Up Database -->
@@ -206,7 +216,7 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">All three directories are needed: <code class="doc-inline-code">storage</code> holds logs, uploads and caches, <code class="doc-inline-code">bootstrap</code> holds the compiled config and route caches, and <code class="doc-inline-code">public</code> has to be writable because setup creates the <code class="doc-inline-code">public/storage</code> symlink that serves uploaded images.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The web-server user must also be able to write to the <code class="doc-inline-code">.env</code> file you create in the next step. The app writes its <code class="doc-inline-code">APP_KEY</code> there on the first request, and the setup wizard saves your database configuration to the same file, so give it the same owner (e.g. <code class="doc-inline-code">sudo chown www-data:www-data .env</code>). If it is read-only, the wizard shows a warning at the top of the form and stops before touching the database rather than leaving you half configured.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The web-server user must also be able to write to the <code class="doc-inline-code">.env</code> file you create in the next step. Step 4 gives it the right owner as soon as it exists.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Which user?</div>
@@ -222,17 +232,20 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            4. Configure Environment
+            4. Run the Setup Wizard
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Copy the example environment file to create your configuration:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Copy the example environment file to create your configuration, and give it to the web-server user:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>bash</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code><span class="code-keyword">cp</span> .env.example .env</code></pre>
+            <pre><code><span class="code-keyword">cp</span> .env.example .env
+<span class="code-keyword">sudo chown</span> www-data:www-data .env</code></pre>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Use the same user as in step 3. The app writes its <code class="doc-inline-code">APP_KEY</code> to this file on the first request, and the wizard saves your database settings to it. If the web-server user cannot write to it, the wizard shows a warning at the top of the form and stops before touching the database, so you are never left half configured.</p>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Leave APP_URL blank</div>
@@ -364,7 +377,7 @@
                         <td>Every minute</td>
                     </tr>
                     <tr>
-                        <td>Send scheduled newsletters</td>
+                        <td>Send scheduled newsletters, read the <a href="{{ route('marketing.docs.managing_schedules') }}#feeds" class="doc-link">feeds</a> that are due, and look up venue addresses for the <a href="{{ route('marketing.docs.selfhost.admin') }}#venue-map" class="doc-link">venue map</a> when it is set up</td>
                         <td>Every minute</td>
                     </tr>
                     <tr>
@@ -372,7 +385,7 @@
                         <td>Every 5 minutes</td>
                     </tr>
                     <tr>
-                        <td>Google, Outlook and CalDAV calendar sync, AI translation</td>
+                        <td>Google, Outlook and CalDAV calendar sync, AI translation, and the check for schedules that publish a private calendar</td>
                         <td>Every 15 minutes</td>
                     </tr>
                     <tr>
@@ -380,7 +393,7 @@
                         <td>Hourly</td>
                     </tr>
                     <tr>
-                        <td>Renew calendar webhooks, prune old logs and backups, notify owners about new booking requests, fan content and poll options, run curator auto-imports, and check GitHub for a new release</td>
+                        <td>Renew calendar webhooks, prune old logs and backups, delete personal data past its retention period, notify owners about new event requests, fan content and poll options, run auto imports, and check GitHub for a new release</td>
                         <td>Daily</td>
                     </tr>
                     <tr>
@@ -429,7 +442,9 @@
             <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-link">Google Calendar integration</a></li>
             <li>Set up <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="doc-link">Outlook Calendar integration</a></li>
             <li>Let ticket buyers save their ticket to <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> (optional)</li>
-            <li>Set up <a href="{{ route('marketing.docs.saas.twilio') }}" class="doc-link">Twilio</a> to text invitations to venues or talent you added by phone number, and to send WhatsApp messages (<code class="doc-inline-code">TWILIO_SID</code>, <code class="doc-inline-code">TWILIO_AUTH_TOKEN</code>, <code class="doc-inline-code">TWILIO_FROM_NUMBER</code>)</li>
+            <li>Set up <a href="{{ route('marketing.docs.saas.twilio') }}" class="doc-link">Twilio</a> to verify phone numbers by text message and to create events from WhatsApp messages (<code class="doc-inline-code">TWILIO_SID</code>, <code class="doc-inline-code">TWILIO_AUTH_TOKEN</code>, <code class="doc-inline-code">TWILIO_FROM_NUMBER</code>). A selfhosted install never texts or emails an invitation to a venue or performer you added</li>
+            <li>Add <a href="#google-keys" class="doc-link">Google keys</a> for venue coordinates, map images and YouTube search (optional)</li>
+            <li>Switch on the <a href="{{ route('marketing.docs.selfhost.admin') }}#venue-map" class="doc-link">venue map</a>, a map of a schedule's venues on its public page, by naming an address search service (optional, off by default)</li>
             <li>Enable <a href="#push-notifications" class="doc-link">push notifications</a> with OneSignal (optional)</li>
             <li>Add a <a href="#spam-protection" class="doc-link">Turnstile challenge</a> to your public forms (optional)</li>
             <li>Turn on <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">federation</a> to share your public events with the eventschedule.com listings (optional, off by default)</li>
@@ -448,8 +463,8 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">An upgrade is one step, from the browser or from the server. Either way it downloads the new release, installs it, runs any new migrations and clears the cached config, routes and views.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li><span class="font-semibold text-gray-900 dark:text-white">Take a backup first:</span> the database, and the <code class="doc-inline-code">storage</code> directory.</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">In the browser:</span> open <span class="font-semibold text-gray-900 dark:text-white">Settings &gt; App Update</span>, which shows your installed version next to the latest release and offers an <span class="font-semibold text-gray-900 dark:text-white">Update</span> button when a newer one is out. Instance admins have the same on <a href="{{ route('marketing.docs.selfhost.admin') }}#system-app-update" class="doc-link">Admin &gt; System &gt; App Update</a>, where a badge on the System tab says a release is waiting.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Take a backup first:</span> the database, the <code class="doc-inline-code">storage</code> directory and the <code class="doc-inline-code">.env</code> file. <code class="doc-inline-code">.env</code> holds <code class="doc-inline-code">APP_KEY</code>, and without that key the payment credentials users saved cannot be read.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">In the browser:</span> sign in as an instance admin and open <span class="font-semibold text-gray-900 dark:text-white">Settings &gt; App Update</span>, which shows your installed version next to the latest release and offers an <span class="font-semibold text-gray-900 dark:text-white">Update</span> button when a newer one is out. The same is on <a href="{{ route('marketing.docs.selfhost.admin') }}#system-app-update" class="doc-link">Admin &gt; System &gt; App Update</a>, where a badge on the System tab says a release is waiting. Other accounts do not see the tab. An old install that has no instance admin at all still shows it to every signed-in account.</li>
             <li><span class="font-semibold text-gray-900 dark:text-white">Or on the server:</span> run <code class="doc-inline-code">php artisan app:update</code>.</li>
         </ol>
 
@@ -463,7 +478,7 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The <span class="font-semibold text-gray-900 dark:text-white">Update</span> button runs as the web-server user and has to replace every file of the app, so on an install where that user can write only to <code class="doc-inline-code">storage</code>, <code class="doc-inline-code">bootstrap</code> and <code class="doc-inline-code">public</code> (the <a href="#permissions" class="doc-link">file permissions</a> step), it stops and says so without changing any file of the app. On such an install only root can write every file, so run <code class="doc-inline-code">sudo php artisan app:update</code> on the server instead, then run the ownership command from the file permissions step again, because anything the update creates under <code class="doc-inline-code">storage</code> belongs to root until you do.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design, so they survive it. The latest version is looked up once a day by the <a href="#cron" class="doc-link">scheduler</a>; <span class="font-semibold text-gray-900 dark:text-white">Check for Updates</span> on the admin page asks GitHub straight away.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design, so they survive it. The <code class="doc-inline-code">vendor</code> directory is not: it is replaced with the release's own copy, so a package you added with <code class="doc-inline-code">composer require</code> is gone after the next update. The latest version is looked up once a day by the <a href="#cron" class="doc-link">scheduler</a>; <span class="font-semibold text-gray-900 dark:text-white">Check for Updates</span> on the admin page asks GitHub straight away.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">If the App Update screen is not there at all, or a large update outruns PHP's <code class="doc-inline-code">max_execution_time</code>, use the command: it works on every install, has no time limit and does not depend on the screen. That is also the way back from an older release whose UI hid the update button.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A server whose PHP runs OPcache with <code class="doc-inline-code">opcache.validate_timestamps=0</code> keeps serving the old code after the files change: reload PHP-FPM (or your web server) once the update has finished.</p>
     </section>
@@ -528,6 +543,57 @@ TURNSTILE_SECRET_KEY=your-turnstile-secret-key</code></pre>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Turnstile is deliberately inactive on tenant custom domains, because a site key is registered against specific hostnames and would fail to validate on a domain you do not control. If you run a multi-tenant SaaS with <a href="{{ route('marketing.docs.saas.custom_domains') }}" class="doc-link">custom domains</a>, expect those pages to fall back to no challenge.</p>
     </section>
 
+    <!-- Google keys -->
+    <section id="google-keys" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+            </svg>
+            Google Maps and YouTube Keys (Optional)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Two Google API keys switch on the map and video features below. Both are off when unset, and nothing is sent to Google. Create them in the <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" class="doc-link">Google Cloud Console</a>, enable the APIs named for each, and add them to <code class="doc-inline-code">.env</code>:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>BACKEND_GOOGLE_KEY=your-server-key
+MAPS_API_KEY=your-browser-key</code></pre>
+        </div>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>APIs to enable</th>
+                        <th>What it turns on</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">BACKEND_GOOGLE_KEY</code></td>
+                        <td>Geocoding API, Maps Static API, YouTube Data API v3</td>
+                        <td>Your server uses it. It finds a venue's coordinates when the schedule is saved, adds the <strong class="text-gray-900 dark:text-white">Validate Address</strong> button under an address, draws the map picture on an event page, and searches YouTube when someone adds a video. The coordinates also give a <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> pass its arrival notification.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">MAPS_API_KEY</code></td>
+                        <td>Maps Embed API</td>
+                        <td>A visitor's browser uses it. It puts an interactive Google Map of the venue on an event page. The map loads only after the visitor allows marketing cookies or asks to see it, and it is never shown on a schedule's own custom domain.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Restrict the browser key to your own domain in the Cloud Console, because anyone can read it in the page. If you replaced the privacy policy at <a href="{{ route('marketing.docs.selfhost.admin') }}#system-legal-pages" class="doc-link">Legal Pages</a>, name Google Maps in yours: the bundled policy lists it once either key is set.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">The venue map is separate</div>
+            <p>The map of a schedule's venues on its public page never uses Google. It needs an OpenStreetMap-style address search of its own, set with <code class="doc-inline-code">MAP_GEOCODER_URL</code> and <code class="doc-inline-code">MAP_TILE_URL</code>. See <a href="{{ route('marketing.docs.selfhost.admin') }}#venue-map" class="doc-link">Venue map</a> in the admin panel guide.</p>
+        </div>
+    </section>
+
     <!-- Troubleshooting -->
     <section id="troubleshooting" class="doc-section">
         <h2 class="doc-heading">
@@ -548,6 +614,9 @@ TURNSTILE_SECRET_KEY=your-turnstile-secret-key</code></pre>
             <div class="doc-callout-title">Manual fallback</div>
             <p>If the wizard still does not appear, open <code class="doc-inline-code">.env</code>, clear the <code class="doc-inline-code">APP_URL</code> value so it is blank, and reload. The wizard will run again and rewrite <code class="doc-inline-code">APP_URL</code> once setup succeeds.</p>
         </div>
+
+        <h3 id="troubleshooting-page-expired" class="doc-subheading">Sign Up answers "Page Expired" (419)</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The site is on plain HTTP. <code class="doc-inline-code">.env.example</code> ships <code class="doc-inline-code">SESSION_SECURE_COOKIE=true</code>, so the browser never stores the session cookie over HTTP and every form fails its security check. <strong class="text-gray-900 dark:text-white">Test</strong> still works, which makes it look as if only Sign Up is broken. Browsers treat <code class="doc-inline-code">http://localhost</code> as secure, so you see this on a LAN address or a hostname, not on localhost. Install a certificate, or for a test install only set <code class="doc-inline-code">SESSION_SECURE_COOKIE=false</code> (see <a href="#environment" class="doc-link">HTTPS and Session Cookies</a>).</p>
 
         <h3 class="doc-subheading">No email is ever delivered</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Start with <code class="doc-inline-code">MAIL_MAILER</code>, which ships as <code class="doc-inline-code">log</code>. That writes the whole message into <code class="doc-inline-code">storage/logs/laravel.log</code> instead of sending it, so finding your "missing" emails in that file confirms the diagnosis. Set your real mail credentials as described in <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-link">Email Setup</a>.</p>

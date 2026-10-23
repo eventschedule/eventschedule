@@ -414,6 +414,14 @@ class FreePlanLimitsTest extends TestCase
         $this->actingAs($owner)->getJson(route('checkin.search', [
             'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
         ]).'?q=smith')->assertStatus(403);
+
+        // The scanner does not offer the dashboard's button below Pro, as the Sales page does not.
+        $dashboard = 'href="'.e(route('checkin.index')).'"';
+        $this->assertStringNotContainsString($dashboard, $this->actingAs($owner)->get(route('ticket.scan'))->assertOk()->getContent());
+
+        $proOwner = $this->createOwner();
+        $this->createRole($proOwner);
+        $this->assertStringContainsString($dashboard, $this->actingAs($proOwner)->get(route('ticket.scan'))->assertOk()->getContent(), 'sanity check: on Pro it is there');
     }
 
     public function test_the_ticket_waitlist_stays_pro_but_the_rsvp_waitlist_stays_free(): void
@@ -685,6 +693,38 @@ class FreePlanLimitsTest extends TestCase
             (bool) $event->fresh()->individual_tickets,
             'a setting the schedule already had is kept when it drops to free, not destroyed'
         );
+    }
+
+    /**
+     * Individual tickets is free on free registration (no money taken) and Pro with tickets
+     * (docs/FEATURES.md). A flag stored under free registration is not "already had" once the event
+     * starts selling tickets, or free registration would be a way round the plan.
+     */
+    public function test_individual_tickets_is_free_on_free_registration_and_does_not_carry_into_tickets(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $event = $this->createEvent($role, ['rsvp_enabled' => true]);
+
+        $save = function (array $mode) use ($owner, $role, $event) {
+            $request = \Illuminate\Http\Request::create('/', 'POST', array_merge([
+                'name' => 'Registration Event',
+                'starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+                'duration' => 2,
+                'schedule_type' => 'one_time',
+                'individual_tickets' => 1,
+            ], $mode));
+            $request->setUserResolver(fn () => $owner);
+            $this->app->instance('request', $request);
+
+            app(\App\Repos\EventRepo::class)->saveEvent($role, $request, $event->fresh(), false);
+        };
+
+        $save(['rsvp_enabled' => 1, 'tickets_enabled' => 0]);
+        $this->assertTrue((bool) $event->fresh()->individual_tickets, 'free registration keeps individual tickets on the free plan');
+
+        $save(['rsvp_enabled' => 0, 'tickets_enabled' => 1, 'tickets' => [['type' => 'General', 'price' => 20, 'quantity' => 10]]]);
+        $this->assertFalse((bool) $event->fresh()->individual_tickets, 'switching to tickets below Pro scrubs a flag stored under free registration');
     }
 
     /**

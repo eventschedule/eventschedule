@@ -3,6 +3,7 @@
     title="Custom Domains for Tenants: DNS and SSL - Event Schedule"
     description="Let the schedules on your SaaS deployment use their own domain names, with automatic SSL provisioning through DigitalOcean App Platform."
     lede="Let the schedules on your deployment use their own domain names, with automatic SSL provisioning via DigitalOcean App Platform."
+    plan="enterprise"
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -25,14 +26,14 @@
             <x-doc-badge plan="enterprise" />
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A custom domain lets a schedule be reached at its owner's own address (for example <code class="doc-inline-code">events.example.com</code>) instead of the default <code class="doc-inline-code">subdomain.yourdomain.com</code> URL.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The work is split in two. Each owner sets the domain on their own schedule's edit page. You configure DigitalOcean once, in <code class="doc-inline-code">.env</code>, and afterwards follow every domain on your platform at <strong>Manage &rarr; Domains</strong> in the admin panel (<code class="doc-inline-code">/admin/domains</code>).</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The work is split in two. Each owner sets the domain on their own schedule's edit page. You configure DigitalOcean once, in <code class="doc-inline-code">.env</code>, and afterwards follow every domain on your platform at <strong>Manage &rarr; Domains</strong> in the platform admin panel (<code class="doc-inline-code">/admin/domains</code>).</p>
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Enterprise only</div>
-            <p>Custom domains are an Enterprise feature. On a schedule that is not on Enterprise, the Redirect and Direct options render disabled with an upgrade prompt, and the server re-applies the schedule's existing values on save, so a hand-crafted POST cannot set a domain either. A schedule that later drops off Enterprise keeps the domain it already has: only <em>changing</em> it is blocked. <a href="#admin-management" class="doc-link">Remove it from the admin panel</a> if you need it gone.</p>
+            <p>Custom domains are an Enterprise feature. On a schedule that is not on Enterprise, the Redirect and Direct options render disabled with an upgrade prompt, and the server re-applies the schedule's existing values on save, so a hand-crafted POST cannot set a domain either. A schedule that later drops off Enterprise keeps the domain it already has: only <em>changing</em> it is blocked. <a href="#admin-management" class="doc-link">Remove it from the platform admin panel</a> if you need it gone.</p>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Owners choose the mode themselves. On the schedule's edit page (<strong class="text-gray-900 dark:text-white">Edit Schedule</strong>), the <strong class="text-gray-900 dark:text-white">Settings</strong> tab opens with the <strong class="text-gray-900 dark:text-white">Schedule URL</strong>. Its <strong class="text-gray-900 dark:text-white">Edit</strong> link reveals a <strong class="text-gray-900 dark:text-white">Mode</strong> chooser with three options, and for the two custom modes a <strong class="text-gray-900 dark:text-white">Custom Domain</strong> field. Nothing changes until the form is saved. The owner's side of this is in <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Creating Schedules</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Owners choose the mode themselves. On the schedule's edit page (<strong class="text-gray-900 dark:text-white">Edit Schedule</strong>), the <strong class="text-gray-900 dark:text-white">Settings</strong> tab opens with the <strong class="text-gray-900 dark:text-white">Schedule URL</strong>. Its <strong class="text-gray-900 dark:text-white">Edit</strong> link reveals a <strong class="text-gray-900 dark:text-white">Mode</strong> chooser with three options, and for the two custom modes a <strong class="text-gray-900 dark:text-white">Custom Domain</strong> field, which takes the full address with <code class="doc-inline-code">https://</code>, as its placeholder <code class="doc-inline-code">https://events.example.com</code> shows. Nothing changes until the form is saved. The owner's side of this is in <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Creating Schedules</a>.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -60,7 +61,7 @@
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">Direct</strong></td>
                         <td>The schedule is served on the owner's domain itself, over HTTPS, with the domain kept in the address bar.</td>
-                        <td>The custom domain, once active</td>
+                        <td>The custom domain once active, unless the owner keeps the subdomain as the <a href="#main-address" class="doc-link">main address</a></td>
                         <td>Enterprise plus DigitalOcean App Platform</td>
                     </tr>
                 </tbody>
@@ -80,7 +81,7 @@
                 <tbody>
                     <tr>
                         <td>Canonical URL and sitemap</td>
-                        <td>The custom domain becomes the SEO canonical for that schedule's guest portal, and the schedule serves its own <code class="doc-inline-code">/sitemap.xml</code> on that host. Your platform's global sitemap never lists custom-domain URLs. An owner can instead keep the subdomain as the main address: the custom domain still serves every page, while the canonical, structured data, emails and shared links name the subdomain, and its pages are listed in the global sitemap. In Redirect mode the subdomain stays canonical, because the custom domain only 301s away from itself.</td>
+                        <td>The custom domain becomes the SEO canonical for that schedule's guest portal, and the schedule serves its own <code class="doc-inline-code">/sitemap.xml</code> on that host. Your platform's global sitemap never lists custom-domain URLs. An owner can instead keep the subdomain as the <a href="#main-address" class="doc-link">main address</a>: the custom domain still serves every page, while the canonical, structured data, emails and shared links name the subdomain, and its pages are listed in the global sitemap. In Redirect mode the subdomain stays canonical, because the custom domain only 301s away from itself.</td>
                     </tr>
                     <tr>
                         <td>Ads</td>
@@ -96,7 +97,7 @@
                     </tr>
                     <tr>
                         <td>Emails</td>
-                        <td>Send readers to it. Event links in newsletters, in the automatic new-event digest to confirmed subscribers, and in interest-list and waitlist emails land on the custom domain. Ticket links in purchase confirmations stay on your app subdomain.</td>
+                        <td>Send readers to the main address. Event links in newsletters, in the automatic new-event digest to confirmed subscribers, and in interest-list and waitlist emails land on the custom domain, or on the subdomain when the owner kept that as the main address. Ticket links in purchase confirmations stay on your app subdomain.</td>
                     </tr>
                     <tr>
                         <td>Calendar feed and short links</td>
@@ -210,7 +211,7 @@
         </h2>
 
         <h3 class="doc-subheading">Redirect Mode</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The owner stores their domain and sets up a Cloudflare page rule that 301 redirects it to their <code class="doc-inline-code">subdomain.yourdomain.com</code> URL. Nothing is registered with DigitalOcean, no certificate is issued by you, and no status is tracked, so the Status column in the admin panel stays empty for these schedules. The subdomain remains the canonical URL, since the custom domain never renders a page itself.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The owner stores their domain and sets up a Cloudflare page rule that 301 redirects it to their <code class="doc-inline-code">subdomain.yourdomain.com</code> URL. Nothing is registered with DigitalOcean, no certificate is issued by you, and no status is tracked, so the Status column in the platform admin panel stays empty for these schedules. The subdomain remains the canonical URL, since the custom domain never renders a page itself.</p>
 
         <h3 class="doc-subheading">Direct Mode</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">When an owner saves their domain in Direct mode:</p>
@@ -225,8 +226,16 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Only the schedule's own URLs are rewritten</div>
-            <p>The rewrite deliberately leaves app URLs such as login, the admin panel and the follow flow pointing at <code class="doc-inline-code">app.yourdomain.com</code>. Those pages need the session cookie that is scoped to your base domain, so moving them onto the customer's host would sign the visitor out. Redirects issued during the structured guest-submit flow opt out of the rewrite for the same reason.</p>
+            <p>The rewrite deliberately leaves app URLs such as login, the admin portal and the follow flow pointing at <code class="doc-inline-code">app.yourdomain.com</code>. Those pages need the session cookie that is scoped to your base domain, so moving them onto the customer's host would sign the visitor out. Redirects issued during the structured guest-submit flow opt out of the rewrite for the same reason.</p>
         </div>
+
+        <h3 id="main-address" class="doc-subheading">Main address</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">In Direct mode the domain editor shows a <strong class="text-gray-900 dark:text-white">Main address</strong> choice under the DNS steps: the owner's domain (the default) or the schedule's subdomain. Both keep serving every page once the domain is active. The choice decides which address the app names:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Your domain</strong> - the custom domain is the canonical URL, the schedule's events are left out of your platform's global sitemap, and the custom host serves its own <code class="doc-inline-code">/sitemap.xml</code>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Your subdomain</strong> - the canonical, structured data, emails, shared links, the QR code and the address at the top of the schedule's settings name the subdomain, and the schedule's pages are listed in the global sitemap. On the custom host, <code class="doc-inline-code">/sitemap.xml</code> answers page-not-found and <code class="doc-inline-code">robots.txt</code> points at the global sitemap. The settings page names the custom domain on an <strong class="text-gray-900 dark:text-white">Also at</strong> line under the address.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Until the domain is active the subdomain is the address whichever is chosen. The <strong>Manage &rarr; Domains</strong> list does not show the choice. The owner's side is in <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Creating Schedules</a>.</p>
 
         <h3 class="doc-subheading">Domain status lifecycle</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Direct-mode domains carry a status. Owners and admins see a coloured badge; the underlying value is what filters and the middleware key off.</p>
@@ -254,7 +263,7 @@
                     <tr>
                         <td><code class="doc-inline-code">failed</code></td>
                         <td>Setup failed</td>
-                        <td>The API call failed, or the domain is no longer present in the app spec. Re-provisioning from the admin panel puts it back to pending.</td>
+                        <td>The API call failed, or the domain is no longer present in the app spec. Re-provisioning from the platform admin panel puts it back to pending.</td>
                     </tr>
                 </tbody>
             </table>
@@ -314,7 +323,7 @@
             <li>Save, and wait for DNS to propagate. SSL is provisioned automatically once DigitalOcean can resolve the record.</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">DNS propagation can take up to 48 hours, though it is usually much faster. The status badge beside the <strong>Schedule URL</strong> moves from <strong>Setting up...</strong> to <strong>Active</strong> within five minutes of DigitalOcean reporting the domain live, and the same change shows in the admin domains list.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">DNS propagation can take up to 48 hours, though it is usually much faster. Within five minutes of DigitalOcean reporting the domain live, the <strong>Setting up...</strong> badge beside the <strong>Schedule URL</strong> goes away, the domain editor under its <strong>Edit</strong> link shows <strong>Active</strong>, and the same change shows in the platform admin panel's domains list.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Apex domains need CNAME flattening</div>
@@ -331,7 +340,7 @@
             </svg>
             Admin Management
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Every schedule with a custom domain, in either mode, is listed at <strong class="text-gray-900 dark:text-white">Manage</strong> &rarr; <strong class="text-gray-900 dark:text-white">Domains</strong> in the admin panel (<code class="doc-inline-code">/admin/domains</code>): the <strong class="text-gray-900 dark:text-white">Manage</strong> tab, then <strong class="text-gray-900 dark:text-white">Domains</strong> in the row of pages under it. The page is hosted-only and admin-only.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every schedule with a custom domain, in either mode, is listed at <strong class="text-gray-900 dark:text-white">Manage</strong> &rarr; <strong class="text-gray-900 dark:text-white">Domains</strong> in the platform admin panel (<code class="doc-inline-code">/admin/domains</code>): the <strong class="text-gray-900 dark:text-white">Manage</strong> tab, then <strong class="text-gray-900 dark:text-white">Domains</strong> in the row of pages under it. The page is hosted-only and admin-only.</p>
 
         <h3 class="doc-subheading">Reading the page</h3>
         <ul class="doc-list mb-6">
@@ -377,11 +386,11 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Domain shows "Setup failed"</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Either the API call failed at save time, or the sync no longer finds the domain on your app. DigitalOcean's own reason is shown directly under the Setup failed badge in the admin panel, so start there. Common causes: a CNAME that does not resolve yet, an invalid hostname, the domain already registered against another app, or an API token missing the <strong>update</strong> scope. Fix the cause, then re-provision. If re-provisioning reports the domain is already registered, the entry is present and correct on your app, so the remaining fix is the DNS record or removing the domain and adding it back.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Either the API call failed at save time, or the sync no longer finds the domain on your app. DigitalOcean's own reason is shown directly under the Setup failed badge in the platform admin panel, so start there. Common causes: a CNAME that does not resolve yet, an invalid hostname, the domain already registered against another app, or an API token missing the <strong>update</strong> scope. Fix the cause, then re-provision. If re-provisioning reports the domain is already registered, the entry is present and correct on your app, so the remaining fix is the DNS record or removing the domain and adding it back.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">404 on the custom domain</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">An unknown host is a 404 by design. The middleware only serves a schedule whose mode is direct <em>and</em> whose status is active, so a pending or redirect-mode domain 404s here, and so does the domain of a schedule that has been deleted. Lookups are cached for 10 minutes, so a status that has only just changed can take that long to take effect unless it was changed from the admin panel, which clears the cache.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">An unknown host is a 404 by design. The middleware only serves a schedule whose mode is direct <em>and</em> whose status is active, so a pending or redirect-mode domain 404s here, and so does the domain of a schedule that has been deleted. Lookups are cached for 10 minutes, so a status that has only just changed can take that long to take effect unless it was changed from the platform admin panel, which clears the cache.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"This custom domain is already in use by another schedule"</h4>

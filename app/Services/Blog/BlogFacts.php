@@ -118,6 +118,8 @@ class BlogFacts
             ':pro_yearly' => plan_price(PlatformPricing::proYearly()),
             ':enterprise_monthly' => plan_price(PlatformPricing::enterpriseMonthly()),
             ':enterprise_yearly' => plan_price(PlatformPricing::enterpriseYearly()),
+            // Not a price, but set by the installation the same way (TRIAL_DAYS), so never typed.
+            ':trial_days' => (string) (int) config('app.trial_days', 7),
         ];
     }
 

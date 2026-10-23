@@ -365,8 +365,8 @@ class User extends Authenticatable implements MustVerifyEmail
      * Scoped claim on purpose: this closes the PAGES, not the endpoints. /sales/action/{id} and
      * the /api/sales routes authorize through canViewEventData(), which carries no Enterprise
      * clause, so a downgraded team member who still holds a sale id can act on it. That gap
-     * predates this method (canEditEvent never filtered either) and closing it means re-gating
-     * Analytics and check-in stats too, which have no such filter on their own role scopes.
+     * predates this method (canEditEvent never filtered either). The /analytics page lists and
+     * totals through this set as well (AnalyticsController, AnalyticsService::getUserRoleIds()).
      *
      * Keys on roles.user_id exactly like viewAdmin(); CheckData::checkRoleOwnership() repairs
      * drift from the pivot.

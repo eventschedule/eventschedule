@@ -219,6 +219,7 @@ class HelpUtils
         // Simple page-level mappings
         '{subdomain}/schedule' => '/docs/managing-schedules#schedule',
         '{subdomain}/appointments' => '/docs/appointments',
+        '{subdomain}/appointments/bookings/*/reschedule' => '/docs/appointments#rescheduling',
         '{subdomain}/templates' => '/docs/managing-schedules#templates',
         '{subdomain}/availability' => '/docs/managing-schedules#availability',
         // The seating tab, the designer and the box office console. No ticket-tab-* entry to go
@@ -244,11 +245,15 @@ class HelpUtils
         '{subdomain}/feeds/*' => '/docs/managing-schedules#feeds-review',
         '{subdomain}/followers' => '/docs/managing-schedules#followers',
         '{subdomain}/team' => '/docs/managing-schedules#team',
+        // The team tab's own pages: '{subdomain}/team' above matches the tab alone.
+        '{subdomain}/team/add-member' => '/docs/managing-schedules#team',
+        '{subdomain}/team/transfer' => '/docs/managing-schedules#transfer-ownership',
+        'schedule-transfer/*' => '/docs/managing-schedules#transfer-ownership',
         '{subdomain}/plan' => '/docs/managing-schedules#plan',
         '{subdomain}/audit-log' => '/docs/managing-schedules#audit-log',
         '{subdomain}/videos' => '/docs/managing-schedules#videos',
         '{subdomain}/merge-venues*' => '/docs/creating-schedules#merge',
-        '{subdomain}/subscribe' => '/docs/creating-schedules',
+        '{subdomain}/subscribe' => '/docs/managing-schedules#plan',
         'my-carpools' => '/docs/creating-schedules#engagement-carpool',
         '{subdomain}/import' => '/docs/ai-import',
         '{subdomain}/import/ai' => '/docs/ai-import',
@@ -267,14 +272,16 @@ class HelpUtils
                 'graphic-pane-email' => '/docs/event-graphics#email-scheduling',
             ],
         ],
-        'events' => '/docs/getting-started',
         // Explicit rather than load-bearing: '{subdomain}/merge-venues*' above already matches
         // this page, because resolvePattern() substitutes '*' for {subdomain} when there is no
         // route parameter. Kept so the mapping survives if that fallback ever tightens, and so
         // the page is not silently relying on it.
         'following/merge-venues*' => '/docs/creating-schedules#merge',
         'following' => '/docs/sharing#followers',
-        'tickets' => '/docs/tickets',
+        // The tickets the signed-in person HOLDS (TicketController::tickets), not the organizer's
+        // side: no guide section covers this page, so Help opens the docs home rather than
+        // Selling Tickets.
+        'tickets' => '/docs',
         // /sales carries six tabs covering four different doc pages, so a flat mapping sent the
         // Help button to "Managing Sales" from the Installments, Subscriptions and Gift Cards
         // tabs alike. Keyed on the tab BUTTON ids, which is what navigation.blade.php reads from
@@ -298,7 +305,7 @@ class HelpUtils
         'analytics' => [
             'doc' => '/docs/analytics',
             'anchors' => [
-                'tab-web' => '/docs/analytics',
+                'tab-web' => '/docs/analytics#web-analytics',
                 'tab-revenue' => '/docs/analytics#revenue',
                 'tab-checkins' => '/docs/analytics#checkins',
                 'tab-realtime' => '/docs/analytics#realtime',

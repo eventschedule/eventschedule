@@ -1174,8 +1174,12 @@ if (! function_exists('can_self_update')) {
      *
      * Disabled on nexus (eventschedule.com deploys via git/CI) and in testing.
      * On a multi-tenant self-hosted SaaS (hosted) it is operator-only (admin),
-     * so a tenant can't trigger a global update. On a plain selfhost it is
-     * available to any authenticated user.
+     * so a tenant can't trigger a global update. On a plain selfhost it is the
+     * install's admins too, because with ALLOW_REGISTRATION on "any signed-in
+     * account" is anyone who signs up, and the update replaces the app's files
+     * and runs migrate --force. An install with no admin at all (its first
+     * account predates the automatic admin flag, issue #106) keeps the old rule,
+     * any signed-in account, or nobody could update it from the app.
      */
     function can_self_update(?\App\Models\User $user = null): bool
     {
@@ -1183,11 +1187,11 @@ if (! function_exists('can_self_update')) {
             return false;
         }
 
-        if (! config('app.hosted')) {
-            return true; // plain selfhost - any authenticated user
+        if (! config('app.hosted') && ! \App\Models\User::where('is_admin', true)->exists()) {
+            return true; // plain selfhost with no admin - any authenticated user
         }
 
-        return (bool) ($user ?? auth()->user())?->isAdmin(); // self-hosted SaaS - admin only
+        return (bool) ($user ?? auth()->user())?->isAdmin(); // admin only
     }
 }
 

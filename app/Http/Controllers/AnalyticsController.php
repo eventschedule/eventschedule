@@ -16,13 +16,23 @@ class AnalyticsController extends Controller
     public function index(Request $request, AnalyticsService $analytics)
     {
         $user = auth()->user();
-        $roleIds = $user->editor()->pluck('roles.id');
-        $roles = $user->editor()->get();
+        // The schedules whose figures this person may read: owned or administered, and on hosted
+        // somebody else's only while its plan includes a team (User::manageableRoles(), the rule
+        // Sales, /scan, /checkin and the schedule's admin pages follow). editor() alone kept a
+        // team admin reading revenue and check-ins here after a downgrade closed everything else.
+        $roles = $user->manageableRoles();
+        $roleIds = $roles->pluck('id');
 
         // Get selected role for filtering (decode from URL-safe format)
         // Auto-select when user has only one schedule
         $selectedRoleId = $request->role_id ? UrlUtils::decodeId($request->role_id) : null;
-        if (! $selectedRoleId && $roles->count() === 1) {
+        // A schedule the plan now closes to this team member (a link saved before the downgrade)
+        // is dropped, not refused: the page says why it is missing (partials/team-access-notice).
+        $droppedRoleId = $selectedRoleId && ! $roleIds->contains($selectedRoleId) && $user->planBlockedRoles()->contains('id', $selectedRoleId);
+        if ($droppedRoleId) {
+            $selectedRoleId = null;
+        }
+        if (! $selectedRoleId && ! $droppedRoleId && $roles->count() === 1) {
             $selectedRoleId = $roles->first()->id;
         }
 
@@ -47,17 +57,18 @@ class AnalyticsController extends Controller
         $ownedDataOnly = $tab !== 'web';
 
         // The schedule the Realtime tab is narrowed to, and what the tab strip's link to it
-        // carries. Live traffic follows manageableRoles(), which on hosted is narrower than the
-        // schedules this page lists: a schedule whose plan no longer includes a team is still on
-        // the picker here and is closed to its admins there. Such a selection is dropped on the
-        // way to that tab, never refused: the tab strip carries the selection forward, and a 403
-        // for pressing a tab would be this page's own fault. (The poll, which is asked for one
-        // schedule by id, does refuse it: RealtimeController::data().)
+        // carries. Live traffic follows manageableRoles(), the same set this page lists, and it
+        // also needs the live view to be on. Such a selection is dropped on the way to that tab,
+        // never refused: the tab strip carries the selection forward, and a 403 for pressing a
+        // tab would be this page's own fault. (The poll, which is asked for one schedule by id,
+        // does refuse it: RealtimeController::data().)
         $realtimeRoleId = $realtimeAvailable && $selectedRoleId && $user->manageableRoles()->contains('id', $selectedRoleId)
             ? $selectedRoleId
             : null;
-        // What every return below hands the tab strip.
-        $realtimeTab = ['realtimeAvailable' => $realtimeAvailable, 'realtimeRoleId' => $realtimeRoleId];
+        // What every return below hands the tab strip, and the schedules the plan closes to this
+        // person, which every tab names (partials/team-access-notice) so a schedule missing from
+        // the picker is explained, as on Sales and Check-in.
+        $realtimeTab = ['realtimeAvailable' => $realtimeAvailable, 'realtimeRoleId' => $realtimeRoleId, 'planBlockedRoles' => $user->planBlockedRoles()];
 
         // Get selected event for filtering (decode from URL-safe format)
         $selectedEventId = $request->event_id ? UrlUtils::decodeId($request->event_id) : null;

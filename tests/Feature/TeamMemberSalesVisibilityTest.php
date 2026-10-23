@@ -218,6 +218,54 @@ class TeamMemberSalesVisibilityTest extends TestCase
             ->assertDontSee('Create events to start selling tickets');
     }
 
+    /**
+     * /analytics follows the same rule. It scoped to editor(), which knows nothing of the plan, so
+     * after a downgrade closed Sales, /scan, /checkin and the admin pages, a team admin still read
+     * the schedule's revenue and check-in figures there.
+     * Mutation: put editor() back in AnalyticsService::getUserRoleIds() or AnalyticsController.
+     */
+    public function test_hosted_analytics_closes_to_a_team_member_when_the_schedule_is_not_enterprise(): void
+    {
+        config(['app.hosted' => true]);
+
+        [$owner, $role, $event, $sale] = $this->scheduleWithASale();
+        $sale->update(['paid_at' => now()]);
+        $role->update(['name' => 'Ed Presents']);
+        $event->update(['ticket_currency_code' => 'USD']);
+        $admin = $this->createOwner();
+        $this->followRole($admin, $role, 'admin');
+        $analytics = fn () => app(\App\Services\AnalyticsService::class);
+        [$start, $end] = [now()->subDays(29)->startOfDay(), now()->endOfDay()];
+
+        // Positive control: while the schedule is Enterprise its admin reads its figures.
+        $this->assertCount(1, $analytics()->getTopEventsByRevenue($admin, 10, $start, $end));
+        $this->actingAs($admin)->get(route('analytics', ['tab' => 'revenue']))
+            ->assertOk()
+            ->assertDontSee('Team member access requires the Enterprise plan');
+
+        $role->plan_type = 'free';
+        $role->plan_expires = now()->subYear()->format('Y-m-d');
+        $role->save();
+
+        $this->assertCount(0, $analytics()->getTopEventsByRevenue($admin->fresh(), 10, $start, $end), 'no revenue after the plan closed the team');
+        // A link saved before the downgrade drops the schedule rather than showing its figures.
+        $saved = $this->actingAs($admin->fresh())->get(route('analytics', ['tab' => 'revenue', 'role_id' => UrlUtils::encodeId($role->id)]))
+            ->assertOk()
+            ->assertSee('Team member access requires the Enterprise plan');
+        $this->assertNull($saved->viewData('selectedRoleId'));
+        $this->assertCount(0, $saved->viewData('roles'));
+        $this->assertCount(0, $saved->viewData('topEventsByRevenue'));
+        foreach (['web', 'revenue', 'checkins'] as $tab) {
+            $this->actingAs($admin->fresh())->get(route('analytics', ['tab' => $tab]))
+                ->assertOk()
+                ->assertSee('Team member access requires the Enterprise plan')
+                ->assertSee('Ed Presents');
+        }
+
+        // The owner is never gated by their own schedule's plan.
+        $this->assertCount(1, $analytics()->getTopEventsByRevenue($owner, 10, $start, $end));
+    }
+
     public function test_the_scan_and_checkin_pickers_explain_the_plan_block(): void
     {
         config(['app.hosted' => true]);

@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\RoleSource;
 use App\Models\User;
+use App\Services\AuditService;
 use App\Services\CuratorSourceService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -103,6 +104,43 @@ class EventListingRightsTest extends TestCase
         $this->assertFalse($lister->events()->where('events.id', $event->id)->exists(), 'only a curator lists somebody else\'s event');
         $this->assertFalse($stranger->canViewEventData($event->fresh()));
         $this->assertFalse($stranger->canEditEvent($event->fresh()));
+    }
+
+    public function test_a_curators_audit_log_does_not_show_the_buyers_of_an_event_it_lists(): void
+    {
+        [$owner, $venue, $event, $stranger, $lister] = $this->listedByAStranger();
+        $buyer = $this->createOwner();
+        $buyer->update(['name' => 'Somebody Who Bought']);
+        $saleLog = AuditService::log(AuditService::SALE_CHECKOUT, $buyer->id, 'Sale', 1, null, null, 'event_id:'.$event->id);
+        $eventLog = AuditService::log(AuditService::EVENT_UPDATE, $owner->id, 'Event', $event->id);
+
+        $listed = $this->actingAs($stranger)->get(route('role.audit_log', ['subdomain' => $lister->subdomain]));
+        $listed->assertOk();
+        $this->assertNotContains($saleLog->id, $listed->viewData('logs')->pluck('id')->all(), 'a curator that lists an event is not shown its buyers');
+        $this->assertNotContains($eventLog->id, $listed->viewData('logs')->pluck('id')->all());
+        $listed->assertDontSee('Somebody Who Bought');
+
+        $own = $this->actingAs($owner)->get(route('role.audit_log', ['subdomain' => $venue->subdomain]));
+        $this->assertContains($saleLog->id, $own->viewData('logs')->pluck('id')->all(), 'the event\'s own schedule still sees its sales');
+        $this->assertContains($eventLog->id, $own->viewData('logs')->pluck('id')->all());
+    }
+
+    public function test_a_venue_sees_the_sales_of_an_event_it_accepted_and_not_of_one_it_declined(): void
+    {
+        $talent = $this->createRole($this->createOwner(), 'talent');
+        $event = $this->createEvent($talent, ['creator_role_id' => $talent->id]);
+        $declinedEvent = $this->createEvent($talent, ['creator_role_id' => $talent->id]);
+        $venueOwner = $this->createOwner();
+        $venue = $this->createRole($venueOwner, 'venue');
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+        $declinedEvent->roles()->attach($venue->id, ['is_accepted' => false]);
+        $accepted = AuditService::log(AuditService::SALE_CHECKOUT, null, 'Sale', 1, null, null, 'event_id:'.$event->id);
+        $declined = AuditService::log(AuditService::SALE_CHECKOUT, null, 'Sale', 2, null, null, 'event_id:'.$declinedEvent->id);
+
+        $ids = $this->actingAs($venueOwner)->get(route('role.audit_log', ['subdomain' => $venue->subdomain]))->viewData('logs')->pluck('id')->all();
+
+        $this->assertContains($accepted->id, $ids, 'a venue an event was accepted onto sees its sales, as on the Sales page');
+        $this->assertNotContains($declined->id, $ids, 'a venue that declined an event has none of its buyers');
     }
 
     public function test_opening_the_listing_address_lists_nothing(): void

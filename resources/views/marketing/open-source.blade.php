@@ -1041,7 +1041,7 @@
 
         // Published surfaces, all served as static files out of public/.
         $specFiles = [
-            ['/api/openapi.json', 'OpenAPI 3.0.3', 'Twenty-nine paths, forty operations, request and response schemas.'],
+            ['/api/openapi.json', 'OpenAPI 3.0.3', 'Thirty paths, forty-one operations, request and response schemas.'],
             ['/llms.txt', 'Short brief', 'The product in one page: schedule types, auth, plans, rate limits.'],
             ['/llms-full.txt', 'Long brief', 'The same, expanded, for a model with room to read.'],
             ['/.well-known/agents.json', 'Agent flows', 'Five named flows with their steps written out: register and set up, create an event with tickets, sell tickets, manage a schedule, book an appointment.'],

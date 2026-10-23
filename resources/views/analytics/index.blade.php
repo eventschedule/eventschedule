@@ -55,6 +55,12 @@
 
         @include('analytics._filters')
 
+        {{-- A schedule the plan closes to a team member is missing from the picker and from every
+             figure; this says why. The Realtime tab prints its own, above its Vue mount. --}}
+        @if ($tab !== 'realtime')
+            @include('partials.team-access-notice', ['roles' => $planBlockedRoles ?? collect()])
+        @endif
+
         @if ($tab === 'revenue')
             @include('analytics._revenue')
         @elseif ($tab === 'checkins')

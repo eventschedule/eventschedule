@@ -404,6 +404,12 @@ class ApiSaleController extends Controller
                 return response()->json(['error' => 'Event has no start date. Please provide event_date parameter.'], 422);
             }
             $eventDate = $event->saleEventDateFromStartsAt();
+        } elseif (! Event::isOccurrenceDate($eventDate) || ! $event->matchesDate($eventDate, $event->scheduleTimezone())) {
+            // The date a sale is for is decided by the event, never by the request: stock is kept
+            // per date string, so a date the event does not happen on had a full allotment of its
+            // own and a sold-out ticket type sold again under it. The same test as checkout's
+            // TicketController::assertSaleDateIsTheEvents().
+            return response()->json(['error' => 'The event does not take place on this event_date'], 422);
         }
 
         // Verify event has tickets enabled and may sell

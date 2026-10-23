@@ -30,6 +30,7 @@
         </x-doc-nav-group>
         <x-doc-nav-link href="#followers">Followers</x-doc-nav-link>
         <x-doc-nav-group label="Team" href="#team">
+            <x-doc-nav-link href="#team-leaving">When someone leaves</x-doc-nav-link>
             <x-doc-nav-link href="#transfer-ownership">Transferring Ownership</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#plan">Plan</x-doc-nav-link>
@@ -50,7 +51,7 @@
             Click a schedule's name in the sidebar to open its admin panel: the pages you run that schedule from, day to day. Under the schedule's name is its public address, with <strong class="text-gray-900 dark:text-white">Copy</strong> beside it, and <strong class="text-gray-900 dark:text-white">View</strong> once the schedule's email address is verified. Below that is a row of tabs, each of which is its own page (on a phone the row is a dropdown). A tab with something to count shows the number beside its name.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Not every tab is offered to every schedule: some depend on the <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-types" class="doc-link">schedule type</a>, some on your access level or on whether the site is eventschedule.com, and one appears only when there is something waiting for you. A tab your plan does not include is still there, and says what the plan adds.
+            Not every tab is offered to every schedule: some depend on the <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-types" class="doc-link">schedule type</a> or on whether the site is eventschedule.com, and Requests appears only when there is something waiting for you. A tab your plan does not include is still there, and says what the plan adds. A viewer sees only the Schedule tab, and Availability on a Talent schedule: every other tab is for owners and admins.
         </p>
 
         <x-doc-screenshot id="managing-schedules--schedule-tab" alt="A schedule's admin panel: its name and public address, the row of tabs, and the Schedule tab's month calendar" loading="eager" />
@@ -68,7 +69,7 @@
                     <tr>
                         <td><a href="#schedule" class="doc-link">Schedule</a></td>
                         <td>Your events, a month at a time, plus anything without a date</td>
-                        <td>Always</td>
+                        <td>Always, viewers included</td>
                     </tr>
                     <tr>
                         <td><a href="#templates" class="doc-link">Templates</a></td>
@@ -78,17 +79,17 @@
                     <tr>
                         <td><a href="#videos" class="doc-link">Videos</a></td>
                         <td>Match YouTube videos to the talent on your upcoming events</td>
-                        <td>Curator schedules</td>
+                        <td>Curator schedules, owners and admins</td>
                     </tr>
                     <tr>
                         <td><a href="#availability" class="doc-link">Availability</a></td>
                         <td>Days you are not free to be booked</td>
-                        <td>Talent schedules. Saving needs <x-doc-badge plan="enterprise" /></td>
+                        <td>Talent schedules, viewers included. Saving needs <x-doc-badge plan="enterprise" /></td>
                     </tr>
                     <tr>
                         <td><a href="#appointments" class="doc-link">Appointments</a></td>
                         <td>Bookable time slots and the bookings they produce. The number is bookings waiting for your approval</td>
-                        <td>Always</td>
+                        <td>Owners and admins</td>
                     </tr>
                     <tr>
                         <td><a href="#seating" class="doc-link">Seating plans</a></td>
@@ -98,7 +99,7 @@
                     <tr>
                         <td><a href="#requests" class="doc-link">Requests</a></td>
                         <td>Submitted events and bookings waiting for your decision</td>
-                        <td>Only while something is pending</td>
+                        <td>Owners and admins, only while something is pending</td>
                     </tr>
                     <tr>
                         <td><a href="#feeds" class="doc-link">Feeds</a></td>
@@ -108,17 +109,17 @@
                     <tr>
                         <td><a href="#followers" class="doc-link">Followers</a></td>
                         <td>People who follow the schedule or signed up by email, and your QR follow code</td>
-                        <td>Always on eventschedule.com; on a selfhosted install, once someone has subscribed</td>
+                        <td>Owners and admins. Always on eventschedule.com; on a selfhosted install, once someone has subscribed</td>
                     </tr>
                     <tr>
                         <td><a href="#team" class="doc-link">Team</a></td>
                         <td>Who can get into the admin panel, and at what level</td>
-                        <td>Always</td>
+                        <td>Owners and admins</td>
                     </tr>
                     <tr>
                         <td><a href="#plan" class="doc-link">Plan</a></td>
                         <td>Subscription, usage allowances, and billing</td>
-                        <td>eventschedule.com only</td>
+                        <td>Owners and admins, on eventschedule.com only</td>
                     </tr>
                 </tbody>
             </table>
@@ -128,12 +129,12 @@
             Two controls sit beside the schedule's name on every tab. <strong class="text-gray-900 dark:text-white">Edit Schedule</strong> opens the <a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-link">schedule's settings</a>, for owners and admins. The <a href="#actions" class="doc-link">Actions</a> menu holds importing, embedding, deleting the schedule and the <a href="#audit-log" class="doc-link">Audit Log</a>, which is a page of its own and not a tab.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Until the schedule's email address is verified, a notice above the tabs says <strong class="text-gray-900 dark:text-white">Please verify the email address</strong>, with <strong class="text-gray-900 dark:text-white">Resend Email</strong> beside it. Adding events, the View link and the list of requests all wait for that.
+            Until the schedule's email address is verified, a notice above the tabs says <strong class="text-gray-900 dark:text-white">Please verify the email address</strong>, with <strong class="text-gray-900 dark:text-white">Resend Email</strong> beside it. Adding events, the View link, the list of requests and adding team members all wait for that.
         </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Your access level changes what you see</div>
-            <p>Schedules have three access levels: <strong>owner</strong>, <strong>admin</strong>, and <strong>viewer</strong>. Viewers get a read-only admin panel, cannot see ticket sales, and cannot open the schedule settings page at all. Following a schedule is not an access level and grants nothing in the admin panel. See <a href="#team" class="doc-link">Team</a>.</p>
+            <p>Schedules have three access levels: <strong>owner</strong>, <strong>admin</strong>, and <strong>viewer</strong>. Viewers see only the Schedule tab (and Availability on a Talent schedule, where they mark their own days). They cannot see ticket sales, followers, requests, bookings or the team, and cannot open the schedule settings page. Following a schedule is not an access level and grants nothing in the admin panel. See <a href="#team" class="doc-link">Team</a>.</p>
         </div>
     </section>
 
@@ -168,7 +169,7 @@
             <li><strong>Use a Template</strong> sits beside Add Event once you have at least one saved <a href="#templates" class="doc-link">template</a> (Pro)</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Saving a new event brings you back here, on the event's month, where a line above the calendar confirms it with <strong class="text-gray-900 dark:text-white">Copy Link</strong> and <strong class="text-gray-900 dark:text-white">View Event</strong>, plus <strong class="text-gray-900 dark:text-white">Add location</strong> or <strong class="text-gray-900 dark:text-white">Add tickets</strong> if it was saved without them. A draft has no public page yet, so it offers <strong class="text-gray-900 dark:text-white">Edit Event</strong> instead. Your very first event gets a fuller panel with the same links. For the event form itself, see <a href="{{ route('marketing.docs.creating_events') }}" class="doc-link">Creating Events</a>.
+            Saving a new event brings you back here, on the event's month, where a line above the calendar confirms it with <strong class="text-gray-900 dark:text-white">Copy Link</strong> and <strong class="text-gray-900 dark:text-white">View Event</strong>, plus <strong class="text-gray-900 dark:text-white">Add location</strong> or <strong class="text-gray-900 dark:text-white">Add tickets</strong> if it was saved without them. A draft has no public page yet, so it offers <strong class="text-gray-900 dark:text-white">Edit Event</strong> instead. Your very first event gets a fuller panel with the same links and <strong class="text-gray-900 dark:text-white">Add another event</strong>; for a draft it also has <strong class="text-gray-900 dark:text-white">Publish</strong>. While the setup guide is running, its own panel takes that place. For the event form itself, see <a href="{{ route('marketing.docs.creating_events') }}" class="doc-link">Creating Events</a>.
         </p>
 
         <h3 id="schedule-filters" class="doc-subheading">Filter Events</h3>
@@ -206,6 +207,11 @@
         <h3 id="schedule-unscheduled" class="doc-subheading">Unscheduled</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             On Venue and Talent schedules, events with no date at all are listed in an <strong class="text-gray-900 dark:text-white">Unscheduled</strong> section below the calendar. Each card shows the talent on the event, with its picture, name and description, and links to that talent's public page. Owners and admins get two buttons on it: <strong class="text-gray-900 dark:text-white">Schedule</strong> opens the event so you can give it a date, and <strong class="text-gray-900 dark:text-white">Decline</strong> drops it from your schedule after a confirmation.
+        </p>
+
+        <h3 id="schedule-other-notices" class="doc-subheading">Other notices above the calendar</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Owners and admins may see a few more panels above the calendar. While the schedule has no events, <strong class="text-gray-900 dark:text-white">Already have your events listed somewhere?</strong> offers ways to bring them in, such as from a link or a flyer (see <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a>). When a calendar sync is keeping events off your public page, or publishes a whole main calendar, a notice says so and links to the events it held (see <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a>). On a selfhosted site, an invitation to join or list the schedule on the Event Schedule network can appear here too.
         </p>
 
         <h3 id="schedule-notices" class="doc-subheading">Notices on a Curator schedule</h3>
@@ -335,8 +341,8 @@
         </p>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Viewers, and what the search needs</div>
-            <p>Viewers can browse the suggestions and watch them, but cannot select, save or skip. The search needs the site to have a Google API key with the YouTube Data API enabled; without one the tab reports that no videos were found.</p>
+            <div class="doc-callout-title">What the search needs</div>
+            <p>The tab is for owners and admins; viewers do not see it. The search needs the site to have a Google API key with the YouTube Data API enabled; without one the tab reports that no videos were found.</p>
         </div>
     </section>
 
@@ -351,7 +357,7 @@
         </h2>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Availability</strong> tab is on <strong class="text-gray-900 dark:text-white">Talent</strong> schedules only. Each owner and admin marks the days they are not free, which answers "can we book them that night" for the people who run the schedule with you. It is a note to your team: it is never shown publicly, and marking a day does not stop anything from being booked on it.
+            The <strong class="text-gray-900 dark:text-white">Availability</strong> tab is on <strong class="text-gray-900 dark:text-white">Talent</strong> schedules only. Each member of the team, viewers included, marks the days they are not free, which answers "can we book them that night" for the people who run the schedule with you. It is a note to your team: it is never shown publicly, and marking a day does not stop anything from being booked on it.
         </p>
 
         <x-doc-screenshot id="managing-schedules--availability" alt="Availability tab on a Talent schedule: a month grid with the Unavailable key and a Save button above it" />
@@ -371,7 +377,7 @@
         <ul class="doc-list mb-6">
             <li>Days on which someone is unavailable are tinted on the Schedule tab's month grid</li>
             <li>The info icon on such a day lists <strong>which</strong> team members are unavailable</li>
-            <li>Viewers see the tab and everyone's marks on the Schedule tab, but cannot mark days of their own</li>
+            <li>Viewers mark and save their own days on the tab like anyone else, and see everyone's marks on the Schedule tab. Nobody can mark days for someone else</li>
         </ul>
 
         <div class="doc-callout doc-callout-plan">
@@ -494,7 +500,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Who can act on requests</div>
-            <p>Only owners and admins get the Accept, Decline and Accept All buttons. Viewers see the same cards, and can open a request, but cannot decide it. An appointment whose start time has already passed is refused rather than confirmed, and Accept All steps over it instead of failing.</p>
+            <p>Only owners and admins see the Requests tab, and they decide what is on it. Viewers do not see it at all. An appointment whose start time has already passed is refused rather than confirmed, and Accept All steps over it instead of failing.</p>
         </div>
 
         <h3 class="doc-subheading">Being told about them</h3>
@@ -711,14 +717,14 @@
 
         <h3 id="followers-grow" class="doc-subheading">Growing the list</h3>
         <ul class="doc-list mb-6">
-            <li><strong>QR Code</strong> at the top right downloads a PNG ready to print on a poster or a flyer. Scanning it opens your public schedule page, or your custom domain if you have one, scrolled to the sign-up form</li>
-            <li><strong>Embed Signup Form</strong>, beside the QR code, gives you the code to put the sign-up form on your own website. See <a href="{{ route('marketing.docs.sharing') }}#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a></li>
+            <li><strong>Embed Signup Form</strong>, at the top right, gives you the code to put the sign-up form on your own website. See <a href="{{ route('marketing.docs.sharing') }}#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a></li>
+            <li><strong>QR Code</strong>, beside it, downloads a PNG ready to print on a poster or a flyer. Scanning it opens your public schedule page, or your custom domain if you have one, scrolled to the sign-up form</li>
             <li>Before anyone has joined, the tab shows <strong>Your follow link</strong> with a <strong>Copy Link</strong> button. It opens the same place as the QR code</li>
         </ul>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Follower details stay private</div>
-            <p>Names and email addresses are visible only to the schedule's own members, here and on the newsletter pages. They never appear on your public schedule, your embedded calendar, or your public stats. Somebody pressing Follow is told first that the schedule will see their name and email. The notice has a <strong>Don't ask me again</strong> box, so a person who ticked it on an earlier follow is not shown it again.</p>
+            <p>Names and email addresses are visible only to the schedule's owners and admins, here and on the newsletter pages, along with whether each person opens the schedule's newsletters and clicks their links. They never appear on your public schedule, your embedded calendar, or your public stats. Somebody pressing Follow is told first that the schedule will see their name and email. The notice has a <strong>Don't ask me again</strong> box, so a person who ticked it on an earlier follow is not shown it again.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -758,18 +764,18 @@
                 <tbody>
                     <tr>
                         <td><strong>Owner</strong></td>
-                        <td>Everything an admin can, plus change a member's level, remove members, manage the plan and billing, transfer ownership, and delete the schedule</td>
+                        <td>Everything an admin can, plus change a member's level, remove members, manage the plan and billing, set up the schedule's calendar sync, transfer ownership, and delete the schedule</td>
                         <td>Be removed or demoted</td>
                     </tr>
                     <tr>
                         <td><strong>Admin</strong></td>
-                        <td>Run the schedule day to day: add and edit events, accept and decline requests, edit the schedule settings, sell tickets, see the schedule's sales, waitlist and check-in dashboard, refund a sale, scan tickets at the door, invite new members</td>
+                        <td>Run the schedule day to day: add and edit events, accept and decline requests, edit the schedule settings (except its calendar sync, which is the owner's), sell tickets, see the schedule's sales, waitlist and check-in dashboard, refund a sale, scan tickets at the door, invite new members</td>
                         <td>Change anyone's level, remove another member, manage the plan, transfer ownership, or delete the schedule; and while the owner has the team pick from <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-presets-team" class="doc-link">ticket presets</a>, type an event's ticket prices or change the presets</td>
                     </tr>
                     <tr>
                         <td><strong>Viewer</strong></td>
-                        <td>Read the admin panel: browse the calendar, requests, followers, team and bookings, generate a graphic, grab the embed code, and scan tickets at the door</td>
-                        <td>Add or change anything, act on requests, see ticket sales, the waitlist or the check-in dashboard, or open the schedule settings page at all</td>
+                        <td>Browse the Schedule tab's calendar, mark their own unavailable days and see everyone's on a Talent schedule, generate a graphic, grab the embed code, and scan tickets at the door</td>
+                        <td>Open any other tab (requests, followers, team, bookings, plan), add or change anything but their own availability, see ticket sales, the waitlist or the check-in dashboard, or open the schedule settings page</td>
                     </tr>
                 </tbody>
             </table>
@@ -783,13 +789,23 @@
 
         <h3 class="doc-subheading">Managing Members</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Click <strong>Add Member</strong>, which owners and admins both have, and give the person's name and email address. A phone number is optional, and <strong>Role</strong> starts on Admin. Click <strong>Save</strong>.</li>
+            <li>Click <strong>Add Member</strong>, which owners and admins both have, once the schedule's email address is verified, and give the person's name and email address. A phone number is optional, and <strong>Role</strong> starts on Admin. Click <strong>Save</strong>.</li>
             <li>They are emailed an invitation. On eventschedule.com, a new person you gave a phone number for is invited by text message instead, when text messaging is configured.</li>
             <li>Until they have signed up, their row is marked <strong>Pending</strong> and has a <strong>Resend Invite</strong> link, and, on eventschedule.com, a second <strong>Resend by text message</strong> link when you gave a phone number and text messaging is configured.</li>
             <li>Once they have signed up, the owner can change their level between <strong>Admin</strong> and <strong>Viewer</strong> from the dropdown in that row. It saves as soon as you pick.</li>
             <li><strong>Remove</strong> revokes access, after a confirmation. Only the owner can remove someone else; anyone else can take themselves off with <strong>Leave</strong> on their own row, which is the one marked <strong>You</strong>. The owner's own row has neither.</li>
             <li>Sort the list by name by clicking the column heading.</li>
         </ol>
+
+        <h3 id="team-leaving" class="doc-subheading">When someone leaves the team</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            When a member leaves, is removed, or is changed to a viewer, they keep no hold on what they set up here:
+        </p>
+        <ul class="doc-list mb-6">
+            <li>The events they created on this schedule pass to the owner, except an event that has already taken money, which stays with them so its refunds still reach the right payment account</li>
+            <li>Any <a href="{{ route('marketing.docs.appointments') }}#hosts" class="doc-link">appointment type</a> they host is switched off, and the owner is emailed so they can give it a new host</li>
+            <li>When they leave or are removed, a <a href="#feeds" class="doc-link">feed</a> they added is paused until someone still on the team looks at it, and their own calendar sync for this schedule is deleted</li>
+        </ul>
 
         <div class="doc-callout doc-callout-plan mb-6">
             <div class="doc-callout-title">Team size by plan <x-doc-badge plan="enterprise" /></div>
@@ -874,7 +890,7 @@
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Three more things appear when they apply. While a trial has 30 days or fewer to run, the owner sees a notice at the top with the days left and a prompt to add a payment method. While a plan's <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">free trial</a> runs, a line under its end date says that nothing has been charged yet, and which card is charged how much on which day. And a free schedule gets a <strong class="text-gray-900 dark:text-white">Your plan</strong> panel that lists what Free includes and what Pro adds, with the price.
+            More appears when it applies. When a plan the site gave the schedule is set to end, the owner sees <strong class="text-gray-900 dark:text-white">Your complimentary plan ends on</strong> its end date, with what the free plan keeps and the price of keeping the current features. While a trial has 30 days or fewer to run, the owner sees a notice at the top with the days left and a prompt to add a payment method. While a plan's <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">free trial</a> runs, a line under its end date says that nothing has been charged yet, and which card is charged how much on which day. And a free schedule gets a <strong class="text-gray-900 dark:text-white">Your plan</strong> panel that lists what Free includes and what Pro adds, with the price.
         </p>
 
         <div class="doc-callout doc-callout-info mb-6">
@@ -986,7 +1002,7 @@
                     </tr>
                     <tr>
                         <td><strong>Event</strong></td>
-                        <td>Created, updated, deleted, published, accepted, declined</td>
+                        <td>Created, updated, deleted, published, accepted, declined, cancelled, restored</td>
                     </tr>
                     <tr>
                         <td><strong>Sales</strong></td>
@@ -994,7 +1010,7 @@
                     </tr>
                     <tr>
                         <td><strong>Schedule</strong></td>
-                        <td>Created, updated, deleted; a member added or removed; a video removed; and an ownership transfer requested, accepted, declined or cancelled</td>
+                        <td>Created, updated, deleted, claimed; a member added or removed; a video removed; a feed added, changed, paused, resumed or removed; the shared notification address confirmed or removed; and an ownership transfer requested, accepted, declined or cancelled</td>
                     </tr>
                     <tr>
                         <td><strong>Subscription</strong></td>
@@ -1006,14 +1022,14 @@
 
         <h3 class="doc-subheading">Reading and filtering it</h3>
         <ul class="doc-list mb-6">
-            <li>Each row gives the <strong>Time</strong>, the <strong>User</strong> who did it (or "System" for anything automatic), the <strong>Action</strong>, and a short line of <strong>Details</strong></li>
+            <li>Each row gives the <strong>Time</strong>, the <strong>User</strong> who did it (or "System" for anything automatic), the <strong>Action</strong>, and a short line of <strong>Details</strong>. On a sale entry the User is the buyer, when they bought while signed in</li>
             <li>The action is a status mark coloured by what happened: green for something that went through, such as a paid sale or an accepted event; red for something called off or removed; amber for something that needs a look, such as an expired sale or a failed installment</li>
             <li>Sort by any of the four columns by clicking its heading</li>
             <li>Narrow the list by <strong>Category</strong>, by a <strong>From</strong> and <strong>To</strong> date, and by a <strong>Search</strong> across the action and its details, then click <strong>Filter</strong></li>
             <li><strong>Clear</strong> appears once a filter is set and resets them all. Longer logs are paged 50 entries at a time</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The log is scoped to this schedule: its own settings and subscription changes, its events, sales on those events, and its boost campaigns. Sign-ins and account-level changes are not shown here.
+            The log is scoped to this schedule: its own settings and subscription changes, the events it owns, the events a Talent or Venue schedule has accepted, sales on those events, and its boost campaigns. An event a Curator schedule only lists, or one any schedule declined, is not in its log: that event's entries belong to the schedule that created it. Sign-ins, account-level changes and gift card activity are not shown here.
         </p>
     </section>
 

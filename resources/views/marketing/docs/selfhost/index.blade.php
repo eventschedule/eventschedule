@@ -48,7 +48,7 @@
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Add an AI key</h4>
-                <p>Google Gemini or OpenAI, if you want AI event import, agenda scanning, translation or auto import. Everything else works without one.</p>
+                <p>Google Gemini or OpenAI, if you want AI event import, agenda scanning, translation or auto import. Everything else works without one, feeds included.</p>
                 <p><a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">AI Setup</a></p>
             </li>
             <li class="doc-step">
@@ -65,6 +65,8 @@
             <li><a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> puts an "Add to Google Wallet" button on every ticket, free registrations included, and needs a Google Wallet issuer account of your own.</li>
             <li>The <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">admin panel</a> at <code class="doc-inline-code">/admin</code> gives you instance-wide monitoring and settings, and lets you edit any schedule on the install down to its name, path and contact details. The account the setup wizard created is already an instance admin.</li>
             <li>The <a href="{{ route('marketing.docs.selfhost.accessibility') }}" class="doc-link">accessibility</a> guide covers the accessibility panel you can switch on for a schedule, and what to put in your own accessibility statement.</li>
+            <li><a href="{{ route('marketing.docs.selfhost.installation') }}#google-keys" class="doc-link">Google keys</a> add venue coordinates, Google maps on event pages and YouTube search, and the <a href="{{ route('marketing.docs.selfhost.admin') }}#venue-map" class="doc-link">venue map</a> shows a schedule's venues on its public page. Both are off until configured.</li>
+            <li><a href="{{ route('marketing.docs.selfhost.installation') }}#push-notifications" class="doc-link">Push notifications</a> through OneSignal, and a <a href="{{ route('marketing.docs.selfhost.installation') }}#spam-protection" class="doc-link">Turnstile challenge</a> on public forms.</li>
         </ul>
 
         <h3 id="differences" class="doc-subheading">How a selfhosted install differs</h3>
@@ -100,7 +102,7 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Team members</span></td>
                         <td>Unlimited</td>
-                        <td>The owner only, until Enterprise, which allows up to five members per schedule</td>
+                        <td>The owner only, until Enterprise, which allows up to five people per schedule, the owner included</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Email delivery</span></td>
@@ -129,8 +131,23 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Updates</span></td>
-                        <td><a href="{{ route('marketing.docs.account_settings') }}#app-update" class="doc-link">Settings &rarr; App Update</a> compares your installed version against the latest release and applies it in one click, or run <code class="doc-inline-code">php artisan app:update</code>. Instance admins have the same on <a href="{{ route('marketing.docs.selfhost.admin') }}#system-app-update" class="doc-link">Admin &rarr; System &rarr; App Update</a></td>
+                        <td>An instance admin's <a href="{{ route('marketing.docs.account_settings') }}#app-update" class="doc-link">Settings &rarr; App Update</a> compares your installed version against the latest release and applies it in one click, as does <a href="{{ route('marketing.docs.selfhost.admin') }}#system-app-update" class="doc-link">Admin &rarr; System &rarr; App Update</a>. Or run <code class="doc-inline-code">php artisan app:update</code> on the server. See <a href="{{ route('marketing.docs.selfhost.installation') }}#updating" class="doc-link">Updating</a></td>
                         <td>Updated for you</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Realtime</span></td>
+                        <td>Off until an instance admin turns it on at <a href="{{ route('marketing.docs.selfhost.admin') }}#settings-realtime" class="doc-link">Admin &rarr; Settings</a>. A second switch there gives schedule owners their own <a href="{{ route('marketing.docs.analytics') }}#realtime" class="doc-link">Realtime tab</a></td>
+                        <td>On, with the owners' Realtime tab</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Maps</span></td>
+                        <td>Google maps on event pages need your own <a href="{{ route('marketing.docs.selfhost.installation') }}#google-keys" class="doc-link">Google keys</a>. The <a href="{{ route('marketing.docs.selfhost.admin') }}#venue-map" class="doc-link">venue map</a> on a schedule's page is off until you name an address search service</td>
+                        <td>Configured by the service</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Invitations to claim a page</span></td>
+                        <td>Not sent. A venue or performer an organizer names gets a page, but is never emailed or texted an invitation to claim it</td>
+                        <td>Sent when the organizer ticks it, by email, or by text message where only a phone number was given</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Attribution</span></td>

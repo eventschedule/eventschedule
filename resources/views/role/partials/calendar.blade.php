@@ -446,8 +446,8 @@
                 @endif
             </div>
 
-            {{-- Save Button --}}
-            @if ($route == 'admin' && $role->email_verified_at && !(auth()->check() && auth()->user()->isViewer($role->subdomain)))
+            {{-- Save Button. A viewer saves their own days as well. --}}
+            @if ($route == 'admin' && $role->email_verified_at)
                 @if ($tab == 'availability')
                     <x-brand-button id="saveButton" :disabled="true" class="flex-grow md:flex-grow-0">
                         <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
@@ -727,8 +727,9 @@
             $pickToday = $today->format('Y-m-d');
             $pickTodayCol = ($today->year == $year && $today->month == $month) ? ($today->dayOfWeek - $firstDay + 7) % 7 : -1;
             // A day can be pressed where the script that marks it is on the page, and only there
-            // (role/show-admin gives it to everyone but a viewer: keep the two conditions one).
-            $pickMarks = $route == 'admin' && $role->email_verified_at && ! ($isViewer ?? false);
+            // (role/show-admin gives it to every member on this tab, a viewer included, who marks
+            // their own days: keep the two conditions one).
+            $pickMarks = $route == 'admin' && $role->email_verified_at;
             $pickMarked = is_array($datesUnavailable) ? $datesUnavailable : [];
             $pickCol = 0;
         @endphp

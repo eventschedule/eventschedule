@@ -412,4 +412,41 @@ class GraphicPageTest extends TestCase
         (require $file)->up();
         $this->assertSame($again, $after('never'));
     }
+
+    /**
+     * The AI rewrite of the caption is handed the events' fields as metadata. It used to be
+     * handed every stored custom field answer, private ones included, numbered in storage order;
+     * it is now given what the caption's {custom_N} may print, under the same N.
+     */
+    public function test_the_ai_rewrite_is_not_handed_a_private_answer(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['language_code' => 'en']);
+        $role->event_custom_fields = [
+            'fieldprivate' => ['name' => 'Door code', 'type' => 'string', 'index' => 1, 'private' => true],
+            'fieldpublic' => ['name' => 'Room', 'type' => 'string', 'index' => 3],
+        ];
+        $role->save();
+        $this->createEvent($role->fresh(), ['name' => 'Night', 'custom_field_values' => ['fieldprivate' => 'zebra-seven', 'fieldpublic' => 'cellar']]);
+
+        $prompts = [];
+        \App\Utils\GeminiUtils::fakeResponses(function ($prompt) use (&$prompts) {
+            $prompts[] = $prompt;
+
+            return [['text' => 'rewritten']];
+        });
+
+        try {
+            $this->actingAs($owner)->postJson(route('event.graphic_ai_text', ['subdomain' => $role->subdomain]), [
+                'text' => 'Night',
+                'ai_prompt' => 'Add emoji.',
+            ])->assertOk();
+        } finally {
+            \App\Utils\GeminiUtils::fakeResponses(null);
+        }
+
+        $this->assertCount(1, $prompts, 'the rewrite asked the model once');
+        $this->assertStringNotContainsString('zebra-seven', $prompts[0]);
+        $this->assertStringContainsString('custom_3="cellar"', $prompts[0], 'control: a field that is not private is handed over under its own number');
+    }
 }

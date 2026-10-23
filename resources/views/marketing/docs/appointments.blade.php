@@ -87,7 +87,7 @@
             <li>Open your schedule in the admin panel and go to the <strong class="text-gray-900 dark:text-white">Appointments</strong> tab.</li>
             <li>Choose <strong class="text-gray-900 dark:text-white">New appointment type</strong>. The editor takes over the tab until you save or cancel.</li>
             <li>Fill in the <strong class="text-gray-900 dark:text-white">Details</strong> card, then work through the other six: Weekly hours, Date overrides, Scheduling rules, Location, Price and Booking form. On a wide screen they sit in two columns.</li>
-            <li>Leave <strong class="text-gray-900 dark:text-white">Active</strong> switched on in the bar at the top and choose <strong class="text-gray-900 dark:text-white">Save</strong> beside it. The bar stays in view as you scroll, and <strong class="text-gray-900 dark:text-white">Cancel</strong> in it goes back to the list without saving.</li>
+            <li>Leave <strong class="text-gray-900 dark:text-white">Active</strong> switched on in the bar at the top and choose <strong class="text-gray-900 dark:text-white">Save</strong> beside it. The bar stays in view as you scroll, and <strong class="text-gray-900 dark:text-white">Cancel</strong> in it goes back to the list without saving. When you edit a type guests can already book, the bar also has <strong class="text-gray-900 dark:text-white">Preview</strong>, which opens its booking page in a new tab.</li>
         </ol>
 
         <x-doc-screenshot id="appointments--editor" alt="The appointment type editor: the bar with Active, Cancel and Save, then the Details card with Name, Description and Duration" />
@@ -135,7 +135,7 @@
                     <tr>
                         <td>Clone</td>
                         <td>Actions menu</td>
-                        <td>Makes a copy named "... (Copy)" and opens it in the editor, switched off, so you rename it before anyone can book it. On the Free plan it is refused while your one type is active.</td>
+                        <td>Makes a copy named "... (Copy)" and opens it in the editor, switched off, so you rename it before anyone can book it. On the Free plan it is refused while your one type is active, and the copy starts with the scheduling rules at their defaults (no date overrides, buffers or minimum notice, a 60-day booking window, no approval step).</td>
                     </tr>
                     <tr>
                         <td>Delete</td>
@@ -301,7 +301,7 @@
             Payments
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The editor's <strong class="text-gray-900 dark:text-white">Price</strong> card opens on <strong class="text-gray-900 dark:text-white">Free</strong>. Choose <strong class="text-gray-900 dark:text-white">Paid</strong> and three fields appear: <strong class="text-gray-900 dark:text-white">Amount</strong>, <strong class="text-gray-900 dark:text-white">Currency</strong> and <strong class="text-gray-900 dark:text-white">Payment Method</strong>, which is <strong class="text-gray-900 dark:text-white">Cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong> or <strong class="text-gray-900 dark:text-white">Payment Link</strong>, plus <strong class="text-gray-900 dark:text-white">PayPal</strong>, <strong class="text-gray-900 dark:text-white">Payfast</strong> and <strong class="text-gray-900 dark:text-white">Razorpay</strong> once you have connected them. Invoice Ninja is the one payment method appointments do not offer, because it would set up a product and a subscription in your Invoice Ninja account for every booking. A currency is required once there is a price, and the payment method has to take it: Payfast takes South African rand only, Razorpay takes Indian rupees (INR) only and PayPal does not take every currency, so saving a type in a currency its method cannot take says so and asks for another. Switching back to Free sets the amount to zero. If you own the schedule, <strong class="text-gray-900 dark:text-white">Manage payment methods</strong>, under the row, opens the settings where they are connected.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Taking payment for a booking needs Pro <x-doc-badge plan="pro" />. On the Free plan, choosing Paid shows the notice <strong class="text-gray-900 dark:text-white">Charging for a booking is a Pro feature</strong>: the price is saved, but the type stays off your booking page until you upgrade.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Taking payment for a booking needs Pro <x-doc-badge plan="pro" />. On the Free plan, choosing Paid shows the notice <strong class="text-gray-900 dark:text-white">Charging for a booking is a Pro feature</strong>: the price is saved, but the type stays off your booking page until you upgrade. The exception is a type that already carried a price before charging for bookings became part of Pro: it keeps taking paid bookings.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -471,7 +471,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Either side can start it:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">The guest</strong> uses <strong class="text-gray-900 dark:text-white">Reschedule</strong> on their private link, picks from the same times anyone else would see, and can do it right up until the appointment starts.</li>
-            <li><strong class="text-gray-900 dark:text-white">You</strong> use <strong class="text-gray-900 dark:text-white">Reschedule</strong> on the Bookings row. Your picker ignores the type's minimum notice and booking window, so you can move something to later today or up to a year out. Times that have already passed are not offered, and weekly hours, date overrides, buffers and times you are already booked all still apply, so you cannot double-book yourself.</li>
+            <li><strong class="text-gray-900 dark:text-white">You</strong> use <strong class="text-gray-900 dark:text-white">Reschedule</strong> on the Bookings row. Your picker ignores the type's minimum notice and booking window, so you can move something to later today or up to a year out (further, if the type's booking window is longer than a year). Times that have already passed are not offered, and weekly hours, date overrides, buffers and times you are already booked all still apply, so you cannot double-book yourself.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Whoever did not start the move is emailed about it. The guest's email carries an updated calendar invite that moves the entry already in their calendar rather than adding a second one, and your own connected calendars are updated too. When you move a booking you can add a note for the guest, or choose not to email them at all.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Any move tags the Bookings row <strong class="text-gray-900 dark:text-white">Moved</strong>, so it is still obvious later. If a guest moves a booking less than a day before its original time, the email to you says so as well.</p>
@@ -506,7 +506,7 @@
             <li>A private link to manage the booking. It offers an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> menu for Google Calendar, Outlook and a calendar file, and lets them <a href="#rescheduling" class="doc-link">move the booking to another time</a> or cancel it while the appointment is still in the future.</li>
             <li>A reminder email about 24 hours before it starts, with the invite attached again.</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300">If nothing on your schedule is bookable, the booking page is not there, and the Book a Time button does not appear. When that is because every active type carries a price the schedule cannot charge, the Appointments tab says so under <strong class="text-gray-900 dark:text-white">Your booking page is empty</strong> in place of the link.</p>
+        <p class="text-gray-600 dark:text-gray-300">If nothing on your schedule is bookable, the booking page is not there, and the Book a Time button does not appear. When you have active types but none can take bookings right now (a price your plan cannot charge, or no payment method a paid type can use), the Appointments tab says so under <strong class="text-gray-900 dark:text-white">Your booking page is empty</strong> in place of the link.</p>
     </section>
 
     <!-- Good to know -->
@@ -532,7 +532,7 @@
             </div>
             <div class="doc-field">
                 <h4>Paid bookings follow the same rule as paid tickets</h4>
-                <p>Taking payment for an appointment needs Pro, exactly as selling a priced <em>ticket</em> for an event does. Free bookings work on every plan.</p>
+                <p>Taking payment for an appointment needs Pro, as selling a priced ticket does. See <a href="#payments" class="doc-link">Payments</a>.</p>
             </div>
             <div class="doc-field">
                 <h4>A booking is not a ticket</h4>
@@ -556,7 +556,7 @@
             </div>
             <div class="doc-field">
                 <h4>Plan</h4>
-                <p>Free covers one active appointment type. Pro and Enterprise add more types, the ability to charge, and the scheduling rules, as does every selfhosted deployment. Nothing is deleted when a plan lapses: every type and every rule is kept exactly as configured, and they come back on upgrade.</p>
+                <p>Nothing is deleted when a plan lapses: every type and every rule is kept as configured, and they come back on upgrade. What each plan includes is in the <a href="#overview" class="doc-link">table at the top</a>.</p>
             </div>
         </div>
     </section>

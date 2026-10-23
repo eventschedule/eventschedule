@@ -9,6 +9,7 @@
         <x-doc-nav-link href="#create-account">Create a Twilio Account</x-doc-nav-link>
         <x-doc-nav-link href="#environment">Environment Setup</x-doc-nav-link>
         <x-doc-nav-link href="#phone-verification">Phone Verification</x-doc-nav-link>
+        <x-doc-nav-link href="#sms-invitations">SMS Invitations</x-doc-nav-link>
         <x-doc-nav-link href="#whatsapp">WhatsApp Setup</x-doc-nav-link>
         <x-doc-nav-link href="#testing">Testing</x-doc-nav-link>
     </x-slot:toc>
@@ -22,7 +23,7 @@
             </svg>
             Overview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Twilio is an optional integration. One Twilio account serves the whole deployment: you configure it once in <code class="doc-inline-code">.env</code>, and every schedule on the platform uses it. There is nothing for an individual schedule owner to connect, and no screen in the admin panel for it: the three variables are the whole setup. Twilio powers exactly three things:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Twilio is an optional integration. One Twilio account serves the whole deployment: you configure it once in <code class="doc-inline-code">.env</code>, and every schedule on the platform uses it. There is nothing for an individual schedule owner to connect, and no screen in the platform admin panel for it: the three variables are the whole setup. Twilio powers exactly three things:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -168,6 +169,28 @@
         </div>
     </section>
 
+    {{-- SMS Invitations --}}
+    <section id="sms-invitations" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+            </svg>
+            SMS Invitations
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On a hosted install with Twilio configured, two invitations can go by text message instead of email. Both carry a sign-up link that works for 30 days, and both are queued, so they leave when the <a href="{{ route('marketing.docs.saas.setup') }}#scheduler" class="doc-link">scheduler</a> next drains the queue.</p>
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">A team member added by phone</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a schedule's <strong>Team</strong> tab, <strong>Add Member</strong> takes a <strong>Phone Number</strong> as well as an email address. A person who has no account yet, or whose account has neither a verified email nor a verified phone, is texted "You've been added to the "<em>name</em>" schedule. Sign up here: ..." instead of being emailed. Until they sign up, their row on the Team tab offers <strong>Resend by text message</strong> beside <strong>Resend Invite</strong>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">A venue or performer named on an event</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">When an event names a venue or a performer that has no account and only a phone number, the event form shows <strong>Send an SMS to notify them</strong> under it. Ticked, the save texts that number the event's name and a link to sign up and <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">claim the page</a> the app made for them. A page that has opted out of messages is not texted.</p>
+            </div>
+        </div>
+    </section>
+
     {{-- WhatsApp Setup --}}
     <section id="whatsapp" class="doc-section">
         <h2 class="doc-heading">
@@ -243,7 +266,7 @@
             <pre><code>tail -f storage/logs/laravel.log</code></pre>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">If a variable is missing, the app logs <code class="doc-inline-code">Twilio SMS not configured, skipping SMS send</code> (or <code class="doc-inline-code">Twilio not configured, skipping WhatsApp send</code>) and carries on. If Twilio is configured but rejects the send, the failure is logged with the HTTP status and Twilio's response body, which usually names the problem outright.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Invitation messages are dispatched to the queue instead, and the queue is drained by the <a href="{{ route('marketing.docs.saas.setup') }}#scheduler" class="doc-link">scheduler</a>, so a stopped scheduler looks exactly like a broken Twilio account. Check <strong class="text-gray-900 dark:text-white">System</strong> &rarr; <strong class="text-gray-900 dark:text-white">Queue</strong> in the admin panel before you check the credentials.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Invitation messages are dispatched to the queue instead, and the queue is drained by the <a href="{{ route('marketing.docs.saas.setup') }}#scheduler" class="doc-link">scheduler</a>, so a stopped scheduler looks exactly like a broken Twilio account. Check <strong class="text-gray-900 dark:text-white">System</strong> &rarr; <strong class="text-gray-900 dark:text-white">Queue</strong> in the platform admin panel before you check the credentials.</p>
 
         <h3 class="doc-subheading">Testing WhatsApp</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Twilio provides a WhatsApp sandbox for testing without requiring Meta approval:</p>
@@ -257,7 +280,7 @@
         <h3 class="doc-subheading">Troubleshooting</h3>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">No reply at all.</strong> The signature check almost certainly failed, and by design that produces an empty response rather than an error. Compare the URL in Twilio's Console debugger with the URL the app builds, and confirm the auth token matches.</li>
-            <li><strong class="text-gray-900 dark:text-white">"Your phone number is not linked to an account."</strong> The sending number does not match a user with a verified phone number. Verify it in account settings first.</li>
+            <li><strong class="text-gray-900 dark:text-white">"Your phone number is not linked to an account."</strong> The sending number does not match a user with a verified phone number. Verify it in account settings first. An account blocked at <strong class="text-gray-900 dark:text-white">Manage</strong> &rarr; <strong class="text-gray-900 dark:text-white">Blocked</strong> in the platform admin panel gets the same reply.</li>
             <li><strong class="text-gray-900 dark:text-white">"No default schedule set."</strong> The user edits more than one schedule and has not chosen a <strong class="text-gray-900 dark:text-white">Default schedule</strong> on the <strong class="text-gray-900 dark:text-white">Profile Information</strong> tab of <strong class="text-gray-900 dark:text-white">Settings</strong>.</li>
             <li><strong class="text-gray-900 dark:text-white">"Creating events over WhatsApp is part of the Enterprise plan."</strong> The schedule the message would go to is not on Enterprise.</li>
             <li><strong class="text-gray-900 dark:text-white">"You have reached your daily limit of ... AI requests."</strong> The schedule has used its AI allowance for the day, through WhatsApp, AI import or both. It resets the next day.</li>

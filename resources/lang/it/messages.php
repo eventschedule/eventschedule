@@ -258,7 +258,7 @@ return [
     'payment_links' => 'Link di Pagamento',
     'are_you_sure' => 'Sei sicuro?',
     'no_requests' => 'Nessuna Richiesta',
-    'team_lead' => 'Gli amministratori gestiscono il calendario giorno per giorno. I visualizzatori possono vedere tutto ma non modificare nulla. Solo il proprietario cambia i ruoli, rimuove i membri e gestisce il piano.',
+    'team_lead' => 'Gli amministratori gestiscono il calendario giorno per giorno. I visualizzatori possono vedere tutto e segnare i propri giorni disponibili, ma non modificare nient\'altro. Solo il proprietario cambia i ruoli, rimuove i membri e gestisce il piano.',
     'requests_lead' => 'Eventi e prenotazioni in attesa della tua risposta. Accettandone uno, viene aggiunto al tuo calendario.',
     'availability_lead' => 'Segna i giorni in cui non sei disponibile, poi salva. Ogni membro segna i propri giorni.',
     'resend_invite_sms' => 'Invia di nuovo via SMS',
@@ -1051,6 +1051,7 @@ return [
     'promo_share_link' => 'Link che applica questo codice:',
     'order_fields_help' => 'Viene chiesto una volta per l\'intero ordine, non per ogni biglietto.',
     'calendar_not_synced_draft' => 'Solo gli eventi visibili agli ospiti vengono copiati nel calendario.',
+    'calendar_not_synced_cancelled' => 'Un evento annullato non viene copiato nel calendario. Verrà copiato di nuovo quando lo ripristini.',
     'saving_removes' => 'Salvando verrà rimosso',
     'schedule_short_description_help' => 'Una riga mostrata sotto il nome del tuo programma quando lo stile dell\'intestazione è :style.',
     'schedule_description_help' => 'Mostrata in cima alla pagina del tuo programma.',
@@ -1357,7 +1358,7 @@ return [
     'from_google_calendar' => 'Da Google Calendar',
     'from_google_calendar_description' => 'Gli eventi di Google Calendar arrivano qui. Se non li pubblichi automaticamente, restano in attesa come bozze.',
     'bidirectional_sync' => 'Sincronizzazione Bidirezionale',
-    'bidirectional_sync_description' => 'Gli eventi che aggiungi qui vanno nel tuo calendario, e i nuovi eventi del tuo calendario arrivano qui, come bozze se non li pubblichi automaticamente (gli aggiornamenti si sincronizzano in una sola direzione)',
+    'bidirectional_sync_description' => 'Gli eventi che aggiungi qui vanno nel tuo calendario, e i nuovi eventi del tuo calendario arrivano qui, come bozze se non li pubblichi automaticamente (le modifiche fatte da una parte vengono copiate nell\'altra)',
     'no_sync' => 'Nessuna Sincronizzazione',
     'no_sync_description' => 'Disabilita la sincronizzazione Google Calendar',
     'sync_events' => 'Sincronizza Eventi',
@@ -3820,6 +3821,7 @@ return [
 
     'individual_tickets' => 'Biglietti individuali',
     'individual_tickets_description' => 'Ogni partecipante riceve la propria conferma e il proprio codice QR',
+    'individual_tickets_off_for_passes' => 'Disattivato finché un tipo di biglietto è un pass o abbonamento. Un pass è un solo codice QR per ordine, quindi salvando l\'evento questa opzione si disattiva.',
     'individual_ticket_fields' => 'Raccogli campi biglietto per ospite',
     'individual_ticket_fields_description' => 'Mostra i campi personalizzati del biglietto per ogni ospite',
     'guest_information' => 'Informazioni sull\'ospite',
@@ -5105,7 +5107,7 @@ return [
     'monetization_native_cpc' => 'Prezzo per clic',
     'monetization_native_cpc_help' => 'Addebitato all\'inserzionista. Si applica solo alle nuove campagne.',
     'promotion_rate_not_configured' => 'I prezzi delle promozioni non sono ancora stati configurati su questo sito. Contatta l\'amministratore.',
-    'promotion_credit_available' => 'Hai :amount di credito promozionale. Tutto ciò che eccede viene addebitato sulla tua carta.',
+    'promotion_credit_available' => 'Hai :amount di credito promozionale, usato solo per un budget che copre per intero. Per questo budget l\'intero importo viene addebitato sulla tua carta e il credito resta disponibile.',
 
     // Stay22 accommodation map (see docs/FEATURES.md, "Accommodation Affiliate")
     'accommodation' => 'Alloggi',

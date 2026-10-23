@@ -38,7 +38,7 @@
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Your own domain <x-doc-badge plan="enterprise" /></div>
-            <p>With an Enterprise plan the schedule can live on your own domain, such as <code class="doc-inline-code">events.yourdomain.com</code>. Set it up under <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Edit Schedule &rarr; Settings</a>. Once the domain is live it is the address shown under the schedule's name, and the one your <a href="#qr-code" class="doc-link">QR code</a> and follow link point at.</p>
+            <p>With an Enterprise plan the schedule can live on your own domain, such as <code class="doc-inline-code">events.yourdomain.com</code>. Set it up under <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Edit Schedule &rarr; Settings</a>. Once the domain is live it is the address shown under the schedule's name, and the one your <a href="#qr-code" class="doc-link">QR code</a>, follow link, emails and shared links use, unless you chose to keep your subdomain as the <strong class="text-gray-900 dark:text-white">Main address</strong>. Then the subdomain is the address you hand out, and the domain keeps working beside it.</p>
         </div>
     </section>
 
@@ -272,7 +272,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">For the details of the checkout opt-in and the digest, see <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">Email Subscribers</a>.</p>
 
         <h3 class="doc-subheading" id="managing-followers">Managing Followers</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab of your schedule in the admin portal. The tab label carries the running total, so you can see how big your audience is without opening it. On a selfhosted install the tab appears once you have your first email subscriber. From top to bottom it holds:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab of your schedule in the admin portal. It is there for the schedule's owner and admins, not for a viewer. The tab label carries the running total, so you can see how big your audience is without opening it. On a selfhosted install the tab appears once you have your first email subscriber. From top to bottom it holds:</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4>Three figures and two buttons</h4>
@@ -365,7 +365,7 @@
             <li>Use it on flyers, posters, table tents, or anywhere else</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">When scanned, the QR code opens your schedule with the sign-up form ready: for anyone not signed in, the page scrolls straight to the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel, so they can sign up on the spot. That works even if you have turned the panel off for everyone else. Until your first follower or subscriber arrives, the Followers tab also shows <strong class="text-gray-900 dark:text-white">Your follow link</strong> with a copy button, which opens the same place. If you have an Enterprise custom domain set up, both point at that domain rather than the eventschedule.com address.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When scanned, the QR code opens your schedule with the sign-up form ready: for anyone not signed in, the page scrolls straight to the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel, so they can sign up on the spot. That works even if you have turned the panel off for everyone else. Until your first follower or subscriber arrives, the Followers tab also shows <strong class="text-gray-900 dark:text-white">Your follow link</strong> with a copy button, which opens the same place. If you have an Enterprise custom domain set up, both point at that domain rather than the eventschedule.com address, unless you kept the subdomain as the <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">main address</a>.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install the Followers tab is shown once the schedule has its first email subscriber, so the button is not there before that. What the QR code holds is the schedule's address with <code class="doc-inline-code">?subscribe=1</code> on the end, so until the tab appears you can share that link, or make a code from it with any QR generator.</p>
 
@@ -392,16 +392,8 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Almost always a missing <code class="doc-inline-code">?embed=true</code>. Every other Event Schedule URL is served with framing switched off, so a plain schedule link inside an iframe is refused by the browser. Copy the Embed URL out of the Embed Schedule dialog rather than out of your address bar. Privacy extensions that block third-party frames are the other, rarer cause; test in a private window.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed appears too small or cut off</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The embed iframe needs explicit height. Set a minimum height of 600px for comfortable viewing. Example: <code class="doc-inline-code">height="800"</code> or <code class="doc-inline-code">style="height: 800px;"</code></p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Scrollbars appear on the embed</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Increase the height of your iframe. The content may be taller than the container. For schedules with many events, try <code class="doc-inline-code">height="1000"</code> or higher.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed doesn't resize on mobile</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Set the width to 100% and wrap the iframe in a responsive container. Example: <code class="doc-inline-code">width="100%"</code> and put it inside a <code class="doc-inline-code">&lt;div style="max-width: 100%;"&gt;</code></p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The embed is cut off, scrolls, or does not fit a phone</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The frame does not size itself, so give it the room. Set a height of at least 600 pixels, for example <code class="doc-inline-code">height="800"</code>, and raise it (<code class="doc-inline-code">height="1000"</code> or more) when a long list scrolls inside the frame. Set <code class="doc-inline-code">width="100%"</code> so it fits whatever column it is in, phones included, or use the <a href="#responsive-embed" class="doc-link">responsive code</a> below to keep its shape.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong layout</h4>

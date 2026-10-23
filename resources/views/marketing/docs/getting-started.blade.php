@@ -28,7 +28,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Signing up is free and takes no credit card. All you need is an email address you can check right away, because Event Schedule confirms it with a code before the account is created.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <a href="{{ app_url('/sign_up') }}" class="doc-link">the sign-up page</a>, type your email address in the <strong class="text-gray-900 dark:text-white">Email</strong> field, and tick <strong class="text-gray-900 dark:text-white">"I accept the Terms of Service and Privacy Policy"</strong>.</li>
+            <li>Open <a href="{{ app_url('/sign_up') }}" class="doc-link">the sign-up page</a>, type your email address in the <strong class="text-gray-900 dark:text-white">Email</strong> field, and tick <strong class="text-gray-900 dark:text-white">"I accept the Terms of Service and Privacy Policy"</strong>. The box under it, <strong class="text-gray-900 dark:text-white">"Don't email me product news, tips or digests"</strong>, is optional. Every such email also carries an unsubscribe link.</li>
             <li>Click <strong class="text-gray-900 dark:text-white">"Continue"</strong>. A six-digit code is emailed to that address and stays valid for 10 minutes. If the address looks like a typo of a common provider (gmial.com, say), the page offers the corrected address first, so no code is sent to an inbox nobody reads.</li>
             <li>Type or paste the code into the six boxes. It is checked straight away: the boxes turn green when it is right, or red, with the reason, when it is not.</li>
             <li>Enter your <strong class="text-gray-900 dark:text-white">Full Name</strong> and a <strong class="text-gray-900 dark:text-white">Password</strong> of at least 8 characters, then click <strong class="text-gray-900 dark:text-white">"Create Account"</strong>.</li>
@@ -37,13 +37,13 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">If the code does not arrive, <strong class="text-gray-900 dark:text-white">"Didn't receive the code? Resend code"</strong> appears under the boxes after 30 seconds, with a note on where else to look (the spam folder, and the email's subject line, which carries the code too). You can request up to five codes per hour for the same address. Typed the wrong address? Click <strong class="text-gray-900 dark:text-white">"Use a different email"</strong> to go back a step. Your timezone and language are detected from your browser, so there is nothing to choose during sign-up.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Already confirmed an email sign-up on someone's schedule? That set up an account on your address with no password yet. Sign up with the same address and the form completes that account, so the schedules you follow come with it. If you added a password back then, sign in instead.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Already confirmed an email sign-up on someone's schedule? That set up an account on your address with no password yet. On eventschedule.com, sign up with the same address and the form completes that account, so the schedules you follow come with it. On a selfhosted install, the sign-up page emails that address a link to set its password instead. If you added a password back then, sign in instead.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Signing up with Google is quicker. Where the page offers <strong class="text-gray-900 dark:text-white">"Continue with Google"</strong>, click it instead and there is no code to enter: Google has already confirmed the address, so the account is created verified and you land straight on the schedule-type chooser. Either way, your data is yours, and we never share or sell your information.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Selfhosted installs work differently</div>
-            <p>On a selfhosted server the sign-up page doubles as the setup wizard: it asks for your MySQL details first, and the first account created there becomes the instance admin. After that, sign-up is closed unless you enable <code class="doc-inline-code">ALLOW_REGISTRATION</code>. See <a href="{{ route('marketing.docs.selfhost.installation') }}#user-accounts" class="doc-link">User Accounts and Registration</a> for the details.</p>
+            <p>On a selfhosted server the sign-up page doubles as the setup wizard: it asks for your MySQL details first, and the first account created there becomes the instance admin. There is no code step: name, email and password are on one form. After that, sign-up is closed unless you enable <code class="doc-inline-code">ALLOW_REGISTRATION</code>. See <a href="{{ route('marketing.docs.selfhost.installation') }}#user-accounts" class="doc-link">User Accounts and Registration</a> for the details.</p>
         </div>
     </section>
 
@@ -58,15 +58,20 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule is your event calendar: it is where your events live, and it gets its own public page that you share with your audience. Creating one is a short form with one field to fill in, <strong class="text-gray-900 dark:text-white">Schedule Name</strong>, plus <strong class="text-gray-900 dark:text-white">Street Address</strong> on a Venue schedule. From there a setup guide walks you to a live page: it shows as a small ring above the form, and its first line says <strong class="text-gray-900 dark:text-white">"Two steps to your live schedule"</strong>.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Choose the type.</strong> Straight after sign-up you get a welcome screen that asks <strong class="text-gray-900 dark:text-white">"What best describes you?"</strong> over three cards, Talent, Venue and Curator. Pick the one that fits (see <a href="#schedule-types" class="doc-link">Schedule Types</a> below). If you would rather look around first, click <strong class="text-gray-900 dark:text-white">"Skip for now"</strong> and come back later.</li>
+            <li><strong class="text-gray-900 dark:text-white">Choose the type.</strong> Straight after sign-up you get a welcome screen that asks <strong class="text-gray-900 dark:text-white">"What best describes you?"</strong> over three cards, Talent, Venue and Curator. Pick the one that fits (see <a href="#schedule-types" class="doc-link">Schedule Types</a> below). If you would rather look around first, click <strong class="text-gray-900 dark:text-white">"Skip for now"</strong> and come back later. If you signed up from a page that had already picked a type, such as a page for venues, this screen is skipped and the form for that type opens.</li>
             <li><strong class="text-gray-900 dark:text-white">Name it.</strong> The form asks for a <strong class="text-gray-900 dark:text-white">Schedule Name</strong> and, for a Venue, a <strong class="text-gray-900 dark:text-white">Street Address</strong>. That is all it needs. For a Talent schedule the name is prefilled with your own name.</li>
             <li><strong class="text-gray-900 dark:text-white">Check the two lines underneath.</strong> The first is your account's email address, which becomes the schedule's contact email. The second says which timezone the schedule's times are in, with <strong class="text-gray-900 dark:text-white">Change</strong> beside it. If your device is set to a different timezone from your account, the picker opens by itself with the device's timezone selected. The email can be changed afterwards, along with everything else, on the schedule form.</li>
-            <li><strong class="text-gray-900 dark:text-white">Click "Save and continue".</strong> Event Schedule creates the schedule and, because it is your first, takes you straight to adding an event, with the setup guide alongside. If your events are already listed somewhere, the question above the form, <strong class="text-gray-900 dark:text-white">"Already have your events listed somewhere?"</strong>, brings them in instead: <strong class="text-gray-900 dark:text-white">Google Calendar</strong> (for the schedule's owner), <strong class="text-gray-900 dark:text-white">A web page or calendar link</strong>, or <strong class="text-gray-900 dark:text-white">A flyer, screenshot or text</strong> each opens <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">Import Events</a>, Google Calendar straight at its own steps. A schedule with no events asks the same question on its Schedule tab, above the calendar. Everything else (description, images, colours, integrations) is optional and waits for you on the schedule form. See <a href="#customize" class="doc-link">Customize Your Schedule</a> for what each section holds.</li>
+            <li><strong class="text-gray-900 dark:text-white">Click "Save and continue".</strong> Event Schedule creates the schedule and, because it is your first, takes you straight to adding an event, with the setup guide alongside. If your events are already listed somewhere, the question above the form, <strong class="text-gray-900 dark:text-white">"Already have your events listed somewhere?"</strong>, brings them in instead: <strong class="text-gray-900 dark:text-white">Google Calendar</strong> (for the schedule's owner), <strong class="text-gray-900 dark:text-white">A web page or calendar link</strong>, or <strong class="text-gray-900 dark:text-white">A flyer, screenshot or text</strong> (where the site has AI import set up) each opens <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">Import Events</a>, Google Calendar straight at its own steps. A schedule with no events asks the same question on its Schedule tab, above the calendar. Everything else (description, images, colors, integrations) is optional and waits for you on the schedule form. See <a href="#customize" class="doc-link">Customize Your Schedule</a> for what each section holds.</li>
         </ol>
 
-        <x-doc-screenshot id="getting-started--create-form" alt="The short form a new Venue schedule starts on: Schedule Name, Street Address, the account email and timezone lines, and the save button" />
+        <x-doc-screenshot id="getting-started--create-form" alt="The first-run form for a Venue schedule: the setup ring reading Two steps to your live schedule, Schedule Name, Street Address, the account email and timezone lines, Choose a different type and Save and continue" />
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Already have an account and want another schedule? Use the <strong class="text-gray-900 dark:text-white">"New Schedule"</strong> menu at the top of the dashboard (on a phone it is behind the three-dot button beside Add Event): it offers the same three types and opens the same form, where the button says <strong class="text-gray-900 dark:text-white">"Save"</strong> and you land on the new schedule's own page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Already have an account and want another schedule? Use the <strong class="text-gray-900 dark:text-white">"New Schedule"</strong> menu at the top of the dashboard (on a phone it is behind the three-dot button beside Add Event): it offers the same three types and opens the same form, where the button says <strong class="text-gray-900 dark:text-white">"Save"</strong>, <strong class="text-gray-900 dark:text-white">Cancel</strong> takes you back, and you land on the new schedule's own page.</p>
+
+        <div class="doc-callout doc-callout-plan">
+            <div class="doc-callout-title">Each schedule has its own plan</div>
+            <p>A plan belongs to one schedule, so a new schedule starts on Free even when another of yours is on Pro or Enterprise. On eventschedule.com the form says so when you already have a paid schedule. To sell tickets for an event at another venue, add the event to your paid Talent or Curator schedule instead of making a new one; a Venue schedule's events are always at that venue. See <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">Plan</a>.</p>
+        </div>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Your schedule URL</div>
@@ -144,77 +149,12 @@
             </svg>
             Customize Your Schedule
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Everything below lives on one page, the schedule form. Choose the schedule in the sidebar and click <strong class="text-gray-900 dark:text-white">"Edit Schedule"</strong> at the top of its page, then use the list on the left to move between sections. What everyone fills in is on the page as a section opens; the rest sits in rows that open in place and say their current setting while closed. One <strong class="text-gray-900 dark:text-white">Save</strong>, in the bar at the bottom, saves every section. Nothing here is required to publish, so start with Details and Style and come back later. The table follows the form's order.</p>
-
-        <div class="doc-table-wrap">
-            <table class="doc-table">
-                <thead>
-                    <tr>
-                        <th>Section</th>
-                        <th>What you set there</th>
-                        <th>Shown for</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Details</span></td>
-                        <td>The name, Short Description and the Markdown Description. Three rows under them: <strong class="text-gray-900 dark:text-white">Language and time</strong> holds the language, an optional second language to offer translations in, the timezone your event times are read in, a 24-hour clock switch and the first day of the week. <strong class="text-gray-900 dark:text-white">Contact info</strong> holds the email, phone and website. The <strong class="text-gray-900 dark:text-white">Announcement bar</strong> <x-doc-badge plan="pro" link /> shows a message at the top of your page.</td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Event Sources</span></td>
-                        <td>Pick talent and venue schedules, and every event they publish appears on yours automatically.</td>
-                        <td>Curator schedules</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Address</span></td>
-                        <td>Street address, city, state, postal code and country, with <strong class="text-gray-900 dark:text-white">View Map</strong> and <strong class="text-gray-900 dark:text-white">Validate Address</strong>. The address is shown on your page and on your events, where it can also draw a map.</td>
-                        <td>Venue schedules</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Style</span></td>
-                        <td>Your <strong class="text-gray-900 dark:text-white">Square Profile Image</strong> (your logo), accent colour and font, with a preview of your page beside them. Four rows under them, in the order of your page: <strong class="text-gray-900 dark:text-white">Header</strong> (the header style and header image), <strong class="text-gray-900 dark:text-white">Background</strong>, <strong class="text-gray-900 dark:text-white">Events</strong> (the default layout, hiding past events, the event animation and how each event is worded on your list) and <strong class="text-gray-900 dark:text-white">Custom CSS</strong>. Full reference in <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>. Custom CSS requires <x-doc-badge plan="pro" link /></td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Page content</span></td>
-                        <td>Your social links, each also answering at a short address on your schedule URL that counts its clicks. Rows under them for your featured YouTube videos, a <strong class="text-gray-900 dark:text-white">Gallery</strong> of photos of your venue, past events or your team <x-doc-badge plan="pro" link />, sponsor logos <x-doc-badge plan="pro" link />, and, where the site offers them, a map of your venues and nearby accommodation.</td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Customize</span></td>
-                        <td>Four rows. <strong class="text-gray-900 dark:text-white">Sub-schedules</strong> creates colour-coded parts such as "Live Music", "DJ Nights" or "Comedy" that visitors can filter by; they organize and colour-code, and do not hide anything. The other three are <strong class="text-gray-900 dark:text-white">Custom Fields</strong>, <strong class="text-gray-900 dark:text-white">Categories</strong> and <strong class="text-gray-900 dark:text-white">Custom Labels</strong>. Custom fields and custom labels require <x-doc-badge plan="pro" link /></td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Engagement</span></td>
-                        <td>Event requests from visitors, the sign-up panel and &ldquo;Notify me&rdquo; card that collect visitors' email addresses, fan content, post-event feedback and carpooling, each in its own row.</td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Tickets</span></td>
-                        <td><strong class="text-gray-900 dark:text-white">Ticket presets</strong>, the ticket setups each new event starts from, and <strong class="text-gray-900 dark:text-white">Gift cards</strong>: balance-tracked gift cards that buyers send to a recipient by email. Gift cards require <x-doc-badge plan="pro" link /></td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Settings</span></td>
-                        <td>The <strong class="text-gray-900 dark:text-white">Schedule URL</strong>, with rows for <strong class="text-gray-900 dark:text-white">New events</strong> (what each new event starts with), <strong class="text-gray-900 dark:text-white">Notifications</strong> and <strong class="text-gray-900 dark:text-white">Advanced</strong>.</td>
-                        <td>Every schedule</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Integrations</span></td>
-                        <td>Rows for <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong>, <strong class="text-gray-900 dark:text-white">Feeds from other sites</strong> and <strong class="text-gray-900 dark:text-white">Calendar text and feeds</strong>, with <strong class="text-gray-900 dark:text-white">Email Settings</strong> first on eventschedule.com. A selfhosted install adds <strong class="text-gray-900 dark:text-white">Auto import</strong>, which reads events from a list of web pages once a day and can keep only the events held in the cities you name.</td>
-                        <td>Every schedule</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6 mt-6">Every one of these sections is covered field by field in <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-form" class="doc-link">Creating Schedules</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Everything else about a schedule is set on one page, the schedule form. Choose the schedule in the sidebar and click <strong class="text-gray-900 dark:text-white">"Edit Schedule"</strong> at the top of its page, then use the list of sections on the left: Details, Style, Page content, Customize, Engagement, Tickets, Settings and Integrations, plus Event Sources on a Curator and Address on a Venue. One <strong class="text-gray-900 dark:text-white">Save</strong>, in the bar at the bottom, saves every section.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Nothing there is needed to publish, so add your logo and description in Details and Style and come back for the rest. <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-form" class="doc-link">Creating Schedules</a> lists every section and what it needs, field by field, and <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a> covers the look of your page.</p>
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">What the free plan leaves out</div>
-            <p>Almost nothing on this page needs a paid plan. The free plan runs unlimited events, syncs calendars, takes unlimited RSVPs and free registrations, embeds your calendar and makes event graphics. Putting a price on a ticket is what needs Pro, and Pro also adds the live check-in dashboard (scanning tickets at the door is free on every plan), custom fields, custom CSS and removing the Event Schedule branding. There is no platform fee on any plan, and money always goes to your own Stripe, PayPal or other account. Enterprise adds custom domains, extra team members, availability and the AI generation features. Compare them on the <a href="{{ route('marketing.pricing') }}" class="doc-link">pricing page</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing is held back there.</p>
+            <p>The free plan runs unlimited events, syncs calendars, takes unlimited RSVPs and free registrations, embeds your calendar and makes event graphics. Putting a price on a ticket is what needs Pro, and Pro also adds the live check-in dashboard (scanning tickets at the door is free on every plan) and removes the Event Schedule branding. On the schedule form, Pro covers the announcement bar, custom CSS, the gallery, sponsors, custom fields, custom labels, post-event feedback, carpooling and gift cards; <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-form" class="doc-link">Creating Schedules</a> has the full list. There is no platform fee on any plan, and money always goes to your own Stripe, PayPal or other account. Enterprise adds custom domains, extra team members, availability and the AI generation features. Compare them on the <a href="{{ route('marketing.pricing') }}" class="doc-link">pricing page</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing is held back there.</p>
         </div>
     </section>
 
@@ -301,7 +241,7 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Add more events</strong> - done at three events, or one that repeats</li>
             <li><strong class="text-gray-900 dark:text-white">Share your schedule</strong> - done when you copy your link or the code that puts your events on your own website</li>
-            <li><strong class="text-gray-900 dark:text-white">Tickets or free entry?</strong> - done when an event of yours has tickets or sign-up, or you answer that it needs none. A curator that only lists other schedules' events is not asked</li>
+            <li><strong class="text-gray-900 dark:text-white">Tickets or free entry?</strong> - done when an event of yours has tickets or sign-up, or you answer that it needs none. Where the schedule's plan does not include selling paid tickets, the step is called <strong class="text-gray-900 dark:text-white">Sign-up or open entry?</strong> and asks the same about sign-up. A curator that only lists other schedules' events is not asked</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">A ring fills as you go, and a line says how close you are, for example <strong class="text-gray-900 dark:text-white">One step from live</strong>. On the other pages of that schedule it is a small ring that leads back to the card, and a <strong class="text-gray-900 dark:text-white">Setup guide</strong> line under Dashboard in the sidebar does the same from anywhere. <strong class="text-gray-900 dark:text-white">Hide setup guide</strong> puts it away, and the sidebar line brings it back. Once the guide is gone, the same place on the dashboard holds <strong class="text-gray-900 dark:text-white">Next steps</strong>: suggestions such as publishing a draft or connecting a payment method, each of which you can dismiss.</p>
 
@@ -332,7 +272,7 @@
                 <p>Yes, and it is free. Connect a calendar under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Integrations</strong>, which has a row for <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong> and <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong>. For each one you pick a direction: push your events to the calendar, pull its events in, or both. For a one-time copy instead, <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">import events</a> by pasting a link to a calendar or an events page, some text or a photo of a flyer.</p>
             </x-doc-faq>
             <x-doc-faq question="Is Event Schedule free?">
-                <p>Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, unlimited RSVP with capacity limits, embedding your calendar, one appointment type, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Selling a ticket that carries a price is a Pro feature: Pro is {{ plan_price($proMonthly) }} a month, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial. There is no platform fee on any plan.</p>
+                <p>Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, unlimited RSVP with capacity limits, embedding your calendar, one appointment type, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Selling a ticket that carries a price is a Pro feature: Pro is {{ plan_price($proMonthly) }} a month, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a {{ (int) config('app.trial_days', 7) }}-day free trial. There is no platform fee on any plan.</p>
             </x-doc-faq>
             <x-doc-faq question="How do I get paid for tickets?">
                 <p>Connect your own account under <strong class="text-gray-900 dark:text-white">Settings &rarr; Payment Methods</strong>: Stripe, PayPal, Payfast (South African rand only), Razorpay (Indian rupees only) or Invoice Ninja. A payment link, or cash at the door, works too. You pick the method on each event, and the money goes to your own account with no platform fee on any plan. A Stripe, PayPal or Razorpay sale can be refunded in full or in part from the Sales page, and the money goes back through the provider; any other sale can be marked as refunded there. See <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Payment Methods</a> and <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Managing Sales</a>.</p>
@@ -413,7 +353,7 @@
                     "name": "Is Event Schedule free?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, unlimited RSVP with capacity limits, embedding your calendar, one appointment type, and 10 newsletter emails a month (each recipient counts as one email). Selling a ticket that carries a price is a Pro feature: Pro is {{ plan_price($proMonthly) }} a month, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial. There is no platform fee on any plan."
+                        "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, unlimited RSVP with capacity limits, embedding your calendar, one appointment type, and 10 newsletter emails a month (each recipient counts as one email). Selling a ticket that carries a price is a Pro feature: Pro is {{ plan_price($proMonthly) }} a month, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a {{ (int) config('app.trial_days', 7) }}-day free trial. There is no platform fee on any plan."
                     }
                 },
                 {

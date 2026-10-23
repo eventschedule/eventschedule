@@ -102,7 +102,10 @@ class EventLifecycleService
         $event->forceFill($fields)->save();
 
         if ($pushToCalendars) {
-            $event->dispatchCalendarSync('delete');
+            // 'cancel', not 'delete': an entry this app pushed out comes off the calendar, but the
+            // owner's own entry a sync read this event in from stays (a cancel can be undone,
+            // deleting a calendar entry cannot).
+            $event->dispatchCalendarSync('cancel');
         }
 
         if ($webhook && ! $event->is_draft) {

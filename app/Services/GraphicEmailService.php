@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Http\Controllers\GraphicController;
 use App\Mail\GraphicEmail;
-use App\Models\Event;
 use App\Models\Role;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
@@ -39,31 +38,10 @@ class GraphicEmailService
             $maxPerSchedule = GraphicController::resolveMaxPerSchedule($settings['max_per_schedule'] ?? null);
             $poolLimit = GraphicController::resolveGraphicPoolLimit($eventLimit, $maxPerSchedule);
 
-            // Build the base query for future events
-            $baseQuery = function () use ($role, $excludeRecurring) {
-                return Event::with(['roles', 'tickets', 'venue'])
-                    ->whereHas('roles', function ($query) use ($role) {
-                        $query->where('role_id', $role->id)->where('is_accepted', true);
-                    })
-                    ->upcomingOrOngoing()
-                    ->where('is_private', false)
-                    ->where('is_draft', false)
-                    ->where('is_cancelled', false)
-                    ->whereNull('event_password')
-                    ->when($excludeRecurring, function ($query) {
-                        $query->whereNull('days_of_week');
-                    });
-            };
-
-            // Flyer events are always required for the graphic image
+            // Upcoming events, each series under its next occurrence (as on the page).
+            // Flyer events are always required for the graphic image.
             $events = GraphicController::applyPerScheduleCap(
-                $baseQuery()
-                    ->whereNotNull('flyer_image_url')
-                    ->where('flyer_image_url', '!=', '')
-                    ->orderBy('starts_at')
-                    ->orderBy('id')
-                    ->limit($poolLimit)
-                    ->get(),
+                GraphicController::upcomingGraphicEvents($role, (bool) $excludeRecurring, true, $poolLimit),
                 $maxPerSchedule,
                 $role
             )->take($eventLimit);
@@ -85,12 +63,12 @@ class GraphicEmailService
                 $textEvents = $events;
             } elseif ($textShowAll) {
                 $textEvents = GraphicController::applyPerScheduleCap(
-                    $baseQuery()->orderBy('starts_at')->orderBy('id')->get(), $maxPerSchedule, $role, $posterEvents
+                    GraphicController::upcomingGraphicEvents($role, (bool) $excludeRecurring), $maxPerSchedule, $role, $posterEvents
                 );
             } else {
                 $textEvents = GraphicController::takeWithPosterReserved(
                     GraphicController::applyPerScheduleCap(
-                        $baseQuery()->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(),
+                        GraphicController::upcomingGraphicEvents($role, (bool) $excludeRecurring, false, $poolLimit),
                         $maxPerSchedule,
                         $role,
                         $posterEvents

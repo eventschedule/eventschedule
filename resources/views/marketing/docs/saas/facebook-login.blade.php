@@ -24,7 +24,7 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Adds <strong>Continue with Facebook</strong> to the login and sign-up pages, and a <strong>Facebook Settings</strong> section on the <strong>Integrations</strong> tab of each account's <strong>Settings</strong>, where your customers connect or disconnect Facebook. An account with no password can also verify with Facebook before setting one.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">It is optional and <strong>off by default</strong>, and it is set up entirely in the Meta developer console and <code class="doc-inline-code">.env</code>: there is no screen for it in the admin panel. Until both values under <a href="#configure" class="doc-link">Configure Event Schedule</a> are set there is no Facebook button and no Facebook Settings section, no Facebook entry in the bundled privacy policy's processor list, and every <code class="doc-inline-code">/auth/facebook</code> URL returns 404.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">It is optional and <strong>off by default</strong>, and it is set up entirely in the Meta developer console and <code class="doc-inline-code">.env</code>: there is no screen for it in the platform admin panel. Until both values under <a href="#configure" class="doc-link">Configure Event Schedule</a> are set there is no Facebook button and no Facebook Settings section, no Facebook entry in the bundled privacy policy's processor list, and every <code class="doc-inline-code">/auth/facebook</code> URL returns 404.</p>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Events are not synced</div>
             <p>Facebook login only signs people in. It does not import events from Facebook or publish events there: Meta limits reading Page and personal events to its approved Marketing Partners, and publishing them to its Official Events API partners, which is closed to new applicants. To promote an event on Facebook, share its link, post an image from <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">event graphics</a>, or run a paid <a href="{{ route('marketing.docs.boost') }}" class="doc-link">Boost</a>.</p>
@@ -73,7 +73,7 @@
                     </tr>
                     <tr>
                         <td><strong>Privacy policy URL</strong></td>
-                        <td>Your privacy policy. If you replaced it under <strong>System &rarr; Legal Pages</strong> in the admin panel (<code class="doc-inline-code">/admin/legal</code>), use that one.</td>
+                        <td>Your privacy policy. If you replaced it under <strong>System &rarr; Legal Pages</strong> in the platform admin panel (<code class="doc-inline-code">/admin/legal</code>), use that one.</td>
                     </tr>
                     <tr>
                         <td><strong>Terms of service URL</strong></td>

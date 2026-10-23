@@ -177,8 +177,8 @@ class AppUpdateService
                     report($e);
                 }
 
-                // The path goes to the console only: on a plain selfhost install any signed-in
-                // user can open Settings > App Update (can_self_update()).
+                // The path goes to the console only: on a plain selfhost install with no admin
+                // account any signed-in user can open Settings > App Update (can_self_update()).
                 $blocked = $forConsole ? $this->firstUnwritableFile(base_path()) : null;
 
                 return [

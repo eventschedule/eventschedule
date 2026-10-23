@@ -64,4 +64,73 @@ class CalendarSyncMembersOnlyTest extends TestCase
         $this->assertContains($response->status(), [403, 422], 'refused before anything is sent');
         $this->assertSame(0, DB::table('calendar_syncs')->where('event_id', $draft->id)->count());
     }
+
+    /**
+     * Sync Now follows the save's rule: only an event guests can see goes to a calendar. It used
+     * to push whatever it was given, so one press copied a draft, an internal event or a cancelled
+     * one into the owner's calendar. Mutation: drop the calendarSyncRefusal() check from either
+     * controller.
+     */
+    public function test_sync_now_does_not_copy_a_draft_internal_or_cancelled_event_to_google(): void
+    {
+        $owner = $this->createOwner();
+        $owner->forceFill(['google_token' => 'token', 'google_token_scopes' => 'https://www.googleapis.com/auth/calendar'])->save();
+        $role = $this->createRole($owner, 'venue');
+        $hidden = [
+            'draft' => $this->createEvent($role, ['is_draft' => true, 'creator_role_id' => $role->id]),
+            'internal' => $this->createEvent($role, ['is_draft' => true, 'is_internal' => true, 'creator_role_id' => $role->id]),
+            'cancelled' => $this->createEvent($role, ['is_cancelled' => true, 'creator_role_id' => $role->id]),
+        ];
+        $published = $this->createEvent($role, ['creator_role_id' => $role->id]);
+
+        $this->mock(GoogleCalendarService::class, function ($mock) use ($published) {
+            $mock->shouldReceive('ensureValidToken')->andReturn(true);
+            $mock->shouldReceive('createEvent')->once()
+                ->withArgs(fn ($event) => (int) $event->id === (int) $published->id)
+                ->andReturn(new \Google\Service\Calendar\Event(['id' => 'google-1']));
+        });
+
+        foreach ($hidden as $state => $event) {
+            $this->actingAs($owner->fresh())
+                ->postJson(route('google.calendar.sync_event', ['subdomain' => $role->subdomain, 'eventId' => UrlUtils::encodeId($event->id)]))
+                ->assertStatus(422);
+            $this->assertSame(0, DB::table('calendar_syncs')->where('event_id', $event->id)->count(), "a {$state} event is not copied");
+        }
+
+        // Positive control: a published event still goes.
+        $this->actingAs($owner->fresh())
+            ->postJson(route('google.calendar.sync_event', ['subdomain' => $role->subdomain, 'eventId' => UrlUtils::encodeId($published->id)]))
+            ->assertOk();
+    }
+
+    public function test_sync_now_does_not_copy_a_draft_internal_or_cancelled_event_to_outlook(): void
+    {
+        $owner = $this->createOwner();
+        $owner->forceFill(['microsoft_token' => 'token'])->save();
+        $role = $this->createRole($owner, 'venue');
+        $hidden = [
+            'draft' => $this->createEvent($role, ['is_draft' => true, 'creator_role_id' => $role->id]),
+            'internal' => $this->createEvent($role, ['is_draft' => true, 'is_internal' => true, 'creator_role_id' => $role->id]),
+            'cancelled' => $this->createEvent($role, ['is_cancelled' => true, 'creator_role_id' => $role->id]),
+        ];
+        $published = $this->createEvent($role, ['creator_role_id' => $role->id]);
+
+        $this->mock(MicrosoftCalendarService::class, function ($mock) use ($published) {
+            $mock->shouldReceive('ensureValidToken')->andReturn(true);
+            $mock->shouldReceive('createEvent')->once()
+                ->withArgs(fn ($event) => (int) $event->id === (int) $published->id)
+                ->andReturn(['id' => 'outlook-1']);
+        });
+
+        foreach ($hidden as $state => $event) {
+            $this->actingAs($owner->fresh())
+                ->postJson(route('microsoft.calendar.sync_event', ['subdomain' => $role->subdomain, 'eventId' => UrlUtils::encodeId($event->id)]))
+                ->assertStatus(422);
+            $this->assertSame(0, DB::table('microsoft_calendar_syncs')->where('event_id', $event->id)->count(), "a {$state} event is not copied");
+        }
+
+        $this->actingAs($owner->fresh())
+            ->postJson(route('microsoft.calendar.sync_event', ['subdomain' => $role->subdomain, 'eventId' => UrlUtils::encodeId($published->id)]))
+            ->assertOk();
+    }
 }

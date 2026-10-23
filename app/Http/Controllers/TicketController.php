@@ -64,7 +64,8 @@ class TicketController extends Controller
         }
 
         // event.creatorRole: each row renders localStartsAt(), which resolves the schedule's zone.
-        $query = Sale::with('event.creatorRole', 'saleTickets')
+        // event.roles: each row names the event's venue, and the venue accessor reads roles.
+        $query = Sale::with('event.creatorRole', 'event.roles', 'saleTickets')
             ->where('user_id', $user->id)
             ->where('is_deleted', false);
 
@@ -2908,6 +2909,9 @@ class TicketController extends Controller
 
         return view('ticket.scan', [
             'events' => $eventsData,
+            // The check-in DASHBOARD is Pro (CheckInController::index() lists Pro events only), so
+            // its button is hidden below Pro, the same test the Sales page uses for it.
+            'hasPro' => $user->manageableRoles()->contains(fn ($role) => $role->isPro()),
             'selectedEventId' => $selectedEventId ? UrlUtils::encodeId($selectedEventId) : null,
             // scannableBy() above drops any schedule the plan filter closed. Scanning itself is
             // available on every plan, so an empty picker here reads as "you have no events"

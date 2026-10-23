@@ -348,9 +348,12 @@
     <div class="page-shell page-col is-narrow scan-page">
         <x-page-header :title="__('messages.scan_ticket')" :lead="__('messages.scan_lead')"
                        :back="route('sales')" :back-label="__('messages.sales')">
+            {{-- The check-in dashboard is Pro and hidden below it, as on the Sales page. Scanning is not. --}}
+            @if ($hasPro ?? false)
             <x-slot name="actions">
                 <x-secondary-link :href="route('checkin.index')">{{ __('messages.checkin_dashboard') }}</x-secondary-link>
             </x-slot>
+            @endif
         </x-page-header>
 
         @include('partials.team-access-notice', ['roles' => $planBlockedRoles])

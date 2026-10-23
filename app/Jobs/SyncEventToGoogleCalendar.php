@@ -19,7 +19,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
 
     protected $role;
 
-    protected $action; // 'create', 'update', 'delete'
+    protected $action; // 'create', 'update', 'delete', 'cancel' (a delete that leaves the owner's original)
 
     protected $user; // Optional: specific user (defaults to role owner)
 
@@ -120,6 +120,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
                     $this->updateEvent($googleCalendarService);
                     break;
                 case 'delete':
+                case 'cancel':
                     $this->deleteEvent($googleCalendarService);
                     break;
             }
@@ -243,14 +244,19 @@ class SyncEventToGoogleCalendar implements ShouldQueue
     }
 
     /**
-     * Whether the entry this would delete is the owner's own, which the sync read this draft in
-     * from. Hiding or deleting the draft here (to keep it off the public page) must leave the
-     * owner's calendar as it was. A team member's copy is always ours to remove.
+     * Whether the entry this would delete is the owner's own, which the sync read this event in
+     * from, and must stay. The original belongs to the owner's calendar: hiding the event here (a
+     * draft) or cancelling it (which can be undone) never deletes it, and deleting the event takes
+     * it out only while the schedule pushes its changes to that calendar. A team member's copy is
+     * always ours to remove.
      */
     private function isOwnersOriginal(): bool
     {
-        return $this->event->is_draft
-            && (int) $this->getSyncUser()->id === (int) $this->role->user_id
-            && $this->event->cameFromCalendarSync(Event::IMPORT_GOOGLE, $this->role);
+        if ((int) $this->getSyncUser()->id !== (int) $this->role->user_id
+            || ! $this->event->cameFromCalendarSync(Event::IMPORT_GOOGLE, $this->role)) {
+            return false;
+        }
+
+        return $this->event->is_draft || $this->action === 'cancel' || ! $this->role->syncsToGoogle();
     }
 }

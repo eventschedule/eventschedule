@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Sale;
+use App\Models\User;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -77,5 +80,61 @@ class SaleDateBelongsToTheEventTest extends TestCase
 
         $this->assertSame(1, Sale::where('event_id', $event->id)->where('event_date', $real)->count(), 'control: the real date takes the one place');
         $this->assertSame(0, Sale::where('event_id', $event->id)->where('event_date', $other)->count());
+    }
+
+    // ---- POST /api/sales ----------------------------------------------------------------------
+
+    private function apiKey(User $user): array
+    {
+        $raw = 'testapikey_'.Str::random(24);
+        $user->api_key = substr(hash('sha256', $raw), 0, 8);
+        $user->api_key_hash = Hash::make($raw);
+        $user->save();
+
+        return ['X-API-Key' => $raw];
+    }
+
+    private function buyOverTheApi(array $key, $event, $ticket, string $date)
+    {
+        return $this->postJson('/api/sales', [
+            'event_id' => UrlUtils::encodeId($event->id), 'name' => 'API Buyer', 'email' => 'buyer'.random_int(1000, 9999).'@gmail.com',
+            'event_date' => $date, 'tickets' => [UrlUtils::encodeId($ticket->id) => 1],
+        ], $key);
+    }
+
+    public function test_the_api_does_not_sell_a_ticket_for_a_date_the_event_does_not_happen_on(): void
+    {
+        config(['app.hosted' => true]);
+        [$role, $event, $ticket] = $this->ticketed();
+        $key = $this->apiKey(User::find($role->user_id));
+        $real = $event->saleEventDateFromStartsAt();
+        $other = Carbon::parse($real)->addDays(3)->format('Y-m-d');
+
+        $this->buyOverTheApi($key, $event, $ticket, $real)->assertSuccessful();
+        $this->buyOverTheApi($key, $event, $ticket, $other)
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'The event does not take place on this event_date');
+
+        $this->assertSame(0, Sale::where('event_id', $event->id)->where('event_date', $other)->count(), 'the sold-out ticket is not sold again under another date');
+        $this->assertSame(1, Sale::where('event_id', $event->id)->count());
+    }
+
+    public function test_the_api_does_not_sell_a_recurring_event_on_a_day_that_is_not_an_occurrence(): void
+    {
+        config(['app.hosted' => true]);
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $starts = Carbon::now()->addDays(7)->setTime(16, 0);
+        $days = str_repeat('0', 7);
+        $days[$starts->copy()->setTimezone($role->timezone)->dayOfWeek] = '1';
+        $event = $this->createRecurringEvent($role, ['tickets_enabled' => true, 'creator_role_id' => $role->id, 'starts_at' => $starts->format('Y-m-d H:i:s'), 'days_of_week' => $days]);
+        $ticket = $this->createTicket($event, ['quantity' => 5, 'price' => 0]);
+        $key = $this->apiKey(User::find($role->user_id));
+        $real = $starts->copy()->setTimezone($role->timezone)->addWeek()->format('Y-m-d');
+        $notOne = Carbon::parse($real)->addDay()->format('Y-m-d');
+
+        $this->buyOverTheApi($key, $event, $ticket, $real)->assertSuccessful();
+        $this->buyOverTheApi($key, $event, $ticket, $notOne)->assertStatus(422);
+
+        $this->assertSame(0, Sale::where('event_id', $event->id)->where('event_date', $notOne)->count());
     }
 }

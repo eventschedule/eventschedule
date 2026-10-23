@@ -19,7 +19,7 @@ class SyncEventToCalDAV implements ShouldQueue
 
     protected $role;
 
-    protected $action; // 'create', 'update', 'delete'
+    protected $action; // 'create', 'update', 'delete', 'cancel' (a delete that leaves the owner's original)
 
     /**
      * Create a new job instance.
@@ -54,6 +54,7 @@ class SyncEventToCalDAV implements ShouldQueue
                     $this->updateEvent($calDAVService);
                     break;
                 case 'delete':
+                case 'cancel':
                     $this->deleteEvent($calDAVService);
                     break;
             }
@@ -127,9 +128,13 @@ class SyncEventToCalDAV implements ShouldQueue
     {
         $uid = $this->event->getCalDAVEventUidForRole($this->role->id);
 
-        // The owner's own entry, which the sync read this draft in from: hiding or deleting the
-        // draft here (to keep it off the public page) must leave their calendar as it was.
-        if (! $uid || ($this->event->is_draft && $this->event->cameFromCalendarSync(Event::IMPORT_CALDAV, $this->role))) {
+        // The owner's own entry, which the sync read this event in from, belongs to their calendar:
+        // hiding the event here (a draft) or cancelling it (which can be undone) leaves it, and
+        // deleting the event takes it out only while the schedule pushes its changes to that server.
+        $ownersOriginal = $this->event->cameFromCalendarSync(Event::IMPORT_CALDAV, $this->role)
+            && ($this->event->is_draft || $this->action === 'cancel' || ! $this->role->syncsToCalDAV());
+
+        if (! $uid || $ownersOriginal) {
             return;
         }
 

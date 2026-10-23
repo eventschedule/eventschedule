@@ -29,9 +29,9 @@ class ApiFeedbackController extends Controller
      */
     private function managedRoleIds()
     {
-        return auth()->user()->roles()
-            ->wherePivotIn('level', ['owner', 'admin'])
-            ->pluck('roles.id');
+        // Owner or admin, and on hosted somebody else's schedule only while it is Enterprise, as
+        // on the web (User::isEditor()): the moderation queue is a team page there.
+        return auth()->user()->manageableRoles()->pluck('id');
     }
 
     private function perPage(Request $request): int

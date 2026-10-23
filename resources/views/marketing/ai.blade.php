@@ -637,7 +637,7 @@
         // Honest allowance board. Caps come from config/usage.php; every one of
         // them returns null (no cap) when the install is selfhosted.
         $board = [
-            ['Parse an event from text, an image or a web page', 'Every plan', '10 to 100 a day, by plan'],
+            ['Parse an event from text, an image or a web page', 'Every plan', '50 to 100 a day, by plan'],
             // LinkImportService: a feed or a page's JSON-LD never reaches the model, so it
             // writes no usage row and needs no AI key.
             ['Read a calendar feed or a page\'s own event data from a link', 'Every plan', 'No AI involved, so not counted'],

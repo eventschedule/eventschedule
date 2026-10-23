@@ -193,7 +193,7 @@ class EventFormPlacementTest extends TestCase
         $this->assertStringContainsString("} else if (this.savedSponsorCount > 0 && this.event.sponsor_mode !== 'custom') {\n          removes.push(L.saving_removes_sponsors);", $bar);
         $this->assertStringContainsString("text: withStanding(this.visibility === 'public' ? L.saving_publishes : L.saving_hides)", $bar);
         $this->assertStringContainsString('tabs: asTabs(dirty), note: standing }', $bar);
-        $this->assertStringContainsString("text: withStanding(L.unsaved_changes)", $bar);
+        $this->assertStringContainsString('text: withStanding(L.unsaved_changes)', $bar);
         $this->assertStringContainsString('<span v-if="barStatus.note" class="event-save-strong ms-2" v-text="barStatus.note"></span>', $html, 'the unsaved tabs carry it');
     }
 
@@ -216,6 +216,89 @@ class EventFormPlacementTest extends TestCase
             $other = $this->createEvent($role, ['creator_role_id' => $role->id] + $attrs);
             $this->assertStringContainsString('calendarSummary: "",', $this->page($this->editUrl($other, $role)), "a {$state} event");
         }
+    }
+
+    /**
+     * No save copies a Draft, Internal or cancelled event to a calendar (EventRepo::saveEvent()),
+     * so Sync Now, which would, is not offered on one, and the line under the calendar says why
+     * instead of promising the next save. It used to say "It is copied the next time you save."
+     * on a cancelled event, which has not been true since a save stopped pushing one.
+     */
+    public function test_sync_now_is_offered_only_where_a_save_would_copy_the_event(): void
+    {
+        $role = $this->createRole($this->owner, 'talent', ['sync_direction' => 'to']);
+        RoleUser::where('role_id', $role->id)->where('user_id', $this->owner->id)->update(['google_calendar_id' => 'primary']);
+
+        $listing = function (array $attrs) use ($role): string {
+            $event = $this->createEvent($role, ['creator_role_id' => $role->id] + $attrs);
+
+            return $this->slice($this->page($this->editUrl($event, $role)), '<h3 id="listing-calendar-sync"', 'data-section="section-engagement"');
+        };
+
+        $public = $listing([]);
+        $this->assertStringContainsString('id="sync-event-btn"', $public);
+        $this->assertStringContainsString(e(__('messages.calendar_not_synced_next_save')), $public);
+
+        foreach ([
+            'draft' => [['is_draft' => true], 'calendar_not_synced_draft'],
+            'internal' => [['is_draft' => true, 'is_internal' => true], 'calendar_not_synced_draft'],
+            'cancelled' => [['is_cancelled' => true], 'calendar_not_synced_cancelled'],
+        ] as $state => [$attrs, $line]) {
+            $html = $listing($attrs);
+            $this->assertStringNotContainsString('id="sync-event-btn"', $html, "Sync Now on a {$state} event");
+            $this->assertStringContainsString(e(__('messages.'.$line)), $html, "the line on a {$state} event");
+            $this->assertStringNotContainsString(e(__('messages.calendar_not_synced_next_save')), $html, "a {$state} event is not copied by a save");
+        }
+    }
+
+    /**
+     * Saving an event with a pass turns Individual tickets off (EventRepo::saveEvent()), so while a
+     * type is a pass the switch is drawn off and locked with the reason under it, and posts 0. A
+     * pass is one per order whatever is typed, so it is not offered + Add Limit either.
+     */
+    public function test_a_pass_locks_individual_tickets_and_has_no_order_limit(): void
+    {
+        $event = $this->createEvent($this->role, ['creator_role_id' => $this->role->id, 'tickets_enabled' => true]);
+        $html = $this->page($this->editUrl($event, $this->role));
+
+        $checkout = $this->slice($html, 'data-ticket-pane="checkout"', 'data-tab="sales_rules"');
+        $this->assertStringContainsString(':checked="individualTicketsOn"', $checkout);
+        $this->assertStringContainsString(':disabled="individualTicketsPlanLocked || hasPassTicket"', $checkout);
+        $this->assertStringContainsString('v-if="hasPassTicket" data-individual-tickets-pass-note>'.e(__('messages.individual_tickets_off_for_passes')).'</p>', $checkout);
+        $this->assertStringContainsString('name="individual_tickets" :value="individualTicketsOn ? 1 : 0"', $checkout);
+
+        $view = file_get_contents(resource_path('views/event/edit.blade.php'));
+        $this->assertStringContainsString('return !! this.event.tickets_enabled && this.tickets.some(function (ticket) { return !! ticket.is_pass; });', $view);
+        $this->assertStringContainsString("return !! this.event.individual_tickets && ! this.hasPassTicket\n          && (! this.individualTicketsPlanLocked || this.savedIndividualTicketsSold);", $view);
+        $this->assertStringContainsString('if (this.individualTicketsOn) { asked.push(C.individual_tickets); }', $view, 'the Checkout line does not name it either');
+
+        $this->assertSame(2, substr_count($html, '@click="addTicketMaxPerOrder(index)"'), 'sanity check: both + Add Limit links are on the page');
+        $this->assertSame(2, substr_count($html, 'v-if="!ticket.is_pass && (ticket.max_per_order === null || ticket.max_per_order === undefined)"'), '+ Add Limit is not offered on a pass');
+        $this->assertStringContainsString('<div v-if="!ticket.is_pass && ticket.max_per_order !== null && ticket.max_per_order !== undefined" class="mt-4">', $html);
+    }
+
+    /**
+     * Individual tickets is free on free registration and Pro with tickets (docs/FEATURES.md,
+     * EventRepo::saveEvent()). Below Pro the switch is locked only while tickets are on, and under
+     * that lock it shows (and posts) only what an event SAVED selling with it keeps.
+     */
+    public function test_individual_tickets_is_locked_below_pro_only_with_tickets(): void
+    {
+        $free = $this->createFreeRole($this->owner, 'talent');
+        $rsvp = $this->createEvent($free, ['creator_role_id' => $free->id, 'rsvp_enabled' => true, 'individual_tickets' => true]);
+        $html = $this->page($this->editUrl($rsvp, $free));
+
+        $checkout = $this->slice($html, 'data-ticket-pane="checkout"', 'data-tab="sales_rules"');
+        $this->assertStringContainsString(':disabled="individualTicketsPlanLocked || hasPassTicket"', $checkout);
+        $this->assertStringContainsString('<template v-if="individualTicketsPlanLocked">', $checkout, 'the Pro badge follows the plan lock, not the plan alone');
+        $this->assertStringNotContainsString('!isPro', $this->slice($checkout, 'id="individual_tickets_checkbox"', 'name="individual_tickets"'));
+        $this->assertStringContainsString('savedIndividualTicketsSold: false,', $html, 'stored under free registration is not stored selling tickets');
+
+        $view = file_get_contents(resource_path('views/event/edit.blade.php'));
+        $this->assertStringContainsString("individualTicketsPlanLocked() {\n        return ! this.isPro && !! this.event.tickets_enabled;", $view);
+
+        $lapsed = $this->createEvent($free, ['creator_role_id' => $free->id, 'tickets_enabled' => true, 'individual_tickets' => true]);
+        $this->assertStringContainsString('savedIndividualTicketsSold: true,', $this->page($this->editUrl($lapsed, $free)), 'a lapsed Pro event keeps what it sells with');
     }
 
     public function test_checkout_offers_its_custom_fields_upgrade_for_tickets_as_well(): void

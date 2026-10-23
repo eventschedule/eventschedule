@@ -480,7 +480,7 @@ class ListWording
                 'city' => $ownVenue || ! $venue ? '' : (string) $venue->textInLanguage('city', $lang),
                 'address' => $ownVenue || ! $venue ? '' : (string) $venue->textInLanguage('address1', $lang),
                 'state' => $ownVenue || ! $venue ? '' : (string) $venue->textInLanguage('state', $lang),
-                'country' => $ownVenue || ! $venue ? '' : (string) $venue->country,
+                'country' => $ownVenue || ! $venue ? '' : strtoupper((string) $venue->country_code),
                 'duration' => (string) ($event->duration ?? ''),
                 'coupon_code' => (string) ($event->coupon_code ?? ''),
                 default => '',

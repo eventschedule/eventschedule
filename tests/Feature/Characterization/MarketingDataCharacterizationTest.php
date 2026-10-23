@@ -38,6 +38,10 @@ class MarketingDataCharacterizationTest extends TestCase
         // something a scheduled command wrote.
         \App\Models\Setting::where('key', \App\Utils\GitHubUtils::STARS_KEY)->delete();
         \Illuminate\Support\Facades\Http::fake();
+
+        // The comparison rows say the trial length the installation sets (TRIAL_DAYS), and CI
+        // ships 365 where a machine with no value has 7: the fixture holds 7.
+        config(['app.trial_days' => 7]);
     }
 
     private const COMPARISON_KEYS = [

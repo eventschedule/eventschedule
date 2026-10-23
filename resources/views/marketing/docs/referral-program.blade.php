@@ -66,7 +66,7 @@
             <li>The first referral link counts. If they followed another organizer's link earlier in the same session, that organizer gets the referral, not you.</li>
             <li>Each person can be referred once. If someone already has an Event Schedule account, or was already referred by another organizer, a new referral is not created for them.</li>
             <li>You cannot refer yourself. A signup that matches your own account is ignored.</li>
-            <li>The 30-day clock starts when the subscription starts, and the 7-day free trial counts towards it.</li>
+            <li>The 30-day clock starts when the subscription starts, and the {{ config('app.trial_days') }}-day free trial counts towards it.</li>
             <li>Statuses are recalculated once a day, so a referral that hits its 30th day shows as Earned on the next daily run rather than to the minute.</li>
         </ul>
 

@@ -714,7 +714,7 @@
                     <ul class="space-y-3">
                         @foreach ([
                             'An act pastes their pitch or uploads a poster, and it is read into a request for you.',
-                            'Up to 50 applications are read a day on the free plan and on Pro, 10 while a schedule is on its trial and 100 on Enterprise.',
+                            'Up to 50 applications are read a day on the free plan and on Pro, and 100 on Enterprise.',
                             'Or switch to the booking form, where every application brings a date, a time and a description.',
                         ] as $point)
                             <li class="flex items-start gap-3">

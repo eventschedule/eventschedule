@@ -15,6 +15,7 @@
         <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
         <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
         <x-doc-nav-link href="#razorpay">Razorpay</x-doc-nav-link>
+        <x-doc-nav-link href="#default-payment-method">Default payment method</x-doc-nav-link>
         <x-doc-nav-link href="#refunds">Refunds</x-doc-nav-link>
         <x-doc-nav-link href="#testing">Testing</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
@@ -42,7 +43,7 @@
 
         <h3 class="doc-subheading">Where the payment method is chosen</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Server configuration only makes Stripe <em>available</em>. Each event still picks one payment method on the event form, in the <strong class="text-gray-900 dark:text-white">Payment</strong> row of its <strong class="text-gray-900 dark:text-white">Tickets</strong> tab: Cash, Stripe, Invoice Ninja, Payment Link, Payfast, PayPal or Razorpay. Only the methods that are connected, and that can settle the event's currency, are listed. The seven options are described on the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Tickets</a> page.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Each person's own connections live in <strong class="text-gray-900 dark:text-white">Settings</strong>, on the <strong class="text-gray-900 dark:text-white">Payment Methods</strong> tab. It lists one row per method (Stripe, Invoice Ninja, Payment Link, Payfast, PayPal, Razorpay), each saying whether it is connected, and a row opens in place to show its details.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Each person's own connections live in <strong class="text-gray-900 dark:text-white">Settings</strong>, on the <strong class="text-gray-900 dark:text-white">Payment Methods</strong> tab. It lists one row per method (Stripe, Invoice Ninja, Payment Link, Payfast, PayPal, Razorpay), each saying whether it is connected, and a row opens in place to show its details. Payment Link needs no server setup at all: each user enters the address of their own payment page in that row.</p>
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Plan requirement</div>
@@ -95,6 +96,7 @@
             <li>Will several people each need to be paid into <strong class="text-gray-900 dark:text-white">their own</strong> Stripe account? You are a SaaS operator.</li>
             <li>Should every ticket sold anywhere on the install settle into <strong class="text-gray-900 dark:text-white">one</strong> account you control? You are a selfhosted user.</li>
         </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install you can skip <a href="#saas-operators" class="doc-link">For SaaS Operators</a>: after Stripe, go on to <a href="#invoice-ninja" class="doc-link">Invoice Ninja</a>, <a href="#paypal" class="doc-link">PayPal</a>, <a href="#payfast" class="doc-link">Payfast</a> or <a href="#razorpay" class="doc-link">Razorpay</a> if you need them.</p>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Stripe Connect needs hosted mode</div>
@@ -616,18 +618,7 @@
         <h3 id="payfast-currency" class="doc-subheading">Rand only, with a R5.00 minimum</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Payfast is offered only on events priced in ZAR. Separately, a single payment below R5.00 is refused at checkout rather than hidden from the list, because Payfast will not process it. If Payfast is missing from the <strong class="text-gray-900 dark:text-white">Payment Method</strong> list in an event's <strong class="text-gray-900 dark:text-white">Payment</strong> row, check the event's <strong class="text-gray-900 dark:text-white">Currency</strong> first: a schedule whose country is blank, or not in the built-in currency map, starts its events in your installation currency, which defaults to USD. That is <code class="doc-inline-code">PLATFORM_CURRENCY</code>, or whatever is chosen in the <strong class="text-gray-900 dark:text-white">Platform currency</strong> card of the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#system-settings" class="doc-link">Settings</a> page.</p>
 
-        <h3 class="doc-subheading">Making Payfast the default for new events</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">New events start on <strong>Cash</strong> unless you say otherwise. On an install where Payfast is the only way to take money, that means choosing it by hand every time. Name it once instead:</p>
-
-        <div class="doc-code-block">
-            <div class="doc-code-header">
-                <span>.env</span>
-                <button class="doc-copy-btn">Copy</button>
-            </div>
-            <pre><code><span class="code-variable">DEFAULT_PAYMENT_METHOD</span>=<span class="code-string">payfast</span></code></pre>
-        </div>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Accepts any gateway key - <code class="doc-inline-code">cash</code>, <code class="doc-inline-code">stripe</code>, <code class="doc-inline-code">invoiceninja</code>, <code class="doc-inline-code">payment_url</code>, <code class="doc-inline-code">payfast</code>, <code class="doc-inline-code">paypal</code> or <code class="doc-inline-code">razorpay</code> - and applies to events created through the API as well as the form. It only takes effect where the gateway can actually be used: an owner who has not connected it, or an event in a currency it cannot settle, still starts on Cash. On the event form a schedule's default <a href="{{ route('marketing.docs.tickets') }}#ticket-presets" class="doc-link">ticket preset</a> takes priority over it when the preset names a payment method; through the API it applies whenever <code class="doc-inline-code">payment_method</code> is omitted and no preset is used (one is always used for a team member the schedule's preset switch binds).</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">New events start on <strong>Cash</strong>. On an install where Payfast is the only way to take money, set <code class="doc-inline-code">DEFAULT_PAYMENT_METHOD=payfast</code> so nobody has to pick it by hand. See <a href="#default-payment-method" class="doc-link">Default payment method</a>.</p>
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Your install must be publicly reachable</div>
@@ -691,7 +682,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Razorpay has no API for registering a webhook, so add it yourself in the Razorpay Dashboard. Do it for the install-wide account; each user who connects their own account adds their own the same way:</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In the Razorpay Dashboard under <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; Webhooks</strong>, add a webhook pointing at <code class="doc-inline-code">https://your-site/payments/razorpay/webhook</code></li>
-            <li>Tick <code class="doc-inline-code">payment_link.paid</code> and <code class="doc-inline-code">payment_link.expired</code></li>
+            <li>Tick <code class="doc-inline-code">payment_link.paid</code>, <code class="doc-inline-code">payment_link.expired</code> and <code class="doc-inline-code">payment_link.cancelled</code>. The last gives the seats back at once when a link is cancelled in the Razorpay Dashboard</li>
             <li>Choose a secret, put the same value in <code class="doc-inline-code">RAZORPAY_WEBHOOK_SECRET</code> and run <code class="doc-inline-code">php artisan config:clear</code></li>
         </ol>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Test Mode and Live Mode each have their own webhooks, so add it in the mode your keys are from.</p>
@@ -700,6 +691,27 @@
             <div class="doc-callout-title">Without it, two things are lost</div>
             <p>A buyer who pays but never comes back from Razorpay (common when paying in a UPI app on a phone) is not issued a ticket, because the app never hears of the payment. And a checkout nobody finishes keeps its seats, since Razorpay's payment page has no cancel button to tell us; with the webhook, the seats go back when the page expires, about half an hour later. Without it, turn on <strong class="text-gray-900 dark:text-white">Expire unpaid tickets</strong> on your events, and set the webhook up on a site taking real money.</p>
         </div>
+    </section>
+
+    <!-- Default payment method -->
+    <section id="default-payment-method" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+            Default Payment Method for New Events
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">New events start on <strong>Cash</strong> unless you say otherwise. On an install that takes money through one gateway, name it once so owners are not choosing it by hand every time:</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">DEFAULT_PAYMENT_METHOD</span>=<span class="code-string">payfast</span></code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Accepts any gateway key - <code class="doc-inline-code">cash</code>, <code class="doc-inline-code">stripe</code>, <code class="doc-inline-code">invoiceninja</code>, <code class="doc-inline-code">payment_url</code>, <code class="doc-inline-code">payfast</code>, <code class="doc-inline-code">paypal</code> or <code class="doc-inline-code">razorpay</code> - and applies to events created through the API as well as the form. It only takes effect where the gateway can actually be used: an owner who has not connected it, or an event in a currency it cannot settle, still starts on Cash. On the event form a schedule's default <a href="{{ route('marketing.docs.tickets') }}#ticket-presets" class="doc-link">ticket preset</a> takes priority over it when the preset names a payment method; through the API it applies whenever <code class="doc-inline-code">payment_method</code> is omitted and no preset is used (one is always used for a team member the schedule's preset switch binds).</p>
     </section>
 
     <!-- Refunds -->
@@ -723,7 +735,7 @@
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Refunds made in the Stripe, PayPal or Razorpay dashboard are not reported back</div>
-            <p>The app only listens for payments and expired payment links, never for refunds: <code class="doc-inline-code">checkout.session.completed</code> and <code class="doc-inline-code">payment_intent.succeeded</code> from Stripe, <code class="doc-inline-code">PAYMENT.CAPTURE.COMPLETED</code> and <code class="doc-inline-code">PAYMENT.CAPTURE.DENIED</code> from PayPal, <code class="doc-inline-code">payment_link.paid</code> and <code class="doc-inline-code">payment_link.expired</code> from Razorpay. A refund issued in any of those dashboards therefore leaves the sale paid and its tickets scanning at the door. Refund from the Sales page instead.</p>
+            <p>The app only listens for payments and for payment links that expire or are cancelled, never for refunds: <code class="doc-inline-code">checkout.session.completed</code> and <code class="doc-inline-code">payment_intent.succeeded</code> from Stripe, <code class="doc-inline-code">PAYMENT.CAPTURE.COMPLETED</code> and <code class="doc-inline-code">PAYMENT.CAPTURE.DENIED</code> from PayPal, <code class="doc-inline-code">payment_link.paid</code>, <code class="doc-inline-code">payment_link.expired</code> and <code class="doc-inline-code">payment_link.cancelled</code> from Razorpay. A refund issued in any of those dashboards therefore leaves the sale paid and its tickets scanning at the door. Refund from the Sales page instead.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">A refund needs no webhook of its own, because the app calls the provider directly. The app sends no refund email, so tell the buyer yourself. The one message a refund can set off is for a paid appointment booking: refunding it in full cancels the booking, and the guest gets the usual cancellation email.</p>
@@ -842,7 +854,7 @@ stripe trigger customer.subscription.created</code></pre>
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe is missing from the payment method list</h4>
                 <p class="text-gray-600 dark:text-gray-400 text-sm mb-2"><strong class="text-gray-900 dark:text-white">Applies to:</strong> All setups</p>
                 <ul class="doc-list text-sm">
-                    <li>Selfhosted: <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> is not set, or the config cache is stale. The <strong class="text-gray-900 dark:text-white">Stripe</strong> row on the <strong class="text-gray-900 dark:text-white">Payment Methods</strong> tab of <strong class="text-gray-900 dark:text-white">Settings</strong> tells you which: it says <strong class="text-gray-900 dark:text-white">Connected</strong>, and "Stripe is configured" when opened, only while the secret is readable. Otherwise it says <strong class="text-gray-900 dark:text-white">Not connected</strong> and "Stripe is not configured".</li>
+                    <li>Selfhosted: <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> is not set, or the config cache is stale. The <strong class="text-gray-900 dark:text-white">Stripe</strong> row on the <strong class="text-gray-900 dark:text-white">Payment Methods</strong> tab of <strong class="text-gray-900 dark:text-white">Settings</strong> tells you which: it says <strong class="text-gray-900 dark:text-white">Connected</strong>, and "Stripe is configured" when opened, only while the secret is readable. Otherwise it says <strong class="text-gray-900 dark:text-white">Not set up</strong> and "Stripe is not configured".</li>
                     <li>SaaS: the user has not finished Connect onboarding, so Stripe is not offered yet.</li>
                     <li>Either setup: the <strong class="text-gray-900 dark:text-white">Payment</strong> row only appears once the event's <strong class="text-gray-900 dark:text-white">Tickets</strong> tab is set to <strong class="text-gray-900 dark:text-white">Sell tickets</strong>.</li>
                 </ul>

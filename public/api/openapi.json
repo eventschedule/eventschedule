@@ -3,7 +3,7 @@
   "info": {
     "title": "Event Schedule API",
     "version": "1.0",
-    "description": "API for managing events, schedules, and tickets on Event Schedule. To get started, register an account, then create a schedule before adding events. Write operations require a Pro plan. New accounts get a trial period."
+    "description": "API for managing events, schedules, and tickets on Event Schedule. To get started, register an account, then create a schedule before adding events. On the hosted service a schedule must be on the Pro or Enterprise plan for the API to read or write it (creating a schedule, deleting one, recording a sale, the category lists and fan content are the exceptions). A new schedule starts on the Free plan with no trial, so subscribe before adding events. A team admin's key reaches a schedule only while it is on Enterprise. Selfhosted installs have every endpoint. Reference: https://eventschedule.com/docs/developer/api"
   },
   "servers": [
     {
@@ -106,7 +106,7 @@
         "operationId": "register",
         "tags": ["Authentication"],
         "summary": "Register a new account",
-        "description": "Creates a new user account and returns an API key. In hosted mode, a verification code (from /register/send-code) is required. In selfhosted mode, registration is only allowed if no users exist yet. Rate limited to 3 registrations per IP per hour.",
+        "description": "Creates a new user account and returns an API key. In hosted mode, a verification code (from /register/send-code) is required. In selfhosted mode, registration is only allowed while no users exist, unless the install sets ALLOW_REGISTRATION; there, an address with an account waiting for its owner is emailed a set-password link and answered 422. Rate limited to 3 registrations per IP per hour.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -145,7 +145,7 @@
                   "language_code": {
                     "type": "string",
                     "description": "Preferred language code",
-                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru"]
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru", "ro"]
                   }
                 }
               }
@@ -449,7 +449,7 @@
         "operationId": "create_schedule",
         "tags": ["Schedules"],
         "summary": "Create a schedule",
-        "description": "Creates a new schedule. In hosted mode, new schedules receive a Pro trial period. The subdomain is automatically generated from the schedule name.",
+        "description": "Creates a new schedule. No plan check, but on the hosted service the schedule starts on the Free plan with no trial, and most other endpoints need it on Pro or Enterprise. The subdomain is generated from the name. On hosted one account may own up to 50 schedules, and a schedule given no email takes the account's own.",
         "requestBody": {
           "required": true,
           "content": {
@@ -492,7 +492,7 @@
                   "language_code": {
                     "type": "string",
                     "description": "Language code for the schedule",
-                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru"]
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru", "ro"]
                   },
                   "website": {
                     "type": "string",
@@ -674,7 +674,7 @@
                   "language_code": {
                     "type": "string",
                     "description": "Language code for the schedule",
-                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru"]
+                    "enum": ["en", "es", "de", "fr", "it", "pt", "he", "nl", "ar", "et", "ru", "ro"]
                   },
                   "website": {
                     "type": "string",
@@ -1188,7 +1188,7 @@
         "operationId": "list_events",
         "tags": ["Events"],
         "summary": "List events",
-        "description": "Returns a paginated list of events owned by the authenticated user. Can be filtered by schedule, date range, and paginated.",
+        "description": "Returns a paginated list of the events GET /events/{id} would answer for this key, newest start first: events the caller's schedules own and events on a venue or talent schedule the caller runs, never an event a curator schedule only lists or one a schedule turned down. Drafts, internal, unlisted and cancelled events are included. Appointment bookings are left out. starts_after and starts_before compare a recurring event's first date.",
         "parameters": [
           {
             "name": "subdomain",
@@ -1255,6 +1255,14 @@
             "name": "tickets_enabled",
             "in": "query",
             "description": "Filter by whether tickets are enabled",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "rsvp_enabled",
+            "in": "query",
+            "description": "Filter by whether free registration (RSVP) is enabled",
             "schema": {
               "type": "boolean"
             }
@@ -2016,7 +2024,7 @@
         "operationId": "list_categories",
         "tags": ["Categories"],
         "summary": "List event categories",
-        "description": "Returns all available event categories that can be used when creating or updating events.",
+        "description": "Returns the built-in event categories with their English names. A schedule can rename, remove or add categories of its own, and category_id is checked against that schedule's list: use GET /categories/{subdomain} for the exact set a schedule accepts. Not paginated, and no plan check.",
         "responses": {
           "200": {
             "description": "List of categories",
@@ -2038,6 +2046,65 @@
           },
           "401": {
             "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/{subdomain}": {
+      "get": {
+        "operationId": "list_schedule_categories",
+        "tags": ["Categories"],
+        "summary": "List a schedule's event categories",
+        "description": "Returns the categories one schedule accepts as category_id, after its own renames, removals and additions. Not paginated, and no plan check.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The schedule's subdomain",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The schedule's categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Category"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2159,7 +2226,7 @@
         "operationId": "create_sale",
         "tags": ["Sales"],
         "summary": "Create a sale",
-        "description": "Creates a new ticket sale for an event. The event must have tickets enabled and belong to a Pro schedule. Tickets can be referenced by encoded ticket ID or by ticket type name. Sales are created with 'unpaid' status unless the total is zero (free tickets), in which case they are automatically marked as 'paid'.",
+        "description": "Creates a new ticket sale for an event. The caller must be the event's maker or an owner or admin of a schedule it is on (a curator that only lists it is refused). The event must have tickets enabled and still be selling; a priced ticket needs the schedule on Pro or Enterprise, a free one sells on any plan. event_date must be one of the event's own dates, else a 422, and stock is checked under a lock. Tickets can be referenced by encoded ticket ID or by ticket type name. Sales are created with 'unpaid' status unless the total is zero (free tickets), in which case they are automatically marked as 'paid'.",
         "requestBody": {
           "required": true,
           "content": {
@@ -2332,7 +2399,7 @@
         "operationId": "update_sale",
         "tags": ["Sales"],
         "summary": "Update sale status",
-        "description": "Performs a status action on a sale. Available actions: mark_paid (unpaid -> paid), refund (paid -> refunded), cancel (unpaid or paid -> cancelled).",
+        "description": "Performs a status action on a sale. Available actions: mark_paid (unpaid -> paid), refund (paid -> refunded, or amount_mismatch -> refunded on Stripe, PayPal and Razorpay), cancel (unpaid or paid -> cancelled). On a Stripe, PayPal or Razorpay sale, refund sends the money back through the provider; send amount to return part of it, which leaves the sale paid and answers 'Partial refund sent'. Every other method only records the refund and ignores amount. An installment plan is refunded in full only. A named guest's row of a group answers 403: act on the group's primary row.",
         "parameters": [
           {
             "name": "id",
@@ -2356,6 +2423,17 @@
                     "type": "string",
                     "enum": ["mark_paid", "refund", "cancel"],
                     "description": "The action to perform on the sale"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "description": "With refund: the part to send back. Omitted, the whole remaining balance goes back"
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "pattern": "^[A-Za-z0-9_.:-]+$",
+                    "description": "With refund: a key of your own. A repeat with the same key returns the first attempt's outcome instead of refunding twice; a repeat while the first is still running answers 409"
                   }
                 }
               }
@@ -2417,8 +2495,18 @@
               }
             }
           },
+          "409": {
+            "description": "A refund whose outcome could not be confirmed, or one still in progress under the same idempotency_key. Nothing is retried; check the provider before acting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "422": {
-            "description": "Action cannot be performed on current sale status",
+            "description": "Action cannot be performed on current sale status, a refund the provider refused, or amount sent for an installment plan",
             "content": {
               "application/json": {
                 "schema": {
@@ -3807,7 +3895,12 @@
           "phone": {
             "type": "string",
             "nullable": true,
-            "description": "Contact phone number"
+            "description": "Contact phone number (read only)"
+          },
+          "show_phone": {
+            "type": "integer",
+            "nullable": true,
+            "description": "1 when the phone number is shown on the public page, 0 when it is not (read only)"
           },
           "website": {
             "type": "string",
@@ -3938,6 +4031,11 @@
             "nullable": true,
             "description": "Human-readable category name"
           },
+          "category_color": {
+            "type": "string",
+            "nullable": true,
+            "description": "The category's colour as the schedule has it"
+          },
           "event_url": {
             "type": "string",
             "format": "uri",
@@ -3976,9 +4074,17 @@
             "nullable": true,
             "description": "URL of the flyer image"
           },
+          "is_draft": {
+            "type": "boolean",
+            "description": "Draft: hidden from the public page"
+          },
           "is_private": {
             "type": "boolean",
-            "description": "Whether the event is private (hidden from calendar, only accessible via direct link)"
+            "description": "Unlisted: hidden from the calendar, only accessible via direct link"
+          },
+          "is_internal": {
+            "type": "boolean",
+            "description": "Internal: never public"
           },
           "external_id": {
             "type": "string",
@@ -4035,9 +4141,23 @@
             "nullable": true,
             "description": "End date (Y-m-d) or number of occurrences, depending on recurring_end_type"
           },
+          "rsvp_enabled": {
+            "type": "boolean",
+            "description": "Whether free registration is enabled"
+          },
+          "rsvp_limit": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Cap on registrations per date"
+          },
           "tickets_enabled": {
             "type": "boolean",
             "description": "Whether ticket sales are enabled for this event"
+          },
+          "seating_plan_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Encoded ID of the event's seating plan, null on a general-admission event"
           },
           "ticket_currency_code": {
             "type": "string",
@@ -4047,7 +4167,7 @@
           "payment_method": {
             "type": "string",
             "nullable": true,
-            "enum": ["stripe", "invoiceninja", "payment_url", "manual"],
+            "enum": ["cash", "stripe", "paypal", "invoiceninja", "payment_url", "payfast", "razorpay", null],
             "description": "Payment method for ticket sales"
           },
           "ticket_preset_id": {
@@ -4066,6 +4186,41 @@
             "description": "Ticket types for this event (only present when tickets are enabled)",
             "items": {
               "$ref": "#/components/schemas/Ticket"
+            }
+          },
+          "addons": {
+            "type": "array",
+            "description": "Add-ons for this event (only present when tickets are enabled)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "string",
+                  "description": "Decimal string, such as \"5.000\""
+                },
+                "quantity": {
+                  "type": "integer",
+                  "nullable": true
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "image_url": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "url": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
             }
           },
           "members": {
@@ -4173,7 +4328,7 @@
           "duration": {
             "type": "number",
             "minimum": 0,
-            "maximum": 24,
+            "maximum": 8760,
             "description": "Event duration in hours"
           },
           "ends_at": {
@@ -4195,23 +4350,44 @@
           "event_url": {
             "type": "string",
             "format": "uri",
-            "maxLength": 255,
+            "maxLength": 500,
             "description": "External URL for the event"
           },
           "event_password": {
             "type": "string",
             "maxLength": 255,
-            "description": "Password to protect the event page"
+            "description": "Password to protect the event page. Kept only on an Unlisted (is_private) event"
+          },
+          "is_draft": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Draft: hidden from the public page. With no visibility flag at all, a new event takes the schedule's default; on a drafts-by-default schedule send false to publish"
           },
           "is_private": {
             "type": "boolean",
             "nullable": true,
-            "description": "Make event private (hidden from calendar, only accessible via direct link)"
+            "description": "Unlisted: kept off the calendar, reachable by direct link. Enterprise only; on a lower plan it is stripped and the event saved as a draft"
+          },
+          "is_internal": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Internal: never public, and also a draft. Enterprise only, and not combined with is_private"
+          },
+          "rsvp_enabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Free registration: collects a name and email with no payment step"
+          },
+          "rsvp_limit": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Cap on registrations per date"
           },
           "registration_url": {
             "type": "string",
             "format": "uri",
-            "maxLength": 255,
+            "maxLength": 2048,
             "description": "External registration URL"
           },
           "category_id": {
@@ -4234,7 +4410,7 @@
           },
           "payment_method": {
             "type": "string",
-            "enum": ["stripe", "invoiceninja", "payment_url", "manual"],
+            "enum": ["cash", "stripe", "paypal", "invoiceninja", "payment_url", "payfast", "razorpay", "manual"],
             "description": "Payment method for ticket sales"
           },
           "payment_instructions": {
@@ -4338,15 +4514,20 @@
           },
           "tickets": {
             "type": "array",
-            "description": "Ticket types for the event",
+            "description": "Ticket types for the event. On a create every row is new. On an update the list replaces the event's: a row with the id a read returned updates that row and keeps what it does not send, a row with no id is added, a stored row left out is retired, and an id that is not this event's is a 422",
             "items": {
               "type": "object",
               "required": ["type"],
               "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Update only: the encoded ID of the ticket type this row changes"
+                },
                 "type": {
                   "type": "string",
+                  "nullable": true,
                   "maxLength": 255,
-                  "description": "Ticket type name (e.g. General Admission, VIP)"
+                  "description": "Ticket type name (e.g. General Admission, VIP). Required on create; may be null on an update, as a read returns it for an event with one unnamed ticket type"
                 },
                 "quantity": {
                   "type": "integer",
@@ -4362,17 +4543,93 @@
                   "type": "string",
                   "maxLength": 1000,
                   "description": "Ticket description"
+                },
+                "sales_start_at": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "When sales open, in UTC (Y-m-d H:i:s)"
+                },
+                "sales_end_at": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "When sales close, in UTC (Y-m-d H:i:s)"
+                },
+                "max_per_order": {
+                  "type": "integer",
+                  "nullable": true,
+                  "description": "Most of this ticket type one order may hold; empty for no limit"
+                },
+                "volume_discount": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "A discount from a number of tickets up",
+                  "properties": {
+                    "min_quantity": {
+                      "type": "integer",
+                      "minimum": 2
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": ["percentage", "fixed"]
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "addons": {
+            "type": "array",
+            "description": "Paid extras sold beside a ticket (parking, merchandise). Saved only while tickets_enabled is true. Rows on an update follow the rules of tickets",
+            "items": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Update only: the encoded ID of the add-on this row changes"
+                },
+                "type": {
+                  "type": "string",
+                  "maxLength": 255
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "price": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "maxLength": 2000
+                },
+                "max_per_order": {
+                  "type": "integer",
+                  "nullable": true
                 }
               }
             }
           },
           "event_parts": {
             "type": "array",
-            "description": "Sub-sections or segments of the event",
+            "description": "Agenda parts of the event. Rows on an update follow the rules of tickets, except that a stored part left out is deleted",
             "items": {
               "type": "object",
               "required": ["name"],
               "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Update only: the encoded ID of the part this row changes"
+                },
                 "name": {
                   "type": "string",
                   "maxLength": 255,
@@ -4430,18 +4687,47 @@
             "description": "Ticket type name"
           },
           "price": {
-            "type": "number",
-            "description": "Ticket price"
+            "type": "string",
+            "description": "Ticket price as a decimal string, such as \"25.000\""
           },
           "quantity": {
             "type": "integer",
             "nullable": true,
-            "description": "Number of tickets available (null for unlimited)"
+            "description": "Number of tickets available (0 or null for unlimited)"
           },
           "description": {
             "type": "string",
             "nullable": true,
             "description": "Ticket description"
+          },
+          "sales_start_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When sales open (ISO 8601)"
+          },
+          "sales_end_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When sales close (ISO 8601)"
+          },
+          "volume_discount": {
+            "type": "object",
+            "nullable": true,
+            "description": "min_quantity, type (percentage or fixed) and value, or null"
+          },
+          "is_pass": {
+            "type": "boolean",
+            "description": "Whether this ticket type is a pass. A pass adds its pass_* settings"
+          },
+          "seating_band": {
+            "type": "string",
+            "description": "Present only on a ticket that sells a seating band, with is_allocated"
+          },
+          "is_allocated": {
+            "type": "boolean",
+            "description": "Present only beside seating_band: whether seats are picked from a map"
           }
         }
       },
@@ -4516,24 +4802,62 @@
             "format": "email",
             "description": "Buyer email"
           },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "description": "Buyer phone, when one was asked for"
+          },
           "event_date": {
             "type": "string",
             "format": "date",
-            "description": "Date of the event occurrence"
+            "description": "Date of the event occurrence, in the schedule's timezone"
           },
           "status": {
             "type": "string",
-            "enum": ["unpaid", "paid", "cancelled", "refunded", "expired"],
-            "description": "Payment status"
+            "enum": ["unpaid", "paid", "cancelled", "refunded", "expired", "amount_mismatch"],
+            "description": "Payment status. amount_mismatch is a sale whose payment arrived for a different amount, held for review"
           },
           "payment_method": {
             "type": "string",
             "nullable": true,
-            "description": "Payment method used"
+            "description": "The event's payment method when the sale was made, rsvp for a free registration, or import for an imported attendee"
           },
           "payment_amount": {
             "type": "number",
-            "description": "Total payment amount"
+            "description": "What the buyer agreed to pay. On a group, the primary row holds the whole order's total and guest rows read 0"
+          },
+          "volume_discount_amount": {
+            "type": "number",
+            "nullable": true,
+            "description": "What a volume discount took off"
+          },
+          "discount_amount": {
+            "type": "number",
+            "nullable": true,
+            "description": "What a promo code took off"
+          },
+          "gift_card_amount": {
+            "type": "number",
+            "nullable": true,
+            "description": "What a gift card paid"
+          },
+          "group_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Shared by the rows of an order bought for several named guests"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "The row of a group that holds its totals and takes status actions"
+          },
+          "order_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Shared by the rows of one purchase that covered several events"
+          },
+          "is_order_primary": {
+            "type": "boolean",
+            "description": "The anchoring row of a multi-event order"
           },
           "transaction_reference": {
             "type": "string",
@@ -4560,11 +4884,24 @@
                 },
                 "price": {
                   "type": "number",
-                  "description": "Price per ticket"
+                  "description": "The ticket type's price today, not what this buyer paid"
                 },
                 "type": {
                   "type": "string",
                   "description": "Ticket type name"
+                },
+                "is_addon": {
+                  "type": "boolean"
+                },
+                "is_pass": {
+                  "type": "boolean"
+                },
+                "seats": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Allocated seating only: the labels of the seats this row holds"
                 }
               }
             }
@@ -5068,11 +5405,11 @@
     },
     {
       "name": "Sub-schedules",
-      "description": "Manage sub-schedules within a schedule. Sub-schedules allow you to organize events into categories within a schedule. Requires a Pro plan for write operations."
+      "description": "Manage sub-schedules within a schedule. Sub-schedules allow you to organize events into categories within a schedule. Requires a Pro or Enterprise plan for reads and writes on the hosted service."
     },
     {
       "name": "Events",
-      "description": "Manage events. Events belong to schedules and can have tickets, recurring configurations, and associated members. Write operations require a Pro plan. Rate limits: GET requests are limited to 300 per minute, POST/PUT/DELETE requests are limited to 30 per minute."
+      "description": "Manage events. Events belong to schedules and can have tickets, recurring configurations, and associated members. Reads and writes require a Pro or Enterprise plan on the hosted service. Rate limits, per account: GET requests are limited to 300 per minute, POST/PUT/DELETE requests to 30 per minute."
     },
     {
       "name": "Categories",

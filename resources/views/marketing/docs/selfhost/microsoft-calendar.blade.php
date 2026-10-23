@@ -55,11 +55,19 @@
                     </tr>
                     <tr>
                         <td><strong>Edit Schedule</strong> &rarr; <strong>Integrations</strong> &rarr; <strong>Outlook Calendar</strong> row</td>
-                        <td>The schedule's owner picks the calendar, the sync direction and what a deletion in Outlook does here, and can turn on <strong>Create Teams meetings for online events</strong></td>
+                        <td>The schedule's owner picks the calendar, the sync direction, whether new events from it are published automatically and what a deletion in Outlook does here, and can turn on <strong>Create Teams meetings for online events</strong></td>
+                    </tr>
+                    <tr>
+                        <td>The schedule's <strong>Schedule</strong> tab &rarr; <strong>Review</strong></td>
+                        <td>Events read in from Outlook wait here as drafts. The owner and the schedule's admins publish them or keep them hidden. See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a></td>
                     </tr>
                     <tr>
                         <td>Event form &rarr; <strong>Listing</strong> &rarr; <strong>Calendar sync</strong></td>
                         <td>Shows whether this event has a copy in Outlook. <strong>Sync Now</strong> and <strong>Remove</strong> are the owner's to use</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Admin</strong> &rarr; <strong>Manage</strong> &rarr; <strong>Private calendars</strong></td>
+                        <td>The install's administrators. Lists schedules whose synced events show meeting details or an email thread, and can hide those events or pause the sync. See <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-private-calendars" class="doc-link">Private calendars</a></td>
                     </tr>
                 </tbody>
             </table>
@@ -225,7 +233,7 @@
                     </tr>
                     <tr>
                         <td>Inbound</td>
-                        <td>Microsoft Graph subscriptions notify the webhook endpoint, and a queued job pulls the changes in with a Graph delta query</td>
+                        <td>Microsoft Graph subscriptions notify the webhook endpoint, and a queued job pulls the changes in with a Graph delta query. New entries arrive as drafts unless the owner publishes them automatically</td>
                     </tr>
                     <tr>
                         <td>Polling fallback</td>
@@ -243,7 +251,7 @@
         <p>The calendar selection, the Graph subscription, and every outbound and inbound sync run on the schedule owner's connected Microsoft account. Team members do not get their own Outlook sync, and the <strong>Outlook Calendar</strong> row only shows the settings to the owner: anyone else, and an owner who has not connected yet, sees a <strong>Connect Outlook Calendar</strong> button there instead. Per-member calendar sync is a <a href="{{ route('marketing.docs.selfhost.google_calendar') }}#member-sync" class="doc-link">Google Calendar feature</a>.</p>
 
         <h3 id="sync-direction" class="doc-subheading">Sync Direction</h3>
-        <p>Each schedule picks one of four options under <strong>Sync Direction</strong>. Saving the schedule creates or removes the Graph subscription for you.</p>
+        <p>Each schedule picks one of four options under <strong>Sync Direction</strong>. Saving the schedule creates or removes the Graph subscription for you. To start reading from Outlook the owner has to choose a calendar: the account's default calendar is never read without being chosen, and a save that starts reading without one is refused with "Choose the calendar to read events from."</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -261,7 +269,7 @@
                     </tr>
                     <tr>
                         <td>From Outlook Calendar</td>
-                        <td>Outlook events are imported into Event Schedule</td>
+                        <td>Outlook events come in to Event Schedule, as drafts unless <strong>Publish new events automatically</strong> is on</td>
                         <td>Created</td>
                     </tr>
                     <tr>
@@ -297,73 +305,26 @@
         <h3 id="teams" class="doc-subheading">Microsoft Teams Meeting Links</h3>
         <p>Enable <strong>Create Teams meetings for online events</strong> in the schedule's <strong>Outlook Calendar</strong> row. Every event with no venue is then created in Outlook as a Teams for Business meeting, and the join link is written into the event's <strong>Event URL</strong> field, but only when that field is still empty so a link you entered yourself is never overwritten.</p>
         <p>Personal Microsoft accounts usually cannot create Teams for Business meetings. When Graph rejects the request, Event Schedule retries immediately without the Teams flags, so you get a normal Outlook event and no join link rather than a failed sync.</p>
+        <p>An event the sync read in from Outlook is a copy of the owner's own entry, and the entry belongs to the owner's calendar. Publishing it does not create a second Outlook entry or a new Teams meeting, and hiding it as a draft or cancelling it never deletes the owner's original. Deleting it deletes the original only when it is published and the schedule's direction sends events to Outlook (Bidirectional Sync, or To Outlook Calendar); with From Outlook Calendar the original stays.</p>
 
         <h3 id="inbound-events" class="doc-subheading">Events That Arrive From Outlook</h3>
-        <p>Inbound sync uses a Graph delta query over a window running from 30 days ago to 365 days ahead. On the first run, or after you switch calendars, the whole window is read; after that only changes are fetched. Events brought in this way:</p>
+        <p>Inbound sync uses a Graph delta query over a window running from 30 days ago to 365 days ahead. On the first run, or after you switch calendars, the whole window is read; after that only changes are fetched. Each schedule that reads from Outlook also gets one more full read of the window, so entries read in before the private-entry rules existed are judged by them too: it takes an entry off the page or puts back one it took off, never rewrites what the owner edited here, and only the scheduled <code class="doc-inline-code">microsoft:sync</code> runs it, at most ten schedules per run.</p>
+        <p>What the owner sees is described once, in the schedule guide: new entries arrive as drafts unless <a href="{{ route('marketing.docs.creating_schedules') }}#publish-on-arrival" class="doc-link">Publish new events automatically</a> is on, they wait under <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a>, and some entries are never read in at all (<a href="{{ route('marketing.docs.creating_schedules') }}#calendar-privacy" class="doc-link">What stays off your page</a>). In Outlook's terms, an entry is skipped when it is cancelled, when its sensitivity is private, confidential or personal, when the calendar's owner declined it, or when it shows as out of office or working elsewhere. An entry that shows meeting details or an email thread is held as a draft even with automatic publishing on. Events brought in:</p>
         <ul class="doc-list">
-            <li>Arrive already approved and use the schedule's slug pattern and default category</li>
+            <li>Are added to the schedule as its own events, and use the schedule's slug pattern and default category</li>
             <li>Take their name, description, start time and duration from the Outlook entry. The description is converted from HTML to Markdown</li>
-            <li>Convert the Outlook location into a venue, reusing one of your existing venues when the name or address matches. An event that already has a venue keeps it</li>
+            <li>Convert the Outlook location into a venue, reusing one of your existing venues when the name or address matches. An event that already has a venue keeps it. A Teams link, a dial-in number or "Microsoft Teams Meeting" is never made into a venue</li>
             <li>Are matched to an existing event by name and start time when there is no stored mapping yet, so an event you pushed out does not come back as a duplicate</li>
             <li>Never overwrite an appointment booking. An event created by a booking is owned by Event Schedule: inbound sync does not rewrite its name, description or time, so moving the Outlook copy will not move a customer's booking</li>
         </ul>
 
         <h3 id="delete-sync" class="doc-subheading">When an Event Is Deleted in Outlook</h3>
-        <p>Schedules that import from Outlook also choose <strong>When an event is deleted in the connected calendar</strong>, under the sync direction. It is one setting for the schedule, shared with the Google Calendar integration, and it is shown in one place only: if you have also connected Google Calendar, it appears in the <strong>Google Calendar</strong> row instead of this one, and only while that row's own direction is From Google Calendar or Bidirectional Sync.</p>
-        <div class="doc-table-wrap">
-            <table class="doc-table">
-                <thead>
-                    <tr>
-                        <th>Option</th>
-                        <th>Result in Event Schedule</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Keep it here</td>
-                        <td>The event stays exactly as it is. This is the default</td>
-                    </tr>
-                    <tr>
-                        <td>Mark as cancelled</td>
-                        <td>The event is marked cancelled rather than removed, which is reversible. Recommended when tickets are sold</td>
-                    </tr>
-                    <tr>
-                        <td>Delete it here</td>
-                        <td>The event is removed, which cannot be undone. Events with ticket sales or ad boost spend are marked cancelled instead of deleted</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <p>Only a real deletion in Outlook triggers this policy. An event that merely moves outside the sync window is left untouched. Marking an event cancelled this way does not notify anyone: the cancellation notice that <strong>Cancel event</strong> in the event editor can send to ticket buyers and to the event's interest list only goes out from there.</p>
-        <p>An event that belongs to more than one schedule is only detached from this schedule, never cancelled or deleted outright, unless this schedule is the one that owns it. The other schedules keep the event as it is.</p>
+        <p>Schedules that read from Outlook also choose <strong>When an event is deleted in the connected calendar</strong>: Keep it here (the default), Mark as cancelled, or Delete it here. The three choices, and what is never deleted, are described in <a href="{{ route('marketing.docs.creating_schedules') }}#delete-sync" class="doc-link">the schedule guide</a>. It is one setting shared with Google and shown in one place only: if the owner has also connected Google Calendar, it appears in the <strong>Google Calendar</strong> row instead of this one, and only while that row's own direction is From Google Calendar or Bidirectional Sync.</p>
+        <p>Only a real deletion in Outlook triggers it. An event that merely moves outside the sync window is left untouched. Marking an event cancelled this way notifies nobody: the notice to ticket buyers goes out only from <strong>Cancel event</strong> in the event editor.</p>
 
         <h3 id="calendar-sync-tab" class="doc-subheading">Calendar Sync on an Event</h3>
-        <p>Once a schedule has a calendar selected and a direction that includes To Outlook Calendar, the <strong>Listing</strong> tab of a saved event ends with <strong>Calendar sync</strong>, which has an <strong>Outlook Calendar</strong> line:</p>
-        <div class="doc-table-wrap">
-            <table class="doc-table">
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>What it means, and what the line offers</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Synced</td>
-                        <td>The event has a copy in the owner's Outlook calendar. <strong>Remove</strong> deletes the Outlook copy, after a confirmation</td>
-                    </tr>
-                    <tr>
-                        <td>Not synced</td>
-                        <td>No copy yet. The line under it says why: "It is copied the next time you save." for a published event, and "Only an event guests can see is copied to the calendar." for a Draft or Internal one. <strong>Sync Now</strong> creates the copy at once</td>
-                    </tr>
-                    <tr>
-                        <td>Not shown</td>
-                        <td>The event has not been saved yet, the schedule has no calendar selected, or its direction does not include To Outlook Calendar</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <p>The status is the schedule owner's copy, while <strong>Sync Now</strong> and <strong>Remove</strong> act with the Microsoft account of whoever is signed in, so they are the owner's buttons to use. If a request fails, the reason is shown in the row.</p>
+        <p>Once a schedule has a calendar selected and a direction that includes To Outlook Calendar, the <strong>Listing</strong> tab of a saved event ends with <strong>Calendar sync</strong>, with an <strong>Outlook Calendar</strong> line. Its <strong>Synced</strong> and <strong>Not synced</strong> states, <strong>Sync Now</strong> and <strong>Remove</strong> are described in <a href="{{ route('marketing.docs.creating_events') }}#google-calendar" class="doc-link">the event guide</a>. <strong>Sync Now</strong> is not offered, and the server refuses it, for a Draft, Internal or cancelled event.</p>
+        <p>For an operator, one detail matters: the status is the schedule owner's copy, while <strong>Sync Now</strong> and <strong>Remove</strong> act with the Microsoft account of whoever is signed in, so they are the owner's buttons to use.</p>
 
         <h3 id="realtime" class="doc-subheading">Real-Time Sync and Polling Fallback</h3>
         <ul class="doc-list">
@@ -400,11 +361,13 @@
                 <h4 class="doc-step-title">Choose a Calendar and Sync Direction</h4>
                 <ol class="doc-list doc-list-numbered">
                     <li>Open the schedule, click <strong>Edit Schedule</strong>, choose the <strong>Integrations</strong> tab and open the <strong>Outlook Calendar</strong> row</li>
-                    <li>Pick which Outlook calendar to sync with under <strong>Select Outlook Calendar</strong></li>
+                    <li>Pick which Outlook calendar to sync with under <strong>Select Outlook Calendar</strong>. A calendar made after the page opened appears after <strong>Refresh list</strong>. Choosing the account's main calendar shows a warning, because a main calendar usually holds meetings and appointments: make a calendar just for public events in Outlook and choose that one</li>
                     <li>Choose the <strong>Sync Direction</strong>: To Outlook Calendar, From Outlook Calendar, Bidirectional Sync, or No Sync</li>
+                    <li>With From Outlook Calendar or Bidirectional Sync selected, decide on <strong>Publish new events automatically</strong>. Off (the default), new events wait as drafts for you to review; on, they go onto the public page as they arrive, with a warning that says so</li>
+                    <li>With the same two directions, choose <strong>When an event is deleted in the connected calendar</strong>, unless your Google Calendar is connected too, in which case it is in the Google row</li>
                     <li>Click <strong>Save</strong></li>
                 </ol>
-                <p>Only the schedule owner sees these controls.</p>
+                <p>Only the schedule owner sees these controls. When the save starts reading from Outlook, the Schedule tab says that the calendar's events will arrive within 15 minutes.</p>
             </li>
 
             <li class="doc-step">
@@ -414,7 +377,7 @@
 
             <li class="doc-step">
                 <h4 class="doc-step-title">Sync a Single Event by Hand</h4>
-                <p>Open the event's form and choose the <strong>Listing</strong> tab; <strong>Calendar sync</strong> is at its end. On the <strong>Outlook Calendar</strong> line, click <strong>Sync Now</strong>, or <strong>Remove</strong> to delete the Outlook copy. It only appears once a calendar is selected and the direction includes To Outlook Calendar.</p>
+                <p>Open the event's form and choose the <strong>Listing</strong> tab; <strong>Calendar sync</strong> is at its end. On the <strong>Outlook Calendar</strong> line, click <strong>Sync Now</strong>, or <strong>Remove</strong> to delete the Outlook copy. It only appears once a calendar is selected and the direction includes To Outlook Calendar. <strong>Sync Now</strong> is for an event guests can see: publish a Draft or Internal event first.</p>
             </li>
 
             <li class="doc-step">
@@ -424,12 +387,7 @@
         </ol>
 
         <h3 id="automatic-sync" class="doc-subheading">Automatic Sync</h3>
-        <p>Once the schedule owner has connected Outlook and the direction includes <strong>To Outlook Calendar</strong>, events are synced automatically when they are:</p>
-        <ul class="doc-list">
-            <li>Published, whether that is a new event or a draft you just published</li>
-            <li>Edited, which updates the existing Outlook entry in place</li>
-            <li>Deleted, cancelled or un-published, which removes the Outlook copy. Restoring a cancelled event puts it back</li>
-        </ul>
+        <p>Once the schedule owner has connected Outlook and the direction includes <strong>To Outlook Calendar</strong>, publishing, editing, cancelling and deleting an event change its Outlook copy with no extra step, and Draft and Internal events are never pushed. Cancelling an event the sync read in from Outlook leaves the owner's entry, as described above. The event guide's <a href="{{ route('marketing.docs.creating_events') }}#google-calendar" class="doc-link">Calendar Sync</a> section says what is copied when.</p>
         <p>Inbound polling and subscription renewal run through the <a href="#scheduled-commands" class="doc-link">scheduled commands</a> below, so the Laravel scheduler cron has to be active.</p>
     </section>
 
@@ -487,7 +445,7 @@
                     <tr>
                         <td><code class="doc-inline-code">POST /microsoft-calendar/sync-event/{subdomain}/{eventId}</code></td>
                         <td>Signed in</td>
-                        <td>Sync a specific event, with the caller's own Microsoft connection. This is what <strong>Sync Now</strong> calls</td>
+                        <td>Sync a specific event, with the caller's own Microsoft connection. This is what <strong>Sync Now</strong> calls. Refused for a Draft, Internal or cancelled event</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">DELETE /microsoft-calendar/unsync-event/{subdomain}/{eventId}</code></td>
@@ -574,9 +532,27 @@
 
             <x-doc-faq question="Sync stopped, and the schedule is back on No Sync">
                 <ul class="doc-list">
-                    <li>Microsoft ended the grant: access was removed in the Microsoft account, or a password change or sign-in policy invalidated it. When Microsoft reports that on the next token refresh, Event Schedule forgets the tokens and switches every schedule that user owns to No Sync, clearing its subscription and sync cursor</li>
+                    <li>Microsoft ended the grant: access was removed in the Microsoft account, or a password change or sign-in policy invalidated it. When Microsoft reports that on the next token refresh, Event Schedule forgets the tokens and switches every schedule that user owns to No Sync, clearing its subscription and sync cursor and turning <strong>Publish new events automatically</strong> off</li>
                     <li>The calendar choice and the record of which event became which Outlook entry are kept, so reconnecting does not copy everything again</li>
                     <li>Connect again under <strong>Settings</strong> &rarr; <strong>Integrations</strong> &rarr; <strong>Outlook Calendar</strong>, then set the sync direction on each schedule and save</li>
+                    <li>If only the reading stopped, see the next question</li>
+                </ul>
+            </x-doc-faq>
+
+            <x-doc-faq question="Reading stopped, and Bidirectional Sync became To Outlook Calendar">
+                <ul class="doc-list">
+                    <li>Either an administrator paused the sync on <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-private-calendars" class="doc-link">Private calendars</a>, or the schedule changed owner. Either way reading stops: From Outlook Calendar becomes No Sync, Bidirectional Sync becomes To Outlook Calendar, and pushing out carries on</li>
+                    <li>The Outlook Calendar row says which it was, and automatic publishing is off again</li>
+                    <li>The owner starts again by choosing a calendar that holds only public events and a direction, and saving. An administrator can also undo a pause from the same admin page, unless the owner has changed the direction since</li>
+                </ul>
+            </x-doc-faq>
+
+            <x-doc-faq question="Events from Outlook are not on the schedule's page">
+                <ul class="doc-list">
+                    <li>New entries arrive as drafts unless <strong>Publish new events automatically</strong> is on. They wait on the schedule's <strong>Schedule</strong> tab under <strong>Review</strong>; see <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a></li>
+                    <li>Cancelled entries, entries marked private, confidential or personal, invitations the owner declined, and out-of-office or working-elsewhere blocks are not read in at all. An event already on the page is taken off it when Outlook starts saying so</li>
+                    <li>An entry with meeting details or an email thread stays a draft even with automatic publishing on, and is published one at a time</li>
+                    <li>The schedule's Outlook Calendar row shows when the calendar was last read, how many events were added and how many were left out</li>
                 </ul>
             </x-doc-faq>
 
@@ -584,7 +560,7 @@
                 <ul class="doc-list">
                     <li>The direction must be To Outlook Calendar or Bidirectional Sync, and a calendar must be selected</li>
                     <li>Only the schedule owner's connected account is used, so check who owns the schedule</li>
-                    <li>Draft and Internal events are not pushed. Publish the event</li>
+                    <li>Draft, Internal and cancelled events are not pushed, and <strong>Sync Now</strong> is not offered for them. Publish the event</li>
                     <li>Events created before sync was enabled are not pushed in bulk. Open each one and use <strong>Sync Now</strong> under <strong>Calendar sync</strong> on its <strong>Listing</strong> tab</li>
                 </ul>
             </x-doc-faq>
@@ -683,7 +659,7 @@
                     </tr>
                     <tr>
                         <td>Clean disconnect</td>
-                        <td>Disconnecting deletes the Graph subscriptions of the schedules the user owns, switches them to No Sync, and deletes the stored tokens, event mappings and calendar selections. Nothing already in the Outlook calendar is deleted</td>
+                        <td>Disconnecting deletes the Graph subscriptions of the schedules the user owns, switches them to No Sync with automatic publishing off, and deletes the stored tokens, event mappings and calendar selections. Nothing already in the Outlook calendar is deleted</td>
                     </tr>
                     <tr>
                         <td>Audit trail</td>

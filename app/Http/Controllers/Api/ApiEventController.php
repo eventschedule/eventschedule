@@ -73,11 +73,11 @@ class ApiEventController extends Controller
         // Role::isPro()), so the schedules' subscriptions and the owning schedule come with the page.
         $events = Event::with(['roles.subscriptions', 'creatorRole.subscriptions', 'tickets', 'addons', 'parts'])
             ->whereNull('appointment_type_id') // appointment bookings are not real events
-            ->whereHas('roles', function ($q) {
-                $q->whereIn('roles.id', auth()->user()->roles()
-                    ->wherePivotIn('level', ['owner', 'admin'])
-                    ->pluck('roles.id'));
-            });
+            // What Show answers (User::canEditEvent()). It used to be every event on any schedule
+            // the caller is owner or admin of, which listed events a curator only lists, events
+            // a schedule turned down and, on hosted, a team schedule's events after it left
+            // Enterprise, all of which Show then refused.
+            ->editableBy(auth()->user());
 
         // Filter out non-Pro events
         $events->whereHas('roles', function ($q) {
@@ -153,7 +153,7 @@ class ApiEventController extends Controller
             $events->where('external_id', (string) $request->external_id)
                 ->whereIn('creator_role_id', $request->has('subdomain')
                     ? Role::where('subdomain', $request->subdomain)->select('id')
-                    : auth()->user()->roles()->wherePivotIn('level', ['owner', 'admin'])->select('roles.id'));
+                    : auth()->user()->manageableRoles()->pluck('id'));
         }
 
         // Filter by sub-schedule (group)
@@ -220,7 +220,8 @@ class ApiEventController extends Controller
             ->wherePivotIn('level', ['owner', 'admin'])
             ->first();
 
-        if (! $userRole) {
+        // On hosted a team belongs to the Enterprise plan, as on the web (User::isEditor()).
+        if (! $userRole || ! auth()->user()->planAllowsTeamAccess($role)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -523,7 +524,8 @@ class ApiEventController extends Controller
 
     public function update(Request $request, $id)
     {
-        $event = Event::with(['roles', 'tickets', 'addons', 'parts'])->find(UrlUtils::decodeId($id));
+        // roles.subscriptions: canEditEvent() asks each schedule's plan (planAllowsTeamAccess()).
+        $event = Event::with(['roles.subscriptions', 'tickets', 'addons', 'parts'])->find(UrlUtils::decodeId($id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -724,19 +726,29 @@ class ApiEventController extends Controller
 
         // The schedule the save runs through: the one the caller named, when the event is on it
         // (store() has already checked the caller runs it), else the first of the event's
-        // schedules where the caller is owner or admin.
+        // schedules the caller runs under the rule canEditEvent() asks: owner or admin on a plan
+        // that lets a team member act there (manageableRoles()), and never a curator that merely
+        // lists the event or a schedule that turned it down. A bare owner/admin row used to pick
+        // a schedule the plan had closed to the caller, or a curator's list, to save through.
         $currentRole = $through ? $event->roles->firstWhere('id', $through->id) : null;
 
         if (! $currentRole) {
+            $runs = auth()->user()->manageableRoles()->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $owning = (int) ($event->creator_role_id
+                ?: \Illuminate\Support\Facades\DB::table('event_role')->where('event_id', $event->id)->orderBy('id')->value('role_id'));
+
             foreach ($event->roles as $role) {
-                $pivot = auth()->user()->roles()
-                    ->where('roles.id', $role->id)
-                    ->wherePivotIn('level', ['owner', 'admin'])
-                    ->first();
-                if ($pivot) {
-                    $currentRole = $role;
-                    break;
+                if (! in_array((int) $role->id, $runs, true)) {
+                    continue;
                 }
+
+                $declined = ($role->pivot->is_accepted ?? null) !== null && ! $role->pivot->is_accepted;
+                if ((int) $role->id !== $owning && ($role->isCurator() || $declined)) {
+                    continue;
+                }
+
+                $currentRole = $role;
+                break;
             }
         }
 
@@ -1220,10 +1232,8 @@ class ApiEventController extends Controller
             return $refuse('This event has no owning schedule, so it cannot carry an external_id.');
         }
 
-        $runsTheOwner = auth()->user()->roles()
-            ->where('roles.id', $event->creator_role_id)
-            ->wherePivotIn('level', ['owner', 'admin'])
-            ->exists();
+        // Owner or admin of it, on a plan that lets a team member act there (manageableRoles()).
+        $runsTheOwner = auth()->user()->manageableRoles()->contains('id', (int) $event->creator_role_id);
 
         if (! $runsTheOwner) {
             return $refuse('Only an owner or admin of the schedule that owns this event can set its external_id.');

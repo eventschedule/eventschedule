@@ -614,13 +614,19 @@ class MonthGridTest extends TestCase
         $guest = $this->get('/'.$this->role->subdomain.'?layout=calendar')->assertOk()->getContent();
         $this->assertStringNotContainsString('monthPeek.go.edit ? null', $guest, 'a guest\'s page opens an event in its own tab');
 
-        // A viewer cannot mark a day (the script is not given to one), so no day says it is a button.
+        // A viewer marks their own days (CLAUDE.md: a viewer "marks their own days"), so the script,
+        // the form and the Save button are given to one, and every day is a button that says its
+        // state, their own marks drawn.
         $viewer = \App\Models\User::factory()->create(['email_verified_at' => now()]);
-        $this->role->users()->attach($viewer->id, ['level' => 'viewer']);
+        $this->role->users()->attach($viewer->id, ['level' => 'viewer', 'dates_unavailable' => json_encode([now()->format('Y-m-d')])]);
         $asViewer = $this->actingAs($viewer)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent();
         $this->assertSame(1, substr_count($asViewer, 'data-availability-grid'));
-        $this->assertSame(0, substr_count($asViewer, 'role="button" tabindex="0" aria-pressed'), 'a viewer\'s days are not buttons that do nothing');
-        $this->assertSame(0, substr_count($asViewer, 'day-element" data-date='));
+        $this->assertGreaterThan(27, substr_count($asViewer, 'day-element" data-date='), 'a viewer\'s days can be pressed');
+        $this->assertSame(substr_count($asViewer, 'day-element" data-date='), substr_count($asViewer, 'role="button" tabindex="0" aria-pressed'));
+        $this->assertStringContainsString('id="availability_form"', $asViewer);
+        $this->assertStringContainsString('id="saveButton"', $asViewer);
+        $this->assertStringContainsString("document.getElementById('availability_form').submit();", $asViewer);
+        $this->assertSame(1, substr_count($asViewer, 'class="day-x"'), 'their own mark is drawn');
     }
 
     /**

@@ -258,7 +258,7 @@ return [
     'payment_links' => 'Links de Pagamento',
     'are_you_sure' => 'Tem certeza?',
     'no_requests' => 'Nenhuma Solicitação',
-    'team_lead' => 'Os administradores cuidam do calendário no dia a dia. Os visualizadores podem ver tudo, mas não alterar nada. Só o proprietário altera funções, remove membros e gerencia o plano.',
+    'team_lead' => 'Os administradores cuidam do calendário no dia a dia. Os visualizadores podem ver tudo e marcar os seus próprios dias disponíveis, mas não alterar mais nada. Só o proprietário altera funções, remove membros e gerencia o plano.',
     'requests_lead' => 'Eventos e reservas aguardando a sua resposta. Ao aceitar um, ele é adicionado ao seu calendário.',
     'availability_lead' => 'Marque os dias em que você não está disponível e depois salve. Cada membro marca os seus próprios dias.',
     'resend_invite_sms' => 'Reenviar por SMS',
@@ -1051,6 +1051,7 @@ return [
     'promo_share_link' => 'Link que aplica este código:',
     'order_fields_help' => 'Perguntado uma vez por pedido, não para cada ingresso.',
     'calendar_not_synced_draft' => 'Somente eventos que os convidados podem ver são copiados para o calendário.',
+    'calendar_not_synced_cancelled' => 'Um evento cancelado não é copiado para o calendário. Será copiado novamente quando você o restaurar.',
     'saving_removes' => 'Ao salvar, será removido',
     'schedule_short_description_help' => 'Uma linha exibida abaixo do nome da sua agenda quando o estilo do cabeçalho é :style.',
     'schedule_description_help' => 'Exibida no topo da página da sua agenda.',
@@ -1357,7 +1358,7 @@ return [
     'from_google_calendar' => 'Do Google Calendar',
     'from_google_calendar_description' => 'Os eventos do Google Agenda chegam aqui. A menos que você os publique automaticamente, eles aguardam como rascunhos.',
     'bidirectional_sync' => 'Sincronização Bidirecional',
-    'bidirectional_sync_description' => 'Os eventos que você adiciona aqui vão para o seu calendário, e os novos eventos do seu calendário chegam aqui, como rascunhos a menos que você os publique automaticamente (as atualizações sincronizam em um só sentido)',
+    'bidirectional_sync_description' => 'Os eventos que você adiciona aqui vão para o seu calendário, e os novos eventos do seu calendário chegam aqui, como rascunhos a menos que você os publique automaticamente (as alterações feitas em um lado são copiadas para o outro)',
     'no_sync' => 'Sem Sincronização',
     'no_sync_description' => 'Desabilitar sincronização Google Calendar',
     'sync_events' => 'Sincronizar Eventos',
@@ -3821,6 +3822,7 @@ return [
 
     'individual_tickets' => 'Bilhetes individuais',
     'individual_tickets_description' => 'Cada participante recebe a sua própria confirmação e código QR',
+    'individual_tickets_off_for_passes' => 'Desativado enquanto um tipo de bilhete for um passe ou subscrição. Um passe é um único código QR por encomenda, por isso guardar o evento desativa esta opção.',
     'individual_ticket_fields' => 'Coletar campos de ingresso por convidado',
     'individual_ticket_fields_description' => 'Mostrar campos personalizados de ingresso para cada convidado',
     'guest_information' => 'Informações do convidado',
@@ -5107,7 +5109,7 @@ return [
     'monetization_native_cpc' => 'Preço por clique',
     'monetization_native_cpc_help' => 'Cobrado do anunciante. Aplica-se apenas a novas campanhas.',
     'promotion_rate_not_configured' => 'Os preços das promoções ainda não foram configurados neste site. Entre em contato com o administrador.',
-    'promotion_credit_available' => 'Você tem :amount em crédito de promoção. Tudo acima disso será cobrado no seu cartão.',
+    'promotion_credit_available' => 'Você tem :amount em crédito de promoção, usado apenas para um orçamento que ele cubra por completo. Para este orçamento, o valor total será cobrado no seu cartão e o seu crédito é mantido.',
 
     // Stay22 accommodation map (see docs/FEATURES.md, "Accommodation Affiliate")
     'accommodation' => 'Alojamento',

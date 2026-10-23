@@ -68,6 +68,7 @@
             <li><strong class="text-gray-900 dark:text-white">Flyer required for the image.</strong> Only events that have their own flyer image are drawn. Events without one still appear in the text, which needs no artwork.</li>
             <li><strong class="text-gray-900 dark:text-white">Hidden events stay hidden.</strong> Draft and internal events, unlisted events, password-protected events and cancelled events are never included.</li>
             <li><strong class="text-gray-900 dark:text-white">Up to 20 events.</strong> That is the ceiling; <strong>Number of events</strong> can lower it.</li>
+            <li><strong class="text-gray-900 dark:text-white">A recurring event appears once, under its next date.</strong> It is placed by that date among your other events, and the image and the caption both show that date, even when the series began weeks ago. Today's date counts until it starts. A series with no date in the coming year is left out.</li>
             <li><strong class="text-gray-900 dark:text-white">Recurring events can be left out</strong> with <strong>Exclude recurring events</strong>, which affects both the image and the caption. The switch is offered once the schedule has a recurring event.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -103,32 +104,28 @@
 
         <h3 class="doc-subheading">Layout</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Layout is the first choice on the page: three tiles, each with a sketch of what it draws, and a line under them describing the chosen one.
+            Layout is the first choice on the page: three tiles, each with a sketch of what it draws, and a line under them describing the chosen one. A layout says how the flyers are arranged; where the result is posted is a matter of <a href="#shape" class="doc-link">Shape</a>.
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
                         <th>Layout</th>
-                        <th>How it looks</th>
-                        <th>Best for</th>
+                        <th>What it draws</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">Grid</strong></td>
-                        <td>Flyers drawn at a uniform size and wrapped into rows</td>
-                        <td>Instagram and Facebook posts</td>
+                        <td>Flyers side by side in a block, all drawn at one size</td>
                     </tr>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">Rows</strong></td>
-                        <td>One row by default, and every flyer keeps its own proportions</td>
-                        <td>Twitter/X posts and website banners</td>
+                        <td>Rows of equal height, where each flyer keeps its own width. On Auto it is one long row</td>
                     </tr>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">List</strong></td>
-                        <td>A small flyer, then the event name, its short description, the venue and the date and time, with a separator between items</td>
-                        <td>Instagram Stories and email newsletters</td>
+                        <td>One event on each line: a small flyer, then the event name, its short description, the venue and the date and time</td>
                     </tr>
                 </tbody>
             </table>
@@ -138,7 +135,7 @@
             <strong>Flyers per row</strong>, under the layout, is how many flyers are drawn before wrapping to the next row, from 1 to 10, or Auto. On Auto, Rows puts every flyer on one long line, so pick a number to wrap it; the page shows such a line at a readable height and lets you scroll along it. Flyers per row is switched off for List, which puts one event on each line.
         </p>
 
-        <h3 class="doc-subheading">Shape</h3>
+        <h3 id="shape" class="doc-subheading">Shape</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             <strong>Shape</strong> fits the finished graphic to a fixed social-media shape. The graphic is scaled to fit inside the shape and centered, and the padding around it is filled with your schedule's own background, so nothing is ever cropped or stretched. Under the five shapes the page gives the chosen one's size in pixels and where it is used.
         </p>
@@ -148,14 +145,15 @@
                     <tr>
                         <th>Option</th>
                         <th>Pixels</th>
+                        <th>Where it is used</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Natural</td><td>No fixed shape: the size the flyers need, which grows with the number of events</td></tr>
-                    <tr><td>Square</td><td>1080 × 1080</td></tr>
-                    <tr><td>Portrait</td><td>1080 × 1350</td></tr>
-                    <tr><td>Story</td><td>1080 × 1920</td></tr>
-                    <tr><td>Wide</td><td>1200 × 630</td></tr>
+                    <tr><td>Natural</td><td>No fixed shape: the size the flyers need, which grows with the number of events</td><td>Anywhere a fixed shape is not needed</td></tr>
+                    <tr><td>Square</td><td>1080 × 1080</td><td>Instagram and Facebook posts</td></tr>
+                    <tr><td>Portrait</td><td>1080 × 1350</td><td>The tallest post an Instagram feed shows</td></tr>
+                    <tr><td>Story</td><td>1080 × 1920</td><td>Stories and WhatsApp status</td></tr>
+                    <tr><td>Wide</td><td>1200 × 630</td><td>Link previews, X and banners</td></tr>
                 </tbody>
             </table>
         </div>
@@ -286,7 +284,7 @@
             The <strong>Caption</strong> row controls the caption that goes with the image. The template defines how one event is written, and it is repeated once per event, with a blank line between entries.
         </p>
 
-        <x-doc-screenshot id="event-graphics--settings" alt="The Caption row open: how each event is written, with variables to press" />
+        <x-doc-screenshot id="event-graphics--settings" alt="The caption settings: the wording of each event, filled with the default template, and the AI instruction under it" />
 
         <h3 class="doc-subheading">Default Template</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Until you save a template of your own, the <strong>How each event is written</strong> box opens filled in with this one:</p>
@@ -319,7 +317,7 @@ example.com/summer-concert</code></pre>
 
         <div class="doc-callout doc-callout-tip mt-6">
             <div class="doc-callout-title">Tip</div>
-            <p>Use <code class="doc-inline-code">*text*</code> for bold formatting on WhatsApp and Telegram, or <code class="doc-inline-code">_text_</code> for italics.</p>
+            <p>Stars around a word, <code class="doc-inline-code">*text*</code>, make it bold in WhatsApp, and underscores, <code class="doc-inline-code">_text_</code>, make it italic. Other apps show the stars and underscores as they are, so leave them out of a caption meant for somewhere else.</p>
         </div>
 
         <h3 class="doc-subheading">Showing a price before and after a coupon</h3>
@@ -605,7 +603,7 @@ example.com/summer-concert</code></pre>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">{url}</code></td>
-                        <td>Event URL, formatted by the Include HTTPS and Include Event ID settings</td>
+                        <td>Event URL, formatted by the <a href="#text-options" class="doc-link">Start with https:// and End with the event's ID</a> switches</td>
                         <td>example.com/summer-concert</td>
                     </tr>
                 </tbody>
@@ -628,7 +626,7 @@ example.com/summer-concert</code></pre>
                 <tbody>
                     <tr>
                         <td><code class="doc-inline-code">{venue}</code></td>
-                        <td>Venue name (translated)</td>
+                        <td>Venue name (in English when <strong>In English</strong> is on)</td>
                         <td>Central Park</td>
                     </tr>
                     <tr>
@@ -648,7 +646,7 @@ example.com/summer-concert</code></pre>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">{country}</code></td>
-                        <td>Country</td>
+                        <td>The venue's two-letter country code, in capitals</td>
                         <td>US</td>
                     </tr>
                 </tbody>
@@ -702,7 +700,7 @@ example.com/summer-concert</code></pre>
 
         <h3 class="doc-subheading">Custom Fields <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            If you have defined <a href="{{ marketing_url('/features/custom-fields') }}" class="doc-link">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
+            If you have defined <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="doc-link">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
         </p>
 
         @if (!empty($customFieldsData))
@@ -765,7 +763,7 @@ example.com/summer-concert</code></pre>
             </div>
         @endif
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Custom field variables follow the number shown beside each field in your schedule's settings. For example, if your first custom field is "Speaker Name", then <code class="doc-inline-code">{custom_1}</code> shows the speaker's name. A yes/no field prints as Yes or No.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Custom field variables follow the number shown beside each field in your schedule's settings. For example, if your first custom field is "Speaker Name", then <code class="doc-inline-code">{custom_1}</code> shows the speaker's name. A yes/no field prints as Yes or No. A field marked private always prints nothing, here and on the date strip, because its answers are for the schedule's team only.</p>
 
         <h3 id="overlay-variables" class="doc-subheading">On the date strip</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">The same variables work in <strong>Text instead of the date</strong> on the flyer strip, with four exceptions: <code class="doc-inline-code">{url}</code>, <code class="doc-inline-code">{number}</code>, <code class="doc-inline-code">{month_pad}</code> and <code class="doc-inline-code">{day_pad}</code> are caption-only and are left as they are there. Keep it short: it is drawn on one line across the width of a flyer.</p>

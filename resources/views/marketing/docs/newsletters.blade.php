@@ -36,8 +36,11 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             A newsletter is an email you compose and send to a schedule's audience: its followers, its email subscribers, its ticket buyers, or a list of your own. Open <strong class="text-gray-900 dark:text-white">Newsletters</strong> in the sidebar. Newsletters are on every plan, with a <a href="#allowance" class="doc-link">monthly allowance</a> that counts recipients.
         </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Newsletters are for a schedule's owner and its admins. A team member with view-only access does not see the schedule here. On eventschedule.com an admin also needs the schedule to be on the Enterprise plan, which is the plan that includes <a href="{{ route('marketing.docs.managing_schedules') }}#team" class="doc-link">team access</a>.
+        </p>
 
-        <x-doc-screenshot id="newsletters--list" alt="The Newsletters page for one schedule, with the Create Newsletter button and an empty list" loading="eager" />
+        <x-doc-screenshot id="newsletters--list" alt="The Newsletters tab for one schedule: the schedule picker and Create Newsletter, then a draft, a scheduled and a sent newsletter with its open and click rates" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             The section is one page with four tabs, which become a dropdown on a phone. <strong class="text-gray-900 dark:text-white">Create Newsletter</strong> sits at the end of the title row on every tab. If you manage more than one schedule, a schedule picker sits beside it: each schedule has its own newsletters, segments and templates, and changing schedule keeps you on the tab you are on.
@@ -137,7 +140,7 @@
             Click <strong class="text-gray-900 dark:text-white">Create Newsletter</strong> to open the builder. The page has a link back to <strong class="text-gray-900 dark:text-white">Newsletters</strong> above its title and the allowance meter at the end of the title row. When the schedule has saved templates, a <strong class="text-gray-900 dark:text-white">Start from a template</strong> card comes first. The editing panel is split into three tabs, with a live preview pinned beside it on wide screens, and a bar along the foot of the page holds what saves and sends it.
         </p>
 
-        <x-doc-screenshot id="newsletters--create" alt="The newsletter builder: the Content, Style and Settings tabs, the subject line and block list, and the live preview beside them" />
+        <x-doc-screenshot id="newsletters--create" alt="The newsletter builder: the Content, Style and Settings tabs, the subject, the To line naming who receives it, preview text and the block list, the Desktop and Mobile preview beside them, and Send a Test, Save and Review and send at the foot" />
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -205,7 +208,7 @@
         <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Heading</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Large text for section titles and headlines.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Large text for section titles and headlines. While the first heading is empty or the same as the subject line, it copies the subject as you type it. Once you type in the heading itself, it keeps your wording.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Heading Text, Heading Level (Header, Subheader or Section), Alignment (left, center or right)</p>
             </div>
             <div class="doc-field">
@@ -215,8 +218,8 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events, each with its day, time, price (or Free, or Sold Out) and a link to its page. The Cards layout adds each event's flyer in the designs that show pictures (Modern, Classic and Bold), and in those three it opens with the first event as a larger card; the List layout is text only in every design. Left on All Upcoming Events it lists up to ten upcoming or ongoing events in date order, a recurring event under its next date that has not begun; hand-picked events are shown in date order too. Either way it never includes drafts, cancelled events, unlisted events, password-protected ones, an event your schedule has not accepted, or one that has ended, and a link to your full schedule follows the list. An event people sign up for, or whose tickets can no longer be bought, is listed without a price.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> All Upcoming Events (on) or a hand-picked list of events, Event Layout (cards or list)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events, each with its day, time, price (or Free, or Sold Out) and a link to its page. The Cards layout adds each event's flyer in the designs that show pictures (Modern, Classic and Bold), and in those three it opens with the first event as a larger card; the List layout is text only in every design. Left on All upcoming events (auto) it lists up to ten upcoming or ongoing events in date order, a recurring event under its next date that has not begun; hand-picked events are shown in date order too. Either way it never includes drafts, cancelled events, unlisted events, password-protected ones, an event your schedule has not accepted, or one that has ended, and a link to your full schedule follows the list. An event people sign up for, or whose tickets can no longer be bought, is listed without a price.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> All upcoming events (auto) or a hand-picked list of events, Event Layout (cards or list)</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Button</h4>
@@ -282,7 +285,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Leave the <strong>Events</strong> block on "All Upcoming Events" and a cloned newsletter always goes out with the current schedule, with no block editing between sends.</p>
+            <p>Leave the <strong>Events</strong> block on "All upcoming events (auto)" and a cloned newsletter always goes out with the current schedule, with no block editing between sends.</p>
         </div>
     </section>
 
@@ -295,7 +298,7 @@
             Templates
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Style</strong> tab opens with the five built-in designs, under <strong class="text-gray-900 dark:text-white">Design</strong>. Picking one rewrites the colour, font and button settings in a single click; your blocks, your footer text and the layout chosen on the Events block are left alone, so you can try designs on a finished draft without losing work. If the colours you are replacing were your own, <strong class="text-gray-900 dark:text-white">Undo</strong> beside the picker brings them back for a few seconds.
+            The <strong class="text-gray-900 dark:text-white">Style</strong> tab opens with the five built-in designs, under <strong class="text-gray-900 dark:text-white">Design</strong>. Picking one rewrites the colour, font and button settings in a single click; your blocks, your footer text, your preview text and the layout chosen on the Events block are left alone, so you can try designs on a finished draft without losing work. If the colours you are replacing were your own, <strong class="text-gray-900 dark:text-white">Undo</strong> beside the picker brings them back for a few seconds.
         </p>
 
         <div class="doc-table-wrap">
@@ -349,7 +352,7 @@
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-4 mb-6">
-            Every value stays editable afterwards, so a preset is a starting point rather than a lock-in. A preset is also a layout of its own, which stays whatever colours you give it: Modern is a rounded sheet with the title on a band of your accent colour, Classic a framed page with a nameplate and outlined buttons, Minimal a bare page of text links, Bold heavy type on a page that starts dark, and Compact a tight digest. Choosing a preset changes the colours, typeface and corners; your footer text, your preview text and the layout chosen for your events stay. System is the reader's own interface font (San Francisco, Segoe UI or Roboto, whichever their device has).
+            Every value stays editable afterwards, so a preset is a starting point rather than a lock-in. A preset is also a layout of its own, which stays whatever colours you give it: Modern is a rounded sheet with the title on a band of your accent colour, Classic a framed page with a nameplate and outlined buttons, Minimal a bare page of text links, Bold heavy type on a page that starts dark, and Compact a tight digest. System is the reader's own interface font (San Francisco, Segoe UI or Roboto, whichever their device has).
         </p>
 
         <h3 id="saved-templates" class="doc-subheading">Saving Your Own Templates</h3>
@@ -815,7 +818,7 @@
             Managing Newsletters
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Newsletters</strong> tab lists every newsletter of the selected schedule, 20 to a page: its subject, its status with the time it was or will be sent, and once it has gone out its recipients, open rate and click rate. Click a column heading to sort by it. The subject opens the builder for a draft or a scheduled newsletter and the statistics for one that is sending or sent, and the links at the end of the row are <strong class="text-gray-900 dark:text-white">Edit</strong> or <strong class="text-gray-900 dark:text-white">Stats</strong>, <strong class="text-gray-900 dark:text-white">Clone</strong> and <strong class="text-gray-900 dark:text-white">Delete</strong>. With more than one schedule, the picker at the end of the title row switches between them.
+            The <strong class="text-gray-900 dark:text-white">Newsletters</strong> tab lists every newsletter of the selected schedule, 20 to a page: its subject, its status with the time it was or will be sent, once it has gone out its recipients, open rate and click rate, and the day it was created. Click a column heading to sort by it; the newest are first until you do. The subject opens the builder for a draft or a scheduled newsletter and the statistics for one that is sending or sent, and the links at the end of the row are <strong class="text-gray-900 dark:text-white">Edit</strong> or <strong class="text-gray-900 dark:text-white">Stats</strong>, <strong class="text-gray-900 dark:text-white">Clone</strong> and <strong class="text-gray-900 dark:text-white">Delete</strong>. With more than one schedule, the picker at the end of the title row switches between them.
         </p>
 
         <div class="doc-fields">

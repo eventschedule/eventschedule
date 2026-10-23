@@ -61,7 +61,8 @@ class SelfUpdateVisibilityTest extends TestCase
 
     public function test_a_non_admin_sees_the_app_update_section_on_a_plain_selfhost(): void
     {
-        // The #106 case exactly: a signed-in selfhost user who is not user id 1.
+        // The #106 case exactly: a signed-in selfhost user on an install where no account carries
+        // the admin flag (its first account predates it).
         $this->selfhost();
         $user = $this->createOwner();
         $this->assertFalse($user->isAdmin());
@@ -72,6 +73,24 @@ class SelfUpdateVisibilityTest extends TestCase
         $response->assertSee('id="section-app"', false);
         $response->assertSee(__('messages.app_update'));
         $response->assertViewHas('version_installed', 'v1.0.100');
+    }
+
+    /**
+     * Once the install has an admin, the update is theirs. "Any signed-in account" was the #106
+     * repair for installs with no admin at all, and with ALLOW_REGISTRATION on it meant anyone who
+     * signs up could replace the app's files and run migrate --force.
+     * Mutation: return true on a plain selfhost whatever the admins.
+     */
+    public function test_a_non_admin_does_not_update_a_plain_selfhost_that_has_an_admin(): void
+    {
+        $this->selfhost();
+        $this->createOwner(true);
+        $user = $this->createOwner();
+
+        $this->assertFalse(can_self_update($user));
+        $this->actingAs($user)->get(route('profile.edit'))
+            ->assertOk()
+            ->assertDontSee('id="section-app"', false);
     }
 
     public function test_an_admin_sees_the_app_update_section_on_a_plain_selfhost(): void
@@ -145,7 +164,8 @@ class SelfUpdateVisibilityTest extends TestCase
     public static function selfUpdateMatrix(): array
     {
         return [
-            // Plain selfhost: everyone, admin or not. This is what #106 restored.
+            // Plain selfhost with no admin at all: everyone. This is what #106 restored. (With an
+            // admin on the install it is admins only: test_a_non_admin_does_not_update_...)
             'plain selfhost, non-admin' => [false, false, false, false, true],
             'plain selfhost, admin' => [false, false, false, true, true],
             // Hosted-mode selfhost (a self-hosted SaaS): operator only.

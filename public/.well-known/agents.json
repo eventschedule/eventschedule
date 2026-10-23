@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "name": "Event Schedule API",
-  "description": "API for creating and managing events, schedules, tickets, and sales. Supports venue, talent, and curator schedule types with automatic translation to 11 languages.",
+  "description": "API for creating and managing events, schedules, tickets, and sales. Supports venue, talent, and curator schedule types, in 12 languages with automatic translation between them.",
   "url": "https://eventschedule.com",
   "source": {
     "type": "openapi",
@@ -10,7 +10,7 @@
   "flows": [
     {
       "name": "register_and_setup",
-      "description": "Register a new account, create a schedule, and add your first event. In hosted mode, email verification is required before registration.",
+      "description": "Register a new account, create a schedule, and add your first event. In hosted mode, email verification is required before registration, and a new schedule starts on the Free plan with no trial: the owner must subscribe it to Pro or Enterprise (in the admin panel) before create_event will succeed, or it answers 403. Selfhosted installs need no plan.",
       "steps": [
         {
           "operationId": "send_verification_code",
@@ -54,7 +54,7 @@
         },
         {
           "operationId": "create_event",
-          "description": "Create the first event under the new schedule",
+          "description": "Create the first event under the new schedule (hosted: once the schedule is on Pro or Enterprise)",
           "parameters": {
             "headers": {
               "X-API-Key": "$steps.register.outputs.api_key"

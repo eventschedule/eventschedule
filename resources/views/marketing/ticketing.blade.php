@@ -645,7 +645,7 @@
             ],
             [
                 'q' => 'Do I need a paid plan to sell tickets?',
-                'a' => 'To charge for one, yes: a ticket with a price on it is a Pro feature, at '.plan_price($proMonthly).' a month with a 7 day free trial, which also brings the live check-in dashboard, waitlists, promo codes, passes and the sales export. We take no platform fee on any tier, whatever you charge. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email with a QR code that scans at the door for nothing.',
+                'a' => 'To charge for one, yes: a ticket with a price on it is a Pro feature, at '.plan_price($proMonthly).' a month with a '.config('app.trial_days').'-day free trial, which also brings the live check-in dashboard, waitlists, promo codes, passes and the sales export. We take no platform fee on any tier, whatever you charge. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email with a QR code that scans at the door for nothing.',
             ],
             [
                 'q' => 'How does QR code check-in work?',
@@ -1180,7 +1180,7 @@
                         <h3 class="es-turn-ink text-lg font-black">The moment there is a price on it</h3>
                         <span class="es-turn-plan es-turn-plan-pro">Pro</span>
                     </div>
-                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Put a number in the price field and you are on Pro, which brings the rest of this page with it: {{ plan_price($proMonthly) }} a month with a 7 day free trial, and still zero platform fees.</p>
+                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Put a number in the price field and you are on Pro, which brings the rest of this page with it: {{ plan_price($proMonthly) }} a month with a {{ config('app.trial_days') }}-day free trial, and still zero platform fees.</p>
                     <ul class="es-turn-muted space-y-2.5 text-sm">
                         @foreach (['Ticket types with their own price, quantity and sales window', 'Promo codes, add-ons, gift cards and installment plans', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
                             <li class="flex gap-2.5">

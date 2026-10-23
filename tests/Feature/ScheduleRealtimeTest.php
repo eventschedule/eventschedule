@@ -181,9 +181,9 @@ class ScheduleRealtimeTest extends TestCase
         $this->actingAs($member)->getJson('/analytics/realtime/data')->assertOk()->assertJsonPath('overview.views_30m', 1);
         $this->actingAs($member)->getJson('/analytics/realtime/data?schedule='.UrlUtils::encodeId($closed->id))->assertForbidden();
 
-        // On the Analytics page that schedule is still on the picker (it lists what they edit),
-        // and the tab strip carries the selection from tab to tab. Arriving at Realtime with it
-        // selected shows all of theirs: a 403 for pressing a tab would be the page's own doing.
+        // The Analytics page drops that schedule from a link that names it (it lists only what
+        // manageableRoles() covers, and says why the rest is missing), and the tab strip never
+        // carries it. Arriving at Realtime with it selected shows all of theirs, never a 403.
         // Mutation: narrow the tab to whatever role_id says.
         $closedId = UrlUtils::encodeId($closed->id);
         $web = $this->actingAs($member)->get('/analytics?role_id='.$closedId)->assertOk();

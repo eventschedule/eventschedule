@@ -5022,10 +5022,9 @@ class Role extends Model implements MustVerifyEmail
             return null;
         }
 
-        if ($this->isOnTrial()) {
-            return config('usage.ai_parse_daily_limit_trial');
-        }
-
+        // A trial gets the allowance of the plan it is a trial of. It used to get a trial cap of
+        // its own (10), so starting a trial of a paid plan cut a schedule's AI import from the 50
+        // a day it had on Free.
         if ($this->isEnterprise()) {
             return config('usage.ai_parse_daily_limit_enterprise');
         }

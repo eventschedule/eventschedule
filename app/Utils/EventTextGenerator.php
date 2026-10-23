@@ -229,7 +229,7 @@ class EventTextGenerator
             '{city}' => $event->venue ? (($forceEnglish ? $event->venue->englishCity() : $event->venue->city) ?? '') : '',
             '{address}' => $event->venue ? (($forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
             '{state}' => $event->venue ? (($forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',
-            '{country}' => $event->venue ? ($event->venue->country ?? '') : '',
+            '{country}' => $event->venue ? strtoupper((string) $event->venue->country_code) : '',
 
             // Ticket variables
             '{currency}' => $event->ticket_currency_code ?? '',
@@ -241,12 +241,28 @@ class EventTextGenerator
         ];
 
         // Add custom field replacements using stable indices
-        $customFieldValues = $event->custom_field_values ?? [];
-        $roleCustomFields = $role->event_custom_fields ?? [];
-        // Initialize all custom fields to empty
         for ($i = 1; $i <= 10; $i++) {
             $replacements['{custom_'.$i.'}'] = '';
         }
+        foreach (self::customFieldTokens($event, $role, $forceEnglish) as $index => $value) {
+            $replacements['{custom_'.$index.'}'] = $value;
+        }
+
+        return $replacements;
+    }
+
+    /**
+     * What {custom_N} prints, keyed by N: the schedule's fields by their stored index (or their
+     * order, for a field saved before indices existed), a switch as Yes/No, and never a private
+     * field. The AI caption rewrite is handed the same list, so it sees no more than the caption.
+     *
+     * @return array<int, mixed>
+     */
+    public static function customFieldTokens($event, $role, bool $forceEnglish = false): array
+    {
+        $tokens = [];
+        $customFieldValues = $event->custom_field_values ?? [];
+        $roleCustomFields = $role->event_custom_fields ?? [];
         // Fill in values using stored index, or fallback to iteration order for backward compatibility
         $fallbackIndex = 1;
         foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
@@ -265,11 +281,11 @@ class EventTextGenerator
                     $isOn = $value === '1' || $value === 1 || $value === true;
                     $value = trans($isOn ? 'messages.yes' : 'messages.no', [], $forceEnglish ? 'en' : null);
                 }
-                $replacements['{custom_'.$index.'}'] = $value;
+                $tokens[(int) $index] = $value;
             }
         }
 
-        return $replacements;
+        return $tokens;
     }
 
     /**
@@ -372,8 +388,9 @@ class EventTextGenerator
 
             if (! $prices->isEmpty()) {
                 // Check if all tickets are free
+                // tickets.price is decimal(13,3) and comes back as "0.000", so compare the number.
                 $allFree = $prices->every(function ($price) {
-                    return $price === 0;
+                    return (float) $price == 0;
                 });
 
                 if ($allFree) {

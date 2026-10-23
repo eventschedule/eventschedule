@@ -37,9 +37,12 @@ class ApiScheduleController extends Controller
         );
 
         // subscriptions: each schedule's data says what its plan includes (isPro()).
+        // manageableRoles(): owner or admin, and on hosted somebody else's schedule only while
+        // it is Enterprise, as on the web (User::isEditor()).
         $schedules = auth()->user()->roles()
             ->with(['groups', 'subscriptions'])
             ->wherePivotIn('level', ['owner', 'admin'])
+            ->whereIn('roles.id', auth()->user()->manageableRoles()->pluck('id'))
             ->where('is_deleted', false)
             ->wherePro();
 
@@ -85,6 +88,11 @@ class ApiScheduleController extends Controller
 
         if (! $role) {
             return response()->json(['error' => 'Schedule not found'], 404);
+        }
+
+        // On hosted a team belongs to the Enterprise plan, as on the web (User::isEditor()).
+        if (! auth()->user()->planAllowsTeamAccess($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         if (! $role->isPro()) {
@@ -209,6 +217,11 @@ class ApiScheduleController extends Controller
 
         if (! $role) {
             return response()->json(['error' => 'Schedule not found'], 404);
+        }
+
+        // On hosted a team belongs to the Enterprise plan, as on the web (User::isEditor()).
+        if (! auth()->user()->planAllowsTeamAccess($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         if (! $role->isPro()) {

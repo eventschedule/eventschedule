@@ -3542,7 +3542,17 @@ class RoleController extends Controller
             $sortBy = 'created_at';
         }
 
-        $eventIds = $role->events()->pluck('events.id');
+        // The events whose history (and buyers) this schedule may read, the Sales page's rule
+        // (Event::scopeManagedThrough()): its own events, and somebody else's only once a venue
+        // or talent schedule ACCEPTED it. Never every link: a curator that merely lists an event,
+        // or a schedule that declined one, is not handed its buyers.
+        $eventIds = $role->ownEvents()->pluck('events.id');
+        if (! $role->isCurator()) {
+            $eventIds = $eventIds
+                ->merge($role->events()->wherePivot('is_accepted', true)->pluck('events.id'))
+                ->unique()
+                ->values();
+        }
 
         $query = AuditLog::with('user')
             ->where(function ($q) use ($eventIds, $role) {

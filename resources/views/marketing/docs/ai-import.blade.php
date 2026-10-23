@@ -65,10 +65,6 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>During a paid-plan trial</td>
-                        <td>10</td>
-                    </tr>
-                    <tr>
                         <td>Free or Pro</td>
                         <td>50</td>
                     </tr>
@@ -83,7 +79,7 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The trial row is checked first, so a schedule inside a paid-plan trial gets the trial allowance rather than its plan's. Separately from the daily count there are two short-term ceilings: 30 submissions a minute, and 10 links a minute. Meeting either shows a message asking you to wait a minute, and it clears on its own.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule on a paid-plan trial gets the allowance of the plan it is trying: 50 on a Pro trial, 100 on an Enterprise trial. Separately from the daily count there are two short-term ceilings: 30 submissions a minute, and 10 links a minute. Meeting either shows a message asking you to wait a minute, and it clears on its own.</p>
         <p class="text-gray-600 dark:text-gray-300">A venue or curator schedule that accepts event requests without requiring visitors to have an account shows those visitors this same AI box instead of a structured form. Their box takes text and images, not links. Their submissions count against the schedule's daily allowance too. See <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">Requests</a> for the submission form options.</p>
     </section>
 
@@ -96,7 +92,7 @@
             Importing from a Link
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Paste the address of the page or calendar where your events are already listed. When the box holds a link and nothing else, a line under it reads <em>We will read this page</em> and the button reads <strong class="text-gray-900 dark:text-white">Read link</strong>.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">A link is a one-time copy of what is listed there now. Events added to that page or calendar later do not appear on your schedule by themselves: read the link again and the ones you already have are left out, or come back unticked. To keep a calendar of your own in step continuously, connect it under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Integrations</a> instead. To keep somebody else's calendar or page in step, press <strong class="text-gray-900 dark:text-white">Keep this link in sync</strong> under that note: the link becomes a <a href="{{ route('marketing.docs.managing_schedules') }}#feeds" class="doc-link">feed</a>, which is read about once an hour (Enterprise on eventschedule.com).</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A link is a one-time copy of what is listed there now. Events added to that page or calendar later do not appear on your schedule by themselves: read the link again and the ones you already have are left out, or come back unticked. To keep a calendar of your own in step continuously, connect it under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Integrations</a> instead. To keep somebody else's calendar or page in step, press <strong class="text-gray-900 dark:text-white">Keep this link in sync</strong> under that note: the link becomes a <a href="{{ route('marketing.docs.managing_schedules') }}#feeds" class="doc-link">feed</a>, which is read about once an hour (Enterprise on eventschedule.com). It is offered when the link was a calendar feed or a page that publishes its events as data, not for a page the AI had to read.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Paste the link into the box. The <code class="doc-inline-code">https://</code> is optional, so <code class="doc-inline-code">yourvenue.com/events</code> works</li>
@@ -154,7 +150,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Left out</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">From a calendar or a page's event data: cancelled entries, entries marked private, past events, and events your schedule already has, including dates a repeating event of the same name already covers. The results say how many were left out because you already have them, and how many entries could not be read at all. From a page the AI read, a likely duplicate comes back unticked instead.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">From a calendar or a page's event data: cancelled entries, entries marked private, past events, and events your schedule already has, including dates a repeating event of the same name already covers. The results say how many were left out because you already have them, and how many entries could not be read at all. From a page the AI read, a likely duplicate comes back unticked instead. A calendar location that is only a dial-in, a provider's name such as "Microsoft Teams Meeting", or a link carrying the meeting's password is not used as the venue or as the event's link.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">More than 100</h4>
@@ -406,7 +402,7 @@ Tickets: $20</code></pre>
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Every event a read finds becomes a card: on its own when there is one event, or opened from its row when there is a <a href="#choosing-events" class="doc-link">list</a>. The card holds the event as it will be saved, and every field on it can be corrected first. What follows is the same whatever the event was read from.</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Which fields appear</strong> - Name, date and time, and venue are always on the card. The extra fields (short description, description, price, coupon code and its discount, registration URL, category and sub-schedule) are switched on per schedule, and can be marked required. The sub-schedule field only appears once the schedule has sub-schedules</li>
+            <li><strong class="text-gray-900 dark:text-white">Which fields appear</strong> - Name, date and time, and venue are always on the card. The extra fields (short description, description, price, coupon code and its discount, registration URL, category and sub-schedule) are switched on per schedule under <a href="#custom-prompts" class="doc-link">Import Form Fields</a> on eventschedule.com, and can be marked required. The sub-schedule field only appears once the schedule has sub-schedules. A selfhosted install has no such setting, so its cards show only the name, date and venue; an installation admin can tick <strong class="text-gray-900 dark:text-white">Show all fields</strong> above the results to see every field. What is read into a field the card does not show is still saved with the event</li>
             <li><strong class="text-gray-900 dark:text-white">Performer videos</strong> - On a curator schedule, when a parsed performer does not match a talent schedule you already have, the card searches YouTube for that name and offers up to six clips. Pick one and it becomes the new talent schedule's video</li>
         </ul>
 
@@ -455,7 +451,7 @@ Tickets: $20</code></pre>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Rows that start unticked</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A row missing a name, date or time reads <em>Add a name, date and time</em>. A row that matches an event you already have reads <em>Looks like one you already have</em>. Open the row to fix or check it, then tick it.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A row missing a name, date or time reads <em>Add a name, date and time</em>. A row that matches an event you already have reads <em>Looks like one you already have</em>. Two more keep a meeting from being published by accident, which matters most when you import your own calendar: <em>Shows meeting details (a passcode or dial-in code), so it is not ticked</em>, and <em>Looks like an email rather than an event, so it is not ticked</em>. Open the row to fix or check it, then tick it.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding</h4>
@@ -571,6 +567,7 @@ Tickets: $20</code></pre>
             <li><a href="{{ route('marketing.docs.creating_events') }}" class="doc-link">Creating Events</a> - Add events by hand and configure event settings</li>
             <li><a href="{{ route('marketing.docs.creating_events') }}#whatsapp" class="doc-link">Creating Events via WhatsApp</a> - Send a message or flyer to a WhatsApp number and let AI create the event (Enterprise)</li>
             <li><a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-link">Scan Agenda</a> - Use AI to read a printed agenda and create event parts (Enterprise)</li>
+            <li><a href="{{ route('marketing.docs.managing_schedules') }}#feeds" class="doc-link">Feeds</a> - Keep somebody else's calendar, RSS feed or events page in step, read about once an hour (Enterprise on eventschedule.com)</li>
             <li><a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> - Have a selfhosted install import events every day from a list of event URLs</li>
             <li><a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="doc-link">Custom Fields</a> - Define your own event fields, with AI prompts for each (Pro)</li>
         </ul>

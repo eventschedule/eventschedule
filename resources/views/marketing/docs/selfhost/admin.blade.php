@@ -79,7 +79,7 @@
                     </tr>
                     <tr>
                         <td>Manage</td>
-                        <td><a href="#manage-boost" class="doc-link">Boost</a>, <a href="#manage-plans" class="doc-link">Schedules</a>, <a href="#manage-domains" class="doc-link">Domains</a>, <a href="#manage-referrals" class="doc-link">Referrals</a>, <a href="#manage-newsletters" class="doc-link">Newsletters</a>, <a href="#manage-blog" class="doc-link">Blog</a></td>
+                        <td><a href="#manage-boost" class="doc-link">Boost</a>, <a href="#manage-plans" class="doc-link">Schedules</a>, <a href="#manage-blocked" class="doc-link">Blocked</a>, <a href="#manage-private-calendars" class="doc-link">Private calendars</a>, <a href="#manage-feeds" class="doc-link">Feeds</a>, <a href="#manage-domains" class="doc-link">Domains</a>, <a href="#manage-referrals" class="doc-link">Referrals</a>, <a href="#manage-newsletters" class="doc-link">Newsletters</a>, <a href="#manage-blog" class="doc-link">Blog</a></td>
                         <td>Domains and Referrals: only when <code class="doc-inline-code">IS_HOSTED=true</code>. Blog: eventschedule.com only</td>
                     </tr>
                     <tr>
@@ -239,6 +239,11 @@
                         <td>Every install</td>
                     </tr>
                     <tr>
+                        <td>Check PHP: this version may have a critical security flaw (PHP2Shell)</td>
+                        <td>The server runs a PHP release older than the one that fixed a known remote code execution flaw: 8.2.35, 8.3.36, 8.4.27 or 8.5.12. Nothing in the app can fix it, so upgrade PHP on the server and the row goes away. Debian and Ubuntu backport security fixes into their packages and keep the old version number, so on their PHP the row can show although the fix is installed: check the package's changelog for PHP2Shell (CVE-2026-109618 and CVE-2026-109619). The row names the PHP version it found and links to Queue.</td>
+                        <td>Every install</td>
+                    </tr>
+                    <tr>
                         <td>Venue map address lookups are failing</td>
                         <td>The address search behind the <a href="#venue-map" class="doc-link">venue map</a> has not answered for an hour, so maps that owners switched on are still waiting for their pins. Check that the address in <code class="doc-inline-code">MAP_GEOCODER_URL</code> is reachable from the server. Links to Queue.</td>
                         <td>Where <code class="doc-inline-code">MAP_GEOCODER_URL</code> is set</td>
@@ -299,6 +304,26 @@
                         <td>When the promotions network is enabled</td>
                     </tr>
                     <tr>
+                        <td>Boost partners waiting for confirmation</td>
+                        <td>A <a href="#boost-partners" class="doc-link">boost partner</a> that shared its ad account and Page with your Meta Business and is waiting for you to check and confirm it. Links to Boost partners on the Boost page.</td>
+                        <td>Hosted</td>
+                    </tr>
+                    <tr>
+                        <td>Partner boosts stuck before Facebook</td>
+                        <td>A partner's boost that has been approved and paid for 30 minutes or more and still has not reached Meta. Links to Boost partners.</td>
+                        <td>Hosted</td>
+                    </tr>
+                    <tr>
+                        <td>Boost statements unpaid</td>
+                        <td>A partner's monthly fee that failed to charge or needs the partner to act. Links to Boost partners.</td>
+                        <td>Hosted</td>
+                    </tr>
+                    <tr>
+                        <td>Schedules may be publishing a private calendar</td>
+                        <td>A schedule whose calendar-synced events show meeting details or an email thread on its public page. Links to <a href="#manage-private-calendars" class="doc-link">Private calendars</a>.</td>
+                        <td>Every install</td>
+                    </tr>
+                    <tr>
                         <td>Accounts may be spam</td>
                         <td>An account with one of your watched words, such as <code class="doc-inline-code">paypal</code> or <code class="doc-inline-code">bitcoin</code>, in a schedule it owns or an event it made, or in its own name or email address once it owns a schedule. It clears as you block each one or mark it not spam. Links to <a href="#blocked-spam" class="doc-link">Blocked</a>.</td>
                         <td>Every install</td>
@@ -322,6 +347,11 @@
                         <td>Unread support messages</td>
                         <td>Support chat messages from customers that no admin has read.</td>
                         <td>Hosted</td>
+                    </tr>
+                    <tr>
+                        <td>Blog posts held for review</td>
+                        <td>Posts the blog's writer finished that its check would not publish. Links to the Blog page, filtered to them.</td>
+                        <td>eventschedule.com only</td>
                     </tr>
                     <tr>
                         <td>Campaigns with disapproved ads</td>
@@ -675,6 +705,10 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Boost page is the first page of the Manage tab. It is where you oversee every paid promotion bought on the platform, whether it runs as a Meta ad or as a promotion served on your own pages. From top to bottom:</p>
         <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
+                <h4>Boost partners</h4>
+                <p>Hosted only, and only once there is a partner or <code class="doc-inline-code">BOOST_PARTNERS_ENABLED</code> is set. Described <a href="#boost-partners" class="doc-link">below</a>.</p>
+            </div>
+            <div class="doc-field">
                 <h4>Two strips of figures</h4>
                 <p>Total and active campaigns, markup revenue net of refunds, ad spend that left for Meta, and refunds; then the average click-through rate, cost per click and cost per thousand impressions, and the <strong>Rejection Rate</strong>: rejected campaigns as a share of those with a settled outcome, turning red above 20 percent.</p>
             </div>
@@ -720,6 +754,16 @@
             <li><strong class="text-gray-900 dark:text-white">Set Spending Limit</strong> - raise or lower the maximum budget that schedule may put on a single campaign. Schedules with a custom limit are listed underneath; when none has one, the card names the default that applies to everyone else instead.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Both are written to the audit log.</p>
+
+        <h3 id="boost-partners" class="doc-subheading">Boost partners</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A boost partner is an account whose schedules boost under its own Facebook Page and Meta ad account rather than yours: Meta bills the partner's ad account, and the platform charges the partner a monthly fee on what was spent. It exists only when <code class="doc-inline-code">IS_HOSTED=true</code>. The card at the top of the Boost page holds:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Enable</strong> - type the email address of an account to make it a partner. The form is there only while <code class="doc-inline-code">BOOST_PARTNERS_ENABLED</code> is set</li>
+            <li><strong class="text-gray-900 dark:text-white">The partners</strong> - each enabled account with its status and the ad account it connected, including the Business that owns that ad account</li>
+            <li><strong class="text-gray-900 dark:text-white">Confirm</strong> - a partner that shared its ad account and Page with your Meta Business waits for you to check the owning Business and confirm it once. Until then its boosts do not launch</li>
+            <li><strong class="text-gray-900 dark:text-white">Disable</strong> - after a confirmation, stops the account being a partner. Its open boost requests are declined, and new boosts on its schedules run on your own Page again. A partner with an unpaid fee stays listed until it is settled</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Enabling, confirming and disabling are written to the audit log. A partner waiting for confirmation, a partner boost that has not reached Meta and an unpaid monthly fee each raise a <a href="#needs-attention" class="doc-link">Needs attention</a> row. The Meta configuration a partner needs is in <a href="{{ route('marketing.docs.selfhost.boost') }}#boost-partners" class="doc-link">Boost Setup</a>.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Nothing to manage until Boost is configured</div>
@@ -874,8 +918,8 @@
             </svg>
             Private calendars (Manage)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Private calendars page, at <code class="doc-inline-code">/admin/private-calendars</code>, lists schedules that look as though a calendar import is publishing somebody's private calendar: events that show a meeting's passcode or dial-in code, a join link carrying the meeting's password, or an email made into an entry. A sweep reads the events calendars bring in every 15 minutes, and the list counts toward the alerts on the admin dashboard. It only finds; nothing on the page happens until you press it.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule's page shows what was found first, then four steps, each audited: <strong class="text-gray-900 dark:text-white">Hide what is public now</strong> (the flagged events become drafts, except ones people hold tickets to, and venues made out of meeting links are taken down), <strong class="text-gray-900 dark:text-white">Pause the sync</strong> (stops reading the calendar and keeps pushing to it), <strong class="text-gray-900 dark:text-white">Tell the owner</strong> (an email in the owner's language, with a preview, at most once a week) and <strong class="text-gray-900 dark:text-white">Mark reviewed</strong>, which takes the schedule off the list until something new turns up. Hiding and pausing can be put back from the same page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Private calendars page, at <code class="doc-inline-code">/admin/private-calendars</code>, lists schedules that look as though a calendar import is publishing somebody's private calendar: events that show a meeting's passcode or dial-in code, a join link carrying the meeting's password, or an email made into an entry. A sweep reads the events calendars bring in every 15 minutes, and the list counts toward the alerts on the admin dashboard. The sweep flags events and changes none of them: nothing on this page happens until you press it. The one thing the sweep removes by itself is a venue that an import made out of a meeting link (a Zoom link, a dial-in, "Microsoft Teams Meeting") when nobody runs it and no event made by hand uses it: it is taken off its events, cleaned of the link and deleted.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule's page shows what was found first, then four steps, each audited: <strong class="text-gray-900 dark:text-white">Hide what is public now</strong> (the flagged events become drafts, except ones people hold tickets to, and venues made out of meeting links are taken down), <strong class="text-gray-900 dark:text-white">Pause the sync</strong> (stops reading the calendar and keeps pushing to it), <strong class="text-gray-900 dark:text-white">Tell the owner</strong> (an email in the owner's language, with a preview, at most once a week) and <strong class="text-gray-900 dark:text-white">Mark reviewed</strong>, which takes the schedule off the list until something new turns up. Hiding and pausing can be put back from the same page; a venue taken down stays down. What the owner sees afterwards (the hidden events as drafts on their review list, the paused row in their schedule form) is in <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a> and the calendar setup guides for <a href="{{ route('marketing.docs.selfhost.google_calendar') }}#troubleshooting" class="doc-link">Google</a> and <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}#troubleshooting" class="doc-link">Outlook</a>.</p>
     </section>
 
     <section id="manage-feeds" class="doc-section">
@@ -1113,7 +1157,7 @@
             </svg>
             App Update (System)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The App Update page shows the version this installation is running next to the latest release published on GitHub, and applies an update in one click. It never appears on eventschedule.com, which deploys from git. The same update is offered on the <a href="{{ route('marketing.docs.account_settings') }}#app-update" class="doc-link">App Update</a> tab of your own Settings page; the admin one is the operator's copy, and it is the one the System tab badges when a release is waiting.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The App Update page shows the version this installation is running next to the latest release published on GitHub, and applies an update in one click. It never appears on eventschedule.com, which deploys from git. The same update is offered to the install's admins on the <a href="{{ route('marketing.docs.account_settings') }}#app-update" class="doc-link">App Update</a> tab of their own Settings page (on an old install that has no admin account at all, to every signed-in account); the admin one is the operator's copy, and it is the one the System tab badges when a release is waiting.</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Installed Version</strong> - what <code class="doc-inline-code">config/self-update.php</code> reports, which the release you are running ships. If this stays on an old number after a successful update, you have a cached config: run <code class="doc-inline-code">php artisan config:clear</code>.</li>
             <li><strong class="text-gray-900 dark:text-white">Latest Version</strong> - the newest tag on GitHub, refreshed once a day by a scheduled check so no page load has to wait on the network. It reads <strong class="text-gray-900 dark:text-white">Unknown</strong> if GitHub could not be reached, which is never treated as an update being available.</li>
@@ -1138,7 +1182,7 @@
             </svg>
             Settings (System)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. There are seven, and a plain selfhost sees four of them: Header / Footer Code, Event Schedule network, Platform currency and Realtime visitors, plus Accommodation affiliate when it is enabled. None of these settings can be changed while the install is in demo mode.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. There are eight, and a plain selfhost sees four of them: Header / Footer Code, Event Schedule network, Platform currency and Realtime visitors, plus Accommodation affiliate when it is enabled. None of these settings can be changed while the install is in demo mode.</p>
 
         <x-doc-screenshot id="selfhost-admin--settings" alt="The admin Settings page, opening on the Header / Footer Code card" />
 
@@ -1181,6 +1225,11 @@
                         <td><a href="#settings-realtime" class="doc-link">Realtime visitors</a></td>
                         <td>Turns <a href="#realtime" class="doc-link">Realtime</a> on or off for the whole install, and the schedule owners' view of it</td>
                         <td>Always</td>
+                    </tr>
+                    <tr>
+                        <td>Homepage quotes</td>
+                        <td>Up to three quotes from organizers, shown on the marketing homepage with their schedule's name, picture and link</td>
+                        <td>eventschedule.com only</td>
                     </tr>
                     <tr>
                         <td><a href="#settings-accommodation" class="doc-link">Accommodation affiliate</a></td>

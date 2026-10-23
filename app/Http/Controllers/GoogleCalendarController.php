@@ -498,6 +498,12 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
+            // Only what guests can see goes to a calendar, as on save (EventRepo::saveEvent()):
+            // a draft or internal event stays off it, and a cancelled one was taken off it.
+            if ($notSynced = $event->calendarSyncRefusal()) {
+                return response()->json(['error' => $notSynced], 422);
+            }
+
             // Ensure user has valid token before syncing
             if (! $this->googleCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);

@@ -379,7 +379,7 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translations never appear</h4>
                 <ul class="doc-list text-sm">
-                    <li>Translation runs on the scheduler, not on save, so confirm the cron entry for <code class="doc-inline-code">php artisan schedule:run</code> is installed and allow up to an hour</li>
+                    <li>Translation runs on the scheduler, not on save, so confirm the cron entry for <code class="doc-inline-code">php artisan schedule:run</code> is installed. The task runs every 15 minutes, so allow that long, or longer for a large schedule</li>
                     <li>Nothing is translated unless <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> is on and <strong class="text-gray-900 dark:text-white">Translate into</strong> differs from the schedule's own language</li>
                     <li>Only empty translation fields are filled, so text you typed yourself is never overwritten</li>
                 </ul>

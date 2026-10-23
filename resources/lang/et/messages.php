@@ -266,7 +266,7 @@ return [
     'payment_links' => 'Makse lingid',
     'are_you_sure' => 'Kas olete kindlad?',
     'no_requests' => 'Taotlusi pole',
-    'team_lead' => 'Halduse õigustega liikmed juhivad ajakava igapäevaselt. Vaatajad saavad kõike vaadata, kuid mitte midagi muuta. Rolle muudab, liikmeid eemaldab ja plaani haldab ainult omanik.',
+    'team_lead' => 'Halduse õigustega liikmed juhivad ajakava igapäevaselt. Vaatajad saavad kõike vaadata ja märkida oma vabad päevad, kuid mitte midagi muud muuta. Rolle muudab, liikmeid eemaldab ja plaani haldab ainult omanik.',
     'requests_lead' => 'Sündmused ja broneeringud, mis ootavad sinu vastust. Nõustumisel lisatakse see sinu ajakavasse.',
     'availability_lead' => 'Märgi päevad, mil sa ei ole saadaval, ja salvesta. Iga liige märgib oma päevad ise.',
     'resend_invite_sms' => 'Saada uuesti SMS-iga',
@@ -628,6 +628,7 @@ return [
     'promo_share_link' => 'Link, mis rakendab selle koodi:',
     'order_fields_help' => 'Küsitakse üks kord kogu tellimuse kohta, mitte iga pileti kohta.',
     'calendar_not_synced_draft' => 'Kalendrisse kopeeritakse ainult sündmused, mida külalised näevad.',
+    'calendar_not_synced_cancelled' => 'Tühistatud sündmust kalendrisse ei kopeerita. See kopeeritakse uuesti, kui sa selle taastad.',
     'saving_removes' => 'Salvestamisel eemaldatakse',
     'schedule_short_description_help' => 'Üks rida sinu ajakava nime all, kui päise stiil on :style.',
     'schedule_description_help' => 'Kuvatakse sinu ajakava lehe ülaosas.',
@@ -1364,7 +1365,7 @@ return [
     'from_google_calendar' => 'Google\'i kalendrist',
     'from_google_calendar_description' => 'Google\'i kalendri sündmused jõuavad siia. Kui sa neid automaatselt ei avalda, ootavad need mustandina.',
     'bidirectional_sync' => 'Kahesuunaline sünkroonimine',
-    'bidirectional_sync_description' => 'Siia lisatud sündmused lähevad sinu kalendrisse ja sinu kalendri uued sündmused jõuavad siia, mustandina, kui sa neid automaatselt ei avalda (uuendused sünkroonitakse ainult ühes suunas)',
+    'bidirectional_sync_description' => 'Siia lisatud sündmused lähevad sinu kalendrisse ja sinu kalendri uued sündmused jõuavad siia, mustandina, kui sa neid automaatselt ei avalda (ühes kohas tehtud muudatused kopeeritakse teise)',
     'no_sync' => 'Sünkroonimist pole',
     'no_sync_description' => 'Keela Google\'i kalendri sünkroonimine',
     'sync_events' => 'Sündmuste sünkroonimine',
@@ -3818,6 +3819,7 @@ return [
 
     'individual_tickets' => 'Individuaalsed piletid',
     'individual_tickets_description' => 'Iga osaleja saab oma kinnituse ja QR-koodi',
+    'individual_tickets_off_for_passes' => 'Väljas, kuni mõni piletitüüp on pääse või tellimus. Pääse on üks QR-kood tellimuse kohta, seega ürituse salvestamine lülitab selle välja.',
     'individual_ticket_fields' => 'Kogu piletivälju iga külalise kohta',
     'individual_ticket_fields_description' => 'Kuva piletitaseme kohandatud välju iga külalise jaoks',
     'guest_information' => 'Külalise andmed',
@@ -5107,7 +5109,7 @@ return [
     'monetization_native_cpc' => 'Hind kliki kohta',
     'monetization_native_cpc_help' => 'Tasu võetakse reklaamijalt. Kehtib ainult uutele kampaaniatele.',
     'promotion_rate_not_configured' => 'Edenduste hinnad ei ole sellel saidil veel seadistatud. Võtke ühendust administraatoriga.',
-    'promotion_credit_available' => 'Teil on :amount edenduskrediiti. Kõik sellest ületav võetakse teie kaardilt.',
+    'promotion_credit_available' => 'Teil on :amount edenduskrediiti, mida kasutatakse ainult eelarve puhul, mille see täielikult katab. Selle eelarve puhul võetakse kogu summa teie kaardilt ja krediit jääb alles.',
 
     // Stay22 accommodation map (see docs/FEATURES.md, "Accommodation Affiliate")
     'accommodation' => 'Ööbimine',

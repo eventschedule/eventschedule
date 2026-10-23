@@ -905,7 +905,7 @@
         $faqs = [
             [
                 'q' => 'Is the API free to use?',
-                'a' => 'The REST API is part of the Pro plan at '.plan_price($proMonthly).' a month, with a seven-day trial when you subscribe. Selfhosted installations are Pro by definition, so running your own copy unlocks every endpoint at no cost. Ticket sales carry zero platform fees on every plan and in both modes: you keep everything except your payment processor\'s cut.',
+                'a' => 'The REST API is part of the Pro plan at '.plan_price($proMonthly).' a month, with a '.config('app.trial_days').'-day free trial when you subscribe. Selfhosted installations are Pro by definition, so running your own copy unlocks every endpoint at no cost. Ticket sales carry zero platform fees on every plan and in both modes: you keep everything except your payment processor\'s cut.',
             ],
             [
                 'q' => 'Which endpoints need the Pro plan, and what happens without it?',

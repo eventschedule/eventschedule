@@ -42,6 +42,15 @@ class MarketingController extends Controller
     }
 
     /**
+     * The length of the free trial, in days, as the installation sets it (TRIAL_DAYS), for the
+     * same tables and FAQs. They used to type a week, whatever it was set to.
+     */
+    private function trialDays(): int
+    {
+        return (int) config('app.trial_days', 7);
+    }
+
+    /**
      * One month of ticket sales priced on each platform, for a comparison page's "fees, worked
      * out" table. The totals are worked out here from each platform's published rates rather than
      * typed, so a changed rate or plan price cannot leave a sum behind. Every ticket is its own
@@ -1861,7 +1870,7 @@ class MarketingController extends Controller
         return [
             'Pricing & Fees' => [
                 ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only', 'Yes (forever)'],
-                ['Paid plan price', 'From '.plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
+                ['Paid plan price', 'From '.plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
                 ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket', 'N/A (no ticketing)'],
                 ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay', 'Built-in (2.9% per order, on top)', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', 'No'],
             ],
@@ -2037,7 +2046,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to publish events', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on tickets)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on tickets)', true],
                         ['Platform fees', '0%', '3.7% + $1.79/ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built-in (2.9% per order, on top)', false],
                     ],
@@ -2213,7 +2222,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (forever)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '$59/mo', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', '$59/mo', true],
                         ['Platform fees', '0%', '5% (free plan), 0% (Plus)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe (2.9% + $0.30)', false],
                     ],
@@ -2269,7 +2278,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => plan_price($this->planPrice()).'/mo vs $59/mo',
-                        'description' => 'Event Schedule Pro costs '.plan_price($this->planPrice()).'/mo with a 7-day free trial. Luma Plus costs $59/mo, billed annually, for comparable features.',
+                        'description' => 'Event Schedule Pro costs '.plan_price($this->planPrice()).'/mo with a '.$this->trialDays().'-day free trial. Luma Plus costs $59/mo, billed annually, for comparable features.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -2367,7 +2376,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Luma free?', 'answer' => 'Luma\'s free plan has no monthly charge, but on paid tickets it takes a 5% platform fee, and Stripe\'s processing fee (typically 2.9% + 30 cents) is charged on top. Luma Plus removes the platform fee for $59 a month, billed annually. Event Schedule takes no platform fee on any plan: free registration is unlimited on the free plan, and selling a ticket with a price on it is on Pro at '.plan_price($this->planPrice()).'/mo.'],
-                    ['question' => 'What does Luma Plus cost, and what does it add?', 'answer' => 'Luma Plus is $59 a month, billed annually, which is $708 a year. It removes the 5% platform fee, raises calendar admins from three to five, and raises invites and newsletters from 500 a week to 5,000. Stripe\'s processing fee still applies. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with a 7-day free trial and no platform fee.'],
+                    ['question' => 'What does Luma Plus cost, and what does it add?', 'answer' => 'Luma Plus is $59 a month, billed annually, which is $708 a year. It removes the 5% platform fee, raises calendar admins from three to five, and raises invites and newsletters from 500 a week to 5,000. Stripe\'s processing fee still applies. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with a '.$this->trialDays().'-day free trial and no platform fee.'],
                     ['question' => 'Luma or Eventbrite: which charges less per ticket?', 'answer' => 'On a $20 ticket, Luma\'s free plan takes $1.00 (5%) and Eventbrite takes $2.53 (3.7% + $1.79), before payment processing on either. Luma Plus takes nothing per ticket for $59 a month. Event Schedule takes nothing per ticket on any plan; the only deduction is your payment processor\'s own.'],
                     ['question' => 'Is it easy to switch from Luma to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Your audience can sign up by email for an occasional digest of the new events you create, or subscribe to the schedule\'s live calendar feed, which needs no email address.'],
                     ['question' => 'How does Event Schedule pricing compare to Luma?', 'answer' => 'Luma Plus is $59/mo billed annually, and Luma\'s free plan takes a 5% platform fee on paid events. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, unlimited free registration and newsletters, with no platform fee on anything you sell.'],
@@ -2392,7 +2401,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free events only', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $0.28/ticket', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $0.28/ticket', true],
                         ['Platform fees', '0%', '$0.28 to $0.60/ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/PayPal/Square', false],
                     ],
@@ -2694,7 +2703,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (limited)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $16.79/mo (organizer)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $16.79/mo (organizer)', true],
                         ['Platform fees', '0%', '0% (but subscription required)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built-in (for paid events)', false],
                     ],
@@ -2830,7 +2839,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for organizers', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on buyers)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on buyers)', true],
                         ['Platform fees', '0%', 'Service fee on buyers', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built-in', false],
                     ],
@@ -2967,7 +2976,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to list', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on tickets)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on tickets)', true],
                         ['Platform fees', '0%', '$0.99 + 5% per ticket (buyer-paid)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built-in', false],
                     ],
@@ -3104,7 +3113,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'No (custom pricing)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Enterprise pricing', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Enterprise pricing', true],
                         ['Platform fees', '0%', 'Included in subscription', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built-in', false],
                     ],
@@ -3241,7 +3250,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Small events only (under 50 attendees)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $50/mo', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $50/mo', true],
                         ['Platform fees', '0%', 'Ticketing add-on required', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe (separate)', false],
                     ],
@@ -3377,7 +3386,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'No (quote-based)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Custom quotes', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Custom quotes', true],
                         ['Platform fees', '0%', '3% + $0.99/ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe (2.9% + $0.30)', false],
                     ],
@@ -3514,7 +3523,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'No (paid plans only)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $7,500 (Professional)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $7,500 (Professional)', true],
                         ['Platform fees', '0%', 'No transaction fees (paid plans)', false],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/Square/Payflow', false],
                     ],
@@ -3652,7 +3661,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for free events', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '3% per ticket (cap 25 EUR)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', '3% per ticket (cap 25 EUR)', true],
                         ['Platform fees', '0%', '3% per ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/PayPal', true],
                     ],
@@ -3790,7 +3799,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (100 clicks/mo, 20 RSVPs)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $36/mo (monthly billing)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $36/mo (monthly billing)', true],
                         ['Platform fees', '0%', 'N/A (no ticketing)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'N/A (no ticketing)', true],
                     ],
@@ -3923,7 +3932,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Selfhosted only (Community Edition)', true],
-                        ['Hosted pricing', plan_price($this->planPrice()).'/mo (7-day free trial)', '2.5%/ticket (cap 15 EUR)', true],
+                        ['Hosted pricing', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', '2.5%/ticket (cap 15 EUR)', true],
                         ['Platform fees', '0%', '2.5% per ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/PayPal/Mollie', false],
                     ],
@@ -4062,7 +4071,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for free events', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'No subscription (per-ticket only)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'No subscription (per-ticket only)', true],
                         ['Platform fees', '0%', 'Booking fee on paid tickets (under $3 for most)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Included in platform fee', false],
                     ],
@@ -4201,7 +4210,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for free events only', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '$1.50/ticket + up to 2.9%', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', '$1.50/ticket + up to 2.9%', true],
                         ['Platform fees', '0%', '1.9% to 2.9% (Pro/Plus plans)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/PayPal (separate fees)', true],
                     ],
@@ -4342,7 +4351,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'No (30-day free trial)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $9/mo, billed annually', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $9/mo, billed annually', false],
                         ['Platform fees', '0%', '2.5% + $0.90 per paid ticket (add-on)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Timely Pay/Stripe/Square/PayPal/Authorize.net', false],
                     ],
@@ -4466,7 +4475,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (core plugin)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $259/yr (Essentials)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $259/yr (Essentials)', true],
                         ['Platform fees', '0%', '2% on the free Event Tickets plugin, 0% on Pro and Elite', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/PayPal/Square, WooCommerce on Pro', false],
                     ],
@@ -4511,7 +4520,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => plan_price($this->planPrice()).'/mo vs $259/yr',
-                        'description' => 'Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with a 7-day free trial. The Events Calendar paid tiers are $259, $399 and $599 a year, renewed annually.',
+                        'description' => 'Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with a '.$this->trialDays().'-day free trial. The Events Calendar paid tiers are $259, $399 and $599 a year, renewed annually.',
                         'icon' => 'dollar',
                         'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
                         'border' => 'border-sky-200 dark:border-sky-500/20',
@@ -4588,7 +4597,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (free for artists)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (paid email and SMS extras)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (paid email and SMS extras)', false],
                         ['Platform fees', '0%', 'N/A (links to outside ticket sellers)', false],
                     ],
                     'Events & Ticketing' => [
@@ -4701,7 +4710,7 @@ class MarketingController extends Controller
                 ],
                 'sections' => [
                     'Pricing & Fees' => [
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'No subscription (service fee per ticket)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'No subscription (service fee per ticket)', false],
                         ['Platform fees', '0%', 'Service fee on each ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe Connect', false],
                     ],
@@ -4739,7 +4748,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Flat '.plan_price($this->planPrice()).'/mo for Pro',
-                        'description' => 'Paid tickets are on Pro at '.plan_price($this->planPrice()).'/mo with a 7-day free trial, whether you sell ten tickets a month or ten thousand.',
+                        'description' => 'Paid tickets are on Pro at '.plan_price($this->planPrice()).'/mo with a '.$this->trialDays().'-day free trial, whether you sell ten tickets a month or ten thousand.',
                         'icon' => 'dollar',
                         'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
                         'border' => 'border-sky-200 dark:border-sky-500/20',
@@ -5045,7 +5054,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (100% free, tip-funded)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'None (optional tips at checkout)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'None (optional tips at checkout)', false],
                         ['Platform fees', '0%', '0% (optional tips at checkout)', false],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe (card fees covered by Zeffy)', false],
                         ['Open to any organizer', 'Yes', 'No (nonprofits and charities only)', true],
@@ -5165,7 +5174,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (agenda view, 2,000 views/mo)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '$8/mo per calendar (Premium)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', '$8/mo per calendar (Premium)', false],
                         ['Platform fees', '0%', 'N/A (no ticketing)', false],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'No', true],
                     ],
@@ -5281,7 +5290,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'No monthly fee on Cloud (per-ticket fee)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'No subscription (1.25% + $0.60 per ticket)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'No subscription (1.25% + $0.60 per ticket)', true],
                         ['Platform fees', '0%', '1.25% + $0.60 per ticket (Cloud)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe, plus offline payments', false],
                     ],
@@ -5509,7 +5518,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to use (fees on paid tickets)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'No subscription (fees per ticket)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'No subscription (fees per ticket)', false],
                         ['Platform fees', '0%', '$1 + 2% per ticket, plus 3% per order', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built in (Stripe), paid out after the event', false],
                     ],
@@ -5629,7 +5638,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (Tourbox for artists)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (paid email campaigns)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (paid email campaigns)', false],
                         ['Platform fees', '0%', 'N/A (links to outside ticket sellers)', false],
                     ],
                     'Events & Ticketing' => [
@@ -5744,7 +5753,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (5 active upcoming events)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'USD 12, 60 or 200/mo', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'USD 12, 60 or 200/mo', false],
                         ['Platform fees', '0%', 'USD 1 per paid ticket (buyers pay by default)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Your Stripe or PayPal (India: AllEvents)', false],
                     ],
@@ -5868,7 +5877,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to publish (fees on paid tickets)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'No subscription (Pro plans custom)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'No subscription (Pro plans custom)', false],
                         ['Platform fees', '0%', '2% + $0.79 per ticket (US Starter)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Universe Payments (3%) or your own Stripe', false],
                     ],
@@ -7798,6 +7807,8 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Feeds from Other Sites', 'description' => 'Keep a schedule up to date from a calendar address, an RSS feed or a page that lists events.', 'url' => $r['creating_schedules'].'#integrations-feeds', 'category' => 'User Guide', 'keywords' => 'feed rss atom ics ical webcal sync import subscribe'],
             ['page' => 'Creating Schedules', 'section' => 'Calendar Text and Feeds', 'description' => 'Calendar description template and iCal/RSS feed URLs.', 'url' => $r['creating_schedules'].'#integrations-advanced', 'category' => 'User Guide', 'keywords' => 'advanced feeds ical rss subscribe calendar description template variables price discount before after coupon calendar text'],
             ['page' => 'Creating Schedules', 'section' => 'Template Variables', 'description' => 'Every variable a calendar description template can use.', 'url' => $r['creating_schedules'].'#available-variables', 'category' => 'User Guide', 'keywords' => 'template variables calendar description'],
+            ['page' => 'Creating Schedules', 'section' => 'Custom domain main address', 'description' => 'Choose whether your domain or your subdomain is the main address search engines, mail and shared links use.', 'url' => $r['creating_schedules'].'#custom-domain-main-address', 'category' => 'User Guide', 'keywords' => 'custom domain main address subdomain canonical primary direct mode sitemap emails shared links qr also at'],
+            ['page' => 'Creating Schedules', 'section' => 'When calendar reading stops', 'description' => 'What happens when an admin pauses a calendar or the schedule changes owner, and how reading resumes.', 'url' => $r['creating_schedules'].'#reading-stopped', 'category' => 'User Guide', 'keywords' => 'calendar sync reading stopped paused private calendar owner transfer no sync to google calendar to outlook calendar resume publish automatically'],
 
             // Schedule Styling
             ['page' => 'Schedule Styling', 'section' => 'Overview', 'description' => 'Introduction to schedule styling options.', 'url' => $r['schedule_styling'].'#overview', 'category' => 'User Guide', 'keywords' => 'design appearance theme'],
@@ -7842,6 +7853,8 @@ class MarketingController extends Controller
             ['page' => 'Managing Schedules', 'section' => 'Seating Plans', 'description' => 'Reusable seating plans on a Venue schedule: new plan, designer, duplicate, delete (Enterprise).', 'url' => $r['managing_schedules'].'#seating', 'category' => 'User Guide', 'keywords' => 'seating plans tab venue'],
             ['page' => 'Managing Schedules', 'section' => 'Filter Events', 'description' => 'Search and filter the admin calendar, filter chips, and Copy Link for a filtered public address.', 'url' => $r['managing_schedules'].'#schedule-filters', 'category' => 'User Guide', 'keywords' => 'filter events search chips copy link'],
             ['page' => 'Managing Schedules', 'section' => 'Curator Notices', 'description' => 'Duplicate venues and events in another timezone on a Curator schedule.', 'url' => $r['managing_schedules'].'#schedule-notices', 'category' => 'User Guide', 'keywords' => 'curator duplicate venues timezone notice'],
+            ['page' => 'Managing Schedules', 'section' => 'When someone leaves the team', 'description' => 'What happens to events, appointment hosts, feeds and calendar sync when a member leaves, is removed or becomes a viewer.', 'url' => $r['managing_schedules'].'#team-leaving', 'category' => 'User Guide', 'keywords' => 'team member leave remove viewer events owner appointment host feeds paused calendar sync'],
+            ['page' => 'Managing Schedules', 'section' => 'Other notices above the calendar', 'description' => 'The import band, calendar-sync notices and the network prompt on the Schedule tab.', 'url' => $r['managing_schedules'].'#schedule-other-notices', 'category' => 'User Guide', 'keywords' => 'notice import band calendar sync drafts network prompt schedule tab'],
 
             // Creating Events
             ['page' => 'Creating Events', 'section' => 'Manual Event Creation', 'description' => 'Create events manually with full control over details.', 'url' => $r['creating_events'].'#manual', 'category' => 'User Guide', 'keywords' => 'add new event create'],
@@ -7872,6 +7885,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Events', 'section' => 'Tabs of the Event Form', 'description' => 'The seven tabs of the event form, what each covers and when it appears.', 'url' => $r['creating_events'].'#tabs', 'category' => 'User Guide', 'keywords' => 'tabs event tickets participants agenda page content gallery sponsors listing calendar sync engagement'],
             ['page' => 'Creating Events', 'section' => 'Saving an Event', 'description' => 'What the save bar says, what saving removes, and what a refused save keeps.', 'url' => $r['creating_events'].'#saving', 'category' => 'User Guide', 'keywords' => 'save bar publish save draft unsaved changes cancel'],
             ['page' => 'Creating Events', 'section' => 'Importing an Agenda with AI', 'description' => 'Read an agenda from text or a photo into event parts from the Agenda tab\'s Import row.', 'url' => $r['creating_events'].'#agenda-import', 'category' => 'User Guide', 'keywords' => 'agenda import ai photo text parts'],
+            ['page' => 'Creating Events', 'section' => 'Default curator schedules', 'description' => 'List every new event on chosen Curator schedules automatically, clones included.', 'url' => $r['creating_events'].'#default-curators', 'category' => 'User Guide', 'keywords' => 'default curators also list on automatic curator clone duplicate'],
 
             // AI Import
             ['page' => 'AI Import', 'section' => 'The Import Page', 'description' => 'Import events from a link, pasted text or a flyer image.', 'url' => $r['ai_import'].'#ai-import', 'category' => 'User Guide', 'keywords' => 'ai artificial intelligence import parse bring existing events'],
@@ -7925,7 +7939,7 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'Tickets Elsewhere', 'description' => 'Link to external registration pages and display event pricing, coupon code and discount.', 'url' => $r['tickets'].'#external', 'category' => 'User Guide', 'keywords' => 'external registration url price coupon discount link'],
             ['page' => 'Selling Tickets', 'section' => 'Free Registration', 'description' => 'Enable free event registration with optional capacity limits.', 'url' => $r['tickets'].'#registration', 'category' => 'User Guide', 'keywords' => 'registration rsvp free sign up attend'],
             ['page' => 'Selling Tickets', 'section' => 'Sell Tickets', 'description' => 'Set up paid or multi-type ticketing for events.', 'url' => $r['tickets'].'#ticketing', 'category' => 'User Guide', 'keywords' => 'ticketing setup paid pro sell'],
-            ['page' => 'Selling Tickets', 'section' => 'Start with a free trial', 'description' => 'Save and start free trial: Pro starts with a 7-day trial, once per account, and a plan covers one schedule.', 'url' => $r['tickets'].'#selling-trial', 'category' => 'User Guide', 'keywords' => 'trial free trial sell paid tickets seven days 7 days plan pro upgrade checkout charged card once per account second schedule per schedule'],
+            ['page' => 'Selling Tickets', 'section' => 'Start with a free trial', 'description' => 'Save and start free trial: Pro starts with a free trial, once per account, and a plan covers one schedule.', 'url' => $r['tickets'].'#selling-trial', 'category' => 'User Guide', 'keywords' => 'trial free trial sell paid tickets plan pro upgrade checkout charged card once per account second schedule per schedule'],
             ['page' => 'Selling Tickets', 'section' => 'Ticket Types', 'description' => 'Configure different ticket type options.', 'url' => $r['tickets'].'#ticket-types', 'category' => 'User Guide', 'keywords' => 'general vip types tiers'],
             ['page' => 'Selling Tickets', 'section' => 'Buying Several Events at Once', 'description' => 'Let a visitor collect tickets to several events and pay for them in one checkout.', 'url' => $r['tickets'].'#cart', 'category' => 'User Guide', 'keywords' => 'cart basket multiple events one checkout add to cart order several'],
             ['page' => 'Selling Tickets', 'section' => 'Volume Discount', 'description' => 'Discount a ticket type once a buyer takes a minimum quantity, as a percentage or a fixed amount.', 'url' => $r['tickets'].'#volume-discount', 'category' => 'User Guide', 'keywords' => 'volume discount bulk group minimum quantity percentage fixed amount stacks promo code'],
@@ -7935,7 +7949,7 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'PayPal', 'description' => 'Connect PayPal to sell tickets.', 'url' => $r['tickets'].'#paypal', 'category' => 'User Guide', 'keywords' => 'paypal client id secret sandbox test mode developer dashboard apps and credentials orders capture currencies supported pending review echeck refund partial refund multi-event cart installments gift cards'],
             ['page' => 'Selling Tickets', 'section' => 'When a PayPal checkout is refused', 'description' => 'Why PayPal may not appear, and what a buyer sees when a checkout cannot start.', 'url' => $r['tickets'].'#paypal-refused', 'category' => 'User Guide', 'keywords' => 'paypal refused declined unsupported currency no longer available amount mismatch seats released reservation expired'],
             ['page' => 'Selling Tickets', 'section' => 'Razorpay', 'description' => 'Connect Razorpay to sell tickets in Indian rupees by UPI, card, netbanking or wallet.', 'url' => $r['tickets'].'#razorpay', 'category' => 'User Guide', 'keywords' => 'razorpay india inr indian rupees upi netbanking wallet card key id key secret rzp_live rzp_test test mode payment link refund partial refund multi-event cart installments gift cards provided by this installation'],
-            ['page' => 'Selling Tickets', 'section' => 'Razorpay webhook', 'description' => 'Add the Razorpay webhook so a buyer who pays and never comes back still gets a ticket, and an unfinished checkout gives its seats back.', 'url' => $r['tickets'].'#razorpay-webhook', 'category' => 'User Guide', 'keywords' => 'razorpay webhook secret payment_link.paid payment_link.expired upi app closed tab seats held expire unpaid tickets mark paid no webhook test mode live mode'],
+            ['page' => 'Selling Tickets', 'section' => 'Why the Razorpay webhook matters', 'description' => 'Add the Razorpay webhook so a buyer who pays and never comes back still gets a ticket, and an unfinished checkout gives its seats back.', 'url' => $r['tickets'].'#razorpay-webhook', 'category' => 'User Guide', 'keywords' => 'razorpay webhook secret payment_link.paid payment_link.expired upi app closed tab seats held expire unpaid tickets mark paid no webhook test mode live mode'],
             ['page' => 'Selling Tickets', 'section' => 'When a Razorpay checkout is refused', 'description' => 'Why Razorpay may not appear, and what a buyer sees when a checkout cannot start.', 'url' => $r['tickets'].'#razorpay-refused', 'category' => 'User Guide', 'keywords' => 'razorpay refused minimum one rupee inr currency no longer available try again amount mismatch seats released'],
             ['page' => 'Selling Tickets', 'section' => 'Payfast', 'description' => 'Connect Payfast to sell tickets in South African rand.', 'url' => $r['tickets'].'#payfast', 'category' => 'User Guide', 'keywords' => 'payfast south africa zar rand instant eft capitec pay merchant id merchant key passphrase sandbox test mode itn instant transaction notification notify url payfast refund provided by this installation'],
             ['page' => 'Selling Tickets', 'section' => 'Invoice Ninja Modes', 'description' => 'Invoice mode vs. payment link mode for Invoice Ninja.', 'url' => $r['tickets'].'#invoiceninja-modes', 'category' => 'User Guide', 'keywords' => 'invoice ninja mode payment link'],
@@ -7993,6 +8007,7 @@ class MarketingController extends Controller
             ['page' => 'Subscriptions & Passes', 'section' => 'Admissions Per Event', 'description' => 'Let one pass admit more than one person per event - for example the holder plus a guest - without using extra visits.', 'url' => $r['subscriptions'].'#admissions-per-event', 'category' => 'User Guide', 'keywords' => 'admissions per event admit guest bring a guest plus one party size scan twice couple family membership holder companion'],
             ['page' => 'Subscriptions & Passes', 'section' => 'Redeeming Passes', 'description' => 'Scan a pass at the door and read the result.', 'url' => $r['subscriptions'].'#redeeming', 'category' => 'User Guide', 'keywords' => 'redeem scan check-in door event selector visit already expired not covered'],
             ['page' => 'Subscriptions & Passes', 'section' => 'Tracking Subscriptions', 'description' => 'See who used a pass, how many visits, and at which events.', 'url' => $r['subscriptions'].'#monitoring', 'category' => 'User Guide', 'keywords' => 'track usage visits subscriptions tab subscribers report monitor'],
+            ['page' => 'Subscriptions & Passes', 'section' => 'Passes and Individual tickets', 'description' => 'An event with a pass type cannot use Individual tickets.', 'url' => $r['subscriptions'].'#pass-individual-tickets', 'category' => 'User Guide', 'keywords' => 'pass individual tickets disabled switch off'],
 
             // Gift Cards
             ['page' => 'Appointments', 'section' => 'Overview', 'description' => 'Let guests book time with you on a public page: appointment types, weekly hours, and a shareable booking link.', 'url' => $r['appointments'].'#overview', 'category' => 'User Guide', 'keywords' => 'appointments booking calendly book a time one on one slots meeting'],
@@ -8033,6 +8048,7 @@ class MarketingController extends Controller
             ['page' => 'Event Graphics', 'section' => 'AI Text Prompt', 'description' => 'Tell AI how to rewrite the caption (Enterprise).', 'url' => $r['event_graphics'].'#ai-prompt', 'category' => 'User Guide', 'keywords' => 'ai prompt transform text rewrite caption instruction'],
             ['page' => 'Event Graphics', 'section' => 'Email Scheduling', 'description' => 'Have the graphic and its caption emailed daily, weekly or monthly (Enterprise).', 'url' => $r['event_graphics'].'#email-scheduling', 'category' => 'User Guide', 'keywords' => 'email schedule scheduled automatic send it now last sent'],
             ['page' => 'Event Graphics', 'section' => 'Caption Options', 'description' => 'The switches that decide what the caption beside the graphic includes.', 'url' => $r['event_graphics'].'#text-options', 'category' => 'User Guide', 'keywords' => 'caption text options url link short https event id english every upcoming event'],
+            ['page' => 'Event Graphics', 'section' => 'Graphic shapes and sizes', 'description' => 'The shapes a graphic can take and where each is used.', 'url' => $r['event_graphics'].'#shape', 'category' => 'User Guide', 'keywords' => 'shape size square story portrait landscape instagram'],
 
             // Analytics
             ['page' => 'Analytics', 'section' => 'Overview', 'description' => 'Introduction to the analytics dashboard.', 'url' => $r['analytics'].'#overview', 'category' => 'User Guide', 'keywords' => 'analytics dashboard stats'],
@@ -8112,7 +8128,7 @@ class MarketingController extends Controller
             ['page' => 'Installation', 'section' => 'Set Up the Database', 'description' => 'Create MySQL database and user.', 'url' => $r['selfhost_installation'].'#database', 'category' => 'Selfhost', 'keywords' => 'database mysql create'],
             ['page' => 'Installation', 'section' => 'Download the Application', 'description' => 'Download and extract Event Schedule files.', 'url' => $r['selfhost_installation'].'#download', 'category' => 'Selfhost', 'keywords' => 'download extract files'],
             ['page' => 'Installation', 'section' => 'Set File Permissions', 'description' => 'Set proper directory permissions.', 'url' => $r['selfhost_installation'].'#permissions', 'category' => 'Selfhost', 'keywords' => 'permissions chmod directories'],
-            ['page' => 'Installation', 'section' => 'Configure Environment', 'description' => 'Set up the .env configuration file.', 'url' => $r['selfhost_installation'].'#environment', 'category' => 'Selfhost', 'keywords' => 'env environment configuration'],
+            ['page' => 'Installation', 'section' => 'Run the Setup Wizard', 'description' => 'Copy .env, hand it to the web-server user, and run the browser setup wizard.', 'url' => $r['selfhost_installation'].'#environment', 'category' => 'Selfhost', 'keywords' => 'env environment configuration'],
             ['page' => 'Installation', 'section' => 'User Accounts and Registration', 'description' => 'Selfhost is single user by default; enable ALLOW_REGISTRATION to let others sign up.', 'url' => $r['selfhost_installation'].'#user-accounts', 'category' => 'Selfhost', 'keywords' => 'registration sign up register accounts users ALLOW_REGISTRATION single user attendees multi user public registration'],
             ['page' => 'Installation', 'section' => 'Running Behind a Reverse Proxy', 'description' => 'Set TRUSTED_PROXIES when running behind Nginx, Apache, or Cloudflare.', 'url' => $r['selfhost_installation'].'#reverse-proxy', 'category' => 'Selfhost', 'keywords' => 'proxy reverse proxy nginx apache cloudflare hestiacp https forwarded proto redirect loop TRUSTED_PROXIES'],
             ['page' => 'Installation', 'section' => 'Set Up the Cron Job', 'description' => 'Configure scheduled tasks for the application.', 'url' => $r['selfhost_installation'].'#cron', 'category' => 'Selfhost', 'keywords' => 'cron scheduler task'],
@@ -8139,7 +8155,7 @@ class MarketingController extends Controller
             ['page' => 'Stripe Integration', 'section' => 'Razorpay', 'description' => 'Razorpay on a selfhosted install: one account for everyone via .env, or one per user.', 'url' => $r['selfhost_stripe'].'#razorpay', 'category' => 'Selfhost', 'keywords' => 'razorpay selfhost india inr indian rupees upi localhost no public host needed payment link'],
             ['page' => 'Stripe Integration', 'section' => 'Razorpay for the whole install', 'description' => 'Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET so every schedule can sell in Indian rupees without connecting an account.', 'url' => $r['selfhost_stripe'].'#razorpay', 'category' => 'Selfhost', 'keywords' => 'RAZORPAY_KEY_ID RAZORPAY_KEY_SECRET RAZORPAY_WEBHOOK_SECRET env platform wide install wide razorpay every schedule default account india'],
             ['page' => 'Stripe Integration', 'section' => 'Razorpay webhook', 'description' => 'Add the Razorpay webhook for an install-wide account, or late payments stay unpaid and unfinished checkouts keep their seats.', 'url' => $r['selfhost_stripe'].'#razorpay-webhook', 'category' => 'Selfhost', 'keywords' => 'razorpay webhook secret payment_link.paid payment_link.expired install-wide'],
-            ['page' => 'Stripe Integration', 'section' => 'Default payment method', 'description' => 'DEFAULT_PAYMENT_METHOD sets what new events start on instead of Cash.', 'url' => $r['selfhost_stripe'].'#payfast', 'category' => 'Selfhost', 'keywords' => 'DEFAULT_PAYMENT_METHOD default payment method new event cash payfast paypal razorpay stripe env'],
+            ['page' => 'Stripe Integration', 'section' => 'Default payment method', 'description' => 'DEFAULT_PAYMENT_METHOD sets what new events start on instead of Cash.', 'url' => $r['selfhost_stripe'].'#default-payment-method', 'category' => 'Selfhost', 'keywords' => 'DEFAULT_PAYMENT_METHOD default payment method new event cash payfast paypal razorpay stripe env'],
             ['page' => 'Stripe Integration', 'section' => 'Payfast ITN and proxies', 'description' => 'Why the unrecognised source address warning is harmless behind Cloudflare or Docker.', 'url' => $r['selfhost_stripe'].'#payfast-itn-log', 'category' => 'Selfhost', 'keywords' => 'payfast itn unrecognised source address trusted proxies cloudflare docker reverse proxy warning'],
             ['page' => 'Stripe Integration', 'section' => 'Refunds', 'description' => 'Refund a Stripe, PayPal or Razorpay sale from the Sales page, in full or in part; other methods only record it, and dashboard refunds are not reported back.', 'url' => $r['selfhost_stripe'].'#refunds', 'category' => 'Selfhost', 'keywords' => 'refund refunds partial refund full refund mark as refunded money back stripe dashboard paypal dashboard razorpay dashboard sales page installment plan'],
             ['page' => 'Stripe Integration', 'section' => 'Stripe Connect', 'description' => 'Let each customer connect their own Stripe account, and what the Stripe row in Settings shows.', 'url' => $r['selfhost_stripe'].'#stripe-connect', 'category' => 'Selfhost', 'keywords' => 'stripe connect onboarding connected setup not finished'],
@@ -8191,6 +8207,7 @@ class MarketingController extends Controller
             ['page' => 'Email Setup', 'section' => 'Troubleshooting', 'description' => 'Fix email delivery issues.', 'url' => $r['selfhost_email'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'troubleshoot fix delivery'],
             ['page' => 'Email Setup', 'section' => 'No Mail Transport', 'description' => 'What is skipped and what is only written to the log while MAIL_MAILER is log or array.', 'url' => $r['selfhost_email'].'#no-transport', 'category' => 'Selfhost', 'keywords' => 'mail_mailer log array skipped not sent'],
             ['page' => 'Email Setup', 'section' => 'Differences from the Hosted Service', 'description' => 'No per-schedule sender, no newsletter allowance, and no platform nudges or digests on a selfhosted install.', 'url' => $r['selfhost_email'].'#hosted-differences', 'category' => 'Selfhost', 'keywords' => 'hosted selfhost difference onboarding digest nudges'],
+            ['page' => 'Email Setup', 'section' => 'Packages and updates', 'description' => 'A package added with composer require is removed by the next update; use the provider\'s SMTP.', 'url' => $r['selfhost_email'].'#composer-packages', 'category' => 'Selfhost', 'keywords' => 'postmark resend composer vendor update package removed smtp'],
 
             // AI (Selfhost)
             ['page' => 'AI Setup', 'section' => 'Overview', 'description' => 'Enable AI features with Google Gemini and OpenAI.', 'url' => $r['selfhost_ai'].'#overview', 'category' => 'Selfhost', 'keywords' => 'ai gemini openai setup'],
@@ -8223,6 +8240,9 @@ class MarketingController extends Controller
             ['page' => 'Installation', 'section' => 'Custom dashboard links', 'description' => 'Add custom links to the admin sidebar via CUSTOM_LINK_* environment variables.', 'url' => $r['selfhost_installation'].'#custom-links', 'category' => 'Selfhost', 'keywords' => 'custom links sidebar dashboard navigation menu env environment'],
             ['page' => 'Installation', 'section' => 'Updating', 'description' => 'Update from the App Update page in Settings or the admin panel, or with php artisan app:update.', 'url' => $r['selfhost_installation'].'#updating', 'category' => 'Selfhost', 'keywords' => 'update upgrade app:update new version'],
             ['page' => 'Installation', 'section' => 'Cron URL', 'description' => 'Drive the scheduler over HTTP with APP_CRON_SECRET when the host has no crontab.', 'url' => $r['selfhost_installation'].'#cron-url', 'category' => 'Selfhost', 'keywords' => 'cron url translate_data app_cron_secret no crontab'],
+            ['page' => 'Installation', 'section' => 'Google Maps and YouTube keys', 'description' => 'BACKEND_GOOGLE_KEY and MAPS_API_KEY: venue coordinates, map images, the Google Map on event pages, YouTube search.', 'url' => $r['selfhost_installation'].'#google-keys', 'category' => 'Selfhost', 'keywords' => 'google maps geocoding youtube BACKEND_GOOGLE_KEY MAPS_API_KEY api key'],
+            ['page' => 'Installation', 'section' => 'PHP settings that ship with the app', 'description' => 'Upload size, request time and PHP2Shell stopgaps set by public/.user.ini.', 'url' => $r['selfhost_installation'].'#php-settings', 'category' => 'Selfhost', 'keywords' => 'upload_max_filesize max_execution_time user.ini php2shell php settings'],
+            ['page' => 'Installation', 'section' => 'Page Expired on sign up', 'description' => 'Sign Up returns 419 on plain HTTP because SESSION_SECURE_COOKIE is true.', 'url' => $r['selfhost_installation'].'#troubleshooting-page-expired', 'category' => 'Selfhost', 'keywords' => '419 page expired http session secure cookie SESSION_SECURE_COOKIE'],
             ['page' => 'SaaS Setup', 'section' => 'Custom dashboard links', 'description' => 'Add platform-wide custom links to the admin sidebar via CUSTOM_LINK_* environment variables.', 'url' => $r['saas_setup'].'#custom-links', 'category' => 'SaaS', 'keywords' => 'custom links sidebar dashboard navigation menu env environment'],
 
             // Admin Panel (Selfhost)
@@ -8267,6 +8287,7 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'Date range', 'description' => 'The period select on the admin pages and what it covers.', 'url' => $r['selfhost_admin'].'#date-range', 'category' => 'Selfhost', 'keywords' => 'date range period last 30 days'],
             ['page' => 'Admin Panel', 'section' => 'Federation', 'description' => 'eventschedule.com only: reviewing the installs that share events with the network.', 'url' => $r['selfhost_admin'].'#system-federation', 'category' => 'Selfhost', 'keywords' => 'federation moderation approve suspend'],
             ['page' => 'Admin Panel', 'section' => 'Support', 'description' => 'Hosted only: the support chat inbox.', 'url' => $r['selfhost_admin'].'#system-support', 'category' => 'Selfhost', 'keywords' => 'support chat conversations'],
+            ['page' => 'Admin Panel', 'section' => 'Boost partners', 'description' => 'The Boost partners card: partners who run boosts on their own Page and ad account.', 'url' => $r['selfhost_admin'].'#boost-partners', 'category' => 'Selfhost', 'keywords' => 'boost partners partner meta page ad account fee statements'],
 
             // Boost Setup (Selfhost)
             ['page' => 'Boost Setup', 'section' => 'Overview', 'description' => 'Set up Meta/Facebook boost for selfhosted instances.', 'url' => $r['selfhost_boost'].'#overview', 'category' => 'Selfhost', 'keywords' => 'boost meta facebook setup'],
@@ -8280,6 +8301,7 @@ class MarketingController extends Controller
             ['page' => 'Boost Setup', 'section' => 'Environment Variables', 'description' => 'Complete .env configuration for Boost.', 'url' => $r['selfhost_boost'].'#environment', 'category' => 'Selfhost', 'keywords' => 'env environment variables configuration'],
             ['page' => 'Boost Setup', 'section' => 'Scheduled Command', 'description' => 'Set up the Boost sync scheduler.', 'url' => $r['selfhost_boost'].'#scheduled-command', 'category' => 'Selfhost', 'keywords' => 'scheduler cron command sync'],
             ['page' => 'Boost Setup', 'section' => 'The Admin Boost Page', 'description' => 'What the admin panel\'s Boost page shows on a selfhosted install, and which cards are hosted only.', 'url' => $r['selfhost_boost'].'#admin-boost-page', 'category' => 'Selfhost', 'keywords' => 'admin boost page campaigns credit spending limit'],
+            ['page' => 'Boost Setup', 'section' => 'Boost partners (hosted only)', 'description' => 'The extra variables and how a partner connects and is confirmed.', 'url' => $r['selfhost_boost'].'#boost-partners', 'category' => 'Selfhost', 'keywords' => 'boost partners BOOST_PARTNERS_ENABLED META_BUSINESS_ID META_SYSTEM_USER_ID META_LOGIN_CONFIG_ID hosted'],
 
             // ===== SAAS =====
 
@@ -8293,11 +8315,11 @@ class MarketingController extends Controller
             ['page' => 'SaaS Setup', 'section' => 'DNS Setup', 'description' => 'Configure subdomain DNS for SaaS.', 'url' => $r['saas_setup'].'#dns', 'category' => 'SaaS', 'keywords' => 'dns subdomain wildcard'],
             ['page' => 'SaaS Setup', 'section' => 'Web Server', 'description' => 'Web server configuration for SaaS mode.', 'url' => $r['saas_setup'].'#webserver', 'category' => 'SaaS', 'keywords' => 'webserver nginx apache'],
             ['page' => 'SaaS Setup', 'section' => 'Stripe Integration', 'description' => 'Configure Stripe for SaaS subscriptions.', 'url' => $r['saas_setup'].'#stripe', 'category' => 'SaaS', 'keywords' => 'stripe payment subscription'],
-            ['page' => 'SaaS Setup', 'section' => 'Plan pricing', 'description' => 'Set your own Pro and Enterprise prices, from the admin panel or the STRIPE_PRICE_*_AMOUNT variables.', 'url' => $r['saas_setup'].'#stripe-variables', 'category' => 'SaaS', 'keywords' => 'plan pricing custom pricing price amount pro enterprise monthly yearly white label STRIPE_PRICE_MONTHLY_AMOUNT'],
+            ['page' => 'SaaS Setup', 'section' => 'Plan pricing', 'description' => 'Set the Pro and Enterprise amounts your platform shows; the Stripe Price decides the charge.', 'url' => $r['saas_setup'].'#stripe-variables', 'category' => 'SaaS', 'keywords' => 'plan pricing custom pricing price amount pro enterprise monthly yearly white label STRIPE_PRICE_MONTHLY_AMOUNT'],
             ['page' => 'SaaS Setup', 'section' => 'Plan currency', 'description' => 'Set PLATFORM_CURRENCY so your plan prices show in your own currency rather than dollars.', 'url' => $r['saas_setup'].'#stripe-variables', 'category' => 'SaaS', 'keywords' => 'PLATFORM_CURRENCY plan price currency symbol dollar euro pound rand white label branding'],
             ['page' => 'SaaS Setup', 'section' => 'Example', 'description' => 'Complete SaaS setup example.', 'url' => $r['saas_setup'].'#example', 'category' => 'SaaS', 'keywords' => 'example tutorial walkthrough'],
             ['page' => 'SaaS Setup', 'section' => 'Verification', 'description' => 'Verify your SaaS setup is working.', 'url' => $r['saas_setup'].'#verification', 'category' => 'SaaS', 'keywords' => 'verify test check'],
-            ['page' => 'SaaS Setup', 'section' => 'Demo Account', 'description' => 'The demo host and its sample data, created and reset hourly by the scheduler on a hosted install.', 'url' => $r['saas_setup'].'#demo', 'category' => 'SaaS', 'keywords' => 'demo test account sample'],
+            ['page' => 'SaaS Setup', 'section' => 'Demo Mode', 'description' => 'The demo host and its sample data, created and reset hourly by the scheduler on a hosted install.', 'url' => $r['saas_setup'].'#demo', 'category' => 'SaaS', 'keywords' => 'demo test account sample'],
             ['page' => 'SaaS Setup', 'section' => 'Troubleshooting', 'description' => 'Fix common SaaS setup issues.', 'url' => $r['saas_setup'].'#troubleshooting', 'category' => 'SaaS', 'keywords' => 'troubleshoot fix problem'],
             ['page' => 'SaaS Setup', 'section' => 'Related Documentation', 'description' => 'Links to related SaaS documentation.', 'url' => $r['saas_setup'].'#related', 'category' => 'SaaS', 'keywords' => ''],
             ['page' => 'SaaS Setup', 'section' => 'Security', 'description' => 'Security considerations for SaaS deployments.', 'url' => $r['saas_setup'].'#security', 'category' => 'SaaS', 'keywords' => 'security ssl https'],
@@ -8309,6 +8331,7 @@ class MarketingController extends Controller
             ['page' => 'SaaS Setup', 'section' => 'How Subscriptions Work', 'description' => 'From Upgrade on the Plan tab to the webhook that grants the plan.', 'url' => $r['saas_setup'].'#stripe-flow', 'category' => 'SaaS', 'keywords' => 'subscription flow upgrade plan tab'],
             ['page' => 'SaaS Setup', 'section' => 'HTTP cron endpoint', 'description' => 'Drive the scheduler by requesting a URL once a minute.', 'url' => $r['saas_setup'].'#http-cron', 'category' => 'SaaS', 'keywords' => 'http cron translate_data app_cron_secret'],
             ['page' => 'SaaS Setup', 'section' => 'Knowing that it stopped', 'description' => 'The Scheduler card on the Queue page, SCHEDULER_RAIL and SCHEDULER_EXPECTED_RAIL.', 'url' => $r['saas_setup'].'#scheduler-health', 'category' => 'SaaS', 'keywords' => 'scheduler stalled health rail'],
+            ['page' => 'SaaS Setup', 'section' => 'The minimum to go live', 'description' => 'The steps a platform needs before it opens.', 'url' => $r['saas_setup'].'#go-live-checklist', 'category' => 'SaaS', 'keywords' => 'go live checklist launch minimum steps'],
 
             // Custom Domains (SaaS)
             ['page' => 'Custom Domains', 'section' => 'Overview', 'description' => 'Allow users to use custom domains.', 'url' => $r['saas_custom_domains'].'#overview', 'category' => 'SaaS', 'keywords' => 'custom domain branded url'],
@@ -8319,6 +8342,7 @@ class MarketingController extends Controller
             ['page' => 'Custom Domains', 'section' => 'Admin Management', 'description' => 'Domain management dashboard for admins.', 'url' => $r['saas_custom_domains'].'#admin-management', 'category' => 'SaaS', 'keywords' => 'admin manage dashboard'],
             ['page' => 'Custom Domains', 'section' => 'Troubleshooting', 'description' => 'Fix custom domain issues.', 'url' => $r['saas_custom_domains'].'#troubleshooting', 'category' => 'SaaS', 'keywords' => 'troubleshoot fix dns ssl'],
             ['page' => 'Custom Domains', 'section' => 'What changes on a direct custom domain', 'description' => 'What works differently on a schedule served from its own domain.', 'url' => $r['saas_custom_domains'].'#direct-differences', 'category' => 'SaaS', 'keywords' => 'direct custom domain differences signed in'],
+            ['page' => 'Custom Domains', 'section' => 'Main address', 'description' => 'Keep the subdomain as a schedule\'s main address while the custom domain still serves every page.', 'url' => $r['saas_custom_domains'].'#main-address', 'category' => 'SaaS', 'keywords' => 'main address subdomain canonical custom domain direct sitemap emails links'],
 
             // Twilio (SaaS)
             ['page' => 'Twilio Integration', 'section' => 'Overview', 'description' => 'Phone verification and WhatsApp for SaaS.', 'url' => $r['saas_twilio'].'#overview', 'category' => 'SaaS', 'keywords' => 'twilio phone sms whatsapp'],
@@ -8327,6 +8351,7 @@ class MarketingController extends Controller
             ['page' => 'Twilio Integration', 'section' => 'Phone Verification', 'description' => 'Implement phone number verification.', 'url' => $r['saas_twilio'].'#phone-verification', 'category' => 'SaaS', 'keywords' => 'phone verify number sms'],
             ['page' => 'Twilio Integration', 'section' => 'WhatsApp Setup', 'description' => 'Register and configure WhatsApp messaging.', 'url' => $r['saas_twilio'].'#whatsapp', 'category' => 'SaaS', 'keywords' => 'whatsapp messaging sender'],
             ['page' => 'Twilio Integration', 'section' => 'Testing', 'description' => 'Test SMS and WhatsApp functionality.', 'url' => $r['saas_twilio'].'#testing', 'category' => 'SaaS', 'keywords' => 'test sms whatsapp verify'],
+            ['page' => 'Twilio Integration', 'section' => 'SMS Invitations', 'description' => 'Team invitations and claim links sent by text message.', 'url' => $r['saas_twilio'].'#sms-invitations', 'category' => 'SaaS', 'keywords' => 'sms invitations text message invite team claim link phone'],
             ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['saas_federation'].'#overview', 'category' => 'SaaS', 'keywords' => 'federation network listings discovery traffic backlink'],
             ['page' => 'Monetization', 'section' => 'Overview', 'description' => 'Show ads on free schedules and sell promotional placement to paid ones. The licence credit is not an upsell.', 'url' => $r['saas_monetization'].'#overview', 'category' => 'SaaS', 'keywords' => 'monetization ads adsense revenue advertising free tier earn upsell branding white label attribution credit'],
             ['page' => 'Monetization', 'section' => 'Consent and privacy', 'description' => 'Consent management, non-personalized ads and Global Privacy Control.', 'url' => $r['saas_monetization'].'#consent', 'category' => 'SaaS', 'keywords' => 'consent gdpr cmp privacy personalized ads sec-gpc eea uk cookie banner COOKIE_CONSENT_BANNER utm attribution cookies'],
@@ -8338,7 +8363,7 @@ class MarketingController extends Controller
             ['page' => 'Monetization', 'section' => 'Turning it on', 'description' => 'Switch on ads and the promotions network for the install.', 'url' => $r['saas_monetization'].'#enable', 'category' => 'SaaS', 'keywords' => 'enable ads_enabled monetization card'],
             ['page' => 'Monetization', 'section' => 'Turning it off', 'description' => 'What is safe to switch off, and what stops settling if ADS_ENABLED is removed with campaigns outstanding.', 'url' => $r['saas_monetization'].'#disable', 'category' => 'SaaS', 'keywords' => 'disable turn off ads_enabled'],
             ['page' => 'Monetization', 'section' => 'Environment variables', 'description' => 'Every monetization variable and its default.', 'url' => $r['saas_monetization'].'#environment', 'category' => 'SaaS', 'keywords' => 'env variables ads adsense promotions stay22'],
-            ['page' => 'Monetization', 'section' => 'Opting out', 'description' => 'How a paid schedule keeps other schedules\' promotions off its pages.', 'url' => $r['saas_monetization'].'#promotions-opt-out', 'category' => 'SaaS', 'keywords' => 'opt out promotions do not show'],
+            ['page' => 'Monetization', 'section' => 'Opting out', 'description' => 'How any schedule keeps promotions and AdSense off its pages.', 'url' => $r['saas_monetization'].'#promotions-opt-out', 'category' => 'SaaS', 'keywords' => 'opt out promotions do not show'],
             ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['saas_federation'].'#enable', 'category' => 'SaaS', 'keywords' => 'enable turn on register approve settings welcome email contact email list these schedules checklist status'],
             ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in for itself, in one click from the dashboard or its page; new schedules start undecided and share nothing.', 'url' => $r['saas_federation'].'#per-schedule', 'category' => 'SaaS', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto list on the network prompt dashboard one click dismiss listed badge'],
             ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['saas_federation'].'#listings', 'category' => 'SaaS', 'keywords' => 'listing card link backlink filter country language image needs an image preview'],
@@ -8413,6 +8438,7 @@ class MarketingController extends Controller
             ['page' => 'API Reference', 'section' => 'External ID', 'description' => 'Give an event the id your own system knows it by, and find it again on the next sync.', 'url' => $r['developer_api'].'#event-external-id', 'category' => 'Developer', 'keywords' => 'external_id external id sync duplicate 409 conflict lookup source id import'],
             ['page' => 'API Reference', 'section' => 'Create or Update in One Call', 'description' => 'Send "upsert": true with an external_id: the first call creates the event, later calls update it.', 'url' => $r['developer_api'].'#event-upsert', 'category' => 'Developer', 'keywords' => 'upsert create or update external_id sync idempotent duplicate post events'],
             ['page' => 'API Reference', 'section' => 'Daily Cap', 'description' => 'The daily limit on events created per schedule and per account.', 'url' => $r['developer_api'].'#event-daily-cap', 'category' => 'Developer', 'keywords' => 'daily cap limit event_create_limit 422'],
+            ['page' => 'API Reference', 'section' => 'Other ticket settings', 'description' => 'Ticket settings the API keeps but does not document: questions, seating band, passes.', 'url' => $r['developer_api'].'#event-ticket-settings', 'category' => 'Developer', 'keywords' => 'ticket custom fields seating band pass is_pass pass_ api'],
 
             // Webhooks (Developer)
             ['page' => 'Webhooks', 'section' => 'Overview', 'description' => 'Real-time notifications for events via HTTP callbacks.', 'url' => $r['developer_webhooks'].'#overview', 'category' => 'Developer', 'keywords' => 'webhooks callback http notifications retries retry timeout delivery log'],

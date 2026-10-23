@@ -349,8 +349,9 @@ class Event extends Model
     /**
      * Whether a standing calendar sync read this event in from its schedule's calendar, so the
      * entry there is the owner's own and this event the copy, not the other way round. Unpublishing
-     * or deleting the copy must not reach back and delete the original, and the original must not
-     * be created a second time when the copy is published.
+     * or cancelling the copy must not reach back and delete the original (deleting the copy does,
+     * only while the schedule pushes its changes to that calendar), and the original must not be
+     * created a second time when the copy is published.
      *
      * A one-time import from the same calendar names the same source but always carries a batch
      * (ImportRun), which a standing sync never writes. An event synced before import_source existed
@@ -895,9 +896,10 @@ class Event extends Model
     }
 
     /**
-     * Dispatch the given calendar-sync action ('create' / 'update' / 'delete') to Google Calendar and
-     * CalDAV for every role (and synced member) that has sync enabled. Shared by the delete hook and by
-     * the soft-cancel / restore flows (cancel removes the synced entry, restore re-creates it).
+     * Dispatch the given calendar-sync action ('create' / 'update' / 'delete' / 'cancel') to Google
+     * Calendar and CalDAV for every role (and synced member) that has sync enabled. Shared by the delete
+     * hook and by the soft-cancel / restore flows (cancel removes the entry this app pushed out, restore
+     * re-creates it; 'cancel' leaves the owner's own entry a sync read the event in from).
      */
     public function dispatchCalendarSync(string $action): void
     {
@@ -1722,6 +1724,25 @@ class Event extends Model
     }
 
     /**
+     * Why "Sync Now" will not copy this event to a calendar, or null when it may. A save pushes
+     * only a published event that is not cancelled (EventRepo::saveEvent()), and the button
+     * follows the same rule: a draft or internal event is not for guests, and cancelling took it
+     * off the calendar until it is restored.
+     */
+    public function calendarSyncRefusal(): ?string
+    {
+        if ($this->is_draft || $this->is_internal) {
+            return __('messages.calendar_not_synced_draft');
+        }
+
+        if ($this->is_cancelled) {
+            return __('messages.calendar_not_synced_cancelled');
+        }
+
+        return null;
+    }
+
+    /**
      * Resolve the event's four-state visibility into a single label.
      * Mirrors the Vue getter on the event form. Internal is checked before draft
      * (internal implies draft), and draft before private, so a legacy row that has
@@ -1980,6 +2001,79 @@ class Event extends Model
             $roles->pluck('id')->all(),
             $roles->where('type', '!=', 'curator')->pluck('id')->all(),
         );
+    }
+
+    /**
+     * Events User::canEditEvent() answers yes for, as one query: what the API's List Events
+     * lists, so that it lists nothing Show Event refuses.
+     *
+     * Not managedBy(), which is the money rule and differs from canEditEvent() twice: its "I
+     * made it" arm outlives a place on the team, and it leaves out a venue or talent that has
+     * not answered yet. The arms here are canEditEvent()'s:
+     *  - I made it, while I still run the event's own schedule (or it has none);
+     *  - I run (owner or admin, plan permitting: manageableRoles()) the event's own schedule,
+     *    or a venue or talent schedule it is on that did not turn it down. A curator that only
+     *    lists the event does not count. Listing an event is not running it.
+     * The event's own schedule is creator_role_id, or for an event from before that column the
+     * schedule it was first put on (User::owningScheduleId()).
+     */
+    public function scopeEditableBy(Builder $query, User $user): Builder
+    {
+        $roles = $user->manageableRoles();
+        $roleIds = $roles->pluck('id')->all();
+        $nonCuratorIds = $roles->where('type', '!=', 'curator')->pluck('id')->all();
+        $owning = '(coalesce(events.creator_role_id, (select first_link.role_id from event_role as first_link where first_link.event_id = events.id order by first_link.id limit 1)))';
+
+        // Narrowed first, through indexes, to the events any arm could reach: mine by
+        // events.user_id, my schedules' own by creator_role_id, the ones a venue or talent of
+        // mine has not turned down by its pivot rows, and the legacy ones with no
+        // creator_role_id that are on a schedule of mine. The exact arms below then run on those
+        // rows alone. Without this the arms sit under an OR at the top of the WHERE, which MySQL
+        // cannot make a semi-join, and every page read the whole events table. A derived table
+        // inside IN, not IN (... UNION ...): only the first is materialised as a semi-join
+        // (ScheduleActivity::ownedEventIds() for the same reason).
+        $candidates = DB::table('events')->where('user_id', $user->id)->select('id as event_id');
+
+        if ($roleIds) {
+            $candidates->unionAll(DB::table('events')->whereIn('creator_role_id', $roleIds)->select('id as event_id'));
+            $candidates->unionAll(DB::table('event_role')
+                ->join('events as legacy', 'legacy.id', '=', 'event_role.event_id')
+                ->whereIn('event_role.role_id', $roleIds)
+                ->whereNull('legacy.creator_role_id')
+                ->select('event_role.event_id'));
+        }
+
+        if ($nonCuratorIds) {
+            $candidates->unionAll(DB::table('event_role')
+                ->whereIn('role_id', $nonCuratorIds)
+                ->where(fn ($p) => $p->whereNull('is_accepted')->orWhere('is_accepted', true))
+                ->select('event_id'));
+        }
+
+        $query->whereIn('events.id', DB::query()->fromSub($candidates, 'editable')->select('editable.event_id'));
+
+        return $query->where(function ($q) use ($user, $roleIds, $nonCuratorIds, $owning) {
+            $q->where(fn ($made) => $made->where('events.user_id', $user->id)
+                ->where(fn ($o) => $o->whereRaw($owning.' is null')
+                    ->when($roleIds, fn ($r) => $r->orWhereIn(DB::raw($owning), $roleIds))));
+
+            if (! $roleIds) {
+                return;
+            }
+
+            $q->orWhereExists(fn ($sub) => $sub->selectRaw('1')
+                ->from('event_role as link')
+                ->whereColumn('link.event_id', 'events.id')
+                ->whereIn('link.role_id', $roleIds)
+                ->where(function ($w) use ($nonCuratorIds, $owning) {
+                    $w->whereRaw('link.role_id = '.$owning);
+
+                    if ($nonCuratorIds) {
+                        $w->orWhere(fn ($a) => $a->whereIn('link.role_id', $nonCuratorIds)
+                            ->where(fn ($p) => $p->whereNull('link.is_accepted')->orWhere('link.is_accepted', true)));
+                    }
+                }));
+        });
     }
 
     /**

@@ -64,7 +64,11 @@
                     </tr>
                     <tr>
                         <td><strong>Edit Schedule</strong> &rarr; <strong>Integrations</strong> &rarr; <strong>Google Calendar</strong> row</td>
-                        <td>The schedule's owner picks the calendar, the sync direction and what a deletion in Google does here, and can run <strong>Resync to Google Calendar</strong>. Other team members get <strong>Sync to My Calendar</strong> in the same row</td>
+                        <td>The schedule's owner picks the calendar, the sync direction, whether new events from it are published automatically and what a deletion in Google does here, and can run <strong>Resync to Google Calendar</strong>. Other team members get <strong>Sync to My Calendar</strong> in the same row</td>
+                    </tr>
+                    <tr>
+                        <td>The schedule's <strong>Schedule</strong> tab &rarr; <strong>Review</strong></td>
+                        <td>Events read in from the calendar wait here as drafts. The owner and the schedule's admins publish them or keep them hidden. See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a></td>
                     </tr>
                     <tr>
                         <td>Event form &rarr; <strong>Listing</strong> &rarr; <strong>Calendar sync</strong></td>
@@ -77,6 +81,10 @@
                     <tr>
                         <td><strong>Actions</strong> &rarr; <strong>Import Events</strong> &rarr; <strong>Google Calendar</strong></td>
                         <td>The owner's one-time, read-only import</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Admin</strong> &rarr; <strong>Manage</strong> &rarr; <strong>Private calendars</strong></td>
+                        <td>The install's administrators. Lists schedules whose synced events show meeting details or an email thread, and can hide those events or pause the sync. See <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-private-calendars" class="doc-link">Private calendars</a></td>
                     </tr>
                 </tbody>
             </table>
@@ -153,7 +161,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Google sign-in comes with it</div>
-            <p>The same Client ID and Client Secret power signing in with Google, and it is not a separate switch: once <code class="doc-inline-code">GOOGLE_CLIENT_ID</code> is set, the log in page shows <strong>Log in with Google</strong>, the sign-up page shows <strong>Continue with Google</strong> where registration is open, and <strong>Google Settings</strong> offers <strong>Connect Google Account</strong>. Without the three redirect URIs above, Google refuses those buttons with a redirect URI mismatch. Signing in with Google and connecting Google Calendar stay separate actions, and a user can do either one without the other.</p>
+            <p>The same Client ID and Client Secret power signing in with Google, and it is not a separate switch: once <code class="doc-inline-code">GOOGLE_CLIENT_ID</code> is set, the log in page shows <strong>Log in with Google</strong>, and the sign-up page shows <strong>Continue with Google</strong> where registration is open. <strong>Google Settings</strong> shows its <strong>Connect Google Account</strong> and <strong>Connect Google Calendar</strong> buttons whether or not the variables are set, so on an install without them those buttons fail. Without the three redirect URIs above, Google refuses those buttons with a redirect URI mismatch. Signing in with Google and connecting Google Calendar stay separate actions, and a user can do either one without the other.</p>
         </div>
 
         <h3 id="setup-env" class="doc-subheading">4. Environment Configuration</h3>
@@ -246,7 +254,7 @@
                     </tr>
                     <tr>
                         <td>Inbound</td>
-                        <td>Google change notifications post to the webhook endpoint, and Event Schedule reads the changes with an incremental sync</td>
+                        <td>Google change notifications post to the webhook endpoint, and Event Schedule reads the changes with an incremental sync. New entries arrive as drafts unless the owner publishes them automatically</td>
                     </tr>
                     <tr>
                         <td>Polling fallback</td>
@@ -261,7 +269,7 @@
         </div>
 
         <h3 id="sync-direction" class="doc-subheading">Sync Direction</h3>
-        <p>Each schedule picks one of four options under <strong>Sync Direction</strong>. Saving the schedule is what applies the choice and sets up the change channel. Only the schedule's owner sees the controls, and only while their own Google account is connected.</p>
+        <p>Each schedule picks one of four options under <strong>Sync Direction</strong>. Saving the schedule is what applies the choice and sets up the change channel. Only the schedule's owner sees the controls, and only while their own Google account is connected. To start reading from Google the owner has to choose a calendar: the account's main calendar is never read by default, and a save that starts reading without one is refused with "Choose the calendar to read events from."</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -279,18 +287,18 @@
                     </tr>
                     <tr>
                         <td>From Google Calendar</td>
-                        <td>Events from Google Calendar are imported into Event Schedule</td>
+                        <td>Events from Google Calendar come in to Event Schedule, as drafts unless <strong>Publish new events automatically</strong> is on</td>
                         <td>Created, so edits arrive quickly</td>
                     </tr>
                     <tr>
                         <td>Bidirectional Sync</td>
-                        <td>Both of the above. New events and edits travel in both directions. Deleting an event here removes its Google copy; deleting one in Google follows <a href="#delete-sync" class="doc-link">the deletion setting</a></td>
+                        <td>Both of the above. New events and edits travel in both directions. Deleting an event here removes its Google copy (cancelling one that came in from Google leaves the owner's entry, see <a href="#automatic-sync" class="doc-link">Automatic Sync</a>); deleting one in Google follows <a href="#delete-sync" class="doc-link">the deletion setting</a></td>
                         <td>Created</td>
                     </tr>
                     <tr>
                         <td>No Sync</td>
                         <td>Google Calendar synchronization is off for the schedule. Nothing is pushed, and inbound notifications are ignored. Events already on the calendar are left alone</td>
-                        <td>Any existing channel stays registered but is no longer acted on</td>
+                        <td>Removed when you save, if the schedule was reading from Google before</td>
                     </tr>
                 </tbody>
             </table>
@@ -314,11 +322,12 @@
         </ul>
 
         <h3 id="inbound-events" class="doc-subheading">Events That Arrive From Google</h3>
+        <p>What the owner sees is described once, in the schedule guide: new entries arrive as drafts unless <a href="{{ route('marketing.docs.creating_schedules') }}#publish-on-arrival" class="doc-link">Publish new events automatically</a> is on, they wait under <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a>, and some entries are never read in at all (<a href="{{ route('marketing.docs.creating_schedules') }}#calendar-privacy" class="doc-link">What stays off your page</a>). In Google's terms, an entry is skipped when its visibility is private or confidential, when the calendar's owner declined it, or when it is not an ordinary event (out of office, focus time, working location). An entry that shows meeting details or an email thread is held as a draft even with automatic publishing on.</p>
         <p>Inbound sync expands Google's recurring events first, so each occurrence arrives as its own event. Events brought in this way:</p>
         <ul class="doc-list">
-            <li>Arrive already approved, and use the schedule's slug pattern and default category</li>
+            <li>Are added to the schedule as its own events, and use the schedule's slug pattern and default category</li>
             <li>Take their name, description, start time and duration from the Google entry. The description is converted from HTML to Markdown</li>
-            <li>Convert the Google location into a venue, reusing one of your existing venues when the name or address matches and creating one when nothing matches. An event that already has a venue keeps it</li>
+            <li>Convert the Google location into a venue, reusing one of your existing venues when the name or address matches and creating one when nothing matches. An event that already has a venue keeps it. A meeting link, a dial-in number or a provider's name ("Microsoft Teams Meeting") is never made into a venue</li>
             <li>Are matched to an existing event by name and start time when there is no stored mapping yet, so an event you pushed out does not come back as a duplicate</li>
             <li>Never overwrite an appointment booking. An event created by a booking is owned by Event Schedule: inbound sync does not rewrite its name, description or time, so moving the Google copy will not move a customer's booking</li>
         </ul>
@@ -330,65 +339,17 @@
             <li>The daily <code class="doc-inline-code">google:refresh-webhooks</code> command replaces channels that are within three days of expiring</li>
             <li>Inbound sync is incremental: Event Schedule stores Google's sync cursor, so each run fetches only what changed. If Google rejects the stored cursor, which happens after a long gap or a calendar switch, one full sync runs to rebuild it</li>
             <li>The first full sync covers a window from 30 days ago to 365 days ahead</li>
+            <li>Each schedule that reads from Google also gets one more full read of that window, so entries read in before the private-entry rules existed are judged by them too. It only re-judges: it takes an entry off the page or puts back one it took off, and never rewrites what the owner edited here. Only the scheduled <code class="doc-inline-code">google:sync</code> runs it (a webhook or <strong>Sync Events</strong> never does), at most ten schedules per run, and a read too big for one run carries on in the next</li>
             <li>Inbound work is serialized per schedule, so the webhook and the poll cannot import the same event twice</li>
         </ul>
 
         <h3 id="delete-sync" class="doc-subheading">When an Event Is Deleted in the Connected Calendar</h3>
-        <p>Schedules that sync inbound also choose <strong>When an event is deleted in the connected calendar</strong>, shown right under the sync direction once the direction is From Google Calendar or Bidirectional Sync. It is one setting for the schedule, shared with the Outlook Calendar integration: while your Google Calendar is connected it is shown in this row and not in the Outlook one.</p>
-        <div class="doc-table-wrap">
-            <table class="doc-table">
-                <thead>
-                    <tr>
-                        <th>Setting</th>
-                        <th>What happens in Event Schedule</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Keep it here</td>
-                        <td>Nothing. The event stays exactly as it is. This is the default</td>
-                    </tr>
-                    <tr>
-                        <td>Mark as cancelled</td>
-                        <td>The event is marked cancelled rather than removed, so the record and its history survive. This is reversible, and is the right choice when tickets have been sold</td>
-                    </tr>
-                    <tr>
-                        <td>Delete it here</td>
-                        <td>The event is deleted, which cannot be undone. Events with ticket sales or ad boost spend are marked cancelled instead, so their records are never destroyed</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <p>Only a real deletion in Google Calendar triggers the policy, and only through the incremental sync, so the schedule needs at least one completed inbound sync first. Marking an event cancelled this way does not notify anyone: the cancellation notice that <strong>Cancel event</strong> in the event editor can send to ticket buyers and to the event's interest list only goes out from there.</p>
-        <p>An event that belongs to more than one schedule is only detached from this schedule, never cancelled or deleted outright, unless this schedule is the one that owns it. The other schedules keep the event as it is.</p>
+        <p>Schedules that read from Google also choose <strong>When an event is deleted in the connected calendar</strong>: Keep it here (the default), Mark as cancelled, or Delete it here. The three choices, and what is never deleted, are described in <a href="{{ route('marketing.docs.creating_schedules') }}#delete-sync" class="doc-link">the schedule guide</a>. It is one setting shared with Outlook, shown in the Google row while the owner's Google Calendar is connected and the direction reads from Google.</p>
+        <p>Two things an operator should know. Only a real deletion in Google triggers it, and only through the incremental sync, so the schedule needs one completed inbound sync first. And marking an event cancelled this way notifies nobody: the notice to ticket buyers goes out only from <strong>Cancel event</strong> in the event editor.</p>
 
         <h3 id="calendar-sync-tab" class="doc-subheading">Calendar Sync on an Event</h3>
-        <p>Once a schedule has a calendar selected and a direction that includes To Google Calendar, the <strong>Listing</strong> tab of a saved event ends with <strong>Calendar sync</strong>, which has a <strong>Google Calendar</strong> line. It shows the state of this event on the calendar of the schedule you are editing it under:</p>
-        <div class="doc-table-wrap">
-            <table class="doc-table">
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>What it means, and what the line offers</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Synced</td>
-                        <td>The event has a copy on the calendar, and Event Schedule remembers which calendar it lives on. <strong>Remove</strong> takes the copy off the calendar, after a confirmation</td>
-                    </tr>
-                    <tr>
-                        <td>Not synced</td>
-                        <td>This event has no copy on the calendar yet. The line under it says why: "It is copied the next time you save." for a published event, and "Only an event guests can see is copied to the calendar." for a Draft or Internal one. <strong>Sync Now</strong> creates the copy at once</td>
-                    </tr>
-                    <tr>
-                        <td>Not shown</td>
-                        <td>The event has not been saved yet, the schedule has no calendar selected, or its direction does not include To Google Calendar</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <p>The status is the schedule owner's copy, while <strong>Sync Now</strong> and <strong>Remove</strong> act with the Google account of whoever is signed in, so they are the owner's buttons to use. If a request fails, the reason is shown in the row. The same tab carries an <strong>Outlook Calendar</strong> row when the schedule pushes to Outlook too.</p>
+        <p>Once a schedule has a calendar selected and a direction that includes To Google Calendar, the <strong>Listing</strong> tab of a saved event ends with <strong>Calendar sync</strong>. Its <strong>Synced</strong> and <strong>Not synced</strong> states, <strong>Sync Now</strong> and <strong>Remove</strong> are described in <a href="{{ route('marketing.docs.creating_events') }}#google-calendar" class="doc-link">the event guide</a>. <strong>Sync Now</strong> is not offered, and the server refuses it, for a Draft, Internal or cancelled event.</p>
+        <p>For an operator, one detail matters: the status is the schedule owner's copy, while <strong>Sync Now</strong> and <strong>Remove</strong> act with the Google account of whoever is signed in, so they are the owner's buttons to use.</p>
 
         <h3 id="member-sync" class="doc-subheading">Personal Calendar Sync for Members</h3>
         <p>A team member who is not the schedule owner sees a <strong>Sync to My Calendar</strong> block in the schedule's <strong>Google Calendar</strong> row. Choosing one of their own calendars mirrors the schedule's events into it, in addition to whatever the owner has configured, and the member gets the same create, update and delete operations even when the owner has left the schedule on No Sync. Turning it back off removes the copies the member received.</p>
@@ -441,17 +402,18 @@
                 <h4 class="doc-step-title">Choose a Calendar and Sync Direction</h4>
                 <ol class="doc-list doc-list-numbered">
                     <li>Open the schedule, click <strong>Edit Schedule</strong>, choose the <strong>Integrations</strong> tab and open the <strong>Google Calendar</strong> row</li>
-                    <li>Pick the calendar to sync with under <strong>Select Google Calendar</strong></li>
+                    <li>Pick the calendar to sync with under <strong>Select Google Calendar</strong>. A calendar made after the page opened appears after <strong>Refresh list</strong>. Choosing the account's main calendar shows a warning, because a main calendar usually holds meetings and appointments: make a calendar just for public events in Google Calendar and choose that one</li>
                     <li>Choose a <strong>Sync Direction</strong>: To Google Calendar, From Google Calendar, Bidirectional Sync or No Sync</li>
-                    <li>With From Google Calendar or Bidirectional Sync selected, choose <strong>When an event is deleted in the connected calendar</strong>: Keep it here, Mark as cancelled, or Delete it here. Keep it here is the default</li>
+                    <li>With From Google Calendar or Bidirectional Sync selected, decide on <strong>Publish new events automatically</strong>. Off (the default), new events wait as drafts for you to review; on, they go onto the public page as they arrive, with a warning that says so</li>
+                    <li>With the same two directions, choose <strong>When an event is deleted in the connected calendar</strong>: Keep it here, Mark as cancelled, or Delete it here. Keep it here is the default</li>
                     <li>Click <strong>Save</strong></li>
                 </ol>
-                <p>Saving is what applies the selection and sets up the change channel. It does not push the events you already have: use step 3, 4 or 5 for those. Only the schedule's owner sees these controls. An owner who has not connected yet sees a <strong>Connect Google Calendar</strong> button in the row instead, which opens Settings.</p>
+                <p>Saving is what applies the selection and sets up the change channel. When it starts reading from Google, the Schedule tab says that the calendar's events will arrive within 15 minutes. It does not push the events you already have: use step 3, 4 or 5 for those. Only the schedule's owner sees these controls. An owner who has not connected yet sees a <strong>Connect Google Calendar</strong> button in the row instead, which goes straight to Google and brings them back to this row.</p>
             </li>
 
             <li class="doc-step">
                 <h4 class="doc-step-title">Sync a Single Event</h4>
-                <p>Open the event's form and choose the <strong>Listing</strong> tab; <strong>Calendar sync</strong> is at its end. On the <strong>Google Calendar</strong> line, click <strong>Sync Now</strong>, or <strong>Remove</strong> to take the copy back off the calendar. It appears once the schedule has a calendar selected and pushes to Google.</p>
+                <p>Open the event's form and choose the <strong>Listing</strong> tab; <strong>Calendar sync</strong> is at its end. On the <strong>Google Calendar</strong> line, click <strong>Sync Now</strong>, or <strong>Remove</strong> to take the copy back off the calendar. It appears once the schedule has a calendar selected and pushes to Google. <strong>Sync Now</strong> is for an event guests can see: publish a Draft or Internal event first.</p>
             </li>
 
             <li class="doc-step">
@@ -491,13 +453,8 @@
         </ol>
 
         <h3 id="automatic-sync" class="doc-subheading">Automatic Sync</h3>
-        <p>Once a schedule pushes to Google, its events are synced automatically when they are:</p>
-        <ul class="doc-list">
-            <li>Published, whether that is a new event or a draft you just published</li>
-            <li>Edited, which updates the existing Google entry in place</li>
-            <li>Deleted, cancelled or turned back into a draft, which removes the copy from the calendar. Restoring a cancelled event puts it back</li>
-        </ul>
-        <p>Drafts are never pushed, so an event only reaches the calendar once it is published. Members with personal calendar sync receive the same create, update and delete operations even when the owner has not turned on sync for the schedule.</p>
+        <p>Once a schedule pushes to Google, publishing, editing, cancelling and deleting an event change its Google copy with no extra step, and Draft and Internal events are never pushed. The event guide's <a href="{{ route('marketing.docs.creating_events') }}#google-calendar" class="doc-link">Calendar Sync</a> section says what is copied when. Members with personal calendar sync receive the same create, update and delete operations even when the owner has not turned on sync for the schedule.</p>
+        <p>An event the sync read in from Google is a copy of the owner's own entry, and the entry belongs to the owner's calendar, so it is treated differently: publishing it does not create a second entry in Google, and hiding it as a draft or cancelling it never deletes the owner's original. Deleting it deletes the original only when it is published and the schedule's direction sends events to Google (Bidirectional Sync, or To Google Calendar); with From Google Calendar the original stays. A team member's own copy, from <strong>Sync to My Calendar</strong>, is removed as usual.</p>
 
         <h3 id="developers" class="doc-subheading">For Developers: Sync Helpers on the Event Model</h3>
         <p>Outbound sync and status checks go through the <code class="doc-inline-code">Event</code> model:</p>
@@ -594,7 +551,7 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">POST /google-calendar/sync-event/{subdomain}/{eventId}</code></td>
-                        <td>Sync one event, with the caller's own Google connection</td>
+                        <td>Sync one event, with the caller's own Google connection. Refused for a Draft, Internal or cancelled event</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">DELETE /google-calendar/unsync-event/{subdomain}/{eventId}</code></td>
@@ -683,9 +640,27 @@
 
             <x-doc-faq question="Sync stopped, and the schedule is back on No Sync">
                 <ul class="doc-list">
-                    <li>Access was removed in the Google account, or the grant lapsed. When Google reports that on the next token refresh, Event Schedule forgets the connection by itself: the tokens, the sync direction, change channel and sync cursor of every schedule that user owns, their event mappings and their calendar selections</li>
+                    <li>Access was removed in the Google account, or the grant lapsed. When Google reports that on the next token refresh, Event Schedule forgets the connection by itself: the tokens, the sync direction, change channel and sync cursor of every schedule that user owns, their event mappings, their calendar selections and their <strong>Publish new events automatically</strong> choices</li>
                     <li>Events here, and copies already on the Google calendar, are not touched</li>
                     <li>Connect again, then choose the calendar and direction again and save. Copies pushed before are no longer linked to their events, so a push after reconnecting can create them a second time</li>
+                    <li>If only the reading stopped, see the next question</li>
+                </ul>
+            </x-doc-faq>
+
+            <x-doc-faq question="Reading stopped, and Bidirectional Sync became To Google Calendar">
+                <ul class="doc-list">
+                    <li>Either an administrator paused the sync on <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-private-calendars" class="doc-link">Private calendars</a>, or the schedule changed owner. Either way reading stops: From Google Calendar becomes No Sync, Bidirectional Sync becomes To Google Calendar, and pushing out carries on</li>
+                    <li>The Google Calendar row says which it was, and automatic publishing is off again</li>
+                    <li>The owner starts again by choosing a calendar that holds only public events and a direction, and saving. An administrator can also undo a pause from the same admin page, unless the owner has changed the direction since</li>
+                </ul>
+            </x-doc-faq>
+
+            <x-doc-faq question="Events from Google are not on the schedule's page">
+                <ul class="doc-list">
+                    <li>New entries arrive as drafts unless <strong>Publish new events automatically</strong> is on. They wait on the schedule's <strong>Schedule</strong> tab under <strong>Review</strong>; see <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a></li>
+                    <li>Entries Google marks private or confidential, invitations the owner declined, and out-of-office or working-location blocks are not read in at all. An event already on the page is taken off it when Google starts saying so</li>
+                    <li>An entry with meeting details or an email thread stays a draft even with automatic publishing on, and is published one at a time</li>
+                    <li>The schedule's Google Calendar row shows when the calendar was last read, how many events were added and how many were left out</li>
                 </ul>
             </x-doc-faq>
 
@@ -693,7 +668,7 @@
                 <ul class="doc-list">
                     <li>The schedule's sync direction has to be To Google Calendar or Bidirectional Sync, and the schedule has to be saved after the change</li>
                     <li>Events that already existed when you turned sync on are not pushed in bulk. Use <strong>Sync Events</strong> from the schedule's <strong>Actions</strong> menu, <strong>Sync Now</strong> under <strong>Calendar sync</strong> on the event's <strong>Listing</strong> tab, or <strong>Resync to Google Calendar</strong></li>
-                    <li>Draft and Internal events are never pushed. Publish the event first</li>
+                    <li>Draft, Internal and cancelled events are never pushed, and <strong>Sync Now</strong> is not offered for them. Publish the event first</li>
                     <li>A read-only connection pushes nothing. See <a href="#read-only" class="doc-link">read-only connections</a></li>
                     <li>Confirm the Google Calendar API is enabled on the project and that the account granted the calendar scopes</li>
                     <li>Check the logs for the failing call</li>
@@ -789,7 +764,7 @@
                     </tr>
                     <tr>
                         <td>Owner-only controls</td>
-                        <td>A schedule's calendar, its sync direction, its deletion setting, <strong>Sync Events</strong>, the full resync and the one-time import belong to the schedule's owner, because the standing sync runs on the owner's Google account. A team member's own calendar goes through <strong>Sync to My Calendar</strong></td>
+                        <td>A schedule's calendar, its sync direction, <strong>Publish new events automatically</strong>, its deletion setting, <strong>Sync Events</strong>, the full resync and the one-time import belong to the schedule's owner, because the standing sync runs on the owner's Google account. A team member's own calendar goes through <strong>Sync to My Calendar</strong></td>
                     </tr>
                     <tr>
                         <td>Token refresh</td>
@@ -797,7 +772,7 @@
                     </tr>
                     <tr>
                         <td>Clean disconnect</td>
-                        <td>Disconnecting removes the change channels, revokes the grant at Google and turns sync off for the schedules the user owns, clears their sync cursors, and deletes the stored tokens, the user's event mappings and their calendar selection on every schedule they belong to. The same clean-up runs by itself when Google reports the grant withdrawn. It does not delete anything already on the Google calendar</td>
+                        <td>Disconnecting removes the change channels, revokes the grant at Google and turns sync and automatic publishing off for the schedules the user owns, clears their sync cursors, and deletes the stored tokens, the user's event mappings and their calendar selection on every schedule they belong to. The same clean-up runs by itself when Google reports the grant withdrawn. It does not delete anything already on the Google calendar</td>
                     </tr>
                     <tr>
                         <td>Audit trail</td>

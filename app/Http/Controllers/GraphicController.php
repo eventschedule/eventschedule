@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Repos\EventRepo;
 use App\Services\EventGraphicGenerator;
 use App\Services\GraphicEmailService;
 use App\Services\UsageTrackingService;
@@ -11,6 +12,7 @@ use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use App\Utils\ListWording;
 use App\Utils\OpenAIUtils;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -407,35 +409,19 @@ class GraphicController extends Controller
         $maxPerSchedule = self::resolveMaxPerSchedule($request->get('max_per_schedule'));
         $poolLimit = self::resolveGraphicPoolLimit($eventLimit, $maxPerSchedule);
 
-        // Base query builder for future/ongoing events belonging to this schedule
-        $baseQuery = function () use ($role, $request) {
-            return Event::with(['roles', 'tickets', 'venue', 'creatorRole'])
-                ->whereHas('roles', function ($query) use ($role) {
-                    $query->where('role_id', $role->id)->where('is_accepted', true);
-                })
-                ->upcomingOrOngoing()
-                ->where('is_private', false)
-                ->where('is_draft', false)
-                ->where('is_cancelled', false)
-                ->whereNull('event_password')
-                ->when($request->boolean('exclude_recurring', false), function ($query) {
-                    $query->whereNull('days_of_week');
-                });
-        };
-
-        // Build flyer-only query (for image generation)
-        $flyerQuery = $baseQuery()
-            ->whereNotNull('flyer_image_url')
-            ->where('flyer_image_url', '!=', '');
+        // Upcoming events of this schedule, each series under its next occurrence
+        // (upcomingGraphicEvents()); the flyer-only list is the image's.
+        $excludeRecurring = $request->boolean('exclude_recurring', false);
+        $hasUpcomingEvents = fn () => self::upcomingGraphicEvents($role, $excludeRecurring, false, 1)->isNotEmpty();
 
         // The flyer list is the poster. The text branches below need it too - either
         // because numbering ties the caption to it, or (when a cap is set) to seed the
         // caption's quota so it cannot describe a different line-up. Resolve it once.
         $resolvedFlyerEvents = null;
-        $flyerEventList = function () use ($flyerQuery, $poolLimit, $eventLimit, $maxPerSchedule, $role, &$resolvedFlyerEvents) {
+        $flyerEventList = function () use ($excludeRecurring, $poolLimit, $eventLimit, $maxPerSchedule, $role, &$resolvedFlyerEvents) {
             if ($resolvedFlyerEvents === null) {
                 $resolvedFlyerEvents = self::applyPerScheduleCap(
-                    (clone $flyerQuery)->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(),
+                    self::upcomingGraphicEvents($role, $excludeRecurring, true, $poolLimit),
                     $maxPerSchedule,
                     $role
                 )->take($eventLimit);
@@ -482,8 +468,7 @@ class GraphicController extends Controller
 
             if ($flyerEvents->isEmpty()) {
                 // Check if there are future events at all (just without flyers)
-                $hasFutureEvents = $baseQuery()->exists();
-                $errorKey = $hasFutureEvents ? 'no_events_with_flyers' : 'no_events_found';
+                $errorKey = $hasUpcomingEvents() ? 'no_events_with_flyers' : 'no_events_found';
 
                 if ($type === 'image') {
                     return response()->json(['error' => __('messages.'.$errorKey), 'error_type' => $errorKey]);
@@ -514,12 +499,12 @@ class GraphicController extends Controller
                 // the count limit. The cap still applies; it is about which events, not
                 // how many.
                 $textEvents = self::applyPerScheduleCap(
-                    $baseQuery()->orderBy('starts_at')->orderBy('id')->get(), $maxPerSchedule, $role, $posterEvents
+                    self::upcomingGraphicEvents($role, $excludeRecurring), $maxPerSchedule, $role, $posterEvents
                 );
             } else {
                 $textEvents = self::takeWithPosterReserved(
                     self::applyPerScheduleCap(
-                        $baseQuery()->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(),
+                        self::upcomingGraphicEvents($role, $excludeRecurring, false, $poolLimit),
                         $maxPerSchedule,
                         $role,
                         $posterEvents
@@ -530,8 +515,7 @@ class GraphicController extends Controller
             }
 
             if ($textEvents->isEmpty()) {
-                $hasFutureEvents = $baseQuery()->exists();
-                $errorKey = $hasFutureEvents ? 'no_events_with_flyers' : 'no_events_found';
+                $errorKey = $hasUpcomingEvents() ? 'no_events_with_flyers' : 'no_events_found';
 
                 return response()->json(['error' => __('messages.'.$errorKey), 'error_type' => $errorKey]);
             }
@@ -648,25 +632,10 @@ class GraphicController extends Controller
         $excludeRecurring = $request->boolean('exclude_recurring', false);
         $textShowAll = $request->boolean('text_show_all', false);
 
-        $baseQuery = Event::with(['roles', 'tickets', 'venue'])
-            ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
-            ->upcomingOrOngoing()
-            ->where('is_private', false)
-            ->where('is_draft', false)
-            ->where('is_cancelled', false)
-            ->whereNull('event_password')
-            ->when($excludeRecurring, fn ($q) => $q->whereNull('days_of_week'));
-
-        // The poster's list, resolved from a clone before the numbering branch below
-        // mutates $baseQuery. Only needed to seed the cap so this metadata matches the
+        // The poster's list. Only needed to seed the cap so this metadata matches the
         // caption the user is actually transforming.
         $posterEvents = $maxPerSchedule ? self::applyPerScheduleCap(
-            (clone $baseQuery)->whereNotNull('flyer_image_url')
-                ->where('flyer_image_url', '!=', '')
-                ->orderBy('starts_at')
-                ->orderBy('id')
-                ->limit($poolLimit)
-                ->get(),
+            self::upcomingGraphicEvents($role, $excludeRecurring, true, $poolLimit),
             $maxPerSchedule,
             $role
         )->take($eventLimit) : null;
@@ -675,20 +644,15 @@ class GraphicController extends Controller
         // AI's metadata must match that filtered list (otherwise the
         // "Event N: ..." indices won't line up with the badges).
         if ($numberEvents) {
-            $events = $posterEvents ?? $baseQuery->whereNotNull('flyer_image_url')
-                ->where('flyer_image_url', '!=', '')
-                ->orderBy('starts_at')
-                ->orderBy('id')
-                ->limit($eventLimit)
-                ->get();
+            $events = $posterEvents ?? self::upcomingGraphicEvents($role, $excludeRecurring, true, $eventLimit);
         } elseif ($textShowAll) {
             $events = self::applyPerScheduleCap(
-                $baseQuery->orderBy('starts_at')->orderBy('id')->get(), $maxPerSchedule, $role, $posterEvents
+                self::upcomingGraphicEvents($role, $excludeRecurring), $maxPerSchedule, $role, $posterEvents
             );
         } else {
             $events = self::takeWithPosterReserved(
                 self::applyPerScheduleCap(
-                    $baseQuery->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(),
+                    self::upcomingGraphicEvents($role, $excludeRecurring, false, $poolLimit),
                     $maxPerSchedule,
                     $role,
                     $posterEvents
@@ -703,10 +667,10 @@ class GraphicController extends Controller
 
         $roleId = $role->id;
 
-        dispatch(function () use ($requestId, $text, $aiPrompt, $events, $aiModel, $roleId, $numberEvents, $forceEnglish) {
+        dispatch(function () use ($requestId, $text, $aiPrompt, $events, $aiModel, $roleId, $numberEvents, $forceEnglish, $role) {
             set_time_limit(120);
 
-            $result = $this->processTextWithAI($text, $aiPrompt, $events, $aiModel, $numberEvents, $forceEnglish);
+            $result = $this->processTextWithAI($text, $aiPrompt, $events, $role, $aiModel, $numberEvents, $forceEnglish);
 
             if ($result) {
                 Cache::put("ai_text_{$requestId}", ['status' => 'completed', 'text' => $result], 300);
@@ -782,38 +746,13 @@ class GraphicController extends Controller
         $excludeRecurring = $graphicSettings['exclude_recurring'] ?? false;
 
         // Only include events that have their own flyer image (not relying on role image)
-        $query = Event::with(['roles', 'tickets', 'venue'])
-            ->whereHas('roles', function ($query) use ($role) {
-                $query->where('role_id', $role->id)->where('is_accepted', true);
-            })
-            ->upcomingOrOngoing()
-            ->whereNotNull('flyer_image_url')
-            ->where('flyer_image_url', '!=', '')
-            ->where('is_private', false)
-            ->where('is_draft', false)
-            ->where('is_cancelled', false)
-            ->whereNull('event_password');
-
-        // Only exclude recurring events if setting is true
-        if ($excludeRecurring) {
-            $query->whereNull('days_of_week');
-        }
-
         $events = self::applyPerScheduleCap(
-            $query->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(), $maxPerSchedule, $role
+            self::upcomingGraphicEvents($role, (bool) $excludeRecurring, true, $poolLimit), $maxPerSchedule, $role
         )->take($eventLimit);
 
         if ($events->isEmpty()) {
             // Check if there are future events at all (just without flyers)
-            $hasFutureEvents = Event::whereHas('roles', function ($query) use ($role) {
-                $query->where('role_id', $role->id)->where('is_accepted', true);
-            })
-                ->upcomingOrOngoing()
-                ->where('is_private', false)
-                ->where('is_draft', false)
-                ->where('is_cancelled', false)
-                ->whereNull('event_password')
-                ->exists();
+            $hasFutureEvents = self::upcomingGraphicEvents($role, false, false, 1)->isNotEmpty();
 
             $errorKey = $hasFutureEvents ? 'no_events_with_flyers' : 'no_events_found';
 
@@ -854,7 +793,7 @@ class GraphicController extends Controller
             ->header('Expires', '0');
     }
 
-    private function processTextWithAI($text, $aiPrompt, $events, $aiModel = '', $numberEvents = false, $forceEnglish = false)
+    private function processTextWithAI($text, $aiPrompt, $events, Role $role, $aiModel = '', $numberEvents = false, $forceEnglish = false)
     {
         try {
             // Build structured metadata so the AI can reference event properties
@@ -868,7 +807,7 @@ class GraphicController extends Controller
                     'city' => $event->venue ? (($forceEnglish ? $event->venue->englishCity() : $event->venue->city) ?? '') : '',
                     'address' => $event->venue ? (($forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
                     'state' => $event->venue ? (($forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',
-                    'country' => $event->venue ? ($event->venue->country ?? '') : '',
+                    'country' => $event->venue ? strtoupper((string) $event->venue->country_code) : '',
                     'price' => EventTextGenerator::getPrice($event),
                     'currency' => $event->ticket_currency_code ?? '',
                     'coupon_code' => $event->coupon_code ?? '',
@@ -877,12 +816,10 @@ class GraphicController extends Controller
                     'original_price' => $event->original_price,
                 ];
 
-                // Add custom field values
-                $customFieldValues = $event->custom_field_values ?? [];
-                $fieldIndex = 1;
-                foreach ($customFieldValues as $key => $value) {
-                    $fields['custom_'.$fieldIndex] = $value;
-                    $fieldIndex++;
+                // The custom fields the caption's {custom_N} may print, numbered as it numbers them.
+                // A private answer is never handed to the model.
+                foreach (EventTextGenerator::customFieldTokens($event, $role, $forceEnglish) as $index => $value) {
+                    $fields['custom_'.$index] = $value;
                 }
 
                 $parts = [];
@@ -1086,6 +1023,107 @@ class GraphicController extends Controller
     public static function resolveGraphicPoolLimit(int $eventLimit, ?int $maxPerSchedule): int
     {
         return $maxPerSchedule ? max($eventLimit, self::GRAPHIC_CANDIDATE_POOL) : $eventLimit;
+    }
+
+    /** How far ahead a series' next date may be and still be listed: the newsletter's year. */
+    private const SERIES_HORIZON_DAYS = 366;
+
+    /**
+     * The upcoming events the graphic, its caption, its AI rewrite and its scheduled email list,
+     * earliest first (by start, then id), at most $limit of them (null for all).
+     *
+     * From the schedule page's own list (EventRepo::upcomingForGuest()), so the rules are the
+     * page's: accepted on this schedule, public, not a draft, not cancelled, no password. These
+     * used to be one query on `starts_at >= now`, and a series' starts_at is its FIRST date, so a
+     * weekly night begun last month was on no graphic at all. A series is listed once, under the
+     * next occurrence still to come (today's, until it starts), as the newsletter lists it: every
+     * occurrence of a daily class would fill a twenty-flyer poster with one picture.
+     *
+     * A series moved to a later date is a COPY whose starts_at is that occurrence's start, in the
+     * schedule's timezone, so the image, the caption's date tokens, {first_event_date} and the
+     * link (whose date segment comes from starts_at) all name the day it really happens, and the
+     * id-based cap and poster reservation below still see one event. Nothing saves these copies.
+     * Twice the number wanted is asked for, because a series moved past today can fall behind
+     * events that were below the cut.
+     *
+     * @return EloquentCollection<int, Event>
+     */
+    public static function upcomingGraphicEvents(Role $role, bool $excludeRecurring = false, bool $flyersOnly = false, ?int $limit = null): EloquentCollection
+    {
+        $narrow = fn ($query) => $query->with(['tickets', 'venue'])
+            ->when($flyersOnly, fn ($q) => $q->whereNotNull('events.flyer_image_url')->where('events.flyer_image_url', '!=', ''))
+            ->when($excludeRecurring, fn ($q) => $q->whereNull('events.days_of_week'));
+
+        // A series whose date today has begun moves to its next one, so it can fall below an
+        // event past the rows fetched. Nothing unfetched is dated before the last fetched row
+        // (moving only ever goes later), so the cut is safe once the last event kept is dated
+        // before that row; until then, fetch twice as many.
+        $fetch = $limit === null ? PHP_INT_MAX : max(1, $limit * 2);
+
+        while (true) {
+            $rows = app(EventRepo::class)
+                ->upcomingForGuest($role, null, $fetch, self::SERIES_HORIZON_DAYS, $narrow);
+
+            $events = $rows
+                ->map(fn (array $row) => self::onItsNextOccurrence($row['event'], $row['date']))
+                ->filter()
+                ->sortBy([['starts_at', 'asc'], ['id', 'asc']])
+                ->take($limit ?? PHP_INT_MAX)
+                ->values();
+
+            if ($limit === null || $rows->count() < $fetch) {
+                break;
+            }
+
+            $lastFetched = $rows->last();
+            $lastFetchedZone = $lastFetched['event']->scheduleTimezone();
+            $unfetchedFrom = Carbon::parse($lastFetched['date'] ?? $lastFetched['event']->getStartDateTime(null, true, $lastFetchedZone)->format('Y-m-d'), $lastFetchedZone)->startOfDay();
+
+            if ($events->count() >= $limit && Carbon::parse($events->last()->starts_at, 'UTC')->lt($unfetchedFrom)) {
+                break;
+            }
+
+            $fetch *= 2;
+        }
+
+        return EloquentCollection::make($events->all());
+    }
+
+    /**
+     * $event as it happens on $date, or on the next occurrence after today's once that has begun
+     * (Event::occurrencesAfter(), as NewsletterService::aheadOfNow() does); null when a series has
+     * none left. A one-off, and a series still before its first date, is returned as it is.
+     */
+    private static function onItsNextOccurrence(Event $event, ?string $date): ?Event
+    {
+        if (! $event->days_of_week) {
+            return $event;
+        }
+
+        if (! $date) {
+            return null;
+        }
+
+        $zone = $event->scheduleTimezone();
+
+        if (! $event->getStartDateTime($date, true, $zone)->gt(Carbon::now($zone))) {
+            $date = $event->occurrencesAfter(null, 1)[0] ?? null;
+
+            if (! $date) {
+                return null;
+            }
+        }
+
+        if ($date === $event->saleEventDateFromStartsAt()) {
+            return $event;
+        }
+
+        $copy = clone $event;
+        $copy->starts_at = $event->hasDateOnlyStart()
+            ? $date
+            : $event->getStartDateTime($date, true, $zone)->setTimezone('UTC')->format('Y-m-d H:i:s');
+
+        return $copy;
     }
 
     /**

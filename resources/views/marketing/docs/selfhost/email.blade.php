@@ -274,8 +274,8 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">MAIL_PORT</code></td>
-                        <td>SMTP port number</td>
-                        <td><code class="doc-inline-code">587</code> (TLS) or <code class="doc-inline-code">465</code> (SSL)</td>
+                        <td>SMTP port number. It also decides the encryption: <code class="doc-inline-code">465</code> connects over SSL from the start, and any other port, such as <code class="doc-inline-code">587</code>, upgrades to TLS with STARTTLS whenever the server offers it</td>
+                        <td><code class="doc-inline-code">587</code> (STARTTLS) or <code class="doc-inline-code">465</code> (SSL)</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">MAIL_USERNAME</code></td>
@@ -289,8 +289,8 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">MAIL_ENCRYPTION</code></td>
-                        <td>Encryption protocol</td>
-                        <td><code class="doc-inline-code">tls</code> or <code class="doc-inline-code">ssl</code></td>
+                        <td>Not read by the install-wide mailer, whatever its value: the port chooses the encryption (see <code class="doc-inline-code">MAIL_PORT</code>). Harmless to leave in place</td>
+                        <td><code class="doc-inline-code">tls</code></td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">MAIL_FROM_ADDRESS</code></td>
@@ -323,7 +323,7 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Gmail / Google Workspace</h4>
                 <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
-                    <p>Host: <code class="doc-inline-code">smtp.gmail.com</code> | Port: <code class="doc-inline-code">587</code> | Encryption: <code class="doc-inline-code">tls</code></p>
+                    <p>Host: <code class="doc-inline-code">smtp.gmail.com</code> | Port: <code class="doc-inline-code">587</code> (STARTTLS)</p>
                     <p>Requires an <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="doc-link">App Password</a> if 2FA is enabled. Personal mailboxes also apply a daily sending cap, so this suits a small instance rather than a busy one.</p>
                 </div>
             </div>
@@ -331,7 +331,7 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Outlook / Microsoft 365</h4>
                 <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
-                    <p>Host: <code class="doc-inline-code">smtp.office365.com</code> | Port: <code class="doc-inline-code">587</code> | Encryption: <code class="doc-inline-code">tls</code></p>
+                    <p>Host: <code class="doc-inline-code">smtp.office365.com</code> | Port: <code class="doc-inline-code">587</code> (STARTTLS)</p>
                     <p>SMTP authentication has to be enabled for the mailbox in the Microsoft 365 admin center; many tenants have it off by default.</p>
                 </div>
             </div>
@@ -339,7 +339,7 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Amazon SES</h4>
                 <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
-                    <p>Host: <code class="doc-inline-code">email-smtp.us-east-1.amazonaws.com</code> (region-specific) | Port: <code class="doc-inline-code">587</code> | Encryption: <code class="doc-inline-code">tls</code></p>
+                    <p>Host: <code class="doc-inline-code">email-smtp.us-east-1.amazonaws.com</code> (region-specific) | Port: <code class="doc-inline-code">587</code> (STARTTLS)</p>
                     <p>Use your SES SMTP credentials (not your AWS access keys). SES also has a dedicated driver, see <a href="#drivers" class="doc-link">Other Mail Drivers</a>.</p>
                 </div>
             </div>
@@ -347,7 +347,7 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Mailgun</h4>
                 <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
-                    <p>Host: <code class="doc-inline-code">smtp.mailgun.org</code> | Port: <code class="doc-inline-code">587</code> | Encryption: <code class="doc-inline-code">tls</code></p>
+                    <p>Host: <code class="doc-inline-code">smtp.mailgun.org</code> | Port: <code class="doc-inline-code">587</code> (STARTTLS)</p>
                     <p>Username is usually <code class="doc-inline-code">postmaster@yourdomain.com</code>. Mailgun is supported through SMTP; there is no <code class="doc-inline-code">mailgun</code> API driver in Event Schedule.</p>
                 </div>
             </div>
@@ -402,12 +402,12 @@
                     <tr>
                         <td>Postmark</td>
                         <td><code class="doc-inline-code">postmark</code></td>
-                        <td>Set <code class="doc-inline-code">POSTMARK_TOKEN</code>, and install the transport with <code class="doc-inline-code">composer require symfony/postmark-mailer</code>. Postmark's SMTP endpoint needs no extra package</td>
+                        <td>Set <code class="doc-inline-code">POSTMARK_TOKEN</code>, and install the transport with <code class="doc-inline-code">composer require symfony/postmark-mailer symfony/http-client</code>. See the warning below. Postmark's SMTP endpoint needs no extra package</td>
                     </tr>
                     <tr>
                         <td>Resend</td>
                         <td><code class="doc-inline-code">resend</code></td>
-                        <td>Set <code class="doc-inline-code">RESEND_KEY</code>, and install the transport with <code class="doc-inline-code">composer require resend/resend-php</code></td>
+                        <td>Set <code class="doc-inline-code">RESEND_KEY</code>, and install the transport with <code class="doc-inline-code">composer require resend/resend-php</code>. See the warning below. Resend also offers SMTP, which needs no extra package</td>
                     </tr>
                     <tr>
                         <td>Log</td>
@@ -421,6 +421,11 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div id="composer-packages" class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">An update removes packages you added</div>
+            <p>The in-app update, and <code class="doc-inline-code">php artisan app:update</code>, replace the <code class="doc-inline-code">vendor</code> directory with the release's own copy. A package added with <code class="doc-inline-code">composer require</code> is gone after the next update, and mail then fails with a "class not found" error. On an install from the release zip, send through Postmark's or Resend's SMTP endpoint with <code class="doc-inline-code">MAIL_MAILER=smtp</code> instead, which needs no package. The <code class="doc-inline-code">postmark</code> and <code class="doc-inline-code">resend</code> drivers suit an install you build and update yourself with Composer, from a <code class="doc-inline-code">git clone</code>.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">
@@ -564,7 +569,7 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Mailer [mailgun] is not defined"</h4>
                 <ul class="doc-list text-sm">
                     <li><code class="doc-inline-code">MAIL_MAILER</code> names a mailer that does not exist in <code class="doc-inline-code">config/mail.php</code>. <code class="doc-inline-code">mailgun</code> is the usual culprit; use <code class="doc-inline-code">smtp</code> instead</li>
-                    <li>A "class not found" error from a valid value such as <code class="doc-inline-code">postmark</code> or <code class="doc-inline-code">resend</code> means the transport package is missing. See <a href="#drivers" class="doc-link">Other Mail Drivers</a></li>
+                    <li>A "class not found" error from a valid value such as <code class="doc-inline-code">postmark</code> or <code class="doc-inline-code">resend</code> means the transport package is missing, often because an update replaced <code class="doc-inline-code">vendor</code>. See <a href="#composer-packages" class="doc-link">An update removes packages you added</a></li>
                 </ul>
             </div>
 
@@ -573,7 +578,7 @@
                 <ul class="doc-list text-sm">
                     <li>Verify your server's firewall allows outbound connections on port <code class="doc-inline-code">587</code> (or <code class="doc-inline-code">465</code>)</li>
                     <li>Some hosting providers block outbound SMTP. Check with your host.</li>
-                    <li>Try using port <code class="doc-inline-code">465</code> with <code class="doc-inline-code">MAIL_ENCRYPTION=ssl</code> if port <code class="doc-inline-code">587</code> is blocked</li>
+                    <li>If port <code class="doc-inline-code">587</code> is blocked, try <code class="doc-inline-code">MAIL_PORT=465</code>, which connects over SSL. The port alone decides that: <code class="doc-inline-code">MAIL_ENCRYPTION</code> is not read</li>
                 </ul>
             </div>
 

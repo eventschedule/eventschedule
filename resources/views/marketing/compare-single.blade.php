@@ -98,7 +98,7 @@
         // come for and the one that said the least. Every step below names a
         // real route out of the tool they are leaving: EventController::parse
         // for the events (Role::aiParseDailyLimit(): 50 a day on Free and Pro
-        // alike, 10 during a Pro trial, 100 on Enterprise),
+        // alike, a trial included, 100 on Enterprise),
         // NewsletterController::importStore for the list (10,000 rows, no plan
         // gate), and Event::canSellPaidTickets() for what selling costs: a
         // ticket that carries a price is Pro, free registration never is.
@@ -107,7 +107,7 @@
         // rendered as a link at the foot of its card. DocsManifestTest checks every anchor.
         $switchSteps = $switch_steps ?? [
             ['title' => 'Create your schedule', 'description' => 'Free, no card, and it has its own address the moment it exists. Nothing has to move before it is useful.', 'doc' => 'getting-started#create-schedule'],
-            ['title' => 'Bring the events across', 'description' => 'Paste a listing or upload the flyer and the parser fills in the name, date, time, venue and description for you to check. Fifty a day on the free and Pro plans (ten during a Pro trial), a hundred on Enterprise.', 'doc' => 'ai-import'],
+            ['title' => 'Bring the events across', 'description' => 'Paste a listing or upload the flyer and the parser fills in the name, date, time, venue and description for you to check. Fifty a day on the free and Pro plans, a hundred on Enterprise.', 'doc' => 'ai-import'],
             ['title' => 'Bring your list across', 'description' => 'Export the addresses you already have and paste them in or upload a CSV, up to ten thousand rows, on any plan. What the newsletter allowance counts is sending to them, not holding them.', 'doc' => 'newsletters#importing-emails'],
             ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Your own Stripe or PayPal account, so the money settles into it rather than into ours. Zero platform fees on every plan, a ticket with a price on it is Pro, and refunds go back through the same account.', 'doc' => 'tickets#payment'],
         ];

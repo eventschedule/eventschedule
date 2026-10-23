@@ -10,7 +10,7 @@
         ['term' => 'Schedule type', 'family' => 'calendar', 'guide' => 'getting-started#schedule-types', 'def' => 'Talent, Venue or Curator. The type decides what a schedule gets: a venue has a full address, a curator aggregates events from other schedules. Choose carefully, because the type is fixed once the schedule is saved.'],
         ['term' => 'Sub-schedule', 'family' => 'calendar', 'guide' => 'creating-schedules#customize-subschedules', 'def' => 'A category for events inside one schedule, such as Live Music, Comedy or Workshops. Each one has its own color and its own URL, and visitors can filter by it. It organizes and color-codes only: it cannot hide an event.'],
         ['term' => 'Embed', 'family' => 'calendar', 'guide' => 'sharing#embed', 'def' => 'Your schedule shown on another website inside an iframe. The calendar embed and the RSVP form are free; embedding the ticket purchase widget needs Pro.'],
-        ['term' => 'Admin Panel', 'family' => 'calendar', 'guide' => 'managing-schedules', 'def' => 'The management side of one schedule, opened from its name in the sidebar: a row of tabs where you add events, answer requests and manage your team, with its settings behind Edit Schedule. Not the selfhost admin panel at /admin, which manages a whole install.'],
+        ['term' => 'Admin Panel', 'family' => 'calendar', 'guide' => 'managing-schedules', 'def' => 'The management side of one schedule, opened from its name in the sidebar: a row of tabs where you add events, answer requests and manage your team, with its settings behind Edit Schedule. Not the platform admin panel at /admin, which manages a whole install.'],
         ['term' => 'Event', 'family' => 'events', 'guide' => 'creating-events', 'def' => 'A single occurrence with a date, time, location and details. An event belongs to a schedule and can repeat daily, weekly, every few weeks, monthly or yearly, with dates you add or skip.'],
         ['term' => 'Request', 'family' => 'events', 'guide' => 'managing-schedules#requests', 'def' => 'An event waiting for your approval: one a visitor submitted from your public request page, or one another schedule added you to. Requests sit on the Requests tab until you accept or decline them, and you are emailed when new ones land unless you turn that off.'],
         ['term' => 'Unclaimed page', 'family' => 'events', 'guide' => 'creating-events#claim', 'def' => 'A schedule page created for a performer or venue you name on an event before they are on Event Schedule. It says who created it, credits each date to the schedule that added it, and stays out of search engines. The person it names claims it with an account on the email address or phone number it lists, and becomes its owner.'],
@@ -111,7 +111,7 @@
             'lede' => 'Drive Event Schedule from your own code over REST. API access is a Pro feature, on reads as well as writes.',
             'file' => 'cURL Example',
             'line' => 'developer/api#authentication',
-            'why' => 'Every endpoint but Register and Login takes this one header.',
+            'why' => 'Every endpoint but the sign-up and login ones takes this one header.',
             'where' => 'API Reference, authentication',
         ],
     ];

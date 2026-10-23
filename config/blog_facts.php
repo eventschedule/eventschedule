@@ -21,7 +21,7 @@
 |
 | docs/FEATURES.md is the source of truth for plans: a feature that moves plan there moves
 | here in the same change. Prices are never typed: the :placeholders are filled from
-| PlatformPricing at run time. BlogFactsTest holds the shape, the URLs and the guide pages.
+| PlatformPricing at run time, and :trial_days from TRIAL_DAYS. BlogFactsTest holds the shape, the URLs and the guide pages.
 |
 */
 
@@ -56,7 +56,7 @@ return [
     'visibility' => ['tier' => 'free', 'says' => 'An event is Public or Draft on every plan.'],
 
     // On the Pro plan and above (not on Free)
-    'paid-tickets' => ['tier' => 'pro', 'says' => 'Selling tickets that have a price: priced ticket types, paid through Stripe, PayPal, Payfast (South African rand only), Razorpay (Indian rupees only), Invoice Ninja, a payment link or cash at the door. A Free schedule can try selling for 7 days.', 'url' => '/features/ticketing', 'guide' => 'tickets', 'match' => ['ticket type', 'price', 'payment', 'stripe', 'sell tickets']],
+    'paid-tickets' => ['tier' => 'pro', 'says' => 'Selling tickets that have a price: priced ticket types, paid through Stripe, PayPal, Payfast (South African rand only), Razorpay (Indian rupees only), Invoice Ninja, a payment link or cash at the door. Pro starts with a :trial_days-day free trial when you subscribe, once per account.', 'url' => '/features/ticketing', 'guide' => 'tickets', 'match' => ['ticket type', 'price', 'payment', 'stripe', 'sell tickets']],
     'refunds' => ['tier' => 'pro', 'says' => 'Full and partial refunds through Stripe, PayPal and Razorpay.', 'guide' => 'tickets', 'match' => ['refund']],
     'promo' => ['tier' => 'pro', 'says' => 'Promo codes: a percentage or a fixed amount off, with a usage limit and an expiry date.', 'url' => '/features/promo-codes', 'guide' => 'tickets', 'match' => ['promo']],
     'addons' => ['tier' => 'pro', 'says' => 'Add-ons sold beside a ticket, with their own stock.', 'guide' => 'tickets', 'match' => ['add-on']],

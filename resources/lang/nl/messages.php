@@ -258,7 +258,7 @@ return [
     'payment_links' => 'Betalingslinks',
     'are_you_sure' => 'Weet je het zeker?',
     'no_requests' => 'Geen Verzoeken',
-    'team_lead' => 'Beheerders regelen de agenda van dag tot dag. Kijkers kunnen alles bekijken, maar niets wijzigen. Alleen de eigenaar wijzigt rollen, verwijdert leden en beheert het abonnement.',
+    'team_lead' => 'Beheerders regelen de agenda van dag tot dag. Kijkers kunnen alles bekijken en hun eigen beschikbare dagen aangeven, maar verder niets wijzigen. Alleen de eigenaar wijzigt rollen, verwijdert leden en beheert het abonnement.',
     'requests_lead' => 'Evenementen en boekingen die op jouw antwoord wachten. Als je er een accepteert, komt het in je agenda.',
     'availability_lead' => 'Markeer de dagen waarop je niet beschikbaar bent en sla dan op. Elk lid markeert zijn eigen dagen.',
     'resend_invite_sms' => 'Opnieuw verzenden per sms',
@@ -1047,6 +1047,7 @@ return [
     'promo_share_link' => 'Link die deze code toepast:',
     'order_fields_help' => 'Wordt één keer per bestelling gevraagd, niet per ticket.',
     'calendar_not_synced_draft' => 'Alleen evenementen die gasten kunnen zien, worden naar de agenda gekopieerd.',
+    'calendar_not_synced_cancelled' => 'Een geannuleerd evenement wordt niet naar de agenda gekopieerd. Het wordt weer gekopieerd zodra je het herstelt.',
     'saving_removes' => 'Opslaan verwijdert',
     'schedule_short_description_help' => 'Eén regel onder de naam van je schema wanneer de kopstijl :style is.',
     'schedule_description_help' => 'Staat bovenaan je schemapagina.',
@@ -1357,7 +1358,7 @@ return [
     'from_google_calendar' => 'Van Google Calendar',
     'from_google_calendar_description' => 'Evenementen uit Google Agenda komen hier binnen. Tenzij je ze automatisch publiceert, wachten ze als concept.',
     'bidirectional_sync' => 'Bidirectionele Synchronisatie',
-    'bidirectional_sync_description' => 'Evenementen die je hier toevoegt gaan naar je agenda, en nieuwe evenementen uit je agenda komen hier binnen, als concept tenzij je ze automatisch publiceert (updates synchroniseren maar in één richting)',
+    'bidirectional_sync_description' => 'Evenementen die je hier toevoegt gaan naar je agenda, en nieuwe evenementen uit je agenda komen hier binnen, als concept tenzij je ze automatisch publiceert (wijzigingen aan de ene kant worden aan de andere kant overgenomen)',
     'no_sync' => 'Geen Synchronisatie',
     'no_sync_description' => 'Google Calendar synchronisatie uitschakelen',
     'sync_events' => 'Synchroniseer Evenementen',
@@ -3821,6 +3822,7 @@ return [
 
     'individual_tickets' => 'Individuele tickets',
     'individual_tickets_description' => 'Elke deelnemer ontvangt een eigen bevestiging en QR-code',
+    'individual_tickets_off_for_passes' => 'Uit zolang een tickettype een pas of abonnement is. Een pas is één QR-code per bestelling, dus bij het opslaan van het evenement wordt dit uitgeschakeld.',
     'individual_ticket_fields' => 'Ticketvelden per gast verzamelen',
     'individual_ticket_fields_description' => 'Aangepaste ticketvelden voor elke gast tonen',
     'guest_information' => 'Gastgegevens',
@@ -5108,7 +5110,7 @@ return [
     'monetization_native_cpc' => 'Prijs per klik',
     'monetization_native_cpc_help' => 'Wordt in rekening gebracht bij de adverteerder. Geldt alleen voor nieuwe campagnes.',
     'promotion_rate_not_configured' => 'De prijzen voor promoties zijn op deze site nog niet ingesteld. Neem contact op met de beheerder.',
-    'promotion_credit_available' => 'U heeft :amount aan promotietegoed. Alles daarboven wordt van uw kaart afgeschreven.',
+    'promotion_credit_available' => 'U heeft :amount aan promotietegoed. Dit wordt alleen gebruikt voor een budget dat het volledig dekt. Voor dit budget wordt het volledige bedrag van uw kaart afgeschreven en blijft uw tegoed staan.',
 
     // Stay22 accommodation map (see docs/FEATURES.md, "Accommodation Affiliate")
     'accommodation' => 'Accommodatie',

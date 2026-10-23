@@ -71,7 +71,8 @@
         <li>Under <strong>Also list these schedules</strong>, untick any of your own schedules that
         should stay off the network. It lists the schedules you own that are still <em>Not decided
         yet</em>, already ticked, each with the number of its upcoming public events that would be
-        shared.</li>
+        shared. Once sharing is on, the boxes start unticked, so a later save lists only what you
+        tick.</li>
         <li>Click <strong>Save</strong>.</li>
     </ol>
     <p>
@@ -278,7 +279,7 @@
     <p>An event is shared when all of these hold:</p>
     <ul class="doc-list">
         <li>It is public and upcoming. A recurring event counts, and so does an event of a day or more that has not ended yet.</li>
-        <li>It is not a Draft, Internal or Unlisted event, not cancelled, and has no password.</li>
+        <li>It is not a Draft, Internal or Unlisted event, not cancelled, and has no password. An event a calendar sync brought in as a draft is shared once it is published.</li>
         <li>It is accepted on at least one schedule that is <em>Listed on the network</em> and has a verified email address or phone number.</li>
         <li>No schedule attached to it has chosen <em>Not listed</em>.</li>
         <li>It has a picture: the event flyer, or failing that the profile image of its talent or its venue. An event without one is marked <em>Needs an image</em> in the settings preview, and goes out on the next run once it has one. This matches the bar applied to eventschedule.com's own events.</li>

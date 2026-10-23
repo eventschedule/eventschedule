@@ -196,6 +196,12 @@ class MicrosoftCalendarController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
+            // Only what guests can see goes to a calendar, as on save (EventRepo::saveEvent()):
+            // a draft or internal event stays off it, and a cancelled one was taken off it.
+            if ($notSynced = $event->calendarSyncRefusal()) {
+                return response()->json(['error' => $notSynced], 422);
+            }
+
             if (! $this->microsoftCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Outlook Calendar token invalid and refresh failed'], 401);
             }

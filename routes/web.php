@@ -281,8 +281,8 @@ Route::get('/manifest.webmanifest', [AppController::class, 'manifest'])
 
 // Self-update is available on any non-nexus install (selfhosted or a self-hosted SaaS).
 // On a multi-tenant self-hosted SaaS it is operator-only (the 'admin' middleware,
-// EnsureUserIsAdmin, so a tenant cannot trigger a global update); on a plain selfhost any
-// authenticated user may trigger it.
+// EnsureUserIsAdmin, so a tenant cannot trigger a global update); on a plain selfhost the
+// install's admins may trigger it, or any authenticated user while it has no admin at all.
 //
 // Registered on every install and gated at runtime by can_self_update() inside
 // AppController::update(), rather than wrapped in a registration-time if. Two reasons:

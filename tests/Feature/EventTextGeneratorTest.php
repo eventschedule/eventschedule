@@ -256,4 +256,91 @@ class EventTextGeneratorTest extends TestCase
 
         $this->assertStringContainsString('15/6/'.$nextYear->format('y'), $text);
     }
+
+    /**
+     * tickets.price is decimal(13,3), so a free ticket reads back as "0.000". The all-free test
+     * compared it with === 0 and never matched, so {price} printed "0" and the line that holds
+     * it was kept. The date strip asks the same function.
+     */
+    public function test_price_is_blank_when_every_ticket_is_free(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['language_code' => 'en']);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'ticket_currency_code' => 'USD']);
+        $this->createTicket($event, ['price' => 0]);
+        $this->createTicket($event, ['type' => 'VIP', 'price' => 0]);
+        $event = $event->fresh()->load('tickets');
+
+        $this->assertSame('0.000', (string) $event->tickets->first()->price, 'fixture: the price reads back as a decimal string');
+        $this->assertSame('', EventTextGenerator::getPrice($event));
+        $this->assertSame('x', trim(EventTextGenerator::parseTemplate("x\n{price}", $event, $role, false)));
+
+        if (extension_loaded('gd')) {
+            $this->assertSame('[]', $this->overlay($role, $event, '[{price}]'));
+        }
+    }
+
+    public function test_price_is_the_lowest_paid_ticket(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['language_code' => 'en']);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'ticket_currency_code' => 'USD']);
+        $this->createTicket($event, ['price' => 25]);
+        $this->createTicket($event, ['type' => 'Early', 'price' => 10]);
+        $event = $event->fresh()->load('tickets');
+
+        $this->assertSame('10', (string) EventTextGenerator::getPrice($event));
+    }
+
+    /**
+     * roles has no `country` column, only `country_code`, so {country} was empty everywhere it
+     * is offered. It prints the code in capitals; an address lower-cases it like every token.
+     */
+    public function test_country_prints_the_venues_country_code(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createVenueWithAddress($owner, ['language_code' => 'en', 'country_code' => 'us']);
+        $event = $this->createEvent($venue, ['name' => 'Show']);
+        $curator = $this->createCurator($owner);
+        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+        $event = $event->fresh();
+
+        $this->assertSame('in US', trim(EventTextGenerator::parseTemplate('in {country}', $event, $venue, false)));
+        $this->assertSame('show-us', \App\Utils\SlugPatternUtils::generateSlug('{event_name}-{country}', 'Show', null, $event, $venue));
+        $this->assertSame('US', \App\Utils\ListWording::values($event, $curator, 'en', ['country'])['country']);
+
+        if (extension_loaded('gd')) {
+            $this->assertSame('in US', $this->overlay($venue, $event, 'in {country}'));
+        }
+    }
+
+    /**
+     * A private custom field is the owner's alone: its token stays empty in the text and on the
+     * date strip, while a field that is not private is written (the control).
+     */
+    public function test_a_private_custom_field_is_blank_in_the_text_and_on_the_date_strip(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['language_code' => 'en']);
+        $role->event_custom_fields = [
+            'fieldprivate' => ['name' => 'Door code', 'type' => 'string', 'index' => 1, 'private' => true],
+            'fieldpublic' => ['name' => 'Room', 'type' => 'string', 'index' => 2],
+        ];
+        $role->save();
+        $role = $role->fresh();
+        $event = $this->createEvent($role, ['custom_field_values' => ['fieldprivate' => 'zebra-seven', 'fieldpublic' => 'cellar']]);
+
+        $this->assertSame('[] [cellar]', trim(EventTextGenerator::parseTemplate('[{custom_1}] [{custom_2}]', $event, $role, false)));
+
+        if (extension_loaded('gd')) {
+            $this->assertSame('[] [cellar]', $this->overlay($role, $event, '[{custom_1}] [{custom_2}]'));
+        }
+    }
+
+    /** The date strip's own replacement map (AbstractEventDesign::parseOverlayText). */
+    private function overlay($role, $event, string $template): string
+    {
+        $design = new \App\Services\designs\ListDesign($role, collect([$event]));
+        $parse = new \ReflectionMethod($design, 'parseOverlayText');
+        $parse->setAccessible(true);
+
+        return $parse->invoke($design, $template, $event);
+    }
 }

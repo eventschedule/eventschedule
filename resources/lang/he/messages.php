@@ -257,7 +257,7 @@ return [
     'payment_links' => 'קישורי תשלום',
     'are_you_sure' => 'האם אתה בטוח?',
     'no_requests' => 'אין בקשות',
-    'team_lead' => 'מנהלים מפעילים את הלוח ביום-יום. צופים יכולים לראות הכול אך לא לשנות דבר. רק הבעלים משנים תפקידים, מסירים חברים ומנהלים את התוכנית.',
+    'team_lead' => 'מנהלים מפעילים את הלוח ביום-יום. צופים יכולים לראות הכול ולסמן את הימים שבהם הם זמינים, אך לא לשנות שום דבר אחר. רק הבעלים משנים תפקידים, מסירים חברים ומנהלים את התוכנית.',
     'requests_lead' => 'אירועים והזמנות שממתינים לתשובתכם. אישור של בקשה מוסיף אותה ללוח שלכם.',
     'availability_lead' => 'סמנו את הימים שבהם אינכם זמינים, ואז שמרו. כל חבר מסמן את הימים שלו.',
     'resend_invite_sms' => 'שלח שוב ב-SMS',
@@ -790,6 +790,7 @@ return [
     'promo_share_link' => 'קישור שמחיל את הקוד הזה:',
     'order_fields_help' => 'נשאל פעם אחת לכל ההזמנה, לא לכל כרטיס.',
     'calendar_not_synced_draft' => 'רק אירועים שהאורחים יכולים לראות מועתקים ליומן.',
+    'calendar_not_synced_cancelled' => 'אירוע שבוטל אינו מועתק ליומן. הוא יועתק שוב כשתשחזר אותו.',
     'saving_removes' => 'השמירה תסיר',
     'schedule_short_description_help' => 'שורה אחת שמוצגת מתחת לשם לוח הזמנים שלך כשסגנון הכותרת הוא :style.',
     'schedule_description_help' => 'מוצג בראש דף לוח הזמנים שלך.',
@@ -1414,7 +1415,7 @@ return [
     'from_google_calendar' => 'מ-Google Calendar',
     'from_google_calendar_description' => 'אירועים מ-Google Calendar מגיעים לכאן. אם לא מפרסמים אותם אוטומטית, הם ממתינים כטיוטות.',
     'bidirectional_sync' => 'סנכרון דו-כיווני',
-    'bidirectional_sync_description' => 'אירועים שמוסיפים כאן עוברים ליומן שלך, ואירועים חדשים מהיומן שלך מגיעים לכאן, כטיוטות אם לא מפרסמים אותם אוטומטית (עדכונים מסונכרנים בכיוון אחד בלבד)',
+    'bidirectional_sync_description' => 'אירועים שמוסיפים כאן עוברים ליומן שלך, ואירועים חדשים מהיומן שלך מגיעים לכאן, כטיוטות אם לא מפרסמים אותם אוטומטית (עריכות שנעשות באחד המקומות מועתקות למקום השני)',
     'no_sync' => 'ללא סנכרון',
     'no_sync_description' => 'השבת סנכרון Google Calendar',
     'sync_events' => 'סנכרן אירועים',
@@ -3878,6 +3879,7 @@ return [
 
     'individual_tickets' => 'כרטיסים אישיים',
     'individual_tickets_description' => 'כל משתתף מקבל אישור וקוד QR משלו',
+    'individual_tickets_off_for_passes' => 'כבוי כל עוד אחד מסוגי הכרטיסים הוא כרטיס רב-פעמי או מנוי. כרטיס כזה הוא קוד QR אחד להזמנה, ולכן שמירת האירוע מכבה אפשרות זו.',
     'individual_ticket_fields' => 'איסוף שדות כרטיס לכל אורח',
     'individual_ticket_fields_description' => 'הצגת שדות מותאמים אישית של כרטיס לכל אורח',
     'guest_information' => 'פרטי האורח',
@@ -5105,7 +5107,7 @@ return [
     'monetization_native_cpc' => 'מחיר ללחיצה',
     'monetization_native_cpc_help' => 'מחויב מהמפרסם. חל על קמפיינים חדשים בלבד.',
     'promotion_rate_not_configured' => 'המחירים לקמפיינים ממומנים עדיין לא הוגדרו באתר הזה. יש לפנות למנהל המערכת.',
-    'promotion_credit_available' => 'יש לך :amount יתרה לקמפיינים ממומנים. כל סכום מעבר לכך יחויב בכרטיס שלך.',
+    'promotion_credit_available' => 'יש לך :amount יתרה לקמפיינים ממומנים, והיא משמשת רק לתקציב שהיא מכסה במלואו. עבור תקציב זה הסכום כולו יחויב בכרטיס שלך והיתרה תישמר.',
 
     // Stay22 accommodation map (see docs/FEATURES.md, "Accommodation Affiliate")
     'accommodation' => 'לינה',

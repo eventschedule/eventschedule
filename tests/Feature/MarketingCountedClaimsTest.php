@@ -232,11 +232,11 @@ class MarketingCountedClaimsTest extends TestCase
 
         $source = $this->page('open-source');
         $this->assertMatchesRegularExpression(
-            '/Twenty-nine paths, forty operations/i',
+            '/Thirty paths, forty-one operations/i',
             $source,
             "/open-source states the OpenAPI shape; public/api/openapi.json now has {$paths} paths and {$operations} operations"
         );
-        $this->assertSame(29, $paths);
-        $this->assertSame(40, $operations);
+        $this->assertSame(30, $paths);
+        $this->assertSame(41, $operations);
     }
 }

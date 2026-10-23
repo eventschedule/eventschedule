@@ -3554,7 +3554,7 @@
                                                 <button type="button" @click="addTicketVolumeDiscount(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
                                                     + {{ __('messages.add_volume_discount') }}
                                                 </button>
-                                                <button type="button" @click="addTicketMaxPerOrder(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
+                                                <button type="button" @click="addTicketMaxPerOrder(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.is_pass && (ticket.max_per_order === null || ticket.max_per_order === undefined)">
                                                     + {{ __('messages.add_limit') }}
                                                 </button>
                                                 <button type="button" @click="openTicketDescription(ticket)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="! ticket.description && ! ticketDescOpen[ticket.uid]">
@@ -3575,7 +3575,7 @@
                                             <button type="button" @click="addTicketVolumeDiscount(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
                                                 + {{ __('messages.add_volume_discount') }}
                                             </button>
-                                            <button type="button" @click="addTicketMaxPerOrder(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
+                                            <button type="button" @click="addTicketMaxPerOrder(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.is_pass && (ticket.max_per_order === null || ticket.max_per_order === undefined)">
                                                 + {{ __('messages.add_limit') }}
                                             </button>
                                             <button type="button" @click="openTicketDescription(ticket)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="! ticket.description && ! ticketDescOpen[ticket.uid]">
@@ -3612,7 +3612,9 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div v-if="ticket.max_per_order !== null && ticket.max_per_order !== undefined" class="mt-4">
+                                        {{-- Not on a pass: EventRepo::saveEvent() stores 1 per order for a pass whatever
+                                             is typed (one redeemable unit per sale), and checkout enforces that 1. --}}
+                                        <div v-if="!ticket.is_pass && ticket.max_per_order !== null && ticket.max_per_order !== undefined" class="mt-4">
                                             <x-input-label :value="__('messages.max_per_order')" />
                                             <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
                                                 <x-text-input type="number" min="1" step="1" v-model.number="ticket.max_per_order" class="block w-full sm:w-48" />
@@ -4307,34 +4309,41 @@
                                 @endunless
 
                                 <!-- Individual Tickets -->
-                                {{-- Pro. The blanket non-Pro wrapper that used to freeze this whole
-                                     panel is gone (the free plan sells now), so the control carries
-                                     its own lock: disabled rather than hidden, so a free organizer
-                                     can see the feature exists instead of turning it on and watching
-                                     EventRepo::saveEvent() silently scrub it back off. --}}
+                                {{-- Free on free registration (no money is taken), Pro with tickets, which is the
+                                     rule EventRepo::saveEvent() applies. Below Pro with tickets the control carries
+                                     its own lock: disabled rather than hidden, so a free organizer can see the
+                                     feature exists instead of turning it on and watching saveEvent() silently scrub
+                                     it back off. One a lapsed Pro event already sells with is kept, as the server
+                                     keeps it (individualTicketsOn). --}}
+                                {{-- A pass is one redeemable unit per order, so EventRepo::saveEvent() turns this
+                                     off whenever a ticket type is a pass. While one is, the switch is drawn off and
+                                     locked with the reason under it, and posts 0; the stored choice is left alone
+                                     (not v-model), so taking the pass off again shows it as it was. --}}
                                 <div class="mb-6">
-                                    <div class="flex items-center gap-3" :class="isPro ? '' : 'opacity-60'">
-                                        <label class="relative w-11 h-6 flex-shrink-0" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                    <div class="flex items-center gap-3" :class="(!individualTicketsPlanLocked && !hasPassTicket) ? '' : 'opacity-60'">
+                                        <label class="relative w-11 h-6 flex-shrink-0" :class="(!individualTicketsPlanLocked && !hasPassTicket) ? 'cursor-pointer' : 'cursor-not-allowed'">
                                             <input id="individual_tickets_checkbox" type="checkbox"
-                                                v-model="event.individual_tickets"
-                                                :disabled="!isPro"
+                                                :checked="individualTicketsOn"
+                                                @change="event.individual_tickets = $event.target.checked"
+                                                :disabled="individualTicketsPlanLocked || hasPassTicket"
                                                 class="sr-only peer">
                                             <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                         </label>
-                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300" :class="(!individualTicketsPlanLocked && !hasPassTicket) ? 'cursor-pointer' : 'cursor-not-allowed'">
                                             {{ __('messages.individual_tickets') }}
                                         </label>
-                                        <template v-if="!isPro"><x-lock-badge tier="pro" /></template>
+                                        <template v-if="individualTicketsPlanLocked"><x-lock-badge tier="pro" /></template>
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
-                                    <p class="text-xs mt-1 ms-14" v-if="!isPro">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14" v-if="hasPassTicket" data-individual-tickets-pass-note>{{ __('messages.individual_tickets_off_for_passes') }}</p>
+                                    <p class="text-xs mt-1 ms-14" v-if="individualTicketsPlanLocked">
                                         <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_see_pro') }}</button>
                                     </p>
-                                    <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
+                                    <input type="hidden" name="individual_tickets" :value="individualTicketsOn ? 1 : 0">
 
                                     <!-- Individual Ticket Fields sub-toggle -->
-                                    <div v-show="event.individual_tickets" class="mt-3 ms-14">
+                                    <div v-show="individualTicketsOn" class="mt-3 ms-14">
                                         <div class="flex items-center gap-3">
                                             <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                                 <input id="individual_ticket_fields_checkbox" type="checkbox"
@@ -5689,6 +5698,15 @@
                              address (#section-calendar-sync) lands here and brings this into view. The title
                              has a field label's look, not event-group-label, which is "Schedules you follow"
                              just above: this would read as a third group of its checkboxes. --}}
+                        {{-- Members only (Draft and Internal both set is_draft) or cancelled: no save copies it
+                             (EventRepo::saveEvent() pushes neither), so the line says so and Sync Now, which
+                             would copy it, is not offered. --}}
+                        @php
+                            $calendarNotSyncedLine = $event->is_cancelled
+                                ? __('messages.calendar_not_synced_cancelled')
+                                : (($event->is_draft || $event->is_internal) ? __('messages.calendar_not_synced_draft') : __('messages.calendar_not_synced_next_save'));
+                            $calendarSyncNowOffered = ! $event->is_cancelled && ! $event->is_draft && ! $event->is_internal;
+                        @endphp
                         <div class="mt-8">
                             <h3 id="listing-calendar-sync" tabindex="-1" class="block font-medium text-sm text-gray-700 dark:text-gray-300 focus:outline-none">{{ __('messages.calendar_sync') }}</h3>
                             <p class="event-hint">{{ __('messages.calendar_sync_help') }}</p>
@@ -5702,9 +5720,9 @@
                                         @else
                                         <span class="event-status">{{ __('messages.not_synced') }}</span>
                                         {{-- Why, since the line above the list says a published event is copied on every
-                                             save: members only (Draft and Internal both set is_draft), or simply not
-                                             saved since the calendar was connected. --}}
-                                        <p class="event-list-sub">{{ $event->is_draft ? __('messages.calendar_not_synced_draft') : __('messages.calendar_not_synced_next_save') }}</p>
+                                             save: members only, cancelled, or simply not saved since the calendar was
+                                             connected. --}}
+                                        <p class="event-list-sub">{{ $calendarNotSyncedLine }}</p>
                                         @endif
                                         <span id="sync-status-{{ $event->id }}" class="hidden event-list-sub ms-2">{{ __('messages.syncing') }}</span>
                                         <p id="sync-error-{{ $event->id }}" role="alert" class="hidden mt-1 text-sm text-red-600 dark:text-red-400"></p>
@@ -5712,7 +5730,7 @@
                                     <div class="event-list-actions">
                                         @if ($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain))
                                         <button type="button" id="unsync-event-btn" class="event-link is-danger" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.remove') }}</button>
-                                        @else
+                                        @elseif ($calendarSyncNowOffered)
                                         <x-secondary-button type="button" id="sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.sync_now') }}</x-secondary-button>
                                         @endif
                                     </div>
@@ -5726,10 +5744,7 @@
                                         <span class="event-status is-on">{{ __('messages.synced') }}</span>
                                         @else
                                         <span class="event-status">{{ __('messages.not_synced') }}</span>
-                                        {{-- Why, since the line above the list says a published event is copied on every
-                                             save: members only (Draft and Internal both set is_draft), or simply not
-                                             saved since the calendar was connected. --}}
-                                        <p class="event-list-sub">{{ $event->is_draft ? __('messages.calendar_not_synced_draft') : __('messages.calendar_not_synced_next_save') }}</p>
+                                        <p class="event-list-sub">{{ $calendarNotSyncedLine }}</p>
                                         @endif
                                         <span id="microsoft-sync-status-{{ $event->id }}" class="hidden event-list-sub ms-2">{{ __('messages.syncing') }}</span>
                                         <p id="microsoft-sync-error-{{ $event->id }}" role="alert" class="hidden mt-1 text-sm text-red-600 dark:text-red-400"></p>
@@ -5737,7 +5752,7 @@
                                     <div class="event-list-actions">
                                         @if ($event->isSyncedToMicrosoftCalendarForSubdomain(request()->subdomain))
                                         <button type="button" id="microsoft-unsync-event-btn" class="event-link is-danger" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.remove') }}</button>
-                                        @else
+                                        @elseif ($calendarSyncNowOffered)
                                         <x-secondary-button type="button" id="microsoft-sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">{{ __('messages.sync_now') }}</x-secondary-button>
                                         @endif
                                     </div>
@@ -6758,6 +6773,7 @@
         // Which field the message is about, so the end-date one sits under the end-date row.
         dateTimeErrorField: '',
         isPro: @json($role->isPro()),
+        savedIndividualTicketsSold: @json($event->exists && $event->tickets_enabled && $event->individual_tickets),
         // old() first: a refused save comes back on the choice that was on screen, where its
         // error is, not on the saved one.
         ticketMode: @json(old('tickets_enabled', $event->tickets_enabled) ? 'tickets' : (old('rsvp_enabled', $event->rsvp_enabled) ? 'rsvp' : 'external')),
@@ -9700,7 +9716,7 @@
         var asked = [];
         if (e.ask_phone) { asked.push(C.ask_phone); }
         if ((this.isPro || this.eventExists) && this.eventCustomFields && Object.keys(this.eventCustomFields).length) { asked.push(C.custom_fields); }
-        if (e.individual_tickets) { asked.push(C.individual_tickets); }
+        if (this.individualTicketsOn) { asked.push(C.individual_tickets); }
         if (e.tickets_enabled && (e.terms_url || '').trim()) { asked.push(C.terms_url); }
         if ((e.ticket_notes || '').trim()) { asked.push(e.tickets_enabled ? C.ticket_notes : C.registration_notes); }
         // The sales dates first: they are what this row is opened for, and the line is cut at its
@@ -9789,6 +9805,22 @@
       },
       anyTicketPriced() {
         return this.tickets.some(function (ticket) { return parseFloat(ticket.price) > 0; });
+      },
+      // EventRepo::saveEvent() turns Individual tickets off when any ticket type is a pass.
+      hasPassTicket() {
+        return !! this.event.tickets_enabled && this.tickets.some(function (ticket) { return !! ticket.is_pass; });
+      },
+      // Individual tickets is free on free registration and Pro with tickets, as
+      // EventRepo::saveEvent() rules: below Pro it cannot be turned on while tickets are on.
+      individualTicketsPlanLocked() {
+        return ! this.isPro && !! this.event.tickets_enabled;
+      },
+      // What the switch shows and posts. Under the plan lock only an event that was SAVED selling
+      // with it keeps it (a lapsed Pro event), which is what the server keeps; one turned on under
+      // free registration is off once tickets are on, and back when they are off again.
+      individualTicketsOn() {
+        return !! this.event.individual_tickets && ! this.hasPassTicket
+          && (! this.individualTicketsPlanLocked || this.savedIndividualTicketsSold);
       },
       // Page content: a line for each of its rows, and the tab's, from what is on screen now.
       pageRows() {

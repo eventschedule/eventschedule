@@ -447,6 +447,35 @@ class ScheduleFormShellTest extends TestCase
         $this->assertStringContainsString('name="gift_card_amounts_submitted" value="1"', $html);
     }
 
+    /** The field takes a full address (type="url", and the rule is `url`), so it shows one. */
+    public function test_the_custom_domain_field_shows_a_full_address(): void
+    {
+        [, , $html] = $this->talentForm();
+
+        $this->assertMatchesRegularExpression('/<input[^>]*id="custom_domain"[^>]*placeholder="https:\/\/events\.example\.com"/', $html);
+    }
+
+    /**
+     * The gift card currency starts on the schedule's own events' currency, never on one an event
+     * it merely lists was priced in (Role::ownEvents(), not events()).
+     * Mutation: read $role->events() for the default again.
+     */
+    public function test_the_gift_card_currency_starts_on_the_schedules_own_events_not_on_one_it_lists(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, ['gift_cards_enabled' => true, 'gift_card_currency_code' => null]);
+        $venue = $this->createRole($this->createOwner(), 'venue');
+        $listed = $this->createEvent($venue, ['creator_role_id' => $venue->id, 'ticket_currency_code' => 'JPY']);
+        $listed->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        $selected = fn (string $html) => preg_match('/<option value="([A-Z]{3})" selected>/', substr($html, strpos($html, 'id="gift_card_currency_code"')), $m) ? $m[1] : null;
+
+        $this->assertSame(platform_currency(), $selected($this->formHtml($owner, $curator)), 'a listed event\'s currency is not the curator\'s');
+
+        $this->createEvent($curator, ['creator_role_id' => $curator->id, 'ticket_currency_code' => 'GBP']);
+        $this->assertSame('GBP', $selected($this->formHtml($owner, $curator)), 'its own event\'s currency is');
+    }
+
     /** The merge tab had a header on a phone and no link in the sidebar. */
     public function test_the_merge_tab_can_be_reached_on_a_desktop(): void
     {

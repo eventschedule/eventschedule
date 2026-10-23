@@ -621,11 +621,13 @@ class AnalyticsService
     }
 
     /**
-     * Get the role IDs of schedules the user owns or administers.
+     * Get the role IDs of schedules the user owns or administers and whose plan lets them in
+     * (User::manageableRoles(): on hosted, somebody else's schedule only while it is Enterprise,
+     * the rule the Sales page and the schedule's admin pages follow).
      */
     protected function getUserRoleIds(User $user): Collection
     {
-        return $this->userRoleIds[$user->id] ??= $user->editor()->pluck('roles.id');
+        return $this->userRoleIds[$user->id] ??= $user->manageableRoles()->pluck('id');
     }
 
     /**

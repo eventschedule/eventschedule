@@ -156,6 +156,118 @@ class CalendarPublishEchoTest extends TestCase
         $this->assertFalse($this->syncedDraft($role, Event::IMPORT_GOOGLE)->cameFromCalendarSync(Event::IMPORT_MICROSOFT));
     }
 
+    private function syncedPublished(Role $role, string $source): Event
+    {
+        return $this->createEvent($role, [
+            'is_draft' => false,
+            'import_source' => $source,
+            'creator_role_id' => $role->id,
+        ]);
+    }
+
+    /**
+     * Cancelling can be undone and deleting a calendar entry cannot, so cancelling a published
+     * event the sync read in leaves the owner's entry; restoring it does not make a second one.
+     */
+    public function test_cancelling_a_published_synced_event_leaves_the_owners_google_entry(): void
+    {
+        [$owner, $role] = $this->syncingSchedule();
+        $event = $this->syncedPublished($role, Event::IMPORT_GOOGLE);
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'google_event_id' => 'g-original', 'google_calendar_id' => 'primary']);
+
+        $google = $this->googleMock();
+        $google->shouldNotReceive('deleteEvent');
+        $google->shouldNotReceive('createEvent');
+
+        $lifecycle = app(EventLifecycleService::class);
+        $this->assertSame(EventLifecycleService::CANCELLED, $lifecycle->cancel($event->fresh(), $owner->id));
+        $this->assertSame('g-original', CalendarSync::where('event_id', $event->id)->value('google_event_id'));
+
+        $this->assertSame(EventLifecycleService::RESTORED, $lifecycle->restore($event->fresh(), $owner->id));
+        $this->assertSame('g-original', CalendarSync::where('event_id', $event->id)->value('google_event_id'));
+    }
+
+    /** The control: an event made here and pushed out still comes off the calendar on a cancel. */
+    public function test_cancelling_an_event_made_here_still_removes_its_entry(): void
+    {
+        [$owner, $role] = $this->syncingSchedule();
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id]);
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'google_event_id' => 'g-pushed', 'google_calendar_id' => 'primary']);
+
+        $google = $this->googleMock();
+        $google->shouldReceive('deleteEvent')->once()->with('g-pushed', 'primary', $role->id)->andReturn(true);
+
+        app(EventLifecycleService::class)->cancel($event->fresh(), $owner->id);
+
+        $this->assertFalse(CalendarSync::where('event_id', $event->id)->exists());
+    }
+
+    /** Deleting the event here removes the original while the schedule pushes its changes there. */
+    public function test_deleting_a_published_synced_event_removes_the_original_when_the_sync_is_both_ways(): void
+    {
+        [$owner, $role] = $this->syncingSchedule();
+        $event = $this->syncedPublished($role, Event::IMPORT_GOOGLE);
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'google_event_id' => 'g-original', 'google_calendar_id' => 'primary']);
+
+        $google = $this->googleMock();
+        $google->shouldReceive('deleteEvent')->once()->with('g-original', 'primary', $role->id)->andReturn(true);
+
+        $event->fresh()->delete();
+
+        $this->assertDatabaseMissing('events', ['id' => $event->id]);
+    }
+
+    /** A schedule that only reads from the calendar never deletes the owner's entry. */
+    public function test_deleting_a_synced_event_on_a_read_only_sync_leaves_the_original(): void
+    {
+        [$owner, $role] = $this->syncingSchedule(['sync_direction' => 'from']);
+        $event = $this->syncedPublished($role, Event::IMPORT_GOOGLE);
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'google_event_id' => 'g-original', 'google_calendar_id' => 'primary']);
+
+        $google = $this->googleMock();
+        $google->shouldNotReceive('deleteEvent');
+
+        (new SyncEventToGoogleCalendar($event->fresh(), $role, 'delete'))->handle($google);
+        $this->assertTrue(CalendarSync::where('event_id', $event->id)->exists());
+
+        $event->fresh()->delete();
+        $this->assertDatabaseMissing('events', ['id' => $event->id]);
+    }
+
+    public function test_cancelling_keeps_the_original_on_outlook_and_caldav_too(): void
+    {
+        [$owner, $role] = $this->syncingSchedule(['sync_direction' => null, 'microsoft_sync_direction' => 'both']);
+        $role->forceFill([
+            'caldav_settings' => ['server_url' => 'https://calendar.example.org', 'username' => 'x', 'password' => 'y', 'calendar_url' => 'https://calendar.example.org/c'],
+            'caldav_sync_direction' => 'both',
+        ])->save();
+
+        $outlookEvent = $this->syncedPublished($role, Event::IMPORT_MICROSOFT);
+        MicrosoftCalendarSync::create(['user_id' => $owner->id, 'event_id' => $outlookEvent->id, 'role_id' => $role->id, 'microsoft_event_id' => 'm-original', 'microsoft_calendar_id' => null]);
+        $caldavEvent = $this->syncedPublished($role, Event::IMPORT_CALDAV);
+        $caldavEvent->roles()->updateExistingPivot($role->id, ['caldav_event_uid' => 'uid-original']);
+
+        $microsoft = Mockery::mock(MicrosoftCalendarService::class);
+        $microsoft->shouldReceive('ensureValidToken')->andReturn(true);
+        $microsoft->shouldNotReceive('deleteEvent');
+        $caldav = Mockery::mock(CalDAVService::class);
+        $caldav->shouldNotReceive('deleteEvent');
+
+        (new SyncEventToMicrosoftCalendar($outlookEvent->fresh(), $role->fresh(), 'cancel'))->handle($microsoft);
+        (new SyncEventToCalDAV($caldavEvent->fresh(), $role->fresh(), 'cancel'))->handle($caldav);
+
+        $this->assertSame('m-original', MicrosoftCalendarSync::where('event_id', $outlookEvent->id)->value('microsoft_event_id'));
+        $this->assertSame('uid-original', $caldavEvent->fresh()->getCalDAVEventUidForRole($role->id));
+
+        // A delete on a read-only direction leaves them as well.
+        $role->forceFill(['microsoft_sync_direction' => 'from', 'caldav_sync_direction' => 'from'])->save();
+        (new SyncEventToMicrosoftCalendar($outlookEvent->fresh(), $role->fresh(), 'delete'))->handle($microsoft);
+        (new SyncEventToCalDAV($caldavEvent->fresh(), $role->fresh(), 'delete'))->handle($caldav);
+
+        $this->assertSame('m-original', MicrosoftCalendarSync::where('event_id', $outlookEvent->id)->value('microsoft_event_id'));
+        $this->assertSame('uid-original', $caldavEvent->fresh()->getCalDAVEventUidForRole($role->id));
+    }
+
     public function test_the_same_holds_for_outlook(): void
     {
         [$owner, $role] = $this->syncingSchedule(['sync_direction' => null, 'microsoft_sync_direction' => 'both']);

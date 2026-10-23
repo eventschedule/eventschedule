@@ -42,6 +42,9 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Analytics shows how your schedule pages are performing. Open it by clicking <strong>Analytics</strong> in the sidebar. It is built in and on every plan, so there is nothing to install and no third-party tracking script to add.
         </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            It covers the schedules you own and the ones you run as an admin; a viewer sees nothing here. On eventschedule.com, an admin of somebody else's schedule sees its Revenue and Check-Ins figures only while that schedule is on the Enterprise plan, the plan that includes team members, as with its Sales page.
+        </p>
 
         <x-doc-screenshot id="analytics--dashboard" alt="The Analytics page: the tabs, the schedule, event and date range filters, and one card holding the page views figure, its change and the views chart" loading="eager" />
 

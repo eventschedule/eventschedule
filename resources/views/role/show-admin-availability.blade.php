@@ -1,4 +1,4 @@
-@if(!$isViewer)
+{{-- Every member who reaches this tab, a viewer included, marks their own days here. --}}
 <form method="post" id="availability_form"
         action="{{ route('role.availability', ['subdomain' => $subdomain]) }}">
 
@@ -10,7 +10,6 @@
     <input type="hidden" id="year" name="year" value="{{ $year }}"/>
 
 </form>
-@endif
 
 <div class="page-head">
     <p class="page-lead">{{ __('messages.availability_lead') }}</p>

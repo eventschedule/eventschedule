@@ -63,7 +63,7 @@
             Open <strong class="text-gray-900 dark:text-white">Settings</strong> from the sidebar. These settings belong to <em>you</em>, not to a schedule: anything that differs per schedule, such as calendar sync or a schedule's own sending address, lives in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">the schedule's settings</a> instead. That includes the notification emails you get about a schedule, such as a new ticket sale or a new event request, which are chosen under its <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Notifications</a> settings.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Six entries are listed down the left side of the page (an accordion on a phone or tablet), and this guide follows them in order. Under each entry's name is a line saying what is set there, so most questions (is two-factor on? which payment methods are connected?) are answered without opening anything.
+            Six entries are listed down the left side of the page (an accordion on a phone or tablet), with Boosts for a boost partner and App Update on a selfhosted site, and this guide follows them in order. Under each entry's name is a line saying what is set there, so most questions (is two-factor on? which payment methods are connected?) are answered without opening anything.
         </p>
 
         <x-doc-screenshot id="account-settings--settings" alt="The Settings page: six entries down the left, each with a line saying what is set, and Profile Information open" loading="eager" />
@@ -94,6 +94,10 @@
                         <td><a href="#google" class="doc-link">Google Settings</a>, <a href="#microsoft" class="doc-link">Outlook Calendar</a> and, where Facebook login is enabled, <a href="#facebook" class="doc-link">Facebook Settings</a></td>
                     </tr>
                     <tr>
+                        <td><a href="#boosts" class="doc-link">Boosts</a></td>
+                        <td>Only for an account set up as a boost partner: the Page and ad account, then the fee card</td>
+                    </tr>
+                    <tr>
                         <td>Developers</td>
                         <td><a href="#api" class="doc-link">API Settings</a>, then <a href="#webhooks" class="doc-link">Webhooks</a></td>
                     </tr>
@@ -103,7 +107,7 @@
                     </tr>
                     <tr>
                         <td><a href="#app-update" class="doc-link">App Update</a></td>
-                        <td>A seventh entry, only on a selfhosted site that can update itself</td>
+                        <td>The last entry, only on a selfhosted site that can update itself, for its administrators</td>
                     </tr>
                 </tbody>
             </table>
@@ -250,7 +254,7 @@
             Cash needs nothing set up. To take payment any other way, connect a method here. There are six, each a row that opens in place and says beside its name whether it is connected, or what the method is while it is not: Stripe, Invoice Ninja, Payment Link, Payfast, PayPal and Razorpay. The line under Payment Methods in the list of entries names the ones that are. While nothing is connected the first row opens by itself, and a row's button reads <strong class="text-gray-900 dark:text-white">Connect</strong> until there is something to save over.
         </p>
 
-        <x-doc-screenshot id="account-settings--payment-methods" alt="The Payment Methods tab of Settings: five rows, Stripe, Invoice Ninja, Payment Link, Payfast and PayPal, each with a line beside its name" />
+        <x-doc-screenshot id="account-settings--payment-methods" alt="The Payment Methods tab of Settings: six rows, Stripe, Invoice Ninja, Payment Link, Payfast, PayPal and Razorpay, each with a line beside its name" />
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Which one an event uses is decided per event, in the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> row of the event's Tickets tab, so connecting more than one lets you route different events differently. With nothing connected, an event can only take cash, unless the site you are on provides an account for everyone, as described below.
         </p>
@@ -331,7 +335,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Test mode</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Sends payments to Payfast's sandbox so nothing is really charged. While it is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and buyers see a notice on the payment page. Turn it off before you sell real tickets.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Sends payments to Payfast's sandbox so nothing is really charged. Payfast's public sandbox credentials are merchant ID <code class="doc-inline-code">10000100</code> and merchant key <code class="doc-inline-code">46f0cd694581a</code>; set a passphrase in your own <x-link href="https://sandbox.payfast.co.za" target="_blank">Payfast sandbox account</x-link> and enter it with them, because all three are required either way. Payfast cannot reach a notification address on <code class="doc-inline-code">localhost</code>, so a sandbox purchase only completes on a site the internet can reach. While test mode is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and buyers see a notice on the payment page. Turn it off before you sell real tickets.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment methods</h4>
@@ -347,7 +351,7 @@
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            For the full walkthrough, including the sandbox credentials and what happens to an event priced in another currency, see <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">Connecting Payfast</a>.
+            For the orders Payfast refuses (under R5.00, or not in ZAR) and how refunds work, see <a href="{{ route('marketing.docs.tickets') }}#payfast-refused" class="doc-link">Payfast in Selling Tickets</a>.
         </p>
 
         <h3 id="paypal" class="doc-subheading">PayPal</h3>
@@ -365,7 +369,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Test mode</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Uses your PayPal sandbox credentials so nothing is really charged. While it is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and the Tickets tab's Payment row shows a warning. Turn it off before you sell real tickets - test tickets look exactly like real ones.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Uses PayPal's sandbox so nothing is really charged. The sandbox has its own pair: copy the Client ID and Secret from the <strong class="text-gray-900 dark:text-white">Sandbox</strong> tab of Apps &amp; Credentials. The live pair does not work in test mode and the sandbox pair does not work outside it, so the tab you copied from must match the switch. To act as the buyer, sign in at checkout with the personal test account PayPal's sandbox creates beside your business one. A sandbox purchase completes on <code class="doc-inline-code">localhost</code> too. While test mode is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and the Tickets tab's Payment row shows a warning. Turn it off before you sell real tickets - test tickets look exactly like real ones.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
@@ -377,7 +381,7 @@
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            PayPal settles Australian, Canadian, Hong Kong, New Zealand, Singapore and US dollars, the euro, sterling, the Swiss franc, the Czech koruna, the Danish, Norwegian and Swedish krone, the Brazilian real, the Chinese yuan, the Israeli shekel, the Malaysian ringgit, the Mexican peso, the Philippine peso, the Polish zloty, the Russian rouble and the Thai baht. For the full walkthrough see <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">Connecting PayPal</a>.
+            PayPal settles Australian, Canadian, Hong Kong, New Zealand, Singapore and US dollars, the euro, sterling, the Swiss franc, the Czech koruna, the Danish, Norwegian and Swedish krone, the Brazilian real, the Chinese yuan, the Israeli shekel, the Malaysian ringgit, the Mexican peso, the Philippine peso, the Polish zloty, the Russian rouble and the Thai baht. For the checkouts PayPal refuses and how refunds work, see <a href="{{ route('marketing.docs.tickets') }}#paypal-refused" class="doc-link">PayPal in Selling Tickets</a>.
         </p>
 
         <h3 id="razorpay" class="doc-subheading">Razorpay</h3>
@@ -387,7 +391,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What to enter</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your <strong class="text-gray-900 dark:text-white">Key ID</strong> and <strong class="text-gray-900 dark:text-white">Key Secret</strong>, from the Razorpay Dashboard under <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; API Keys</strong>. The Key ID starts with <code>rzp_live_</code>, or <code>rzp_test_</code> for test mode.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your <strong class="text-gray-900 dark:text-white">Key ID</strong> and <strong class="text-gray-900 dark:text-white">Key Secret</strong>, from the Razorpay Dashboard under <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; API Keys</strong>. The Key ID starts with <code>rzp_live_</code>, or <code>rzp_test_</code> for test mode. Live keys exist only once Razorpay has activated your account. Razorpay shows the Key Secret only once, and regenerating it replaces the pair.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">They are checked when you save</h4>
@@ -395,7 +399,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Webhook Secret (recommended)</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The Razorpay row shows a webhook URL with a <strong class="text-gray-900 dark:text-white">Copy</strong> button. In the Razorpay Dashboard, open <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; Webhooks</strong>, add that URL, tick <code>payment_link.paid</code> and <code>payment_link.expired</code>, choose a secret and enter the same secret here. With it, a buyer who pays but never comes back from Razorpay (common when paying in a UPI app) still gets their ticket, and a checkout nobody finishes gives its seats back when its payment page expires. Test Mode and Live Mode each need their own webhook. While no secret is saved, the row reads <strong class="text-gray-900 dark:text-white">No webhook</strong>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The Razorpay row shows a webhook URL, ending in <code class="doc-inline-code">/payments/razorpay/webhook</code>, with a <strong class="text-gray-900 dark:text-white">Copy</strong> button. In the Razorpay Dashboard, open <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; Webhooks</strong>, add that URL, tick <code>payment_link.paid</code> and <code>payment_link.expired</code>, choose a secret and enter the same secret here. With it, a buyer who pays but never comes back from Razorpay (common when paying in a UPI app) still gets their ticket, and a checkout nobody finishes gives its seats back when its payment page expires. Test Mode and Live Mode each need their own webhook. While no secret is saved, the row reads <strong class="text-gray-900 dark:text-white">No webhook</strong>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Test mode</h4>
@@ -407,7 +411,7 @@
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            For the full walkthrough, including what to do without a webhook and when a checkout is refused, see <a href="{{ route('marketing.docs.tickets') }}#razorpay" class="doc-link">Connecting Razorpay</a>.
+            For why the webhook matters and what to do without one, see <a href="{{ route('marketing.docs.tickets') }}#razorpay-webhook" class="doc-link">Razorpay's webhook</a>; for the checkouts Razorpay refuses and how refunds work, see <a href="{{ route('marketing.docs.tickets') }}#razorpay-refused" class="doc-link">Razorpay in Selling Tickets</a>.
         </p>
 
         <div class="doc-callout doc-callout-info">
@@ -490,6 +494,10 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Recovery codes</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Each code works once and lets you sign in without the authenticator app. <strong class="text-gray-900 dark:text-white">Regenerate recovery codes</strong> asks you to confirm, then issues a fresh set and displays it once; every earlier code stops working at that moment.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Signing in</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Every way of signing in with your password asks for the code. The form for submitting an event to a schedule cannot ask, so it sends an account with two-factor to the login page instead. After five wrong codes the account waits up to five minutes before it can try again, however many times you sign in afresh.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Turning it off</h4>
@@ -604,7 +612,7 @@
         <div class="doc-fields">
             <div class="doc-field" id="boosts-account">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Page and ad account</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Follow the numbered steps to share your ad account and Page with our Meta Business, enter the two IDs (a number, <code class="doc-inline-code">act_</code> followed by the number, or the address copied from Facebook), and press <strong class="text-gray-900 dark:text-white">Save and check</strong>. Each check is listed with its result, with the fix when one fails, and <strong class="text-gray-900 dark:text-white">Check again</strong> runs them again once you have fixed something on Facebook. The status reads Waiting for confirmation until we confirm the IDs once, and you are emailed when that is done; requests approved and paid in the meantime start then. Where it is offered, you can sign in with Facebook instead and pick the Page and ad account from your own. <strong class="text-gray-900 dark:text-white">Disconnect</strong> stops your running boosts first, then removes the connection. The same block holds <strong class="text-gray-900 dark:text-white">How businesses pay you</strong>: a link or a contact shown to a business once you approve its boost.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your Page and ad account must both be in a Meta Business portfolio (business.facebook.com): an ad account that is only in a personal Facebook profile cannot be shared. Follow the numbered steps to share them with our Meta Business, giving it <strong class="text-gray-900 dark:text-white">Manage campaigns</strong> on the ad account and <strong class="text-gray-900 dark:text-white">Ads</strong> access on the Page, then enter the two IDs (a number, <code class="doc-inline-code">act_</code> followed by the number, or the address copied from Facebook), and press <strong class="text-gray-900 dark:text-white">Save and check</strong>. Each check is listed with its result, with the fix when one fails, and <strong class="text-gray-900 dark:text-white">Check again</strong> runs them again once you have fixed something on Facebook. The status reads Waiting for confirmation until we confirm the IDs once, and you are emailed when that is done; requests approved and paid in the meantime start then. Where it is offered, you can sign in with Facebook instead and pick the Page and ad account from your own. <strong class="text-gray-900 dark:text-white">Disconnect</strong> stops your running boosts first, then removes the connection. The same block holds <strong class="text-gray-900 dark:text-white">How businesses pay you</strong>: a link or a contact shown to a business once you approve its boost.</p>
             </div>
             <div class="doc-field" id="boosts-card">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Fee card</h3>
@@ -770,7 +778,7 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            On a selfhosted installation, every user except an administrator can delete their own account here: the section is not shown to an administrator. The installation always keeps at least one administrator, so the last one cannot be deleted.
+            On a selfhosted installation the section is hidden from administrators, so that the installation always keeps one. Every other user can delete their own account here.
         </p>
     </section>
 
@@ -784,14 +792,14 @@
             App Update
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <strong class="text-gray-900 dark:text-white">App Update</strong> is the last entry in the list, and only on a selfhosted installation. Its line says the installed version, or "Update available" with the version that is waiting. The section shows the <strong class="text-gray-900 dark:text-white">Installed Version</strong> next to the <strong class="text-gray-900 dark:text-white">Latest Version</strong> published on GitHub. If they match it simply says you are up to date. If they differ, an <strong class="text-gray-900 dark:text-white">Update</strong> button downloads and applies the new release, after a confirmation. If GitHub cannot be reached, the section says so and offers no button.
+            <strong class="text-gray-900 dark:text-white">App Update</strong> is the last entry in the list, and only on a selfhosted installation, for its administrators. Its line says the installed version, or "Update available" with the version that is waiting. The section shows the <strong class="text-gray-900 dark:text-white">Installed Version</strong> next to the <strong class="text-gray-900 dark:text-white">Latest Version</strong> published on GitHub. If they match it simply says you are up to date. If they differ, an <strong class="text-gray-900 dark:text-white">Update</strong> button downloads and applies the new release, after a confirmation. If GitHub cannot be reached, the section says so and offers no button.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             A large update can outrun PHP's execution limit. If it times out, run <code class="doc-inline-code">php artisan app:update</code> from the command line, raise <code class="doc-inline-code">max_execution_time</code> in <code class="doc-inline-code">php.ini</code>, or download the release zip linked under the button and extract it to <code class="doc-inline-code">/tmp/eventschedule/</code> before trying again. If it says the web server cannot write to every file of the app, run <code class="doc-inline-code">sudo php artisan app:update</code> on the server, then set the file permissions again (see <a href="{{ route('marketing.docs.selfhost.installation') }}#updating" class="doc-link">Keeping the Install Up to Date</a>).
         </p>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Who sees it</div>
-            <p>This section never appears on eventschedule.com, where everyone is always on the latest version automatically. On a single-tenant selfhost any signed-in user sees it; on a selfhosted platform running in hosted mode it is limited to the instance administrator, so a customer cannot update the whole installation.</p>
+            <p>This section never appears on eventschedule.com, where everyone is always on the latest version automatically. On a selfhosted site it is for the site's administrators, so a user cannot update the whole installation. A very old install that has no administrator account at all still shows it to every signed-in user.</p>
             <p class="mt-3">Instance admins have the same panel at <strong class="text-gray-900 dark:text-white">Admin &rarr; System &rarr; App Update</strong> (the System tab, then App Update in the row under it), which adds a last-checked time, a <strong class="text-gray-900 dark:text-white">Check for Updates</strong> button and a badge on the System tab when a release is waiting. Either way, <code class="doc-inline-code">php artisan app:update</code> does the same job from the command line and works even when neither screen is available.</p>
         </div>
     </section>

@@ -198,7 +198,7 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            That variable is shared with the rest of the product's outbound marketing links, so change it only if you are ready for all of them to point at your site, and make sure the resulting <code class="doc-inline-code">/accessibility</code> path there actually serves your statement.
+            That variable is shared with the rest of the product's outbound marketing links, so change it only if you are ready for all of them to point at your site, and make sure the resulting <code class="doc-inline-code">/accessibility</code> path there actually serves your statement. The links into this guide move with it: the <strong class="text-gray-900 dark:text-white">Learn more</strong> links in the app (under Settings &gt; Payment Methods, for example) would open <code class="doc-inline-code">/docs/...</code> on your site, which has no such pages.
         </p>
     </section>
 

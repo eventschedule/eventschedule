@@ -1158,6 +1158,25 @@ class EventRepo
             }
         }
 
+        // Per-order questions (the event's own custom_fields) are Pro. The form shows their editor
+        // only on Pro and does not post them below it, but this method stored whatever was posted,
+        // so the API or a hand-made post set them on a Free schedule. The plan that counts is the
+        // current schedule's OR the event's own (as for sponsors below), and a request that does not
+        // carry the field changes nothing: a Free save leaves stored questions as they are.
+        if ($request->has('custom_fields')) {
+            $orderFieldsOwnRole = $event?->exists ? $event->ticketingRole() : null;
+            $orderFieldsOnPlan = ($currentRole && $currentRole->isPro())
+                || ($orderFieldsOwnRole && $orderFieldsOwnRole->isPro());
+
+            if (! $orderFieldsOnPlan) {
+                $request->request->remove('custom_fields');
+                $request->query->remove('custom_fields');
+                if ($request->isJson()) {
+                    $request->json()->remove('custom_fields');
+                }
+            }
+        }
+
         // Decode event-level custom_fields from JSON string
         if ($request->has('custom_fields')) {
             $customFields = json_decode($request->input('custom_fields'), true);
@@ -1368,17 +1387,20 @@ class EventRepo
             $event->installment_min_order_amount = min(9999999, max(0, (float) $event->installment_min_order_amount));
         }
 
-        // Individual tickets is Pro. Scrubbed rather than validated so a hand-posted flag on a free
-        // schedule is ignored instead of failing the whole save. The RSVP variant of per-guest
-        // registration stays free, which is why this only clears the flag when it is being turned on.
+        // Individual tickets is Pro with tickets. Scrubbed rather than validated so a hand-posted flag
+        // on a free schedule is ignored instead of failing the whole save. On free registration
+        // (rsvp_enabled, no money taken) it is free on every plan (docs/FEATURES.md), so only an
+        // event that takes tickets is scrubbed, and the event form unlocks the switch there too.
         //
         // Gate on the STORED value, the same way the pass scrub below does. Clearing whenever the
         // flag is simply true also wiped it for a lapsed Pro schedule on its very next save of any
         // event - and it did so however the form was rendered, because the boolean loop above leaves
         // an unposted flag at its stored value rather than at false. An event that already sold
         // per-guest tickets would silently change how its checkout behaves. Clamped, never deleted.
+        // "Already had" means had WITH tickets: a flag stored under free registration does not carry
+        // over when the event switches to selling tickets, or free registration was a way round it.
         if (! $ticketExtrasAllowed && $event->tickets_enabled && $event->individual_tickets
-            && ! $event->getOriginal('individual_tickets')) {
+            && ! ($event->getOriginal('individual_tickets') && $event->getOriginal('tickets_enabled'))) {
             $event->individual_tickets = false;
         }
 
@@ -3165,9 +3187,13 @@ class EventRepo
      * newsletter asks for a year, because it announces a weekly night months before its first date
      * as readily as it does a one-off, which has no horizon here at all.
      *
+     * $narrow is applied to both queries, for a caller that wants fewer events or more relations
+     * (the Events graphic asks for flyered events only, with their tickets and venue). It may only
+     * narrow: the visibility rules above are the list's, whoever asks.
+     *
      * @return \Illuminate\Support\Collection<int, array{event: Event, date: string}>
      */
-    public function upcomingForGuest(Role $role, ?\App\Models\Group $group = null, int $limit = 50, int $seriesHorizonDays = 60): \Illuminate\Support\Collection
+    public function upcomingForGuest(Role $role, ?\App\Models\Group $group = null, int $limit = 50, int $seriesHorizonDays = 60, ?\Closure $narrow = null): \Illuminate\Support\Collection
     {
         $base = fn () => Event::query()
             ->where('events.is_draft', false)
@@ -3185,7 +3211,8 @@ class EventRepo
                 ->where('is_accepted', true)
                 ->when($group, fn ($q) => $q->where('group_id', $group->id)))
             ->with(['roles', 'creatorRole'])
-            ->withCount('polls');
+            ->withCount('polls')
+            ->when($narrow, fn ($query) => $narrow($query));
 
         $oneOff = $base()
             ->whereNull('events.days_of_week')

@@ -28,6 +28,11 @@ class ApiGroupController extends Controller
             return response()->json(['error' => 'Schedule not found'], 404);
         }
 
+        // On hosted a team belongs to the Enterprise plan, as on the web (User::isEditor()).
+        if (! auth()->user()->planAllowsTeamAccess($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         if (! $role->isPro()) {
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
@@ -52,6 +57,11 @@ class ApiGroupController extends Controller
 
         if (! $role) {
             return response()->json(['error' => 'Schedule not found'], 404);
+        }
+
+        // On hosted a team belongs to the Enterprise plan, as on the web (User::isEditor()).
+        if (! auth()->user()->planAllowsTeamAccess($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         if (! $role->isPro()) {
@@ -107,6 +117,11 @@ class ApiGroupController extends Controller
 
         if (! $role) {
             return response()->json(['error' => 'Schedule not found'], 404);
+        }
+
+        // On hosted a team belongs to the Enterprise plan, as on the web (User::isEditor()).
+        if (! auth()->user()->planAllowsTeamAccess($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         if (! $role->isPro()) {
@@ -172,6 +187,11 @@ class ApiGroupController extends Controller
 
         if (! $role) {
             return response()->json(['error' => 'Schedule not found'], 404);
+        }
+
+        // On hosted a team belongs to the Enterprise plan, as on the web (User::isEditor()).
+        if (! auth()->user()->planAllowsTeamAccess($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         if (! $role->isPro()) {

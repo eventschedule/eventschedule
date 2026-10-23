@@ -20,7 +20,6 @@ return [
     'translation_retry_after_hours' => (int) env('USAGE_TRANSLATION_RETRY_HOURS', 24),
     'ai_image_daily_limit_trial' => (int) env('AI_IMAGE_DAILY_LIMIT_TRIAL', 3),
     'ai_image_daily_limit_paid' => (int) env('AI_IMAGE_DAILY_LIMIT_PAID', 10),
-    'ai_parse_daily_limit_trial' => (int) env('AI_PARSE_DAILY_LIMIT_TRIAL', 10),
     'ai_parse_daily_limit_pro' => (int) env('AI_PARSE_DAILY_LIMIT_PRO', 50),
     'ai_parse_daily_limit_enterprise' => (int) env('AI_PARSE_DAILY_LIMIT_ENTERPRISE', 100),
     'ai_agenda_daily_limit_enterprise' => (int) env('AI_AGENDA_DAILY_LIMIT_ENTERPRISE', 10),

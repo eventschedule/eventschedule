@@ -343,7 +343,7 @@
             </svg>
             Step 8: Environment Variables
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Here is the full set of environment variables for the Meta boost channel. Every one of them is read from <code class="doc-inline-code">config/services.php</code> under the <code class="doc-inline-code">meta</code> key, and the on-network promotions channel uses a completely separate set:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Here is the full set of environment variables for the Meta boost channel on a selfhosted install (a multi-tenant hosted install has four more, for <a href="#boost-partners" class="doc-link">boost partners</a>). Every one of them is read from <code class="doc-inline-code">config/services.php</code> under the <code class="doc-inline-code">meta</code> key, and the on-network promotions channel uses a completely separate set:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -465,8 +465,39 @@
         </div>
 
         <h3 id="admin-boost-page" class="doc-subheading">What the admin panel shows</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Every campaign on the install is listed on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-boost" class="doc-link">Boost</a> page, under <strong class="text-gray-900 dark:text-white">Manage</strong>: campaign counts, total ad spend, the average rates, a notice for campaigns that are stuck, failed or disapproved, <strong class="text-gray-900 dark:text-white">Status Distribution</strong>, <strong class="text-gray-900 dark:text-white">Top Boosters</strong> and the <strong class="text-gray-900 dark:text-white">Campaigns</strong> list.</p>
-        <p class="text-gray-600 dark:text-gray-300">The parts that belong to the hosted billing model are drawn only when <code class="doc-inline-code">IS_HOSTED=true</code>: markup revenue and refunds, the <strong class="text-gray-900 dark:text-white">Revenue Trend</strong> chart, the <strong class="text-gray-900 dark:text-white">Grant Boost Credit</strong> and <strong class="text-gray-900 dark:text-white">Set Spending Limit</strong> cards, and <strong class="text-gray-900 dark:text-white">Recent Billing Records</strong>. So is the per-schedule limit that grows as a schedule completes campaigns: with <code class="doc-inline-code">IS_HOSTED=false</code> the per-campaign cap is always <code class="doc-inline-code">META_MAX_BUDGET</code> and there is no credit to grant.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Every campaign on the install is listed on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-boost" class="doc-link">Boost</a> page, under <strong class="text-gray-900 dark:text-white">Manage</strong>, which that guide describes card by card. On a selfhosted install the billing parts (markup, refunds, credit and the per-schedule limit) are left out: the per-campaign cap is always <code class="doc-inline-code">META_MAX_BUDGET</code> and there is no credit to grant.</p>
+
+        <h3 id="boost-partners" class="doc-subheading">Boost partners (hosted only)</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On a multi-tenant hosted install, an account can be made a boost partner: its schedules then boost under its own Facebook Page and Meta ad account rather than yours. Meta bills the partner's ad account, and the platform charges the partner a monthly fee on what was actually spent (20 percent unless set otherwise per partner). A selfhosted install never offers it. It needs four more variables:</p>
+        <div class="doc-table-wrap mb-6">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">BOOST_PARTNERS_ENABLED</code></td>
+                        <td>Set to <code class="doc-inline-code">true</code> to show the <strong class="text-gray-900 dark:text-white">Enable</strong> form on the admin panel's Boost page, where you make an account a partner by its email address</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">META_BUSINESS_ID</code></td>
+                        <td>Your own Meta Business. A partner shares its ad account and Page with it</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">META_SYSTEM_USER_ID</code></td>
+                        <td>The system user whose token is <code class="doc-inline-code">META_ACCESS_TOKEN</code>. A shared ad account and Page are assigned to it, so that token can run the partner's ads. Without this and <code class="doc-inline-code">META_BUSINESS_ID</code>, a partner's check of a shared account fails</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">META_LOGIN_CONFIG_ID</code></td>
+                        <td>Optional. A Facebook Login for Business configuration, which lets a partner connect by signing in to Facebook instead of sharing. The option is hidden until it is set, and it needs App Review</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A partner connects in their own settings, under <strong class="text-gray-900 dark:text-white">Boosts</strong>. A shared account then waits until an admin checks the Business that owns it and presses <strong class="text-gray-900 dark:text-white">Confirm</strong> on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#boost-partners" class="doc-link">Boost partners</a> card. The monthly fee is charged by <code class="doc-inline-code">boost:charge-statements</code> (see <a href="#scheduled-command" class="doc-link">Step 9</a>).</p>
 
         <h3 class="doc-subheading">Applying the changes</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">No code changes are needed - every key above is already wired up in <code class="doc-inline-code">config/services.php</code>. Clear the config cache after editing <code class="doc-inline-code">.env</code>, or the app keeps reading the old values:</p>
@@ -504,6 +535,8 @@
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">A third command, <code class="doc-inline-code">promo:sync</code>, settles the on-network promotions channel on the same 15 minute schedule. It is gated on <code class="doc-inline-code">ADS_ENABLED</code> rather than on any Meta variable, so it stays dormant on an instance that only uses Meta, and you do not need to configure anything here for it.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a multi-tenant hosted install a fourth, <code class="doc-inline-code">boost:charge-statements</code>, runs daily: it closes each <a href="#boost-partners" class="doc-link">boost partner's</a> month and charges its fee, and tries a declined card again. It does nothing on a selfhosted install.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
