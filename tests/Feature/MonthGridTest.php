@@ -586,9 +586,8 @@ class MonthGridTest extends TestCase
         $this->assertSame(1, preg_match('/window\.monthClamp = \{.*?beforeMount\(el, binding\).*?beforeUpdate\(el, binding\)/s', $script));
         $this->assertSame(0, preg_match('/window\.monthClamp = \{[^}]*?\n    (mounted|updated)\(/s', $script));
 
-        // "Nothing scheduled in October" is a statement about the schedule: not said while a
-        // filter is what hid the month's events.
-        $this->assertStringContainsString('v-if="!isLoadingEvents && !loadFailed && monthIsBare && narrowingFilterCount === 0" class="gk-cal-empty"', $month);
+        // An empty month is just its empty weeks: no "Nothing scheduled in October" strip above them.
+        $this->assertStringNotContainsString('gk-cal-empty', $month);
 
         // A night that runs past midnight is not over at midnight.
         $this->assertStringContainsString('const past = start ? ended : last < now.slice(0, 10);', $script);

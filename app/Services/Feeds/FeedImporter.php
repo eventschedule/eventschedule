@@ -256,6 +256,8 @@ class FeedImporter
         $complete = $reading->complete;
         $next = $reading->next;
         $asked = [$feed->url => true];
+        $since = $reading->listedSince;
+        $sinceKnown = $since !== null;
 
         for ($page = 1; $next !== null; $page++) {
             // A feed that pages forever, or back to where it began, is not walked to the end.
@@ -279,9 +281,15 @@ class FeedImporter
             $seen += $further->seen;
             $complete = $complete && $further->complete;
             $next = $further->next;
+            // An empty last page says nothing about time. A page that cannot say when its posts
+            // were put up leaves the read unable to say how far back it saw.
+            if ($further->items) {
+                $sinceKnown = $sinceKnown && $further->listedSince !== null;
+                $since = $sinceKnown ? min($since, $further->listedSince) : null;
+            }
         }
 
-        return new FeedReading($items, $seen, $complete, $reading->listsEverything, null, $reading->skipped);
+        return new FeedReading($items, $seen, $complete, $reading->listsEverything, null, $reading->skipped, $sinceKnown ? $since : null);
     }
 
     /**
@@ -328,7 +336,9 @@ class FeedImporter
 
             // What the list knows and the item's own page may not repeat. Kept with the item:
             // its page may be read on a later run, when the list answered "nothing changed".
-            if ($entry['row'] === null && ($changed || ! isset($item->pending['hint']))) {
+            // Also once for an item stored before its hint said when it was put up.
+            $undated = array_key_exists('published', $entry['hint'] ?? []) && ! array_key_exists('published', $item->pending['hint'] ?? []);
+            if ($entry['row'] === null && ($changed || $undated || ! isset($item->pending['hint']))) {
                 $item->pending = ['hint' => $entry['hint']] + ($item->pending ?? []);
             }
 
@@ -382,7 +392,11 @@ class FeedImporter
         // anything is gone. Nor can a read that showed nothing at all: a calendar that is
         // suddenly empty is a source having a bad moment far more often than every event of
         // its being called off.
-        if (! $reading->complete || ! $reading->listsEverything || ! $this->inThisRead) {
+        // Except a newest-first list read part of the way: what was put up since the oldest post
+        // it reached has all been seen, and only that is judged.
+        $since = $reading->complete ? null : $reading->listedSince;
+
+        if ((! $reading->complete && $since === null) || ! $reading->listsEverything || ! $this->inThisRead) {
             return 0;
         }
 
@@ -406,7 +420,9 @@ class FeedImporter
             ->get()
             // Only what is still to come: an event that has happened is not un-happened.
             ->filter(fn (EventFeedItem $item) => $item->event && $item->event->starts_at && $item->event->starts_at > $nowUtc)
-            ->filter(fn (EventFeedItem $item) => $horizon === false || ($item->starts_at && $item->starts_at->format('Y-m-d H:i:s') <= $horizon));
+            ->filter(fn (EventFeedItem $item) => $horizon === false || ($item->starts_at && $item->starts_at->format('Y-m-d H:i:s') <= $horizon))
+            // Strictly after: two posts put up in the same second can stand either side of a page.
+            ->filter(fn (EventFeedItem $item) => $since === null || (is_int($item->pending['hint']['published'] ?? null) && $item->pending['hint']['published'] > $since));
 
         $gone = collect();
         $longEnough = $now->copy()->subMinutes(self::GONE_AFTER_MINUTES);

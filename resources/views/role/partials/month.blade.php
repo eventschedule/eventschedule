@@ -28,21 +28,6 @@
         <div class="gk-cal-wd" :class="{ 'gk-cal-wd-now': monthTodayCol === {{ $i }} }" role="columnheader">{{ __('messages.' . $key) }}</div>
         @endforeach
     </div>
-    {{-- A month with nothing in it says so above its weeks, over nobody's day, and where the
-         page holds a later event it names it and goes to its month. Behind !loadFailed like
-         every empty state: "nothing scheduled" is a statement about the schedule, which is
-         also why it is not said while a filter is what hid the month's events (the notice
-         above the month says that, and offers the way out). --}}
-    <div v-if="!isLoadingEvents && !loadFailed && monthIsBare && narrowingFilterCount === 0" class="gk-cal-empty" role="row">
-        <div class="gk-cal-empty-card" role="gridcell" aria-colspan="7">
-            <b v-text="monthEmpty.title"></b>
-            <span v-if="monthEmpty.next"><span>{{ __('messages.next_up') }}</span> <bdi v-text="monthEmpty.next.name"></bdi><span v-text="', ' + monthEmpty.next.when"></span></span>
-            <span v-if="monthEmpty.next || monthEmpty.add" class="gk-cal-empty-go">
-                <a v-if="monthEmpty.add" class="gk-peek-btn gk-cal-empty-btn" :class="monthEmpty.next ? 'gk-peek-btn-secondary' : 'gk-peek-btn-primary'" :href="monthEmpty.add" @click.stop>{{ __('messages.add_event') }}</a>
-                <button v-if="monthEmpty.next" type="button" class="gk-peek-btn gk-peek-btn-primary gk-cal-empty-btn" @click.stop="monthGoTo(monthEmpty.next.date)" v-text="monthEmpty.next.go"></button>
-            </span>
-        </div>
-    </div>
     {{-- Keyed by the month and by whether it is still loading, so the weeks are made anew when a
          month arrives: that is what lets them come in from the side they were asked from. --}}
     <div class="gk-cal-weeks" :key="monthYearDatetime + (isLoadingEvents ? ':loading' : '')" :class="[{ 'gk-cal-bare': monthIsBare }, monthCame]" @animationend.self="monthCame = ''">

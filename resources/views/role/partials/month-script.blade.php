@@ -26,8 +26,7 @@
         'register' => $label('register'), 'get_tickets' => $label('get_tickets'), 'buy_tickets' => $label('buy_tickets'),
         'share' => __('messages.share'), 'copied' => __('messages.link_copied'),
         'online' => __('messages.online'), 'coupon' => __('messages.coupon_code'),
-        'n_of' => __('messages.month_n_of'), 'nothing_in' => __('messages.nothing_scheduled_in'),
-        'next_up' => __('messages.next_up'), 'go_to' => __('messages.go_to_month'),
+        'n_of' => __('messages.month_n_of'),
         'add_event' => __('messages.add_event'), 'unavailable' => __('messages.unavailable'),
     ];
     // A plus on a day, for whoever may add an event: on the Schedule tab where the header's own
@@ -134,25 +133,6 @@ return {
             return !this.monthWeeks.some((w) => w.days.some((d) => d.inMonth && d.count > 0));
         },
 
-        // What an empty month says: that it is empty, and the next event the page holds, if any
-        // (a guest's page holds what is to come; the admin's months hold only themselves).
-        monthEmpty() {
-            void this.monthTick;
-            const lang = this.languageCode;
-            const title = say(L.nothing_in, { month: new Date(this.pageYear, this.pageMonth - 1, 1).toLocaleDateString(lang, { month: 'long' }) });
-            const last = ymd(new Date(this.pageYear, this.pageMonth, 0));
-            const today = this.scheduleDay(0);
-            const nx = CAN.guest ? this.allMobileOccurrences.find((e) => e.occurrenceDate && e.occurrenceDate > last && e.occurrenceDate >= today) : null;
-            // Whoever may add an event is offered that, on today or the month's first day.
-            const add = CAN.add ? CAN.add.replace('MONTH-DATE', today.slice(0, 7) === this.monthYearDatetime ? today : this.monthYearDatetime + '-01') : null;
-            if (!nx) return { title, next: null, add };
-            const d = day(nx.occurrenceDate);
-            return { title, add, next: {
-                name: this.getEventDisplayName(nx), date: nx.occurrenceDate,
-                when: d.toLocaleDateString(lang, { weekday: 'short', month: 'short', day: 'numeric' }),
-                go: say(L.go_to, { month: d.toLocaleDateString(lang, { month: 'long' }) }),
-            } };
-        },
     },
 
     methods: {
@@ -548,10 +528,9 @@ return {
             this.monthPlaceDay();
             if (m.refocus && !this.isLoadingEvents) {
                 m.refocus = false;
-                // A month with nothing on it has no day to hold the focus: its own button, from
-                // which Page Up and Page Down still work, or failing that the page's month buttons.
+                // A month with nothing on it has no day to hold the focus: the page's month buttons.
                 const first = root.querySelector('.gk-cal-day:not(.gk-cal-day-out) button.gk-cal-num') || root.querySelector('button.gk-cal-num')
-                    || root.querySelector('.gk-cal-empty-btn') || document.querySelector('#month-nav-controls button, #month-nav-controls a');
+                    || document.querySelector('#month-nav-controls button, #month-nav-controls a');
                 if (first) first.focus({ preventScroll: true });
             }
         },

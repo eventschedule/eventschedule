@@ -263,16 +263,6 @@
     }
 
 
-    {{-- A month with nothing in it says so in a strip above its weeks, over nobody's day, and
-       offers the way to what is next. --}}
-    .gk-cal-empty { border-bottom: 1px solid var(--cal-line); background: var(--gk-well); }
-    .gk-cal-empty-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .375rem 1rem; padding: .75rem 1rem; }
-    .gk-cal-empty-card b { font-size: .9375rem; }
-    .gk-cal-empty-card span { color: var(--gk-ink-2); font-size: .875rem; }
-    .gk-cal-empty-go { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
-    .gk-cal-empty-go:empty { display: none; }
-    .gk-cal-empty-btn { min-height: 2.25rem; }
-
     {{-- The month arriving from the side it was asked from. --}}
     @keyframes gk-cal-in-next { from { opacity: 0; transform: translateX(1rem); } to { opacity: 1; transform: none; } }
     @keyframes gk-cal-in-prev { from { opacity: 0; transform: translateX(-1rem); } to { opacity: 1; transform: none; } }

@@ -57,7 +57,7 @@ class JoliooReader implements FeedReader
 
         foreach ($document->items as $entry) {
             // The post's number, from the address the item is known by.
-            if (! preg_match('#/item/(\d+)\.(?:xml|json|html)(?:$|[?\#])#', $entry['id'].' ', $m)
+            if (! preg_match('#/item/(\d+)\.(?:xml|json|html)(?:$|[?\#])#', trim($entry['id']), $m)
                 && ! preg_match('#/item/(\d+)\.(?:xml|json|html)(?:$|[?\#])#', $entry['link'], $m)) {
                 $seen[$entry['id']] = 'unreadable';
 
@@ -75,11 +75,16 @@ class JoliooReader implements FeedReader
                 'row' => null,
                 'list_hash' => hash('sha256', json_encode([$entry['title'], $entry['html'], $entry['image'], $entry['published']], JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR)),
                 'detail_url' => $detail,
-                'hint' => ['title' => $entry['title'], 'html' => $entry['html'], 'image' => $entry['image'], 'link' => $entry['link']],
+                'hint' => ['title' => $entry['title'], 'html' => $entry['html'], 'image' => $entry['image'], 'link' => $entry['link'], 'published' => $entry['published']],
             ];
         }
 
-        return new FeedReading($items, $seen, ! $document->truncated, true, $items ? $this->nextPage($fetched->url) : null);
+        // The list is newest first by when each post was put up (and an edit never moves one
+        // back), so its oldest time says how far back a page-limited read has seen.
+        $published = array_column(array_column($items, 'hint'), 'published');
+        $since = $items && count(array_filter($published, 'is_int')) === count($items) ? min($published) : null;
+
+        return new FeedReading($items, $seen, ! $document->truncated, true, $items ? $this->nextPage($fetched->url) : null, [], $since);
     }
 
     /** /rss/<token> is page one; /rss/<token>/4 is page four. Null when the address is neither. */

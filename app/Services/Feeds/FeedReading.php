@@ -26,6 +26,11 @@ namespace App\Services\Feeds;
  * next: the next page's address, when the list is in pages.
  *
  * skipped: the reader's counts of what it left out, for the check before a feed is added.
+ *
+ * listedSince: for a list that is newest first by the time each post was put up, the oldest
+ * such time on it. A read that stopped before the end has still seen everything put up after
+ * that moment, so a post from after it that is no longer there has left. Null for a list in
+ * any other order, or one whose entries do not all say when.
  */
 final class FeedReading
 {
@@ -41,6 +46,7 @@ final class FeedReading
         public readonly bool $listsEverything = true,
         public readonly ?string $next = null,
         public readonly array $skipped = [],
+        public readonly ?int $listedSince = null,
     ) {}
 
     /**
