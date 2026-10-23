@@ -4,13 +4,16 @@ namespace Tests\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Routing\Route;
+use ReflectionClass;
 
 /**
  * Finds N+1 queries in whatever the test suite runs, one request, job or command at a time.
  *
  * The suite already requests most pages of the app thousands of times, so it is the cheapest place
  * to notice a page that asks the database once per row. Two rules, both counted inside one SCOPE
- * (a request, a queued job, an artisan command, or the test body around them):
+ * (a request, a queued job, an artisan command, a `measure` - what TestCase::assertQueriesDoNotGrow()
+ * runs, so an Action or command a test calls directly is held too - or the test body around them):
  *
  *  - lazy: an Eloquent relation lazy loaded on two or more models of one result, from the same
  *    line. Laravel marks a model for this only when its query returned more than one row
@@ -25,9 +28,20 @@ use Illuminate\Database\Events\QueryExecuted;
  * A finding is keyed by rule, the file that asked, what it asked for and the controller, job or
  * command it ran under (`rule|origin|what|entry`), never by route: one N+1 in layouts/navigation
  * would otherwise be one entry per page, and keyed by the origin alone a listed shared helper
- * would hide every new page that loops over it. A key not listed in
+ * would hide every new page that loops over it. The entry is the scope's own, stored when it
+ * opens: a request's controller when its route matches (a returned view renders after the
+ * controller has returned, so the stack no longer shows it), a job's class, a command's class.
+ * Commands are scopes only because TestCase reroutes the console events: Laravel raises
+ * CommandStarting in tests only when asked to. A key not listed in
  * tests/query-baseline.php fails the test that ran it. The total per request is only reported,
  * because it depends on what each test seeds (PageQueryScalingTest holds per-page numbers).
+ *
+ * The database's own commands (migrate:fresh, which RefreshDatabase runs) are the test's setup:
+ * a scope of their own, held to no rule.
+ *
+ * What it cannot see: the test body itself (it seeds in loops), so an Action, job or command a
+ * test calls directly unless the test measures it; jobs and mails a test fakes; a job dispatched
+ * once per row (each job is a scope of its own); calls to Storage or Http.
  *
  * Environment:
  *  - QUERY_GUARD_REPORT=1  record, never fail (the report is written at the end of the run)
@@ -68,6 +82,11 @@ final class QueryGuard
 
     /** compiled view path => blade path */
     private static array $views = [];
+
+    /** class => its file, relative, or null when it is not the app's */
+    private static array $classFiles = [];
+
+    private static ?string $compiledViews = null;
 
     private static ?string $basePath = null;
 
@@ -116,6 +135,12 @@ final class QueryGuard
         self::$baseline = $baseline;
     }
 
+    /** Where compiled views are written (config view.compiled), told once the app has booted. */
+    public static function compiledViewsAt(string $path): void
+    {
+        self::$compiledViews = rtrim($path, '/').'/';
+    }
+
     // ---------------------------------------------------------------- scopes
 
     public static function beginTest(string $label): void
@@ -142,13 +167,15 @@ final class QueryGuard
         return $pending;
     }
 
-    public static function push(string $kind, string $label): int
+    /** Open a scope. $entry is the file of the controller, job or command it runs (relative), when known. */
+    public static function push(string $kind, string $label, ?string $entry = null): int
     {
         $id = ++self::$nextId;
         self::$stack[] = [
             'id' => $id,
             'kind' => $kind,
             'label' => $label,
+            'entry' => $entry,
             'queries' => 0,
             'select' => [],
             'lazy' => [],
@@ -164,6 +191,32 @@ final class QueryGuard
                 self::$stack[$i]['label'] = $label;
             }
         }
+    }
+
+    /** A request's route matched: its controller is the entry of the innermost request scope. */
+    public static function routeMatched(Route $route): void
+    {
+        $class = $route->getControllerClass();
+        $entry = $class !== null ? self::fileOf($class) : null;
+
+        for ($i = count(self::$stack) - 1; $i >= 0; $i--) {
+            if (self::$stack[$i]['kind'] === 'request') {
+                self::$stack[$i]['entry'] = $entry;
+
+                return;
+            }
+        }
+    }
+
+    /** The app file a class is written in, relative, or null when it is not the app's (vendor, eval). */
+    public static function fileOf(string $class): ?string
+    {
+        if (! array_key_exists($class, self::$classFiles)) {
+            $file = class_exists($class) ? (new ReflectionClass($class))->getFileName() : false;
+            self::$classFiles[$class] = is_string($file) && ! self::isVendor($file) ? self::relative($file) : null;
+        }
+
+        return self::$classFiles[$class];
     }
 
     /** Close the scope with this id and any opened inside it that never closed (a job that threw). */
@@ -231,7 +284,7 @@ final class QueryGuard
         $scope['queries']++;
 
         // The test body seeds in loops; only what the app runs on its own is held to the rule.
-        if ($scope['kind'] === 'test' || ! preg_match('/^\s*\(?\s*select\b/i', $event->sql)) {
+        if (in_array($scope['kind'], ['test', 'setup'], true) || ! self::isSelect($event->sql)) {
             return;
         }
 
@@ -246,12 +299,15 @@ final class QueryGuard
 
         $frames = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, self::BACKTRACE_DEPTH);
 
-        // A lazy load is the lazy rule's to report, with the relation's name in it.
-        foreach ($frames as $frame) {
-            if (($frame['function'] ?? '') === 'getRelationshipFromMethod') {
-                $entry['lazy'] = true;
+        // A lazy load the lazy rule recorded is its to report, with the relation's name in it. One
+        // it cannot see (a model of a one-row result, or from cursor()) stays a repeat.
+        if ($scope['lazy'] !== []) {
+            foreach ($frames as $frame) {
+                if (($frame['function'] ?? '') === 'getRelationshipFromMethod') {
+                    $entry['lazy'] = true;
 
-                return;
+                    return;
+                }
             }
         }
 
@@ -262,9 +318,9 @@ final class QueryGuard
 
         $entry['finding'] = [
             'rule' => 'repeat',
-            'key' => 'repeat|'.$origin['file'].'|'.self::table($sql).'|'.self::entry($frames),
+            'key' => 'repeat|'.$origin['file'].'|'.self::table($sql).'|'.self::entry($scope, $frames),
             'origin' => $origin['file'].($origin['line'] ? ':'.$origin['line'] : ''),
-            'context' => self::context($frames),
+            'context' => self::context($scope, $frames),
             'what' => $sql,
         ];
     }
@@ -284,8 +340,10 @@ final class QueryGuard
         $frames = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, self::BACKTRACE_DEPTH);
         $origin = self::origin($frames);
 
-        // Test code reading a relation of its own fixtures is not the app's N+1.
-        if ($origin === null || (self::$stack[$top]['kind'] === 'test' && str_starts_with($origin['file'], 'tests/'))) {
+        // Test code reading a relation of its own fixtures (in its body, or a closure it measures)
+        // is not the app's N+1.
+        if ($origin === null || self::$stack[$top]['kind'] === 'setup'
+            || (in_array(self::$stack[$top]['kind'], ['test', 'measure'], true) && str_starts_with($origin['file'], 'tests/'))) {
             return;
         }
 
@@ -298,9 +356,9 @@ final class QueryGuard
                 'count' => 0,
                 'finding' => [
                     'rule' => 'lazy',
-                    'key' => 'lazy|'.$origin['file'].'|'.$what.'|'.self::entry($frames),
+                    'key' => 'lazy|'.$origin['file'].'|'.$what.'|'.self::entry(self::$stack[$top], $frames),
                     'origin' => $origin['file'].($origin['line'] ? ':'.$origin['line'] : ''),
-                    'context' => self::context($frames),
+                    'context' => self::context(self::$stack[$top], $frames),
                     'what' => $what,
                 ],
             ];
@@ -352,6 +410,11 @@ final class QueryGuard
 
     // ---------------------------------------------------------------- helpers
 
+    public static function isSelect(string $sql): bool
+    {
+        return preg_match('/^\s*\(?\s*(select|with)\b/i', $sql) === 1;
+    }
+
     public static function normalize(string $sql): string
     {
         // `in (5, 6)`, `in (?, ?)` and `in (?)` are the same question.
@@ -391,9 +454,9 @@ final class QueryGuard
      * Where the request was when it asked: the outermost controller, command, job, mail or
      * listener, and the outermost view. The origin is often a shared helper; this is the page.
      */
-    private static function context(array $frames): string
+    private static function context(array $scope, array $frames): string
     {
-        $entry = null;
+        $entry = $scope['entry'] ?? null;
         $view = null;
 
         foreach ($frames as $frame) {
@@ -403,7 +466,7 @@ final class QueryGuard
             }
 
             $relative = self::relative($file);
-            if (preg_match('#^app/(Http/Controllers|Console|Jobs|Mail|Notifications|Listeners)/#', $relative)) {
+            if (($scope['entry'] ?? null) === null && preg_match('#^app/(Http/Controllers|Console|Jobs|Mail|Notifications|Listeners)/#', $relative)) {
                 $entry = $relative;
             } elseif ($blade = self::viewSource($file)) {
                 $view = $blade;
@@ -419,8 +482,12 @@ final class QueryGuard
      * subscriptions for every page that asks it): keyed by the helper alone, one listed page
      * would hide every new page that loops over it.
      */
-    private static function entry(array $frames): string
+    private static function entry(array $scope, array $frames): string
     {
+        if (($scope['entry'] ?? null) !== null) {
+            return $scope['entry'];
+        }
+
         $entry = '-';
         foreach ($frames as $frame) {
             $file = $frame['file'] ?? null;
@@ -448,7 +515,7 @@ final class QueryGuard
     /** The Blade file a compiled view came from (BladeCompiler writes its path at the end), or null. */
     public static function viewSource(string $file): ?string
     {
-        if (! str_contains($file, '/storage/framework/views/')) {
+        if (! str_starts_with($file, self::$compiledViews ?? self::basePath().'/storage/framework/views/')) {
             return null;
         }
 

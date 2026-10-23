@@ -1,6 +1,10 @@
 <x-app-admin-layout>
 
 @php
+  // Asked once: the form shows four delete and cancel controls, and each check reads the event's
+  // schedule and its plan afresh (EventPolicy::delete(), User::runsEvent()).
+  $canDeleteEvent = \Illuminate\Support\Facades\Gate::check('delete', $event);
+
   // Set by EventController::create() only. A first event gets a slimmer form: the step
   // indicator, no Boost or locked upgrade controls, and the rarely used sections folded away.
   $isFirstEventRun = $isFirstEventRun ?? false;
@@ -1896,9 +1900,9 @@
       <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" /></svg>
       <p class="text-sm text-red-800 dark:text-red-300 font-medium">{{ __('messages.event_is_cancelled_ap') }}</p>
     </div>
-    @can('delete', $event)
+    @if ($canDeleteEvent)
     <button type="button" @click="submitRestore()" :disabled="isSubmittingRestore" class="shrink-0 inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-colors">{{ __('messages.restore_event') }}</button>
-    @endcan
+    @endif
   </div>
   @endif
 
@@ -2048,7 +2052,7 @@
                         </div>
                     </button>
                     @endif
-                    @can('delete', $event)
+                    @if ($canDeleteEvent)
                     <div class="py-2" role="none">
                         <div class="border-t border-gray-100 dark:border-gray-700"></div>
                     </div>
@@ -2075,7 +2079,7 @@
                             </div>
                         </button>
                     </form>
-                    @endcan
+                    @endif
                 </div>
             </div>
         </div>
@@ -2153,7 +2157,7 @@
                     <div>{{ __('messages.save_as_template') }}</div>
                 </button>
                 @endif
-                @can('delete', $event)
+                @if ($canDeleteEvent)
                 <div class="py-2" role="none">
                     <div class="border-t border-gray-100 dark:border-gray-700"></div>
                 </div>
@@ -2174,7 +2178,7 @@
                     </svg>
                     <div>{{ __('messages.delete_event') }}</div>
                 </button>
-                @endcan
+                @endif
             </div>
         </div>
     </div>
@@ -6491,7 +6495,7 @@
         <input type="hidden" name="venue_name">
         <input type="hidden" name="venue_id">
     </form>
-    @can('delete', $event)
+    @if ($canDeleteEvent)
     <form id="event-cancel-form" method="POST" action="{{ route('event.cancel', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="hidden">
         @csrf
         <input type="hidden" name="notify_attendees" value="0">
@@ -6500,7 +6504,7 @@
     <form id="event-restore-form" method="POST" action="{{ route('event.restore', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="hidden">
         @csrf
     </form>
-    @endcan
+    @endif
     @endif
 
     {{-- Cancel-event confirm dialog (issue #94). --}}

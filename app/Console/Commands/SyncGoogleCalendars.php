@@ -75,6 +75,7 @@ class SyncGoogleCalendars extends Command
 
         $this->rereadsStarted = 0;
         $this->runStarted = microtime(true);
+        $calendarIds = Role::googleCalendarIds($roles);
 
         foreach ($roles as $role) {
             $this->info("Syncing Google Calendar for role: {$role->subdomain} (ID: {$role->id})");
@@ -101,7 +102,7 @@ class SyncGoogleCalendars extends Command
 
                 // The persisted sync token makes an empty poll one cheap request, which is itself
                 // the change check - no separate hasChanges() call is needed.
-                $results = $googleCalendarService->syncFromGoogleCalendar($user, $role, $role->getGoogleCalendarId());
+                $results = $googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarIds[$role->id]);
 
                 $totalCreated += $results['created'];
                 $totalUpdated += $results['updated'];

@@ -5777,11 +5777,26 @@ class Role extends Model implements MustVerifyEmail
      */
     public function getGoogleCalendarId()
     {
-        $pivot = RoleUser::where('role_id', $this->id)
-            ->where('user_id', $this->user_id)
-            ->first();
+        return self::googleCalendarIds([$this])[$this->id];
+    }
 
-        return $pivot?->google_calendar_id ?: 'primary';
+    /**
+     * getGoogleCalendarId() for many roles in one query (google:sync walks every syncing role).
+     *
+     * @param  iterable<Role>  $roles
+     * @return array<int, string> role id => the calendar to read
+     */
+    public static function googleCalendarIds(iterable $roles): array
+    {
+        $roles = collect($roles);
+        // Only the owners' rows: role_user also holds every follower.
+        $pivots = RoleUser::query()->whereIn('role_id', $roles->pluck('id')->all())->whereIn('user_id', $roles->pluck('user_id')->filter()->unique()->all())
+            ->get(['role_id', 'user_id', 'google_calendar_id'])
+            ->keyBy(fn (RoleUser $pivot): string => $pivot->role_id.'|'.$pivot->user_id);
+
+        return $roles->mapWithKeys(fn (Role $role): array => [
+            $role->id => $pivots->get($role->id.'|'.$role->user_id)?->google_calendar_id ?: 'primary',
+        ])->all();
     }
 
     /**

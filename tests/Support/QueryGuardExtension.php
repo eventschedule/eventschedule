@@ -16,9 +16,10 @@ use PHPUnit\TextUI\Configuration\Configuration;
 /**
  * The end of a run, for QueryGuard: the report, the baseline's ratchet and its writer.
  *
- * Only a COMPLETE run may judge the baseline: one with no filter, path, group or suite chosen,
- * not stopped early, and where every test that was started finished. A run that died (CI's OOM
- * of 2026-10 died at about test 5,150) never reaches ExecutionFinished, so it judges nothing.
+ * Only a COMPLETE run may judge the baseline: one with no filter, path, group or suite chosen or
+ * excluded, not a parallel worker, not stopped early, and where every test that was started
+ * finished. A run that died (CI's OOM of 2026-10 died at about test 5,150) never reaches
+ * ExecutionFinished, so it judges nothing.
  *
  *  - The report (storage/logs/query-guard.txt) is written after any run: what was found that is
  *    not listed, listed keys nobody hit, the heaviest requests and the named GET routes no test
@@ -47,12 +48,21 @@ final class QueryGuardExtension implements Extension
     public function bootstrap(Configuration $configuration, Facade $facade, ParameterCollection $parameters): void
     {
         self::$partial = $configuration->hasFilter()
+            || $configuration->hasExcludeFilter()
             || $configuration->hasCliArguments()
             || $configuration->hasGroups()
+            || $configuration->hasExcludeGroups()
             || $configuration->includeTestSuite() !== ''
+            || $configuration->excludeTestSuite() !== ''
+            || $configuration->hasTestsCovering()
+            || $configuration->hasTestsUsing()
+            || $configuration->hasTestsRequiringPhpExtension()
             || $configuration->stopOnFailure()
             || $configuration->stopOnError()
-            || $configuration->stopOnDefect();
+            || $configuration->stopOnDefect()
+            // A parallel worker sees its share of the suite only. (Not TEST_TOKEN: tests/TestDatabase
+            // sets it for every run's own database, parallel or not.)
+            || (string) getenv('LARAVEL_PARALLEL_TESTING') !== '';
 
         $facade->registerSubscriber(new class implements ExecutionStartedSubscriber
         {

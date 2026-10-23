@@ -43,7 +43,9 @@ class Setting extends Model
      */
     public static function set(string $key, ?string $value): void
     {
-        static::updateOrCreate(['key' => $key], ['value' => $value]);
+        // One write, no read first: settings.key is unique. Federation writes a few settings after
+        // every batch it sends, and updateOrCreate() asked for each before writing it.
+        static::query()->upsert([['key' => $key, 'value' => $value]], ['key'], ['value']);
 
         Cache::forget(self::CACHE_KEY);
     }

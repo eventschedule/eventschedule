@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\View;
 use PHPUnit\Framework\AssertionFailedError;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\Support\QueryGuard;
+use Tests\Support\QueryGuardCommand;
+use Tests\Support\QueryGuardController;
 use Tests\Support\QueryGuardExtension;
 use Tests\TestCase;
 
@@ -70,6 +72,7 @@ class QueryGuardTest extends TestCase
 
             throw new \RuntimeException('thrown on purpose');
         });
+        Route::get(self::PREFIX.'/controller-view', QueryGuardController::class);
         Route::get(self::PREFIX.'/view', function () {
             View::addLocation(base_path('tests/fixtures/views'));
 
@@ -222,6 +225,67 @@ class QueryGuardTest extends TestCase
         $this->get(self::PREFIX.'/view')->assertOk();
 
         $this->assertArrayHasKey('lazy|tests/fixtures/views/query-guard-list.blade.php|App\Models\Event::creatorRole|-', $this->found());
+    }
+
+    /**
+     * A view returned from a controller renders after the controller has returned, so the stack
+     * no longer shows it: the finding still names the controller (stored when the route matched).
+     * Keyed '-', one listed key would hide the same N+1 on every page that draws that view.
+     * Mutation: drop the RouteMatched listener from TestCase::refreshApplication().
+     */
+    public function test_a_finding_in_a_view_is_keyed_by_its_controller(): void
+    {
+        $this->threeEvents();
+
+        $this->get(self::PREFIX.'/controller-view')->assertOk();
+
+        $this->assertArrayHasKey('lazy|tests/fixtures/views/query-guard-list.blade.php|App\Models\Event::creatorRole|tests/Support/QueryGuardController.php', $this->found());
+    }
+
+    /**
+     * An artisan command is a scope of its own, held to the repeat rule. Laravel raises the
+     * command events in tests only when asked to, so without TestCase's reroute every command ran
+     * in the test's own scope, where no rule applies.
+     * Mutation: drop rerouteSymfonyCommandEvents() from TestCase::refreshApplication().
+     */
+    public function test_a_command_is_measured_on_its_own(): void
+    {
+        $this->app[\Illuminate\Contracts\Console\Kernel::class]->registerCommand(new QueryGuardCommand);
+
+        $this->artisan('query-guard:repeat')->assertSuccessful();
+
+        $found = collect($this->found())->firstWhere('rule', 'repeat');
+        $this->assertNotNull($found, 'the command repeated a query');
+        $this->assertSame('artisan query-guard:repeat', $found['scope']);
+    }
+
+    /**
+     * What a test measures (assertQueriesDoNotGrow) is held to the rules though the test calls it
+     * directly: an Action, a job or a command run from the test body.
+     * Mutation: drop the measure scope from TestCase::countQueries().
+     */
+    public function test_a_measured_direct_call_is_held_to_the_rules(): void
+    {
+        $this->assertQueriesDoNotGrow(fn () => null, function (): void {
+            foreach (range(1, QueryGuard::REPEAT_LIMIT + 2) as $n) {
+                DB::table('events')->whereIntegerInRaw('id', [$n])->get();
+            }
+        }, label: 'a direct loop');
+
+        $found = collect($this->found())->firstWhere('rule', 'repeat');
+        $this->assertNotNull($found);
+        $this->assertSame('measure a direct loop', $found['scope']);
+    }
+
+    /**
+     * A query that starts with WITH (a common table expression) is a SELECT too.
+     * Mutation: match only `select` in QueryGuard::isSelect().
+     */
+    public function test_a_query_with_a_cte_is_a_select(): void
+    {
+        $this->assertTrue(QueryGuard::isSelect('with recursive t as (select 1) select * from t'));
+        $this->assertTrue(QueryGuard::isSelect(' (select 1) union (select 2)'));
+        $this->assertFalse(QueryGuard::isSelect('update events set name = ?'));
     }
 
     /**

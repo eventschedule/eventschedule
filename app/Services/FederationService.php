@@ -851,6 +851,10 @@ class FederationService
 
     protected function recordSuccess(?string $status, $listingsUrl = null): void
     {
+        // Read before the writes below: each write clears the settings cache, and reading after
+        // them would read the whole table again for every batch sent.
+        $knownListingsUrl = Setting::get('federation_listings_url');
+
         Setting::set('federation_last_error', null);
         Setting::set('federation_last_error_at', null);
         Setting::set('federation_last_synced_at', (string) now());
@@ -864,7 +868,7 @@ class FederationService
         // it is only kept when it really points at the network this install is configured for.
         // Every response carries it, so only a change is written - each write clears the whole
         // settings cache.
-        if (is_string($listingsUrl) && $listingsUrl !== Setting::get('federation_listings_url')
+        if (is_string($listingsUrl) && $listingsUrl !== $knownListingsUrl
             && $this->isNexusUrl($listingsUrl)) {
             Setting::set('federation_listings_url', $listingsUrl);
         }

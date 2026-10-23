@@ -4,12 +4,14 @@ namespace Tests;
 
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Testing\TestResponse;
@@ -140,10 +142,10 @@ abstract class TestCase extends BaseTestCase
 
         $grow($small);
         $request();
-        [$smallCount, $smallSql] = $this->countQueries($request);
+        [$smallCount, $smallSql] = $this->countQueries($request, $label);
 
         $grow($large);
-        [$largeCount, $largeSql] = $this->countQueries($request);
+        [$largeCount, $largeSql] = $this->countQueries($request, $label);
 
         $grew = [];
         foreach ($largeSql as $sql => $count) {
@@ -175,7 +177,28 @@ abstract class TestCase extends BaseTestCase
     }
 
     /** @return array{0: int, 1: array<string, int>} */
-    private function countQueries(callable $request): array
+    private static function isSetupCommand(string $command): bool
+    {
+        return (bool) preg_match('/^(migrate|db:|schema:)/', $command);
+    }
+
+    /**
+     * Artisan command name => class, read once per process.
+     *
+     * @return array<string, class-string>
+     */
+    private static function commandClasses(\Illuminate\Contracts\Foundation\Application $app): array
+    {
+        static $classes = null;
+
+        return $classes ??= array_map(fn (object $command): string => $command::class, $app[ConsoleKernel::class]->all());
+    }
+
+    /**
+     * One cold run, counted, inside a QueryGuard `measure` scope: what the test calls directly
+     * (an Action, a job, a command) is held to the guard's rules too.
+     */
+    private function countQueries(callable $request, string $label = ''): array
     {
         $this->app->forgetInstance('userRoles');
         \Illuminate\Support\Facades\Cache::flush();
@@ -192,10 +215,13 @@ abstract class TestCase extends BaseTestCase
             }
         });
 
+        $id = QueryGuard::push('measure', 'measure '.($label !== '' ? $label : static::class));
+
         try {
             $request();
         } finally {
             $listening = false;
+            QueryGuard::pop($id);
         }
 
         return [$total, $sql];
@@ -238,14 +264,32 @@ abstract class TestCase extends BaseTestCase
 
         // Here and not in setUp(): a test that rebuilds the app mid-body (ForcesEnvironment) gets a
         // new event dispatcher, and a listener on the old one would hear nothing after that.
+        // Laravel raises CommandStarting and CommandFinished in tests only when asked to; without
+        // them every command would run in the test's own scope, where no rule applies.
+        $this->app[ConsoleKernel::class]->rerouteSymfonyCommandEvents();
+
+        // Each scope knows what it runs (its controller, job or command), so a finding keeps it
+        // even when the stack no longer shows it: a returned view renders after the controller.
         $events = $this->app['events'];
         $events->listen(QueryExecuted::class, [QueryGuard::class, 'query']);
-        $events->listen(JobProcessing::class, fn (JobProcessing $e) => QueryGuard::push('job', 'job '.$e->job->resolveName()));
+        $events->listen(RouteMatched::class, fn (RouteMatched $e) => QueryGuard::routeMatched($e->route));
+        $events->listen(JobProcessing::class, function (JobProcessing $e): void {
+            $name = $e->job->resolveName();
+            $class = \Illuminate\Support\Str::before($name, '@');
+            QueryGuard::push('job', 'job '.$name, class_exists($class) ? QueryGuard::fileOf($class) : null);
+        });
         $events->listen(JobProcessed::class, fn () => QueryGuard::popKind('job'));
         $events->listen(JobExceptionOccurred::class, fn () => QueryGuard::popKind('job'));
-        $events->listen(CommandStarting::class, fn (CommandStarting $e) => QueryGuard::push('command', 'artisan '.$e->command));
-        $events->listen(CommandFinished::class, fn () => QueryGuard::popKind('command'));
+        // The database's own commands (RefreshDatabase's migrate:fresh) are the test's setup, not
+        // the app at work: their scope is held to no rule.
+        $events->listen(CommandStarting::class, function (CommandStarting $e): void {
+            $command = (string) $e->command;
+            $class = self::commandClasses($this->app)[$command] ?? null;
+            QueryGuard::push(self::isSetupCommand($command) ? 'setup' : 'command', 'artisan '.$command, $class !== null ? QueryGuard::fileOf($class) : null);
+        });
+        $events->listen(CommandFinished::class, fn (CommandFinished $e) => QueryGuard::popKind(self::isSetupCommand((string) $e->command) ? 'setup' : 'command'));
         QueryGuard::rememberRoutes($this->app['router']->getRoutes());
+        QueryGuard::compiledViewsAt((string) config('view.compiled'));
     }
 
     /**
