@@ -176,6 +176,46 @@ class FeedVenueTest extends TestCase
         $this->assertSame($first->id, $this->resolver()->resolve($feed, $talent, $this->row('', 'Hauptplatz 1, 8570 Voitsberg'), $forgotten)['venue']->id);
     }
 
+    /**
+     * A venue made before a location's postal code and town were split off holds the whole line.
+     * The same line read now is a street, a code and a town, and must find that venue, not make
+     * a second one.
+     */
+    public function test_a_venue_stored_under_the_whole_line_is_found_by_it_after_the_split(): void
+    {
+        $talent = $this->createRole($this->createOwner(), 'talent');
+        $feed = $this->feed($talent);
+        $known = [];
+        $resolver = $this->resolver();
+
+        $old = $resolver->resolve($feed, $talent, $this->row('', 'Brook Lane 7, 1234 Lindenau'), $known)['venue'];
+        $before = Role::count();
+
+        $forgotten = [];
+        $row = ['event_name' => 'Concert', 'venue_name' => '', 'event_address' => 'Brook Lane 7', 'event_city' => 'Lindenau', 'event_postal_code' => '1234', 'event_location' => 'Brook Lane 7, 1234 Lindenau'];
+        $this->assertSame($old->id, $resolver->resolve($feed, $talent, $row, $forgotten)['venue']->id);
+        $this->assertSame($before, Role::count());
+
+        // A new place is made in its parts.
+        $new = $resolver->resolve($feed, $talent, ['event_location' => 'Brook Lane 9, 1234 Lindenau', 'event_address' => 'Brook Lane 9'] + $row, $forgotten)['venue'];
+        $this->assertSame(['Brook Lane 9', 'Lindenau', '1234'], [$new->address1, $new->city, $new->postal_code]);
+    }
+
+    /** A source that names no country is the schedule's own, as an import is. */
+    public function test_a_new_venue_takes_the_schedules_country_when_the_source_names_none(): void
+    {
+        $talent = $this->createRole($this->createOwner(), 'talent', ['country_code' => 'AT']);
+        $feed = $this->feed($talent);
+        $known = [];
+
+        $this->assertSame('at', $this->resolver()->resolve($feed, $talent, $this->row('Mill Hall', 'Brook Lane 7'), $known)['venue']->country_code);
+        $this->assertSame('de', $this->resolver()->resolve($feed, $talent, ['event_country_code' => 'DE'] + $this->row('Old Barn', 'Field Road 2'), $known)['venue']->country_code);
+
+        $nowhere = $this->createRole($this->createOwner(), 'talent', ['country_code' => null]);
+        $fresh = [];
+        $this->assertNull($this->resolver()->resolve($this->feed($nowhere), $nowhere, $this->row('Corner Stage', 'Brook Lane 8'), $fresh)['venue']->country_code);
+    }
+
     /** The place at an address is the venue at that address, whatever the venue is called. */
     public function test_an_address_with_no_name_is_the_venue_the_team_runs_there(): void
     {

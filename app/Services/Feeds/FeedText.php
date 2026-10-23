@@ -32,6 +32,13 @@ final class FeedText
         }, $html) ?? $html;
 
         // A link left with nowhere to go comes out of the conversion as its words.
-        return trim(MarkdownUtils::convertHtmlToMarkdown($html));
+        $text = trim(MarkdownUtils::convertHtmlToMarkdown($html));
+
+        // A body that is only its picture's credit ("© Photographer") says nothing about the event.
+        if (preg_match('/^©[^\n]{0,80}$/u', $text)) {
+            return '';
+        }
+
+        return $text;
     }
 }

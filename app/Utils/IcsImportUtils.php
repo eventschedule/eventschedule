@@ -635,6 +635,9 @@ class IcsImportUtils
             'event_duration' => $duration ?? '',
             'venue_name' => $location['venue_name'],
             'event_address' => $location['event_address'],
+            'event_postal_code' => $location['event_postal_code'],
+            'event_city' => $location['event_city'],
+            'event_location' => $location['event_location'],
             'registration_url' => self::isWebUrl($url) ? $url : $location['url'],
             // A link that was the entry's LOCATION is where a meeting is held, not a page about
             // the event: a caller that publishes the link without a person looking (a feed)
@@ -681,7 +684,7 @@ class IcsImportUtils
     public static function location(string $location): array
     {
         $location = trim(preg_replace('/\s+/', ' ', $location));
-        $result = ['venue_name' => '', 'event_address' => '', 'url' => ''];
+        $result = ['venue_name' => '', 'event_address' => '', 'url' => '', 'event_postal_code' => '', 'event_city' => '', 'event_location' => ''];
 
         if ($location === '') {
             return $result;
@@ -703,6 +706,13 @@ class IcsImportUtils
             return $result;
         }
 
+        // As written, so that a venue stored from it before it was split is still found.
+        $result['event_location'] = $location;
+
+        if ($split = self::postalSplit($location)) {
+            return $split + $result;
+        }
+
         [$first, $rest] = array_pad(array_map('trim', explode(',', $location, 2)), 2, '');
 
         if (preg_match('/\d/', $first)) {
@@ -713,6 +723,49 @@ class IcsImportUtils
         }
 
         return $result;
+    }
+
+    /**
+     * A location that names its postal code and town ("Hall, Street 7, 1234 Town", or
+     * "1234 Town | Hall, Street 7" as some regional sources write it), in its parts. Null when
+     * there is no such part, or when what looks like one may be something else: a street number
+     * ("12345 Main Street"), or a code with more numbers after it ("..., CA 90210").
+     *
+     * @return array{venue_name: string, event_address: string, event_postal_code: string, event_city: string}|null
+     */
+    private static function postalSplit(string $location): ?array
+    {
+        // CalendarPrivacy::venueFromLocation() has already turned " | " and " / " into "; ".
+        $segments = array_values(array_filter(array_map('trim', preg_split('/;|,/u', $location) ?: []), fn ($part) => $part !== ''));
+        $street = '/(stra(ß|ss)e|gasse|weg|platz|street|avenue|road|lane|drive|boulevard|\b(st|ave|rd|blvd|dr)\.?)$/iu';
+
+        foreach ($segments as $at => $segment) {
+            // A town is one name: "Lindenau-Ost", never "Lindenau - Old Castle".
+            if (! preg_match('/^(\d{4,5})\s+(\p{L}[^\d]*)$/u', $segment, $m)
+                || str_contains($m[2], ' - ')
+                || preg_match($street, trim($m[2]))) {
+                continue;
+            }
+
+            $others = array_values(array_diff_key($segments, [$at => true]));
+            // Written last (or with only a country after it), or first as the source's heading.
+            foreach ($at > 0 ? array_slice($segments, $at + 1) : [] as $after) {
+                if (preg_match('/\d/', $after)) {
+                    return null;
+                }
+            }
+
+            $named = $others && ! preg_match('/\d/', $others[0]) && ! preg_match($street, $others[0]);
+
+            return [
+                'venue_name' => $named ? $others[0] : '',
+                'event_address' => implode(', ', $named ? array_slice($others, 1) : $others),
+                'event_postal_code' => $m[1],
+                'event_city' => trim($m[2]),
+            ];
+        }
+
+        return null;
     }
 
     /** Feeds carry plain text, except the ones (Google's among them) that put HTML in it. */

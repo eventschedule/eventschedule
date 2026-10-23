@@ -624,7 +624,7 @@ class IcsImportUtilsTest extends TestCase
 
     public function test_a_meeting_location_names_no_venue_and_its_password_is_no_link(): void
     {
-        $nothing = ['venue_name' => '', 'event_address' => '', 'url' => ''];
+        $nothing = ['venue_name' => '', 'event_address' => '', 'url' => '', 'event_postal_code' => '', 'event_city' => '', 'event_location' => ''];
 
         // A provider's name, or a dial-in with its code, used to become a venue called that.
         $this->assertSame($nothing, IcsImportUtils::location('Microsoft Teams Meeting'));
@@ -637,7 +637,7 @@ class IcsImportUtilsTest extends TestCase
         // What stands beside the meeting is still the place.
         $this->assertSame(
             ['venue_name' => 'The Blue Room', 'event_address' => '12 Main St', 'url' => ''],
-            IcsImportUtils::location('Microsoft Teams Meeting; The Blue Room, 12 Main St')
+            array_intersect_key(IcsImportUtils::location('Microsoft Teams Meeting; The Blue Room, 12 Main St'), array_flip(['venue_name', 'event_address', 'url']))
         );
     }
 }

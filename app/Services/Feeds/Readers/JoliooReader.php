@@ -145,7 +145,12 @@ class JoliooReader implements FeedReader
             : ImportedTime::place($start['at'], $start['states_zone'], $timezone, $keepLocalClock);
         $location = IcsImportUtils::location((string) ($posting['post_message_location'] ?? ''));
         $media = array_values(array_filter((array) ($posting['post_message_media'] ?? []), 'is_string'));
-        $link = (string) ($item['hint']['link'] ?? '');
+        // The post's own link, never the item's page in the list: that page sits under the feed's
+        // address, whose token is what opens the feed, and an event's link is public.
+        $link = ImportAddress::absolute(is_string($posting['post_message_link'] ?? null) ? $posting['post_message_link'] : '', $fetched->url);
+        if (in_array(strtolower((string) parse_url($link, PHP_URL_HOST)), self::HOSTS, true) && str_starts_with((string) parse_url($link, PHP_URL_PATH), '/rss/')) {
+            $link = '';
+        }
 
         return [
             'event_name' => $name,
@@ -154,8 +159,11 @@ class JoliooReader implements FeedReader
             'event_duration' => $duration,
             'venue_name' => $location['venue_name'],
             'event_address' => $location['event_address'],
-            'registration_url' => ImportAddress::absolute($link, $fetched->url) ?: $location['url'],
-            'link_from_location' => ! ImportAddress::absolute($link, $fetched->url) && ! empty($location['url']),
+            'event_postal_code' => $location['event_postal_code'],
+            'event_city' => $location['event_city'],
+            'event_location' => $location['event_location'],
+            'registration_url' => $link ?: $location['url'],
+            'link_from_location' => $link === '' && ! empty($location['url']),
             'category_name' => '',
             'image_url' => ImportAddress::absolute($media[0] ?? (string) ($item['hint']['image'] ?? ''), $fetched->url) ?: null,
             'is_all_day' => $start['all_day'],

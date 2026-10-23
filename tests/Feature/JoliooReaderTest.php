@@ -134,15 +134,31 @@ class JoliooReaderTest extends TestCase
         $this->assertSame(2.5, $row['event_duration']);
         $this->assertFalse($row['is_all_day']);
         $this->assertSame('Stadtsaal Voitsberg', $row['venue_name']);
-        $this->assertSame('Conrad-von-Hötzendorf-Straße 25, 8570 Voitsberg', $row['event_address']);
+        $this->assertSame('Conrad-von-Hötzendorf-Straße 25', $row['event_address']);
+        $this->assertSame('8570', $row['event_postal_code']);
+        $this->assertSame('Voitsberg', $row['event_city']);
         // The picture is the post's first; the one in its text is dropped, and its link is made whole.
         $this->assertSame('https://public.jolioo.com/generated/h1000w1000m1/static/files/22f/f832593e.jpeg', $row['image_url']);
         $this->assertSame('Kommt vorbei! [Mehr](https://app.jolioo.com/mehr)', preg_replace('/\s+/', ' ', $row['event_details']));
-        $this->assertSame(self::FEED.'/item/4686933.html', $row['registration_url']);
+        // The item's page in the list sits under the feed's own address: never the event's link.
+        $this->assertSame('', $row['registration_url']);
         $this->assertSame('Demo', $row['organizer_name']);
         $this->assertSame('2026-05-09 19:30:00', $row['source_time']);
         $this->assertSame('4686933', $row['source_id']);
         $this->assertNull($row['local_time_zone']);
+    }
+
+    /** The feed's address carries the token that opens it, and an event's link is public. */
+    public function test_the_link_is_the_posts_own_and_never_a_page_under_the_feed(): void
+    {
+        $this->assertSame('https://tickets.example/spring', $this->detail(['post_message_link' => 'https://tickets.example/spring'])['registration_url']);
+        $this->assertSame('https://app.jolioo.com/events/spring', $this->detail(['post_message_link' => '/events/spring'])['registration_url']);
+
+        foreach ([self::FEED.'/item/4686933.html', '4686933.html', '/rss/abc/item/1.html', 'mailto:a@b.example', null, ['x']] as $link) {
+            $row = $this->detail(['post_message_link' => $link]);
+            $this->assertSame('', $row['registration_url'], var_export($link, true));
+            $this->assertFalse($row['link_from_location']);
+        }
     }
 
     public function test_only_events_are_taken(): void

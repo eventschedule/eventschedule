@@ -72,7 +72,7 @@ class FeedVenueResolver
             return ['venue' => $venue, 'key' => $key, 'deferred' => false];
         }
 
-        $venue = $this->among($role, $name, $address, $city);
+        $venue = $this->among($role, $name, $address, $city, trim((string) ($row['event_location'] ?? '')));
 
         if (! $venue) {
             if ($this->made >= self::PER_RUN) {
@@ -117,7 +117,7 @@ class FeedVenueResolver
             ->first();
     }
 
-    private function among(Role $role, string $name, string $address, string $city): ?Role
+    private function among(Role $role, string $name, string $address, string $city, string $asWritten = ''): ?Role
     {
         $candidates = $this->candidates[$role->id] ??= $this->candidatesFor($role);
 
@@ -134,8 +134,10 @@ class FeedVenueResolver
 
         // An address and no name: the venue at that address, and when a building holds several
         // (a hall and a cellar bar), the one that is only an address itself.
-        $wanted = GeminiUtils::normalizeForMatch($address);
-        $there = $candidates->filter(fn (Role $venue) => $wanted !== '' && GeminiUtils::normalizeForMatch((string) $venue->address1) === $wanted);
+        // Also as the source wrote it: a venue made before its postal code and town were split
+        // off holds the whole line, and the same place must not become a second venue.
+        $wanted = array_filter(array_unique([GeminiUtils::normalizeForMatch($address), GeminiUtils::normalizeForMatch($asWritten)]), fn ($form) => $form !== '');
+        $there = $candidates->filter(fn (Role $venue) => in_array(GeminiUtils::normalizeForMatch((string) $venue->address1), $wanted, true));
 
         return $there->first(fn (Role $venue) => trim((string) $venue->name) === '') ?? $there->first();
     }

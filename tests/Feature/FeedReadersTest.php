@@ -205,6 +205,11 @@ class FeedReadersTest extends TestCase
         );
         $this->assertSame('', FeedText::details('  ', 'https://venue.example/'));
         $this->assertSame('Plain & simple', FeedText::details('Plain &amp; simple', 'https://venue.example/'));
+
+        // A body that is only its picture's credit is no description; a credit inside one stays.
+        $this->assertSame('', FeedText::details('<p>© Stock Photos<br> </p>', 'https://venue.example/'));
+        $this->assertSame('', FeedText::details('© A. Photographer', 'https://venue.example/'));
+        $this->assertSame("Come along!\n\n© A. Photographer", FeedText::details('<p>Come along!</p><p>© A. Photographer</p>', 'https://venue.example/'));
     }
 
     public function test_an_address_is_the_kind_its_answer_says_and_a_provider_is_known_by_where_it_is(): void
