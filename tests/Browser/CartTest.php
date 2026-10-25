@@ -121,7 +121,57 @@ class CartTest extends DuskTestCase
     private function showTicketForm(Browser $browser): void
     {
         $browser->visit('/talent/venue')->waitForText('Buy Tickets', 15);
-        $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
+        // The recorder buyerTrail() prints, installed in the SAME call that opens the form: the
+        // typed-buyer step fails rarely, and every extra round trip added before it locally (a
+        // probe of its own) made it pass. It records every change to the form's name and email
+        // with the stack that made it, and what the fields were sent, so a failure on CI names
+        // what blanked them (2026-10-25: inputs and model both blank, the cursor still in Email).
+        $browser->script('
+            var trail = window.__buyerTrail = [];
+            var at = function () { return Math.round(performance.now()); };
+            // A run of keystrokes is one entry, so a change that is not typing stands out.
+            var note = function (entry, typed) {
+                for (var i = trail.length - 1; typed && i >= 0 && trail[i].typed; i--) {
+                    if (trail[i][1] === entry[1] && trail[i][2] === entry[2]) {
+                        trail[i][0] = entry[0];
+                        trail[i][trail[i].length - 1] = entry[entry.length - 1];
+                        return;
+                    }
+                }
+                entry.typed = typed;
+                trail.push(entry);
+            };
+            var root = document.querySelector("#ticket-selector");
+            var vm = root && root.__vue_app__ && root.__vue_app__._container._vnode.component.proxy;
+            window.__buyerVm = vm;
+            if (vm) {
+                ["name", "email"].forEach(function (key) {
+                    vm.$watch(key, function (now, was) {
+                        var typed = typeof was === "string" && typeof now === "string" && now.length > was.length && now.indexOf(was) === 0;
+                        // The frames of Vue itself dropped, so what is left starts at the code that made the change.
+                        var stack = function () {
+                            Error.stackTraceLimit = 40;
+                            return (new Error()).stack.split("\n").slice(2).filter(function (line) { return line.indexOf("vue.global") === -1; }).slice(0, 8).join(" | ");
+                        };
+                        note(typed ? [at(), "model", key, was, now] : [at(), "model", key, was, now, stack()], typed);
+                    }, { flush: "sync" });
+                });
+            }
+            ["input", "change", "focusin", "compositionstart", "compositionend", "reset", "submit"].forEach(function (type) {
+                document.addEventListener(type, function (e) {
+                    var el = e.target;
+                    note([at(), type, el && (el.id || el.tagName), e.isTrusted, el && el.value], type === "input");
+                }, true);
+            });
+            new MutationObserver(function (changes) {
+                changes.forEach(function (change) {
+                    [].forEach.call(change.removedNodes, function (node) {
+                        if (node.querySelector && (node.id === "name" || node.querySelector("#name"))) trail.push([at(), "removed #name"]);
+                    });
+                });
+            }).observe(document.body, { childList: true, subtree: true });
+            window.dispatchEvent(new CustomEvent("show-event-form"));
+        ');
         // #ticket-0 is the quantity select, and the ticket app's own v-for renders it - so one wait
         // proves both that showForm() ran and that Vue mounted. The blind pause(1200) this replaces
         // proved neither, which on a page where the button below is on screen from the start (see
@@ -163,6 +213,14 @@ class CartTest extends DuskTestCase
                 inputs: { name: input("name"), email: input("email") },
                 ticket_form: vm ? { name: vm.name, email: vm.email } : null,
                 cart_remembered: stored,
+                same_form: !! vm && vm === window.__buyerVm,
+                url: location.href,
+                age: Math.round(performance.now()),
+                focused: document.activeElement && (document.activeElement.id || document.activeElement.tagName),
+                guest_forms: vm ? vm.showGuestForms : null,
+                guests: vm && vm.guests ? vm.guests.map(function (g) { return [g.name, g.email]; }) : null,
+                // Null when the page was replaced after the form opened.
+                recorded: window.__buyerTrail || null,
             });
         ');
 
