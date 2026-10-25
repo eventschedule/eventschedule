@@ -2238,16 +2238,16 @@ abstract class AbstractEventDesign
                 '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
                 '{duration}' => $event->duration ?? '',
 
-                // Event variables
-                '{event_name}' => ($this->forceEnglish ? $event->englishName() : ($event->translatedName() ?? $event->name)) ?? '',
-                '{short_description}' => ($this->forceEnglish ? $event->englishShortDescription() : $event->translatedShortDescription()) ?? '',
-                '{description}' => strip_tags(($this->forceEnglish ? $event->englishDescriptionHtml() : $event->translatedDescription()) ?? ''),
+                // Event variables, in the graphic's language (as EventTextGenerator::buildReplacements())
+                '{event_name}' => $event->nameInLanguage($this->contentLocale(), $this->role),
+                '{short_description}' => $event->shortDescriptionInLanguage($this->contentLocale(), $this->role) ?? '',
+                '{description}' => strip_tags($event->descriptionHtmlInLanguage($this->contentLocale(), $this->role) ?? ''),
 
                 // Venue variables
-                '{venue}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishName() : $event->venue->translatedName()) ?? '') : '',
-                '{city}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishCity() : $event->venue->translatedCity()) ?? '') : '',
-                '{address}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
-                '{state}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',
+                '{venue}' => $event->venue ? ($event->venue->textInLanguage('name', $this->contentLocale()) ?? '') : '',
+                '{city}' => $event->venue ? ($event->venue->textInLanguage('city', $this->contentLocale()) ?? '') : '',
+                '{address}' => $event->venue ? ($event->venue->textInLanguage('address1', $this->contentLocale()) ?? '') : '',
+                '{state}' => $event->venue ? ($event->venue->textInLanguage('state', $this->contentLocale()) ?? '') : '',
                 '{country}' => $event->venue ? strtoupper((string) $event->venue->country_code) : '',
 
                 // Ticket variables

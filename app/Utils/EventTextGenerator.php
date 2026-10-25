@@ -157,7 +157,7 @@ class EventTextGenerator
     private static function buildReplacements($event, $role, $directRegistration, $urlSettings = [], $eventNumber = null, $forceEnglish = false, $date = null, $timezone = null)
     {
         // Set Carbon locale for translated date formats
-        $locale = $forceEnglish ? 'en' : ($role->language_code ?? 'en');
+        $locale = $forceEnglish ? 'en' : ($role->language_code ?: 'en');
         \Carbon\Carbon::setLocale($locale);
 
         $tz = $timezone ?? $role->timezone ?? 'UTC';
@@ -217,18 +217,21 @@ class EventTextGenerator
             '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
             '{duration}' => $event->duration ?? '',
 
-            // Event variables
+            // Event variables. Named by LANGUAGE, as the guest page does (Event::textInLanguage()):
+            // `name` is in the event's own language and `name_en` in its translation target, so on
+            // a Hebrew curator an English venue's event printed `name` in English, and forced
+            // English printed that venue's `name_en`, which is Hebrew.
             '{number}' => $eventNumber !== null ? (string) $eventNumber : '',
-            '{event_name}' => $forceEnglish ? $event->englishName() : $event->name,
-            '{short_description}' => ($forceEnglish ? $event->englishShortDescription() : $event->short_description) ?? '',
-            '{description}' => self::htmlToPlainText($forceEnglish ? $event->englishDescriptionHtml() : $event->description_html),
+            '{event_name}' => $event->nameInLanguage($locale, $role),
+            '{short_description}' => $event->shortDescriptionInLanguage($locale, $role) ?? '',
+            '{description}' => self::htmlToPlainText($event->descriptionHtmlInLanguage($locale, $role)),
             '{url}' => $eventUrl,
 
             // Venue variables
-            '{venue}' => $event->venue ? (($forceEnglish ? $event->venue->englishName() : $event->venue->name) ?? '') : '',
-            '{city}' => $event->venue ? (($forceEnglish ? $event->venue->englishCity() : $event->venue->city) ?? '') : '',
-            '{address}' => $event->venue ? (($forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
-            '{state}' => $event->venue ? (($forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',
+            '{venue}' => $event->venue ? ($event->venue->textInLanguage('name', $locale) ?? '') : '',
+            '{city}' => $event->venue ? ($event->venue->textInLanguage('city', $locale) ?? '') : '',
+            '{address}' => $event->venue ? ($event->venue->textInLanguage('address1', $locale) ?? '') : '',
+            '{state}' => $event->venue ? ($event->venue->textInLanguage('state', $locale) ?? '') : '',
             '{country}' => $event->venue ? strtoupper((string) $event->venue->country_code) : '',
 
             // Ticket variables

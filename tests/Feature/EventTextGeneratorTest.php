@@ -335,6 +335,35 @@ class EventTextGeneratorTest extends TestCase
     }
 
     /** The date strip's own replacement map (AbstractEventDesign::parseOverlayText). */
+    /**
+     * On a Hebrew curator, an English venue's event (its translation target Hebrew) prints in
+     * Hebrew, as the guest page shows it: `name` is the event's own language and `name_en` its
+     * target, so printing `name` gave the English title and forced English printed the Hebrew one.
+     */
+    public function test_another_languages_event_prints_in_the_curators_language(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createVenueWithAddress($owner, ['name' => 'Torah Center', 'city' => 'Pardes Hanna', 'language_code' => 'en', 'translation_language_code' => 'he']);
+        $venue->forceFill(['name_en' => 'מרכז תורה', 'city_en' => 'פרדס חנה'])->saveQuietly();
+        $event = $this->createEvent($venue, ['name' => 'Torah Night']);
+        $event->forceFill(['name_en' => 'ערב תורה'])->saveQuietly();
+        $curator = $this->createCurator($owner, ['language_code' => 'he', 'translation_language_code' => 'en']);
+        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+        $event = $event->fresh(['roles', 'venue']);
+
+        $this->assertSame('ערב תורה @ מרכז תורה, פרדס חנה', trim(EventTextGenerator::parseTemplate('{event_name} @ {venue}, {city}', $event, $curator, false)));
+        $this->assertSame('Torah Night @ Torah Center, Pardes Hanna', trim(EventTextGenerator::parseTemplate('{event_name} @ {venue}, {city}', $event, $curator, false, [], null, true)));
+
+        // The curator's own translation of the event, when it has one, comes first.
+        $event->roles->firstWhere('id', $curator->id)->pivot->forceFill(['name_translated' => 'לילה של תורה'])->save();
+        $event = $event->fresh(['roles', 'venue']);
+        $this->assertSame('לילה של תורה', trim(EventTextGenerator::parseTemplate('{event_name}', $event, $curator, false)));
+
+        if (extension_loaded('gd')) {
+            $this->assertSame('לילה של תורה @ מרכז תורה', $this->overlay($curator, $event, '{event_name} @ {venue}'));
+        }
+    }
+
     private function overlay($role, $event, string $template): string
     {
         $design = new \App\Services\designs\ListDesign($role, collect([$event]));
