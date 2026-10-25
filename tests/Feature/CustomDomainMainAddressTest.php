@@ -115,6 +115,9 @@ class CustomDomainMainAddressTest extends TestCase
             $custom = 'https://'.self::HOST;
             $ownSitemap = 'Sitemap: '.$custom.route('sitemap', [], false);
             $strip = fn ($html) => preg_replace('#<meta name="csrf-token" content="[^"]*">|nonce="[^"]*"#', '', $html);
+            // The realtime beacon signs the second it was printed in, so two requests that
+            // straddle a second differ in that line alone (seen on CI).
+            $this->freezeTime();
 
             // 1. The domain is the main address until the owner chooses otherwise.
             $before = $this->get($custom.'/')->assertOk()->getContent();

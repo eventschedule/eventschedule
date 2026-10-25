@@ -2,6 +2,7 @@
 
 namespace Tests\Browser;
 
+use App\Models\EventSeatingMap;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SeatingLevel;
@@ -570,6 +571,92 @@ class SeatingTest extends DuskTestCase
             $browser->assertPresent('#seatpick-warning');
             $this->assertBlocked($browser, true);
         });
+    }
+
+    /**
+     * A poll that lands while a hold is on the wire must not drop the seat being held.
+     *
+     * A seat just clicked is selected but not yet marked as the buyer's on the map, and the poll
+     * kept only the buyer's seats, so it dropped it; the next click then posted the selection
+     * without it and the server let it go. On CI that was five clicks ending with four seats.
+     * Here the holds are parked in the browser, which makes the slow answer certain, and another
+     * buyer's sale gives the poll something to say.
+     */
+    public function test_a_poll_during_a_hold_keeps_the_seat_being_held(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestVenue($browser);
+            $this->createTestTalent($browser);
+            $this->createTestEventWithTickets($browser);
+
+            $this->makeSeated('talent', 2);
+            $this->openSeatedForm($browser);
+
+            $rowA = SeatingSeat::whereNotNull('event_seating_map_id')
+                ->where('row_position', 1)->orderBy('position')->pluck('id');
+            $seated = 'document.querySelectorAll(\'input[name="seat_ids[]"]\').length';
+
+            $browser->scrollIntoView('#seat-1-'.$rowA[0])->click('#seat-1-'.$rowA[0]);
+            $browser->waitUntil($seated.' === 1', 15);
+            $this->waitForHolds(1);
+
+            // From here a hold is sent only when the test says so, one at a time and in order.
+            $browser->script(<<<'JS'
+                window.__polls = 0;
+                window.__parked = [];
+                const realFetch = window.fetch;
+                window.fetch = function (url) {
+                    const args = arguments;
+                    if (String(url).includes('since=')) {
+                        return realFetch.apply(window, args).then(function (res) { window.__polls++; return res; });
+                    }
+                    if (! String(url).includes('/seating/hold')) return realFetch.apply(window, args);
+
+                    return new Promise(function (resolve) {
+                        window.__parked.push(function () {
+                            const sent = realFetch.apply(window, args);
+                            resolve(sent);
+                            return sent.then(function (res) { return res.clone().text(); }).catch(function () {});
+                        });
+                    });
+                };
+                window.__release = function () {
+                    window.__released = false;
+                    window.__parked.splice(0).reduce(function (p, go) { return p.then(go); }, Promise.resolve())
+                        .then(function () { window.__released = true; });
+                };
+            JS);
+
+            $browser->scrollIntoView('#seat-1-'.$rowA[1])->click('#seat-1-'.$rowA[1])->pause(300);
+
+            // Another buyer moves the room, and a poll comes back with it.
+            $map = EventSeatingMap::findOrFail(SeatingSeat::findOrFail($rowA[0])->event_seating_map_id);
+            $other = SeatingSeat::where('event_seating_map_id', $map->id)
+                ->where('row_position', 2)->orderBy('position')->firstOrFail();
+            $other->update(['status' => 'sold', 'state_version' => $map->fresh()->bumpVersion()]);
+            $browser->script('window.__polls = 0;');
+            $browser->waitUntil('window.__polls >= 2', 20)->pause(500);
+
+            $this->assertSame(2, (int) $browser->script('return '.$seated.';')[0], 'the poll dropped the seat whose hold was on the wire');
+
+            $browser->scrollIntoView('#seat-1-'.$rowA[2])->click('#seat-1-'.$rowA[2])->pause(300);
+            $browser->script('window.__release();');
+            $browser->waitUntil('window.__released === true', 20)->pause(500);
+
+            $browser->waitUntil($seated.' === 3', 15);
+            $this->waitForHolds(3);
+        });
+    }
+
+    /** The server holds exactly $count seats, within a few seconds. */
+    private function waitForHolds(int $count): void
+    {
+        $deadline = microtime(true) + 10;
+        while (SeatingSeat::whereNotNull('hold_token')->count() !== $count && microtime(true) < $deadline) {
+            usleep(200000);
+        }
+        $this->assertSame($count, SeatingSeat::whereNotNull('hold_token')->count());
     }
 
     /** Reveal the ticket form and wait for the picker to draw itself. */

@@ -1125,9 +1125,23 @@ async function sendHold(ids, attempt = 0) {
  */
 let holdSeq = 0;
 
+/**
+ * How many holds are on the wire. A seat just clicked is in `selected` but not yet `mine` on the
+ * map, so a poll answered meanwhile used to drop it (onPolled keeps only `mine`), and the next
+ * click posted the selection without it: the server let go of a seat the buyer had picked.
+ */
+let holdsInFlight = 0;
+
 async function requestHold(payload, attempt = 0) {
     const seq = ++holdSeq;
-    const { ok, status, data } = await post(props.holdUrl, { ...base(), ...payload });
+    let answer;
+    holdsInFlight++;
+    try {
+        answer = await post(props.holdUrl, { ...base(), ...payload });
+    } finally {
+        holdsInFlight--;
+    }
+    const { ok, status, data } = answer;
 
     // A newer hold has already been answered, so this one describes a selection that no longer
     // exists - including its refusals, which are refusals of a selection the buyer has moved on
@@ -1415,6 +1429,10 @@ function money(amount) {
  * so the buyer knows to pick again rather than wondering what they did wrong.
  */
 function onPolled(data) {
+    // A hold on the wire answers for the selection and its warning itself, and this tick describes
+    // the room from before it.
+    if (holdsInFlight) return;
+
     const before = selected.value.length;
     selected.value = selected.value.filter((id) => seatState(id) === 'mine');
 
