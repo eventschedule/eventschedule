@@ -182,6 +182,34 @@ class ActiveDaysTest extends TestCase
     }
 
     /**
+     * signup_intent is how somebody arrived, and is kept. Somebody who arrived as a subscriber and
+     * now owns a schedule is an organizer here; a follower who owns nothing is not, nor is the owner
+     * of a schedule that has been deleted, nor a guest whose submitted event minted one. Mutation:
+     * drop the owners set, or the is_deleted or "request" condition.
+     */
+    public function test_an_audience_account_that_runs_a_schedule_counts_as_an_organizer(): void
+    {
+        $today = CarbonImmutable::now()->startOfDay();
+        $converted = User::factory()->create(['email_verified_at' => now(), 'signup_intent' => 'subscriber']);
+        $this->createRole($converted);
+        $follower = User::factory()->create(['email_verified_at' => now(), 'signup_intent' => 'subscriber']);
+        $this->createRole($this->createOwner())->followers()->attach($follower->id, ['level' => 'follower']);
+        $deleted = User::factory()->create(['email_verified_at' => now(), 'signup_intent' => 'ticket']);
+        $this->createRole($deleted)->forceFill(['is_deleted' => true])->save();
+        $submitter = User::factory()->create(['email_verified_at' => now(), 'signup_intent' => 'request']);
+        $this->createRole($submitter);
+
+        foreach ([$converted, $follower, $deleted, $submitter] as $user) {
+            $this->mark($user, $today);
+        }
+
+        $stats = ActiveDays::stats();
+
+        $this->assertSame(4, $stats['active_7d']);
+        $this->assertSame(1, $stats['organizers_7d']);
+    }
+
+    /**
      * A day is exact once its whole week lies after the first recorded day, which is itself a part
      * day. Until both weeks are exact the change is withheld: an exact week against an estimate
      * would read as growth. Mutation: compare whenever a previous figure exists.

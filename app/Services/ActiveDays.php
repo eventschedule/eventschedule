@@ -268,7 +268,20 @@ class ActiveDays
 
         /** @var Collection<string, Collection> $byDay */
         $byDay = $rows->groupBy(fn ($row) => substr((string) $row->date, 0, 10));
-        $organizers = $rows->filter(fn ($row) => $row->signup_intent === null || $row->signup_intent === 'organizer')
+        // An organizer is somebody who signed up to run a schedule, or who runs one now: a subscriber
+        // or a ticket buyer who goes on to make a schedule keeps the intent they arrived with, which
+        // the sign-up figures want, and was missing here. Not a guest whose submitted event minted
+        // them one ("request"), which the growth figures do not count as an organizer either.
+        $owners = DB::table('role_user')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where('role_user.level', 'owner')
+            ->where('roles.is_deleted', false)
+            ->whereIn('role_user.user_id', $rows->pluck('user_id')->unique()->values())
+            ->distinct()
+            ->pluck('role_user.user_id')
+            ->flip();
+        $organizers = $rows->filter(fn ($row) => $row->signup_intent === null || $row->signup_intent === 'organizer'
+            || ($row->signup_intent !== 'request' && $owners->has($row->user_id)))
             ->pluck('user_id')->flip()->all();
 
         $out = [];

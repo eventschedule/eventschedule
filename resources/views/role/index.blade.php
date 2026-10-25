@@ -129,6 +129,11 @@
                     @include('role.following_table')
                 </div>
             </div>
+
+            {{-- Below the list, never above it: the list is what the page is for. --}}
+            @if ($offerSchedule ?? false)
+                @include('partials.create-schedule-card', ['menuId' => 'following-create-menu'])
+            @endif
         </div>
     </div>
 

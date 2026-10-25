@@ -4710,6 +4710,11 @@ class RoleController extends Controller
             return view('role/following_table', $data);
         }
 
+        // The page a confirmed subscriber lands on after setting a password, and the one place in
+        // the portal that is theirs: the offer to start a schedule of their own, for anybody who has
+        // no place on one. Same rule as gettingStarted()'s bounce.
+        $data['offerSchedule'] = ! is_demo_mode() && ! $user->member()->exists();
+
         return view('role/index', $data);
     }
 
