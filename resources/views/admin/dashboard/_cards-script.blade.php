@@ -282,7 +282,7 @@
                 });
             }
             action.className = 'text-sm font-medium text-[var(--brand-blue)] hover:underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
-            action.textContent = root.getAttribute(reauth ? 'data-confirm' : 'data-retry');
+            action.textContent = root.getAttribute(reauth ? 'data-reauth-action' : 'data-retry');
             box.appendChild(action);
             swap(slot, box);
         }

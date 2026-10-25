@@ -100,6 +100,21 @@ class AdminDashboardPageTest extends TestCase
     }
 
     /**
+     * layouts/app asks window.confirm() for a click anywhere inside an element carrying
+     * data-confirm, so the cards' wrapper keeps its "Confirm password" label under another name:
+     * as data-confirm, every click in the cards (Show more first of all) opened that dialog.
+     * Mutation: rename the attribute back.
+     */
+    public function test_the_cards_wrapper_asks_nothing_of_a_click_inside_it(): void
+    {
+        config(['app.hosted' => true, 'app.is_nexus' => true]);
+
+        $html = $this->page()->getContent();
+        $this->assertMatchesRegularExpression('/<div id="admin-dashboard"[^>]*\sdata-reauth-action="/', $html);
+        $this->assertDoesNotMatchRegularExpression('/<div id="admin-dashboard"[^>]*\sdata-confirm=/', $html);
+    }
+
+    /**
      * The panels are fetched with the headers the page's script sends. Asked as a page, a lapsed
      * password confirmation answered with a redirect to the form, which fetch followed and the
      * script put where the panel goes. Mutation: send Accept: text/html from the script.

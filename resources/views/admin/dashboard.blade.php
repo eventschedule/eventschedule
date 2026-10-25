@@ -224,7 +224,7 @@
              data-failed="{{ __('messages.admin_dash_card_failed') }}"
              data-retry="{{ __('messages.retry') }}"
              data-reauth="{{ __('messages.realtime_reauth') }}"
-             data-confirm="{{ __('messages.realtime_confirm_password') }}"
+             data-reauth-action="{{ __('messages.realtime_confirm_password') }}"
              @if ($sample) data-sample @endif>
             @foreach (['recent' => '36rem', 'growth' => '52rem', 'platform' => '16rem'] as $panel => $height)
                 <section data-dash-panel="{{ $panel }}" aria-busy="true" aria-label="{{ __('messages.loading') }}" class="grid grid-cols-1 lg:grid-cols-2 gap-4" style="min-height: {{ $height }}">
