@@ -160,7 +160,7 @@ class RealtimeTrendsTest extends TestCase
      */
     public function test_the_card_is_told_in_the_viewers_own_timezone(): void
     {
-        // 12:30 UTC: 15:30 in Jerusalem, 18:00 in Kolkata.
+        // 12:30 UTC: 15:30 in Jerusalem in summer and 14:30 in winter, 18:00 in Kolkata.
         $owner = $this->createOwner();
         $this->audit(['user_id' => $owner->id, 'action' => AuditService::AUTH_REGISTER, 'model_type' => 'User', 'model_id' => $owner->id,
             'created_at' => now()->subDay()->setTime(22, 30)->setTimezone(config('app.timezone'))]);
@@ -173,7 +173,7 @@ class RealtimeTrendsTest extends TestCase
         $this->assertSame([0, 1], array_slice(array_column($jerusalem['buckets'], 'signup'), -2));
 
         $hours = (new RealtimeTrends('24h', null, 'Asia/Jerusalem'))->build()['buckets'];
-        $this->assertStringContainsString('3 PM', end($hours)['label'], 'the hour under way, on the viewer\'s clock');
+        $this->assertStringContainsString(now()->setTimezone('Asia/Jerusalem')->format('g A'), end($hours)['label'], 'the hour under way, on the viewer\'s clock');
         $this->assertStringStartsWith("\u{2066}", end($hours)['label'], 'isolated, so a right-to-left page keeps its order');
 
         // A half-hour zone: each bar is the UTC hour it counts, and says so.
