@@ -782,7 +782,7 @@
 
         // The date of the last change to what this policy says. A fact about the document: move it
         // only in a commit that changes a clause.
-        $lastUpdated = 'October 15, 2026';
+        $lastUpdated = 'October 26, 2026';
 
         // The AI providers this install actually calls (GeminiUtils, OpenAIUtils).
         $aiProviders = array_values(array_filter([
@@ -1020,7 +1020,7 @@
                                                     <li><strong>What you send us:</strong> support chat messages, with the page you wrote from and your country; and comments, photos and videos you post to events.</li>
                                                     <li><strong>Paid plans:</strong> billing is handled by Stripe, and we keep the card type, its last four digits, and the history of your plan.</li>
                                                     <li><strong>How you found us:</strong> when you create an account, the page you first landed on, the site that sent you and any campaign tags, if you allowed marketing cookies or signed up in the same visit. If you came through the sign-up or sign-in button on our homepage, also which headline the homepage was showing.</li>
-                                                    <li><strong>Security records:</strong> while you are signed in, your session with its IP address and browser; a log of sensitive actions on your account with the IP address and browser, kept for 90 days; and the IP address your account was created from, kept for 90 days. If an account is blocked for abuse, its email address, and where the operator chooses its email domain or the IP address it was created from, go on a list that refuses new accounts.</li>
+                                                    <li><strong>Security records:</strong> while you are signed in, your session with its IP address and browser; a log of sensitive actions on your account with the IP address and browser, kept for 90 days; and the IP address your account was created from, kept for 90 days. If an account is blocked for abuse, its email address, and where the operator chooses its email domain, the IP address it was created from or the country that address is in, go on a list that refuses new accounts. When an account is created, the email address, the IP address and the country worked out from it are checked against that list; the country is not stored.</li>
                                                     <li><strong>Days you used the app:</strong> the dates on which you opened the app while signed in, and nothing about what you did there. We use them to count how many people use the service, and keep them for 120 days.</li>
                                                     <li><strong>Visit statistics:</strong> your country, worked out from your IP address, which itself is not stored. If you accept analytics cookies while signed in: the pages you view, and those you viewed in this browser just before signing in, kept for about one hour after your last activity (see "Analytics &amp; Cookies").</li>
                                                     <li><strong>Connected services:</strong> if you connect a calendar, the access tokens Google or Microsoft issue, stored encrypted, and which events are synced. If you turn on push notifications, the identifier the push service gives your browser. On Enterprise schedules, WhatsApp messages sent to the schedule's number to add events, with their images.</li>
@@ -1337,7 +1337,7 @@
                                                                 ['Sessions', $sessionHours.' hours after your last request'],
                                                                 ['Security log', '90 days. For records of plan changes, schedule claims and connected payment or calendar accounts, which are kept, the IP address and browser are removed after 90 days.'],
                                                                 ['The IP address an account was created from', '90 days, or for as long as the account is blocked'],
-                                                                ['The list that refuses new accounts after abuse (an email address, an email domain or an IP address)', 'Until the operator removes the entry'],
+                                                                ['The list that refuses new accounts after abuse (an email address, an email domain, an IP address or a country)', 'Until the operator removes the entry'],
                                                                 ['The dates you used the app while signed in', '120 days. After that only daily totals remain, which contain nothing about you'],
                                                                 ['Background tasks that failed, which can contain an email address', '30 days'],
                                                                 ['Exports you download', '7 days'],

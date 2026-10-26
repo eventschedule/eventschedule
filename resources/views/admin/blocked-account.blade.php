@@ -3,7 +3,7 @@
 
     {{-- One account, as the operator needs it before blocking: why it may be spam, who it is,
          what it owns, where it was made from and who else shares that. The decision is the last card, after the
-         evidence, and the two optional list entries stand beside the number of other accounts
+         evidence, and the three optional list entries stand beside the number of other accounts
          each would also refuse.
 
          The switches and the button are plain form controls, and the page is not a Vue mount: a
@@ -28,6 +28,14 @@
         $addressHelp = e(__('messages.block_also_address_note')).$others('messages.block_others_same_address', $sameAddressCount);
         $domainLabel = $domain ? __('messages.block_also_domain', ['domain' => $ltr($domain)]) : '';
         $domainHelp = e(__('messages.block_also_domain_note')).$others('messages.block_others_same_domain', $sameDomainCount);
+        // A country's figure is the accounts made from there lately, not every account: it
+        // cannot be counted in SQL, and the recent ones are what it would have refused.
+        $countryName = $country ? \App\Services\Blocklist::countryName($country) : null;
+        $countryLabel = $country ? __('messages.block_also_country', ['country' => '<bdi>'.e($countryName).'</bdi>']) : '';
+        $countryHelp = e(__('messages.block_also_country_note'))
+            .($sameCountryCount > 0 ? ' '.e(__('messages.block_others_same_country', ['count' => number_format($sameCountryCount), 'days' => \App\Services\Blocklist::RECENT_DAYS])) : '');
+        $durationNames = collect(array_keys(\App\Services\Blocklist::DURATIONS))->mapWithKeys(fn ($key) => [$key => __('messages.blocklist_for_'.$key)]);
+        $countryFor = old('country_for', \App\Http\Controllers\AdminBlockController::COUNTRY_DURATION);
     @endphp
 
     <div class="page-shell">
@@ -122,6 +130,9 @@
                         <dd>
                             @if ($user->signup_ip)
                             <span class="font-mono" dir="ltr">{{ $user->signup_ip }}</span>
+                            @if ($countryName)
+                            <span class="block-line"><bdi>{{ $countryName }}</bdi></span>
+                            @endif
                             @if ($sameAddressCount > 0)
                             <small>{{ __('messages.block_others_same_address', ['count' => number_format($sameAddressCount)]) }}</small>
                             @endif
@@ -246,7 +257,16 @@
                         <dt>@lang('messages.block_entries_added')</dt>
                         <dd>
                             @foreach ($block->entries as $entry)
-                            <span class="block-line"><span class="font-mono" dir="ltr">{{ $entry->value }}</span></span>
+                            <span class="block-line">
+                                @if ($entry->type === \App\Services\Blocklist::COUNTRY)
+                                <bdi>{{ \App\Services\Blocklist::countryName($entry->value) }}</bdi>
+                                @else
+                                <span class="font-mono" dir="ltr">{{ $entry->value }}</span>
+                                @endif
+                                @if ($entry->expires_at)
+                                <small>{{ $entry->hasEnded() ? __('messages.blocklist_ended') : __('messages.blocklist_until', ['date' => $when($entry->expires_at)]) }}</small>
+                                @endif
+                            </span>
                             @endforeach
                         </dd>
                     </div>
@@ -302,6 +322,26 @@
                             <x-toggle name="block_domain" id="block-domain" :checked="(bool) old('block_domain')" :label="$domainLabel" :help="$domainHelp" />
                         </div>
                         @endif
+
+                        {{-- The country for a while: the answer to one person making account after
+                             account from there this week, which the How long beside it says. --}}
+                        <div>
+                            @if ($country)
+                            <x-toggle name="block_country" id="block-country" :checked="(bool) old('block_country')" :label="$countryLabel" :help="$countryHelp" />
+                            <div class="block-country-for">
+                                <x-input-label for="block-country-for" :value="__('messages.blocklist_for')" />
+                                <select name="country_for" id="block-country-for" class="{{ $field }}" aria-describedby="block-country-for-help">
+                                    @foreach ($durationNames as $key => $name)
+                                    <option value="{{ $key }}" {{ $countryFor === $key ? 'selected' : '' }}>{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                <span id="block-country-for-help" class="sr-only">{!! strip_tags($countryLabel) !!}</span>
+                                <x-input-error :messages="$errors->get('country_for')" class="mt-2" />
+                            </div>
+                            @else
+                            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.block_country_unknown_help')</p>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="page-form-actions">
@@ -335,6 +375,13 @@
             .block-facts dd .block-line {
               display: block;
               margin-inline-start: 0;
+            }
+            /* How long the country is refused, under its switch and in line with its words
+               (the switch is 2.75rem and its gap 0.75rem). */
+            .block-country-for {
+              margin-top: 0.75rem;
+              margin-inline-start: 3.5rem;
+              max-width: 16rem;
             }
         </style>
     </x-slot>

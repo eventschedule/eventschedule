@@ -28,6 +28,9 @@ use Illuminate\Support\Facades\DB;
  */
 class AdminBlockController extends Controller
 {
+    /** How long a country is refused when the form does not say: a spammer's week, not for good. */
+    public const COUNTRY_DURATION = '7d';
+
     public function __construct(private AccountBlockService $blocks) {}
 
     public function index(Request $request)
@@ -113,6 +116,10 @@ class AdminBlockController extends Controller
 
         $domain = str_contains((string) $user->email, '@') ? substr(strrchr($user->email, '@'), 1) : null;
         $range = Blocklist::visitorRange($user->signup_ip);
+        // Only a country an entry can name: the switch would otherwise add nothing and say nothing.
+        $country = Blocklist::countryOf($user->signup_ip);
+        $country = Blocklist::isCountry($country) ? $country : null;
+        $refusal = $this->blocks->refusal($user, $request->user());
 
         // Who else was made from the same address: very often the same person again. Named, and
         // linked, because the next thing an operator does is look at them.
@@ -123,12 +130,18 @@ class AdminBlockController extends Controller
         return view('admin.blocked-account', [
             'user' => $user,
             'block' => $block,
-            'refusal' => $this->blocks->refusal($user, $request->user()),
+            'refusal' => $refusal,
             'schedules' => $schedules,
             'takenDown' => $block ? ($block->role_ids ?? []) : [],
             'domain' => $domain,
             'sameDomainCount' => $domain ? max(0, (int) Blocklist::existingAccounts(Blocklist::DOMAIN, strtolower($domain)) - 1) : 0,
             'range' => $range,
+            'country' => $country,
+            // This account is one of them when it is recent enough to be counted.
+            // Only where the switch is offered: it is the switch's price, and a walk over a month.
+            'sameCountryCount' => $country && ! $user->isBlocked() && ! $refusal
+                ? max(0, Blocklist::recentSignupsFrom($country) - ($user->created_at?->gte(now()->subDays(Blocklist::RECENT_DAYS)) ? 1 : 0))
+                : 0,
             'sameAddress' => $sameAddress,
             'sameAddressCount' => $user->signup_ip ? User::where('signup_ip', $user->signup_ip)->where('id', '!=', $user->id)->count() : 0,
             // Only for an account the list could hold, so the card and its Not spam are never
@@ -148,6 +161,7 @@ class AdminBlockController extends Controller
 
         $validated = $request->validate([
             'note' => ['nullable', 'string', 'max:255'],
+            'country_for' => ['nullable', 'string', 'in:'.implode(',', array_keys(Blocklist::DURATIONS))],
         ]);
 
         try {
@@ -157,6 +171,8 @@ class AdminBlockController extends Controller
                 $validated['note'] ?? null,
                 $request->boolean('block_address'),
                 $request->boolean('block_domain'),
+                $request->boolean('block_country'),
+                Blocklist::expiryFor($validated['country_for'] ?? self::COUNTRY_DURATION),
             );
         } catch (\DomainException $e) {
             return redirect()->back()->with('error', __($e->getMessage()));
@@ -165,6 +181,14 @@ class AdminBlockController extends Controller
         $back = redirect()->route('admin.blocked.account', ['hash' => $hash])
             ->with('success', __('messages.block_done', ['name' => $user->name ?: $user->email])
                 .($result['taken']->isNotEmpty() ? ' '.__('messages.block_done_schedules', ['count' => number_format($result['taken']->count())]) : ''));
+
+        // An entry typed in by hand that the block asked for longer keeps its own end; said, or
+        // the operator takes the country as refused for the month they picked.
+        if ($result['kept']->isNotEmpty()) {
+            $back->with('warning', __('messages.block_entries_kept', ['entries' => $result['kept']
+                ->map(fn (BlocklistEntry $entry) => ($entry->type === Blocklist::COUNTRY ? Blocklist::countryName($entry->value) : $entry->value).' ('.$this->until($entry, $request).')')
+                ->implode(', ')]));
+        }
 
         // A schedule Stripe would not let go of is still up. Said by name: it is the one thing
         // left for the operator to do by hand.
@@ -281,10 +305,13 @@ class AdminBlockController extends Controller
             'type' => ['required', 'string', 'in:'.implode(',', Blocklist::TYPES)],
             'value' => ['required', 'string', 'max:255'],
             'note' => ['nullable', 'string', 'max:255'],
+            'for' => ['nullable', 'string', 'in:'.implode(',', array_keys(Blocklist::DURATIONS))],
         ]);
 
+        $duration = $validated['for'] ?? ($validated['type'] === Blocklist::COUNTRY ? self::COUNTRY_DURATION : 'forever');
+
         try {
-            $entry = Blocklist::add($validated['type'], $validated['value'], $validated['note'] ?? null, $request->user()->id);
+            $entry = Blocklist::add($validated['type'], $validated['value'], $validated['note'] ?? null, $request->user()->id, null, Blocklist::expiryFor($duration));
         } catch (\InvalidArgumentException $e) {
             return redirect()->to(route('admin.blocked').'#list')
                 ->withInput()
@@ -293,22 +320,46 @@ class AdminBlockController extends Controller
 
         // `message` and `warning`, which the layout toasts: the redirect lands on the list,
         // far below where the page would print a notice.
-        if (! $entry->wasRecentlyCreated) {
+        $shown = $entry->type === Blocklist::COUNTRY ? Blocklist::countryName($entry->value) : $entry->value;
+
+        if ($entry->renewal) {
+            AuditService::log(AuditService::ADMIN_BLOCKLIST_ADD, $request->user()->id, 'App\\Models\\BlocklistEntry', $entry->id, null, ['type' => $entry->type, 'value' => $entry->value, 'expires_at' => $entry->expires_at?->toIso8601String(), 'renewal' => $entry->renewal]);
+
             return redirect()->to(route('admin.blocked').'#list')
-                ->with('warning', __('messages.blocklist_already_listed', ['value' => $entry->value]));
+                ->with('message', __('messages.blocklist_'.$entry->renewal, ['value' => $shown]).' '.$this->until($entry, $request).'.');
         }
 
-        AuditService::log(AuditService::ADMIN_BLOCKLIST_ADD, $request->user()->id, 'App\\Models\\BlocklistEntry', $entry->id, null, ['type' => $entry->type, 'value' => $entry->value]);
+        // Said with the end it keeps: a shorter length asked for does not shorten it.
+        if (! $entry->wasRecentlyCreated) {
+            return redirect()->to(route('admin.blocked').'#list')
+                ->with('warning', __('messages.blocklist_already_listed', ['value' => $shown]).($entry->expires_at ? ' '.$this->until($entry, $request).'.' : ''));
+        }
+
+        AuditService::log(AuditService::ADMIN_BLOCKLIST_ADD, $request->user()->id, 'App\\Models\\BlocklistEntry', $entry->id, null, ['type' => $entry->type, 'value' => $entry->value, 'expires_at' => $entry->expires_at?->toIso8601String()]);
 
         // How many accounts already match. They are not touched, and a large number is how a
-        // mail provider's domain is told from a spammer's.
-        $existing = Blocklist::existingAccounts($entry->type, $entry->type === Blocklist::EMAIL ? $entry->value : $entry->match_key);
+        // mail provider's domain is told from a spammer's. A country cannot be counted in SQL,
+        // so its figure is the accounts made from there lately, which is what it would refuse.
+        if ($entry->type === Blocklist::COUNTRY) {
+            $recent = Blocklist::recentSignupsFrom($entry->match_key);
+            $existing = $recent ? ' '.__('messages.blocklist_country_recent', ['count' => number_format($recent), 'days' => Blocklist::RECENT_DAYS]) : '';
+        } else {
+            $count = Blocklist::existingAccounts($entry->type, $entry->type === Blocklist::EMAIL ? $entry->value : $entry->match_key);
+            $existing = $count ? ' '.__('messages.blocklist_existing_accounts', ['count' => number_format($count)]) : '';
+        }
 
         return redirect()->to(route('admin.blocked').'#list')->with(
             'message',
-            __('messages.blocklist_added', ['value' => $entry->value])
-                .($existing ? ' '.__('messages.blocklist_existing_accounts', ['count' => number_format($existing)]) : '')
+            __('messages.blocklist_added', ['value' => $shown]).$existing
         );
+    }
+
+    /** "Until Nov 2, 2026", in the operator's own time zone, or "Until removed". */
+    private function until(BlocklistEntry $entry, Request $request): string
+    {
+        return $entry->expires_at
+            ? __('messages.blocklist_until', ['date' => $entry->expires_at->copy()->setTimezone($request->user()->timezone ?: config('app.timezone'))->translatedFormat('M j, Y')])
+            : __('messages.blocklist_for_forever');
     }
 
     public function removeEntry(Request $request, string $hash)
@@ -325,6 +376,6 @@ class AdminBlockController extends Controller
         });
 
         return redirect()->to(route('admin.blocked').'#list')
-            ->with('message', __('messages.blocklist_removed', ['value' => $entry->value]));
+            ->with('message', __('messages.blocklist_removed', ['value' => $entry->type === Blocklist::COUNTRY ? Blocklist::countryName($entry->value) : $entry->value]));
     }
 }

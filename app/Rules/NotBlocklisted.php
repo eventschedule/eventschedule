@@ -8,7 +8,8 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * Refuses an email address the operator's list refuses (/admin/blocked): the address itself, its
- * domain, and where an account is being MADE also the network address the request comes from.
+ * domain, and where an account is being MADE also the network address and the country the request
+ * comes from.
  *
  * On the email field of every form that makes an account a person can sign in to, and with
  * `address: false` on the form that changes an account's address, where who is asking is
@@ -34,6 +35,7 @@ class NotBlocklisted implements ValidationRule
 
     public static function sentence(string $type): string
     {
-        return __($type === Blocklist::IP ? 'messages.signup_refused_address' : 'messages.signup_refused_email');
+        // A country is said as the network: "right now" is true of an entry with an end too.
+        return __(in_array($type, [Blocklist::IP, Blocklist::COUNTRY], true) ? 'messages.signup_refused_address' : 'messages.signup_refused_email');
     }
 }

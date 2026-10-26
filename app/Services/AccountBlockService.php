@@ -7,6 +7,7 @@ use App\Models\AccountBlock;
 use App\Models\BlocklistEntry;
 use App\Models\Role;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -18,8 +19,8 @@ use Illuminate\Support\Facades\DB;
  * open session included. Every schedule it owns is taken down exactly as Delete on
  * /admin/schedules does it (ScheduleDeletionService::markDeleted(): the page is gone, the name is
  * released, a Stripe subscription is cancelled, every row is kept). And its address goes on the
- * list that refuses new accounts (Blocklist), with the address it signed up from and its email
- * domain if the operator asks for those.
+ * list that refuses new accounts (Blocklist), with the address it signed up from, its email
+ * domain and, for as long as the operator says, the country it signed up from, if asked for.
  *
  * Unblock undoes what the block did and nothing else: it brings back the schedules THIS block
  * took down (account_blocks.role_ids), not ones the owner or an operator had deleted before, and
@@ -68,15 +69,15 @@ class AccountBlockService
     }
 
     /**
-     * @return array{block: AccountBlock, taken: Collection<int, Role>, failed: Collection<int, Role>, entries: Collection<int, BlocklistEntry>}
+     * @return array{block: AccountBlock, taken: Collection<int, Role>, failed: Collection<int, Role>, entries: Collection<int, BlocklistEntry>, kept: Collection<int, BlocklistEntry>}
      */
-    public function block(User $user, User $actor, ?string $note = null, bool $withAddress = false, bool $withDomain = false): array
+    public function block(User $user, User $actor, ?string $note = null, bool $withAddress = false, bool $withDomain = false, bool $withCountry = false, ?CarbonInterface $countryUntil = null): array
     {
         if ($reason = $this->refusal($user, $actor)) {
             throw new \DomainException($reason);
         }
 
-        [$block, $entries] = DB::transaction(function () use ($user, $actor, $note, $withAddress, $withDomain) {
+        [$block, $entries] = DB::transaction(function () use ($user, $actor, $note, $withAddress, $withDomain, $withCountry, $countryUntil) {
             $locked = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
 
             // Not through save(): User::boot() lowercases and re-verifies on a save, and nothing
@@ -95,19 +96,24 @@ class AccountBlockService
             );
 
             $entries = collect();
-            $wanted = [[Blocklist::EMAIL, $locked->email]];
+            $wanted = [[Blocklist::EMAIL, $locked->email, null]];
 
             if ($withAddress && ($range = Blocklist::visitorRange($locked->signup_ip))) {
-                $wanted[] = [Blocklist::IP, $range];
+                $wanted[] = [Blocklist::IP, $range, null];
             }
 
             if ($withDomain && str_contains((string) $locked->email, '@')) {
-                $wanted[] = [Blocklist::DOMAIN, substr(strrchr($locked->email, '@'), 1)];
+                $wanted[] = [Blocklist::DOMAIN, substr(strrchr($locked->email, '@'), 1), null];
             }
 
-            foreach ($wanted as [$type, $value]) {
+            // The country for a while (the operator picks how long), the rest until removed.
+            if ($withCountry && ($country = Blocklist::countryOf($locked->signup_ip))) {
+                $wanted[] = [Blocklist::COUNTRY, $country, $countryUntil];
+            }
+
+            foreach ($wanted as [$type, $value, $until]) {
                 try {
-                    $entries->push(Blocklist::add($type, $value, null, $actor->id, $block->id));
+                    $entries->push(Blocklist::add($type, $value, null, $actor->id, $block->id, $until));
                 } catch (\InvalidArgumentException $e) {
                     // An address the list cannot hold (an account made before addresses were
                     // validated). The account is blocked all the same.
@@ -152,7 +158,15 @@ class AccountBlockService
             'Blocked account '.$user->id,
         );
 
-        return ['block' => $block, 'taken' => $taken, 'failed' => $failed, 'entries' => $entries];
+        return [
+            'block' => $block,
+            'taken' => $taken,
+            'failed' => $failed,
+            'entries' => $entries,
+            // Entries the operator had typed in, shorter than the block asked for: they keep
+            // their own end, and the page says so.
+            'kept' => $entries->filter(fn (BlocklistEntry $entry) => $entry->renewal === 'kept')->values(),
+        ];
     }
 
     /**
@@ -233,6 +247,14 @@ class AccountBlockService
             Blocklist::DOMAIN => $others->where('email', 'like', '%@'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $entry->match_key))->first(),
             Blocklist::IP => $others->whereNotNull('signup_ip')->get()
                 ->first(fn (User $other) => Blocklist::visitorRange($other->signup_ip) === $entry->match_key),
+            // Only an account blocked since the entry was made: one blocked months ago from a
+            // country millions sign up from is not the same person, and taking it as the heir
+            // would leave the country refused after Unblock nearly every time.
+            Blocklist::COUNTRY => $others->whereNotNull('signup_ip')
+                ->where('blocked_at', '>=', $entry->created_at)
+                ->select(['id', 'signup_ip'])
+                ->cursor()
+                ->first(fn (User $other) => Blocklist::countryOf($other->signup_ip) === $entry->match_key),
             default => null,
         };
 

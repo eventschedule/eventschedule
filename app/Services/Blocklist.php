@@ -4,15 +4,25 @@ namespace App\Services;
 
 use App\Models\BlocklistEntry;
 use App\Models\User;
+use App\Utils\CountryUtils;
 use App\Utils\RealtimeTracker;
+use Carbon\CarbonInterface;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 /**
  * The operator's list of what a NEW account is refused for (/admin/blocked): an email address,
- * a whole email domain, or a network address.
+ * a whole email domain, a network address, or a country. Any entry may have an end
+ * (expires_at), after which it refuses nobody; a country usually does, because it is the answer
+ * to one person making account after account from there this week.
+ *
+ * A country is the one entry wider than WIDEST_V4 on purpose: the operator chose it from a
+ * list, and the page says how many accounts came from there lately before it is added. It is
+ * read where the request is (RealtimeTracker::country(): Cloudflare's header on hosted, the
+ * bundled DB-IP database elsewhere), and a visitor whose country cannot be told is not refused.
  *
  * It is asked where an account a person can sign in to is made (the sign-up form and its code,
  * Google and Facebook, the API's register, the account the guest forms offer) and where an
@@ -39,7 +49,29 @@ class Blocklist
 
     public const IP = 'ip';
 
-    public const TYPES = [self::EMAIL, self::DOMAIN, self::IP];
+    public const COUNTRY = 'country';
+
+    public const TYPES = [self::EMAIL, self::DOMAIN, self::IP, self::COUNTRY];
+
+    /** How long an entry refuses, in days; null is until removed. */
+    public const DURATIONS = ['1d' => 1, '7d' => 7, '30d' => 30, 'forever' => null];
+
+    /** A later end within this many hours of the one an entry has is the same length asked for again. */
+    private const RENEWAL_SLACK_HOURS = 1;
+
+    /**
+     * Codes the country names file holds that are not a place a visitor can be in today: regions
+     * and unions (EU, UN, ZZ "Unknown"), territories listed under another code (AC, TA, IC ...)
+     * and retired codes (SU, YU, DD, UK ...). DB-IP and Cloudflare never answer with them, so an
+     * entry naming one would say "Russia" and refuse nobody: SU is in the file beside RU.
+     */
+    private const NOT_COUNTRIES = [
+        'AC', 'AN', 'BU', 'CP', 'CQ', 'CS', 'DD', 'DG', 'DY', 'EA', 'EU', 'EZ', 'FX', 'HV', 'IC',
+        'NH', 'QO', 'RH', 'SU', 'TA', 'TP', 'UK', 'UN', 'VD', 'XA', 'XB', 'YD', 'YU', 'ZR', 'ZZ',
+    ];
+
+    /** How far back the page counts the accounts a country entry would have refused. */
+    public const RECENT_DAYS = 30;
 
     /** The widest range one entry may name. Wider, a single line refuses a whole provider. */
     private const WIDEST_V4 = 16;
@@ -60,7 +92,8 @@ class Blocklist
     {
         try {
             $entry = (is_string($email) && $email !== '' ? self::forEmail($email) : null)
-                ?? ($request ? self::forAddress(self::address($request)) : null);
+                ?? ($request ? self::forAddress(self::address($request)) : null)
+                ?? ($request ? self::forCountry(RealtimeTracker::country($request)) : null);
         } catch (QueryException $e) {
             report($e);
 
@@ -93,10 +126,130 @@ class Blocklist
         $domains = self::domainChain(self::asciiDomain(substr(strrchr(mb_strtolower(trim($email)), '@'), 1)));
 
         return BlocklistEntry::query()
-            ->where(fn ($q) => $q->where('type', self::EMAIL)->where('match_key', $canonical))
-            ->orWhere(fn ($q) => $q->where('type', self::DOMAIN)->whereIn('match_key', $domains))
+            ->active()
+            ->where(fn ($q) => $q
+                ->where(fn ($q) => $q->where('type', self::EMAIL)->where('match_key', $canonical))
+                ->orWhere(fn ($q) => $q->where('type', self::DOMAIN)->whereIn('match_key', $domains)))
             ->orderBy('id')
             ->first();
+    }
+
+    public static function forCountry(?string $code): ?BlocklistEntry
+    {
+        if (! is_string($code) || preg_match('/^[A-Za-z]{2}$/', $code) !== 1) {
+            return null;
+        }
+
+        return BlocklistEntry::active()->where('type', self::COUNTRY)->where('match_key', strtoupper($code))->first();
+    }
+
+    /**
+     * The country an address stored earlier is in (users.signup_ip), from the bundled database:
+     * the request it came with, and Cloudflare's header on it, are long gone.
+     */
+    public static function countryOf(?string $ip): ?string
+    {
+        if (! $ip || filter_var($ip, FILTER_VALIDATE_IP) === false) {
+            return null;
+        }
+
+        try {
+            $code = app(GeoIpService::class)->lookup($ip);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        return is_string($code) && preg_match('/^[A-Za-z]{2}$/', $code) === 1 ? strtoupper($code) : null;
+    }
+
+    /**
+     * How many accounts were made from a country in the last RECENT_DAYS days: what a country
+     * entry would have refused, which is how a spammer's week is told from a whole market.
+     *
+     * Read from users.signup_ip, which is kept 90 days, so the window stays inside it. The
+     * country cannot be asked in SQL, but a month of sign-ups is a short walk over one column.
+     */
+    public static function recentSignupsFrom(string $code): int
+    {
+        $code = strtoupper($code);
+
+        // Ten minutes is fresh enough for a figure that is about a month, and keeps a walk over a
+        // month of sign-ups off every view of an account's page.
+        return Cache::remember('blocklist:recent-signups:'.$code, 600, fn () => self::countRecentSignupsFrom($code));
+    }
+
+    private static function countRecentSignupsFrom(string $code): int
+    {
+        $count = 0;
+
+        foreach (User::query()
+            ->whereNotNull('signup_ip')
+            ->where('created_at', '>=', now()->subDays(self::RECENT_DAYS))
+            ->select('signup_ip')
+            ->toBase()
+            ->cursor() as $row) {
+            if (self::countryOf($row->signup_ip) === $code) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    /** When an entry added now for this long ends, or null for until removed. */
+    public static function expiryFor(?string $duration): ?CarbonInterface
+    {
+        $days = self::DURATIONS[$duration] ?? null;
+
+        return $days ? now()->addDays($days) : null;
+    }
+
+    /**
+     * The countries an entry can name, code => name in the page's language, by name.
+     *
+     * @return array<string, string>
+     */
+    public static function countries(): array
+    {
+        $countries = [];
+
+        foreach (array_keys(array_diff_key(CountryUtils::getCountries(), array_flip(self::NOT_COUNTRIES))) as $code) {
+            $countries[$code] = self::countryName($code);
+        }
+
+        class_exists(\Collator::class)
+            ? (new \Collator(app()->getLocale()))->asort($countries)
+            : asort($countries, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return $countries;
+    }
+
+    /**
+     * What a country entry is shown as: its name in the page's language (intl), else the English
+     * name, else the code. A Hebrew page reads "מרוסיה", not "מRussia".
+     */
+    public static function countryName(string $code): string
+    {
+        $code = strtoupper($code);
+
+        if (class_exists(\Locale::class)) {
+            $name = \Locale::getDisplayRegion('-'.$code, app()->getLocale());
+
+            if (is_string($name) && $name !== '' && $name !== $code) {
+                return $name;
+            }
+        }
+
+        return CountryUtils::getName($code);
+    }
+
+    /** Whether a code is one an entry can name (countries()). */
+    public static function isCountry(?string $code): bool
+    {
+        return is_string($code)
+            && preg_match('/^[A-Z]{2}$/', $code) === 1
+            && ! in_array($code, self::NOT_COUNTRIES, true)
+            && array_key_exists($code, CountryUtils::getCountries());
     }
 
     public static function forAddress(?string $ip): ?BlocklistEntry
@@ -107,7 +260,7 @@ class Blocklist
 
         // Ranges cannot be matched in SQL without storing them as numbers, and the list is an
         // operator's, a few hundred lines at most, read only when an account is being made.
-        foreach (BlocklistEntry::where('type', self::IP)->orderBy('id')->get() as $entry) {
+        foreach (BlocklistEntry::active()->where('type', self::IP)->orderBy('id')->get() as $entry) {
             if (IpUtils::checkIp($ip, $entry->match_key)) {
                 return $entry;
             }
@@ -163,23 +316,70 @@ class Blocklist
     }
 
     /**
-     * Put something on the list. An entry that is already there is returned as it is.
+     * Put something on the list, until $expiresAt when there is one.
+     *
+     * An entry that is already there is returned as it is, unless it has ended (then it starts
+     * over: `renewal` is 'renewed') or the new end is later by more than RENEWAL_SLACK (until
+     * removed is the latest; `renewal` is 'extended'). Adding a country again when its week is up
+     * must refuse again, not answer "already listed"; the same length asked for again a moment
+     * later is "already listed", not a change.
      *
      * @throws \InvalidArgumentException whose message is the key of the sentence to show
      */
-    public static function add(string $type, string $value, ?string $note = null, ?int $createdBy = null, ?int $accountBlockId = null): BlocklistEntry
+    public static function add(string $type, string $value, ?string $note = null, ?int $createdBy = null, ?int $accountBlockId = null, ?CarbonInterface $expiresAt = null): BlocklistEntry
     {
         $normal = self::normalize($type, $value);
 
-        return BlocklistEntry::firstOrCreate(
+        $entry = BlocklistEntry::firstOrCreate(
             ['type' => $type, 'match_key' => $normal['match_key']],
             [
                 'value' => $normal['value'],
                 'note' => ($note = trim((string) $note)) !== '' ? mb_substr($note, 0, 255) : null,
                 'created_by' => $createdBy,
                 'account_block_id' => $accountBlockId,
+                'expires_at' => $expiresAt,
             ],
         );
+
+        // Who owns an entry decides what Unblock takes off. Whoever revives an ended entry owns
+        // it from then on (a hand renewal is the operator's, a block's is that block's), and its
+        // run starts again, which is what Unblock's heir rule measures from. A block never
+        // stretches a running entry the operator typed in: it would become the block's request
+        // and nobody's to take off, so it keeps its end and the block says so ('kept').
+        $longer = $entry->expires_at !== null
+            && ($expiresAt === null || $expiresAt->greaterThan($entry->expires_at->copy()->addHours(self::RENEWAL_SLACK_HOURS)));
+
+        $renewal = match (true) {
+            $entry->wasRecentlyCreated || $entry->expires_at === null => null,
+            $entry->hasEnded() => 'renewed',
+            $longer && $accountBlockId !== null && $entry->account_block_id === null => 'kept',
+            $longer => 'extended',
+            default => null,
+        };
+
+        if ($renewal === 'renewed' || $renewal === 'extended') {
+            $entry->expires_at = $expiresAt;
+            if ($renewal === 'renewed' || $accountBlockId === null) {
+                $entry->account_block_id = $accountBlockId;
+            }
+            if ($renewal === 'renewed') {
+                $entry->created_at = now();
+            }
+        }
+
+        // Asked for by hand, an entry a block added is the operator's from now on, whatever its
+        // length: letting that account back in must not take off what was just asked for.
+        if (! $entry->wasRecentlyCreated && $accountBlockId === null) {
+            $entry->account_block_id = null;
+        }
+
+        if ($entry->isDirty()) {
+            $entry->save();
+        }
+
+        $entry->renewal = $renewal;
+
+        return $entry;
     }
 
     /**
@@ -197,6 +397,7 @@ class Blocklist
             self::EMAIL => self::normalizeEmail($value),
             self::DOMAIN => self::normalizeDomain($value),
             self::IP => self::normalizeAddress($value),
+            self::COUNTRY => self::normalizeCountry($value),
             default => throw new \InvalidArgumentException('messages.invalid_request'),
         };
     }
@@ -206,7 +407,8 @@ class Blocklist
      * only when an account is made), which is why the operator is told the number: a domain
      * with thousands of accounts is a mail provider, not a spammer.
      *
-     * Null for a range of addresses, which cannot be counted in SQL.
+     * Null for a range of addresses and for a country, which cannot be counted in SQL (a
+     * country's recent sign-ups are recentSignupsFrom()).
      */
     public static function existingAccounts(string $type, string $matchKey): ?int
     {
@@ -246,6 +448,17 @@ class Blocklist
         }
 
         return ['value' => $domain, 'match_key' => $domain];
+    }
+
+    private static function normalizeCountry(string $value): array
+    {
+        $code = strtoupper($value);
+
+        if (! self::isCountry($code)) {
+            throw new \InvalidArgumentException('messages.blocklist_invalid_country');
+        }
+
+        return ['value' => $code, 'match_key' => $code];
     }
 
     private static function normalizeAddress(string $value): array

@@ -18,8 +18,13 @@
             \App\Services\Blocklist::EMAIL => __('messages.blocklist_type_email'),
             \App\Services\Blocklist::DOMAIN => __('messages.blocklist_type_domain'),
             \App\Services\Blocklist::IP => __('messages.blocklist_type_ip'),
+            \App\Services\Blocklist::COUNTRY => __('messages.blocklist_type_country'),
         ];
-        $typeValue = old('type', \App\Services\Blocklist::DOMAIN);
+        // The two add rows post to one action; what came back from a refused one goes to it.
+        $countryPosted = old('type') === \App\Services\Blocklist::COUNTRY;
+        $typeValue = $countryPosted ? \App\Services\Blocklist::DOMAIN : old('type', \App\Services\Blocklist::DOMAIN);
+        $durationNames = collect(array_keys(\App\Services\Blocklist::DURATIONS))->mapWithKeys(fn ($key) => [$key => __('messages.blocklist_for_'.$key)]);
+        $countries = \App\Services\Blocklist::countries();
     @endphp
 
     <div class="page-head">
@@ -262,25 +267,71 @@
                 <label class="page-filter">
                     <span>@lang('messages.type')</span>
                     <select name="type" class="{{ $field }}">
-                        @foreach ($typeNames as $key => $name)
+                        @foreach (\Illuminate\Support\Arr::except($typeNames, [\App\Services\Blocklist::COUNTRY]) as $key => $name)
                         <option value="{{ $key }}" {{ $typeValue === $key ? 'selected' : '' }}>{{ $name }}</option>
                         @endforeach
                     </select>
                 </label>
                 <div class="page-filter is-grow">
                     <label for="blocklist-value">@lang('messages.blocklist_value')</label>
-                    <x-text-input id="blocklist-value" name="value" type="text" class="block w-full" :value="old('value')" placeholder="example.com" autocomplete="off" dir="ltr" required maxlength="255" />
+                    <x-text-input id="blocklist-value" name="value" type="text" class="block w-full" :value="$countryPosted ? '' : old('value')" placeholder="example.com" autocomplete="off" dir="ltr" required maxlength="255" />
                 </div>
+                <label class="page-filter">
+                    <span>@lang('messages.blocklist_for')</span>
+                    <select name="for" class="{{ $field }}">
+                        @foreach ($durationNames as $key => $name)
+                        <option value="{{ $key }}" {{ ($countryPosted ? 'forever' : old('for', 'forever')) === $key ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </label>
                 <div class="page-filter is-grow">
                     <label for="blocklist-note">@lang('messages.note')</label>
-                    <x-text-input id="blocklist-note" name="note" type="text" class="block w-full" :value="old('note')" :placeholder="__('messages.blocklist_note_placeholder')" autocomplete="off" dir="auto" maxlength="255" />
+                    <x-text-input id="blocklist-note" name="note" type="text" class="block w-full" :value="$countryPosted ? '' : old('note')" :placeholder="__('messages.blocklist_note_placeholder')" autocomplete="off" dir="auto" maxlength="255" />
                 </div>
                 <div class="is-end">
                     <x-brand-button type="submit" size="sm" class="!py-2">@lang('messages.blocklist_add')</x-brand-button>
                 </div>
             </form>
-            <x-input-error :messages="$errors->get('value')" class="mb-3" />
+            @unless ($countryPosted)
+            <x-input-error :messages="array_merge($errors->get('value'), $errors->get('for'), $errors->get('note'))" class="mb-3" />
+            @endunless
             <p class="blocklist-help">@lang('messages.blocklist_value_help')</p>
+
+            {{-- A whole country, for a while: one person making account after account from there.
+                 Its own row because it is chosen from a list, not typed, and its figure is the
+                 accounts made from there lately (Blocklist::recentSignupsFrom()). --}}
+            <form method="POST" action="{{ route('admin.blocked.entry.store') }}" class="page-filters" id="blocklist-country">
+                @csrf
+                <input type="hidden" name="type" value="{{ \App\Services\Blocklist::COUNTRY }}">
+                <label class="page-filter is-grow">
+                    <span>@lang('messages.blocklist_type_country')</span>
+                    <select name="value" class="{{ $field }}" required>
+                        <option value="">@lang('messages.blocklist_choose_country')</option>
+                        @foreach ($countries as $code => $name)
+                        <option value="{{ $code }}" {{ $countryPosted && old('value') === $code ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="page-filter">
+                    <span>@lang('messages.blocklist_for')</span>
+                    <select name="for" class="{{ $field }}">
+                        @foreach ($durationNames as $key => $name)
+                        <option value="{{ $key }}" {{ ($countryPosted ? old('for', \App\Http\Controllers\AdminBlockController::COUNTRY_DURATION) : \App\Http\Controllers\AdminBlockController::COUNTRY_DURATION) === $key ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <div class="page-filter is-grow">
+                    <label for="blocklist-country-note">@lang('messages.note')</label>
+                    <x-text-input id="blocklist-country-note" name="note" type="text" class="block w-full" :value="$countryPosted ? old('note') : ''" :placeholder="__('messages.blocklist_note_placeholder')" autocomplete="off" dir="auto" maxlength="255" />
+                </div>
+                <div class="is-end">
+                    <x-brand-button type="submit" size="sm" class="!py-2">@lang('messages.blocklist_add_country')</x-brand-button>
+                </div>
+            </form>
+            @if ($countryPosted)
+            <x-input-error :messages="array_merge($errors->get('value'), $errors->get('for'), $errors->get('note'))" class="mb-3" />
+            @endif
+            <p class="blocklist-help">@lang('messages.blocklist_country_help')</p>
 
             @if ($entries->count() > 0 || $type)
             <nav class="blocklist-types" aria-label="{{ __('messages.type') }}">
@@ -309,11 +360,23 @@
                             @php $from = $entry->accountBlock?->user; @endphp
                             <tr>
                                 <td class="c-main c-wrap">
+                                    @if ($entry->type === \App\Services\Blocklist::COUNTRY)
+                                    <span class="c-strong"><bdi>{{ \App\Services\Blocklist::countryName($entry->value) }}</bdi></span>
+                                    <span class="c-sub">{{ $typeNames[$entry->type] }} · <span class="c-mono" dir="ltr">{{ $entry->value }}</span></span>
+                                    @else
                                     <span class="c-strong c-mono" dir="ltr">{{ $entry->value }}</span>
                                     <span class="c-sub">{{ $typeNames[$entry->type] ?? $entry->type }}</span>
+                                    @endif
                                 </td>
                                 <td class="c-quiet c-wrap" data-label="{{ __('messages.note') }}">@if ($entry->note)<bdi>{{ $entry->note }}</bdi>@endif @if ($from)<a href="{{ route('admin.blocked.account', ['hash' => \App\Utils\UrlUtils::encodeId($from->id)]) }}" class="event-link">{{ __('messages.blocklist_from_block', ['name' => $from->name ?: $from->email]) }}</a>@endif</td>
-                                <td class="c-date" data-label="{{ __('messages.date') }}">{{ $day($entry->created_at) }}</td>
+                                <td class="c-date" data-label="{{ __('messages.date') }}">
+                                    {{ $day($entry->created_at) }}
+                                    @if ($entry->hasEnded())
+                                    <span class="c-sub"><span class="event-status">@lang('messages.blocklist_ended')</span></span>
+                                    @elseif ($entry->expires_at)
+                                    <span class="c-sub">{{ __('messages.blocklist_until', ['date' => $day($entry->expires_at)]) }}</span>
+                                    @endif
+                                </td>
                                 <td class="c-num" data-label="{{ __('messages.blocklist_col_refused') }}">
                                     {{ number_format($entry->refused_count) }}
                                     @if ($entry->last_refused_at)
@@ -323,7 +386,7 @@
                                 <td class="c-actions">
                                     <form method="POST" action="{{ route('admin.blocked.entry.remove', ['hash' => \App\Utils\UrlUtils::encodeId($entry->id)]) }}">
                                         @csrf
-                                        <button type="submit" class="event-link is-danger" data-confirm="{{ __('messages.blocklist_remove_confirm', ['value' => $entry->value]) }}">@lang('messages.remove')</button>
+                                        <button type="submit" class="event-link is-danger" data-confirm="{{ __('messages.blocklist_remove_confirm', ['value' => $entry->type === \App\Services\Blocklist::COUNTRY ? \App\Services\Blocklist::countryName($entry->value) : $entry->value]) }}">@lang('messages.remove')</button>
                                     </form>
                                 </td>
                             </tr>
@@ -359,6 +422,10 @@
               line-height: 1.25rem;
               color: rgb(var(--ap-ink-3));
               max-width: 110ch;
+            }
+            /* The country row stands apart from the row above it and its sentence. */
+            #blocklist-country {
+              margin-top: 0.5rem;
             }
             .blocklist-types {
               display: flex;
