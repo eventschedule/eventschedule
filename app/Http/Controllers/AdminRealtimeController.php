@@ -46,6 +46,23 @@ class AdminRealtimeController extends Controller
     }
 
     /**
+     * Top pages, Sources and Countries over a longer range than the live half hour, from the
+     * hourly totals (RealtimeDashboard::rangeBreakdowns()). A range it does not know is 24 hours.
+     */
+    public function breakdowns(Request $request): JsonResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+
+        if (! RealtimeTracker::enabled()) {
+            return response()->json(['state' => 'off']);
+        }
+
+        $range = RealtimeDashboard::cardsRange($request->query('range'));
+
+        return response()->json((new RealtimeDashboard)->rangeBreakdowns($range === '30m' ? '24h' : $range));
+    }
+
+    /**
      * Its own route, never the shared admin.settings.update: that one overwrites the custom
      * header and footer code unless the federation card's marker field is present.
      *

@@ -11,7 +11,7 @@
         <span class="min-w-0 text-end text-xs text-gray-500 dark:text-gray-400">@{{ card.unit }}</span>
     </div>
 
-    <p v-if="!card.rows.length" class="px-5 pb-5 text-sm text-gray-500 dark:text-gray-400">@{{ msg.nothingYet }}</p>
+    <p v-if="!card.rows.length" class="px-5 pb-5 text-sm text-gray-500 dark:text-gray-400">@{{ card.loading ? msg.loading : msg.nothingYet }}</p>
 
     <ul v-else class="px-2 pb-2 max-h-80 overflow-y-auto">
         <li v-for="row in (expandedCards[card.id] ? card.rows : card.rows.slice(0, 8))" :key="row.key" class="flex flex-wrap items-center">

@@ -229,6 +229,9 @@
                     expandedCards: { pages: false, sources: false, countries: false },
                     // The country whose block menu is open (_breakdown), or null.
                     blockMenu: null,
+                    // The breakdown cards' span: '30m' is the live poll, the rest the hourly totals.
+                    cardsRange: CONFIG.cards || '30m',
+                    rangeCards: null,
                     // How many rows of each list are out of sight at xl (measureOverflow).
                     hiddenBelow: { feed: 0, signups: 0 },
                     fresh: {},
@@ -316,13 +319,36 @@
                     var person = this.findPerson(this.expanded);
                     return person && (person.id === data.person_id || person.aliases.indexOf(data.person_id) >= 0) ? data : null;
                 },
+                // The live half hour from the poll, or a longer range from the hourly totals
+                // (fetchRangeCards), whose rows are counts only and filter nothing.
                 cards: function () {
-                    var b = this.p.breakdowns || { pages: [], sources: [], countries: [] };
+                    var live = this.cardsRange === '30m';
+                    var b = live ? (this.p.breakdowns || {}) : (this.rangeCards || {});
+                    var views = live ? this.msg.unitViews30 : this.msg.unitViews[this.cardsRange];
+                    var visits = live ? this.msg.unitVisits30 : this.msg.unitVisits[this.cardsRange];
+                    var note = !live && this.p.filtered ? ' · ' + this.msg.notFiltered : '';
+                    var loading = !live && !this.rangeCards;
                     return [
-                        { id: 'pages', title: this.msg.topPages, unit: this.msg.unitViews30, filter: 'page', rows: b.pages || [] },
-                        { id: 'sources', title: this.msg.sources, unit: this.msg.unitVisits30, filter: 'source', rows: b.sources || [] },
-                        { id: 'countries', title: this.msg.countries, unit: this.msg.unitViews30, filter: 'country', rows: b.countries || [] },
+                        { id: 'pages', title: this.msg.topPages, unit: views + note, filter: 'page', rows: b.pages || [], loading: loading },
+                        { id: 'sources', title: this.msg.sources, unit: visits + note, filter: 'source', rows: b.sources || [], loading: loading },
+                        { id: 'countries', title: this.msg.countries, unit: views + note, filter: 'country', rows: b.countries || [], loading: loading },
                     ];
+                },
+                cardsShown: function () {
+                    return this.cardsRange !== '30m' || this.hasAnyone;
+                },
+                cardsRangeOptions: function () {
+                    var self = this;
+                    return ['30m', '24h', '7d', '30d'].map(function (value) { return { value: value, label: value === '30m' ? self.msg.range30m : self.msg.range[value] }; });
+                },
+                // "Counted from ..." while the totals began inside the range.
+                cardsSince: function () {
+                    if (this.cardsRange === '30m' || !this.rangeCards || !this.rangeCards.since) return '';
+                    try {
+                        return this.msg.trendSince.replace(':time', new Intl.DateTimeFormat(CONFIG.locale, { timeZone: CONFIG.timezone, dateStyle: 'medium', timeStyle: 'short' }).format(new Date(this.rangeCards.since)));
+                    } catch (e) {
+                        return '';
+                    }
                 },
                 // The board's columns: one per part of the site, except Sign up & log in, a doorway
                 // with a row or two, which stacks under the app. A fixed rule, never "the shortest",
@@ -600,7 +626,34 @@
                 urlParams: function () {
                     var params = this.params();
                     if (this.trendRange !== '24h') params.set('trend', this.trendRange);
+                    if (this.cardsRange !== '30m') params.set('cards', this.cardsRange);
                     return params;
+                },
+                setCardsRange: function (range) {
+                    if (range === this.cardsRange) return;
+                    this.cardsRange = range;
+                    this.rangeCards = null;
+                    this.blockMenu = null;
+                    this.syncUrl();
+                    if (range !== '30m') this.fetchRangeCards();
+                },
+                // Its own address, like Trends: the totals move by the hour, so a range change asks
+                // at once and otherwise the cards are refreshed every five minutes.
+                fetchRangeCards: function () {
+                    var self = this, range = this.cardsRange;
+                    if (range === '30m' || !CONFIG.breakdownsUrl) return;
+                    fetch(CONFIG.breakdownsUrl + '?range=' + encodeURIComponent(range), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                        credentials: 'same-origin',
+                    }).then(function (r) {
+                        if (!r.ok) throw r;
+                        return r.json();
+                    }).then(function (data) {
+                        if (data && data.range === self.cardsRange) self.rangeCards = data;
+                    }).catch(function () {
+                        // The cards keep what they have; the poll's status line says when the page
+                        // has lost its connection.
+                    });
                 },
                 syncUrl: function () {
                     var query = this.urlParams().toString();
@@ -1166,6 +1219,8 @@
                 this.$watch('activityAll', function () { self.$nextTick(function () { self.measureOverflow(); }); });
                 this.$watch('signupsAll', function () { self.$nextTick(function () { self.measureOverflow(); }); });
 
+                if (this.cardsRange !== '30m') this.fetchRangeCards();
+
                 // A click anywhere but the open block menu closes it (the menu stops its own clicks).
                 document.addEventListener('click', function () { self.blockMenu = null; });
 
@@ -1175,6 +1230,7 @@
                     // A card asked once and refused (a 429, a blip) is asked again here, or it would
                     // stay a skeleton until somebody pressed a range.
                     if (self.trends || self.trendsAsked) self.fetchTrends(!!self.trends);
+                    if (self.cardsRange !== '30m') self.fetchRangeCards();
                     self.fetchRevenue();
                 }, 300000);
 

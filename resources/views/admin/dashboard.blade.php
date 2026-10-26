@@ -108,6 +108,10 @@
                 'sources' => __('messages.realtime_sources'),
                 'countries' => __('messages.realtime_countries'),
                 'geoCredit' => __('messages.realtime_geo_credit'),
+                'range30m' => __('messages.realtime_range_30m'),
+                'cardsRange' => __('messages.realtime_cards_range'),
+                'unitViews' => ['24h' => __('messages.realtime_unit_views_24h'), '7d' => __('messages.realtime_unit_views_7d'), '30d' => __('messages.realtime_unit_views_30d')],
+                'unitVisits' => ['24h' => __('messages.realtime_unit_visits_24h'), '7d' => __('messages.realtime_unit_visits_7d'), '30d' => __('messages.realtime_unit_visits_30d')],
                 // The menu beside a country: refuse new sign-ups from it (/admin/blocked).
                 'blockCountry' => __('messages.realtime_block_country', ['country' => ':label']),
                 'countryRefused' => __('messages.realtime_country_refused', ['country' => ':label']),
@@ -166,6 +170,9 @@
                 'timezone' => \App\Services\RealtimeTrends::viewerZone(auth()->user()->timezone),
                 // The range Trends opens on, from the address (?trend=), so a bookmark keeps it.
                 'trend' => \App\Services\RealtimeTrends::range(request()->query('trend')),
+                // The breakdown cards' span, from the address (?cards=), and where a longer one is read.
+                'cards' => \App\Services\RealtimeDashboard::cardsRange(request()->query('cards')),
+                'breakdownsUrl' => route('admin.realtime.breakdowns'),
                 'rtl' => is_rtl(),
                 'icons' => \App\Utils\RealtimeIcons::PATHS,
             ];
@@ -214,7 +221,22 @@
 
                 @include('admin.realtime._trends')
 
-                <div v-if="hasAnyone" class="realtime-breakdowns grid gap-4">
+                {{-- The cards' span: the live half hour, or the hourly totals' 24 hours, 7 days or
+                     30 days (RealtimeDashboard::rangeBreakdowns()). Shown while nobody is here too,
+                     since a longer range has something to show then. --}}
+                <div class="flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
+                    <span v-if="cardsSince" class="text-xs text-gray-500 dark:text-gray-400">@{{ cardsSince }}</span>
+                    <div class="inline-flex flex-wrap items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1" role="group" :aria-label="msg.cardsRange">
+                        <button v-for="option in cardsRangeOptions" :key="option.value" type="button" @click="setCardsRange(option.value)"
+                                :aria-pressed="cardsRange === option.value ? 'true' : 'false'"
+                                class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]"
+                                :class="cardsRange === option.value
+                                    ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)]'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'">@{{ option.label }}</button>
+                    </div>
+                </div>
+
+                <div v-if="cardsShown" class="realtime-breakdowns grid gap-4">
                     @include('admin.realtime._breakdown')
                 </div>
 

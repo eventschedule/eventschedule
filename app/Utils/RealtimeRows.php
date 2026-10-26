@@ -38,6 +38,31 @@ class RealtimeRows
         return $ended === null && $lastSeen >= $nowTs - (2 * $hb + 30);
     }
 
+    /**
+     * What a page view is a view OF, for Top pages and its filter: the live view and the hourly
+     * totals of the longer ranges (RealtimeRollup) key a page the same way, or a page would be two
+     * rows across the switch. Every hosted schedule's home page has the path "/", same as the
+     * marketing home, so a schedule page is keyed by its ids, not its path.
+     */
+    public static function pageKey(string $surface, $roleId, $eventId, ?string $path): string
+    {
+        if ($surface === 'gp' && $roleId) {
+            return 'e:'.UrlUtils::encodeId($roleId).($eventId ? ':'.UrlUtils::encodeId($eventId) : '');
+        }
+
+        return 'p:'.$surface.':'.$path;
+    }
+
+    /** Where a visit began, as Sources keys it: the named site, else the kind of source. */
+    public static function sourceKey(?string $channel, ?string $name): ?string
+    {
+        if (! $channel) {
+            return null;
+        }
+
+        return $name ? 'n:'.$name : 'c:'.$channel;
+    }
+
     /** The first second of the oldest bar. */
     public static function firstMinute(int $nowTs): int
     {

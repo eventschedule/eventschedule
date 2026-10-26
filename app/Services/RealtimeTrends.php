@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\DB;
  *    card says since when it is counting, and a comparison it cannot make is left out rather than
  *    made against nothing. "Visitors" is not one of them: a person seen in two hours cannot be told
  *    from two people without keeping who they were, which realtime_hits is not allowed to.
+ *    A blocked account's pages are left out of every hour, the ones counted before the block
+ *    included (BlockedAccounts::withoutTheirCounts()).
  *  - sign-ups, new schedules, new events and orders come from audit_logs, written in the app's
  *    timezone and kept 90 days, by the rules of RealtimeActivity::classify() (kind()): the count a
  *    tile gives is the count the Activity rail would give over the same hours. Admins, the demo
@@ -72,7 +74,10 @@ class RealtimeTrends
     {
         $use24 = (bool) auth()->user()?->use_24_hour_time;
 
-        return Cache::remember('realtime_trends:'.$this->range.':'.app()->getLocale().':'.(int) $use24.':'.$this->zone, self::CACHE_SECONDS, fn () => $this->build());
+        // Under the blocked accounts it leaves out, so a block shows at once rather than in a minute.
+        $blocked = md5(implode(',', (new BlockedAccounts)->userIds()));
+
+        return Cache::remember('realtime_trends:'.$this->range.':'.app()->getLocale().':'.(int) $use24.':'.$this->zone.':'.$blocked, self::CACHE_SECONDS, fn () => $this->build());
     }
 
     public function build(): array
@@ -175,7 +180,13 @@ class RealtimeTrends
         }
         unset($bucket);
 
-        $rows = DB::table('realtime_hourly')
+        $hourly = DB::table('realtime_hourly');
+        if (RealtimeRollup::breakdownsExist()) {
+            // A blocked account's pages, counted before the block (RealtimeRollup's owners).
+            (new BlockedAccounts)->withoutTheirCounts($hourly, 'realtime_hourly');
+        }
+
+        $rows = $hourly
             ->where('hour', '>=', RealtimeTracker::ts($previousStart))
             ->where('hour', '<=', RealtimeTracker::ts($this->now))
             ->whereIn('surface', $surfaces)

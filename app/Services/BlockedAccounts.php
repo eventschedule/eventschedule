@@ -144,6 +144,28 @@ class BlockedAccounts
     }
 
     /**
+     * Leave out of a query on realtime_hourly or realtime_breakdowns the totals of a blocked
+     * account's pages: its schedules', and its events', by the owner columns RealtimeRollup
+     * writes (0 is nobody, and no account is 0). The same rule as withoutTheirHits(), asked of
+     * counts that were added before the block. Rows from before those columns have 0 in all three.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function withoutTheirCounts($query, string $table)
+    {
+        if (! $this->any()) {
+            return $query;
+        }
+
+        foreach (['role_owner_id', 'event_user_id', 'event_owner_id'] as $column) {
+            $query->whereNotIn($table.'.'.$column, $this->userIds());
+        }
+
+        return $query;
+    }
+
+    /**
      * The visitor keys a blocked account was signed in on since $since (a RealtimeTracker::ts()
      * string), for RealtimeDashboard: an anonymous page view on one of them belongs to nobody.
      * The list and the expanded timeline both ask over the timeline's hour, so a key the account

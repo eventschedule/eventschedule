@@ -1112,6 +1112,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::get('/admin/realtime', fn (\Illuminate\Http\Request $request) => redirect()->to(route('admin.dashboard').($request->getQueryString() ? '?'.$request->getQueryString() : '')))->name('admin.realtime');
         Route::get('/admin/realtime/data', [AdminRealtimeController::class, 'data'])->name('admin.realtime.data');
         Route::get('/admin/realtime/trends', [AdminRealtimeController::class, 'trends'])->name('admin.realtime.trends');
+        Route::get('/admin/realtime/breakdowns', [AdminRealtimeController::class, 'breakdowns'])->name('admin.realtime.breakdowns');
         Route::post('/admin/settings/realtime', [AdminRealtimeController::class, 'updateSettings'])->name('admin.settings.update_realtime');
         Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
         Route::get('/admin/revenue', [AdminController::class, 'revenue'])->name('admin.revenue');

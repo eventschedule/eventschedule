@@ -16,6 +16,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Throwable;
@@ -65,6 +66,13 @@ class RealtimeDashboard
     public const FETCH_CAP = 20000;
 
     private const BREAKDOWN_LIMIT = 50;
+
+    /** The breakdown cards' switch: the live half hour, then the hourly totals' ranges. */
+    public const CARD_RANGES = ['30m', '24h', '7d', '30d'];
+
+    private const RANGE_HOURS = ['24h' => 24, '7d' => 168, '30d' => 720];
+
+    private const RANGE_CACHE_SECONDS = 60;
 
     private const STUCK_MINUTES = 10;
 
@@ -282,22 +290,12 @@ class RealtimeDashboard
 
     private function pageKey(object $row): string
     {
-        // Every hosted schedule's home page has the path "/", same as the marketing home, so a
-        // schedule page is keyed by its ids, not its path.
-        if ($row->surface === 'gp' && $row->role_id) {
-            return 'e:'.UrlUtils::encodeId($row->role_id).($row->event_id ? ':'.UrlUtils::encodeId($row->event_id) : '');
-        }
-
-        return 'p:'.$row->surface.':'.$row->path;
+        return RealtimeRows::pageKey($row->surface, $row->role_id, $row->event_id, $row->path);
     }
 
     private function sourceKey(object $row): ?string
     {
-        if (! $row->source_channel) {
-            return null;
-        }
-
-        return $row->source_name ? 'n:'.$row->source_name : 'c:'.$row->source_channel;
+        return RealtimeRows::sourceKey($row->source_channel, $row->source_name);
     }
 
     private function matches(object $row, bool $ignoreSurface = false): bool
@@ -831,6 +829,16 @@ class RealtimeDashboard
 
     private function countriesBreakdown(Collection $rows): array
     {
+        return $this->countryRows($rows->filter(fn ($row) => $row->country)->countBy('country')->all(), true);
+    }
+
+    /**
+     * Country rows from views by code, for the live card and the longer ranges alike.
+     *
+     * @param  array<string, int>  $views
+     */
+    private function countryRows(array $views, bool $filterable): array
+    {
         // Which countries new accounts are refused from (/admin/blocked), so a row can say so
         // beside the menu that adds one. One small read per poll; unreadable is "none".
         try {
@@ -840,23 +848,126 @@ class RealtimeDashboard
             $refused = collect();
         }
 
-        return $rows->filter(fn ($row) => $row->country)
-            ->groupBy('country')
-            ->map(fn ($group, $country) => [
-                'key' => $country,
-                'label' => $country,
+        arsort($views);
+
+        return collect(array_slice($views, 0, self::BREAKDOWN_LIMIT, true))
+            ->map(fn ($count, $country) => [
+                'key' => (string) $country,
+                'label' => (string) $country,
                 'sub' => null,
                 'icon' => null,
                 'url' => null,
-                'views' => $group->count(),
+                'views' => (int) $count,
                 'now' => 0,
-                'filterable' => true,
+                'filterable' => $filterable,
                 'blocked' => $refused->has(strtoupper($country)),
                 'blocked_until' => $refused->get(strtoupper($country))?->toIso8601String(),
                 // A code the list cannot name (EU, a retired one) is offered no menu.
                 'blockable' => Blocklist::isCountry(strtoupper($country)),
             ])
-            ->sortByDesc('views')->take(self::BREAKDOWN_LIMIT)->values()->all();
+            ->values()->all();
+    }
+
+    /** The span the breakdown cards are read over: the live half hour, or a longer range. */
+    public static function cardsRange(?string $range): string
+    {
+        return in_array($range, self::CARD_RANGES, true) ? $range : '30m';
+    }
+
+    /**
+     * Top pages, Sources and Countries over the last 24 hours, 7 days or 30 days, from the hourly
+     * totals RealtimeRollup keeps (realtime_breakdowns), for the switch above the three cards.
+     *
+     * Totals carry no visitor, so the rows here are counts only: nobody is "here now", and a row
+     * filters nothing (filters are made of the live page's rows; the cards say "Not filtered", as
+     * Trends does). A blocked account's pages are left out (withoutTheirCounts()). The counts are
+     * cached for a minute under the blocked accounts they leave out, so a block shows at once;
+     * the labels, which name schedules and events, are made per request and never cached.
+     *
+     * @return array{range: string, since: ?string, pages: list<array>, sources: list<array>, countries: list<array>}
+     */
+    public function rangeBreakdowns(string $range): array
+    {
+        $hours = self::RANGE_HOURS[$range] ?? self::RANGE_HOURS['24h'];
+        $from = RealtimeTracker::ts($this->now->utc()->startOfHour()->subHours($hours - 1));
+        $since = RealtimeRollup::breakdownsSince();
+
+        if (! RealtimeRollup::breakdownsExist()) {
+            return ['range' => $range, 'since' => null, 'pages' => [], 'sources' => [], 'countries' => []];
+        }
+
+        $totals = Cache::remember(
+            'realtime_breakdowns:'.$range.':'.md5(implode(',', $this->blocked->userIds())),
+            self::RANGE_CACHE_SECONDS,
+            fn () => collect(['page', 'source', 'country'])->mapWithKeys(fn ($dimension) => [$dimension => $this->blocked
+                ->withoutTheirCounts(DB::table('realtime_breakdowns'), 'realtime_breakdowns')
+                ->where('dimension', $dimension)
+                ->where('hour', '>=', $from)
+                ->groupBy('item_hash')
+                ->orderByRaw('SUM(views) DESC')
+                ->limit(self::BREAKDOWN_LIMIT)
+                ->get([
+                    DB::raw('MAX(item) as item'),
+                    DB::raw('SUM(views) as total'),
+                    DB::raw('MAX(surface) as surface'),
+                    DB::raw('MAX(role_id) as role_id'),
+                    DB::raw('MAX(event_id) as event_id'),
+                    DB::raw('MAX(title) as title'),
+                    DB::raw('MAX(channel) as channel'),
+                ])
+                ->map(fn ($row) => (array) $row)
+                ->all(),
+            ])->all(),
+        );
+
+        $pages = collect($totals['page'])->map(fn ($row) => (object) [
+            'surface' => (string) $row['surface'],
+            'role_id' => (int) $row['role_id'] ?: null,
+            'event_id' => (int) $row['event_id'] ?: null,
+            'path' => str_starts_with((string) $row['item'], 'p:') ? (string) preg_replace('/^p:[a-z]+:/', '', (string) $row['item']) : '',
+            'title' => $row['title'],
+            'item' => (string) $row['item'],
+            'total' => (int) $row['total'],
+        ]);
+        $this->ensureNames($pages);
+
+        return [
+            'range' => $range,
+            // Counted from later than the range begins: the card says since when.
+            'since' => $since && $since > $from ? CarbonImmutable::parse($since, 'UTC')->toIso8601String() : null,
+            'pages' => $pages->map(function ($row) {
+                $page = $this->pageLabel($row);
+
+                return [
+                    'key' => $row->item,
+                    'label' => $page['label'],
+                    'sub' => $page['surface_label'],
+                    'icon' => $row->surface,
+                    'url' => $page['url'],
+                    'admin_url' => $page['admin_url'],
+                    'admin_label' => $page['admin_label'],
+                    'views' => $row->total,
+                    'now' => 0,
+                    'filterable' => false,
+                ];
+            })->values()->all(),
+            'sources' => collect($totals['source'])->map(function ($row) {
+                $named = str_starts_with((string) $row['item'], 'n:');
+                $channel = (string) ($row['channel'] ?: substr((string) $row['item'], 2));
+
+                return [
+                    'key' => (string) $row['item'],
+                    'label' => $named ? substr((string) $row['item'], 2) : $this->channelLabel($channel),
+                    'sub' => $named ? $this->channelLabel($channel) : null,
+                    'icon' => $channel,
+                    'url' => null,
+                    'views' => (int) $row['total'],
+                    'now' => 0,
+                    'filterable' => false,
+                ];
+            })->values()->all(),
+            'countries' => $this->countryRows(collect($totals['country'])->mapWithKeys(fn ($row) => [(string) $row['item'] => (int) $row['total']])->all(), false),
+        ];
     }
 
     /**

@@ -126,6 +126,10 @@ class AccountBlockService
         $user->blocked_at = $user->blocked_at ?: now();
         $user->syncOriginalAttribute('blocked_at');
 
+        // Its own browsing that the visit totals have counted already: the views of its pages
+        // are left out wherever they are read, but who viewed a page is not kept in a total.
+        RealtimeRollup::forgetViewsBy($user->id);
+
         $taken = collect();
         $failed = collect();
 
