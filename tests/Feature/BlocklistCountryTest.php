@@ -182,6 +182,23 @@ class BlocklistCountryTest extends TestCase
         $this->assertNotNull(Blocklist::forCountry('RU'), 'asked for again by hand, so letting the account back in leaves it');
     }
 
+    public function test_a_country_added_from_the_dashboard_goes_back_to_the_dashboard(): void
+    {
+        $this->asAdmin()->post(route('admin.blocked.entry.store'), ['type' => Blocklist::COUNTRY, 'value' => 'RU', 'for' => '30d', 'from' => 'dashboard'])
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHas('message', fn ($message) => str_starts_with($message, __('messages.blocklist_added', ['value' => 'Russia'])));
+        $this->assertTrue(BlocklistEntry::first()->expires_at->greaterThan(now()->addDays(29)));
+
+        // Again, from the same menu: still back to the dashboard, with what stands.
+        $this->asAdmin()->post(route('admin.blocked.entry.store'), ['type' => Blocklist::COUNTRY, 'value' => 'RU', 'for' => '1d', 'from' => 'dashboard'])
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHas('warning');
+
+        // Anywhere else is not a place to go back to.
+        $this->asAdmin()->post(route('admin.blocked.entry.store'), ['type' => Blocklist::COUNTRY, 'value' => 'FR', 'from' => 'https://example.com'])
+            ->assertSessionHasErrors('from');
+    }
+
     public function test_a_country_is_seven_days_unless_the_form_says_otherwise_and_must_be_a_real_one(): void
     {
         $this->asAdmin()->post(route('admin.blocked.entry.store'), ['type' => Blocklist::COUNTRY, 'value' => 'RU']);

@@ -357,6 +357,41 @@ class AdminRealtimeTest extends TestCase
         $this->assertSame(2, $payload['overview']['now_total']);
     }
 
+    public function test_a_country_row_says_whether_new_sign_ups_from_it_are_refused(): void
+    {
+        $this->hit(['visitor_key' => '7777777777777777', 'country' => 'RU']);
+        $this->hit(['visitor_key' => '8888888888888888', 'country' => 'FR']);
+        $this->hit(['visitor_key' => '9999999999999999', 'country' => 'DE']);
+        $this->hit(['visitor_key' => '6666666666666666', 'country' => 'EU']);
+
+        \App\Services\Blocklist::add(\App\Services\Blocklist::COUNTRY, 'RU', null, null, null, now()->addWeek());
+        \App\Services\Blocklist::add(\App\Services\Blocklist::COUNTRY, 'FR');
+        // Ended: refuses nobody, so the row does not say it does.
+        \App\Services\Blocklist::add(\App\Services\Blocklist::COUNTRY, 'DE', null, null, null, now()->addDay());
+        DB::table('blocklist_entries')->where('match_key', 'DE')->update(['expires_at' => now()->subHour()]);
+
+        $rows = collect((new RealtimeDashboard)->payload()['breakdowns']['countries'])->keyBy('key');
+
+        $this->assertTrue($rows['RU']['blocked']);
+        $this->assertNotNull($rows['RU']['blocked_until']);
+        $this->assertTrue($rows['FR']['blocked']);
+        $this->assertNull($rows['FR']['blocked_until'], 'until removed');
+        $this->assertFalse($rows['DE']['blocked']);
+        $this->assertTrue($rows['DE']['blockable']);
+        $this->assertFalse($rows['EU']['blockable'], 'not a country the list can name, so no menu');
+    }
+
+    public function test_the_dashboard_offers_the_block_menu_beside_a_country(): void
+    {
+        $this->hit(['visitor_key' => 'aaaaaaaaaaaaaaaa', 'country' => 'RU']);
+
+        $this->actingAsAdmin($this->admin())->get('/admin/dashboard')
+            ->assertOk()
+            ->assertSee('realtime-block-toggle', false)
+            ->assertSee('action="'.route('admin.blocked.entry.store').'"', false)
+            ->assertSee('name="from" value="dashboard"', false);
+    }
+
     public function test_activity_reads_the_audit_log_with_its_traps_handled(): void
     {
         $owner = $this->createOwner();

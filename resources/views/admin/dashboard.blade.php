@@ -108,6 +108,13 @@
                 'sources' => __('messages.realtime_sources'),
                 'countries' => __('messages.realtime_countries'),
                 'geoCredit' => __('messages.realtime_geo_credit'),
+                // The menu beside a country: refuse new sign-ups from it (/admin/blocked).
+                'blockCountry' => __('messages.realtime_block_country', ['country' => ':label']),
+                'countryRefused' => __('messages.realtime_country_refused', ['country' => ':label']),
+                'refusedUntil' => __('messages.blocklist_until', ['date' => ':label']),
+                'refusedForever' => __('messages.blocklist_for_forever'),
+                'openBlocked' => __('messages.realtime_open_blocked'),
+                'durations' => collect(array_keys(\App\Services\Blocklist::DURATIONS))->map(fn ($key) => ['key' => $key, 'label' => __('messages.blocklist_for_'.$key)])->all(),
                 'views' => __('messages.realtime_views'),
                 'visits' => __('messages.realtime_visits'),
                 'unitViews30' => __('messages.realtime_unit_views_30'),

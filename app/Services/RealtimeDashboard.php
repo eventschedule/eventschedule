@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BlocklistEntry;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\SupportConversation;
@@ -11,6 +12,7 @@ use App\Utils\RealtimeRows;
 use App\Utils\RealtimeTracker;
 use App\Utils\UrlUtils;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -829,6 +831,15 @@ class RealtimeDashboard
 
     private function countriesBreakdown(Collection $rows): array
     {
+        // Which countries new accounts are refused from (/admin/blocked), so a row can say so
+        // beside the menu that adds one. One small read per poll; unreadable is "none".
+        try {
+            $refused = BlocklistEntry::active()->where('type', Blocklist::COUNTRY)->pluck('expires_at', 'match_key');
+        } catch (QueryException $e) {
+            report($e);
+            $refused = collect();
+        }
+
         return $rows->filter(fn ($row) => $row->country)
             ->groupBy('country')
             ->map(fn ($group, $country) => [
@@ -840,6 +851,10 @@ class RealtimeDashboard
                 'views' => $group->count(),
                 'now' => 0,
                 'filterable' => true,
+                'blocked' => $refused->has(strtoupper($country)),
+                'blocked_until' => $refused->get(strtoupper($country))?->toIso8601String(),
+                // A code the list cannot name (EU, a retired one) is offered no menu.
+                'blockable' => Blocklist::isCountry(strtoupper($country)),
             ])
             ->sortByDesc('views')->take(self::BREAKDOWN_LIMIT)->values()->all();
     }

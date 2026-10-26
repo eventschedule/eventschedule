@@ -227,6 +227,8 @@
                     signupsAll: false,
                     bumped: {},
                     expandedCards: { pages: false, sources: false, countries: false },
+                    // The country whose block menu is open (_breakdown), or null.
+                    blockMenu: null,
                     // How many rows of each list are out of sight at xl (measureOverflow).
                     hiddenBelow: { feed: 0, signups: 0 },
                     fresh: {},
@@ -640,6 +642,22 @@
                 },
                 panelId: function (person) {
                     return 'realtime-person-' + person.id.replace(/[^A-Za-z0-9]/g, '');
+                },
+                // "Until Nov 2, 2026" in the page's clock, or "Until removed".
+                refusedUntil: function (row) {
+                    if (!row.blocked_until) return this.msg.refusedForever;
+                    try {
+                        return this.fill(this.msg.refusedUntil, new Intl.DateTimeFormat(CONFIG.locale, { timeZone: CONFIG.timezone, dateStyle: 'medium' }).format(new Date(row.blocked_until)));
+                    } catch (e) {
+                        return this.fill(this.msg.refusedUntil, row.blocked_until.slice(0, 10));
+                    }
+                },
+                closeBlockMenu: function (key) {
+                    this.blockMenu = null;
+                    this.$nextTick(function () {
+                        var toggle = document.querySelector('[aria-controls="realtime-block-' + key + '"]');
+                        if (toggle) toggle.focus();
+                    });
                 },
                 fill: function (template, label) {
                     // A function, so a "$&" in a page title or source is not a replacement pattern.
@@ -1147,6 +1165,9 @@
                 window.addEventListener('resize', function () { self.measureOverflow(); });
                 this.$watch('activityAll', function () { self.$nextTick(function () { self.measureOverflow(); }); });
                 this.$watch('signupsAll', function () { self.$nextTick(function () { self.measureOverflow(); }); });
+
+                // A click anywhere but the open block menu closes it (the menu stops its own clicks).
+                document.addEventListener('click', function () { self.blockMenu = null; });
 
                 setInterval(function () { self.nowMs = Date.now(); }, 5000);
                 setInterval(function () {

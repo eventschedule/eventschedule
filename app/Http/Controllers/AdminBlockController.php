@@ -306,6 +306,7 @@ class AdminBlockController extends Controller
             'value' => ['required', 'string', 'max:255'],
             'note' => ['nullable', 'string', 'max:255'],
             'for' => ['nullable', 'string', 'in:'.implode(',', array_keys(Blocklist::DURATIONS))],
+            'from' => ['nullable', 'string', 'in:dashboard'],
         ]);
 
         $duration = $validated['for'] ?? ($validated['type'] === Blocklist::COUNTRY ? self::COUNTRY_DURATION : 'forever');
@@ -313,25 +314,25 @@ class AdminBlockController extends Controller
         try {
             $entry = Blocklist::add($validated['type'], $validated['value'], $validated['note'] ?? null, $request->user()->id, null, Blocklist::expiryFor($duration));
         } catch (\InvalidArgumentException $e) {
-            return redirect()->to(route('admin.blocked').'#list')
+            return $this->afterAdding($request)
                 ->withInput()
                 ->withErrors(['value' => __($e->getMessage())]);
         }
 
         // `message` and `warning`, which the layout toasts: the redirect lands on the list,
-        // far below where the page would print a notice.
+        // far below where the page would print a notice, or on the dashboard's live view.
         $shown = $entry->type === Blocklist::COUNTRY ? Blocklist::countryName($entry->value) : $entry->value;
 
         if ($entry->renewal) {
             AuditService::log(AuditService::ADMIN_BLOCKLIST_ADD, $request->user()->id, 'App\\Models\\BlocklistEntry', $entry->id, null, ['type' => $entry->type, 'value' => $entry->value, 'expires_at' => $entry->expires_at?->toIso8601String(), 'renewal' => $entry->renewal]);
 
-            return redirect()->to(route('admin.blocked').'#list')
+            return $this->afterAdding($request)
                 ->with('message', __('messages.blocklist_'.$entry->renewal, ['value' => $shown]).' '.$this->until($entry, $request).'.');
         }
 
         // Said with the end it keeps: a shorter length asked for does not shorten it.
         if (! $entry->wasRecentlyCreated) {
-            return redirect()->to(route('admin.blocked').'#list')
+            return $this->afterAdding($request)
                 ->with('warning', __('messages.blocklist_already_listed', ['value' => $shown]).($entry->expires_at ? ' '.$this->until($entry, $request).'.' : ''));
         }
 
@@ -348,10 +349,21 @@ class AdminBlockController extends Controller
             $existing = $count ? ' '.__('messages.blocklist_existing_accounts', ['count' => number_format($count)]) : '';
         }
 
-        return redirect()->to(route('admin.blocked').'#list')->with(
+        return $this->afterAdding($request)->with(
             'message',
-            __('messages.blocklist_added', ['value' => $shown]).$existing
+            __('messages.blocklist_added', ['value' => $shown])
+                .($entry->expires_at ? ' '.$this->until($entry, $request).'.' : '')
+                .$existing
         );
+    }
+
+    /**
+     * Where an add goes back to: the list, or the dashboard's live view when it came from the
+     * menu beside a country there (admin/realtime/_breakdown).
+     */
+    private function afterAdding(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        return redirect()->to($request->input('from') === 'dashboard' ? route('admin.dashboard') : route('admin.blocked').'#list');
     }
 
     /** "Until Nov 2, 2026", in the operator's own time zone, or "Until removed". */
