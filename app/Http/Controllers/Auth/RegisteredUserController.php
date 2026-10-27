@@ -35,6 +35,23 @@ use Illuminate\View\View;
 class RegisteredUserController extends Controller
 {
     /**
+     * The database the selfhost setup wizard posts, checked the same way by every step of it.
+     */
+    private const SETUP_DATABASE_RULES = [
+        'database_host' => ['required', 'string', 'max:255'],
+        'database_port' => ['required', 'string', 'max:255'],
+        'database_name' => ['required', 'string', 'max:255'],
+        'database_username' => ['required', 'string', 'max:255'],
+        'database_password' => ['required', 'string', 'max:255'],
+    ];
+
+    /**
+     * How long one setup request keeps starting migrations. Well under the 30 seconds a shared
+     * host's FastCGI timeout is often set to, leaving room for one slow migration at the end.
+     */
+    private const SETUP_MIGRATION_SECONDS = 10;
+
+    /**
      * Display the registration view.
      */
     public function create()
@@ -345,6 +362,95 @@ class RegisteredUserController extends Controller
     }
 
     /**
+     * Run the next slice of a fresh install's migrations, for the setup wizard (issue #133).
+     *
+     * A fresh install has close to four hundred migrations. Run in the one request that also
+     * creates the account, they took 23 seconds on a fast local MySQL and longer on a shared
+     * host, where the web server's FastCGI or proxy timeout (often 30 to 60 seconds) cut the
+     * request off: a 500 with nothing in the log, because the worker was killed, and no .env,
+     * because it is written only after the migrations succeed. PHP's own time limit never
+     * fired, since on Linux it counts CPU time and these run on about one second of it.
+     *
+     * So the wizard calls this until it answers `done`, then posts the form, and each call stops
+     * starting migrations once it has spent SETUP_MIGRATION_SECONDS. A call that is cut off
+     * anyway loses only the migration it was in, and the next press carries on from there.
+     */
+    public function migrateForSetup(Request $request): JsonResponse
+    {
+        if (config('app.hosted') || ! selfhost_needs_setup()) {
+            abort(404);
+        }
+
+        $request->validate(self::SETUP_DATABASE_RULES);
+
+        // Before any migration runs, as store() checks it, or the wizard would build the whole
+        // database and only then say the settings cannot be saved.
+        if (! is_writable(base_path('.env'))) {
+            return response()->json(['error' => __('messages.env_not_writable')], 422);
+        }
+
+        $this->useSetupDatabase($request);
+
+        try {
+            $migrator = app('migrator');
+            $files = $migrator->getMigrationFiles(array_merge($migrator->paths(), [database_path('migrations')]));
+            $ran = $migrator->repositoryExists() ? $migrator->getRepository()->getRan() : [];
+            $pending = array_values(array_diff(array_keys($files), $ran));
+            $started = microtime(true);
+
+            while ($pending !== [] && microtime(true) - $started < self::SETUP_MIGRATION_SECONDS) {
+                Artisan::call('migrate', [
+                    '--force' => true,
+                    '--path' => $files[$pending[0]],
+                    '--realpath' => true,
+                ]);
+
+                array_shift($pending);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.setup_migration_failed')], 422);
+        }
+
+        return response()->json([
+            'done' => $pending === [],
+            'migrated' => count($files) - count($pending),
+            'total' => count($files),
+        ]);
+    }
+
+    /**
+     * Point the live MySQL connection at the database the wizard was given.
+     *
+     * Reconnects only when a setting differs: the wizard's slices and its final submit all post
+     * the same values, and the connection already open is the right one.
+     */
+    private function useSetupDatabase(Request $request): void
+    {
+        $settings = [
+            'host' => $request->database_host,
+            'port' => $request->database_port,
+            'database' => $request->database_name,
+            'username' => $request->database_username,
+            'password' => $request->database_password,
+        ];
+
+        $changed = false;
+
+        foreach ($settings as $key => $value) {
+            if ((string) config("database.connections.mysql.{$key}") !== (string) $value) {
+                config(["database.connections.mysql.{$key}" => $value]);
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            DB::purge('mysql');
+        }
+    }
+
+    /**
      * Handle an incoming registration request.
      *
      * The hosted form submits with fetch and `Accept: application/json`, so a rejected code comes
@@ -366,13 +472,7 @@ class RegisteredUserController extends Controller
         }
 
         if (selfhost_needs_setup()) {
-            $request->validate([
-                'database_host' => ['required', 'string', 'max:255'],
-                'database_port' => ['required', 'string', 'max:255'],
-                'database_name' => ['required', 'string', 'max:255'],
-                'database_username' => ['required', 'string', 'max:255'],
-                'database_password' => ['required', 'string', 'max:255'],
-            ]);
+            $request->validate(self::SETUP_DATABASE_RULES);
 
             $baseUrl = $request->getSchemeAndHttpHost();
             $basePath = $request->getBaseUrl(); // Detects "/public" if present
@@ -389,13 +489,11 @@ class RegisteredUserController extends Controller
             // BEFORE persisting anything. If the database is not usable, nothing is
             // written to .env, so the setup wizard stays reachable on the next request
             // instead of locking the user out with a half-configured install.
-            config(['database.connections.mysql.host' => $request->database_host]);
-            config(['database.connections.mysql.port' => $request->database_port]);
-            config(['database.connections.mysql.database' => $request->database_name]);
-            config(['database.connections.mysql.username' => $request->database_username]);
-            config(['database.connections.mysql.password' => $request->database_password]);
-
-            DB::purge('mysql');
+            //
+            // The wizard has normally run them already, a slice at a time through
+            // migrateForSetup(), so this is a no-op then. It stays for a submit that did
+            // not go through the wizard's script.
+            $this->useSetupDatabase($request);
 
             try {
                 Artisan::call('migrate', ['--force' => true]);

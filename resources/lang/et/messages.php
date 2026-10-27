@@ -1091,6 +1091,8 @@ return [
     'report_errors' => 'Vigadest teavitamine arendajatele, et aidata meil rakendust täiustada (valikuline)',
     'env_not_writable' => 'Env-faili ei saa kirjutada. Seadeid ei saa automaatselt salvestada.',
     'setup_migration_failed' => 'Ühendus andmebaasiga õnnestus, kuid tabeleid ei õnnestunud luua. Veendu, et andmebaasi kasutajal on kõik õigused ja kaust storage on kirjutatav, seejärel proovi uuesti. Üksikasjad leiad failist storage/logs/laravel.log.',
+    'setup_migration_interrupted' => 'Server lõpetas päringu enne, kui andmebaas oli valmis. Proovi uuesti, et jätkata sealt, kus see pooleli jäi.',
+    'setting_up_database' => 'Andmebaasi seadistamine...',
     'optional' => 'Valikuline',
     'i_accept_the_terms' => 'Nõustun :terms',
     'import' => 'Impordi',

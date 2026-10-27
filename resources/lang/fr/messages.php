@@ -1056,6 +1056,8 @@ return [
     'report_errors' => 'Signaler les erreurs aux développeurs pour nous aider à améliorer l\'application (facultatif)',
     'env_not_writable' => 'Le fichier .env n’est pas accessible en écriture. Les paramètres ne peuvent pas être enregistrés automatiquement.',
     'setup_migration_failed' => 'La connexion à la base de données a réussi, mais les tables n’ont pas pu être créées. Assurez-vous que l’utilisateur de la base de données dispose de tous les privilèges et que le dossier storage est accessible en écriture, puis réessayez. Consultez storage/logs/laravel.log pour plus de détails.',
+    'setup_migration_interrupted' => 'Le serveur a interrompu la requête avant que la base de données soit prête. Réessayez pour reprendre là où elle s\'est arrêtée.',
+    'setting_up_database' => 'Configuration de la base de données...',
     'optional' => 'Facultatif',
     'i_accept_the_terms' => 'J\'accepte les :terms',
     'import' => 'Importer',

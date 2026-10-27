@@ -1044,6 +1044,8 @@ return [
     'report_errors' => 'Fehler an die Entwickler melden, um uns bei der Verbesserung der App zu helfen (optional)',
     'env_not_writable' => 'Die .env-Datei ist nicht beschreibbar. Einstellungen können nicht automatisch gespeichert werden.',
     'setup_migration_failed' => 'Die Verbindung zur Datenbank war erfolgreich, aber die Tabellen konnten nicht erstellt werden. Stellen Sie sicher, dass der Datenbankbenutzer alle Rechte hat und das Verzeichnis storage beschreibbar ist, und versuchen Sie es erneut. Details finden Sie in storage/logs/laravel.log.',
+    'setup_migration_interrupted' => 'Der Server hat die Anfrage beendet, bevor die Datenbank bereit war. Versuche es erneut, um dort weiterzumachen, wo es aufgehört hat.',
+    'setting_up_database' => 'Datenbank wird eingerichtet...',
     'optional' => 'Optional',
     'i_accept_the_terms' => 'Ich akzeptiere die :terms',
     'import' => 'Importieren',

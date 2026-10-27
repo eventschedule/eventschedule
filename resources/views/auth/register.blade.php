@@ -1620,6 +1620,98 @@
 
         @endif
 
+        @if (selfhost_needs_setup())
+            /**
+             * Build the database before the form is posted (issue #133).
+             *
+             * Run inside the one sign-up request, the migrations outlasted a shared host's request
+             * timeout and the install ended on a bare 500. They run here a slice per request
+             * (RegisteredUserController::migrateForSetup()), and the form is posted once they are
+             * all done, so store() finds nothing left to migrate. A slice that fails or is cut off
+             * leaves the button live: pressing it again carries on from where it stopped.
+             */
+            document.addEventListener('DOMContentLoaded', function () {
+                var form = document.querySelector('form[action="{{ route('sign_up') }}"]');
+                if (!form) return;
+
+                var migrated = false;
+                var running = false;
+
+                form.addEventListener('submit', function (e) {
+                    if (migrated) return;
+                    e.preventDefault();
+                    if (running) return;
+                    running = true;
+
+                    var button = form.querySelector('button[type="submit"]');
+                    button.disabled = true;
+                    document.getElementById('setup-error').hidden = true;
+                    showSetupProgress('');
+
+                    runSetupMigrations(-1).then(function () {
+                        migrated = true;
+                        // submit() skips this listener and the browser's own checks, which the
+                        // press that started all this has already passed.
+                        form.submit();
+                    }).catch(function (message) {
+                        running = false;
+                        button.disabled = false;
+                        document.getElementById('setup-progress').hidden = true;
+                        document.getElementById('setup-error-text').textContent = message;
+                        document.getElementById('setup-error').hidden = false;
+                    });
+                });
+            });
+
+            // The count is isolated left to right, or a Hebrew or Arabic page reads it backwards.
+            function showSetupProgress(count) {
+                var progress = document.getElementById('setup-progress');
+                progress.textContent = @json(__('messages.setting_up_database')) + (count ? ' \u2066' + count + '\u2069' : '');
+                progress.hidden = false;
+            }
+
+            function runSetupMigrations(lastCount) {
+                var failed = @json(__('messages.setup_migration_failed'));
+                var interrupted = @json(__('messages.setup_migration_interrupted'));
+
+                return fetch(@json(route('sign_up.migrate')), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        database_host: document.getElementById('database_host').value,
+                        database_port: document.getElementById('database_port').value,
+                        database_name: document.getElementById('database_name').value,
+                        database_username: document.getElementById('database_username').value,
+                        database_password: document.getElementById('database_password').value
+                    })
+                }).catch(function () {
+                    throw interrupted;
+                }).then(function (response) {
+                    return response.json().catch(function () {
+                        // Not JSON: the server or a proxy in front of it ended the request.
+                        throw interrupted;
+                    }).then(function (data) {
+                        if (!response.ok) {
+                            var errors = data.errors ? Object.values(data.errors) : [];
+                            throw data.error || (errors.length ? errors[0][0] : failed);
+                        }
+
+                        if (data.done) return;
+
+                        // A slice that moved nothing on would ask again forever.
+                        if (data.migrated <= lastCount) throw failed;
+
+                        showSetupProgress(data.migrated + ' / ' + data.total);
+
+                        return runSetupMigrations(data.migrated);
+                    });
+                });
+            }
+        @endif
 
         </script>
 
@@ -2198,6 +2290,14 @@
         </div>
         @endif
         
+        @if (selfhost_needs_setup())
+        {{-- Filled in by runSetupMigrations() while the database is built, a slice per request. --}}
+        <p id="setup-progress" role="status" aria-live="polite" class="mt-6 text-sm text-gray-600 dark:text-gray-400" hidden></p>
+        <div id="setup-error" role="alert" class="mt-6 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3" hidden>
+            <p id="setup-error-text" class="text-sm text-red-700 dark:text-red-300"></p>
+        </div>
+        @endif
+
         {{-- The margin lives on #submit-section, not on this wrapper: the wrapper is always
              rendered, so in step one its margin was dead space at the bottom of the card. --}}
         <div class="flex items-center justify-end">

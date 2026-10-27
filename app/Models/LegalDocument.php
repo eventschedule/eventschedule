@@ -114,6 +114,13 @@ class LegalDocument extends Model
             return self::$indexMemo;
         }
 
+        // A fresh selfhost install has no database to ask yet, and the setup wizard links the
+        // terms. Asking anyway logged an "Access denied" that read as the cause of a failed
+        // install (issue #133).
+        if (selfhost_needs_setup()) {
+            return [];
+        }
+
         try {
             return self::$indexMemo = Cache::rememberForever(self::INDEX_CACHE_KEY, function () {
                 return static::query()

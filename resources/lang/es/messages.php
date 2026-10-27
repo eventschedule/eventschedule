@@ -1052,6 +1052,8 @@ return [
     'report_errors' => 'Reportar errores a los desarrolladores para ayudarnos a mejorar la aplicación (opcional)',
     'env_not_writable' => 'El archivo .env no tiene permisos de escritura. La configuracion no se puede guardar automaticamente.',
     'setup_migration_failed' => 'Conectamos con la base de datos pero no se pudieron crear las tablas. Asegúrate de que el usuario de la base de datos tenga todos los privilegios y de que el directorio storage tenga permisos de escritura, y vuelve a intentarlo. Consulta storage/logs/laravel.log para más detalles.',
+    'setup_migration_interrupted' => 'El servidor terminó la solicitud antes de que la base de datos estuviera lista. Inténtalo de nuevo para continuar desde donde se detuvo.',
+    'setting_up_database' => 'Configurando la base de datos...',
     'optional' => 'Opcional',
     'i_accept_the_terms' => 'Acepto los :terms',
     'import' => 'Importar',

@@ -45,6 +45,12 @@ Route::middleware(['app_subdomain', 'guest'])->group(function () {
     Route::post('sign_up', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:10,1,signup');
 
+    // The selfhost setup wizard's migrations, a slice per request. Answers only while the
+    // install still needs setup; EnsureSelfhostSetup lets sign_up/* through.
+    Route::post('sign_up/migrate', [RegisteredUserController::class, 'migrateForSetup'])
+        ->name('sign_up.migrate')
+        ->middleware('throttle:60,1,signup_migrate');
+
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 

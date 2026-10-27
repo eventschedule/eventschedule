@@ -631,6 +631,8 @@ return [
     'report_errors' => 'Reportar erros aos desenvolvedores para nos ajudar a melhorar o aplicativo (opcional)',
     'env_not_writable' => 'O arquivo .env não é gravável. As configurações não podem ser salvas automaticamente.',
     'setup_migration_failed' => 'Conectamos ao banco de dados, mas não foi possível criar as tabelas. Verifique se o usuário do banco de dados tem todos os privilégios e se o diretório storage é gravável e tente novamente. Consulte storage/logs/laravel.log para mais detalhes.',
+    'setup_migration_interrupted' => 'O servidor encerrou a solicitação antes de o banco de dados ficar pronto. Tente novamente para continuar de onde parou.',
+    'setting_up_database' => 'Configurando o banco de dados...',
     'optional' => 'Opcional',
     'i_accept_the_terms' => 'Eu aceito os :terms',
     'import' => 'Importar',
