@@ -405,8 +405,9 @@ html[data-es-view="list"] #gp-calendar {
         $leadNarrowed = collect(request()->query())->contains(
             fn ($value, $key) => str_starts_with((string) $key, 'custom_') && $value !== null && $value !== '' && $value !== []
         );
-        // Not in an embed, which is the list alone, nor in the picture ?graphic=1 renders.
-        $leadRow = (request()->embed || request()->graphic || $leadNarrowed)
+        // Not in an embed, which is the list alone, nor in the picture ?graphic=1 renders, nor
+        // where the owner turned it off (Style > Events).
+        $leadRow = (request()->embed || request()->graphic || $leadNarrowed || ! $role->guestPageSetting->show_next_event)
             ? null
             : app(\App\Repos\EventRepo::class)->leadOf($upcoming ?? collect(), $leadCategory);
       @endphp

@@ -6772,6 +6772,12 @@ class RoleController extends Controller
             Aurora::saveFromRequest($role, $request);
         }
 
+        // What the guest page shows (guest_page_settings), beside the schedule for the reason
+        // Aurora's settings are. Only on a save that carries the switch: absent is not off.
+        if ($request->has('show_next_event')) {
+            \App\Models\GuestPageSetting::store($role, ['show_next_event' => $request->boolean('show_next_event')]);
+        }
+
         // The main address of a schedule served directly on its own domain, which lives beside
         // the schedule (custom_domain_settings) as Aurora's settings do. Only on a save that drew
         // the choice, for Direct mode, and on Enterprise, where every custom domain field is

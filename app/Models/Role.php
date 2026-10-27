@@ -4553,6 +4553,15 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * What the schedule's guest page shows (Style > Events). No row reads as the defaults: the
+     * next-event card shown.
+     */
+    public function guestPageSetting()
+    {
+        return $this->hasOne(GuestPageSetting::class)->withDefault(GuestPageSetting::DEFAULTS);
+    }
+
+    /**
      * The schedule's venue map settings (Page content > Venue map). Not columns here because this
      * table is at MySQL's row-size limit; a schedule with no row has its map off, which the
      * default model says. Read through App\Services\VenueMap, which also knows whether the

@@ -896,6 +896,7 @@
             'hours_12' => __('messages.settings_12_hour'),
             'hours_24' => __('messages.settings_24_hour'),
             'past_events_hidden' => __('messages.summary_past_events_hidden'),
+            'next_event_hidden' => __('messages.summary_next_event_hidden'),
             'approval_required' => __('messages.summary_approval_required'),
             'signup_panel' => __('messages.summary_signup_panel'),
             'notify_card' => __('messages.summary_notify_card'),
@@ -2408,6 +2409,15 @@
                                     checked="{{ old('hide_past_events', $role->hide_past_events) }}"
                                     help="{{ __('messages.hide_past_events_help') }}" />
                                 <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
+                            </div>
+
+                            {{-- Stored in guest_page_settings, not on roles (GuestPageSetting). --}}
+                            <div class="mb-6">
+                                <x-toggle name="show_next_event"
+                                    label="{{ __('messages.show_next_event') }}"
+                                    checked="{{ old('show_next_event', $role->guestPageSetting->show_next_event) }}"
+                                    help="{{ __('messages.show_next_event_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_next_event')" />
                             </div>
 
                         {{-- Event animation: how event cards arrive as visitors scroll the schedule
@@ -8082,7 +8092,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // The animation is named under Calendar too: it plays on a phone, and whenever a visitor
     // switches to the list.
     kit.summary('style:animation', function() {
-        return kit.join([radioLabel('event_layout'), kit.on('hide_past_events') ? words.past_events_hidden : '', kit.radio('list_animation') === 'none' ? '' : radioLabel('list_animation')]);
+        return kit.join([radioLabel('event_layout'), kit.on('hide_past_events') ? words.past_events_hidden : '', kit.on('show_next_event') ? '' : words.next_event_hidden, kit.radio('list_animation') === 'none' ? '' : radioLabel('list_animation')]);
     });
     kit.summary('style:css', function() {
         var css = document.querySelector('#custom_css, #custom_css_stored');

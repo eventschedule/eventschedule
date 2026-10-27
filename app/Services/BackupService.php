@@ -219,6 +219,11 @@ class BackupService
             'motion' => $aurora->moves(),
         ];
 
+        // What the guest page shows lives beside the schedule too (guest_page_settings).
+        $roleData['guest_page_settings'] = [
+            'show_next_event' => (bool) $role->guestPageSetting->show_next_event,
+        ];
+
         if ($includeImages) {
             $this->collectRoleImages($role, $roleData, $imageFiles);
         }
@@ -1903,6 +1908,10 @@ class BackupService
                 is_numeric($aurora['seed'] ?? null) ? (int) $aurora['seed'] : null,
                 ! array_key_exists('motion', $aurora) || (bool) $aurora['motion'],
             );
+        }
+
+        if (is_array($data['guest_page_settings'] ?? null) && array_key_exists('show_next_event', $data['guest_page_settings'])) {
+            \App\Models\GuestPageSetting::store($role, ['show_next_event' => (bool) $data['guest_page_settings']['show_next_event']]);
         }
 
         return $role;

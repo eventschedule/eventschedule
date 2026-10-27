@@ -15,6 +15,7 @@
         <x-doc-nav-link href="#backgrounds">Background</x-doc-nav-link>
         <x-doc-nav-link href="#event-layout">Default Layout</x-doc-nav-link>
         <x-doc-nav-link href="#hide-past-events">Hide Past Events</x-doc-nav-link>
+        <x-doc-nav-link href="#next-event">Show Next Event</x-doc-nav-link>
         <x-doc-nav-link href="#list-animation">Event Animation</x-doc-nav-link>
         <x-doc-nav-link href="#list-wording">Event List Wording</x-doc-nav-link>
         <x-doc-nav-link href="#custom-css">Custom CSS</x-doc-nav-link>
@@ -68,7 +69,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Events</span></td>
-                        <td><a href="#event-layout" class="doc-link">Default Layout</a>, <a href="#hide-past-events" class="doc-link">Hide Past Events</a>, <a href="#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll your schedule, and <a href="#list-wording" class="doc-link">how each event is worded</a> on your list</td>
+                        <td><a href="#event-layout" class="doc-link">Default Layout</a>, <a href="#hide-past-events" class="doc-link">Hide Past Events</a>, <a href="#next-event" class="doc-link">Show Next Event</a>, <a href="#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll your schedule, and <a href="#list-wording" class="doc-link">how each event is worded</a> on your list</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Custom CSS</span></td>
@@ -332,6 +333,17 @@
         <p class="text-gray-600 dark:text-gray-300">Under Default Layout in the same <strong class="text-gray-900 dark:text-white">Events</strong> row, <strong class="text-gray-900 dark:text-white">Hide Past Events</strong> keeps past events off your public schedule, so visitors only ever see what is still to come. It is off until you turn it on, it is free on every plan, and while it is on the closed row says so. Your own admin views are unaffected, so nothing is lost: the events are still there when you need them.</p>
     </section>
 
+    <!-- Show Next Event -->
+    <section id="next-event" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </svg>
+            Show Next Event
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300">In the calendar layout, a card above the month names your next event: its picture, its name, when and where, and its tickets, with <strong class="text-gray-900 dark:text-white">Today</strong> or <strong class="text-gray-900 dark:text-white">Tomorrow</strong> beside the date when it is that close. It is always the next event to start, inside the sub-schedule or category the visitor is looking at, and it changes by itself as your events go by; to change what it says, edit that event. The list layout never shows it, because the list opens on your next event itself. To take the card off your page, turn off <strong class="text-gray-900 dark:text-white">Show Next Event</strong> under Hide Past Events in the same <strong class="text-gray-900 dark:text-white">Events</strong> row. It is on until you turn it off, it is free on every plan, and while it is off the closed row says so.</p>
+    </section>
+
     <!-- Event Animation -->
     <section id="list-animation" class="doc-section">
         <h2 class="doc-heading">
@@ -340,7 +352,7 @@
             </svg>
             Event Animation
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Event animation</strong> setting, under Hide Past Events in the <strong class="text-gray-900 dark:text-white">Events</strong> row of the Style section, brings your events to life as visitors scroll your schedule: each event card animates into place as it comes into view, then its details follow one after another: the title, the date (which flips down like a tear-off calendar page), the venue, the price and the performers. The first screen plays as an entrance when someone opens your link. It is off (<strong class="text-gray-900 dark:text-white">None</strong>) until you pick a style, and it is available on every plan.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Event animation</strong> setting, under Show Next Event in the <strong class="text-gray-900 dark:text-white">Events</strong> row of the Style section, brings your events to life as visitors scroll your schedule: each event card animates into place as it comes into view, then its details follow one after another: the title, the date (which flips down like a tear-off calendar page), the venue, the price and the performers. The first screen plays as an entrance when someone opens your link. It is off (<strong class="text-gray-900 dark:text-white">None</strong>) until you pick a style, and it is available on every plan.</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -513,7 +525,7 @@
                     <tr><td><code class="doc-inline-code">#gp-map</code></td><td>The venue map: its band and the map it opens</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-map-sheet</code></td><td>The full-window venue map, on a phone and when a visitor enlarges it</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-events</code></td><td>Everything from the events heading down, including the calendar</td></tr>
-                    <tr><td><code class="doc-inline-code">#gp-next-event</code></td><td>The card above the month calendar that shows your next event</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-next-event</code></td><td>The card above the month calendar that shows your next event (<a href="#next-event" class="doc-link">Show Next Event</a> turns it off on any plan)</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-calendar</code></td><td>The calendar or event list panel on its own</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-subscribe</code></td><td>The follow and subscribe panel (also on event pages)</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-gallery</code></td><td>Your photo gallery (also on event pages, for an event's own gallery)</td></tr>
