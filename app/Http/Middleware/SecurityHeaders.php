@@ -60,8 +60,12 @@ class SecurityHeaders
             'payments.cancel',
         ];
         $currentRouteName = $request->route()?->getName();
-        $isEmbeddable = $request->has('embed')
-            && ($request->embed === 'true' || $request->embed === '1')
+        // input(), never has() or ->embed: those read all(), which converts the uploaded files,
+        // and this runs after the controller. A FormRequest is a copy with its own file cache, so
+        // the original may convert an upload here for the first time, after the controller moved
+        // it out of /tmp (GeminiUtils::parseEvent()), and that throws FileNotFoundException.
+        $embed = $request->input('embed');
+        $isEmbeddable = ($embed === 'true' || $embed === '1')
             && in_array($currentRouteName, $embeddableRoutes);
 
         if ($isEmbeddable) {
