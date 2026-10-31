@@ -28,7 +28,11 @@ use Illuminate\View\View;
  */
 class AdminDashboardController extends Controller
 {
-    /** What each panel shows, as the AdminDashboard cards it is built from. */
+    /**
+     * What each panel shows, as the AdminDashboard cards it is built from. On hosted the active
+     * users chart is not in the growth panel: it fills the Revenue card in the corner (revenue()),
+     * which stands as tall as the Now card beside it and had nothing under its two figures.
+     */
     private const PANEL_CARDS = [
         'recent' => ['schedules', 'recentEvents', 'eventCounts'],
         'growth' => ['signups', 'active', 'events'],
@@ -66,12 +70,15 @@ class AdminDashboardController extends Controller
         abort_unless(config('app.hosted'), 404);
 
         $builder = app(AdminDashboard::class);
-        $revenue = $this->sample($request)
-            ? (AdminDashboard::sample()['revenue'] ?? null)
-            : ($builder->build(['revenue'])['revenue'] ?? null);
+        $data = $this->sample($request) ? AdminDashboard::sample() : $builder->build(['revenue', 'active']);
+        $revenue = $data['revenue'] ?? null;
+        $timing = $this->sample($request) ? [] : ['Server-Timing' => $builder->serverTiming()];
+
+        // Each half stands without the other: a failed billing read still draws the chart.
+        $active = ['active' => $this->activeChart($data['active'] ?? null)];
 
         if (! $revenue) {
-            return response()->json(['failed' => true]);
+            return response()->json(['failed' => true] + $active)->withHeaders($timing);
         }
 
         $totals = $revenue['totals'];
@@ -90,7 +97,40 @@ class AdminDashboardController extends Controller
             // Not printed: the figure the growth export reports as ARR, for the test that holds
             // the two to one definition.
             'arr_value' => (float) $totals['arr'],
-        ])->withHeaders($this->sample($request) ? [] : ['Server-Timing' => $builder->serverTiming()]);
+        ] + $active)->withHeaders($timing);
+    }
+
+    /**
+     * The active users chart of the corner card, from AdminDashboard::activeUsers(): the figures
+     * and the two lines the growth panel's card draws (the seeded weeks dashed, never joined to the
+     * exact count). Null when the card failed or the tables are not there yet.
+     */
+    private function activeChart(?array $active): ?array
+    {
+        if (! $active || ! ($active['available'] ?? false)) {
+            return null;
+        }
+
+        $series = $active['series'] ?? [];
+
+        return [
+            'active_7d' => (int) $active['active_7d'],
+            'change' => $active['change'] === null ? null : round((float) $active['change'], 1),
+            'organizers_7d' => (int) $active['organizers_7d'],
+            'active_30d' => (int) $active['active_30d'],
+            'exact_30d' => (bool) $active['exact_30d'],
+            'labels' => array_column($series, 'label'),
+            'exact' => array_map(fn ($point) => $point['exact'] ? $point['active'] : null, $series),
+            'estimate' => array_map(fn ($point) => $point['exact'] ? null : $point['active'], $series),
+        ];
+    }
+
+    /** The cards a panel is built from (PANEL_CARDS), less the one the corner shows on hosted. */
+    public static function panelCards(string $panel): array
+    {
+        $cards = self::PANEL_CARDS[$panel];
+
+        return config('app.hosted') ? array_values(array_diff($cards, ['active'])) : $cards;
     }
 
     /**
@@ -102,7 +142,7 @@ class AdminDashboardController extends Controller
         abort_unless($request->user()->isAdmin(), 403);
         abort_unless(in_array($panel, self::PANELS, true), 404);
 
-        $cards = self::PANEL_CARDS[$panel];
+        $cards = self::panelCards($panel);
         $sample = $this->sample($request);
         $builder = app(AdminDashboard::class);
 

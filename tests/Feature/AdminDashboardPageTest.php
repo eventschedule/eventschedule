@@ -211,7 +211,8 @@ class AdminDashboardPageTest extends TestCase
      */
     public function test_the_windows_are_fixed(): void
     {
-        config(['app.hosted' => true, 'app.is_nexus' => true]);
+        // Selfhosted: on hosted the active users figure is the Revenue card's.
+        config(['app.hosted' => false, 'app.is_nexus' => false]);
         $this->seedSomething();
 
         foreach (['', '?range=last_7_days', '?range=all_time'] as $query) {
@@ -305,9 +306,10 @@ class AdminDashboardPageTest extends TestCase
         config(['app.hosted' => true, 'app.is_nexus' => true]);
         $this->seedSomething();
 
+        // Active users is the Revenue card's on hosted (test_hosted_draws_active_users_in_the_revenue_card).
         $panels = [
             'recent' => ['schedules', 'recentEvents', 'eventCounts'],
-            'growth' => ['signups', 'active', 'events'],
+            'growth' => ['signups', 'events'],
             'platform' => ['federation', 'system'],
         ];
         $all = ['signups', 'active', 'revenue', 'events', 'eventCounts', 'federation', 'schedules', 'recentEvents', 'system'];
@@ -322,7 +324,7 @@ class AdminDashboardPageTest extends TestCase
             }
         }
 
-        $this->assertMatchesRegularExpression('/^revenue;dur=/', (string) $this->revenue()->headers->get('Server-Timing'));
+        $this->assertMatchesRegularExpression('/^revenue;dur=\d+(\.\d+)?, active;dur=\d+(\.\d+)?$/', (string) $this->revenue()->headers->get('Server-Timing'));
 
         // Invented data is not timed: nothing was read to make it.
         $this->assertFalse($this->panel('recent', '?sample=1')->headers->has('Server-Timing'));
@@ -353,12 +355,11 @@ class AdminDashboardPageTest extends TestCase
 
         // A card of the same panel that does not read the failed one.
         $siblings = [
-            'signups' => ['dash-active', 'dash-upcoming'], 'active' => ['dash-signups', 'dash-upcoming'],
-            'events' => ['dash-signups', 'dash-active'], 'federation' => [], 'system' => [],
+            'signups' => ['dash-upcoming'], 'events' => ['dash-signups'], 'federation' => [], 'system' => [],
             'schedules' => ['dash-recent-events'], 'recentEvents' => ['dash-recent'],
             'eventCounts' => ['dash-recent', 'dash-recent-events'],
         ];
-        $panelOf = ['signups' => 'growth', 'active' => 'growth', 'events' => 'growth', 'federation' => 'platform', 'schedules' => 'recent', 'recentEvents' => 'recent', 'eventCounts' => 'recent', 'system' => 'platform'];
+        $panelOf = ['signups' => 'growth', 'events' => 'growth', 'federation' => 'platform', 'schedules' => 'recent', 'recentEvents' => 'recent', 'eventCounts' => 'recent', 'system' => 'platform'];
 
         foreach (['signups', 'active', 'revenue', 'events', 'eventCounts', 'federation', 'schedules', 'recentEvents', 'system'] as $card) {
             $this->app->bind(AdminDashboard::class, fn () => new class($card) extends AdminDashboard
@@ -376,8 +377,16 @@ class AdminDashboardPageTest extends TestCase
                 }
             });
 
+            // The two halves of the corner card stand without each other.
             if ($card === 'revenue') {
-                $this->revenue()->assertOk()->assertExactJson(['failed' => true]);
+                $this->revenue()->assertOk()->assertJsonPath('failed', true)->assertJsonMissingPath('mrr')
+                    ->assertJsonPath('active.active_7d', fn ($value) => is_int($value));
+
+                continue;
+            }
+            if ($card === 'active') {
+                $this->revenue()->assertOk()->assertJsonPath('failed', false)->assertJsonPath('active', null)
+                    ->assertJsonPath('arr_value', 60);
 
                 continue;
             }
@@ -393,6 +402,39 @@ class AdminDashboardPageTest extends TestCase
                 $this->assertStringContainsString('id="'.$id.'"', $html, "{$card} took {$id} with it");
             }
         }
+    }
+
+    /**
+     * On hosted the active users chart fills the Revenue card in the corner, which stands as tall
+     * as the Now card and had nothing under its two figures, and the growth panel leaves it out
+     * (Sign-ups then takes its row alone). Selfhost has no corner card and keeps it in the panel.
+     * The seeded weeks and the exact ones are two lines, never one. Mutation: build active for
+     * the hosted panel, or leave it out of the revenue answer.
+     */
+    public function test_hosted_draws_active_users_in_the_revenue_card(): void
+    {
+        $this->seedSomething();
+        DB::table('user_active_days')->insert(['user_id' => $this->admin->id, 'date' => now()->toDateString(), 'counted' => true]);
+
+        config(['app.hosted' => true, 'app.is_nexus' => true]);
+        $this->panel('growth')->assertDontSee('id="dash-active"', false)->assertSee('id="dash-signups"', false)
+            ->assertViewHas('dashboard', fn (array $dashboard) => ! array_key_exists('active', $dashboard));
+        $active = $this->revenue()->assertOk()->json('active');
+        $this->assertGreaterThanOrEqual(1, $active['active_7d']);
+        $this->assertSame(count($active['labels']), count($active['exact']));
+        $this->assertSame(count($active['labels']), count($active['estimate']));
+        foreach ($active['exact'] as $index => $value) {
+            $this->assertTrue($value === null || $active['estimate'][$index] === null, 'a point on both lines');
+        }
+        // Counting began today, so today's point is the estimate's.
+        $this->assertGreaterThanOrEqual(1, end($active['exact']) ?? end($active['estimate']));
+        $this->assertStringContainsString('ref="activeChart"', $this->page()->getContent());
+
+        config(['app.hosted' => false, 'app.is_nexus' => false]);
+        $this->panel('growth')->assertSee('id="dash-active"', false)->assertSee('id="dash-signups"', false);
+        $this->revenue()->assertNotFound();
+
+        ActiveDays::flush();
     }
 
     /**

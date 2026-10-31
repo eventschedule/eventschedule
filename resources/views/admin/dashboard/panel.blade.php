@@ -31,7 +31,10 @@
     @elseif ($panel === 'growth')
         @php
             $signups = $dashboard['signups'];
-            $active = $dashboard['active'];
+            // Not built on hosted, where the chart stands in the Revenue card at the top
+            // (AdminDashboardController::panelCards()). Sign-ups then takes the row alone.
+            $hasActive = array_key_exists('active', $dashboard);
+            $active = $dashboard['active'] ?? null;
             $events = $dashboard['events'];
             $series = $active['series'] ?? [];
             $charts = [
@@ -58,10 +61,14 @@
             ];
         @endphp
 
-        <div class="{{ $pair }}">
+        @if ($hasActive)
+            <div class="{{ $pair }}">
+                @include('admin.dashboard._signups')
+                @include('admin.dashboard._active-users')
+            </div>
+        @else
             @include('admin.dashboard._signups')
-            @include('admin.dashboard._active-users')
-        </div>
+        @endif
 
         <div class="{{ $pair }}">
             @include('admin.dashboard._sources')

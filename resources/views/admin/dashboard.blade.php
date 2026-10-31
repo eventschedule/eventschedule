@@ -154,6 +154,14 @@
                 // :label is what fill() swaps for the amount.
                 'ofMrr' => __('messages.admin_dash_of_mrr', ['amount' => ':label']),
                 'cardFailed' => __('messages.admin_dash_card_failed'),
+                // The active users chart in the Revenue card (hosted).
+                'activeUsers' => __('messages.active_users_7_days'),
+                'last12Weeks' => __('messages.admin_dash_last_12_weeks'),
+                'organizers' => __('messages.admin_dash_organizers'),
+                'countOfTotal' => __('messages.admin_dash_count_of_total', ['count' => ':count', 'total' => ':total']),
+                'active30' => __('messages.admin_dash_active_30_days'),
+                'estimate' => __('messages.admin_dash_estimate'),
+                'exact' => __('messages.admin_dash_exact'),
             ];
             $realtimeConfig = [
                 'url' => route('admin.realtime.data'),

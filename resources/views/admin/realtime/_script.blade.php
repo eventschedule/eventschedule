@@ -956,11 +956,86 @@
                         return r.json();
                     }).then(function (data) {
                         // A refresh that could not be read keeps the figures already shown.
-                        if (data && data.failed && self.revenue && !self.revenue.failed) return;
+                        if (data && data.failed && self.revenue && !self.revenue.failed) {
+                            if (data.active) { self.revenue = Object.assign({}, self.revenue, { active: data.active }); self.$nextTick(self.drawActiveChart); }
+                            return;
+                        }
                         self.revenue = data;
+                        self.$nextTick(self.drawActiveChart);
                     }).catch(function () {
                         if (!self.revenue) self.revenue = { failed: true };
                     });
+                },
+                // The corner card's active users chart (hosted): the line of the growth panel's
+                // card on the operator's own server, which stands here instead. The weeks seeded
+                // from the security log run low, so they are a dashed line never joined to the
+                // exact one, or the step between them reads as growth. Drawn afresh each time:
+                // it changes every five minutes at most.
+                drawActiveChart: function () {
+                    var self = this, canvas = this.$refs.activeChart, active = this.revenue && this.revenue.active;
+                    if (this.activeChart) { try { this.activeChart.destroy(); } catch (e) {} this.activeChart = null; }
+                    if (!active || !canvas) return;
+                    if (typeof Chart === 'undefined') {
+                        if ((this.activeTries = (this.activeTries || 0) + 1) < 100) setTimeout(function () { self.drawActiveChart(); }, 50);
+                        return;
+                    }
+                    var colors = chartColors();
+                    var soft = function (color) {
+                        var hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec((color || '').trim());
+                        if (!hex) return 'transparent';
+                        var digits = hex[1].length === 3 ? hex[1].replace(/./g, '$&$&') : hex[1];
+                        return 'rgba(' + [0, 2, 4].map(function (at) { return parseInt(digits.substr(at, 2), 16); }).join(',') + ', 0.12)';
+                    };
+                    var exact = active.exact, last = exact.length - 1;
+                    this.activeChart = new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: active.labels,
+                            datasets: [
+                                { label: this.msg.estimate, data: active.estimate, borderColor: colors.gray, borderWidth: 2, borderDash: [5, 4], pointRadius: 0, pointHoverRadius: 4, tension: 0.3, fill: false },
+                                { label: this.msg.exact, data: exact, borderColor: colors.blue, backgroundColor: soft(colors.blue), fill: true, borderWidth: 2, pointRadius: exact.map(function (value, index) { return index === last && value !== null ? 3 : 0; }), pointBackgroundColor: colors.blue, pointHoverRadius: 4, tension: 0.3 },
+                            ],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: false,
+                            interaction: { mode: 'index', intersect: false },
+                            layout: { padding: { top: 4, right: 4 } },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    rtl: CONFIG.rtl,
+                                    filter: function (item) { return item.raw !== null && item.raw !== undefined; },
+                                    callbacks: { label: function (item) { return item.dataset.label + ': ' + numberFormat.format(item.raw || 0); } },
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    reverse: CONFIG.rtl,
+                                    grid: { display: false },
+                                    border: { display: false },
+                                    ticks: { color: colors.ink, font: { size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 4 },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    suggestedMax: 5,
+                                    position: CONFIG.rtl ? 'right' : 'left',
+                                    grid: { color: colors.grid },
+                                    border: { display: false },
+                                    ticks: { color: colors.ink, font: { size: 11 }, precision: 0, maxTicksLimit: 4 },
+                                },
+                            },
+                        },
+                    });
+                },
+                // "+16%", with one decimal only when there is one, as the growth panel prints it.
+                signedPct: function (value) {
+                    var text = String(Math.round(Math.abs(value) * 10) / 10);
+                    return (value >= 0 ? '+' : '-') + text + '%';
+                },
+                activeLine: function (active) {
+                    return this.msg.organizers + ' ' + this.msg.countOfTotal.replace(':count', this.fmt(active.organizers_7d)).replace(':total', this.fmt(active.active_7d));
                 },
                 trendColors: function () {
                     var self = this, colors = { blue: chartColors().blue };
@@ -1191,6 +1266,7 @@
                     this.chart.update('none');
                 },
                 recolorChart: function () {
+                    this.drawActiveChart();
                     if (!this.chart) return;
                     var colors = chartColors();
                     this.chart.data.datasets[0].backgroundColor = colors.blue;

@@ -32,7 +32,7 @@
                 <p class="mt-1 dashboard-stat-value text-2xl font-bold leading-7 text-gray-900 dark:text-white">@{{ revenue.mrr }}</p>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span class="whitespace-nowrap">MRR</span>
-                    <span aria-hidden="true">&middot;</span>
+                    <span class="mx-1" aria-hidden="true">&middot;</span>
                     <span class="whitespace-nowrap">ARR @{{ revenue.arr }}</span>
                 </p>
             </div>
@@ -50,5 +50,27 @@
             <span>@{{ msg.atRisk }} <span class="whitespace-nowrap text-gray-500 dark:text-gray-400">@{{ fill(msg.ofMrr, revenue.at_risk_mrr) }}</span></span>
         </p>
     </template>
+
+    {{-- People active in the seven days up to each date (App\Services\ActiveDays), the chart the
+         growth panel shows on a selfhosted install. It takes what height the card has left beside
+         the Now card, and never sets it: the canvas sits in a box of its own. --}}
+    <div v-if="revenue && revenue.active" class="flex-1 flex flex-col px-4 sm:px-5 pt-3 pb-4" style="border-top: 1px solid var(--ap-hairline)">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">@{{ msg.activeUsers }}</h3>
+            <span class="text-xs text-gray-500 dark:text-gray-400">@{{ msg.last12Weeks }}</span>
+        </div>
+        <p class="mt-1 flex flex-wrap items-baseline gap-x-2">
+            <span class="dashboard-stat-value text-2xl font-bold leading-7 text-gray-900 dark:text-white">@{{ fmt(revenue.active.active_7d) }}</span>
+            <span v-if="revenue.active.change !== null" dir="ltr" class="text-sm font-medium" :class="revenue.active.change >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-600 dark:text-red-400'">@{{ signedPct(revenue.active.change) }}</span>
+        </p>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <span class="whitespace-nowrap">@{{ activeLine(revenue.active) }}</span>
+            <span class="mx-1" aria-hidden="true">&middot;</span>
+            <span class="whitespace-nowrap">@{{ msg.active30 }} @{{ fmt(revenue.active.active_30d) }}<template v-if="!revenue.active.exact_30d"> (@{{ msg.estimate }})</template></span>
+        </p>
+        <div class="relative flex-1 mt-3" style="min-height: 6rem">
+            <div class="absolute inset-0"><canvas ref="activeChart" role="img" :aria-label="msg.activeUsers"></canvas></div>
+        </div>
+    </div>
 
 </section>
