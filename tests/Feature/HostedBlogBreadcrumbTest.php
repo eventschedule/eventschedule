@@ -35,8 +35,8 @@ class HostedBlogBreadcrumbTest extends TestCase
 
     public function test_blog_pages_on_the_blog_host_crumb_home_blog_post(): void
     {
-        // Roll back RefreshDatabase's transaction to release its locks before the app is rebuilt.
-        $this->app['db']->connection()->rollBack();
+        // Step out of RefreshDatabase's transaction to release its locks before the app is rebuilt.
+        $this->leaveTestTransaction();
 
         $this->forceEnv('IS_HOSTED', 'true');
         $this->forceEnv('APP_TESTING', 'false');

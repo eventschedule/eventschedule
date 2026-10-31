@@ -87,8 +87,8 @@ class BlogNexusOnlyTest extends TestCase
 
     private function bootAs(string $hosted, string $testing = 'true'): void
     {
-        // Roll back RefreshDatabase's transaction to release its locks before the app is rebuilt.
-        $this->app['db']->connection()->rollBack();
+        // Step out of RefreshDatabase's transaction to release its locks before the app is rebuilt.
+        $this->leaveTestTransaction();
 
         $this->forceEnv('IS_HOSTED', $hosted);
         $this->forceEnv('IS_NEXUS', 'false');

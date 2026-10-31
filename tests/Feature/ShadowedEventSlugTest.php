@@ -144,7 +144,7 @@ class ShadowedEventSlugTest extends TestCase
 
         // The hosted tenant group is gated on `hosted && ! is_testing`, so only a rebuilt app has
         // it. The sequence is RouteLoadTest::test_hosted_gp_routes_load()'s.
-        $this->app['db']->connection()->rollBack();
+        $this->leaveTestTransaction();
         $this->forceEnv('IS_HOSTED', 'true');
         $this->forceEnv('APP_TESTING', 'false');
         $this->refreshApplication();

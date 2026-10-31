@@ -256,6 +256,13 @@ abstract class TestCase extends BaseTestCase
      * Applying it here rather than in setUp() covers both: Laravel's setUpTheTestEnvironment()
      * calls this whenever $this->app is unset, which is every fresh test.
      */
+    /**
+     * How many times this process has rebuilt the schema (RefreshDatabase's migrate:fresh). Once
+     * per run is the cost of a run; each one after that is about 36 seconds on CI, which is what
+     * ForcedEnvironmentKeepsTheSchemaTest holds the forced-environment tests to.
+     */
+    public static int $schemaBuilds = 0;
+
     protected function refreshApplication(): void
     {
         parent::refreshApplication();
@@ -284,6 +291,9 @@ abstract class TestCase extends BaseTestCase
         // the app at work: their scope is held to no rule.
         $events->listen(CommandStarting::class, function (CommandStarting $e): void {
             $command = (string) $e->command;
+            if ($command === 'migrate:fresh') {
+                self::$schemaBuilds++;
+            }
             $class = self::commandClasses($this->app)[$command] ?? null;
             QueryGuard::push(self::isSetupCommand($command) ? 'setup' : 'command', 'artisan '.$command, $class !== null ? QueryGuard::fileOf($class) : null);
         });

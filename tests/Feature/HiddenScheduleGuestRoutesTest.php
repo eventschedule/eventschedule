@@ -240,8 +240,8 @@ class HiddenScheduleGuestRoutesTest extends TestCase
      */
     public function test_the_hosted_subdomain_routes_answer_the_same_way(): void
     {
-        // Roll back RefreshDatabase's transaction to release its locks before the app is rebuilt.
-        $this->app['db']->connection()->rollBack();
+        // Step out of RefreshDatabase's transaction to release its locks before the app is rebuilt.
+        $this->leaveTestTransaction();
 
         $this->forceEnv('IS_HOSTED', 'true');
         $this->forceEnv('APP_TESTING', 'false');

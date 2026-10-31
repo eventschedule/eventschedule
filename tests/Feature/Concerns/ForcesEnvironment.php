@@ -41,6 +41,34 @@ trait ForcesEnvironment
     }
 
     /**
+     * Step out of RefreshDatabase's transaction so the app can be rebuilt, and step back in at
+     * teardown. Call it where a test used to roll that transaction back by hand.
+     *
+     * RefreshDatabase decides at teardown whether a test left the schema dirty by asking whether
+     * ITS connection is still inside the transaction it opened, and when it is not it rebuilds the
+     * schema for the next test (RefreshDatabaseState::$migrated = false). A test that rolled back
+     * to rebuild the app always answered "not inside", so the next test ran migrate:fresh: about
+     * 36 seconds on CI, after every forced-environment test, which was 7 of the suite's 45 minutes.
+     * What the test does after the rebuild runs on the NEW app's connection, inside a transaction
+     * the test closes itself, so nothing reached the schema and the rebuild was never needed.
+     *
+     * The callback goes FIRST in the list: RefreshDatabase registered its own in setUp(), and the
+     * question has to be answered before that one asks it. ForcedEnvironmentKeepsTheSchemaTest
+     * fails if the next test rebuilds the schema again.
+     */
+    protected function leaveTestTransaction(): void
+    {
+        $connection = $this->app['db']->connection();
+        $connection->rollBack();
+
+        array_unshift($this->beforeApplicationDestroyedCallbacks, function () use ($connection): void {
+            if (! $connection->getPdo()->inTransaction()) {
+                $connection->beginTransaction();
+            }
+        });
+    }
+
+    /**
      * Called by Laravel's setUpTraits() as a beforeApplicationDestroyed callback, so it runs in
      * every tearDown, a failed test's included.
      */

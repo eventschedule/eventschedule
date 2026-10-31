@@ -73,7 +73,7 @@ class CustomDomainMainAddressTest extends TestCase
      */
     private function hosted(callable $body): void
     {
-        $this->app['db']->connection()->rollBack();
+        $this->leaveTestTransaction();
         $this->forceEnv('IS_HOSTED', 'true');
         $this->forceEnv('APP_TESTING', 'false');
         $this->refreshApplication();
