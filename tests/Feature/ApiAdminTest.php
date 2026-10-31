@@ -223,7 +223,16 @@ class ApiAdminTest extends TestCase
         $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
             ->actingAs($admin)->get(route('admin.dashboard.panel', ['panel' => 'growth']))
             ->assertOk()
-            ->assertSee(__('messages.active_users_7_days'));
+            ->assertSee(__('messages.realtime_signups'));
+
+        // On hosted the active users chart is the Revenue card's, which reads it with the billing
+        // (AdminDashboardPageTest::test_hosted_draws_active_users_in_the_revenue_card).
+        if (config('app.hosted')) {
+            $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+                ->actingAs($admin)->getJson(route('admin.dashboard.revenue'))
+                ->assertOk()
+                ->assertJsonStructure(['active']);
+        }
     }
 
     public function test_admin_blog_create(): void
