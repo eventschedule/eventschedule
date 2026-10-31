@@ -498,6 +498,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'Conecta una forma de cobrar',
     'activation_nudge_body_no_gateway' => 'Tu agenda ":schedule" tiene entradas de pago configuradas, pero todavía no hay ningún método de pago conectado, así que los compradores no pueden pagar en línea. Conectar Stripe lleva un par de minutos y el dinero va directamente a tu propia cuenta. También puedes cobrar en efectivo en la puerta y dejar las entradas exactamente como están.',
     'activation_nudge_cta_no_gateway' => 'Conectar pagos',
+    'activation_nudge_subject_paid_blocked' => 'Nadie puede comprar todavía entradas para ":event"',
+    'activation_nudge_heading_paid_blocked' => 'Tus entradas de pago no están a la venta',
+    'activation_nudge_body_paid_blocked' => 'Tu agenda ":schedule" tiene entradas de pago para ":event" (:date), pero el plan gratuito no puede vender entradas de pago, así que nadie puede comprar una todavía. Empieza Pro con una prueba gratuita de :days días para venderlas, o cámbialas a entradas gratuitas o inscripción, que son ilimitadas en todos los planes.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'Tu agenda ":schedule" tiene entradas de pago para ":event" (:date), pero el plan gratuito no puede vender entradas de pago, así que nadie puede comprar una todavía. Pásate a Pro para venderlas, o cámbialas a entradas gratuitas o inscripción, que son ilimitadas en todos los planes.',
+    'activation_nudge_cta_paid_blocked' => 'Empieza a vender entradas',
+    'activation_nudge_subject_no_orders_soon' => 'Todavía no hay pedidos para ":event"',
+    'activation_nudge_heading_no_orders_soon' => 'Es momento de compartir tu evento',
+    'activation_nudge_body_no_orders_soon' => '":event" (:date) en tu agenda ":schedule" todavía no tiene pedidos. La mayoría de las primeras ventas llegan cuando el organizador comparte el enlace: publícalo donde tu público ya te sigue, ponlo en tu biografía y envíalo a quienes vinieron la última vez.',
+    'activation_nudge_cta_no_orders_soon' => 'Abrir la página del evento',
+    'activation_nudge_share_link' => 'El enlace de tu evento:',
 
     'activation_nudge_subject_first_sale' => 'Has vendido tu primera entrada',
     'activation_nudge_heading_first_sale' => 'Primera entrada vendida',
@@ -3000,6 +3010,8 @@ return [
     'subscription_trial_ending_continue' => 'No tienes que hacer nada para continuar. Tu suscripción :plan comenzará automáticamente cuando termine la prueba.',
     'subscription_trial_ending_cancel' => 'Si prefieres no continuar, simplemente cancela desde la configuración de tu plan antes de que termine la prueba. No se te cobrará nada.',
     'subscription_trial_ending_help' => 'Si tienes alguna pregunta, simplemente responde a este correo. ¡Estaremos encantados de ayudarte!',
+    'subscription_trial_ending_tip_no_gateway' => 'Antes de que termine tu prueba: ":event" tiene entradas de pago a la venta, pero no hay ningún método de pago conectado, así que los compradores no pueden pagar en línea. Conectar Stripe lleva un par de minutos:',
+    'subscription_trial_ending_tip_no_orders' => 'Antes de que termine tu prueba: ":event" todavía no tiene pedidos. La mayoría de las primeras ventas llegan al compartir su enlace donde tu público ya te sigue:',
     'subscription_trial_ending_manage' => 'Administrar tu plan',
 
     // Subscription trial ending email (no card on file)

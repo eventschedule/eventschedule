@@ -388,6 +388,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'اربط وسيلة لتحصيل المدفوعات',
     'activation_nudge_body_no_gateway' => 'لدى جدولك ":schedule" تذاكر مدفوعة معدّة، لكن لم تُربط بعد أي وسيلة دفع، فلا يستطيع المشترون الدفع عبر الإنترنت. ربط Stripe يستغرق دقائق قليلة والمال يذهب مباشرة إلى حسابك الخاص. ويمكنك بدلًا من ذلك قبول النقد عند الباب وترك التذاكر كما هي تمامًا.',
     'activation_nudge_cta_no_gateway' => 'اربط المدفوعات',
+    'activation_nudge_subject_paid_blocked' => 'لا يمكن لأحد شراء تذاكر ":event" بعد',
+    'activation_nudge_heading_paid_blocked' => 'تذاكرك المدفوعة ليست معروضة للبيع',
+    'activation_nudge_body_paid_blocked' => 'لدى جدولك ":schedule" تذاكر مدفوعة لـ ":event" (:date)، لكن الباقة المجانية لا تستطيع بيع التذاكر المدفوعة، فلا يمكن لأحد شراء واحدة بعد. ابدأ Pro مع تجربة مجانية لمدة :days أيام لبيعها، أو حوّلها إلى تذاكر مجانية أو تسجيل، وهي غير محدودة في كل الباقات.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'لدى جدولك ":schedule" تذاكر مدفوعة لـ ":event" (:date)، لكن الباقة المجانية لا تستطيع بيع التذاكر المدفوعة، فلا يمكن لأحد شراء واحدة بعد. قم بالترقية إلى Pro لبيعها، أو حوّلها إلى تذاكر مجانية أو تسجيل، وهي غير محدودة في كل الباقات.',
+    'activation_nudge_cta_paid_blocked' => 'ابدأ بيع التذاكر',
+    'activation_nudge_subject_no_orders_soon' => 'لا توجد طلبات بعد على ":event"',
+    'activation_nudge_heading_no_orders_soon' => 'حان وقت مشاركة فعاليتك',
+    'activation_nudge_body_no_orders_soon' => 'لا توجد طلبات بعد على ":event" (:date) في جدولك ":schedule". تأتي معظم المبيعات الأولى من مشاركة المنظّم للرابط بنفسه: انشره حيث يتابعك جمهورك بالفعل، وضعه في نبذتك التعريفية، وأرسله إلى من حضروا في المرة الماضية.',
+    'activation_nudge_cta_no_orders_soon' => 'افتح صفحة الفعالية',
+    'activation_nudge_share_link' => 'رابط فعاليتك:',
 
     'activation_nudge_subject_first_sale' => 'لقد بعت أول تذكرة',
     'activation_nudge_heading_first_sale' => 'بيعت الأولى',
@@ -3062,6 +3072,8 @@ return [
     'subscription_trial_ending_continue' => 'لا تحتاج إلى فعل أي شيء للمتابعة. سيبدأ اشتراكك في :plan تلقائيًا عند انتهاء الفترة التجريبية.',
     'subscription_trial_ending_cancel' => 'إذا كنت لا ترغب في المتابعة، فما عليك سوى الإلغاء من إعدادات خطتك قبل انتهاء الفترة التجريبية. لن يتم خصم أي مبلغ منك.',
     'subscription_trial_ending_help' => 'إذا كانت لديك أي أسئلة، فما عليك سوى الرد على هذه الرسالة. يسعدنا مساعدتك!',
+    'subscription_trial_ending_tip_no_gateway' => 'قبل انتهاء تجربتك: لدى ":event" تذاكر مدفوعة معروضة للبيع، لكن لا توجد وسيلة دفع مربوطة، فلا يستطيع المشترون الدفع عبر الإنترنت. ربط Stripe يستغرق دقائق قليلة:',
+    'subscription_trial_ending_tip_no_orders' => 'قبل انتهاء تجربتك: لا توجد طلبات بعد على ":event". تأتي معظم المبيعات الأولى من مشاركة رابطها حيث يتابعك جمهورك بالفعل:',
     'subscription_trial_ending_manage' => 'إدارة خطتك',
 
     // Subscription trial ending email (no card on file)

@@ -521,6 +521,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'Conectați o modalitate de a fi plătit',
     'activation_nudge_body_no_gateway' => 'Programul ":schedule" are bilete plătite configurate, dar nu este conectată încă nicio metodă de plată, așa că cumpărătorii nu pot plăti online. Conectarea Stripe durează câteva minute, iar banii ajung direct în contul dumneavoastră. Puteți încasa și numerar la intrare, lăsând biletele exact așa cum sunt.',
     'activation_nudge_cta_no_gateway' => 'Conectați plățile',
+    'activation_nudge_subject_paid_blocked' => 'Nimeni nu poate cumpăra încă bilete la ":event"',
+    'activation_nudge_heading_paid_blocked' => 'Biletele plătite nu sunt la vânzare',
+    'activation_nudge_body_paid_blocked' => 'Programul ":schedule" are bilete plătite la ":event" (:date), dar planul gratuit nu poate vinde bilete plătite, așa că nimeni nu poate cumpăra încă unul. Porniți Pro cu o perioadă de probă gratuită de :days zile ca să le vindeți sau transformați-le în bilete gratuite ori înscrieri, nelimitate în orice plan.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'Programul ":schedule" are bilete plătite la ":event" (:date), dar planul gratuit nu poate vinde bilete plătite, așa că nimeni nu poate cumpăra încă unul. Treceți la Pro ca să le vindeți sau transformați-le în bilete gratuite ori înscrieri, nelimitate în orice plan.',
+    'activation_nudge_cta_paid_blocked' => 'Începeți să vindeți bilete',
+    'activation_nudge_subject_no_orders_soon' => 'Încă nicio comandă pentru ":event"',
+    'activation_nudge_heading_no_orders_soon' => 'E momentul să vă distribuiți evenimentul',
+    'activation_nudge_body_no_orders_soon' => '":event" (:date) din programul ":schedule" nu are încă nicio comandă. Majoritatea primelor vânzări vin din faptul că organizatorul distribuie linkul: postați-l acolo unde publicul vă urmărește deja, puneți-l în bio și trimiteți-l celor care au venit data trecută.',
+    'activation_nudge_cta_no_orders_soon' => 'Deschideți pagina evenimentului',
+    'activation_nudge_share_link' => 'Linkul evenimentului:',
 
     'activation_nudge_subject_first_sale' => 'Ați vândut primul bilet',
     'activation_nudge_heading_first_sale' => 'Primul este vândut',
@@ -3010,6 +3020,8 @@ return [
     'subscription_trial_ending_continue' => 'Nu trebuie să faci nimic pentru a continua. Abonamentul :plan va începe automat când se termină perioada de probă.',
     'subscription_trial_ending_cancel' => 'Dacă preferi să nu continui, pur și simplu anulează din setările planului înainte de terminarea perioadei de probă. Nu vei fi taxat.',
     'subscription_trial_ending_help' => 'Dacă ai întrebări, pur și simplu răspunde la acest email. Suntem bucuroși să te ajutăm!',
+    'subscription_trial_ending_tip_no_gateway' => 'Înainte să se încheie perioada de probă: ":event" are bilete plătite la vânzare, dar nu este conectată nicio metodă de plată, așa că cumpărătorii nu pot plăti online. Conectarea Stripe durează câteva minute:',
+    'subscription_trial_ending_tip_no_orders' => 'Înainte să se încheie perioada de probă: ":event" nu are încă nicio comandă. Majoritatea primelor vânzări vin din distribuirea linkului acolo unde publicul vă urmărește deja:',
     'subscription_trial_ending_manage' => 'Administrează Planul',
 
     // Subscription trial ending email (no card on file)

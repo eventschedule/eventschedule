@@ -391,6 +391,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'Verbinden Sie eine Zahlungsmethode',
     'activation_nudge_body_no_gateway' => 'Auf Ihrem Zeitplan ":schedule" sind bezahlte Tickets eingerichtet, aber es ist noch keine Zahlungsmethode verbunden, also können Käufer online nicht bezahlen. Stripe zu verbinden dauert ein paar Minuten und das Geld geht direkt auf Ihr eigenes Konto. Sie können stattdessen auch Barzahlung am Einlass annehmen und die Tickets genau so lassen, wie sie sind.',
     'activation_nudge_cta_no_gateway' => 'Zahlungen verbinden',
+    'activation_nudge_subject_paid_blocked' => 'Für ":event" kann noch niemand Tickets kaufen',
+    'activation_nudge_heading_paid_blocked' => 'Ihre bezahlten Tickets sind nicht im Verkauf',
+    'activation_nudge_body_paid_blocked' => 'Auf Ihrem Zeitplan ":schedule" gibt es bezahlte Tickets für ":event" (:date), aber der kostenlose Tarif kann keine bezahlten Tickets verkaufen, also kann noch niemand eines kaufen. Starten Sie Pro mit einer kostenlosen Testphase von :days Tagen, um sie zu verkaufen, oder stellen Sie sie auf kostenlose Tickets oder Anmeldungen um, die in jedem Tarif unbegrenzt sind.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'Auf Ihrem Zeitplan ":schedule" gibt es bezahlte Tickets für ":event" (:date), aber der kostenlose Tarif kann keine bezahlten Tickets verkaufen, also kann noch niemand eines kaufen. Wechseln Sie zu Pro, um sie zu verkaufen, oder stellen Sie sie auf kostenlose Tickets oder Anmeldungen um, die in jedem Tarif unbegrenzt sind.',
+    'activation_nudge_cta_paid_blocked' => 'Tickets verkaufen',
+    'activation_nudge_subject_no_orders_soon' => 'Noch keine Bestellungen für ":event"',
+    'activation_nudge_heading_no_orders_soon' => 'Zeit, Ihre Veranstaltung zu teilen',
+    'activation_nudge_body_no_orders_soon' => '":event" (:date) auf Ihrem Zeitplan ":schedule" hat noch keine Bestellungen. Die meisten ersten Verkäufe kommen daher, dass der Veranstalter den Link selbst teilt: Posten Sie ihn dort, wo Ihr Publikum Ihnen schon folgt, setzen Sie ihn in Ihre Bio und schicken Sie ihn an die Leute, die letztes Mal da waren.',
+    'activation_nudge_cta_no_orders_soon' => 'Veranstaltungsseite öffnen',
+    'activation_nudge_share_link' => 'Ihr Veranstaltungslink:',
 
     'activation_nudge_subject_first_sale' => 'Sie haben Ihr erstes Ticket verkauft',
     'activation_nudge_heading_first_sale' => 'Das erste ist verkauft',
@@ -3000,6 +3010,8 @@ return [
     'subscription_trial_ending_continue' => 'Sie müssen nichts tun, um fortzufahren. Ihr :plan-Abonnement beginnt automatisch, wenn die Testphase endet.',
     'subscription_trial_ending_cancel' => 'Wenn Sie nicht fortfahren möchten, kündigen Sie einfach vor Ende der Testphase in Ihren Tarifeinstellungen. Es wird Ihnen nichts berechnet.',
     'subscription_trial_ending_help' => 'Wenn Sie Fragen haben, antworten Sie einfach auf diese E-Mail. Wir helfen Ihnen gerne!',
+    'subscription_trial_ending_tip_no_gateway' => 'Bevor Ihre Testphase endet: ":event" hat bezahlte Tickets im Verkauf, aber es ist keine Zahlungsmethode verbunden, also können Käufer online nicht bezahlen. Stripe zu verbinden dauert ein paar Minuten:',
+    'subscription_trial_ending_tip_no_orders' => 'Bevor Ihre Testphase endet: ":event" hat noch keine Bestellungen. Die meisten ersten Verkäufe kommen daher, dass der Link dort geteilt wird, wo Ihr Publikum Ihnen schon folgt:',
     'subscription_trial_ending_manage' => 'Tarif verwalten',
 
     // Subscription trial ending email (no card on file)

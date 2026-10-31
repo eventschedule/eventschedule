@@ -937,6 +937,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'Koppel een manier om betaald te worden',
     'activation_nudge_body_no_gateway' => 'Je schema ":schedule" heeft betaalde tickets ingesteld, maar er is nog geen betaalmethode gekoppeld, dus kopers kunnen niet online betalen. Stripe koppelen kost een paar minuten en het geld gaat rechtstreeks naar je eigen rekening. Je kunt ook contant afrekenen bij de deur en de tickets precies laten zoals ze zijn.',
     'activation_nudge_cta_no_gateway' => 'Betalingen koppelen',
+    'activation_nudge_subject_paid_blocked' => 'Nog niemand kan tickets kopen voor ":event"',
+    'activation_nudge_heading_paid_blocked' => 'Je betaalde tickets zijn niet te koop',
+    'activation_nudge_body_paid_blocked' => 'Je schema ":schedule" heeft betaalde tickets voor ":event" (:date), maar het gratis abonnement kan geen betaalde tickets verkopen, dus nog niemand kan er een kopen. Start Pro met een gratis proefperiode van :days dagen om ze te verkopen, of zet ze om naar gratis tickets of aanmeldingen, die in elk abonnement onbeperkt zijn.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'Je schema ":schedule" heeft betaalde tickets voor ":event" (:date), maar het gratis abonnement kan geen betaalde tickets verkopen, dus nog niemand kan er een kopen. Stap over op Pro om ze te verkopen, of zet ze om naar gratis tickets of aanmeldingen, die in elk abonnement onbeperkt zijn.',
+    'activation_nudge_cta_paid_blocked' => 'Begin met tickets verkopen',
+    'activation_nudge_subject_no_orders_soon' => 'Nog geen bestellingen voor ":event"',
+    'activation_nudge_heading_no_orders_soon' => 'Tijd om je evenement te delen',
+    'activation_nudge_body_no_orders_soon' => '":event" (:date) op je schema ":schedule" heeft nog geen bestellingen. De meeste eerste verkopen komen doordat de organisator de link zelf deelt: post hem waar je publiek je al volgt, zet hem in je bio en stuur hem naar de mensen die er de vorige keer waren.',
+    'activation_nudge_cta_no_orders_soon' => 'Open je evenementpagina',
+    'activation_nudge_share_link' => 'De link naar je evenement:',
 
     'activation_nudge_subject_first_sale' => 'Je hebt je eerste ticket verkocht',
     'activation_nudge_heading_first_sale' => 'De eerste is verkocht',
@@ -3000,6 +3010,8 @@ return [
     'subscription_trial_ending_continue' => 'Je hoeft niets te doen om door te gaan. Je :plan-abonnement start automatisch zodra de proefperiode eindigt.',
     'subscription_trial_ending_cancel' => 'Wil je liever niet doorgaan? Zeg dan gewoon op via je abonnementsinstellingen voordat de proefperiode eindigt. Er wordt dan niets in rekening gebracht.',
     'subscription_trial_ending_help' => 'Heb je vragen? Beantwoord dan gewoon deze e-mail. We helpen je graag!',
+    'subscription_trial_ending_tip_no_gateway' => 'Voordat je proefperiode afloopt: ":event" heeft betaalde tickets te koop, maar er is geen betaalmethode gekoppeld, dus kopers kunnen niet online betalen. Stripe koppelen kost een paar minuten:',
+    'subscription_trial_ending_tip_no_orders' => 'Voordat je proefperiode afloopt: ":event" heeft nog geen bestellingen. De meeste eerste verkopen komen van het delen van de link waar je publiek je al volgt:',
     'subscription_trial_ending_manage' => 'Abonnement beheren',
 
     // Subscription trial ending email (no card on file)

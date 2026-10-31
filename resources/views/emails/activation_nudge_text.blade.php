@@ -2,7 +2,11 @@
 
 {{ $greeting }}
 
-{{ __($bodyKey ?? 'messages.activation_nudge_body_'.$nudgeKey, ['schedule' => $role->name, 'days' => (int) config('app.trial_days', 7)]) }}
+{{ __($bodyKey ?? 'messages.activation_nudge_body_'.$nudgeKey, $params ?? ['schedule' => $role->name, 'days' => (int) config('app.trial_days', 7)]) }}
+@if (! empty($shareUrl))
+
+{{ __('messages.activation_nudge_share_link') }} {!! $shareUrl !!}
+@endif
 @if ($importUrl)
 
 {{ __('messages.activation_nudge_import_'.$nudgeKey) }}

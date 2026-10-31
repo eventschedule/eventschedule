@@ -522,6 +522,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'Connect a way to get paid',
     'activation_nudge_body_no_gateway' => 'Your ":schedule" schedule has paid tickets set up, but no payment method is connected yet, so buyers cannot pay online. Connecting Stripe takes a couple of minutes and the money goes straight to your own account. You can also take cash at the door instead and keep the tickets exactly as they are.',
     'activation_nudge_cta_no_gateway' => 'Connect payments',
+    'activation_nudge_subject_paid_blocked' => 'Nobody can buy tickets to ":event" yet',
+    'activation_nudge_heading_paid_blocked' => 'Your paid tickets are not on sale',
+    'activation_nudge_body_paid_blocked' => 'Your ":schedule" schedule has paid tickets on ":event" (:date), but the free plan cannot sell paid tickets, so nobody can buy one yet. Start Pro with a :days-day free trial to sell them, or switch them to free tickets or registration, which every plan has without limit.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'Your ":schedule" schedule has paid tickets on ":event" (:date), but the free plan cannot sell paid tickets, so nobody can buy one yet. Upgrade to Pro to sell them, or switch them to free tickets or registration, which every plan has without limit.',
+    'activation_nudge_cta_paid_blocked' => 'Start selling tickets',
+    'activation_nudge_subject_no_orders_soon' => 'No orders yet for ":event"',
+    'activation_nudge_heading_no_orders_soon' => 'Time to share your event',
+    'activation_nudge_body_no_orders_soon' => '":event" (:date) on your ":schedule" schedule has no orders yet. Most first sales come from the organizer sharing the link: post it where your audience already follows you, put it in your bio, and send it to the people who came last time.',
+    'activation_nudge_cta_no_orders_soon' => 'Open your event page',
+    'activation_nudge_share_link' => 'Your event link:',
 
     'activation_nudge_subject_first_sale' => 'You sold your first ticket',
     'activation_nudge_heading_first_sale' => 'First one sold',
@@ -3348,6 +3358,8 @@ return [
     'subscription_trial_ending_continue' => 'You don\'t need to do anything to continue. Your :plan subscription will start automatically when the trial ends.',
     'subscription_trial_ending_cancel' => 'If you\'d rather not continue, simply cancel from your plan settings before the trial ends. You won\'t be charged.',
     'subscription_trial_ending_help' => 'If you have any questions, just reply to this email. We\'re happy to help!',
+    'subscription_trial_ending_tip_no_gateway' => 'Before your trial ends: ":event" has paid tickets on sale, but no payment method is connected, so buyers cannot pay online. Connecting Stripe takes a couple of minutes:',
+    'subscription_trial_ending_tip_no_orders' => 'Before your trial ends: ":event" has no orders yet. Most first sales come from sharing its link where your audience already follows you:',
     'subscription_trial_ending_manage' => 'Manage Your Plan',
 
     // Subscription trial ending email (no card on file)

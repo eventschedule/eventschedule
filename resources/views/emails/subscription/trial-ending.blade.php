@@ -11,6 +11,11 @@
 <x-email.text>{{ $body }}</x-email.text>
 <x-email.text>{{ __($windDown ? 'messages.subscription_winddown_continue' : ($hasCard ? 'messages.subscription_trial_ending_continue' : 'messages.subscription_trial_ending_continue_no_card'), ['plan' => $planLabel]) }}</x-email.text>
 
+@if (! empty($sellingTip))
+<x-email.text>{{ __($sellingTip['key'], $sellingTip['params']) }}</x-email.text>
+<x-email.url :href="$sellingTip['url']" />
+@endif
+
 <x-email.callout tone="warning">{{ __($windDown ? 'messages.subscription_winddown_cancel' : ($hasCard ? 'messages.subscription_trial_ending_cancel' : 'messages.subscription_trial_ending_cancel_no_card'), ['plan' => $planLabel]) }}</x-email.callout>
 
 <x-email.text variant="small">{{ __('messages.subscription_trial_ending_help') }}</x-email.text>

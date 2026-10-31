@@ -51,6 +51,58 @@ class SubscriptionTrialEnding extends Mailable
         );
     }
 
+    /**
+     * One piece of advice about the trial's paid event, when there is one on sale: a trial that
+     * ends with nothing sold is a subscription that does not stay. No way to get paid comes first,
+     * because nothing can sell without it; then a paid event with no orders, named, with its link.
+     * Null when the schedule has no upcoming paid event of its own, or it has orders.
+     *
+     * @return array{key: string, params: array<string, string>, url: string}|null
+     */
+    private function sellingTip(): ?array
+    {
+        $user = $this->role->user;
+        if (! $user || ! config('app.hosted')) {
+            return null;
+        }
+
+        $event = $this->role->events()
+            ->where('events.creator_role_id', $this->role->id)
+            ->where('events.is_draft', false)
+            ->where('events.is_private', false)
+            ->where('events.is_cancelled', false)
+            ->where('events.tickets_enabled', true)
+            ->whereNull('events.appointment_type_id')
+            ->hasUpcomingOccurrence()
+            ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
+                ->where('tickets.is_addon', false)
+                ->where('tickets.price', '>', 0))
+            ->orderBy('events.starts_at')
+            ->first(['events.*']);
+
+        if (! $event) {
+            return null;
+        }
+
+        if (empty(payment_gateways()->connectedFor($user))) {
+            return [
+                'key' => 'messages.subscription_trial_ending_tip_no_gateway',
+                'params' => ['event' => (string) $event->name],
+                'url' => app_url(route('profile.edit', [], false).'#section-payment-methods'),
+            ];
+        }
+
+        if ($event->sales()->where('sales.is_deleted', false)->exists()) {
+            return null;
+        }
+
+        return [
+            'key' => 'messages.subscription_trial_ending_tip_no_orders',
+            'params' => ['event' => (string) $event->name],
+            'url' => (string) $event->getGuestUrl($this->role->subdomain, null, true),
+        ];
+    }
+
     public function content(): Content
     {
         $portalUrl = config('app.hosted')
@@ -68,6 +120,7 @@ class SubscriptionTrialEnding extends Mailable
                 'portalUrl' => $portalUrl,
                 'hasCard' => $this->hasCard && ! $this->windDown,
                 'windDown' => $this->windDown,
+                'sellingTip' => $this->windDown ? null : $this->sellingTip(),
             ]
         );
     }

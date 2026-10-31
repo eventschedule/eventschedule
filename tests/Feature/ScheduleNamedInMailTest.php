@@ -38,6 +38,8 @@ class ScheduleNamedInMailTest extends TestCase
         'activation_nudge_subject_no_ticket_type_free', 'activation_nudge_body_no_ticket_type_free',
         'activation_nudge_body_no_ticket_type_free_no_trial',
         'activation_nudge_subject_no_gateway', 'activation_nudge_body_no_gateway',
+        'activation_nudge_body_paid_blocked', 'activation_nudge_body_paid_blocked_no_trial',
+        'activation_nudge_body_no_orders_soon',
         'activation_nudge_body_first_sale',
         'activation_nudge_subject_idle_30', 'activation_nudge_body_idle_30',
         'activation_nudge_subject_idle_60', 'activation_nudge_body_idle_60',

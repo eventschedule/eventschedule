@@ -519,6 +519,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'Ühendage makseviis',
     'activation_nudge_body_no_gateway' => 'Ajakavas ":schedule" on tasulised piletid seadistatud, kuid ühtegi makseviisi pole veel ühendatud, nii et ostjad ei saa veebis maksta. Stripe\'i ühendamine võtab paar minutit ja raha läheb otse teie enda kontole. Võite ka ukse juures sularaha võtta ja jätta piletid täpselt selliseks, nagu need on.',
     'activation_nudge_cta_no_gateway' => 'Ühenda maksed',
+    'activation_nudge_subject_paid_blocked' => 'Üritusele ":event" ei saa veel keegi pileteid osta',
+    'activation_nudge_heading_paid_blocked' => 'Teie tasulised piletid ei ole müügil',
+    'activation_nudge_body_paid_blocked' => 'Ajakavas ":schedule" on üritusel ":event" (:date) tasulised piletid, kuid tasuta pakett ei saa tasulisi pileteid müüa, nii et keegi ei saa veel ühtegi osta. Alustage Pro-ga, millel on :days-päevane tasuta prooviperiood, et neid müüa, või muutke need tasuta piletiteks või registreerimiseks, mis on igas paketis piiramatud.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'Ajakavas ":schedule" on üritusel ":event" (:date) tasulised piletid, kuid tasuta pakett ei saa tasulisi pileteid müüa, nii et keegi ei saa veel ühtegi osta. Minge üle Pro-le, et neid müüa, või muutke need tasuta piletiteks või registreerimiseks, mis on igas paketis piiramatud.',
+    'activation_nudge_cta_paid_blocked' => 'Alusta piletimüüki',
+    'activation_nudge_subject_no_orders_soon' => 'Üritusel ":event" pole veel tellimusi',
+    'activation_nudge_heading_no_orders_soon' => 'Aeg oma üritust jagada',
+    'activation_nudge_body_no_orders_soon' => 'Üritusel ":event" (:date) ajakavas ":schedule" pole veel ühtegi tellimust. Enamik esimesi müüke tuleb sellest, et korraldaja jagab linki ise: postitage see sinna, kus teie publik teid juba jälgib, lisage see oma tutvustusse ja saatke neile, kes eelmisel korral kohal olid.',
+    'activation_nudge_cta_no_orders_soon' => 'Ava ürituse leht',
+    'activation_nudge_share_link' => 'Teie ürituse link:',
 
     'activation_nudge_subject_first_sale' => 'Müüsite oma esimese pileti',
     'activation_nudge_heading_first_sale' => 'Esimene müüdud',
@@ -2997,6 +3007,8 @@ return [
     'subscription_trial_ending_continue' => 'Jätkamiseks ei pea te midagi tegema. Teie :plan tellimus algab automaatselt prooviperioodi lõppedes.',
     'subscription_trial_ending_cancel' => 'Kui te ei soovi jätkata, tühistage tellimus lihtsalt plaani seadetes enne prooviperioodi lõppu. Teilt tasu ei võeta.',
     'subscription_trial_ending_help' => 'Kui teil on küsimusi, vastake lihtsalt sellele e-kirjale. Aitame hea meelega!',
+    'subscription_trial_ending_tip_no_gateway' => 'Enne prooviperioodi lõppu: üritusel ":event" on tasulised piletid müügil, kuid ühtegi makseviisi pole ühendatud, nii et ostjad ei saa veebis maksta. Stripe\'i ühendamine võtab paar minutit:',
+    'subscription_trial_ending_tip_no_orders' => 'Enne prooviperioodi lõppu: üritusel ":event" pole veel tellimusi. Enamik esimesi müüke tuleb lingi jagamisest seal, kus teie publik teid juba jälgib:',
     'subscription_trial_ending_manage' => 'Halda oma plaani',
 
     // Subscription trial ending email (no card on file)

@@ -64,6 +64,13 @@ class SendActivationNudges extends Command
         // $0 row priced today keeps its older created_at and is not held back - acceptable, since
         // that ticket was set up more than a day ago.
         'no_gateway' => ['min_hours' => 24],
+        // A free schedule whose upcoming event has paid tickets its plan cannot sell, so nobody can
+        // buy them. A day after the priced row, like no_gateway; the date ends it.
+        'paid_blocked' => ['min_hours' => 24],
+        // A one-off paid event inside its last stretch with nothing sold. min_days is the event's
+        // age (a page published this morning has had no chance to sell), within_days how close
+        // the date is: near enough that sharing the link is the thing to do this week.
+        'no_orders_soon' => ['min_days' => 3, 'within_days' => 10],
         // First paid sale landed in the last 7 days. Congratulating someone on a sale from
         // last year reads as a bug, not a nudge.
         'first_sale' => ['max_days' => 7],
@@ -212,7 +219,7 @@ class SendActivationNudges extends Command
                     // written by then, so that nudge would never be sent or retried.
                     // Same rule as SendOnboardingNudges and WindDownReminder.
                     SendQueuedEmail::dispatch(
-                        new ActivationNudge($role, $key, $this->ticketsUrlFor($role, $key)),
+                        new ActivationNudge($role, $key, $this->ticketsUrlFor($role, $key), $this->eventFor($role, $key)),
                         $role->user->email,
                         null,
                         $role->user->language_code ?? app()->getLocale()
@@ -251,6 +258,8 @@ class SendActivationNudges extends Command
             'no_ticket_type' => fn (int $limit) => $this->dueForNoTicketType($limit),
             'no_ticket_type_free' => fn (int $limit) => $this->dueForNoTicketTypeFree($limit),
             'no_gateway' => fn (int $limit) => $this->dueForNoGateway($limit),
+            'paid_blocked' => fn (int $limit) => $this->dueForPaidBlocked($limit),
+            'no_orders_soon' => fn (int $limit) => $this->dueForNoOrdersSoon($limit),
             'first_sale' => fn (int $limit) => $this->dueForFirstSale($limit),
             'no_event' => fn (int $limit) => $this->dueForNoEvent($limit),
             'idle_30' => fn (int $limit) => $this->dueForIdle('idle_30', $limit),
@@ -406,6 +415,70 @@ class SendActivationNudges extends Command
             'subdomain' => $role->subdomain,
             'hash' => UrlUtils::encodeId($event->id),
         ], false).'#section-tickets');
+    }
+
+    /**
+     * The paid event a selling nudge is about, as plain values for the email to name: its name,
+     * its own link (on the schedule's custom domain where it has one) and when it starts. Values,
+     * not the Event, for the reason ticketsUrlFor() gives. Null when the key names no event.
+     *
+     * @return array{name: string, url: string, starts_at: string, timezone: string}|null
+     */
+    private function eventFor(Role $role, string $key): ?array
+    {
+        if (! in_array($key, ['paid_blocked', 'no_orders_soon'], true)) {
+            return null;
+        }
+
+        $event = $this->sellingEvents($role->events()->where('events.creator_role_id', $role->id), $key)
+            ->orderBy('events.starts_at')
+            ->first(['events.*']);
+
+        if (! $event) {
+            return null;
+        }
+
+        return [
+            'name' => (string) $event->name,
+            'url' => (string) $event->getGuestUrl($role->subdomain, null, true),
+            'starts_at' => (string) $event->getRawOriginal('starts_at'),
+            'timezone' => (string) ($role->timezone ?: config('app.timezone')),
+        ];
+    }
+
+    /**
+     * The events a selling nudge is about: public, on sale, not called off, a date still to come,
+     * and a priced ticket that has existed for a day. Each key adds its own condition. The caller
+     * scopes them to the schedule's own events (creator_role_id), because a paid ticket belongs to
+     * the schedule that made the event (Event::ticketingRole()).
+     */
+    private function sellingEvents($query, string $key)
+    {
+        $query = $this->publicEvents($query)
+            ->where('events.is_cancelled', false)
+            ->where('events.tickets_enabled', true)
+            ->whereNull('events.appointment_type_id')
+            ->hasUpcomingOccurrence()
+            ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
+                ->where('tickets.is_addon', false)
+                ->where('tickets.price', '>', 0)
+                ->where('tickets.created_at', '<=', now()->subHours(24)));
+
+        if ($key === 'paid_blocked') {
+            // A grandfathered event can still sell on a free plan, so it is not blocked.
+            return $query->whereNull('events.tickets_grandfathered_at');
+        }
+
+        // no_orders_soon: one-off events only. A series' starts_at is its first night, weeks back,
+        // and "your event is in N days with no orders" cannot be said of it from one column.
+        $w = self::WINDOWS['no_orders_soon'];
+
+        return $query->whereNull('events.days_of_week')
+            ->where('events.starts_at', '>', now())
+            ->where('events.starts_at', '<=', now()->addDays($w['within_days']))
+            ->where('events.created_at', '<=', now()->subDays($w['min_days']))
+            // Not one order of any kind: a cash order waiting to be paid is somebody coming.
+            ->whereDoesntHave('sales', fn ($s) => $s->where('sales.is_deleted', false));
     }
 
     /** Events on this schedule that the public can actually see. */
@@ -567,6 +640,44 @@ class SendActivationNudges extends Command
                     ->whereNotNull('events.tickets_grandfathered_at')))
             ->limit($limit)->get()
             ->filter(fn (Role $role) => empty(payment_gateways()->connectedFor($role->user)))
+            ->values();
+    }
+
+    /**
+     * A free schedule with paid tickets on an upcoming event that its plan cannot sell, so the
+     * page shows them and nobody can buy one. The 2026-10-31 growth read found three, one of them
+     * just after its selling trial ended. no_ticket_type_free cannot reach them (they HAVE a
+     * ticket type) and no_gateway skips them (the plan cannot sell, so a gateway would not help).
+     *
+     * The plan test is the NOT IN that dueForNoTicketTypeFree() explains.
+     */
+    private function dueForPaidBlocked(int $limit)
+    {
+        return $this->base('paid_blocked')
+            ->whereNotIn('roles.id', Role::query()->whereCanSellPaidTickets()->select('roles.id'))
+            ->whereHas('events', fn ($q) => $this->sellingEvents($q, 'paid_blocked')
+                ->whereColumn('events.creator_role_id', 'roles.id'))
+            ->limit($limit)->get();
+    }
+
+    /**
+     * Paid tickets on sale, a way to get paid connected, the date close, and not one order. The
+     * sellers who sell share their own link; this says so about the event in question, with the
+     * link in the email. A schedule with no gateway is no_gateway's, which comes first.
+     *
+     * The plan half is no_gateway's: the plan sells, or the same event is grandfathered.
+     */
+    private function dueForNoOrdersSoon(int $limit)
+    {
+        $event = fn ($q) => $this->sellingEvents($q, 'no_orders_soon')
+            ->whereColumn('events.creator_role_id', 'roles.id');
+
+        return $this->base('no_orders_soon')
+            ->where(fn ($q) => $q
+                ->where(fn ($plan) => $plan->whereCanSellPaidTickets()->whereHas('events', $event))
+                ->orWhereHas('events', fn ($e) => $event($e)->whereNotNull('events.tickets_grandfathered_at')))
+            ->limit($limit)->get()
+            ->filter(fn (Role $role) => ! empty(payment_gateways()->connectedFor($role->user)))
             ->values();
     }
 

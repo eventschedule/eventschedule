@@ -1749,4 +1749,132 @@ class ActivationNudgeTest extends TestCase
 
         $this->assertNothingSent();
     }
+
+    /** A paid event of this schedule's own, on sale: what both selling nudges look at. */
+    private function paidEventOnSale(Role $role, array $attrs = []): Event
+    {
+        $event = $this->createEvent($role, $attrs + [
+            'creator_role_id' => $role->id,
+            'tickets_enabled' => true,
+            'name' => 'Spring Gala',
+        ]);
+        $this->createTicket($event, ['price' => 25, 'quantity' => 50]);
+
+        return $event;
+    }
+
+    /** The mailable a queued nudge carries, to read what it says. */
+    private function queuedNudge(): ActivationNudge
+    {
+        $mailable = null;
+        Queue::assertPushed(SendQueuedEmail::class, function ($job) use (&$mailable) {
+            $mailable = (new \ReflectionProperty($job, 'mailable'))->getValue($job);
+
+            return true;
+        });
+
+        return $mailable;
+    }
+
+    /**
+     * Paid tickets on a free schedule are on the page and nobody can buy one. The 2026-10-31
+     * growth read found three such schedules and nothing told them.
+     */
+    public function test_a_free_schedule_with_paid_tickets_it_cannot_sell_is_told(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $this->paidEventOnSale($role);
+
+        $this->nudge('paid_blocked');
+
+        $this->assertSent('paid_blocked');
+        $mail = $this->queuedNudge();
+        $this->assertSame('Spring Gala', $mail->event['name']);
+        $html = $mail->render();
+        $this->assertStringContainsString('Spring Gala', $html);
+        // The button goes to the Plan tab, where the trial and the checkout are.
+        $this->assertStringContainsString(e(app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan'], false))), $html);
+    }
+
+    public function test_a_schedule_that_can_sell_is_not_told_its_tickets_are_blocked(): void
+    {
+        $this->paidEventOnSale($this->createRole($this->owner()));
+        $grandfathered = $this->paidEventOnSale($this->createFreeRole($this->owner()));
+        $grandfathered->forceFill(['tickets_grandfathered_at' => now()])->save();
+        $past = $this->paidEventOnSale($this->createFreeRole($this->owner()), ['starts_at' => now()->subDays(20)->format('Y-m-d H:i:s')]);
+        $off = $this->createFreeRole($this->owner());
+        $this->paidEventOnSale($off, ['tickets_enabled' => false]);
+
+        $this->nudge('paid_blocked');
+
+        $this->assertNothingSent();
+    }
+
+    /**
+     * A paid event close to its date, a way to get paid, and nobody has ordered: the email names
+     * the event and gives its link to share.
+     */
+    public function test_a_paid_event_with_no_orders_close_to_its_date_is_told_to_share(): void
+    {
+        $role = $this->createRole($this->owner(['payment_url' => 'https://paypal.me/someone']));
+        $event = $this->paidEventOnSale($role, [
+            'starts_at' => now()->addDays(5)->setTime(12, 0)->format('Y-m-d H:i:s'),
+            'created_at' => now()->subDays(4),
+        ]);
+
+        $this->nudge('no_orders_soon');
+
+        $this->assertSent('no_orders_soon');
+        $mail = $this->queuedNudge();
+        $this->assertSame($event->getGuestUrl($role->subdomain, null, true), $mail->event['url']);
+        $html = $mail->render();
+        $this->assertStringContainsString('Spring Gala', $html);
+        $this->assertStringContainsString(e($mail->event['url']), $html);
+        $this->assertStringContainsString(now()->addDays(5)->isoFormat('dddd'), $html);
+    }
+
+    /** One case each: an order, no gateway (no_gateway's), too far off, too new, a series. */
+    public function test_the_share_nudge_waits_for_its_moment(): void
+    {
+        $gateway = ['payment_url' => 'https://paypal.me/someone'];
+        $soon = ['starts_at' => now()->addDays(5)->setTime(12, 0)->format('Y-m-d H:i:s'), 'created_at' => now()->subDays(4)];
+
+        $sold = $this->createRole($this->owner($gateway));
+        $event = $this->paidEventOnSale($sold, $soon);
+        $this->createSale($event, $sold, ['status' => 'unpaid', 'payment_method' => 'cash']);
+
+        $this->paidEventOnSale($this->createRole($this->owner()), $soon);
+        $this->paidEventOnSale($this->createRole($this->owner($gateway)), ['starts_at' => now()->addDays(20)->format('Y-m-d H:i:s')] + $soon);
+        $this->paidEventOnSale($this->createRole($this->owner($gateway)), ['created_at' => now()->subDay()] + $soon);
+        $this->paidEventOnSale($this->createRole($this->owner($gateway)), ['days_of_week' => '0000010'] + $soon);
+
+        $this->nudge('no_orders_soon');
+
+        $this->assertNothingSent();
+    }
+
+    /**
+     * The Stripe trial-ending email names the trial's paid event when nothing can be bought or
+     * nothing has been: a trial that ends with no sale is a subscription that does not stay.
+     */
+    public function test_the_trial_ending_email_gives_selling_advice(): void
+    {
+        $role = $this->createRole($this->owner());
+        $event = $this->paidEventOnSale($role);
+        $mail = fn () => (new \App\Mail\SubscriptionTrialEnding($role->fresh(), '$5.00', 'Pro', 'November 3, 2026'))->render();
+
+        $this->assertStringContainsString(e(__('messages.subscription_trial_ending_tip_no_gateway', ['event' => 'Spring Gala'])), $mail());
+
+        $role->user->forceFill(['payment_url' => 'https://paypal.me/someone'])->save();
+        $html = $mail();
+        $this->assertStringContainsString(e(__('messages.subscription_trial_ending_tip_no_orders', ['event' => 'Spring Gala'])), $html);
+        $this->assertStringContainsString(e($event->getGuestUrl($role->subdomain, null, true)), $html);
+
+        $this->createSale($event, $role);
+        $html = $mail();
+        $this->assertStringNotContainsString(e(__('messages.subscription_trial_ending_tip_no_orders', ['event' => 'Spring Gala'])), $html);
+
+        $windDown = (new \App\Mail\SubscriptionTrialEnding($role->fresh(), '$5.00', 'Pro', 'November 3, 2026', true, true))->render();
+        $this->assertStringNotContainsString('Spring Gala', $windDown);
+    }
 }

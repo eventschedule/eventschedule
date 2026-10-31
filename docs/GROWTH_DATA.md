@@ -314,7 +314,7 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     (first view per user), `trial_starts`;
   - `subscriptions_started` (not declined), `subscriptions_ended`, `cancellations`.
 - `nudge_outcomes`: per activation-nudge key, `{sent, matured, acted_event, acted_ticket_type,
-  acted_stripe_connected, acted_paid_sale}`.
+  acted_stripe_connected, acted_paid_sale, acted_subscribed}`. `acted_subscribed` is from schema 25.
   - `acted_*` counts matured nudges (14+ days old) whose schedule did that within 14 days.
   - There is no holdout group: compare keys and periods, never read a rate as the nudge's effect.
 - `onboarding_nudges[]`: `{stage, users, saved_schedule}`. The stage is how many pre-schedule
@@ -616,6 +616,13 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **25** (2026-10-31)
+  - **Two selling nudges and one outcome.** `nudges` and `nudge_outcomes` can carry `paid_blocked`
+    (a free schedule with an upcoming paid event its plan cannot sell) and `no_orders_soon` (a
+    one-off paid event within 10 days, a gateway connected, not one order), and every key's
+    outcome row gains `acted_subscribed`: a subscription started on that schedule within 14 days.
+    The Stripe trial-ending email also names the trial's paid event when it has no gateway or no
+    orders (not a nudge, so not counted here).
 - **24** (2026-10-31)
   - **Blocked accounts are left out** of every count of people and of what they made: the funnel,
     `signups` and `schedules` rows, `traffic[].verified_signups`, `daily`, and every section built

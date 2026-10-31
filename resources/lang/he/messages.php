@@ -680,6 +680,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'חברו דרך לקבל תשלום',
     'activation_nudge_body_no_gateway' => 'בלוח הזמנים ":schedule" מוגדרים כרטיסים בתשלום, אבל עדיין לא חובר אמצעי תשלום, כך שקונים לא יכולים לשלם אונליין. חיבור Stripe לוקח כמה דקות והכסף מגיע ישירות לחשבון שלכם. אפשר גם לגבות מזומן בכניסה ולהשאיר את הכרטיסים בדיוק כפי שהם.',
     'activation_nudge_cta_no_gateway' => 'חיבור תשלומים',
+    'activation_nudge_subject_paid_blocked' => 'עדיין אי אפשר לקנות כרטיסים ל־":event"',
+    'activation_nudge_heading_paid_blocked' => 'הכרטיסים בתשלום שלכם לא במכירה',
+    'activation_nudge_body_paid_blocked' => 'בלוח הזמנים ":schedule" יש כרטיסים בתשלום ל־":event" (:date), אבל התוכנית החינמית לא יכולה למכור כרטיסים בתשלום, כך שאף אחד עדיין לא יכול לקנות. התחילו את Pro עם תקופת ניסיון חינם של :days ימים כדי למכור אותם, או הפכו אותם לכרטיסים חינם או להרשמה, שהם ללא הגבלה בכל תוכנית.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'בלוח הזמנים ":schedule" יש כרטיסים בתשלום ל־":event" (:date), אבל התוכנית החינמית לא יכולה למכור כרטיסים בתשלום, כך שאף אחד עדיין לא יכול לקנות. שדרגו ל־Pro כדי למכור אותם, או הפכו אותם לכרטיסים חינם או להרשמה, שהם ללא הגבלה בכל תוכנית.',
+    'activation_nudge_cta_paid_blocked' => 'התחילו למכור כרטיסים',
+    'activation_nudge_subject_no_orders_soon' => 'עדיין אין הזמנות ל־":event"',
+    'activation_nudge_heading_no_orders_soon' => 'הגיע הזמן לשתף את האירוע',
+    'activation_nudge_body_no_orders_soon' => 'ל־":event" (:date) בלוח הזמנים ":schedule" עדיין אין הזמנות. רוב המכירות הראשונות מגיעות מכך שהמארגנים משתפים את הקישור בעצמם: פרסמו אותו במקום שבו הקהל שלכם כבר עוקב אחריכם, הוסיפו אותו לביו ושלחו אותו למי שהגיעו בפעם הקודמת.',
+    'activation_nudge_cta_no_orders_soon' => 'פתיחת דף האירוע',
+    'activation_nudge_share_link' => 'הקישור לאירוע שלכם:',
 
     'activation_nudge_subject_first_sale' => 'מכרתם את הכרטיס הראשון',
     'activation_nudge_heading_first_sale' => 'הראשון נמכר',
@@ -3057,6 +3067,8 @@ return [
     'subscription_trial_ending_continue' => 'אינך צריך לעשות דבר כדי להמשיך. המנוי שלך ל-:plan יתחיל אוטומטית עם סיום תקופת הניסיון.',
     'subscription_trial_ending_cancel' => 'אם אינך מעוניין להמשיך, פשוט בטל דרך הגדרות התוכנית שלך לפני סיום תקופת הניסיון. לא תחויב.',
     'subscription_trial_ending_help' => 'אם יש לך שאלות, פשוט השב לאימייל זה. נשמח לעזור!',
+    'subscription_trial_ending_tip_no_gateway' => 'לפני שתקופת הניסיון מסתיימת: ל־":event" יש כרטיסים בתשלום במכירה, אבל לא חובר אמצעי תשלום, כך שקונים לא יכולים לשלם אונליין. חיבור Stripe לוקח כמה דקות:',
+    'subscription_trial_ending_tip_no_orders' => 'לפני שתקופת הניסיון מסתיימת: ל־":event" עדיין אין הזמנות. רוב המכירות הראשונות מגיעות משיתוף הקישור במקום שבו הקהל שלכם כבר עוקב אחריכם:',
     'subscription_trial_ending_manage' => 'נהל את התוכנית שלך',
 
     // Subscription trial ending email (no card on file)

@@ -941,6 +941,16 @@ return [
     'activation_nudge_heading_no_gateway' => 'Ligue uma forma de receber',
     'activation_nudge_body_no_gateway' => 'A sua agenda ":schedule" tem bilhetes pagos configurados, mas ainda não há nenhum método de pagamento ligado, por isso os compradores não conseguem pagar online. Ligar o Stripe demora uns minutos e o dinheiro vai directamente para a sua própria conta. Também pode receber em dinheiro à porta e deixar os bilhetes exactamente como estão.',
     'activation_nudge_cta_no_gateway' => 'Ligar pagamentos',
+    'activation_nudge_subject_paid_blocked' => 'Ainda ninguém pode comprar bilhetes para ":event"',
+    'activation_nudge_heading_paid_blocked' => 'Os seus bilhetes pagos não estão à venda',
+    'activation_nudge_body_paid_blocked' => 'A sua agenda ":schedule" tem bilhetes pagos para ":event" (:date), mas o plano gratuito não pode vender bilhetes pagos, por isso ainda ninguém consegue comprar um. Comece o Pro com um teste gratuito de :days dias para os vender, ou mude-os para bilhetes gratuitos ou inscrições, que são ilimitados em todos os planos.',
+    'activation_nudge_body_paid_blocked_no_trial' => 'A sua agenda ":schedule" tem bilhetes pagos para ":event" (:date), mas o plano gratuito não pode vender bilhetes pagos, por isso ainda ninguém consegue comprar um. Passe para o Pro para os vender, ou mude-os para bilhetes gratuitos ou inscrições, que são ilimitados em todos os planos.',
+    'activation_nudge_cta_paid_blocked' => 'Começar a vender bilhetes',
+    'activation_nudge_subject_no_orders_soon' => 'Ainda não há pedidos para ":event"',
+    'activation_nudge_heading_no_orders_soon' => 'Está na altura de partilhar o seu evento',
+    'activation_nudge_body_no_orders_soon' => '":event" (:date) na sua agenda ":schedule" ainda não tem pedidos. A maioria das primeiras vendas vem do organizador partilhar o link: publique-o onde o seu público já o segue, ponha-o na sua biografia e envie-o a quem veio da última vez.',
+    'activation_nudge_cta_no_orders_soon' => 'Abrir a página do evento',
+    'activation_nudge_share_link' => 'O link do seu evento:',
 
     'activation_nudge_subject_first_sale' => 'Vendeu o seu primeiro bilhete',
     'activation_nudge_heading_first_sale' => 'O primeiro está vendido',
@@ -3000,6 +3010,8 @@ return [
     'subscription_trial_ending_continue' => 'Você não precisa fazer nada para continuar. Sua assinatura :plan começará automaticamente quando o teste terminar.',
     'subscription_trial_ending_cancel' => 'Se preferir não continuar, basta cancelar nas configurações do seu plano antes do fim do teste. Você não será cobrado.',
     'subscription_trial_ending_help' => 'Se tiver alguma dúvida, basta responder a este e-mail. Teremos prazer em ajudar!',
+    'subscription_trial_ending_tip_no_gateway' => 'Antes de o seu teste terminar: ":event" tem bilhetes pagos à venda, mas não há nenhum método de pagamento ligado, por isso os compradores não conseguem pagar online. Ligar o Stripe demora uns minutos:',
+    'subscription_trial_ending_tip_no_orders' => 'Antes de o seu teste terminar: ":event" ainda não tem pedidos. A maioria das primeiras vendas vem de partilhar o seu link onde o seu público já o segue:',
     'subscription_trial_ending_manage' => 'Gerenciar seu plano',
 
     // Subscription trial ending email (no card on file)

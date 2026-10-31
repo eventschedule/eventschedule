@@ -37,16 +37,46 @@ class ActivationNudge extends Mailable
      * model that is deleted before the job runs would silently discard this email after its
      * schedule_nudges claim was written, and it would never be sent.
      */
+    /**
+     * $event is the paid event a selling nudge (paid_blocked, no_orders_soon) is about, as plain
+     * values from SendActivationNudges::eventFor() for the same reason $ticketsUrl is a URL.
+     *
+     * @param  array{name: string, url: string, starts_at: string, timezone: string}|null  $event
+     */
     public function __construct(
         public Role $role,
         public string $nudgeKey,
         public ?string $ticketsUrl = null,
+        public ?array $event = null,
     ) {}
+
+    /**
+     * What every string of this nudge is filled with. The date is formatted here, at render, so it
+     * reads in the owner's language (SendQueuedEmail sets it) and the schedule's timezone.
+     */
+    private function params(): array
+    {
+        $params = [
+            'schedule' => $this->role->name,
+            'days' => (int) config('app.trial_days', 7),
+        ];
+
+        if ($this->event) {
+            $params['event'] = $this->event['name'];
+            $params['url'] = $this->event['url'];
+            $params['date'] = \Carbon\Carbon::parse($this->event['starts_at'], 'UTC')
+                ->setTimezone($this->event['timezone'] ?: config('app.timezone'))
+                // The locale's own order: 'l, F j' read "sábado, noviembre 7" in Spanish.
+                ->isoFormat('dddd, LL');
+        }
+
+        return $params;
+    }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('messages.activation_nudge_subject_'.$this->nudgeKey, ['schedule' => $this->role->name]),
+            subject: __('messages.activation_nudge_subject_'.$this->nudgeKey, $this->params()),
             // Replies reach a person on eventschedule.com. An operator platform runs this command
             // too, and support_email defaults to our address, which must not reach their owners.
             replyTo: config('app.is_nexus') && config('app.support_email')
@@ -81,6 +111,9 @@ class ActivationNudge extends Mailable
                 'role' => $this->role,
                 'nudgeKey' => $this->nudgeKey,
                 'bodyKey' => $this->bodyKey(),
+                'params' => $this->params(),
+                // The event's own link, printed as text under the body so it can be copied.
+                'shareUrl' => $this->nudgeKey === 'no_orders_soon' ? ($this->event['url'] ?? null) : null,
                 'ctaUrl' => $this->ctaUrl(),
                 'importUrl' => $this->importUrl(),
                 // "Hello Sam," or just "Hello,", never firstName()'s English "there".
@@ -99,8 +132,8 @@ class ActivationNudge extends Mailable
      */
     private function bodyKey(): string
     {
-        if ($this->nudgeKey === 'no_ticket_type_free' && ! $this->role->isEligibleForTrial()) {
-            return 'messages.activation_nudge_body_no_ticket_type_free_no_trial';
+        if (in_array($this->nudgeKey, ['no_ticket_type_free', 'paid_blocked'], true) && ! $this->role->isEligibleForTrial()) {
+            return 'messages.activation_nudge_body_'.$this->nudgeKey.'_no_trial';
         }
 
         return 'messages.activation_nudge_body_'.$this->nudgeKey;
@@ -122,6 +155,14 @@ class ActivationNudge extends Mailable
             'no_gateway' => app_url(route('profile.edit', [], false).'#section-payment-methods'),
             // The money already arrived; show them where it landed.
             'first_sale' => app_url(route('sales', [], false)),
+            // Selling paid tickets is a plan question, answered on the schedule's Plan tab, where
+            // the trial and the checkout are.
+            'paid_blocked' => app_url(route('role.view_admin', [
+                'subdomain' => $this->role->subdomain,
+                'tab' => 'plan',
+            ], false)),
+            // The event's own page, which is the thing to share.
+            'no_orders_soon' => $this->event['url'] ?? $this->scheduleAdminUrl(),
             // Straight to the Tickets section of the event that needs them, when the command found
             // one this schedule created; otherwise the schedule's admin page, as before.
             'no_ticket_type', 'no_ticket_type_free' => $this->ticketsUrl ?? $this->scheduleAdminUrl(),

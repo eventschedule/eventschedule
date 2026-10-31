@@ -33,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 24;
+    public const SCHEMA_VERSION = 25;
 
     /** How far ahead the schedule rows look for events on sale (upcoming_*). */
     public const UPCOMING_DAYS = 60;
@@ -3324,6 +3324,10 @@ class GrowthExportService
                 AND t.created_at > n.created_at AND t.created_at <= {$window})",
             'stripe_connected' => "EXISTS (SELECT 1 FROM roles r JOIN users u ON u.id = r.user_id
                 WHERE r.id = n.role_id AND u.stripe_completed_at > n.created_at AND u.stripe_completed_at <= {$window})",
+            // paid_blocked asks for a plan, so its answer is a subscription on that schedule.
+            'subscribed' => "EXISTS (SELECT 1 FROM subscriptions sub WHERE sub.role_id = n.role_id
+                AND sub.stripe_status NOT IN ('incomplete', 'incomplete_expired')
+                AND sub.created_at > n.created_at AND sub.created_at <= {$window})",
             'paid_sale' => "EXISTS (SELECT 1 FROM sales s JOIN events e ON e.id = s.event_id
                 WHERE e.creator_role_id = n.role_id AND s.status = 'paid' AND s.is_deleted = 0
                 AND s.payment_method NOT IN ('rsvp', 'import') AND s.payment_amount > 0
