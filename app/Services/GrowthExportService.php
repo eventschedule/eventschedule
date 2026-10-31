@@ -33,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 23;
+    public const SCHEMA_VERSION = 24;
 
     /** How far ahead the schedule rows look for events on sale (upcoming_*). */
     public const UPCOMING_DAYS = 60;
@@ -84,6 +84,7 @@ class GrowthExportService
         return User::query()
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNull('blocked_at')
             // Attendee-intent signups (follow/ticket/request/...) never meant to
             // create a schedule; NULL = pre-tracking rows, treated as organizer.
             ->where(function ($query) {
@@ -145,6 +146,7 @@ class GrowthExportService
         $excludedIntents = User::query()
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNull('blocked_at')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('signup_intent')
             ->where('signup_intent', '!=', 'organizer')
@@ -713,6 +715,12 @@ class GrowthExportService
                 .'feeds and calendar syncs. Every *_in and last_event_created is a bucket of days, never a date. meta.app_commit and a commit on '
                 .'each meta.releases entry date a deploy to its commit where the host sets APP_COMMIT; '
                 .'hero_test.daily splits the headline test by day.',
+            'Since schema_version 24, blocked accounts (AccountBlockService, nearly always spam) are left '
+                .'out of every count of people and of what they made: the funnel, the signup and schedule '
+                .'rows, traffic[].verified_signups, daily and every schedule-based section. A block applies '
+                .'to every pull made after it, so a month re-reads lower once its spam is blocked, and the '
+                .'counts before this version include it (October 2026 most of all). traffic[]\'s visit and '
+                .'signup_* counters are visitor counts and cannot tell; MRR is what Stripe bills and is unchanged.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -823,10 +831,39 @@ class GrowthExportService
         return $months;
     }
 
-    /** Demo exclusion applied to a roles query - the same predicate as scheduleFilter(). */
+    /**
+     * Demo exclusion applied to a roles query - the same predicate as scheduleFilter() - and, from
+     * schema 24, the schedules of blocked accounts.
+     */
     private function excludeDemoRoles($query)
     {
-        return $query->whereNot(fn ($q) => Role::constrainDemoContent($q));
+        return $this->excludeBlockedOwners(
+            $query->whereNot(fn ($q) => Role::constrainDemoContent($q)),
+            'roles.user_id',
+        );
+    }
+
+    /** @var list<int>|null */
+    private ?array $blockedUserIds = null;
+
+    /**
+     * Blocked accounts (AccountBlockService) are left out of every count of people and of what
+     * they made, from schema 24: a block is nearly always spam, and in October 2026 a wave of it
+     * read as the best month the funnel ever had. The accounts are few, so their ids come off
+     * BlockedAccounts once per export and each query is handed the list.
+     *
+     * A NULL owner is kept on purpose: NOT IN drops a row whose column is NULL, and an unclaimed
+     * placeholder schedule (or an event nobody signed in made) has no user_id.
+     */
+    private function excludeBlockedOwners($query, string $column)
+    {
+        $ids = $this->blockedUserIds ??= app(BlockedAccounts::class)->userIds();
+
+        if ($ids === []) {
+            return $query;
+        }
+
+        return $query->where(fn ($q) => $q->whereNull($column)->orWhereNotIn($column, $ids));
     }
 
     /**
@@ -846,7 +883,8 @@ class GrowthExportService
     {
         $base = User::query()
             ->whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL);
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNull('blocked_at');
 
         $total = (clone $base)->count();
 
@@ -3076,6 +3114,7 @@ class GrowthExportService
         $signups = User::query()
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNull('blocked_at')
             ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))
             ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as c")
             ->orderBy('ym')
@@ -3205,8 +3244,9 @@ class GrowthExportService
         };
 
         $users = fn () => DB::table('users')->whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL);
-        $realEvents = fn () => DB::table('events')->whereNotIn('events.id', $this->demoEventIds());
+            ->where('email', '!=', DemoService::DEMO_EMAIL)->whereNull('users.blocked_at');
+        $realEvents = fn () => $this->excludeBlockedOwners(
+            DB::table('events')->whereNotIn('events.id', $this->demoEventIds()), 'events.user_id');
         // A "first" is a MIN per entity, and only counts on its day if it falls inside the window.
         $firsts = fn ($query, $key, string $at) => $query->groupBy($key)
             ->selectRaw("MIN({$at}) as first_at")->havingRaw("MIN({$at}) >= ?", [$from]);

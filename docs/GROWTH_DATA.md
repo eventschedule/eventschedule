@@ -616,6 +616,15 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **24** (2026-10-31)
+  - **Blocked accounts are left out** of every count of people and of what they made: the funnel,
+    `signups` and `schedules` rows, `traffic[].verified_signups`, `daily`, and every section built
+    on schedules or subscriptions. A block is nearly always spam, and October 2026's wave read as
+    the funnel's best month (10 of that month's schedule-savers had already been blocked by the
+    2026-10-31 pull, and 12 to 13 sign-ups a day on 10/26 and 10/27 against about 5). Counts drop
+    for a month whenever more of its accounts are blocked, so a later pull can read an old month
+    lower; across this version, read October 2026's top of funnel as an upper bound. The visit and
+    `signup_*` counters in `traffic[]` count visitors, not accounts, and are unchanged; so is MRR.
 - **23** (2026-10-22)
   - **`schedules.gateways` can hold `payment_url`**, an owner taking money through a pasted
     payment link. Before this such an owner read as having no gateway while selling (one billing
