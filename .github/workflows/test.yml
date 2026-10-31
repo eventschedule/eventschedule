@@ -174,9 +174,13 @@ jobs:
         env:
           QUERY_GUARD_STRICT: '1'
           QUERY_GUARD_SHARD: ${{ matrix.shard }}/5
+        # The shard's config goes in phpunit.xml's place: `artisan test` always passes
+        # --configuration=phpunit.xml itself, and a second --configuration is a PHPUnit warning
+        # that fails the run with every test green.
         run: |
           php tests/shard.php phpunit ${{ matrix.shard }} 5
-          php artisan test --configuration=phpunit.shard.xml
+          mv phpunit.shard.xml phpunit.xml
+          php artisan test
 
       - name: Upload the query report
         if: always()
@@ -200,7 +204,9 @@ jobs:
       # TestDatabaseSchemaTest pins what the prune is allowed to match.
       - name: Verify the per-session database path
         if: matrix.shard == 1
-        run: TEST_DB_TOKEN=ci1 TEST_DB_PRUNE_DAYS=0 php artisan test --filter=TestDatabaseSchemaTest
+        run: |
+          git checkout -- phpunit.xml
+          TEST_DB_TOKEN=ci1 TEST_DB_PRUNE_DAYS=0 php artisan test --filter=TestDatabaseSchemaTest
 
   # The QueryGuard ratchet over the whole suite: the five shards' hits, judged as one complete run.
   # A shard that is missing or did not finish its share fails this job rather than passing it.
