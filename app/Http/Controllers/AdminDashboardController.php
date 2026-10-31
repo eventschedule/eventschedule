@@ -118,7 +118,6 @@ class AdminDashboardController extends Controller
             'change' => $active['change'] === null ? null : round((float) $active['change'], 1),
             'organizers_7d' => (int) $active['organizers_7d'],
             'active_30d' => (int) $active['active_30d'],
-            'exact_30d' => (bool) $active['exact_30d'],
             'labels' => array_column($series, 'label'),
             'exact' => array_map(fn ($point) => $point['exact'] ? $point['active'] : null, $series),
             'estimate' => array_map(fn ($point) => $point['exact'] ? null : $point['active'], $series),

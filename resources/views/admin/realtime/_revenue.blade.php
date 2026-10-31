@@ -66,7 +66,7 @@
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
             <span class="whitespace-nowrap">@{{ activeLine(revenue.active) }}</span>
             <span class="mx-1" aria-hidden="true">&middot;</span>
-            <span class="whitespace-nowrap">@{{ msg.active30 }} @{{ fmt(revenue.active.active_30d) }}<template v-if="!revenue.active.exact_30d"> (@{{ msg.estimate }})</template></span>
+            <span class="whitespace-nowrap">@{{ msg.active30 }} @{{ fmt(revenue.active.active_30d) }}</span>
         </p>
         <div class="relative flex-1 mt-3" style="min-height: 6rem">
             <div class="absolute inset-0"><canvas ref="activeChart" role="img" :aria-label="msg.activeUsers"></canvas></div>
