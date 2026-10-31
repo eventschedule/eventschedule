@@ -21,6 +21,12 @@ jobs:
           php-version: '8.3'
           tools: composer
 
+      # Here and not in the Dusk job, which runs as several shards: once per push is enough. Before
+      # anything is installed, so vendor/ and node_modules/ are not there to lint; -P lints eight
+      # files at a time (one at a time, in the Dusk job, it took two minutes).
+      - name: Check PHP syntax
+        run: find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -print0 | xargs -0 -n1 -P8 php -l > /dev/null
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress
 
@@ -51,8 +57,18 @@ jobs:
           echo "::warning::npm audit endpoint unavailable - skipping audit"
           jq -r '.message // .' "$RUNNER_TEMP/npm-audit.json" 2>/dev/null || cat "$RUNNER_TEMP/npm-audit.json"
 
+  # The suite runs as five shards side by side (tests/shard.php): as one process it took 45
+  # minutes. Each shard is a fifth of the test files, split by the seconds each file took on CI
+  # (tests/shard-weights.php), so they finish together; every shard works out the same split on its
+  # own. To change the count, change it in the matrix, in the two `5`s below and in the query-guard
+  # job. fail-fast is off so one red shard does not cancel the others' results.
   feature-tests:
+    name: feature-tests (${{ matrix.shard }}/5)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
     services:
       mysql:
         image: mysql:8.0
@@ -140,6 +156,7 @@ jobs:
       # refreshed the manifest correctly, because the commit doing the refreshing is the commit that
       # becomes the view's newest commit. See app/Console/Commands/GenerateSitemapLastmod.php.
       - name: Sitemap lastmod manifest is current
+        if: matrix.shard == 1
         run: |
           php artisan sitemap:lastmod
           if ! git diff --exit-code config/sitemap_lastmod.php; then
@@ -150,21 +167,31 @@ jobs:
       # QUERY_GUARD_STRICT: tests/Support/QueryGuard.php finds N+1 queries in every request the
       # suite makes and fails the test on one that tests/query-baseline.php does not list. Strict
       # adds the ratchet at the end of a complete run: a listed N+1 that no test hit any more, in a
-      # file this push changed, fails the build so it comes off the list (QueryGuardExtension).
-      # QUERY_GUARD_BASE is what "changed in this push" is measured from. QueryGuardTest fails CI
-      # if strict is missing.
+      # file this push changed, fails the build so it comes off the list (QueryGuardExtension). A
+      # shard holds part of the suite, so it only records what it hit (QUERY_GUARD_SHARD), and the
+      # query-guard job below judges the five together. QueryGuardTest fails CI if strict is missing.
       - name: Run Feature & Unit tests
         env:
           QUERY_GUARD_STRICT: '1'
-          QUERY_GUARD_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: php artisan test
+          QUERY_GUARD_SHARD: ${{ matrix.shard }}/5
+        run: |
+          php tests/shard.php phpunit ${{ matrix.shard }} 5
+          php artisan test --configuration=phpunit.shard.xml
 
       - name: Upload the query report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: query-guard-report
+          name: query-guard-report-${{ matrix.shard }}
           path: storage/logs/query-guard.txt
+          if-no-files-found: ignore
+
+      - name: Upload what the shard's requests hit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: query-guard-shard-${{ matrix.shard }}
+          path: storage/logs/query-guard-shard-${{ matrix.shard }}.json
           if-no-files-found: ignore
 
       # The suite above runs token-less, so it never reaches the half of
@@ -172,10 +199,52 @@ jobs:
       # CI's MySQL user is root, so it can create under the prefix without a grant;
       # TestDatabaseSchemaTest pins what the prune is allowed to match.
       - name: Verify the per-session database path
+        if: matrix.shard == 1
         run: TEST_DB_TOKEN=ci1 TEST_DB_PRUNE_DAYS=0 php artisan test --filter=TestDatabaseSchemaTest
 
-  dusk:
+  # The QueryGuard ratchet over the whole suite: the five shards' hits, judged as one complete run.
+  # A shard that is missing or did not finish its share fails this job rather than passing it.
+  query-guard:
+    needs: feature-tests
     runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+        with:
+          # The ratchet asks git which files this push changed.
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress
+
+      - name: Download what each shard hit
+        uses: actions/download-artifact@v4
+        with:
+          pattern: query-guard-shard-*
+          path: shards
+          merge-multiple: true
+
+      - name: Judge the baseline
+        env:
+          QUERY_GUARD_STRICT: '1'
+          QUERY_GUARD_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: php tests/shard.php query-guard shards 5
+
+  # Five shards side by side, as the feature tests are (tests/shard.php browser): one after another
+  # the browser files took 37 minutes.
+  dusk:
+    name: dusk (${{ matrix.shard }}/5)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
     services:
       mysql:
         image: mysql:8.0
@@ -196,9 +265,6 @@ jobs:
           php-version: '8.3'
           extensions: mbstring, intl, pdo, mysql
           tools: composer, npm
-
-      - name: Check PHP syntax
-        run: find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress
@@ -365,12 +431,9 @@ jobs:
           failed=""
           died_during=""
           prev=""
-          for test in tests/Browser/*Test.php; do
-            # dusk:install scaffolds a placeholder ExampleTest.php (asserts "Laravel"); skip it.
-            if [ "$(basename "$test")" = "ExampleTest.php" ]; then
-              echo "Skipping scaffold $test"
-              continue
-            fi
+          # This shard's files. dusk:install scaffolds a placeholder ExampleTest.php (asserts
+          # "Laravel"); tests/shard.php leaves it out.
+          for test in $(php tests/shard.php browser ${{ matrix.shard }} 5); do
             [ -z "$prev" ] || ensure_server "$prev"
             prev="$test"
             echo "Running $test"
@@ -400,14 +463,14 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: dusk-screenshots
+          name: dusk-screenshots-${{ matrix.shard }}
           path: dusk-failures
 
       - name: Upload Query Log
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: query-log
+          name: query-log-${{ matrix.shard }}
           path: storage/logs/queries.log
           if-no-files-found: ignore
 
@@ -415,7 +478,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: error-log
+          name: error-log-${{ matrix.shard }}
           path: |
             storage/logs/laravel.log
             storage/logs/serve.log

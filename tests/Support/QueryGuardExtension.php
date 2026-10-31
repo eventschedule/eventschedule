@@ -30,6 +30,10 @@ use PHPUnit\TextUI\Configuration\Configuration;
  *    because a test or fixture that stopped reaching it says nothing about the code.
  *  - QUERY_GUARD_WRITE=1: adds every key hit to tests/query-baseline.php. Add-only, and only on a
  *    complete run, so a filtered run can never drop what it did not reach.
+ *  - QUERY_GUARD_SHARD=i/N (CI runs the suite as N shards, tests/shard.php): a shard judges
+ *    nothing, since it holds a part of the suite only. It writes what it hit, and whether it ran
+ *    its whole share, to storage/logs/query-guard-shard-i.json, and mergeShards() judges the N of
+ *    them together as one complete run.
  *
  * Failing the run: PHPUnit has already chosen its exit code when this runs, so a failure is a
  * shutdown function that exits 1 after it. tests/bootstrap.php registered its own (the opcache
@@ -92,6 +96,14 @@ final class QueryGuardExtension implements Extension
     public static function finish(): void
     {
         $complete = ! self::$partial && self::$started > 0 && self::$finished >= self::$started;
+
+        // A shard ran its whole share, which is not the whole suite: it hands what it hit to
+        // mergeShards() and judges nothing itself.
+        $shard = self::shard();
+        if ($shard !== null) {
+            self::writeShard($shard[0], $complete);
+            $complete = false;
+        }
         $baseline = QueryGuard::baseline();
         $hits = QueryGuard::hits();
         $base = (string) (getenv('QUERY_GUARD_BASE') ?: '');
@@ -169,6 +181,84 @@ final class QueryGuardExtension implements Extension
         }
 
         return ['fail' => $fail, 'warn' => $warn];
+    }
+
+    /** @return array{0: int, 1: int}|null shard number and count, from QUERY_GUARD_SHARD=i/N */
+    public static function shard(): ?array
+    {
+        $value = (string) ($_SERVER['QUERY_GUARD_SHARD'] ?? $_ENV['QUERY_GUARD_SHARD'] ?? getenv('QUERY_GUARD_SHARD') ?: '');
+
+        if (! preg_match('#^(\d+)/(\d+)$#', $value, $m) || (int) $m[1] < 1 || (int) $m[1] > (int) $m[2]) {
+            return null;
+        }
+
+        return [(int) $m[1], (int) $m[2]];
+    }
+
+    public static function shardPath(string $dir, int $shard): string
+    {
+        return rtrim($dir, '/').'/query-guard-shard-'.$shard.'.json';
+    }
+
+    private static function writeShard(int $shard, bool $complete): void
+    {
+        $dir = QueryGuard::basePath().'/storage/logs';
+        if (! is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+
+        file_put_contents(self::shardPath($dir, $shard), json_encode([
+            'shard' => $shard,
+            'complete' => $complete,
+            'tests' => self::$finished,
+            'hits' => array_keys(QueryGuard::hits()),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * The ratchet over N shards (CI's query-guard job): their hits together are one complete run's,
+     * provided every shard is there and ran its whole share. Returns the exit code.
+     */
+    public static function mergeShards(string $dir, int $count): int
+    {
+        $hits = [];
+        $tests = 0;
+
+        for ($shard = 1; $shard <= $count; $shard++) {
+            $path = self::shardPath($dir, $shard);
+            $data = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+
+            if (! is_array($data) || ! ($data['complete'] ?? false)) {
+                self::say("::error::QueryGuard: shard {$shard} of {$count} is missing or did not run its whole share, so the baseline cannot be judged.");
+
+                return 1;
+            }
+
+            $tests += (int) $data['tests'];
+            foreach ((array) $data['hits'] as $key) {
+                $hits[(string) $key] = true;
+            }
+        }
+
+        $base = (string) (getenv('QUERY_GUARD_BASE') ?: '');
+        $verdict = self::judge(
+            array_keys(QueryGuard::baseline()),
+            array_keys($hits),
+            true,
+            QueryGuard::flag('QUERY_GUARD_STRICT'),
+            $base !== '' ? self::changedFiles($base) : null,
+        );
+
+        foreach ($verdict['warn'] as $key) {
+            self::say("::warning file=tests/query-baseline.php::QueryGuard: listed but not hit by this run, so possibly fixed: {$key}");
+        }
+        foreach ($verdict['fail'] as $key) {
+            self::say("::error file=tests/query-baseline.php::QueryGuard: {$key} is listed, its file changed in this push and no test hit it any more. It is fixed: take it off tests/query-baseline.php.");
+        }
+
+        self::say("QueryGuard: {$count} shards, {$tests} tests, ".count($hits).' key(s) hit, '.count($verdict['fail']).' to take off the baseline.');
+
+        return $verdict['fail'] ? 1 : 0;
     }
 
     /** @return list<string>|null */
@@ -256,8 +346,17 @@ final class QueryGuardExtension implements Extension
         }
     }
 
+    /** Where say() writes instead of STDERR (a test's own list): its ::error lines are annotations on CI. */
+    public static ?\Closure $sayUsing = null;
+
     private static function say(string $line): void
     {
+        if (self::$sayUsing !== null) {
+            (self::$sayUsing)($line);
+
+            return;
+        }
+
         fwrite(STDERR, $line."\n");
     }
 }

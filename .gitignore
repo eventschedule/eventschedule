@@ -23,3 +23,5 @@ yarn-error.log
 vite.config.js.*
 phpunit.dusk.xml
 database.sqlite
+
+phpunit.shard.xml
