@@ -8,7 +8,9 @@ use App\Services\UsageTrackingService;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Exception\UnexpectedResponseException;
 
 class SendQueuedEmail implements ShouldQueue
 {
@@ -91,8 +93,50 @@ class SendQueuedEmail implements ShouldQueue
 
             Mail::to($this->recipient)->send($this->mailable);
             UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $this->roleId ?? 0);
+        } catch (UnexpectedResponseException $e) {
+            // A 4xx reply is SMTP's own "try again later" (RFC 5321 4.2.1): the mail server is
+            // restarting ("421 Service shutting down, try again shortly"), busy or greylisting.
+            // A throw is retried as well, but the worker reports every failed attempt, so each
+            // blip the provider has paged us for a mail that went out a minute later. A release
+            // is a retry the worker does not report; the last attempt still throws, and that one
+            // is reported and lands in failed_jobs as before. Only the platform mailer reaches
+            // here: a schedule's own SMTP failing is caught inside RoleMailerService.
+            if (! self::isTemporaryRefusal($e) || ! $this->willBeRetried()) {
+                throw $e;
+            }
+
+            Log::info('SendQueuedEmail: the mail server answered '.$e->getCode()
+                .', retrying in '.$this->backoff.'s (attempt '.$this->attempts().' of '.$this->tries.')');
+            $this->release($this->backoff);
         } finally {
             app()->setLocale($originalLocale);
         }
+    }
+
+    /**
+     * An SMTP reply in the 4xx range is a transient negative completion: the same message,
+     * sent again later, can succeed. A 5xx is a permanent refusal and is never retried here.
+     */
+    public static function isTemporaryRefusal(UnexpectedResponseException $e): bool
+    {
+        return $e->getCode() >= 400 && $e->getCode() < 500;
+    }
+
+    /**
+     * Whether releasing actually leads to another attempt. Not on the `sync` connection, where
+     * a release does nothing and the mail would be dropped without a word, and not on the last
+     * attempt, which must throw so the failure is reported and kept in failed_jobs.
+     */
+    private function willBeRetried(): bool
+    {
+        if (! $this->job) {
+            return false;
+        }
+
+        if (($this->job->getConnectionName() ?? config('queue.default')) === 'sync') {
+            return false;
+        }
+
+        return $this->attempts() < $this->tries;
     }
 }
