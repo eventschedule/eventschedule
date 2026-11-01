@@ -1,5 +1,7 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Compare Event Platforms: Eventbrite, Luma &amp; {{ count($headToHead) - 2 }} More</x-slot>
+    {{-- Leads with the search Google shows this page for most ("luma vs eventbrite", position 7-9
+         with no clicks in October 2026), and keeps its keyword (config/marketing_keywords.php). --}}
+    <x-slot name="title">Luma vs Eventbrite &amp; {{ count($headToHead) - 2 }} More: Compare Event Platforms</x-slot>
     <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Meetup and {{ count($headToHead) - 3 }} more platforms: feature by feature, a fee calculator at published rates, and 0% platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
 

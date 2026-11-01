@@ -33,7 +33,7 @@ return [
     '/calendly-replacement' => '2026-10-23',
     '/canva-replacement' => '2026-10-23',
     '/community-event-calendar' => '2026-10-23',
-    '/compare' => '2026-10-15',
+    '/compare' => '2026-11-01',
     '/contact' => '2026-10-15',
     '/dice-alternative' => '2026-10-23',
     '/docs' => '2026-10-23',
