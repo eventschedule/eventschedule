@@ -570,8 +570,13 @@ class GuestListRowsTest extends TestCase
 
         // The server half of the same rule, so the two cannot drift unseen: a series sells
         // until its occurrence starts even when it runs over several days.
+        // Today's occurrence began an hour ago on the SCHEDULE's clock. A series keeps its local
+        // time of day, so the first night is set three local days back at that time and stored in
+        // UTC; three UTC days back failed on 2026-11-01, when New York's clocks went back an hour
+        // in between and today's occurrence was starting just then.
+        $zone = $this->role->timezone ?: config('app.timezone');
         $series = $this->event(['name' => 'Long Weekly', 'days_of_week' => '1111111', 'recurring_frequency' => 'daily', 'duration' => 30,
-            'starts_at' => now()->subDays(3)->subHour()->format('Y-m-d H:i:s')]);
+            'starts_at' => now($zone)->subHour()->subDays(3)->utc()->format('Y-m-d H:i:s')]);
         $this->createTicket($series, ['price' => 5, 'quantity' => 0]);
         $today = now($series->fresh()->scheduleTimezone())->format('Y-m-d');
         $this->assertFalse($series->fresh()->passesSellingWindow($today), 'begun an hour ago: over, though it runs thirty hours');
