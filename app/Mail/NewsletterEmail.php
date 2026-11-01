@@ -52,7 +52,7 @@ class NewsletterEmail extends Mailable
         $replyToName = ! empty($role?->email) ? ($role->name ?: $fromName) : $fromName;
 
         return new Envelope(
-            subject: $this->newsletter->subject,
+            subject: app(\App\Services\NewsletterService::class)->subjectFor($this->newsletter),
             from: new Address($fromAddress, $fromName),
             replyTo: [new Address($replyToAddress, $replyToName)],
         );
@@ -73,6 +73,7 @@ class NewsletterEmail extends Mailable
             with: [
                 'renderedHtml' => $this->renderedHtml,
                 'newsletter' => $this->newsletter,
+                'subject' => app(\App\Services\NewsletterService::class)->subjectFor($this->newsletter),
                 'role' => $role,
                 'style' => $style,
                 'unsubscribeUrl' => $unsubscribeUrl,

@@ -89,6 +89,18 @@
     .dark #newsletter-builder .nb-hint.is-warn {
       color: #fbbf24;
     }
+    {{-- Review and send: Repeat above the date, then what the repeat will do in a sentence. --}}
+    #newsletter-builder .nb-label-gap {
+      margin-top: 0.875rem;
+    }
+    #newsletter-builder .nb-hint.nb-repeat-sentence {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    #newsletter-builder .nb-choice-body .nb-warn {
+      margin-top: 0.75rem;
+    }
     #newsletter-builder .nb-icon {
       width: 1.25rem;
       height: 1.25rem;

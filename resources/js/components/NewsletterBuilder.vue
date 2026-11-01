@@ -168,16 +168,17 @@
                                                     </label>
                                                 </div>
                                             </div>
+                                            <!-- Which events: every upcoming one, a date range read when it is sent, or a hand-picked list. -->
                                             <div>
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox"
-                                                        :checked="block.data.useAllEvents"
-                                                        @change="updateBlockData(block.id, 'useAllEvents', $event.target.checked)"
-                                                        class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)]" />
-                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.all_upcoming_events }}</span>
-                                                </label>
+                                                <label :for="'nb-events-range-' + block.id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.events_to_list }}</label>
+                                                <select :id="'nb-events-range-' + block.id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
+                                                    :value="eventsChoice(block)"
+                                                    @change="setEventsChoice(block.id, $event.target.value)">
+                                                    <option v-for="choice in eventsChoices" :key="choice.value" :value="choice.value">{{ choice.label }}</option>
+                                                </select>
+                                                <p v-if="rangeExample(eventsChoice(block))" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ rangeExample(eventsChoice(block)) }}</p>
                                             </div>
-                                            <div v-show="!block.data.useAllEvents">
+                                            <div v-show="block.data.useAllEvents === false">
                                                 <div v-if="events.length" class="space-y-2 max-h-60 overflow-y-auto">
                                                     <div v-for="evt in events" :key="evt.id" class="flex items-center gap-3 p-2 border border-gray-200 dark:border-gray-600 rounded-lg">
                                                         <label class="flex items-center gap-2 cursor-pointer flex-1">
@@ -810,7 +811,7 @@
                 <div class="event-save-actions">
                     <button v-if="canSend" type="button" class="event-bar-text" @click="openTest()">{{ t.send_a_test }}</button>
                     <button type="button" :class="canSend ? 'event-bar-quiet' : ['event-bar-save', brandClasses]" :disabled="saving" @click="save()">{{ t.save }}</button>
-                    <button v-if="canSend" type="button" :class="['event-bar-save', brandClasses]" :disabled="saving || busy" @click="openReview()">{{ abPending ? t.send_ab_test : t.review_and_send }}</button>
+                    <button v-if="canSend" type="button" :class="['event-bar-save', brandClasses]" :disabled="saving || busy" @click="openReview()">{{ abPending ? t.send_ab_test : (props.repeat ? t.change_repeat : t.review_and_send) }}</button>
                 </div>
             </div>
         </div>
@@ -847,13 +848,36 @@
                     <p v-else-if="audience.ab" class="nb-lead">{{ abExplain }}</p>
                     <template v-else>
                         <div class="nb-choices" role="radiogroup" :aria-label="t.review_and_send">
-                            <label class="nb-choice"><input type="radio" name="nb_when" value="now" v-model="reviewWhen" /> <span>{{ t.send_now }}</span></label>
+                            <label class="nb-choice"><input type="radio" name="nb_when" value="now" v-model="reviewWhen" /> <span>{{ props.repeat ? t.send_copy_now : t.send_now }}</span></label>
                             <label class="nb-choice"><input type="radio" name="nb_when" value="later" v-model="reviewWhen" /> <span>{{ t.schedule_for_later }}</span></label>
                         </div>
                         <div v-show="reviewWhen === 'later'" class="nb-choice-body">
-                            <label for="nb-scheduled-at" class="sr-only">{{ t.send_at }}</label>
+                            <!-- Repeat comes first: choosing Every month with no date yet fills the first of next month. -->
+                            <template v-if="repeatAllowed">
+                                <label for="nb-repeat" class="nb-label">{{ t.repeat }}</label>
+                                <select id="nb-repeat" class="nb-input nb-repeat-select block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                    :value="repeatEvery" @change="setRepeat($event.target.value)">
+                                    <option value="">{{ t.repeat_none }}</option>
+                                    <option value="week">{{ t.repeat_week }}</option>
+                                    <option value="month">{{ t.repeat_month }}</option>
+                                </select>
+                                <label for="nb-scheduled-at" class="nb-label nb-label-gap">{{ repeatEvery ? (props.repeat ? t.repeat_next_send : t.repeat_starting) : t.send_at }}</label>
+                            </template>
+                            <label v-else for="nb-scheduled-at" class="sr-only">{{ t.send_at }}</label>
                             <input id="nb-scheduled-at" ref="scheduleInput" type="text" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" :placeholder="t.send_at" @change="scheduleValue = $event.target.value" />
-                            <p class="nb-hint">{{ t.newsletter_times_in.replace(':timezone', audience.timezone) }}</p>
+                            <p class="nb-hint">{{ t.newsletter_times_in.replace(':timezone', (repeatEvery || props.repeat) ? (audience.schedule_timezone || scheduleTimezone) : audience.timezone) }}</p>
+                            <template v-if="repeatEvery">
+                                <p v-if="repeatSentence" class="nb-hint nb-repeat-sentence">{{ repeatSentence }}</p>
+                                <p class="nb-hint">{{ t.repeat_allowance_note }} {{ t.repeat_month_hint }}</p>
+                                <div v-if="repeatRefusal" class="nb-warn" role="alert">
+                                    <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    <p>{{ repeatRefusal }}</p>
+                                </div>
+                                <div v-else-if="hasPickedEvents" class="nb-warn" role="status">
+                                    <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    <p>{{ t.repeat_picked_note }}</p>
+                                </div>
+                            </template>
                         </div>
                         <div v-if="reviewWhen === 'now' && audience.now_refusal" class="nb-warn" role="alert">
                             <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -943,6 +967,15 @@ const props = defineProps({
     abTest: { type: Object, default: null },
     // A scheduled newsletter's time, in the clock it was typed in ('Y-m-d H:i').
     scheduledAt: { type: String, default: '' },
+    // How a repeating newsletter repeats ('week' or 'month'), '' when it does not.
+    repeat: { type: String, default: '' },
+    // Whether this newsletter may repeat: a schedule's, not a template or an A/B variant.
+    canRepeat: { type: Boolean, default: false },
+    // The schedule's timezone: a repeat runs on it, and an Events block's date range is read in it.
+    scheduleTimezone: { type: String, default: 'UTC' },
+    // 'Y-m-d' of the next send, in the schedule's timezone, when one is set.
+    nextSendDate: { type: String, default: '' },
+    rangeLimit: { type: Number, default: 25 },
     use24Hour: { type: Boolean, default: false },
     roleSocialLinks: { type: Array, default: () => [] },
     roleName: { type: String, default: '' },
@@ -1279,14 +1312,90 @@ const abExplain = computed(() => {
 
 const reviewButtonLabel = computed(() => {
     if (abPending.value) return t.send_ab_test;
+    if (reviewWhen.value === 'later' && repeatEvery.value) return props.repeat ? t.save : t.start_repeating;
+    if (reviewWhen.value === 'now' && props.repeat) return t.send_copy_now;
     return reviewWhen.value === 'later' ? t.schedule : t.send_now;
 });
+
+// ── Repeat ────────────────────────────────────────────────────────────
+
+const repeatAllowed = computed(() => props.canRepeat && !abPending.value);
+const repeatEvery = ref(props.canRepeat ? (props.repeat || '') : '');
+
+function pad(n) {
+    return String(n).padStart(2, '0');
+}
+
+function setRepeat(value) {
+    repeatEvery.value = value;
+    // The issue's case in two clicks: every month, from the first of next month at nine.
+    if (value === 'month' && !scheduleValue.value) {
+        const now = new Date();
+        const first = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const str = first.getFullYear() + '-' + pad(first.getMonth() + 1) + '-01 09:00';
+        scheduleValue.value = str;
+        if (scheduleFlatpickr) scheduleFlatpickr.setDate(str, false);
+    }
+}
+
+// 'Y-m-d H:i' as a local Date, or null.
+function parseLocal(value) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}):(\d{2}))?/.exec(value || '');
+    return m ? new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0)) : null;
+}
+
+function formatTime(date) {
+    if (props.use24Hour) return pad(date.getHours()) + ':' + pad(date.getMinutes());
+    try {
+        return date.toLocaleTimeString(window.appLocale || undefined, { hour: 'numeric', minute: '2-digit', hour12: true, numberingSystem: 'latn' });
+    } catch (e) {
+        const h = date.getHours() % 12 || 12;
+        return h + ':' + pad(date.getMinutes()) + ' ' + (date.getHours() < 12 ? 'AM' : 'PM');
+    }
+}
+
+// Latin digits, as the day and the time beside it are. With a weekday the month is written out:
+// a short month ends in a period in German, French, Dutch and Russian, and the sentence its
+// date ends would close on two.
+function formatDay(date, withWeekday) {
+    const options = withWeekday
+        ? { weekday: 'short', month: 'long', day: 'numeric', numberingSystem: 'latn' }
+        : { month: 'short', day: 'numeric', numberingSystem: 'latn' };
+    try {
+        return date.toLocaleDateString(window.appLocale || undefined, options);
+    } catch (e) {
+        return date.toDateString();
+    }
+}
+
+// "Sends every month on day 1 at 09:00 (Europe/Berlin), starting Dec 1." Day N, not "1st", so it
+// reads in every language; a week names its first date with its weekday instead of the weekday on
+// its own, which half the languages decline.
+const repeatSentence = computed(() => {
+    const date = parseLocal(scheduleValue.value);
+    if (!date || !repeatEvery.value) return '';
+    const zone = (audience.value && audience.value.schedule_timezone) || props.scheduleTimezone;
+    const fill = (text) => text
+        .replace(':day', String(date.getDate()))
+        .replace(':time', formatTime(date))
+        .replace(':timezone', zone)
+        .replace(':date', formatDay(date, true));
+    if (repeatEvery.value === 'week') return fill(t.repeat_sentence_week);
+    return fill(date.getDate() > 28 ? t.repeat_sentence_month_late : t.repeat_sentence_month);
+});
+
+const repeatRefusal = computed(() => {
+    const a = audience.value;
+    return (repeatEvery.value && a && a.repeat_refusal && a.repeat_refusal[repeatEvery.value]) || '';
+});
+
+const hasPickedEvents = computed(() => blocks.value.some(b => b.type === 'events' && b.data && b.data.useAllEvents === false));
 
 const reviewCanGo = computed(() => {
     const a = audience.value;
     if (!a || a.refusal) return false;
     if (a.ab) return true;
-    if (reviewWhen.value === 'later') return !!scheduleValue.value;
+    if (reviewWhen.value === 'later') return !!scheduleValue.value && !repeatRefusal.value;
     return !a.now_refusal;
 });
 
@@ -1296,10 +1405,61 @@ function confirmReview() {
     if (audience.value.ab) {
         submitFormTo(routes.ab_send);
     } else if (reviewWhen.value === 'later') {
-        submitFormTo(routes.schedule, { scheduled_at: scheduleValue.value });
+        submitFormTo(routes.schedule, { scheduled_at: scheduleValue.value, repeat: repeatAllowed.value ? repeatEvery.value : '' });
     } else {
         submitFormTo(routes.send);
     }
+}
+
+// ── Events block: which events ────────────────────────────────────────
+
+const eventsChoices = [
+    { value: 'all', label: t.events_range_all },
+    { value: 'next_7_days', label: t.events_range_next_7_days },
+    { value: 'next_30_days', label: t.events_range_next_30_days },
+    { value: 'this_month', label: t.events_range_this_month },
+    { value: 'next_month', label: t.events_range_next_month },
+    { value: 'picked', label: t.events_range_picked },
+];
+
+function eventsChoice(block) {
+    if (block.data.useAllEvents === false) return 'picked';
+    const range = block.data.range || 'all';
+    return eventsChoices.some(c => c.value === range) ? range : 'all';
+}
+
+function setEventsChoice(blockId, value) {
+    if (value === 'picked') {
+        updateBlockData(blockId, 'useAllEvents', false);
+        return;
+    }
+    // Every range lists by date, never the picked list: useAllEvents goes with it.
+    const block = blocks.value.find(b => b.id === blockId);
+    if (block) Object.assign(block.data, { useAllEvents: true, range: value });
+}
+
+// "Sent on Dec 1, this lists Dec 1 to Dec 31 (up to 25 events). Dates are in Europe/Berlin time."
+// Worked out from the next send when one is set, otherwise from today, as the mail will be.
+function rangeExample(range) {
+    if (range === 'all' || range === 'picked') return '';
+    const sent = parseLocal(props.nextSendDate) || new Date();
+    const day = new Date(sent.getFullYear(), sent.getMonth(), sent.getDate());
+    let from = day;
+    let to;
+    // Counting the day it is sent: seven days from Nov 1 is Nov 1 to Nov 7.
+    if (range === 'next_7_days') to = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 6);
+    else if (range === 'next_30_days') to = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 29);
+    else if (range === 'this_month') to = new Date(day.getFullYear(), day.getMonth() + 1, 0);
+    else {
+        from = new Date(day.getFullYear(), day.getMonth() + 1, 1);
+        to = new Date(day.getFullYear(), day.getMonth() + 2, 0);
+    }
+    return t.events_range_example
+        .replace(':sent', formatDay(day, false))
+        .replace(':from', formatDay(from, false))
+        .replace(':to', formatDay(to, false))
+        .replace(':limit', String(props.rangeLimit))
+        .replace(':timezone', props.scheduleTimezone);
 }
 
 // ── Send a test ───────────────────────────────────────────────────────
@@ -1547,8 +1707,11 @@ function blockSnippet(block) {
             return (d.content || '').replace(/[#*_>\x60~]|\[|\]\([^)]*\)/g, '').replace(/\s+/g, ' ').trim().substring(0, 80);
         case 'quote':
             return (d.text || '').substring(0, 80);
-        case 'events':
-            return d.useAllEvents ? t.all_upcoming_events : ((d.eventIds || []).length + ' ' + t.events);
+        case 'events': {
+            if (d.useAllEvents === false) return (d.eventIds || []).length + ' ' + t.events;
+            const choice = eventsChoices.find(c => c.value === (d.range || 'all'));
+            return choice ? choice.label : t.events_range_all;
+        }
         case 'image': {
             const images = d.images || [];
             const filled = images.filter(img => img.url);

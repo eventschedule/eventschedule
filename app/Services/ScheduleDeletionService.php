@@ -111,7 +111,8 @@ class ScheduleDeletionService
             // sending is the owner's to decide again.
             Newsletter::where('role_id', $locked->id)
                 ->where('status', 'scheduled')
-                ->update(['status' => 'draft', 'scheduled_at' => null]);
+                // A repeating newsletter stops repeating with it.
+                ->update(['status' => 'draft', 'scheduled_at' => null, 'repeat' => null]);
 
             AuditService::log(
                 $auditAction,

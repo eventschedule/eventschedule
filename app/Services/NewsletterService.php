@@ -36,9 +36,23 @@ class NewsletterService
         }
 
         $sendToken = Str::random(64);
+        // A repeating newsletter is never sent itself: each run sends a copy (runRepeat()), and
+        // sending the newsletter would end the series for good.
+        if ($newsletter->isRepeating()) {
+            return false;
+        }
+
+        // events_as_of is the instant an Events block with a date range is read against, for
+        // every batch of this send. A copy of a repeating newsletter arrives with it set to the
+        // run's due time, which is kept.
         $updated = Newsletter::where('id', $newsletter->id)
             ->whereIn('status', ['draft', 'scheduled'])
-            ->update(['status' => 'sending', 'send_token' => $sendToken]);
+            ->whereNull('repeat')
+            ->update([
+                'status' => 'sending',
+                'send_token' => $sendToken,
+                'events_as_of' => DB::raw('COALESCE(events_as_of, '.DB::getPdo()->quote(now()->format('Y-m-d H:i:s')).')'),
+            ]);
 
         if ($updated === 0) {
             Log::warning('Newsletter send skipped: status already changed', [
@@ -124,9 +138,17 @@ class NewsletterService
                 'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
                 'send_token' => null,
             ]);
+            $this->forgetEventsAsOf($newsletter);
             report($e);
 
             return false;
+        }
+
+        // Past the point of no return: the subject is stored as it went, so the list and the
+        // statistics name the month instead of printing {month}. A copy of a repeating
+        // newsletter arrives filled in already.
+        if (str_contains((string) $newsletter->subject, '{month}')) {
+            $newsletter->update(['subject' => $this->subjectFor($newsletter)]);
         }
 
         $batchIndex = 0;
@@ -163,6 +185,297 @@ class NewsletterService
             'scheduled_at' => null,
             'send_token' => null,
         ]);
+        $this->forgetEventsAsOf($newsletter);
+    }
+
+    /**
+     * A newsletter handed back unsent reads its events as of its NEXT send. Not a repeat's copy,
+     * whose instant is the run it was made for.
+     */
+    private function forgetEventsAsOf(Newsletter $newsletter): void
+    {
+        if (! $newsletter->repeat_parent_id && $newsletter->events_as_of) {
+            $newsletter->forceFill(['events_as_of' => null])->save();
+        }
+    }
+
+    /**
+     * The instant a newsletter's Events blocks with a date range, and its {month}, are read as of.
+     *
+     * Once a send is claimed, the stamp it was claimed with: processBlocks() runs again for every
+     * batch, 15 seconds apart and again on recovery an hour later, and the readers of one send
+     * must not get different lists. Before that (the builder's preview, a test), the time it is
+     * set to go, and otherwise now.
+     */
+    public function eventsAsOf(Newsletter $newsletter): Carbon
+    {
+        if ($newsletter->events_as_of) {
+            return $newsletter->events_as_of->copy();
+        }
+
+        if ($newsletter->status === 'scheduled' && $newsletter->scheduled_at && $newsletter->scheduled_at->isFuture()) {
+            return $newsletter->scheduled_at->copy();
+        }
+
+        return Carbon::now();
+    }
+
+    /**
+     * One run of a repeating newsletter (issue #134): move it on to its next run, then send a COPY
+     * of it, which is listed, counted and tracked like any other sent newsletter.
+     *
+     * The move is the claim. Both cron rails run ProcessScheduledNewsletters and share no lock,
+     * so it is a conditional UPDATE on the run's own due time: whoever moves the row on owns the
+     * run, and the other rail finds nothing to move. The copy is made in the same transaction and
+     * as a DRAFT with no scheduled_at, which neither the cron nor recoverStuckNewsletters() nor
+     * send()'s failure path can ever turn into a plain scheduled send.
+     *
+     * A run that cannot go (no events in its range, the allowance used up, nobody to send to, a
+     * verification needed) is skipped and the owner is told. The newsletter has already moved on,
+     * so one bad month never stops the series.
+     *
+     * @return string 'sent', 'skipped' or 'lost' (another rail had it, or it no longer repeats)
+     */
+    public function runRepeat(Newsletter $parent): string
+    {
+        $role = $parent->role;
+        if (! $parent->isRepeating() || ! $role || $parent->isAdmin() || ! $parent->scheduled_at) {
+            return 'lost';
+        }
+
+        $due = $parent->scheduled_at->copy();
+        $next = Newsletter::nextRepeatRun($parent->repeat, $parent->repeatZone(), Carbon::now()->max($due));
+
+        $copy = DB::transaction(function () use ($parent, $due, $next, $role) {
+            $claimed = Newsletter::where('id', $parent->id)
+                ->where('status', 'scheduled')
+                ->whereNotNull('repeat')
+                ->where('scheduled_at', $due->copy()->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s'))
+                ->update($next
+                    ? ['scheduled_at' => $next->copy()->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s')]
+                    // An anchor that cannot be read any more: the series ends as a draft.
+                    : ['status' => 'draft', 'scheduled_at' => null, 'repeat' => null]);
+
+            if ($claimed === 0) {
+                return null;
+            }
+
+            // As of NOW, not the due time: a run sent late (a stalled worker, a selfhost
+            // install without its cron for a week) must not list events that are already over
+            // or name the month it was due in. The claim above is what makes it one run.
+            return $this->makeCopy($parent, Carbon::now(), $this->senderOfRecord($parent, $role));
+        });
+
+        if (! $copy) {
+            return 'lost';
+        }
+
+        // The run is already claimed: whatever goes wrong from here must not leave a draft
+        // nobody wrote, or a run nobody hears about.
+        try {
+            $reason = $this->sendCopy($copy);
+        } catch (\Throwable $e) {
+            report($e);
+            $copy->refresh();
+            if ($copy->status === 'draft') {
+                $copy->delete();
+            }
+            $reason = 'failed';
+        }
+
+        if ($reason === null) {
+            return 'sent';
+        }
+
+        $this->notifyRepeatSkipped($parent, $reason, $due, $next);
+
+        return 'skipped';
+    }
+
+    /**
+     * A repeat's copy that got stuck before its recipients were made (recoverStuckNewsletters()):
+     * removed, and the owner told it was not sent, while the newsletter still repeats.
+     */
+    public function abandonStuckCopy(Newsletter $copy): void
+    {
+        $parent = $copy->repeatParent;
+        $wasRun = $parent && $copy->events_as_of && $parent->isRepeating();
+        $asOf = $copy->events_as_of?->copy();
+
+        $copy->delete();
+
+        if ($wasRun) {
+            $this->notifyRepeatSkipped($parent, 'failed', $asOf, $parent->scheduled_at?->copy());
+        }
+    }
+
+    /**
+     * "Send a copy now" on a repeating newsletter: one copy, now, sent by the person pressing it,
+     * with the series left where it is. send() on the newsletter itself would end the series.
+     *
+     * @return bool|array as send(), plus ['no_events', 0] / ['picked_passed', 0] for a copy with
+     *                    nothing to list
+     */
+    public function sendCopyNow(Newsletter $parent, \App\Models\User $by): bool|array
+    {
+        if (! $parent->isRepeating() || ! $parent->role) {
+            return false;
+        }
+
+        $copy = $this->makeCopy($parent, Carbon::now(), $by->id);
+
+        if ($nothing = $this->nothingToList($copy)) {
+            $copy->delete();
+
+            return [$nothing, 0];
+        }
+
+        try {
+            $result = $this->send($copy);
+        } catch (\Throwable $e) {
+            report($e);
+            $result = false;
+        }
+
+        if ($result !== true) {
+            $copy->refresh();
+            if ($copy->status === 'draft') {
+                $copy->delete();
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * A repeating newsletter as one send, made for the run due at $asOf: the same blocks, design
+     * and segments, its {month} written in (so the list and the statistics read "December" long
+     * after), and its events read as of the run.
+     */
+    private function makeCopy(Newsletter $parent, Carbon $asOf, ?int $userId): Newsletter
+    {
+        $role = $parent->role;
+        $month = $this->monthFor($parent, $asOf);
+
+        $blocks = collect($parent->blocks ?? [])->map(function ($block) use ($role, $month) {
+            if (in_array($block['type'] ?? '', ['heading', 'text', 'button'], true) && is_array($block['data'] ?? null)) {
+                foreach (['text', 'content'] as $key) {
+                    if (isset($block['data'][$key]) && is_string($block['data'][$key])) {
+                        $block['data'][$key] = Newsletter::fillPlaceholders($block['data'][$key], $role, $month);
+                    }
+                }
+            }
+
+            return $block;
+        })->all();
+
+        $style = $parent->style_settings;
+        if (is_array($style) && isset($style['previewText'])) {
+            $style['previewText'] = Newsletter::fillPlaceholders((string) $style['previewText'], $role, $month);
+        }
+
+        $copy = $parent->replicate(['send_token', 'sent_count', 'open_count', 'click_count', 'sent_at', 'ab_test_id', 'ab_variant', 'scheduled_at', 'repeat', 'events_as_of', 'repeat_parent_id']);
+        $copy->forceFill([
+            'status' => 'draft',
+            'subject' => Newsletter::fillPlaceholders($parent->subject, $role, $month),
+            'blocks' => $blocks,
+            'style_settings' => $style,
+            'user_id' => $userId ?? $parent->user_id,
+            'repeat_parent_id' => $parent->id,
+            'events_as_of' => $asOf,
+        ]);
+        $copy->save();
+
+        return $copy;
+    }
+
+    /**
+     * Send a repeat's copy. Null when it went; otherwise why not, with the copy deleted (it is a
+     * draft nobody wrote). send() answering false after the gate passed is a database failure
+     * it has reported: 'failed'.
+     */
+    private function sendCopy(Newsletter $copy): ?string
+    {
+        $role = $copy->role;
+
+        $reason = match (true) {
+            ! $role->canSendNewsletter() => 'limit_exceeded',
+            default => $this->nothingToList($copy),
+        };
+
+        if ($reason === null) {
+            $result = $this->send($copy);
+
+            if ($result === true) {
+                return null;
+            }
+
+            if ($result === false) {
+                $copy->refresh();
+                if ($copy->status === 'draft') {
+                    $copy->delete();
+                }
+
+                return 'failed';
+            }
+
+            $reason = $result[0];
+            $limit = $role->newsletterLimit();
+            if ($reason === 'limit_exceeded' && $limit !== null && ($result[1] ?? 0) > $limit) {
+                $reason = 'over_plan';
+            }
+        }
+
+        $copy->delete();
+
+        return $reason;
+    }
+
+    /**
+     * Who a repeating newsletter's copies are sent by: its author while they still run the
+     * schedule (an owner or admin its plan lets in), otherwise its owner. send() checks the
+     * verification gate against this person's phone, which must not be the phone of somebody
+     * who has left the team.
+     */
+    private function senderOfRecord(Newsletter $parent, Role $role): ?int
+    {
+        $author = $parent->user;
+
+        if ($author && $this->stillRuns($author, $role)) {
+            return $author->id;
+        }
+
+        return $role->user_id ?: $parent->user_id;
+    }
+
+    private function stillRuns(\App\Models\User $user, Role $role): bool
+    {
+        return (int) $user->id === (int) $role->user_id
+            || ($role->members()->where('users.id', $user->id)->wherePivotIn('level', ['owner', 'admin'])->exists()
+                && $user->planAllowsTeamAccess($role));
+    }
+
+    /**
+     * Tell the schedule's owner, and the newsletter's author while they still run the schedule,
+     * that a run did not go and when the next one is.
+     */
+    private function notifyRepeatSkipped(Newsletter $parent, string $reason, Carbon $due, ?Carbon $next): void
+    {
+        $role = $parent->role;
+        $people = collect([$role->user, $parent->user])
+            ->filter()
+            ->unique('id')
+            ->filter(fn ($user) => $user->email && $this->stillRuns($user, $role));
+
+        foreach ($people as $user) {
+            try {
+                $mail = new \App\Mail\NewsletterRepeatSkippedMail($parent, $user, $reason, $due, $next);
+                $mail->locale(is_valid_language_code($user->language_code) ? $user->language_code : 'en');
+                Mail::to($user->email)->send($mail);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
     }
 
     public function sendToRecipient(Newsletter $newsletter, NewsletterRecipient $recipient, bool $isTest = false, ?array $processedBlocks = null): bool
@@ -409,9 +722,22 @@ class NewsletterService
         $blocks = $newsletter->blocks ?? [];
         $role = $newsletter->role;
         $upcoming = null;
+        $asOf = $this->eventsAsOf($newsletter);
+        $month = $this->monthFor($newsletter, $asOf);
+        $ranged = [];
 
         foreach ($blocks as &$block) {
             $type = $block['type'] ?? '';
+
+            // {month}, before anything reads the text: the text part prints data.content and
+            // data.text as they are, and the HTML is converted from content below.
+            if (in_array($type, ['heading', 'text', 'button'], true) && is_array($block['data'] ?? null)) {
+                foreach (['text', 'content'] as $key) {
+                    if (isset($block['data'][$key]) && is_string($block['data'][$key])) {
+                        $block['data'][$key] = Newsletter::fillPlaceholders($block['data'][$key], $role, $month);
+                    }
+                }
+            }
 
             // Only ever the HTML the markdown renders to: the view prints contentHtml unescaped,
             // and a stored block can carry one of its own, since the builder's JSON is saved as
@@ -426,9 +752,12 @@ class NewsletterService
             if ($type === 'events') {
                 $pairs = collect();
                 if ($role) {
-                    $pairs = ($block['data']['useAllEvents'] ?? true)
-                        ? ($upcoming ??= $this->upcomingEvents($role))
-                        : $this->pickedEvents($role, $block['data']['eventIds'] ?? []);
+                    $range = self::eventRange($block['data'] ?? []);
+                    $pairs = match (true) {
+                        ! ($block['data']['useAllEvents'] ?? true) => $this->pickedEvents($role, $block['data']['eventIds'] ?? []),
+                        $range === 'all' => $upcoming ??= $this->upcomingEvents($role),
+                        default => $ranged[$range] ??= $this->eventsInRange($role, $range, $asOf),
+                    };
                 }
 
                 $block['data']['resolvedEvents'] = $pairs->map(fn (array $pair) => $this->eventRow($pair['event'], $pair['date'], $role))->values();
@@ -519,6 +848,7 @@ class NewsletterService
     public function renderHtml(Newsletter $newsletter, ?NewsletterRecipient $recipient = null, ?array $processedBlocks = null, bool $markBlocks = false): string
     {
         $style = array_merge(Newsletter::defaultStyleSettings(), $newsletter->style_settings ?? []);
+        $style['previewText'] = $this->previewTextFor($newsletter);
         $blocks = $processedBlocks ?? $this->processBlocks($newsletter);
         $unsubscribeUrl = $recipient
             ? url('/nl/u/'.$recipient->token)
@@ -538,6 +868,7 @@ class NewsletterService
 
         return $this->inScheduleLocale($role, fn () => view('emails.newsletter', [
             'newsletter' => $newsletter,
+            'subject' => $this->subjectFor($newsletter),
             'style' => $style,
             'blocks' => $blocks,
             'role' => $role,
@@ -548,6 +879,42 @@ class NewsletterService
             'isRtl' => $isRtl,
             'markBlocks' => $markBlocks,
         ])->render());
+    }
+
+    /**
+     * The month {month} names: the month the newsletter's events are in. That is the month it is
+     * sent in, except when its first Events block with a date range lists the whole of the
+     * following month, where "What's on in {month}" over December's events must say December.
+     */
+    public function monthFor(Newsletter $newsletter, ?Carbon $asOf = null): Carbon
+    {
+        $asOf ??= $this->eventsAsOf($newsletter);
+
+        $range = collect($newsletter->blocks ?? [])
+            ->filter(fn ($block) => ($block['type'] ?? '') === 'events' && ($block['data']['useAllEvents'] ?? true) !== false)
+            ->map(fn ($block) => self::eventRange($block['data'] ?? []))
+            ->first(fn ($range) => $range !== 'all');
+
+        return $range === 'next_month'
+            ? self::rangeWindow('next_month', $asOf, Newsletter::zoneOf($newsletter->role))[0]
+            : $asOf;
+    }
+
+    /**
+     * The subject as it is sent, with {month} filled in. Never written back to the model: the
+     * batch job saves the newsletter it holds (its counts), and would store the filled subject.
+     */
+    public function subjectFor(Newsletter $newsletter): string
+    {
+        return Newsletter::fillPlaceholders($newsletter->subject, $newsletter->role, $this->monthFor($newsletter));
+    }
+
+    /** The preview text as it is sent, with {month} filled in. */
+    public function previewTextFor(Newsletter $newsletter): string
+    {
+        $style = array_merge(Newsletter::defaultStyleSettings(), $newsletter->style_settings ?? []);
+
+        return Newsletter::fillPlaceholders((string) ($style['previewText'] ?? ''), $newsletter->role, $this->monthFor($newsletter));
     }
 
     /**
@@ -663,6 +1030,170 @@ class NewsletterService
         $this->loadForRows($pairs->pluck('event'));
 
         return $pairs;
+    }
+
+    /** The date ranges an Events block can list, besides every upcoming event. */
+    public const EVENT_RANGES = ['all', 'next_7_days', 'next_30_days', 'this_month', 'next_month'];
+
+    /** How many events a block with a date range lists at most. "All upcoming" stays at 10. */
+    public const RANGE_EVENT_LIMIT = 25;
+
+    /**
+     * A block's range as stored, validated. A block saved before ranges existed has none, and
+     * lists every upcoming event, as it always did.
+     */
+    public static function eventRange(array $data): string
+    {
+        $range = $data['range'] ?? 'all';
+
+        return in_array($range, self::EVENT_RANGES, true) ? $range : 'all';
+    }
+
+    /**
+     * The window a range covers, as instants: [from, to), read in the schedule's clock from
+     * $asOf. Null for "all".
+     *
+     * "The rest of the month it is sent in" runs from the send to the end of that month there;
+     * "the whole of the following month" from the first of the next month to its end.
+     *
+     * @return ?array{0: Carbon, 1: Carbon}
+     */
+    public static function rangeWindow(string $range, Carbon $asOf, string $zone): ?array
+    {
+        $at = $asOf->copy()->setTimezone($zone);
+
+        return match ($range) {
+            // Seven calendar days counting the day it is sent: Nov 1 lists Nov 1 to Nov 7.
+            'next_7_days' => [$at->copy(), $at->copy()->startOfDay()->addDays(7)],
+            'next_30_days' => [$at->copy(), $at->copy()->startOfDay()->addDays(30)],
+            'this_month' => [$at->copy(), $at->copy()->startOfMonth()->addMonthNoOverflow()],
+            'next_month' => [$at->copy()->startOfMonth()->addMonthNoOverflow(), $at->copy()->startOfMonth()->addMonthsNoOverflow(2)],
+            default => null,
+        };
+    }
+
+    /**
+     * What a block with a date range lists: the schedule's upcoming events (the same list as
+     * upcomingEvents(), accepted, public, no password) that are on during the window, each under
+     * the first of its dates there, in date order, up to RANGE_EVENT_LIMIT.
+     *
+     * One-off events are narrowed in SQL with a day's margin each side, and on the ONE-OFF query
+     * only: a bound on starts_at would drop every series that began before the window, since a
+     * series' starts_at is its first date. Which events are in is then decided here on local
+     * dates, because a date-only event's starts_at is a date in the schedule's own calendar, which
+     * a comparison with a UTC instant puts a day out west of Greenwich.
+     *
+     * @return Collection<int, array{event: Event, date: ?string}>
+     */
+    private function eventsInRange(Role $role, string $range, Carbon $asOf): Collection
+    {
+        $zone = Newsletter::zoneOf($role);
+        $window = self::rangeWindow($range, $asOf, $zone);
+        if (! $window) {
+            return $this->upcomingEvents($role);
+        }
+
+        [$from, $to] = $window;
+        $fromDate = $from->format('Y-m-d');
+        $lastDate = $to->copy()->subSecond()->format('Y-m-d');
+        // A window that starts later than its reference (the following month) reaches back to
+        // its own start; one that starts at the send keeps the "still on" test at the send.
+        $startsLater = $from->gt($asOf);
+        $lowerUtc = $startsLater ? $from->copy()->subDay()->setTimezone('UTC') : $asOf->copy()->setTimezone('UTC');
+        $upperUtc = $to->copy()->addDay()->setTimezone('UTC');
+
+        $pairs = app(EventRepo::class)->upcomingForGuest(
+            $role,
+            null,
+            self::RANGE_EVENT_LIMIT * 4,
+            self::SERIES_HORIZON_DAYS,
+            null,
+            $lowerUtc,
+            fn ($query) => $query->where('events.starts_at', '<', $upperUtc->format('Y-m-d H:i:s')),
+        );
+
+        $pairs = $pairs
+            ->map(function (array $pair) use ($fromDate, $lastDate, $from, $asOf, $startsLater) {
+                $event = $pair['event'];
+
+                if ($event->days_of_week) {
+                    $date = $this->firstOccurrenceIn($event, $fromDate, $startsLater ? null : $asOf, $lastDate);
+
+                    return $date && $date <= $lastDate ? ['event' => $event, 'date' => $date] : null;
+                }
+
+                $date = $pair['date'];
+                if (! $date || $date > $lastDate) {
+                    return null;
+                }
+
+                // Starts before the window: in only while it is still on when the window opens,
+                // and only an event of a day or more (a weekend festival running into the month),
+                // as upcomingOrOngoing() reads "ongoing". A show that ends at half past one is
+                // last month's.
+                if ($date < $fromDate && ((float) $event->duration < 24 || $event->getEndDateTime(null, true)->lte($from))) {
+                    return null;
+                }
+
+                return $pair;
+            })
+            ->filter()
+            ->sortBy(fn (array $pair) => $pair['date'].' '.$pair['event']->localTimeOfDay())
+            ->take(self::RANGE_EVENT_LIMIT)
+            ->values();
+
+        $this->loadForRows($pairs->pluck('event'));
+
+        return $pairs;
+    }
+
+    /**
+     * A series' first date on or after $fromDate, and, when $notBefore is given, one that has
+     * not begun by then (today's nine o'clock class is not listed in a mail sent at two). Null
+     * when there is none within the horizon or the recurrence cannot be read.
+     */
+    private function firstOccurrenceIn(Event $event, string $fromDate, ?Carbon $notBefore, string $lastDate): ?string
+    {
+        // Only as far as the window reaches: a yearly series walked a year on every batch.
+        $days = fn (string $from) => max(0, (int) Carbon::parse($from)->diffInDays(Carbon::parse($lastDate), false));
+
+        try {
+            $date = $event->nextOccurrenceFrom($fromDate, $days($fromDate));
+
+            if ($date && $notBefore && $event->getStartDateTime($date, true, $event->scheduleTimezone())->lte($notBefore)) {
+                $next = Carbon::parse($date)->addDay()->format('Y-m-d');
+                $date = $next <= $lastDate ? $event->nextOccurrenceFrom($next, $days($next)) : null;
+            }
+
+            return $date;
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+    }
+
+    /**
+     * Whether a newsletter has an Events block and every one of them lists nothing as of $asOf.
+     * A repeating newsletter skips such a run rather than mail an empty month. Returns the
+     * reason: 'no_events' for a date range, 'picked_passed' when the events picked by hand are
+     * all over; null when there is something to list or no Events block at all.
+     */
+    public function nothingToList(Newsletter $newsletter): ?string
+    {
+        $eventBlocks = collect($newsletter->blocks ?? [])->filter(fn ($block) => ($block['type'] ?? '') === 'events');
+        if ($eventBlocks->isEmpty()) {
+            return null;
+        }
+
+        $resolved = collect($this->processBlocks($newsletter))->filter(fn ($block) => ($block['type'] ?? '') === 'events');
+        if ($resolved->contains(fn ($block) => count($block['data']['resolvedEvents'] ?? []) > 0)) {
+            return null;
+        }
+
+        return $eventBlocks->every(fn ($block) => ($block['data']['useAllEvents'] ?? true) === false)
+            ? 'picked_passed'
+            : 'no_events';
     }
 
     /**

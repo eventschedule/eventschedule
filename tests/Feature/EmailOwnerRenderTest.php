@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Mail\EmailSettingsFailedMail;
 use App\Mail\FeedbackNotification;
 use App\Mail\GiftCardSaleNotification;
+use App\Mail\NewsletterRepeatSkippedMail;
 use App\Mail\NotificationEmailConfirmation;
 use App\Mail\ScheduleTransferDeclined;
 use App\Mail\ScheduleTransferInvite;
@@ -86,6 +87,8 @@ class EmailOwnerRenderTest extends TestCase
             'comment' => 'Best night out all year',
         ]);
 
+        $repeating = \App\Models\Newsletter::create(['role_id' => $role->id, 'user_id' => $owner->id, 'subject' => 'What is on in {month}', 'status' => 'scheduled', 'template' => 'modern', 'blocks' => [], 'type' => 'schedule']);
+
         $mails = [
             'GiftCardSaleNotification' => fn () => (new GiftCardSaleNotification($card, $role, $owner))->render(),
             'FeedbackNotification' => fn () => (new FeedbackNotification($feedback, $sale, $event, $role, $owner))->render(),
@@ -95,6 +98,7 @@ class EmailOwnerRenderTest extends TestCase
             'NotificationEmailConfirmation' => fn () => (new NotificationEmailConfirmation($role, url('/ne/confirm/abc'), 'Hillel'))->render(),
             'ScheduleTransferInvite' => fn () => (new ScheduleTransferInvite($this->transfer($role, $owner)))->render(),
             'ScheduleTransferDeclined' => fn () => (new ScheduleTransferDeclined($this->transfer($role, $owner)))->render(),
+            'NewsletterRepeatSkippedMail' => fn () => (new NewsletterRepeatSkippedMail($repeating, $owner, 'no_events', now(), now()->addMonth()))->render(),
         ];
 
         foreach ($mails as $label => $render) {

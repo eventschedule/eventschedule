@@ -21,7 +21,25 @@
         @include('newsletter.partials._notices')
         @include('newsletter.partials._verification-warning')
 
-        @if ($newsletter->status === 'scheduled')
+        @if ($newsletter->isRepeating())
+        @php
+            $lastCopy = \App\Models\Newsletter::where('repeat_parent_id', $newsletter->id)->whereIn('status', ['sending', 'sent'])->orderByDesc('id')->first();
+            $repeatFormat = get_use_24_hour_time($role) ? 'M j, Y H:i' : 'M j, Y g:i A';
+        @endphp
+        {{-- A repeating newsletter: what it does, when it next goes, and how it went last time. --}}
+        <x-page-notice tone="info" class="news-notice">
+            {{ __('messages.newsletter_repeats_notice_' . $newsletter->repeatEvery(), ['date' => $newsletter->scheduled_at->copy()->timezone($newsletter->repeatZone())->translatedFormat($repeatFormat).' ('.$newsletter->repeatZone().')']) }}
+            @if ($lastCopy)
+            {{ __('messages.newsletter_last_sent_notice', ['date' => ($lastCopy->sent_at ?? $lastCopy->events_as_of ?? $lastCopy->created_at)->copy()->timezone($newsletter->repeatZone())->translatedFormat('M j'), 'count' => number_format($lastCopy->sent_count)]) }}
+            @endif
+            <x-slot name="action">
+                <form method="POST" action="{{ route('newsletter.cancel', $newsletterParams) }}">
+                    @csrf
+                    <button type="submit" class="event-link">{{ __('messages.newsletter_stop_repeating') }}</button>
+                </form>
+            </x-slot>
+        </x-page-notice>
+        @elseif ($newsletter->status === 'scheduled')
         <x-page-notice tone="info" class="news-notice">
             {{ __('messages.scheduled_for') }}: {{ $newsletter->scheduled_at->timezone(auth()->user()->timezone ?? $role->timezone ?? 'UTC')->translatedFormat(get_use_24_hour_time($role) ? 'M j, Y H:i' : 'M j, Y g:i A') }}
             <x-slot name="action">

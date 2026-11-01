@@ -54,7 +54,7 @@
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
-<title>{{ $newsletter->subject }}</title>
+<title>{{ $subject ?? $newsletter->subject }}</title>
 <!--[if mso]>
 <noscript><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
 <style>table, td, p, a, span, h1, h2, h3, div { mso-line-height-rule: exactly;{!! $nl->outlookFont ? ' font-family: '.$nl->outlookFont.' !important;' : '' !!} }</style>
@@ -94,7 +94,7 @@ u + .nl-body a { color: inherit; }
 @if ($preheader !== '')
 <div style="display: none; max-height: 0px; max-width: 0px; overflow: hidden; opacity: 0; mso-hide: all;">{{ $preheader }}{!! str_repeat('&#847;&zwnj;&nbsp;', 30) !!}</div>
 @endif
-<div role="article" aria-roledescription="email" aria-label="{{ $newsletter->subject }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $nl->dir }}" style="background-color: {{ $nl->ground }};">
+<div role="article" aria-roledescription="email" aria-label="{{ $subject ?? $newsletter->subject }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $nl->dir }}" style="background-color: {{ $nl->ground }};">
 <table role="presentation" dir="{{ $nl->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ $nl->ground }}" style="background-color: {{ $nl->ground }};">
 <tr>
 <td align="center" class="nl-page" style="padding: {{ $pagePad }};">

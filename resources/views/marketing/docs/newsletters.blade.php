@@ -218,8 +218,8 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events, each with its day, time, price (or Free, or Sold Out) and a link to its page. The Cards layout adds each event's flyer in the designs that show pictures (Modern, Classic and Bold), and in those three it opens with the first event as a larger card; the List layout is text only in every design. Left on All upcoming events (auto) it lists up to ten upcoming or ongoing events in date order, a recurring event under its next date that has not begun; hand-picked events are shown in date order too. Either way it never includes drafts, cancelled events, unlisted events, password-protected ones, an event your schedule has not accepted, or one that has ended, and a link to your full schedule follows the list. An event people sign up for, or whose tickets can no longer be bought, is listed without a price.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> All upcoming events (auto) or a hand-picked list of events, Event Layout (cards or list)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events, each with its day, time, price (or Free, or Sold Out) and a link to its page. The Cards layout adds each event's flyer in the designs that show pictures (Modern, Classic and Bold), and in those three it opens with the first event as a larger card; the List layout is text only in every design. <strong class="text-gray-900 dark:text-white">Events to list</strong> chooses which: <em>All upcoming events</em> lists up to ten upcoming or ongoing events in date order, a recurring event under its next date that has not begun. <em>The next 7 days</em>, <em>The next 30 days</em>, <em>The rest of the month it is sent in</em> and <em>The whole of the following month</em> list up to 25 events in that window, worked out when the newsletter is sent (not when you write it) and read in your schedule's timezone; a line under the choice works the window out for you, from the next send if one is set. An event of a day or more that is still on when the window opens counts, and a recurring event is listed once, under its first date in the window. <em>Events I choose</em> is a hand-picked list, shown in date order too. Either way it never includes drafts, cancelled events, unlisted events, password-protected ones, an event your schedule has not accepted, or one that has ended, and a link to your full schedule follows the list. An event people sign up for, or whose tickets can no longer be bought, is listed without a price.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Events to list (all upcoming, a date range, or events you choose), Event Layout (cards or list)</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Button</h4>
@@ -285,7 +285,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Leave the <strong>Events</strong> block on "All upcoming events (auto)" and a cloned newsletter always goes out with the current schedule, with no block editing between sends.</p>
+            <p>Leave the <strong>Events</strong> block on "All upcoming events", or on a date range, and a cloned or <a href="#repeating" class="doc-link">repeating</a> newsletter always goes out with the current schedule, with no block editing between sends.</p>
         </div>
     </section>
 
@@ -685,6 +685,32 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send a Test</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Saves the newsletter and sends one copy to you, or to your schedule's contact email address; the dialog lets you choose and says when it has gone. Test sends do not count against your monthly allowance and are excluded from the statistics, and there is a short cooling-off period between tests. Send one before every real send: images, links and dark-mode rendering are the three things that most often look different in a real inbox from the builder preview. <strong class="text-gray-900 dark:text-white">Send a test first</strong> in Review and send opens the same dialog.</p>
+            </div>
+        </div>
+
+        <h3 id="repeating" class="doc-subheading">Repeating Newsletters</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A newsletter can send itself every week or every month. In <strong class="text-gray-900 dark:text-white">Review and send</strong>, choose <strong class="text-gray-900 dark:text-white">Schedule for later</strong>, then <strong class="text-gray-900 dark:text-white">Repeat</strong>: Every week or Every month. Every month with no date picked yet fills in the first of next month at 9:00. The time you pick is the first send, and a sentence under it says what will happen, such as "Sends every month on day 1 at 9:00 AM (Europe/Berlin), starting Tue, December 1". A repeat always runs on your schedule's timezone, whoever on your team sets it up. A monthly newsletter set for the 29th, 30th or 31st goes out on the last day of a shorter month and returns to its day after.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Each time, a copy of the newsletter goes out, with its events worked out at that moment, so pair it with a date range in the <a href="#block-types" class="doc-link">Events block</a>: a newsletter on the 1st of every month listing <em>The rest of the month it is sent in</em> is that month's programme. Write <code class="doc-inline-code">{month}</code> in the subject, the preview text, a heading, a text block or a button and each copy names the month its events are in ("What's on in December 2026"): the month it is sent in, or the next one when the Events block lists the whole of the following month. It works in any newsletter, repeating or not.
+        </p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On the Newsletters tab</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A repeating newsletter is pinned at the top of the list, marked Repeats monthly or Repeats weekly, with its next send and when it last went out. Each copy it sends is an ordinary Sent row with its own statistics and a Repeat label that leads back to it. Editing the repeating newsletter changes the copies still to come; the ones already sent stay as they went.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send a copy now</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">In a repeating newsletter's Review and send, <strong class="text-gray-900 dark:text-white">Send a copy now</strong> sends one copy straight away and leaves the next send where it is.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stop repeating</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The notice at the top of its edit page offers <strong class="text-gray-900 dark:text-white">Stop repeating</strong>, which returns it to a draft. To pause it for the summer, stop it and set Repeat again when you are back. Deleting it stops it too; the copies already sent stay.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When a send is skipped</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A send is skipped when its Events block has nothing to list (no events in the range, or the events you picked have all passed), when nobody is in its segments, when it would go over the month's <a href="#allowance" class="doc-link">allowance</a>, or when it needs a <a href="#verification" class="doc-link">verification</a>. The schedule's owner, and whoever set it up while they are still on the team, get an email saying why, and the next one goes out as planned. Every copy counts against the allowance of the month it goes out in, and a repeat that could never fit in your plan's monthly allowance is refused when you set it up.</p>
             </div>
         </div>
 

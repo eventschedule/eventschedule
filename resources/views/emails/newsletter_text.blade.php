@@ -6,8 +6,8 @@
     $line = fn (string $text, string $char) => str_repeat($char, max(3, mb_strwidth($text)));
     $href = fn ($url) => \App\Utils\UrlUtils::safeActionHref($url);
 @endphp
-{!! $newsletter->subject !!}
-{!! $line($newsletter->subject, '=') !!}
+{!! $subject ?? $newsletter->subject !!}
+{!! $line($subject ?? $newsletter->subject, '=') !!}
 
 @foreach ($blocks as $block)
 @php

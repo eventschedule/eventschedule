@@ -3193,7 +3193,15 @@ class EventRepo
      *
      * @return \Illuminate\Support\Collection<int, array{event: Event, date: string}>
      */
-    public function upcomingForGuest(Role $role, ?\App\Models\Group $group = null, int $limit = 50, int $seriesHorizonDays = 60, ?\Closure $narrow = null): \Illuminate\Support\Collection
+    /**
+     * @param  ?Carbon  $oneOffFrom  the instant a one-off must still be on at (now when null). A
+     *                               newsletter's date range reads its events as of the moment its send
+     *                               was claimed, which a batch sent an hour later is not.
+     * @param  ?\Closure  $narrowOneOff  narrows the ONE-OFF query only. $narrow reaches the series
+     *                                   query too, where a bound on starts_at (a series' FIRST date)
+     *                                   would drop every series that began before it.
+     */
+    public function upcomingForGuest(Role $role, ?\App\Models\Group $group = null, int $limit = 50, int $seriesHorizonDays = 60, ?\Closure $narrow = null, ?Carbon $oneOffFrom = null, ?\Closure $narrowOneOff = null): \Illuminate\Support\Collection
     {
         $base = fn () => Event::query()
             ->where('events.is_draft', false)
@@ -3216,7 +3224,8 @@ class EventRepo
 
         $oneOff = $base()
             ->whereNull('events.days_of_week')
-            ->upcomingOrOngoing(Carbon::now('UTC'))
+            ->upcomingOrOngoing(($oneOffFrom ?? Carbon::now('UTC'))->copy()->setTimezone('UTC'))
+            ->when($narrowOneOff, fn ($query) => $narrowOneOff($query))
             ->orderBy('events.starts_at')
             ->limit($limit)
             ->get()

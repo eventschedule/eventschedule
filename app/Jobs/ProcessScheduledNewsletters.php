@@ -25,6 +25,14 @@ class ProcessScheduledNewsletters
         foreach ($newsletters as $newsletter) {
             try {
                 Log::info('Processing scheduled newsletter', ['newsletter_id' => $newsletter->id]);
+
+                // A repeating newsletter sends a copy of itself and moves on to its next run.
+                if ($newsletter->isRepeating()) {
+                    $service->runRepeat($newsletter);
+
+                    continue;
+                }
+
                 $result = $service->send($newsletter);
                 if ($result === false) {
                     Log::warning('Scheduled newsletter could not be sent', [
@@ -77,7 +85,15 @@ class ProcessScheduledNewsletters
             $totalRecipients = $stuck->recipients()->count();
             $pendingIds = $stuck->recipients()->where('status', 'pending')->pluck('id')->toArray();
 
-            if ($totalRecipients === 0) {
+            if ($totalRecipients === 0 && $stuck->repeat_parent_id) {
+                // A repeating newsletter's copy. It has no scheduled_at, so the reset below would
+                // leave a draft nobody wrote; its run is reported as skipped instead.
+                Log::warning('Recovering stuck repeat copy (no recipients created)', [
+                    'newsletter_id' => $stuck->id,
+                    'role_id' => $stuck->role_id,
+                ]);
+                app(NewsletterService::class)->abandonStuckCopy($stuck);
+            } elseif ($totalRecipients === 0) {
                 // Crashed before recipients were created - reset for retry
                 Log::warning('Recovering stuck newsletter (no recipients created)', [
                     'newsletter_id' => $stuck->id,
@@ -88,6 +104,8 @@ class ProcessScheduledNewsletters
                     'status' => $stuck->scheduled_at ? 'scheduled' : 'draft',
                     'send_token' => null,
                 ]);
+                // Its next send reads its events as of then, not as of this crashed one.
+                $stuck->forceFill(['events_as_of' => null])->save();
             } elseif (empty($pendingIds)) {
                 // All recipients processed - mark as sent
                 Log::warning('Recovering stuck newsletter (all recipients processed)', [

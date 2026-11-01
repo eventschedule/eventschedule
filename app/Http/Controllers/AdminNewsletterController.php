@@ -285,7 +285,7 @@ class AdminNewsletterController extends Controller
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
 
-        $copy = $newsletter->replicate();
+        $copy = $newsletter->replicate(['repeat', 'repeat_parent_id', 'events_as_of']);
         $copy->user_id = auth()->id();
         $copy->status = 'draft';
         $copy->scheduled_at = null;

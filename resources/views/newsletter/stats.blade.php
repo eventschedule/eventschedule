@@ -37,6 +37,16 @@
             </x-slot>
         </x-page-header>
 
+        @if ($newsletter->repeat_parent_id && ($repeatParent = $newsletter->repeatParent) && $repeatParent->isRepeating())
+        {{-- A copy a repeating newsletter sent: the next one is written on the repeating one. --}}
+        <x-page-notice tone="info" class="news-notice">
+            {{ __('messages.newsletter_sent_by_repeat') }}
+            <x-slot name="action">
+                <a href="{{ route('newsletter.edit', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($repeatParent->id)]) }}" class="event-link">{{ __('messages.newsletter_edit_next_one') }}</a>
+            </x-slot>
+        </x-page-notice>
+        @endif
+
         @include('newsletter.partials._stats')
     </div>
 

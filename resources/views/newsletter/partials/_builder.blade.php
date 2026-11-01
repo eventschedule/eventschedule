@@ -84,9 +84,19 @@ if (! $isAdmin && $saved && $newsletter->ab_test_id && $newsletter->abTest) {
     ];
 }
 
-// A scheduled newsletter's time, in the clock the schedule dialog reads it in.
+// A scheduled newsletter's time, in the clock the schedule dialog reads it in: a repeating one
+// runs on the schedule's (Newsletter::repeatZone()), a single send on the person's own.
+$isRepeating = $saved && $newsletter->isRepeating();
 $scheduledAtLocal = $saved && $newsletter->status === 'scheduled' && $newsletter->scheduled_at
-    ? $newsletter->scheduled_at->copy()->timezone(\App\Http\Controllers\NewsletterController::scheduleTimezone($isAdmin ? null : $role))->format('Y-m-d H:i')
+    ? $newsletter->scheduled_at->copy()->timezone($isRepeating ? $newsletter->repeatZone() : \App\Http\Controllers\NewsletterController::scheduleTimezone($isAdmin ? null : $role))->format('Y-m-d H:i')
+    : '';
+
+// Repeat is a schedule's, and not for a template or one of the two variants of an A/B test.
+$canRepeat = ! $isAdmin && ! $isTemplateMode && ! ($saved && $newsletter->ab_test_id);
+$scheduleZone = $isAdmin ? 'UTC' : \App\Models\Newsletter::zoneOf($role);
+// The day an Events block's date range is worked out from in its example: the next send, if one is set.
+$nextSendDate = $saved && $newsletter->status === 'scheduled' && $newsletter->scheduled_at
+    ? $newsletter->scheduled_at->copy()->timezone($scheduleZone)->format('Y-m-d')
     : '';
 
 $roleSocialLinks = $isAdmin ? [] : \App\Models\Newsletter::buildSocialLinksForRole($role);
@@ -109,6 +119,11 @@ $builderProps = [
     'everyoneLabel' => $isAdmin ? __('messages.all_platform_users') : __('messages.newsletter_audience_everyone', ['name' => $role->name]),
     'abTest' => $abTestData,
     'scheduledAt' => $scheduledAtLocal,
+    'repeat' => $isRepeating ? $newsletter->repeatEvery() : '',
+    'canRepeat' => $canRepeat,
+    'scheduleTimezone' => $scheduleZone,
+    'nextSendDate' => $nextSendDate,
+    'rangeLimit' => \App\Services\NewsletterService::RANGE_EVENT_LIMIT,
     'use24Hour' => (bool) get_use_24_hour_time($isAdmin ? null : $role),
     'roleName' => $isAdmin ? config('app.name') : ($role->name ?? ''),
     'isTemplateMode' => $isTemplateMode,
@@ -148,6 +163,14 @@ $builderProps = [
         'cards' => __('messages.cards'),
         'list' => __('messages.list'),
         'all_upcoming_events' => __('messages.all_upcoming_events'),
+        'events_to_list' => __('messages.newsletter_events_to_list'),
+        'events_range_all' => __('messages.newsletter_events_range_all'),
+        'events_range_next_7_days' => __('messages.newsletter_events_range_next_7_days'),
+        'events_range_next_30_days' => __('messages.newsletter_events_range_next_30_days'),
+        'events_range_this_month' => __('messages.newsletter_events_range_this_month'),
+        'events_range_next_month' => __('messages.newsletter_events_range_next_month'),
+        'events_range_picked' => __('messages.newsletter_events_range_picked'),
+        'events_range_example' => __('messages.newsletter_events_range_example', ['sent' => ':sent', 'from' => ':from', 'to' => ':to', 'limit' => ':limit', 'timezone' => ':timezone']),
         'events' => __('messages.events'),
         'no_upcoming_events' => __('messages.no_upcoming_events'),
         'button_text' => __('messages.button_text'),
@@ -264,6 +287,21 @@ $builderProps = [
         'review_and_send' => __('messages.newsletter_review_and_send'),
         'schedule_for_later' => __('messages.newsletter_schedule_for_later'),
         'newsletter_times_in' => __('messages.newsletter_times_in', ['timezone' => ':timezone']),
+        'repeat' => __('messages.newsletter_repeat'),
+        'repeat_none' => __('messages.newsletter_repeat_none'),
+        'repeat_starting' => __('messages.newsletter_repeat_starting'),
+        'repeat_next_send' => __('messages.newsletter_repeat_next_send'),
+        'repeat_week' => __('messages.newsletter_repeat_week'),
+        'repeat_month' => __('messages.newsletter_repeat_month'),
+        'repeat_sentence_week' => __('messages.newsletter_repeat_sentence_week', ['time' => ':time', 'timezone' => ':timezone', 'date' => ':date']),
+        'repeat_sentence_month' => __('messages.newsletter_repeat_sentence_month', ['day' => ':day', 'time' => ':time', 'timezone' => ':timezone', 'date' => ':date']),
+        'repeat_sentence_month_late' => __('messages.newsletter_repeat_sentence_month_late', ['day' => ':day', 'time' => ':time', 'timezone' => ':timezone', 'date' => ':date']),
+        'repeat_allowance_note' => __('messages.newsletter_repeat_allowance_note'),
+        'repeat_month_hint' => __('messages.newsletter_repeat_month_hint'),
+        'repeat_picked_note' => __('messages.newsletter_repeat_picked_note'),
+        'start_repeating' => __('messages.newsletter_start_repeating'),
+        'send_copy_now' => __('messages.newsletter_send_copy_now'),
+        'change_repeat' => __('messages.newsletter_change_repeat'),
         'newsletter_send_test_first' => __('messages.newsletter_send_test_first'),
         'newsletter_allowance' => __('messages.newsletter_allowance'),
         'newsletter_allowance_after' => __('messages.newsletter_allowance_after', ['left' => ':left', 'limit' => ':limit']),
