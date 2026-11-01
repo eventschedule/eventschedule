@@ -212,6 +212,38 @@ class BlogPagesTest extends TestCase
         $this->get('/blog?q=zzzz')->assertOk()->assertSee(__('messages.no_posts_found'));
     }
 
+    /**
+     * The admin's list finds a post by its title, its address or its excerpt, keeps the held
+     * filter while searching, and says when nothing matched. A typed % is looked for as itself.
+     */
+    public function test_the_admin_list_finds_a_post_by_title_address_or_excerpt(): void
+    {
+        $this->makePost(['title' => 'Event Schedule Alternatives: Agenda, Itinerary & More', 'slug' => 'event-schedule-alternatives-agenda-itinerary-more']);
+        $this->makePost(['title' => 'Door prices', 'excerpt' => 'Why a 100% markup at the door works']);
+        $this->makePost(['title' => 'A held post about agendas', 'is_published' => false, 'published_at' => null, 'held_reason' => 'too short']);
+
+        $as = fn () => $this->withSession(['admin_password_confirmed_at' => now()->timestamp])->actingAs($this->admin());
+        $list = fn (array $query) => $as()->get(route('blog.admin.index', $query))->assertOk()->getContent();
+
+        $byTitle = $list(['search' => 'itinerary']);
+        $this->assertStringContainsString('Agenda, Itinerary &amp; More', $byTitle);
+        $this->assertStringNotContainsString('Door prices', $byTitle);
+        $this->assertStringContainsString('value="itinerary"', $byTitle);
+
+        $this->assertStringContainsString('Itinerary', $list(['search' => 'alternatives-agenda']));
+        $this->assertStringContainsString('Door prices', $list(['search' => '100%']));
+        // Unescaped, "1%0" would be a wildcard and match "100%".
+        $this->assertStringNotContainsString('Door prices', $list(['search' => '1%0']));
+
+        $heldOnly = $list(['search' => 'agenda', 'held' => 1]);
+        $this->assertStringContainsString('A held post about agendas', $heldOnly);
+        $this->assertStringNotContainsString('Itinerary &amp; More', $heldOnly);
+
+        $none = $list(['search' => 'zzzz']);
+        $this->assertStringContainsString(__('messages.no_results_found'), $none);
+        $this->assertStringNotContainsString(__('messages.no_posts_description'), $none);
+    }
+
     public function test_a_post_the_check_held_waits_in_the_admins_list_with_its_reason(): void
     {
         $this->makePost(['title' => 'A live post']);

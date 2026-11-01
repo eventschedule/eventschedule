@@ -44,6 +44,22 @@
         </x-page-notice>
         @endif
 
+        <form method="GET" action="{{ route('blog.admin.index') }}" class="page-filters">
+            @if ($heldOnly)
+            <input type="hidden" name="held" value="1">
+            @endif
+            <div class="page-filter is-grow">
+                <label for="blog-search">@lang('messages.search')</label>
+                <x-text-input id="blog-search" name="search" type="search" class="block w-full" :value="$search" autocomplete="off" dir="auto" />
+            </div>
+            <div class="is-end">
+                @if ($search !== '')
+                <a href="{{ route('blog.admin.index', $heldOnly ? ['held' => 1] : []) }}" class="page-tool">@lang('messages.clear')</a>
+                @endif
+                <x-brand-button type="submit" size="sm" class="!py-2">@lang('messages.search')</x-brand-button>
+            </div>
+        </form>
+
         @if ($posts->count() > 0)
         <div>
         <div class="ap-card rounded-xl overflow-hidden">
@@ -133,6 +149,10 @@
         @if ($posts->hasPages())
         <div class="page-pager">{{ $posts->links() }}</div>
         @endif
+        </div>
+        @elseif ($search !== '')
+        <div class="ap-card rounded-xl">
+            <x-page-empty compact :title="__('messages.no_results_found')" />
         </div>
         @else
         <div class="ap-card rounded-xl">

@@ -347,13 +347,22 @@ class BlogController extends Controller
         $heldOnly = request()->boolean('held');
         $held = BlogPost::heldForReview()->count();
 
+        // Finds a post by its title, its address or its excerpt: with hundreds of posts fifteen to
+        // a page, the one Search Console names was pages deep. LIKE's own wildcards are escaped, so
+        // a typed % or _ is looked for as itself.
+        $search = mb_substr(trim((string) request()->query('search', '')), 0, 100);
+        $like = '%'.addcslashes($search, '\\%_').'%';
+
         $posts = BlogPost::query()
             ->when($heldOnly, fn ($query) => $query->heldForReview())
+            ->when($search !== '', fn ($query) => $query->where(fn ($q) => $q->where('title', 'like', $like)
+                ->orWhere('slug', 'like', $like)
+                ->orWhere('excerpt', 'like', $like)))
             ->orderBy('created_at', 'desc')
             ->paginate(15)
             ->withQueryString();
 
-        return view('blog.admin.index', compact('posts', 'held', 'heldOnly'));
+        return view('blog.admin.index', compact('posts', 'held', 'heldOnly', 'search'));
     }
 
     /**
