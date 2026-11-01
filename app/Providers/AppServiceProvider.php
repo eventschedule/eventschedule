@@ -55,6 +55,13 @@ class AppServiceProvider extends ServiceProvider
             return SafeTranslationLoader::wrap($loader, $app['files']);
         });
 
+        // A deadlock on the database cache's limiter row is retried rather than thrown (see the
+        // class). Extended for the same reason as the loader above: RateLimiter is a deferred
+        // binding of CacheServiceProvider.
+        $this->app->extend(\Illuminate\Cache\RateLimiter::class, function ($limiter) {
+            return \App\Support\RetryingRateLimiter::wrap($limiter);
+        });
+
         $this->callAfterResolving('translator', function ($translator) {
             $translator->getLoader()->addPath(config('app.lang_overrides_path'));
         });
