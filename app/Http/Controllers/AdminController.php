@@ -223,6 +223,22 @@ class AdminController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
+        // The same three for organizers alone, for the "Signups by method" card's choice of
+        // Organizers, Other accounts or All. An organizer is the funnel's: no sign-up intent (the
+        // accounts from before it was recorded) or "organizer"; the others came to follow, buy,
+        // subscribe or send a request. Other accounts are All minus these, in the page.
+        $organizerMethods = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->where(fn ($q) => $q->whereNull('signup_intent')->orWhere('signup_intent', 'organizer'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('SUM(password IS NOT NULL AND google_oauth_id IS NULL) as email, '
+                .'SUM(google_oauth_id IS NOT NULL AND password IS NULL) as google, '
+                .'SUM(password IS NOT NULL AND google_oauth_id IS NOT NULL) as hybrid')
+            ->first();
+        $emailOrganizersInPeriod = (int) ($organizerMethods->email ?? 0);
+        $googleOrganizersInPeriod = (int) ($organizerMethods->google ?? 0);
+        $hybridOrganizersInPeriod = (int) ($organizerMethods->hybrid ?? 0);
+
         // Trends data for signup methods
         $trendData = $this->getTrendData($startDate, $endDate);
 
@@ -320,6 +336,9 @@ class AdminController extends Controller
             'emailUsersInPeriod',
             'googleUsersInPeriod',
             'hybridUsersInPeriod',
+            'emailOrganizersInPeriod',
+            'googleOrganizersInPeriod',
+            'hybridOrganizersInPeriod',
             'trendData',
             'range',
             'topUtmSources',
@@ -1151,10 +1170,12 @@ class AdminController extends Controller
             ->orderBy('period')
             ->get();
 
-        // Email users trend (users with password, no google_oauth_id)
+        // Email users trend (users with password, no google_oauth_id), and how many of them are
+        // organizers (the users page's Signups by method card can show either, or the rest).
         $emailUsersTrend = User::select(
             $dateFormatExpr,
-            DB::raw('COUNT(*) as count')
+            DB::raw('COUNT(*) as count'),
+            DB::raw("SUM(signup_intent IS NULL OR signup_intent = 'organizer') as organizers")
         )
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
@@ -1172,7 +1193,8 @@ class AdminController extends Controller
                 'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
                 'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
             },
-            DB::raw('COUNT(*) as count')
+            DB::raw('COUNT(*) as count'),
+            DB::raw("SUM(signup_intent IS NULL OR signup_intent = 'organizer') as organizers")
         )
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
@@ -1190,7 +1212,8 @@ class AdminController extends Controller
                 'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
                 'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
             },
-            DB::raw('COUNT(*) as count')
+            DB::raw('COUNT(*) as count'),
+            DB::raw("SUM(signup_intent IS NULL OR signup_intent = 'organizer') as organizers")
         )
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
@@ -1288,6 +1311,7 @@ class AdminController extends Controller
         $emailUsersData = $allPeriods->map(fn ($period) => $emailUsersTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
         $googleUsersData = $allPeriods->map(fn ($period) => $googleUsersTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
         $hybridUsersData = $allPeriods->map(fn ($period) => $hybridUsersTrend->firstWhere('period', $period)?->count ?? 0)->toArray();
+        $organizers = fn ($trend) => $allPeriods->map(fn ($period) => (int) ($trend->firstWhere('period', $period)?->organizers ?? 0))->toArray();
 
         $revenueData = $allPeriods->map(fn ($period) => (float) ($revenueTrend->firstWhere('period', $period)?->total ?? 0))->toArray();
 
@@ -1299,6 +1323,9 @@ class AdminController extends Controller
             'emailUsers' => $emailUsersData,
             'googleUsers' => $googleUsersData,
             'hybridUsers' => $hybridUsersData,
+            'emailOrganizers' => $organizers($emailUsersTrend),
+            'googleOrganizers' => $organizers($googleUsersTrend),
+            'hybridOrganizers' => $organizers($hybridUsersTrend),
             'revenue' => $revenueData,
         ];
     }

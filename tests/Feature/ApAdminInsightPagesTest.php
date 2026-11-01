@@ -178,6 +178,39 @@ class ApAdminInsightPagesTest extends TestCase
      * reports has its bar at the width it gave, and the one drop it calls the biggest leak is
      * marked once, where it is, and named by the tile above.
      */
+    /**
+     * Signups by method opens on organizers: an account made to follow a schedule or buy a ticket
+     * is a sign-up, but not one this page is about. The chart and the figures under it carry all
+     * and organizers, and the buttons switch between organizers, the other accounts and all.
+     * Mutation: drop the organizer filter, or open the card on all.
+     */
+    public function test_signups_by_method_opens_on_organizers_and_can_show_the_rest(): void
+    {
+        $this->createOwner();
+        \Illuminate\Support\Facades\DB::table('users')->where('id', $this->createOwner()->id)
+            ->update(['google_oauth_id' => 'g-organizer', 'password' => null]);
+        foreach (['subscriber', 'follow'] as $intent) {
+            \Illuminate\Support\Facades\DB::table('users')->where('id', $this->createOwner()->id)->update(['signup_intent' => $intent]);
+        }
+
+        $response = $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->actingAs($this->admin)->get('/admin/users?range=last_30_days')->assertOk();
+        $trend = $response->viewData('trendData');
+
+        $this->assertSame(2, array_sum($trend['emailUsers']) - array_sum($trend['emailOrganizers']), 'the subscriber and the follower are not organizers');
+        $this->assertSame(1, array_sum($trend['googleOrganizers']));
+        $this->assertSame(array_sum($trend['googleUsers']), array_sum($trend['googleOrganizers']));
+
+        $email = $response->viewData('emailUsersInPeriod');
+        $emailOrganizers = $response->viewData('emailOrganizersInPeriod');
+        $this->assertSame($email - 2, $emailOrganizers);
+
+        $html = $response->getContent();
+        $this->assertStringContainsString('data-all="'.$email.'" data-organizers="'.$emailOrganizers.'">'.number_format($emailOrganizers).'<', $html);
+        $this->assertSame(1, preg_match('/data-segment="organizers" aria-pressed="true"/', $html));
+        $this->assertStringContainsString('data: signupSeries.organizers[0]', $html);
+    }
+
     public function test_the_funnel_draws_what_the_service_counted(): void
     {
         foreach ([0, 1, 1, 2, 2, 2] as $step) {

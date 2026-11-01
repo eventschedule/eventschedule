@@ -40,11 +40,13 @@
         $signupTotal = $emailUsers + $googleUsers + $hybridUsers;
         $share = fn ($part, $whole) => $ltr(($whole > 0 ? round(($part / $whole) * 100, 1) : 0).'%');
         // The colours the two sign-up charts draw each method in.
+        // The fifth is the period's organizers, for the Signups by method card's choice.
         $methods = [
-            [__('messages.email'), $emailUsers, $emailUsersInPeriod, 'var(--brand-blue)'],
-            [__('messages.google'), $googleUsers, $googleUsersInPeriod, '#EF4444'],
-            [__('messages.hybrid'), $hybridUsers, $hybridUsersInPeriod, '#F59E0B'],
+            [__('messages.email'), $emailUsers, $emailUsersInPeriod, 'var(--brand-blue)', $emailOrganizersInPeriod],
+            [__('messages.google'), $googleUsers, $googleUsersInPeriod, '#EF4444', $googleOrganizersInPeriod],
+            [__('messages.hybrid'), $hybridUsers, $hybridUsersInPeriod, '#F59E0B', $hybridOrganizersInPeriod],
         ];
+        $signupSegments = ['organizers' => __('messages.admin_dash_organizers'), 'others' => __('messages.admin_dash_other_accounts'), 'all' => __('messages.all')];
         $signupsInPeriod = $usersWithUtmInPeriod + $usersWithoutUtmInPeriod;
     @endphp
 
@@ -247,18 +249,26 @@
                     @endif
                 </x-page-card>
 
-                {{-- Signup Method in Period --}}
+                {{-- Signup Method in Period. Organizers by default: an account made to follow a
+                     schedule or buy a ticket is a sign-up, but not the one this page is about. The
+                     choice redraws the chart and the figures under it in place (the page's script). --}}
                 <x-page-card flush :title="__('messages.signups_by_method')">
                     <x-slot name="aside"><span class="insight-when">@lang('messages.selected_period')</span></x-slot>
                     <div class="insight-pad">
+                        <div id="signup-segments" class="mb-3 inline-flex flex-wrap items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1" role="group" aria-label="{{ __('messages.signups_by_method') }}">
+                            @foreach ($signupSegments as $segment => $segmentLabel)
+                            <button type="button" data-segment="{{ $segment }}" aria-pressed="{{ $segment === 'organizers' ? 'true' : 'false' }}"
+                                    class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] {{ $segment === 'organizers' ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)]' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ $segmentLabel }}</button>
+                            @endforeach
+                        </div>
                         <div class="h-48">
                             <canvas id="signupMethodTrendChart"></canvas>
                         </div>
                     </div>
                     <div class="page-stats insight-strip-top">
-                        @foreach ($methods as [$label, $allTime, $inPeriod, $color])
+                        @foreach ($methods as [$label, $allTime, $inPeriod, $color, $organizersInPeriod])
                         <div class="page-stat">
-                            <div class="page-stat-value">{{ number_format($inPeriod) }}</div>
+                            <div class="page-stat-value" data-all="{{ $inPeriod }}" data-organizers="{{ $organizersInPeriod }}">{{ number_format($organizersInPeriod) }}</div>
                             <div class="page-stat-label"><span class="insight-dot" style="background: {{ $color }}"></span>{{ $label }}</div>
                         </div>
                         @endforeach
@@ -273,7 +283,7 @@
                             <canvas id="signupMethodChart"></canvas>
                         </div>
                         <dl class="page-kv">
-                            @foreach ($methods as [$label, $allTime, $inPeriod, $color])
+                            @foreach ($methods as [$label, $allTime, $inPeriod, $color, $organizersInPeriod])
                             <div>
                                 <dt><span class="insight-dot" style="background: {{ $color }}"></span>{{ $label }}</dt>
                                 <dd>{{ number_format($allTime) }}<small>{{ $share($allTime, $signupTotal) }}</small></dd>
@@ -691,26 +701,33 @@
 
             // Signup Method Trend Chart (Stacked Bar)
             const signupMethodTrendCtx = document.getElementById('signupMethodTrendChart').getContext('2d');
-            new Chart(signupMethodTrendCtx, {
+            // Each method's sign-ups per period, all of them and organizers; the other accounts
+            // are the difference. The chart opens on organizers, as the buttons do.
+            const signupSeries = {
+                all: [@json($trendData['emailUsers']), @json($trendData['googleUsers']), @json($trendData['hybridUsers'])],
+                organizers: [@json($trendData['emailOrganizers']), @json($trendData['googleOrganizers']), @json($trendData['hybridOrganizers'])],
+            };
+            signupSeries.others = signupSeries.all.map((series, i) => series.map((n, j) => n - signupSeries.organizers[i][j]));
+            const signupMethodTrendChart = new Chart(signupMethodTrendCtx, {
                 type: 'bar',
                 data: {
                     labels: @json($trendData['labels']),
                     datasets: [
                         {
                             label: @json(__('messages.email')),
-                            data: @json($trendData['emailUsers']),
+                            data: signupSeries.organizers[0],
                             backgroundColor: brandBlue,
                             stack: 'signups'
                         },
                         {
                             label: @json(__('messages.google')),
-                            data: @json($trendData['googleUsers']),
+                            data: signupSeries.organizers[1],
                             backgroundColor: '#EF4444',
                             stack: 'signups'
                         },
                         {
                             label: @json(__('messages.hybrid')),
-                            data: @json($trendData['hybridUsers']),
+                            data: signupSeries.organizers[2],
                             backgroundColor: '#F59E0B',
                             stack: 'signups'
                         }
@@ -752,6 +769,28 @@
                         }
                     }
                 }
+            });
+
+            // Organizers, other accounts or all: the chart and the three figures under it.
+            const segmentOn = 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)]'.split(' ');
+            const segmentOff = 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'.split(' ');
+            const numberFormat = new Intl.NumberFormat(document.documentElement.lang || undefined);
+            document.querySelectorAll('#signup-segments [data-segment]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const segment = button.dataset.segment;
+                    document.querySelectorAll('#signup-segments [data-segment]').forEach((other) => {
+                        const on = other === button;
+                        other.setAttribute('aria-pressed', on ? 'true' : 'false');
+                        other.classList.remove(...(on ? segmentOff : segmentOn));
+                        other.classList.add(...(on ? segmentOn : segmentOff));
+                    });
+                    signupMethodTrendChart.data.datasets.forEach((dataset, i) => { dataset.data = signupSeries[segment][i]; });
+                    signupMethodTrendChart.update();
+                    document.querySelectorAll('.page-stat-value[data-organizers]').forEach((figure) => {
+                        const all = Number(figure.dataset.all), organizers = Number(figure.dataset.organizers);
+                        figure.textContent = numberFormat.format(segment === 'all' ? all : segment === 'organizers' ? organizers : all - organizers);
+                    });
+                });
             });
 
             // UTM Sources Bar Chart (selected period)
