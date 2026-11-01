@@ -61,6 +61,15 @@ return [
         'attribution_url' => env('MAP_ATTRIBUTION_URL') ?: 'https://www.openstreetmap.org/copyright',
     ],
 
+    // Read-only Search Console for `php artisan app:pull-search-console`, run on a developer's
+    // machine (App\Services\SearchConsole). The credentials are a service account's JSON key, raw or
+    // base64; the property is how Search Console names the site. ?: because .env.example ships both
+    // blank, and a default argument would not fire for a blank value.
+    'search_console' => [
+        'credentials' => env('SEARCH_CONSOLE_CREDENTIALS'),
+        'property' => env('SEARCH_CONSOLE_PROPERTY') ?: 'sc-domain:eventschedule.com',
+    ],
+
     'google' => [
         'backend' => env('BACKEND_GOOGLE_KEY'),
         'maps' => env('MAPS_API_KEY'),

@@ -157,6 +157,16 @@ class TestEnvironmentTest extends TestCase
     }
 
     /**
+     * No test signs in to Search Console with the developer's service account, which reads the
+     * real site's search data. Mutation: drop the phpunit.xml entry on a machine with a key.
+     */
+    public function test_no_test_reads_search_console_with_the_developers_key(): void
+    {
+        $this->assertSame('', (string) config('services.search_console.credentials'), 'phpunit.xml must pin SEARCH_CONSOLE_CREDENTIALS empty.');
+        $this->assertFalse(app(\App\Services\SearchConsole::class)->configured());
+    }
+
+    /**
      * The other half of the harness that only CI can disprove.
      *
      * public/build is gitignored and .github/workflows/test.yml never builds assets, so the real

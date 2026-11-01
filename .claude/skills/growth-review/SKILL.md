@@ -38,6 +38,20 @@ If the pull fails, the command names the problem.
 - **401:** the token here differs from the server's.
 - **429:** wait, then retry.
 
+**Search data.** When the question touches acquisition (which pages bring visitors, a page that
+stopped ranking, whether a page is indexed), also pull Google Search Console:
+
+```bash
+php artisan app:pull-search-console                          # last 28 days vs the 28 before, by page and query
+php artisan app:pull-search-console --days=90                # a longer window
+php artisan app:pull-search-console --inspect=/luma-alternative   # is it indexed, last crawl, Google's canonical
+```
+
+It saves to `storage/app/growth/search-console/` (`latest.json` plus a timestamped copy) and needs
+`SEARCH_CONSOLE_CREDENTIALS` in `.env` (a service account added as a user on the property). The data
+lags about three days, so the window ends three days ago. The older `*.zip` files there are manual
+CSV exports from the Search Console page.
+
 Walk the user through `docs/GROWTH_DATA.md#setup`. Never improvise requests against production to
 debug it. A malformed request pages the team through Sentry.
 

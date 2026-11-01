@@ -55,6 +55,8 @@ class ConfigEmptyEnvDefaultTest extends TestCase
             'growth row cap' => ['usage.php', 'GROWTH_ROW_CAP'],
             // Blank would send app:pull-growth to an empty base URL instead of the default.
             'growth data url' => ['app.php', 'GROWTH_DATA_URL'],
+            // Blank would ask Search Console about a property named "".
+            'search console property' => ['services.php', 'SEARCH_CONSOLE_PROPERTY'],
         ];
     }
 

@@ -273,6 +273,10 @@ or sellers are doing, use the `growth-review` skill (`.claude/skills/growth-revi
   into `storage/app/growth/` (`latest.json`, plus a timestamped copy per pull) and prints the
   headline numbers against the previous pull. It needs `GROWTH_DATA_TOKEN` in `.env`, the same value
   as on the server. `--local` re-prints the summary without downloading.
+- `php artisan app:pull-search-console` reads Google Search Console (read-only, a service account in
+  `SEARCH_CONSOLE_CREDENTIALS`) into `storage/app/growth/search-console/`: clicks and impressions by
+  page and query against the previous window, sitemap status, and `--inspect=<path>` for a page's
+  index status. Local only, never scheduled; `phpunit.xml` pins the credentials empty.
 - `docs/GROWTH_DATA.md` defines every field, population and window, and lists the caveats. Read it
   before drawing conclusions. Query the JSON with `jq` or `python3`; it is too big to Read.
 - **Never commit a pull or any figure from one.** The repository is public. Conclusions and

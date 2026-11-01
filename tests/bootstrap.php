@@ -41,6 +41,7 @@ foreach ([
     'META_SYSTEM_USER_ID',
     'META_LOGIN_CONFIG_ID',
     'GEMINI_API_KEY',
+    'SEARCH_CONSOLE_CREDENTIALS',
     'ADMIN_REQUIRE_2FA',
 ] as $pinned) {
     if (array_key_exists($pinned, $_ENV)) {
