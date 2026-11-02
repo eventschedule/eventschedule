@@ -116,11 +116,17 @@ class SendWebhook implements ShouldQueue
                     'curl' => $curl,
                 ])
                 ->post($this->webhook->url);
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            // An error status whose reply broke off mid-body: Laravel 12 throws it instead of
+            // returning it. The status still stands, so it is logged and retried below like any
+            // other answer (it used to land in the catch-all, reported and never retried).
+            $response = $e->response;
         } catch (ConnectionException|TransferException $e) {
-            // The endpoint could not be reached, so a later attempt may get through. Laravel turns
-            // Guzzle's ConnectException (timeouts included) into ConnectionException; a transfer
-            // that failed without a response, such as a connection reset mid-reply, arrives as
-            // Guzzle's own exception. The message names the endpoint's problem, so it is logged.
+            // The endpoint could not be reached, so a later attempt may get through. Laravel 12
+            // turns a transfer that failed with no answer to keep (a timeout, a refused or reset
+            // connection, a 2xx cut off) into ConnectionException; Guzzle's own exception stays
+            // in the list for a client that is not Laravel's. The message names the endpoint's
+            // problem, so it is logged.
             $this->logDelivery(null, substr($e->getMessage(), 0, 500), false, $startTime);
             $this->retry();
 

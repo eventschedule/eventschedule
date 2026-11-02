@@ -114,8 +114,8 @@ class WebhookRetryTest extends TestCase
         return match ($how) {
             'refused' => Http::failedConnection(),
             'timeout' => Http::failedConnection('cURL error 28: Operation timed out after 5001 milliseconds with 0 bytes received'),
-            // A transfer that failed without a response. Laravel converts only ConnectException,
-            // so this one reaches the job as Guzzle's own RequestException.
+            // A transfer that failed without a response: Guzzle's RequestException, which
+            // Laravel 12 hands the job as a ConnectionException (11 let it through as it was).
             'reset' => fn ($request) => Create::rejectionFor(new RequestException(
                 'cURL error 56: Recv failure: Connection reset by peer',
                 $request->toPsrRequest()
@@ -208,6 +208,29 @@ class WebhookRetryTest extends TestCase
         $this->assertNull($delivery->response_status);
         $this->assertStringContainsString('cURL error', $delivery->response_body);
 
+        $this->assertSame([2], $this->queuedAttempts()->pluck('attempt')->all());
+    }
+
+    /**
+     * An error status whose reply broke off mid-body. Laravel 12 throws it as its own
+     * RequestException, which fell into the job's catch-all: reported as an internal error and
+     * never retried. It is the 503 it is: logged with its status, and tried again.
+     */
+    public function test_a_5xx_cut_off_mid_reply_is_logged_by_its_status_and_retried(): void
+    {
+        $this->useDatabaseQueue();
+        Http::fake(['*' => fn ($request) => Create::rejectionFor(new RequestException(
+            'cURL error 18: transfer closed with 990 bytes remaining to read',
+            $request->toPsrRequest(),
+            new \GuzzleHttp\Psr7\Response(503, [], 'down')
+        ))]);
+        [$sale] = $this->subscribedSale();
+
+        $this->sendFirstAttempt($sale);
+
+        $delivery = WebhookDelivery::sole();
+        $this->assertFalse($delivery->success);
+        $this->assertSame(503, $delivery->response_status);
         $this->assertSame([2], $this->queuedAttempts()->pluck('attempt')->all());
     }
 

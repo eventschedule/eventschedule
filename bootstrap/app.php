@@ -15,6 +15,7 @@ use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\ResolveCustomDomain;
 use App\Http\Middleware\SanitizeUserAgent;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SendRotatedCsrfToken;
 use App\Http\Middleware\SetUserLanguage;
 use App\Http\Middleware\TrackMarketingVisit;
 use App\Models\Role;
@@ -129,6 +130,9 @@ return Application::configure(basePath: dirname(__DIR__))
             // Outside everything that signs a person in or out below, so it sees how the request
             // left (docs/CACHING.md: the edge hands a signed-in visitor the anonymous page).
             MarkSignedIn::class,
+            // Beside it for the same reason: a page that signed somebody in without leaving needs
+            // the CSRF token Laravel 12 rotates at sign-in, or its next request answers 419.
+            SendRotatedCsrfToken::class,
             // After the language is known (the sentence it sends to the sign-in page is the
             // person's own), before anything asks more of an account that is shut out.
             EnsureAccountNotBlocked::class,

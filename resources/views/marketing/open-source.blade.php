@@ -12,7 +12,7 @@
         "description": "Event Schedule is open source under the Attribution Assurance License (AAL), an OSI-approved licence adapted from the BSD licence. Selfhost it on your own server, where every feature resolves to the top tier, or drive the hosted version through the REST API.",
         "codeRepository": "https://github.com/eventschedule/eventschedule",
         "programmingLanguage": ["PHP", "JavaScript", "Vue.js"],
-        "runtimePlatform": "Laravel 11",
+        "runtimePlatform": "Laravel 12",
         "license": "https://opensource.org/licenses/AAL",
         "author": {
             "@type": "Organization",
@@ -1099,7 +1099,7 @@
             ],
             [
                 'q' => 'Do you accept contributions?',
-                'a' => 'Issues and pull requests are open on GitHub. Read the code first: it is a fairly ordinary Laravel 11 application with Vue on the front end, and the parts most people want to change - views, translations, integrations - are where you would expect to find them.',
+                'a' => 'Issues and pull requests are open on GitHub. Read the code first: it is a fairly ordinary Laravel 12 application with Vue on the front end, and the parts most people want to change - views, translations, integrations - are where you would expect to find them.',
             ],
         ];
     @endphp
@@ -1565,7 +1565,7 @@
                     Three ways <span class="hp-ink-grad">in.</span>
                 </h2>
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.14s;">
-                    It is Laravel 11 on PHP 8.2, with MySQL for storage, Vue for the front end and Vite for the build. Nothing exotic to stand up. Pick by how much of the stack you want to touch.
+                    It is Laravel 12 on PHP 8.2, with MySQL for storage, Vue for the front end and Vite for the build. Nothing exotic to stand up. Pick by how much of the stack you want to touch.
                 </p>
             </div>
 

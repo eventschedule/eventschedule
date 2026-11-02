@@ -182,16 +182,23 @@ class LinkImportService
                 'Accept' => 'text/calendar,text/html,application/xhtml+xml;q=0.9,*/*;q=0.5',
                 'Accept-Language' => 'en-US,en;q=0.5',
             ], self::FETCH_TIMEOUT, 4);
-        } catch (ConnectionException $e) {
-            throw $this->refusal('unreachable');
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
-            // Stopped by the guard's size cap: a stated length over it, or a body that ran past
-            // it. Anything else is not ours to explain here.
-            if (in_array($e->getHandlerContext()['errno'] ?? null, [CURLE_WRITE_ERROR, CURLE_FILESIZE_EXCEEDED], true)) {
+        } catch (ConnectionException|\GuzzleHttp\Exception\RequestException $e) {
+            $failure = UrlUtils::transferFailure($e);
+
+            if ($failure === null) {
+                throw $this->refusal('unreachable');
+            }
+
+            // Stopped by the guard's size cap. Anything else is not ours to explain here.
+            if (UrlUtils::stoppedBySizeCap($failure)) {
                 throw $this->refusal('too_large');
             }
 
-            throw $e;
+            throw $failure;
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            // An error status whose body did not arrive whole: Laravel 12 throws it instead of
+            // returning it. The status still stands, and the check below answers it.
+            $followed = ['response' => $e->response, 'url' => $url];
         }
 
         $response = $followed['response'];

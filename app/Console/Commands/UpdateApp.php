@@ -55,6 +55,11 @@ class UpdateApp extends Command
 
         $this->info($result['message']);
 
+        // An update installed but not finished says what failed and what to run.
+        if (! empty($result['detail'])) {
+            $this->warn($result['detail']);
+        }
+
         return self::SUCCESS;
     }
 }

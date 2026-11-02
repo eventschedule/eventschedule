@@ -421,6 +421,11 @@ class LegalPagesTest extends TestCase
         $this->withRemoteMarketingSite();
         config(['app.is_nexus' => true]);
 
+        // From Laravel 12 the FIRST route registered under a name is the one route() builds, so
+        // the domain-less one steps aside under another name before the domain one takes it.
+        $domainless = Route::getRoutes()->getByName('marketing.privacy');
+        $domainless?->setAction(['as' => 'marketing.privacy.domainless'] + $domainless->getAction());
+
         Route::domain('marketing.example.test')
             ->get('/privacy', fn () => '')
             ->name('marketing.privacy');

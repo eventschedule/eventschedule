@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\SendRotatedCsrfToken;
 use App\Jobs\SendQueuedPush;
 use App\Models\Event;
 use App\Models\Role;
@@ -201,12 +202,39 @@ class GuestSubmitProtectionTest extends TestCase
         $this->assertNull($pivot->is_accepted);
     }
 
+    /**
+     * Signing in gives the session a new CSRF token (Laravel 12), and the page stays open: it
+     * posted the token it was rendered with, so "Submit another" answered 419. The answer that
+     * signed somebody in carries the new token (SendRotatedCsrfToken), the page puts it in its
+     * meta tag (partials/request-form-kit), and an answer that changed nothing carries none.
+     */
+    public function test_the_submit_that_signs_somebody_in_hands_the_page_its_new_csrf_token(): void
+    {
+        $curator = $this->curator(['require_approval' => false]);
+
+        $first = $this->submit($curator)->assertOk();
+
+        $this->assertAuthenticated();
+        $this->assertNotEmpty($first->headers->get(SendRotatedCsrfToken::HEADER));
+        $this->assertSame(session()->token(), $first->headers->get(SendRotatedCsrfToken::HEADER));
+
+        $next = $this->postJson(route('event.guest_import.store', ['subdomain' => $curator->subdomain]), array_diff_key(
+            $this->body(['name' => 'Second Night']),
+            array_flip(['account_mode', 'account_name', 'account_email', 'account_password', 'terms'])
+        ));
+
+        $next->assertOk()->assertHeaderMissing(SendRotatedCsrfToken::HEADER);
+    }
+
     public function test_approval_off_and_the_approved_list_still_publish_at_once(): void
     {
         $this->submit($this->curator(['require_approval' => false]))->assertOk()->assertJsonPath('event.status', 'live');
 
-        // A schedule on the approved list, posting as itself.
+        // A schedule on the approved list, posting as itself. Signed out the way the app signs out
+        // (the session invalidated too): from Laravel 12 login() keeps the account's password hash
+        // in the session, and AuthenticateSession refuses the next account while it is there.
         auth()->logout();
+        $this->flushSession();
         $member = $this->createOwner();
         $talent = $this->createRole($member, 'talent', ['name' => 'The Nightjars']);
         $curator = $this->curator(['approved_subdomains' => [$talent->subdomain]]);

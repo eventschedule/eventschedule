@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Services\AppUpdateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -97,7 +98,8 @@ class CronEndpointSecurityTest extends TestCase
      */
     public function test_a_completed_run_stamps_both_heartbeat_keys(): void
     {
-        config(['app.cron_secret' => 'the-real-secret']);
+        config(['app.cron_secret' => 'the-real-secret', 'app.is_nexus' => false]);
+        Cache::forget(AppUpdateService::PHP_SEEN_KEY.'http_cron');
 
         foreach (['td_5min', 'td_15min', 'td_hourly', 'td_translate', 'td_daily', 'td_monthly', 'notified_pending_today'] as $tier) {
             Cache::put($tier, true, now()->addDay());
@@ -107,6 +109,9 @@ class CronEndpointSecurityTest extends TestCase
         Cache::forget('scheduler.last_run_at.http');
 
         $this->get('/translate_data?secret=the-real-secret')->assertStatus(200);
+
+        // The web server's PHP, which this rail runs on, for the self-updater's check.
+        $this->assertSame(PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION, Cache::get(AppUpdateService::PHP_SEEN_KEY.'http_cron'));
 
         $this->assertNotNull(Cache::get('scheduler.last_run_at'),
             'the aggregate heartbeat is what AdminAlertService reads');

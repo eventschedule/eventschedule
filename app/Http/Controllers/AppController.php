@@ -141,6 +141,11 @@ class AppController extends Controller
         }
 
         try {
+            // An update whose migrations did not run in the process that copied it is finished
+            // before any tier runs, so they meet the new schema (AppUpdateService::finishUpdate(),
+            // once per installed state; it never raises).
+            \App\Services\AppUpdateService::finishUpdate();
+
             // Every catch below is \Throwable, not \Exception.
             //
             // Each tier claims its cache key BEFORE running its commands, so an escaping error does
@@ -697,6 +702,9 @@ class AppController extends Controller
             // Per-rail sibling key, so /admin can tell a live worker from a live HTTP cron. This
             // rail is always 'http'; the scheduler rail names itself via config('app.scheduler_rail').
             Cache::put('scheduler.last_run_at.http', now()->timestamp, now()->addDays(7));
+
+            // Which PHP this rail runs on, for the self-updater (AppUpdateService::PHP_SEEN_KEY).
+            \App\Services\AppUpdateService::recordPhp('http_cron');
 
             // Dates the release, as the scheduler rail's heartbeat does (growth meta.releases).
             try {

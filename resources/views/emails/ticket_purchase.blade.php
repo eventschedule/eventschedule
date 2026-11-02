@@ -89,9 +89,8 @@
     @php($badgeSize = getimagesize($googleWalletBadge) ?: [283, 50])
     {{-- embedData, not a hotlink: this app never asks a recipient's mail client to fetch an
          asset from someone else's server. Google's badge may not be recoloured or rebuilt, so
-         it ships as their own artwork under public/images/wallet/google. The <img> stays split
-         over several lines: Mailer::render() swaps a one-line cid: image for a data: URI, and
-         GoogleWalletPassTest asserts the cid: survives. --}}
+         it ships as their own artwork under public/images/wallet/google. A sent mail carries it
+         as cid:, and the preview (Mailer::render()) as a data: URI. --}}
     <x-email.text align="center" :gap="24">
         <a href="{{ $googleWalletUrl }}" target="_blank" rel="noopener" style="text-decoration: none;">
             <img src="{{ $message->embedData(file_get_contents($googleWalletBadge), 'add-to-google-wallet.png', 'image/png') }}"

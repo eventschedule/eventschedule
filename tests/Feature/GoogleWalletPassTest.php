@@ -559,8 +559,8 @@ class GoogleWalletPassTest extends TestCase
 
         // Assert the mailable's DATA first, the way PassBookingTest does. render() is the preview
         // path: Mailer::render() runs replaceEmbeddedAttachments(), which rewrites cid: to a data
-        // URI for any single-line <img> - so a rendered assertion silently depends on how the tag
-        // happens to be wrapped, and checks output no recipient ever receives.
+        // URI (Laravel 11 did it for a single-line <img> only, 12 for every one), so a rendered
+        // assertion checks output no recipient ever receives.
         $content = (new TicketPurchase($sale, $event, $role))->content();
 
         $this->assertSame(
@@ -589,8 +589,15 @@ class GoogleWalletPassTest extends TestCase
         );
 
         // The badge is embedded, never hotlinked - this app does not ask a recipient's mail client
-        // to fetch an asset from someone else's server.
-        $this->assertStringContainsString('cid:add-to-google-wallet.png', $rendered);
+        // to fetch an asset from someone else's server. render() is the preview, where Laravel 12
+        // swaps every embedded image for a data: URI (11 left a multi-line <img> as cid:), and the
+        // Content-ID in a sent mail is symfony/mime's to choose (a random one from 7.4.22), so
+        // either embedding passes and only a hotlink fails.
+        $this->assertMatchesRegularExpression(
+            '/<img src="(cid:|data:image\/png;base64,)[^"]+"\s+alt="'.preg_quote(e(__('messages.add_to_google_wallet')), '/').'"/',
+            $rendered
+        );
+        $this->assertStringNotContainsString('/images/wallet/google/', $rendered);
 
         // And no call to Google was needed to render it.
         $this->assertNothingSentToGoogle();

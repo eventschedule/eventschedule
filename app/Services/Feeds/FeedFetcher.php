@@ -5,6 +5,7 @@ namespace App\Services\Feeds;
 use App\Utils\UrlUtils;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException as HttpRequestException;
 use Illuminate\Http\Client\Response;
 
 /**
@@ -65,18 +66,26 @@ class FeedFetcher
 
         try {
             $followed = UrlUtils::safeHttpGetWithUrl($url, $headers, $seconds, 4);
-        } catch (ConnectionException $e) {
-            // The other side is down, slow or gone. Routine, and not ours to report.
-            return new FetchResult(self::UNREACHABLE);
-        } catch (RequestException $e) {
-            // Stopped by the guard's size cap: a stated length over it, or a body that ran past.
-            if (in_array($e->getHandlerContext()['errno'] ?? null, [CURLE_WRITE_ERROR, CURLE_FILESIZE_EXCEEDED], true)) {
+        } catch (ConnectionException|RequestException $e) {
+            $failure = UrlUtils::transferFailure($e);
+
+            if ($failure === null) {
+                // The other side is down, slow or gone. Routine, and not ours to report.
+                return new FetchResult(self::UNREACHABLE);
+            }
+
+            if (UrlUtils::stoppedBySizeCap($failure)) {
                 return new FetchResult(self::TOO_LARGE);
             }
 
-            $this->reportWithoutAddress($e, $url);
+            $this->reportWithoutAddress($failure, $url);
 
             return new FetchResult(self::FAILED);
+        } catch (HttpRequestException $e) {
+            // An error status whose body did not arrive whole (stopped at the cap, or dropped
+            // mid-body): Laravel 12 throws it instead of returning it. The status still stands,
+            // and the check below answers it before the body is read.
+            $followed = ['response' => $e->response, 'url' => $url];
         } catch (\Throwable $e) {
             $this->reportWithoutAddress($e, $url);
 

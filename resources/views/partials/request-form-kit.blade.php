@@ -316,11 +316,21 @@
             },
 
             // A request that never answers must not hold the form for ever.
+            //
+            // The CSRF token is the meta tag's, read at send time: signing somebody in gives the
+            // session a new one (Laravel 12), which the answer carries in a header
+            // (SendRotatedCsrfToken) and which goes into the tag, so "Submit another" and the next
+            // upload are not refused with a 419.
             async post(url, options, seconds) {
                 const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
                 const timer = controller ? setTimeout(() => controller.abort(), (seconds || 60) * 1000) : null;
+                const meta = document.querySelector('meta[name="csrf-token"]');
+                const headers = Object.assign({}, (options && options.headers) || {}, meta ? { 'X-CSRF-TOKEN': meta.getAttribute('content') } : {});
                 try {
-                    return await fetch(url, Object.assign({}, options, controller ? { signal: controller.signal } : {}));
+                    const response = await fetch(url, Object.assign({}, options, { headers: headers }, controller ? { signal: controller.signal } : {}));
+                    const rotated = response.headers.get('X-Rotated-Csrf-Token');
+                    if (rotated && meta) meta.setAttribute('content', rotated);
+                    return response;
                 } finally {
                     if (timer) clearTimeout(timer);
                 }
@@ -456,7 +466,7 @@
                 try {
                     const response = await this.post('{{ route("event.guest_send_code", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         // `form` says which request page is asking, so each page's funnel counts its own codes.
                         body: JSON.stringify({ email, website: this.honeypot, 'cf-turnstile-response': this.turnstileToken, form: this.formKind || 'submit' })
                     }, 30);

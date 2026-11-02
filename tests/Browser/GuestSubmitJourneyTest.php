@@ -276,6 +276,16 @@ class GuestSubmitJourneyTest extends DuskTestCase
             $this->assertSame('Springfield', $state['city']);
             $this->assertSame('Sam Rivera', $state['postingAs']);
             $this->assertFalse($state['followLine'], 'they follow the schedule now, so the line is not repeated');
+
+            // And the second one goes. Signing in gave the session a new CSRF token (Laravel 12),
+            // and the page sent the one it was drawn with: this answered 419, "page expired".
+            $browser->type('#submit_event_name', 'Blues Night');
+            $browser->script('window.__submitApp.setDate("'.now()->addDays(19)->format('Y-m-d').'");');
+            $browser->type('#submit_event_time', '8:30pm')->keys('#submit_event_time', '{tab}');
+            $this->pressSubmit($browser);
+            $browser->waitUntil('!! document.querySelector("[data-gs-sent] .gs-ticket-name") && document.querySelector("[data-gs-sent] .gs-ticket-name").innerText.trim() === "Blues Night"', 20);
+
+            $this->assertNotNull(Event::where('name', 'Blues Night')->first());
         });
     }
 

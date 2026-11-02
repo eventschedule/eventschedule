@@ -27,6 +27,15 @@ return [
     'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v1.0.139'),
 
     /*
+    | Whether the scheduler finishes an update the updater left undone (its migrations and cache
+    | clears, AppUpdateService::finishUpdate()). Unset, AppUpdateService::finishes() decides: on for
+    | an install from a release zip, which has no .git; off for a git checkout, which is deployed
+    | and migrated by hand, where finishing on the next tick would race its own deploy. Left null
+    | here on purpose: a config cached before this key existed reads it as null too.
+    */
+    'finish_updates' => env('SELF_UPDATER_FINISH_UPDATES'),
+
+    /*
     |--------------------------------------------------------------------------
     | Repository types
     |--------------------------------------------------------------------------
@@ -48,7 +57,11 @@ return [
             'download_path' => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
             'private_access_token' => env('SELF_UPDATER_GITHUB_PRIVATE_ACCESS_TOKEN', ''),
             'use_branch' => env('SELF_UPDATER_USE_BRANCH', ''),
-            'package_file_name' => env('SELF_UPDATER_PACKAGE_FILE_NAME', 'eventschedule.zip'),
+            // eventschedule.zip, or eventschedule-php8.3.zip for a release that needs a newer
+            // PHP. An updater from before AppUpdateService refused such a release matches only
+            // eventschedule.zip, so it finds nothing to download instead of installing a release
+            // its server cannot run; this one fetches it and asks the PHP first.
+            'package_file_name' => env('SELF_UPDATER_PACKAGE_FILE_NAME', 'regex:^eventschedule(?:-php[0-9.]+)?\.zip$'),
         ],
         'gitlab' => [
             'base_url' => '',

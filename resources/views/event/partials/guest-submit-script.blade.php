@@ -484,7 +484,7 @@
                     // (pendingSubmit) with nothing on screen.
                     const response = await this.post('{{ route("event.check_email", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify({ email })
                     }, 15);
                     if (seq !== this.emailCheckSeq) {
@@ -627,7 +627,7 @@
                     formData.append('website', this.honeypot);
                     const response = await this.post('{{ route("event.guest_upload_image", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                        headers: { 'Accept': 'application/json' },
                         body: formData
                     });
                     const data = await response.json().catch(() => ({}));
@@ -668,7 +668,7 @@
                     if (file) formData.append('details_image', file);
                     const response = await this.post('{{ route("event.guest_parse", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                        headers: { 'Accept': 'application/json' },
                         body: formData
                     });
                     let data = (await response.json().catch(() => null)) || {};
@@ -920,7 +920,6 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: JSON.stringify(body),
                     });

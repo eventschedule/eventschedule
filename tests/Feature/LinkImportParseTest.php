@@ -339,6 +339,23 @@ class LinkImportParseTest extends TestCase
         }
     }
 
+    /**
+     * Past its headers, curl's error carries the response, and Laravel 12 throws an error status
+     * as a RequestException of its own: it is the error status it is, said as one.
+     */
+    public function test_a_body_cut_off_after_its_status_line_reads_by_its_status(): void
+    {
+        $cutOff = fn (int $status) => fn ($request) => throw new \GuzzleHttp\Exception\RequestException(
+            'cURL error 23', $request->toPsrRequest(), new \GuzzleHttp\Psr7\Response($status), null, ['errno' => CURLE_WRITE_ERROR]
+        );
+
+        Http::fake(['93.184.216.34/ok' => $cutOff(200), '93.184.216.34/gone' => $cutOff(404)]);
+
+        $this->parse('https://93.184.216.34/ok')->assertStatus(422)->assertJsonPath('reason', 'too_large');
+        $gone = $this->parse('https://93.184.216.34/gone')->assertStatus(422)->assertJsonPath('reason', 'http_error');
+        $this->assertStringContainsString('404', $gone->json('error'));
+    }
+
     public function test_an_international_name_is_fetched_by_its_ascii_form(): void
     {
         // The guard vets the name that is looked up, letter for letter, and refuses one with

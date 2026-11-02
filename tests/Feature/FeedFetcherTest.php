@@ -179,6 +179,31 @@ class FeedFetcherTest extends TestCase
         $this->assertSame([], $this->reported);
     }
 
+    /**
+     * Past its headers, curl's error carries the response, and Laravel 12 sends that down another
+     * road: a 2xx becomes a ConnectionException wrapping it, an error status a RequestException
+     * of Laravel's own that no longer holds the curl error. The first is still the size cap; the
+     * second is the error status it is, and nothing for the error tracker.
+     */
+    public function test_a_body_cut_off_after_its_status_line_reads_by_its_status(): void
+    {
+        $cutOff = fn (int $status, array $headers = []) => fn ($request) => throw new RequestException(
+            'cURL error 23: Failure writing output to destination for '.self::FEED,
+            $request->toPsrRequest(),
+            new \GuzzleHttp\Psr7\Response($status, $headers),
+            null,
+            ['errno' => CURLE_WRITE_ERROR]
+        );
+
+        Http::fake(['93.184.216.34/ok' => $cutOff(200), '93.184.216.34/down' => $cutOff(503, ['Retry-After' => '120'])]);
+
+        $this->assertSame(FeedFetcher::TOO_LARGE, $this->fetcher()->get('https://93.184.216.34/ok')->status);
+
+        $down = $this->fetcher()->get('https://93.184.216.34/down');
+        $this->assertSame([FeedFetcher::HTTP_ERROR, 503, 120], [$down->status, $down->httpStatus, $down->retryAfter]);
+        $this->assertSame([], $this->reported);
+    }
+
     public function test_a_validator_too_long_to_keep_is_not_kept_in_part(): void
     {
         Http::fake(['93.184.216.34/*' => Http::response('<rss/>', 200, ['ETag' => '"'.str_repeat('a', 300).'"', 'Last-Modified' => '  '])]);

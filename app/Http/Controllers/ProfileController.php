@@ -66,6 +66,11 @@ class ProfileController extends Controller
         if (can_self_update($request->user())) {
             $appUpdate = app(AppUpdateService::class);
 
+            // The website's PHP, for an update later run from the command line; and what an
+            // update left undone, for an install whose cron does not run (finishUpdate()).
+            AppUpdateService::recordPhp('web');
+            AppUpdateService::finishUpdate(fromPage: true);
+
             $data['version_installed'] = $appUpdate->versionInstalled();
             // null when the lookup failed, which the partial renders as "unknown" rather
             // than as a version that differs from the installed one.

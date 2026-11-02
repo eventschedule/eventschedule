@@ -443,7 +443,7 @@
                 try {
                     const response = await this.post('{{ route("event.booking_request.store", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify(body),
                     });
                     const data = await response.json().catch(() => ({}));

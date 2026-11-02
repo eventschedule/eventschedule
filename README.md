@@ -10,7 +10,7 @@
         <a href="https://github.com/eventschedule/eventschedule/releases/latest"><img src="https://img.shields.io/github/v/release/eventschedule/eventschedule?label=release" alt="Latest release"></a>
         <a href="LICENSE"><img src="https://img.shields.io/badge/license-AAL-blue" alt="License: AAL"></a>
         <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white" alt="PHP 8.2+">
-        <img src="https://img.shields.io/badge/Laravel-11-FF2D20?logo=laravel&logoColor=white" alt="Laravel 11">
+        <img src="https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white" alt="Laravel 12">
     </p>
     <p>
         <a href="https://eventschedule.com">Website</a> &middot;
@@ -208,7 +208,7 @@ php artisan test            # Feature and Unit tests, run against a separate eve
 
 ## Tech stack
 
-[PHP](https://php.net) 8.2+ / [Laravel](https://laravel.com) 11 / [Vue.js](https://vuejs.org) 3 / [Tailwind CSS](https://tailwindcss.com) / [MySQL](https://mysql.com) or MariaDB / [Vite](https://vite.dev)
+[PHP](https://php.net) 8.2+ / [Laravel](https://laravel.com) 12 / [Vue.js](https://vuejs.org) 3 / [Tailwind CSS](https://tailwindcss.com) / [MySQL](https://mysql.com) or MariaDB / [Vite](https://vite.dev)
 
 ## Documentation
 

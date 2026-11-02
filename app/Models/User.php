@@ -229,6 +229,19 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * '' for an account with no password (made by Google or Facebook, or waiting for one to be
+     * set). Laravel 12 checks a remember-me cookie's third part against this with hash_equals(),
+     * which throws on null: every page answered 500 for such an account once its session expired.
+     * '' matches no typed password (the hasher refuses an empty hash), and reads as "none" to
+     * AuthenticateSession and SessionGuard::login() as null did. Ask `password` itself, never
+     * this, whether an account has one. RememberCookieAcrossUpgradeTest holds it.
+     */
+    public function getAuthPassword(): string
+    {
+        return (string) $this->password;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

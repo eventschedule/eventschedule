@@ -2851,7 +2851,7 @@
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: formData
                     });
@@ -3352,7 +3352,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
                             venue_name: venueName,
@@ -3414,7 +3414,15 @@
                             } : {})
                         })
                     });
-                    
+
+                    // A guest's account is made and signed in by this request, and Laravel 12 gives
+                    // the session a new CSRF token then: the page's next request must send it, or it
+                    // answers 419 (SendRotatedCsrfToken).
+                    const rotatedCsrf = response.headers.get('X-Rotated-Csrf-Token');
+                    if (rotatedCsrf) {
+                        document.querySelector('meta[name="csrf-token"]').setAttribute('content', rotatedCsrf);
+                    }
+
                     // Handle response
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
@@ -3662,7 +3670,7 @@
                     const response = await fetch('{{ isset($isGuest) && $isGuest ? route("event.guest_upload_image", ["subdomain" => $role->subdomain]) : route("event.upload_image", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: formData
                     });

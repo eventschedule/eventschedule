@@ -78,7 +78,7 @@ class EmailGuestCommerceRenderTest extends TestCase
         $this->assertStringContainsString(e($event->name), $html);
         $this->assertStringContainsString(e(__('messages.manage_my_pass')), $html);
         $this->assertStringContainsString(e(__('messages.pass_cancel_email_deadline_forfeit', ['deadline' => $mail->content()->with['cancelDeadlineLabel']])), $html);
-        // The QR code is embedded, and render() swaps a one-line cid: image for a data: URI.
+        // The QR code is embedded, and render() swaps every cid: image for a data: URI.
         $this->assertStringContainsString('data:image/png;base64,', $html);
     }
 

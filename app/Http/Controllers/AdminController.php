@@ -4051,6 +4051,11 @@ class AdminController extends Controller
             abort(404);
         }
 
+        // The website's PHP, for an update later run from the command line; and what an update
+        // left undone, for an install whose cron does not run (finishUpdate()).
+        AppUpdateService::recordPhp('web');
+        AppUpdateService::finishUpdate(fromPage: true);
+
         return view('admin.app-update', [
             'version_installed' => $appUpdate->versionInstalled(),
             'version_available' => $appUpdate->versionAvailable($updater),

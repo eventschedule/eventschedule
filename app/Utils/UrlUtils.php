@@ -1317,6 +1317,28 @@ class UrlUtils
     }
 
     /**
+     * The Guzzle error behind a failed transfer that is NOT the other side being unreachable,
+     * or null when it was (or when nothing is known). Laravel 11 let a RequestException with no
+     * response (curl 23 when the guard's size cap cut a body off, a TLS failure) out raw, and
+     * wrapped only ConnectException in ConnectionException; Laravel 12 wraps both, so a caller
+     * that catches ConnectionException alone reads a cut-off body as "unreachable".
+     */
+    public static function transferFailure(\Throwable $e): ?\GuzzleHttp\Exception\RequestException
+    {
+        if ($e instanceof \Illuminate\Http\Client\ConnectionException) {
+            $e = $e->getPrevious();
+        }
+
+        return $e instanceof \GuzzleHttp\Exception\RequestException ? $e : null;
+    }
+
+    /** Whether a transfer was stopped by the guard's size cap: a stated length over it, or a body that ran past it. */
+    public static function stoppedBySizeCap(\GuzzleHttp\Exception\RequestException $e): bool
+    {
+        return in_array($e->getHandlerContext()['errno'] ?? null, [CURLE_WRITE_ERROR, CURLE_FILESIZE_EXCEEDED], true);
+    }
+
+    /**
      * Bounded, SSRF-safe redirect following. Every hop - including each redirect
      * target - is re-validated and IP-pinned, so a validated host that 30x's to an
      * internal address is stopped at the unsafe hop (Guzzle's own redirect follower

@@ -6,6 +6,7 @@ use App\Mail\PersonalDataExportReady;
 use App\Models\BackupJob;
 use App\Models\User;
 use App\Services\PersonalDataExportService;
+use App\Utils\SetupGuide;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -27,7 +28,7 @@ class PersonalDataExportTest extends TestCase
         Mail::fake();
 
         $user = User::factory()->create(['email' => 'person@example.com']);
-        \App\Utils\SetupGuide::suggest($user, false);
+        SetupGuide::suggest($user, false);
         $role = $this->createRole($this->createOwner());
         $event = $this->createEvent($role, ['name' => 'Night Market']);
         // Bought as a guest, before the account existed: found by the address.
@@ -82,7 +83,9 @@ class PersonalDataExportTest extends TestCase
         $known = array_merge(PersonalDataExportService::EXPORTED, array_keys(PersonalDataExportService::NOT_EXPORTED));
         $missing = [];
 
-        foreach (array_column(Schema::getTables(), 'name') as $table) {
+        // Laravel 12's getTables() lists every schema on the server (the dev database and the
+        // other sessions' test schemas included), so it is asked for this connection's own.
+        foreach (array_column(Schema::getTables(Schema::getCurrentSchemaName()), 'name') as $table) {
             if (in_array($table, ['migrations', 'failed_jobs', 'jobs', 'job_batches', 'cache', 'cache_locks'], true)) {
                 continue;
             }
