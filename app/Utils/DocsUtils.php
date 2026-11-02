@@ -16,8 +16,8 @@ class DocsUtils
     /** Route name => page key, built lazily. */
     private static ?array $routeIndex = null;
 
-    /** Marketing path => docs key, from the manifest's `feature` entries; see featureGuideKeys(). */
-    private static ?array $featureGuideKeys = null;
+    /** Where featureGuideKeys() keeps its map: on the app, not in a static (see there). */
+    private const FEATURE_GUIDE_KEYS = 'docs.feature_guide_keys';
 
     /**
      * Every page, keyed by manifest key, with the key merged in as 'key'.
@@ -335,12 +335,19 @@ class DocsUtils
      * built once per request: guideForPath() runs on every marketing page's related strip, and
      * walking the whole manifest there meant ~40 route lookups per render.
      *
+     * Kept on the app instance, not in a static: the map is read off the routes registered, and a
+     * static outlived the app. In one test process every later test read the map an earlier one
+     * built under another install mode's routes, and a page lost its guide (DocsManifestTest
+     * failed on CI's fifth shard once new test files moved it).
+     *
      * @return array<string, string>
      */
     private static function featureGuideKeys(): array
     {
-        if (self::$featureGuideKeys !== null) {
-            return self::$featureGuideKeys;
+        $app = app();
+
+        if ($app->bound(self::FEATURE_GUIDE_KEYS)) {
+            return $app->make(self::FEATURE_GUIDE_KEYS);
         }
 
         $map = [];
@@ -353,6 +360,8 @@ class DocsUtils
             }
         }
 
-        return self::$featureGuideKeys = $map;
+        $app->instance(self::FEATURE_GUIDE_KEYS, $map);
+
+        return $map;
     }
 }
