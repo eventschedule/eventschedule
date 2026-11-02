@@ -243,12 +243,6 @@ Schedule::call(function () {
     Artisan::call('calendar:scan-exposures');
 })->everyFifteenMinutes()->name('calendar-exposure-scan')->withoutOverlapping(20)->appendOutputTo(storage_path('logs/scheduler.log'));
 
-Schedule::call(function () {
-    if (config('app.hosted')) {
-        Artisan::call('app:setup-demo');
-    }
-})->hourly()->name('app-setup-demo')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
-
 // Nexus only: the blog is the marketing site's. Keep in sync with AppController::translateData().
 Schedule::call(function () {
     if (config('app.is_nexus')) {
@@ -403,6 +397,21 @@ Schedule::call(function () {
 Schedule::call(function () {
     Artisan::call('app:update-geoip');
 })->monthly()->name('app-update-geoip')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));
+
+// The demo reset: about three minutes and the most memory of anything here, since it drops and
+// re-seeds every demo schedule. Second to LAST on purpose. Everything due in a minute runs in one
+// schedule:run process, one task after another, so a task killed mid-run takes every task listed
+// after it down with it, and a daily task is due in that one minute only. On 2026-11-01 and 11-02
+// the worker was killed during this reset at midnight (exit 128, a restart three minutes later)
+// while it sat in the middle of the file, and the ten daily tasks listed below it (audit and
+// personal-data pruning, boost statements, subscription reminders, referral credits, the daily
+// blog post) did not run either day. Down here a reset that dies costs only itself and the feeds.
+// SchedulerHealthTest keeps it here.
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:setup-demo');
+    }
+})->hourly()->name('app-setup-demo')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Feeds: the addresses schedules keep reading for events (App\Services\Feeds\FeedImporter).
 // Every minute, though a feed is due about once an hour: its own next_check_at says when, so most

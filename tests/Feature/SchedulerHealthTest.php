@@ -62,6 +62,24 @@ class SchedulerHealthTest extends TestCase
         );
     }
 
+    /**
+     * Every task due in a minute runs in one schedule:run process, in file order, so a task killed
+     * mid-run takes everything listed after it down too, and a daily task is due in that one
+     * minute only. The demo reset is the longest and hungriest entry, and on 2026-11-01 and 11-02
+     * the worker died inside it at midnight while ten daily tasks sat below it: none of them ran
+     * either day. Only the feed reads, which are last for a reason of their own, may follow it.
+     */
+    public function test_the_demo_reset_runs_after_everything_but_the_feeds(): void
+    {
+        $names = collect($this->events())->map(fn ($event) => $event->description)->values();
+
+        $this->assertSame(
+            ['app-setup-demo', 'app-import-feeds'],
+            $names->slice(-2)->values()->all(),
+            'app-setup-demo must be second to last in routes/console.php, followed only by app-import-feeds'
+        );
+    }
+
     public function test_every_scheduled_task_is_named(): void
     {
         foreach ($this->events() as $event) {
