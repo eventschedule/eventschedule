@@ -14,12 +14,33 @@ class SmsService
             && ! empty(config('services.twilio.from'));
     }
 
+    /** Twilio took the message. */
+    public const SENT = 'sent';
+
+    /**
+     * Twilio turned this message down for good: a 4xx other than 429 (21408 a region the account
+     * may not send to, 21211 a number that is not one, 21610 a recipient who replied STOP).
+     * Sending it again gets the same answer.
+     */
+    public const REFUSED = 'refused';
+
+    /** It may go through later: a 429, a 5xx, a timeout, or SMS is not configured. */
+    public const FAILED = 'failed';
+
     public static function sendSms(string $to, string $message): bool
+    {
+        return self::send($to, $message) === self::SENT;
+    }
+
+    /**
+     * @return self::SENT|self::REFUSED|self::FAILED
+     */
+    public static function send(string $to, string $message): string
     {
         if (! self::isConfigured()) {
             Log::warning('Twilio SMS not configured, skipping SMS send');
 
-            return false;
+            return self::FAILED;
         }
 
         try {
@@ -36,23 +57,26 @@ class SmsService
                 ]);
 
             if ($response->successful()) {
-                return true;
+                return self::SENT;
             }
 
-            Log::error('Twilio SMS failed', [
+            $refused = $response->clientError() && $response->status() !== 429;
+
+            Log::log($refused ? 'warning' : 'error', $refused ? 'Twilio SMS refused' : 'Twilio SMS failed', [
                 'to' => self::maskPhone($to),
                 'status' => $response->status(),
+                'code' => $response->json('code'),
                 'body' => $response->body(),
             ]);
 
-            return false;
+            return $refused ? self::REFUSED : self::FAILED;
         } catch (\Exception $e) {
             Log::error('Twilio SMS exception', [
                 'to' => self::maskPhone($to),
                 'error' => $e->getMessage(),
             ]);
 
-            return false;
+            return self::FAILED;
         }
     }
 

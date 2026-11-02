@@ -36,7 +36,13 @@ class SendQueuedSms implements ShouldQueue
             return;
         }
 
-        if (! SmsService::sendSms($this->to, $this->message)) {
+        $result = SmsService::send($this->to, $this->message);
+
+        // A refusal (a region the Twilio account may not send to, a number that is not one, a
+        // recipient who replied STOP) is Twilio's final answer for this number: thrown, it was
+        // tried three times and reported to Sentry each time for an SMS that could never go.
+        // SmsService has logged it with Twilio's code; the job is done.
+        if ($result === SmsService::FAILED) {
             throw new \RuntimeException('Failed to send SMS');
         }
     }
