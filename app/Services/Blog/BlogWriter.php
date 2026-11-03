@@ -406,6 +406,8 @@ class BlogWriter
             'system' => $system,
             'schema' => $schema,
             'temperature' => $temperature,
+            // The blog follows a long brief; it was written with the model thinking freely.
+            'thinking_level' => GeminiUtils::THINKING_MODEL_DEFAULT,
             'model' => config('services.google.gemini_blog_model'),
             'timeout' => (int) config('blog.call_timeout', 100),
         ]);

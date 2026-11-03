@@ -1,5 +1,7 @@
 <?php
 
+use App\Utils\GeminiUtils;
+
 return [
 
     /*
@@ -77,8 +79,8 @@ return [
         'gemini_key' => env('GEMINI_API_KEY'),
         // ?: because .env.example ships these empty; a default argument would not fire and
         // the model name would be sent to the API blank. Same reason as the plan prices below.
-        'gemini_translation_model' => env('GEMINI_TRANSLATION_MODEL') ?: 'gemini-2.5-flash',
-        'gemini_content_model' => env('GEMINI_CONTENT_MODEL') ?: 'gemini-2.5-flash',
+        'gemini_translation_model' => env('GEMINI_TRANSLATION_MODEL') ?: GeminiUtils::DEFAULT_MODEL,
+        'gemini_content_model' => env('GEMINI_CONTENT_MODEL') ?: GeminiUtils::DEFAULT_MODEL,
         // The blog's writer (App\Services\Blog\BlogWriter) alone: it follows a long brief, and a newer
         // model kept every rule where the content model needed a second attempt. Empty: the content model.
         'gemini_blog_model' => env('GEMINI_BLOG_MODEL') ?: null,

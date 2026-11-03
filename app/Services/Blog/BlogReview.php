@@ -174,6 +174,7 @@ class BlogReview
             'stage' => 'claims',
             'system' => $system,
             'temperature' => 0.1,
+            'thinking_level' => GeminiUtils::THINKING_MODEL_DEFAULT,
             'model' => config('services.google.gemini_blog_model'),
             'timeout' => 60,
             'schema' => [

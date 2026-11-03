@@ -298,6 +298,8 @@ class BlogWriterTest extends TestCase
         $this->assertStringContainsString('never a category', $draft['options']['system_instruction']);
         $this->assertSame('OBJECT', $draft['options']['generation_config']['response_schema']['type']);
         $this->assertSame(0.7, $draft['options']['generation_config']['temperature']);
+        // Every other content call thinks at "low" on Gemini 3+; the blog keeps the model's own depth.
+        $this->assertSame(GeminiUtils::THINKING_MODEL_DEFAULT, $draft['options']['thinking_level']);
         $this->assertStringContainsString('when in doubt, cut', $this->asked['edit'][0]['options']['system_instruction']);
     }
 
