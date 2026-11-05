@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\RepliesToEventSupport;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
@@ -22,7 +23,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class PassBookingConfirmation extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RepliesToEventSupport, SerializesModels;
 
     public function __construct(
         protected Sale $sale,
@@ -49,6 +50,7 @@ class PassBookingConfirmation extends Mailable
         return new Envelope(
             subject: __('messages.pass_booking_confirmation').' - '.$this->bookedEvent->name,
             from: new Address($fromAddress, $fromName),
+            replyTo: $this->eventSupportReplyTo($this->bookedEvent->user?->email),
         );
     }
 

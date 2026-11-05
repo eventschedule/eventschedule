@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\RepliesToEventSupport;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
@@ -18,7 +19,7 @@ use Illuminate\Queue\SerializesModels;
 
 class TicketPurchase extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RepliesToEventSupport, SerializesModels;
 
     protected $sale;
 
@@ -63,6 +64,7 @@ class TicketPurchase extends Mailable
         return new Envelope(
             subject: __($subjectKey).' - '.$this->event->name,
             from: new Address($fromAddress, $fromName),
+            replyTo: $this->eventSupportReplyTo($this->event->user?->email),
         );
     }
 
@@ -116,7 +118,7 @@ class TicketPurchase extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

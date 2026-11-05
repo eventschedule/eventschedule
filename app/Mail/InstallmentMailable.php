@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\RepliesToEventSupport;
 use App\Models\Role;
 use App\Models\SaleInstallment;
 use App\Models\SaleInstallmentPlan;
@@ -21,7 +22,7 @@ use Illuminate\Queue\SerializesModels;
  */
 abstract class InstallmentMailable extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RepliesToEventSupport, SerializesModels;
 
     protected string $template;
 
@@ -51,6 +52,7 @@ abstract class InstallmentMailable extends Mailable
         return new Envelope(
             subject: $this->subjectLine(),
             from: new Address($fromAddress, $fromName),
+            replyTo: $this->eventSupportReplyTo($this->scheduleOrEventSupportEmail($this->role, $this->plan->sale?->event)),
         );
     }
 
