@@ -689,6 +689,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/docs/selfhost/installation') !!}
     </url>
     <url>
+        <loc>{{ url('/docs/selfhost/docker') }}</loc>
+        {!! $lastmodTag('/docs/selfhost/docker') !!}
+    </url>
+    <url>
         <loc>{{ url('/docs/selfhost/stripe') }}</loc>
         {!! $lastmodTag('/docs/selfhost/stripe') !!}
     </url>

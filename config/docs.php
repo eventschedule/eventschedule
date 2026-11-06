@@ -495,6 +495,18 @@ return [
             'modified' => '2026-10-23',
         ],
 
+        'selfhost/docker' => [
+            'group' => 'selfhost',
+            'route' => 'marketing.docs.selfhost.docker',
+            'path' => '/docs/selfhost/docker',
+            'feature' => 'marketing.open_source',
+            'title' => 'Docker',
+            'blurb' => 'Run it with Docker Compose: HTTPS behind a proxy, email, Stripe, backups and updates.',
+            'icon' => 'code',
+            'published' => '2026-11-06',
+            'modified' => '2026-11-06',
+        ],
+
         'selfhost/stripe' => [
             'group' => 'selfhost',
             'route' => 'marketing.docs.selfhost.stripe',

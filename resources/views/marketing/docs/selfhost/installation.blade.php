@@ -42,7 +42,7 @@
             <p>For easier installation, you can use:</p>
             <ul class="doc-list mt-2">
                 <li><a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" rel="noopener noreferrer" class="doc-link">Softaculous</a> - One-click installation on cPanel hosts</li>
-                <li><a href="https://github.com/eventschedule/dockerfiles" target="_blank" rel="noopener noreferrer" class="doc-link">Docker</a> - Containerized deployment with Docker Compose</li>
+                <li><a href="{{ route('marketing.docs.selfhost.docker') }}" class="doc-link">Docker</a> - Containerized deployment with Docker Compose</li>
             </ul>
         </div>
     </section>

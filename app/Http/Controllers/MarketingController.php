@@ -1671,6 +1671,11 @@ class MarketingController extends Controller
         return view('marketing.docs.selfhost.installation');
     }
 
+    public function docsSelfhostDocker()
+    {
+        return view('marketing.docs.selfhost.docker');
+    }
+
     /**
      * SaaS setup documentation page
      */
@@ -7712,6 +7717,7 @@ class MarketingController extends Controller
             'boost' => route('marketing.docs.boost'),
             'selfhost_index' => route('marketing.docs.selfhost'),
             'selfhost_installation' => route('marketing.docs.selfhost.installation'),
+            'selfhost_docker' => route('marketing.docs.selfhost.docker'),
             'selfhost_stripe' => route('marketing.docs.selfhost.stripe'),
             'selfhost_google_calendar' => route('marketing.docs.selfhost.google_calendar'),
             'selfhost_google_wallet' => route('marketing.docs.selfhost.google_wallet'),
@@ -8125,6 +8131,11 @@ class MarketingController extends Controller
             ['page' => 'Selfhost', 'section' => 'Selfhost Guides', 'description' => 'Where to start when deploying Event Schedule on your own server, and which integration guides to add.', 'url' => $r['selfhost_index'].'#guides', 'category' => 'Selfhost', 'keywords' => 'selfhost self hosted on premise own server single tenant guides index overview'],
 
             // Installation
+            ['page' => 'Docker', 'section' => 'Overview', 'description' => 'Run Event Schedule with Docker Compose: the app, Nginx, MariaDB and the scheduler as four containers.', 'url' => $r['selfhost_docker'].'#overview', 'category' => 'Selfhost', 'keywords' => 'docker compose container install selfhost'],
+            ['page' => 'Docker', 'section' => 'Fix the Application Key', 'description' => 'Keep APP_KEY in .env so a rebuilt image does not sign everyone out.', 'url' => $r['selfhost_docker'].'#app-key', 'category' => 'Selfhost', 'keywords' => 'docker app_key key generate rebuild'],
+            ['page' => 'Docker', 'section' => 'Serve It Over HTTPS', 'description' => 'APP_ENV, APP_URL, SESSION_SECURE_COOKIE and TRUSTED_PROXIES behind Caddy, SWAG, Nginx Proxy Manager or Traefik.', 'url' => $r['selfhost_docker'].'#https', 'category' => 'Selfhost', 'keywords' => 'docker https reverse proxy caddy swag traefik nginx proxy manager trusted_proxies'],
+            ['page' => 'Docker', 'section' => 'Backups', 'description' => 'Dump the MariaDB database and archive the storage volume.', 'url' => $r['selfhost_docker'].'#backups', 'category' => 'Selfhost', 'keywords' => 'docker backup volume mariadb dump restore'],
+            ['page' => 'Docker', 'section' => 'Updating', 'description' => 'Rebuild the image without the cache, or pin a release with APP_REF.', 'url' => $r['selfhost_docker'].'#updating', 'category' => 'Selfhost', 'keywords' => 'docker update upgrade rebuild no-cache app_ref release'],
             ['page' => 'Installation', 'section' => 'Overview', 'description' => 'Manual installation guide for selfhosted deployments.', 'url' => $r['selfhost_installation'].'#overview', 'category' => 'Selfhost', 'keywords' => 'install setup deploy server'],
             ['page' => 'Installation', 'section' => 'Requirements', 'description' => 'Server requirements: PHP 8.2+, MySQL 5.7+ or MariaDB 10.3+, the PHP extensions, HTTPS and a cron entry.', 'url' => $r['selfhost_installation'].'#requirements', 'category' => 'Selfhost', 'keywords' => 'requirements php 8.2 mysql mariadb extensions gd server'],
             ['page' => 'Installation', 'section' => 'Set Up the Database', 'description' => 'Create MySQL database and user.', 'url' => $r['selfhost_installation'].'#database', 'category' => 'Selfhost', 'keywords' => 'database mysql create'],
