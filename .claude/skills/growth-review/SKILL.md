@@ -191,6 +191,10 @@ paying, and schedules that newly sold.
   Deploys are manual, so a tag date only says the version existed by then.
 - Line `daily` up with those dates. Compare equal windows either side of a release, and say how
   many events each side holds.
+- A spike in signups (or in the admin dashboard's active users, which a signup week lifts for
+  seven days) is traced in `signup_sources` (schema 26): signups per day by referrer channel,
+  referrer domain, utm source and landing path, last 90 days. Set it beside the outreach log,
+  `~/.claude/plans/growth-outreach/log.tsv`, to name the post that caused it.
 
 ## 5. Discipline (each of these has been gotten wrong before)
 

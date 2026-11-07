@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AnalyticsDaily;
+use App\Models\BlogPost;
 use App\Models\Event;
 use App\Models\MarketingDailyStat;
 use App\Models\Role;
@@ -15,7 +16,9 @@ use App\Utils\SetupGuide;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Cashier\Cashier;
 
 /**
@@ -33,7 +36,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 25;
+    public const SCHEMA_VERSION = 26;
 
     /** How far ahead the schedule rows look for events on sale (upcoming_*). */
     public const UPCOMING_DAYS = 60;
@@ -534,7 +537,7 @@ class GrowthExportService
      */
     private ?array $billingIds = null;
 
-    private ?\Illuminate\Support\Collection $subscriptionsByRole = null;
+    private ?Collection $subscriptionsByRole = null;
 
     /** Per-build memo of customDomainHosts(): attribution and the ticket links both read it. */
     private ?array $customDomainHosts = null;
@@ -785,6 +788,7 @@ class GrowthExportService
             'event_form' => $this->eventForm($months),
             ...($full ? [
                 'daily' => $this->daily(),
+                'signup_sources' => $signups['sources'],
                 'nudge_outcomes' => $this->nudgeOutcomes(),
                 'onboarding_nudges' => $this->onboardingNudges(),
                 'dismissed_steps' => $this->dismissedSteps(),
@@ -938,7 +942,11 @@ class GrowthExportService
             ->pluck('c', 'user_id');
 
         $rows = [];
+        // Each row's signup day, by position, for signupSources() only. Never a column: a row
+        // carries its attribution beside it, and a day on it would date one person's signup.
+        $signupDays = [];
         foreach ((clone $base)->orderByDesc('id')->limit($this->rowCap())->cursor() as $u) {
+            $signupDays[] = substr((string) $u->getRawOriginal('created_at'), 0, 10);
             $roleAgg = $rolesByUser[$u->id] ?? null;
             $ticketAgg = $ticketsByUser[$u->id] ?? null;
             $firstAt = $roleAgg?->first_at ? Carbon::parse($roleAgg->first_at) : null;
@@ -1000,9 +1008,45 @@ class GrowthExportService
         return [
             'columns' => $columns,
             'rows' => $rows,
+            'sources' => $this->signupSources($rows, array_flip($columns), $signupDays),
             'total' => $total,
             'truncated' => $total > $this->rowCap(),
         ];
+    }
+
+    /** How far back signup_sources reaches. */
+    private const SIGNUP_SOURCE_DAYS = 90;
+
+    /**
+     * Signups per day and per source, so a spike can be traced to what caused it: the signup rows
+     * carry only a month. Built from the rows AFTER anonymizeAttribution(), so every value here is
+     * one the rows already export; a cell is a count, never a person.
+     *
+     * @param  array<int, array<int, mixed>>  $rows
+     * @param  array<string, int>  $i
+     * @param  array<int, string>  $days
+     */
+    private function signupSources(array $rows, array $i, array $days): array
+    {
+        $from = now()->copy()->subDays(self::SIGNUP_SOURCE_DAYS - 1)->toDateString();
+        $dims = ['signup_intent', 'referrer_channel', 'referrer_domain', 'utm_source', 'landing_path'];
+
+        $cells = [];
+        foreach ($rows as $n => $row) {
+            $day = $days[$n] ?? '';
+            if ($day < $from) {
+                continue;
+            }
+            $values = array_map(fn ($d) => $row[$i[$d]], $dims);
+            $key = $day."\0".implode("\0", array_map(fn ($v) => (string) $v, $values));
+            $cells[$key] ??= [$day, ...$values, 0];
+            $cells[$key][count($dims) + 1]++;
+        }
+
+        $out = array_values($cells);
+        usort($out, fn ($a, $b) => [$a[0], -$a[count($dims) + 1]] <=> [$b[0], -$b[count($dims) + 1]]);
+
+        return ['columns' => ['date', ...$dims, 'signups'], 'rows' => $out];
     }
 
     /**
@@ -1875,7 +1919,7 @@ class GrowthExportService
     }
 
     /** Every subscription, grouped by role_id, newest first - the Cashier relation's own order. */
-    private function subscriptionsByRole(): \Illuminate\Support\Collection
+    private function subscriptionsByRole(): Collection
     {
         return $this->subscriptionsByRole ??= Cashier::$subscriptionModel::query()
             ->orderBy('created_at', 'desc')
@@ -2783,11 +2827,11 @@ class GrowthExportService
         // A transfer cancels the old owner's subscription, but the schedule changed hands rather
         // than left, so it is counted apart.
         $churned = (clone $rows)->whereNull('resumed_at')
-            ->whereNotIn('source', \App\Models\SubscriptionCancellation::NOT_CHURN_SOURCES);
+            ->whereNotIn('source', SubscriptionCancellation::NOT_CHURN_SOURCES);
 
         return [
             'cancelled' => (clone $churned)->count(),
-            'transferred' => (clone $rows)->whereIn('source', \App\Models\SubscriptionCancellation::NOT_CHURN_SOURCES)->count(),
+            'transferred' => (clone $rows)->whereIn('source', SubscriptionCancellation::NOT_CHURN_SOURCES)->count(),
             'resumed' => (clone $rows)->whereNotNull('resumed_at')->count(),
             'with_reason' => (clone $churned)->whereNotNull('reason')->count(),
             'by_reason' => (clone $churned)->selectRaw("COALESCE(reason, 'none') as k, COUNT(*) as c")
@@ -3587,11 +3631,11 @@ class GrowthExportService
     {
         $columns = ['path', 'section', 'source', 'published', 'words', 'views', 'noindex'];
 
-        if (! config('app.is_nexus') || ! \Illuminate\Support\Facades\Schema::hasColumn('blog_posts', 'category')) {
+        if (! config('app.is_nexus') || ! Schema::hasColumn('blog_posts', 'category')) {
             return ['columns' => $columns, 'rows' => []];
         }
 
-        $rows = \App\Models\BlogPost::published()
+        $rows = BlogPost::published()
             ->orderByDesc('published_at')
             ->get(['slug', 'category', 'source', 'published_at', 'content', 'view_count', 'noindex'])
             ->map(fn ($post) => [

@@ -71,6 +71,8 @@ identifier, subdomain, custom domain or token appears in it.
 - **Dates** on the schedule rows leave only as buckets of days (`*_ends_in`, `last_event_created`).
   Residual risk: `hero_test.daily` counts signups per day and variant, so a variant with a single
   signup in a month dates that signup row (`hero_variant`, `created_month`) to the day.
+  `signup_sources` has the same residual risk: a cell of 1 dates the one signup row that carries
+  those values in that month. Its values are the already-anonymized ones, never a raw string.
 - **Country** (`schedules.country`): a country shared by fewer than 5 schedules reads `(other)`.
   The threshold is higher than attribution's 3 because a schedule row carries more beside it.
 - **Registration links** (`schedules.external_tickets_90d`): the link is organizer-typed, so only
@@ -99,6 +101,7 @@ any two numbers.
 | `claims` | OWNERLESS placeholder schedules, which every other section excludes | Monthly, last 6 months |
 | `churn` | `subscription_cancellations` rows | All time, since 2026-09-28 |
 | `daily` | Mixed: organizer and other signups, real schedules and events, sellers, subscriptions | Last 180 UTC days |
+| `signup_sources` | The `signups` rows (verified, non-demo, not blocked; within the row cap) | Last 90 days |
 | `nudge_outcomes` | Schedules sent an activation nudge | All time; outcomes 14 days after each nudge |
 | `onboarding_nudges` | Organizer cohort signed up since 2026-08-10 | Since 2026-08-10 |
 | `buyers` | Everyone with a paid sale on a non-demo event (money, or free RSVP) | Last 12 months |
@@ -313,6 +316,13 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `paid_orders`, `stripe_connected` (Stripe Connect onboarding completed), `paywall_views`
     (first view per user), `trial_starts`;
   - `subscriptions_started` (not declined), `subscriptions_ended`, `cancellations`.
+- `signup_sources` (columnar, schema 26): signups per day and per source, so a rise in `daily`
+  can be traced to what caused it. Columns `date`, `signup_intent`, `referrer_channel`,
+  `referrer_domain`, `utm_source`, `landing_path`, `signups`: one row per day and combination,
+  biggest first within a day. The values are exactly those of the `signups` rows after
+  anonymization (`(other)`, `(redacted)` and the rest), and the date is the account's
+  `created_at` day, the same clock as `daily`.
+  - A day with no row had no signups in the rows; a row-capped pull can miss the oldest days.
 - `nudge_outcomes`: per activation-nudge key, `{sent, matured, acted_event, acted_ticket_type,
   acted_stripe_connected, acted_paid_sale, acted_subscribed}`. `acted_subscribed` is from schema 25.
   - `acted_*` counts matured nudges (14+ days old) whose schedule did that within 14 days.
@@ -616,6 +626,10 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **26** (2026-11-07)
+  - **New section `signup_sources`:** signups per day by intent, referrer channel, referrer
+    domain, utm source and landing path, for the last 90 days. The signup rows still carry only
+    a month.
 - **25** (2026-10-31)
   - **Two selling nudges and one outcome.** `nudges` and `nudge_outcomes` can carry `paid_blocked`
     (a free schedule with an upcoming paid event its plan cannot sell) and `no_orders_soon` (a
