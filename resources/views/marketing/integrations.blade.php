@@ -749,6 +749,7 @@
             ['money', 'Money ports'],
             ['block', 'Terminal block'],
             ['edges', 'Operator ports'],
+            ['partners', 'Partner apps'],
             ['open', 'Not wired'],
             ['faq', 'Questions'],
             ['claim', 'Wire it up'],
@@ -1407,13 +1408,68 @@
         </div>
     </section>
 
+    {{-- ============================================================
+         8. Partner apps: built on the wires, not a port of their own.
+         Kept out of the sixteen ports above on purpose: nothing here is
+         a connection Event Schedule makes. The Stackapella connection is
+         being built (stackapella docs/event-schedule-integration-plan.md);
+         when it opens, the "being built" words here and on /stackapella
+         are the ones to change.
+         ============================================================ --}}
+    <section id="partners" class="scroll-mt-24 es-wire-rule border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-wire-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-wire-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Partner apps</p>
+                <h2 class="es-balance es-wire-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Apps that plug in <span class="es-wire-accent">from the other end.</span>
+                </h2>
+                <p class="es-wire-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Not a port of ours, so not one of the sixteen: an app on the far side of the wire, which reads your schedule and books into it.
+                </p>
+            </div>
+
+            <div class="es-wire-card p-7 sm:p-9" data-reveal="panel">
+                <div class="mb-5 flex flex-wrap items-center gap-3">
+                    @include('marketing.partials.integration-logo', ['name' => 'stackapella', 'class' => 'h-9 w-9 shrink-0'])
+                    <h3 class="es-wire-ink text-xl font-bold">Stackapella</h3>
+                    <span class="es-wire-dir">both</span>
+                    <span class="es-wire-dir">being built</span>
+                </div>
+                <p class="es-wire-muted mb-6 text-sm">
+                    A web app where singers learn their part from a guide voice and record every part of a song in time. Voice teachers and choirs can use the two side by side today: the lessons, rehearsals and concerts here, the practice there. The connection being built puts them together.
+                </p>
+                <div class="es-wire-spec mb-6">
+                    <span class="es-wire-spec-k">Connecting</span>
+                    <span class="es-wire-spec-v es-wire-muted">From Stackapella's settings: sign in to Event Schedule, approve, pick a schedule. A selfhosted install connects with an API key and its address.</span>
+                    <span class="es-wire-spec-k">Lessons</span>
+                    <span class="es-wire-spec-v es-wire-muted">Singers book your appointment types from inside Stackapella, at the times your hours leave open, and a move or a cancel in either app reaches the other.</span>
+                    <span class="es-wire-spec-k">Choirs</span>
+                    <span class="es-wire-spec-v es-wire-muted">A Stackapella choir group shows your next rehearsals and concerts with what to practise, and the songs appear on the event page.</span>
+                    <span class="es-wire-spec-k">Stays here</span>
+                    <span class="es-wire-spec-v es-wire-muted">Your hours, buffers, calendar sync, reminders and public pages. Stackapella reads them and keeps no second copy.</span>
+                </div>
+                <div class="flex flex-wrap gap-x-6 gap-y-2">
+                    <a href="{{ marketing_url('/stackapella') }}" class="es-wire-link inline-flex items-center gap-1 text-sm font-semibold hover:underline">
+                        Event Schedule and Stackapella
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </a>
+                    <a href="https://stackapella.com/?ref=eventschedule" target="_blank" rel="noopener" class="es-wire-link inline-flex items-center gap-1 text-sm font-semibold hover:underline">
+                        stackapella.com
+                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ============================================================ -->
-    <!-- 8. Unterminated: what is honestly not here                   -->
+    <!-- 9. Unterminated: what is honestly not here                   -->
     <!-- ============================================================ -->
     <section id="open" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-wire-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-wire-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                 <p class="es-wire-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Unterminated</p>
                 <h2 class="es-balance es-wire-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Ports that <span class="es-wire-accent">are not there.</span>
@@ -1470,14 +1526,14 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 10. FAQ                                                      -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-wire-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <div class="es-wire-corner mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <h2 class="es-balance es-wire-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>
@@ -1504,7 +1560,7 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 11. Finale                                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">

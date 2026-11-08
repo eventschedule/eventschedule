@@ -585,6 +585,7 @@ class Role extends Model implements MustVerifyEmail
         'splash-alternative',
         'squarespace-alternative',
         'squarespace-replacement',
+        'stackapella',
         'store',
         'stripe',
         'sub-schedules',

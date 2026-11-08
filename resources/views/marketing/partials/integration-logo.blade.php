@@ -45,6 +45,18 @@
         </svg>
         @break
 
+    @case('stackapella')
+        {{-- Stackapella: its four-bar mark (stackapella web/icons/icon.svg) on a black tile,
+             the bars at the mark's own lengths and colours. --}}
+        <svg class="{{ $iconClass }}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5" fill="#000"/>
+            <rect x="6" y="7.3" width="12" height="1.6" rx="0.8" fill="#ff9139"/>
+            <rect x="6" y="10.1" width="8.88" height="1.6" rx="0.8" fill="#ffea6b"/>
+            <rect x="6" y="12.9" width="10.56" height="1.6" rx="0.8" fill="#45eca4"/>
+            <rect x="6" y="15.7" width="7.44" height="1.6" rx="0.8" fill="#968dfd"/>
+        </svg>
+        @break
+
     @case('caldav')
         {{-- CalDAV (generic calendar sync) --}}
         <svg class="{{ $iconClass }}" viewBox="0 0 24 24" fill="none" aria-hidden="true">

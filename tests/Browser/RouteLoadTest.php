@@ -100,6 +100,7 @@ class RouteLoadTest extends DuskTestCase
                 '/caldav',
                 '/stripe',
                 '/invoiceninja',
+                '/stackapella',
 
                 // Audience pages
                 '/for-talent',

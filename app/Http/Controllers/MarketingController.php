@@ -493,6 +493,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Stackapella page: Event Schedule beside Stackapella, for voice teachers and choirs
+     */
+    public function stackapella()
+    {
+        return view('marketing.stackapella');
+    }
+
+    /**
      * Analytics page
      */
     public function analytics()

@@ -97,6 +97,7 @@ class GenerateSocialImages extends Command
         'caldav' => '/caldav',
         'stripe' => '/stripe',
         'invoiceninja' => '/invoiceninja',
+        'stackapella' => '/stackapella',
 
         // For-X persona pages
         'for-talent' => '/for-talent',

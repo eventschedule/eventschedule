@@ -325,6 +325,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/invoiceninja') !!}
     </url>
     <url>
+        <loc>{{ url('/stackapella') }}</loc>
+        {!! $lastmodTag('/stackapella') !!}
+    </url>
+    <url>
         <loc>{{ url('/features/analytics') }}</loc>
         {!! $lastmodTag('/features/analytics') !!}
     </url>

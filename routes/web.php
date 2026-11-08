@@ -1412,6 +1412,7 @@ if (config('app.is_nexus')) {
         Route::get('/stripe', [MarketingController::class, 'stripe'])->name('marketing.stripe');
         Route::get('/paypal', [MarketingController::class, 'paypal'])->name('marketing.paypal');
         Route::get('/invoiceninja', [MarketingController::class, 'invoiceninja'])->name('marketing.invoiceninja');
+        Route::get('/stackapella', [MarketingController::class, 'stackapella'])->name('marketing.stackapella');
         Route::get('/features/analytics', [MarketingController::class, 'analytics'])->name('marketing.analytics');
         Route::get('/features/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
         Route::get('/features/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
@@ -1698,6 +1699,7 @@ if (config('app.is_nexus')) {
             Route::get('/stripe', [MarketingController::class, 'stripe'])->name('marketing.stripe');
             Route::get('/paypal', [MarketingController::class, 'paypal'])->name('marketing.paypal');
             Route::get('/invoiceninja', [MarketingController::class, 'invoiceninja'])->name('marketing.invoiceninja');
+            Route::get('/stackapella', [MarketingController::class, 'stackapella'])->name('marketing.stackapella');
             Route::get('/features/analytics', [MarketingController::class, 'analytics'])->name('marketing.analytics');
             Route::get('/features/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
             Route::get('/features/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
@@ -1940,6 +1942,7 @@ if (config('app.is_nexus')) {
             Route::get('/caldav', fn () => redirect('https://'._base_domain().'/caldav', 301));
             Route::get('/stripe', fn () => redirect('https://'._base_domain().'/stripe', 301));
             Route::get('/invoiceninja', fn () => redirect('https://'._base_domain().'/invoiceninja', 301));
+            Route::get('/stackapella', fn () => redirect('https://'._base_domain().'/stackapella', 301));
             Route::get('/analytics', fn () => redirect('https://'._base_domain().'/features/analytics', 301));
             Route::get('/integrations', fn () => redirect('https://'._base_domain().'/features/integrations', 301));
             Route::get('/custom-fields', fn () => redirect('https://'._base_domain().'/features/custom-fields', 301));
@@ -2152,6 +2155,7 @@ if (config('app.is_nexus')) {
     Route::get('/caldav', fn () => redirect()->route('home'));
     Route::get('/stripe', fn () => redirect()->route('home'));
     Route::get('/invoiceninja', fn () => redirect()->route('home'));
+    Route::get('/stackapella', fn () => redirect()->route('home'));
     Route::get('/features/integrations', fn () => redirect()->route('home'));
     Route::get('/features/custom-fields', fn () => redirect()->route('home'));
     Route::get('/features/custom-labels', fn () => redirect()->route('home'));

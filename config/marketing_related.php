@@ -510,6 +510,7 @@ return [
         ['title' => 'Stripe', 'path' => '/stripe', 'blurb' => 'The charge is created on your own account, with no platform fee.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
         ['title' => 'Online Events', 'path' => '/features/online-events', 'blurb' => 'Paste a Zoom, Meet or stream link once and the ticket and listing follow.'],
+        ['title' => 'Stackapella', 'path' => '/stackapella', 'blurb' => 'Lessons and rehearsals here, the parts learned in Stackapella.'],
     ],
 
     'features/newsletters' => [
@@ -573,6 +574,7 @@ return [
         ['title' => 'Team Scheduling', 'path' => '/features/team-scheduling', 'blurb' => 'Put other people on your schedule with a named position.'],
         ['title' => 'Custom Fields', 'path' => '/features/custom-fields', 'blurb' => 'Ask your own questions on the ticket and registration forms.'],
         ['title' => 'Calendly Replacement', 'path' => '/calendly-replacement', 'blurb' => 'One-on-one bookings plus public events with ticketing.'],
+        ['title' => 'Stackapella', 'path' => '/stackapella', 'blurb' => 'Lessons and rehearsals here, the parts learned in Stackapella.'],
     ],
 
     'features/boost' => [
@@ -625,6 +627,13 @@ return [
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
         ['title' => 'Integrations', 'path' => '/features/integrations', 'blurb' => 'Google Calendar, Outlook, CalDAV, Stripe, webhooks and the REST API.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'stackapella' => [
+        ['title' => 'Appointments', 'path' => '/features/appointments', 'blurb' => 'Write your hours down once and let guests pick an open time.'],
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'A weekly rehearsal as one event, with the weeks off skipped.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
+        ['title' => 'Integrations', 'path' => '/features/integrations', 'blurb' => 'Google Calendar, Outlook, CalDAV, Stripe, webhooks and the REST API.'],
     ],
 
     'invoiceninja' => [

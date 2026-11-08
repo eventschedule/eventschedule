@@ -20,7 +20,7 @@
  */
 
 return [
-    '/' => '2026-10-22',
+    '/' => '2026-11-08',
     '/about' => '2026-10-15',
     '/accelevents-alternative' => '2026-11-08',
     '/accessibility' => '2026-10-08',
@@ -84,7 +84,7 @@ return [
     '/examples' => '2026-10-09',
     '/facebook-events-alternative' => '2026-11-08',
     '/faq' => '2026-10-15',
-    '/features' => '2026-10-22',
+    '/features' => '2026-11-08',
     '/features/ai' => '2026-10-23',
     '/features/allocated-seating' => '2026-10-15',
     '/features/analytics' => '2026-10-23',
@@ -106,7 +106,7 @@ return [
     '/features/feedback' => '2026-10-23',
     '/features/gift-cards' => '2026-10-23',
     '/features/installments' => '2026-10-23',
-    '/features/integrations' => '2026-10-23',
+    '/features/integrations' => '2026-11-08',
     '/features/lineup' => '2026-10-18',
     '/features/newsletters' => '2026-10-23',
     '/features/online-events' => '2026-10-23',
@@ -168,7 +168,7 @@ return [
     '/google-sheets-replacement' => '2026-11-08',
     '/hi-events-alternative' => '2026-11-08',
     '/humanitix-alternative' => '2026-11-08',
-    '/invoiceninja' => '2026-10-23',
+    '/invoiceninja' => '2026-11-08',
     '/linktree-replacement' => '2026-11-08',
     '/luma-alternative' => '2026-11-08',
     '/mailchimp-replacement' => '2026-11-08',
@@ -193,6 +193,7 @@ return [
     '/songkick-alternative' => '2026-11-08',
     '/splash-alternative' => '2026-11-08',
     '/squarespace-replacement' => '2026-11-08',
+    '/stackapella' => '2026-11-08',
     '/stripe' => '2026-11-08',
     '/surveymonkey-replacement' => '2026-11-08',
     '/switch-from-eventbrite' => '2026-10-23',

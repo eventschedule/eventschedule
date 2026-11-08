@@ -56,6 +56,7 @@ return [
     '/stripe' => ['keyword' => 'sell tickets with Stripe', 'match' => ['Stripe payments for tickets']],
     '/paypal' => ['keyword' => 'sell event tickets with PayPal'],
     '/invoiceninja' => ['keyword' => 'Invoice Ninja ticketing'],
+    '/stackapella' => ['keyword' => 'Stackapella'],
 
     // Features
     '/features/ai' => ['keyword' => 'AI event import'],
