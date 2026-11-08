@@ -6,6 +6,7 @@ use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Models\User;
+use App\Services\SeatHoldService;
 use App\Services\WebhookService;
 use Illuminate\Support\Facades\DB;
 
@@ -35,11 +36,12 @@ trait HandlesSaleStatusActions
     /**
      * May this user move money on this sale, as opposed to merely read it?
      *
-     * The read gate the callers apply first - User::canViewEventData() - deliberately skips
-     * unowned CURATOR roles, but it never looks at `event_role.is_accepted` for a talent or venue
-     * role. It only asks whether the acting user is owner or admin on some role attached to the
-     * event. So a schedule that was merely INVITED to somebody else's event, and has not accepted
-     * (pivot null) or has actively declined (false), passes it.
+     * The read gate the callers apply first - User::canViewEventData() - skips unowned CURATOR
+     * roles and, since 2026-11 (GHSA-4pvq-gfvr-g847), any schedule that has not ACCEPTED somebody
+     * else's event. Before that it let through a schedule that was merely invited (pivot null),
+     * and only `refund` asked this stricter question, so an invited venue could mark paid, cancel
+     * or delete the creator's sales. Every status change now asks it, on the web and in the API,
+     * so the two gates no longer have to agree for a sale to be safe.
      *
      * Event::scopeManagedBy() is the rule the sales LIST already uses
      * (TicketController::sales -> whereHas('event', managedBy)), and it requires the role to be the
@@ -301,7 +303,7 @@ trait HandlesSaleStatusActions
             // cancelled/refunded/expired - and an `amount_mismatch` sale takes the branch above
             // that never changes status, so its seats stayed `sold` against a row that had
             // vanished from every list, with no tooling to recover them.
-            app(\App\Services\SeatHoldService::class)->releaseForSaleIds($deletedIds);
+            app(SeatHoldService::class)->releaseForSaleIds($deletedIds);
 
             return $pre;
         });

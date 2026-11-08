@@ -6,15 +6,21 @@ use App\Casts\EncryptedString;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\SetPassword;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use App\Services\AppointmentHostService;
 use App\Services\AuditService;
 use App\Services\DemoService;
+use App\Utils\PhoneUtils;
+use Google\Service\Calendar;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -150,7 +156,7 @@ class User extends Authenticatable implements MustVerifyEmail
         static::saving(function ($model) {
             $model->email = strtolower($model->email);
             if ($model->phone) {
-                $model->phone = \App\Utils\PhoneUtils::normalize($model->phone);
+                $model->phone = PhoneUtils::normalize($model->phone);
             }
             if (! config('app.hosted') && $model->isDirty('phone')) {
                 $model->phone_verified_at = $model->phone ? now() : null;
@@ -658,7 +664,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 $fresh->phone_verified_at = now();
                 $fresh->saveQuietly();
             } elseif ($fresh->markEmailAsVerified()) {
-                event(new \Illuminate\Auth\Events\Verified($fresh));
+                event(new Verified($fresh));
             }
 
             // syncWithoutDetaching, not attach: the claimant may already follow this schedule
@@ -715,7 +721,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function claimRolesByPhone(string $phone): bool
     {
-        $phone = \App\Utils\PhoneUtils::normalize($phone);
+        $phone = PhoneUtils::normalize($phone);
         if (! $phone) {
             return false;
         }
@@ -751,11 +757,11 @@ class User extends Authenticatable implements MustVerifyEmail
                 // Active, and nobody was told.
                 $hostedOn = AppointmentType::where('host_user_id', $phoneUser->id)->distinct()->pluck('role_id');
                 foreach ($hostedOn as $hostedRoleId) {
-                    if (\App\Services\AppointmentHostService::isEligible((int) $hostedRoleId, (int) $this->id)) {
+                    if (AppointmentHostService::isEligible((int) $hostedRoleId, (int) $this->id)) {
                         AppointmentType::where('role_id', $hostedRoleId)->where('host_user_id', $phoneUser->id)->update(['host_user_id' => $this->id]);
                         Event::where('creator_role_id', $hostedRoleId)->where('appointment_host_user_id', $phoneUser->id)->update(['appointment_host_user_id' => $this->id]);
                     } elseif ($hostedRole = Role::find($hostedRoleId)) {
-                        app(\App\Services\AppointmentHostService::class)->releaseHost($hostedRole, (int) $phoneUser->id);
+                        app(AppointmentHostService::class)->releaseHost($hostedRole, (int) $phoneUser->id);
                     }
                 }
 
@@ -775,7 +781,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     $this->phone = $phone;
                     $this->phone_verified_at = now();
                     $this->saveQuietly();
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     // Phone uniqueness conflict - skip setting phone but continue claiming roles
                     report($e);
                     $this->refresh();
@@ -968,7 +974,7 @@ class User extends Authenticatable implements MustVerifyEmail
             return (int) $event->creator_role_id;
         }
 
-        $first = \Illuminate\Support\Facades\DB::table('event_role')->where('event_id', $event->id)->orderBy('id')->value('role_id');
+        $first = DB::table('event_role')->where('event_id', $event->id)->orderBy('id')->value('role_id');
 
         return $first ? (int) $first : null;
     }
@@ -1035,24 +1041,23 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         foreach ($event->roles as $role) {
-            // A schedule that said no to the event sees nothing of it, its buyers least of all.
-            if ($event->creator_role_id != $role->id && self::declined($role)) {
-                continue;
-            }
-
-            if ($role->isCurator() && $event->creator_role_id != $role->id) {
+            if ($event->creator_role_id != $role->id) {
                 // Private data: a curator that only lists an event never owns the creator's money.
-                if ($skipUnownedCurators) {
+                if ($role->isCurator() && $skipUnownedCurators) {
                     continue;
                 }
 
-                // Traffic: only once the curator ACCEPTED it. Acceptance is what put the event on
-                // the curator's page and made the view its own; syncCuratorSources() attaches a
-                // source venue's events at is_accepted = null without anyone agreeing, and a
-                // decline leaves the row at false rather than detaching, and neither ever rendered
-                // anything. Loose truthiness on purpose - EventRole casts is_auto_sourced but NOT
-                // is_accepted, so the pivot hands back 1/0/null, and `!== true` would reject
-                // every accepted row.
+                // Somebody else's event counts only once this schedule ACCEPTED it. A decline
+                // leaves the row at false rather than detaching, and an invitation waits at null:
+                // until 2026-11 only the decline was turned away here, so a venue or talent that
+                // had merely been invited could read the buyers and mark paid, cancel or delete
+                // another organizer's sales (GHSA-4pvq-gfvr-g847). Event::scopeManagedBy(), which
+                // lists the Sales page, has always asked for the accept. For a curator's traffic it
+                // is the same rule: acceptance is what put the event on the curator's page and made
+                // the view its own (syncCuratorSources() attaches at null without anyone agreeing).
+                // An appointment booking waiting for approval sits at null on the schedule's OWN
+                // event, which the condition above exempts. Loose truthiness on purpose: EventRole
+                // casts is_auto_sourced but NOT is_accepted, so the pivot hands back 1/0/null.
                 if (! $role->pivot->is_accepted) {
                     continue;
                 }
@@ -1211,7 +1216,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public static function googleScopesColumnReady(): bool
     {
-        return \Illuminate\Support\Facades\Schema::hasColumn('users', 'google_token_scopes');
+        return Schema::hasColumn('users', 'google_token_scopes');
     }
 
     /**
@@ -1231,8 +1236,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $granted = preg_split('/\s+/', trim($this->google_token_scopes)) ?: [];
 
-        return in_array(\Google\Service\Calendar::CALENDAR_EVENTS, $granted, true)
-            || in_array(\Google\Service\Calendar::CALENDAR, $granted, true);
+        return in_array(Calendar::CALENDAR_EVENTS, $granted, true)
+            || in_array(Calendar::CALENDAR, $granted, true);
     }
 
     /**

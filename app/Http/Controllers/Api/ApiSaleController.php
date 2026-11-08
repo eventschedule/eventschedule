@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Services\AuditService;
+use App\Services\SaleRefundResult;
+use App\Services\SaleRefundService;
+use App\Services\SeatHoldService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
+use App\Traits\HandlesSaleStatusActions;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -18,7 +23,7 @@ use Illuminate\Validation\ValidationException;
 
 class ApiSaleController extends Controller
 {
-    use \App\Traits\HandlesSaleStatusActions;
+    use HandlesSaleStatusActions;
 
     protected const MAX_PER_PAGE = 500;
 
@@ -163,6 +168,13 @@ class ApiSaleController extends Controller
             ], 422);
         }
 
+        // Every action here changes the event creator's sales, so every one is the money rule,
+        // not the read gate above. See HandlesSaleStatusActions::userMayMoveMoneyOn();
+        // GHSA-4pvq-gfvr-g847 was mark_paid and cancel left on the read gate.
+        if (! $this->userMayMoveMoneyOn($sale, auth()->user())) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         if ($sale->group_id && ! $sale->isPrimarySale()) {
             return response()->json(['error' => 'Cannot modify non-primary grouped sales'], 403);
         }
@@ -177,14 +189,7 @@ class ApiSaleController extends Controller
                 break;
 
             case 'refund':
-                // Stricter than the read gate above, which never looks at event_role.is_accepted
-                // for a talent or venue role - and this moves money out of the event creator's
-                // gateway account. See HandlesSaleStatusActions::userMayMoveMoneyOn().
-                if (! $this->userMayMoveMoneyOn($sale, auth()->user())) {
-                    return response()->json(['error' => 'Unauthorized'], 403);
-                }
-
-                $refundResult = app(\App\Services\SaleRefundService::class)->refund(
+                $refundResult = app(SaleRefundService::class)->refund(
                     $sale,
                     $request->filled('amount') ? (float) $request->input('amount') : null,
                     auth()->id(),
@@ -207,13 +212,13 @@ class ApiSaleController extends Controller
                     return response()->json(
                         ['error' => $refundResult->message ?? 'Refund failed'],
                         in_array($refundResult->status, [
-                            \App\Services\SaleRefundResult::NEEDS_RECONCILIATION,
-                            \App\Services\SaleRefundResult::IN_PROGRESS,
+                            SaleRefundResult::NEEDS_RECONCILIATION,
+                            SaleRefundResult::IN_PROGRESS,
                         ], true) ? 409 : 422,
                     );
                 }
 
-                if ($refundResult->status === \App\Services\SaleRefundResult::PARTIALLY_REFUNDED) {
+                if ($refundResult->status === SaleRefundResult::PARTIALLY_REFUNDED) {
                     // Returns early rather than falling through to $prev. A partial refund leaves
                     // the sale `paid` on purpose, and the code below reads a null $prev as "the
                     // action could not be performed" and would 422 a refund that just succeeded.
@@ -521,7 +526,7 @@ class ApiSaleController extends Controller
                     $ticket = $lockedTickets->find($ticketId);
 
                     if (! $ticket) {
-                        throw new \App\Exceptions\BusinessException('Ticket no longer available');
+                        throw new BusinessException('Ticket no longer available');
                     }
 
                     if ($ticket->quantity > 0) {
@@ -539,7 +544,7 @@ class ApiSaleController extends Controller
 
                             $totalRequested = array_sum($ticketIds);
                             if ($totalRequested > $remainingTickets) {
-                                throw new \App\Exceptions\BusinessException('Tickets not available. Remaining: '.$remainingTickets);
+                                throw new BusinessException('Tickets not available. Remaining: '.$remainingTickets);
                             }
                         } else {
                             $sold = ($ticket->sold ? json_decode($ticket->sold, true) : null) ?? [];
@@ -547,7 +552,7 @@ class ApiSaleController extends Controller
                             $remainingTickets = $ticket->quantity - $soldCount;
 
                             if ($quantity > $remainingTickets) {
-                                throw new \App\Exceptions\BusinessException('Tickets not available for ticket '.UrlUtils::encodeId($ticketId).'. Remaining: '.$remainingTickets);
+                                throw new BusinessException('Tickets not available for ticket '.UrlUtils::encodeId($ticketId).'. Remaining: '.$remainingTickets);
                             }
                         }
                     }
@@ -563,7 +568,7 @@ class ApiSaleController extends Controller
                     $event->setRelation('tickets', $lockedTickets);
                     $houseRemaining = $event->occurrenceSeatsRemaining($eventDate);
                     if ($houseRemaining !== null && array_sum($ticketIds) > $houseRemaining) {
-                        throw new \App\Exceptions\BusinessException('Tickets not available.');
+                        throw new BusinessException('Tickets not available.');
                     }
                 }
 
@@ -593,7 +598,7 @@ class ApiSaleController extends Controller
                 // Allocated seating: no picker on this path, so take the best seats available.
                 // Without this the sale takes quantity stock but no seats, and because an allocated
                 // ticket's availability reads the MAP the picker keeps offering the same seats.
-                app(\App\Services\SeatHoldService::class)->assignBestAvailableForSale($event, $sale);
+                app(SeatHoldService::class)->assignBestAvailableForSale($event, $sale);
 
                 // Create SaleTickets for add-ons
                 $addonSelections = $request->input('addons', []);
@@ -603,7 +608,7 @@ class ApiSaleController extends Controller
                         $addonModel = $event->addons()->lockForUpdate()->find(UrlUtils::decodeId($addonId));
 
                         if (! $addonModel) {
-                            throw new \App\Exceptions\BusinessException('Add-on not found: '.$addonId);
+                            throw new BusinessException('Add-on not found: '.$addonId);
                         }
 
                         if ($addonModel->quantity > 0) {
@@ -612,7 +617,7 @@ class ApiSaleController extends Controller
                             $remaining = $addonModel->quantity - $soldCount;
 
                             if ($addonQty > $remaining) {
-                                throw new \App\Exceptions\BusinessException('Add-on not available: '.$addonId.'. Remaining: '.$remaining);
+                                throw new BusinessException('Add-on not available: '.$addonId.'. Remaining: '.$remaining);
                             }
                         }
 
@@ -650,7 +655,7 @@ class ApiSaleController extends Controller
 
                 return $sale;
             });
-        } catch (\App\Exceptions\BusinessException $e) {
+        } catch (BusinessException $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             report($e);

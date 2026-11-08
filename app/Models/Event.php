@@ -7,10 +7,16 @@ use App\Jobs\GenerateEventImageVariants;
 use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
 use App\Jobs\SyncEventToMicrosoftCalendar;
+use App\Services\BoostBillingService;
+use App\Services\BoostPartnerService;
+use App\Services\EventLifecycleService;
+use App\Services\MetaAdsService;
+use App\Services\SeatingMapService;
 use App\Services\TicketVolumeDiscount;
 use App\Traits\HasImageVariants;
 use App\Utils\EventTextGenerator;
 use App\Utils\GalleryUtils;
+use App\Utils\GuestSeo;
 use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\MoneyUtils;
@@ -20,7 +26,9 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
@@ -375,7 +383,7 @@ class Event extends Model
     public static function importColumnsReady(): bool
     {
         return self::$importColumnsReady = self::$importColumnsReady
-            || \Illuminate\Support\Facades\Schema::hasColumn('events', 'import_source');
+            || Schema::hasColumn('events', 'import_source');
     }
 
     private static bool $importColumnsReady = false;
@@ -608,7 +616,7 @@ class Event extends Model
                     });
 
                     if ($oldSeatingDate && $oldSeatingDate !== $newDate) {
-                        app(\App\Services\SeatingMapService::class)
+                        app(SeatingMapService::class)
                             ->rekeyOccurrence($model, $oldSeatingDate, $newDate);
                     }
                 }
@@ -731,20 +739,20 @@ class Event extends Model
                 // A partner boost is stopped, never deleted at Meta and never refunded: the platform
                 // holds none of its money, and its spend must stay readable for the statement.
                 if ($campaign->isPartner()) {
-                    \App\Services\BoostPartnerService::stopInCascade($campaign);
+                    BoostPartnerService::stopInCascade($campaign);
 
                     continue;
                 }
 
                 try {
-                    if ($campaign->meta_campaign_id && \App\Services\MetaAdsService::isBoostConfigured()) {
-                        $metaService = app()->make(\App\Services\MetaAdsService::class);
+                    if ($campaign->meta_campaign_id && MetaAdsService::isBoostConfigured()) {
+                        $metaService = app()->make(MetaAdsService::class);
                         $metaService->deleteCampaign($campaign);
                     }
 
                     $campaign->update(['status' => 'cancelled', 'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null]);
 
-                    $billingService = new \App\Services\BoostBillingService;
+                    $billingService = new BoostBillingService;
 
                     // Gate the STRIPE call, not the refund. settlePayment()'s credit branch debits
                     // boost_credit regardless of mode, so gating the whole block meant deleting a
@@ -871,7 +879,7 @@ class Event extends Model
         // 'cancel', or a guarded 'delete': hide the event without pushing the change back out.
         // The flag and nothing else: no sequence bump, no webhook, no boost or installment
         // unwinding, and the calendar services write the audit row once they have the outcome.
-        app(\App\Services\EventLifecycleService::class)->cancel(
+        app(EventLifecycleService::class)->cancel(
             $this,
             cancelBoosts: false,
             stopInstallments: false,
@@ -975,7 +983,7 @@ class Event extends Model
 
         $key = (string) $date;
         if (! array_key_exists($key, $this->seatingMapCache)) {
-            $this->seatingMapCache[$key] = app(\App\Services\SeatingMapService::class)->mapFor($this, $date);
+            $this->seatingMapCache[$key] = app(SeatingMapService::class)->mapFor($this, $date);
         }
 
         return $this->seatingMapCache[$key];
@@ -1001,7 +1009,7 @@ class Event extends Model
             $key = 'map:'.$map->id;
 
             if (! array_key_exists($key, $this->seatedBandsByMap)) {
-                $this->seatedBandsByMap[$key] = \App\Models\SeatingSection::where('event_seating_map_id', $map->id)
+                $this->seatedBandsByMap[$key] = SeatingSection::where('event_seating_map_id', $map->id)
                     ->where('is_deleted', false)
                     ->where('kind', '!=', 'standing')
                     ->whereNotNull('band')
@@ -1014,14 +1022,14 @@ class Event extends Model
 
         if ($this->seatedBandsCache === null) {
             $plan = $this->seating_plan_id
-                ? \App\Models\SeatingPlan::with('sections')->find($this->seating_plan_id)
+                ? SeatingPlan::with('sections')->find($this->seating_plan_id)
                 : null;
 
             // whereHas('seats') matters: a section drawn but not yet given rows would otherwise
             // make its ticket "allocated" while the map holds nothing, and the picker would offer
             // the per-order cap for a band with no seats at all.
             $this->seatedBandsCache = $plan
-                ? \App\Models\SeatingSection::where('seating_plan_id', $plan->id)
+                ? SeatingSection::where('seating_plan_id', $plan->id)
                     ->where('is_deleted', false)
                     ->where('kind', '!=', 'standing')
                     ->whereNotNull('band')
@@ -1038,7 +1046,7 @@ class Event extends Model
     {
         if ($this->seatingPlanCache === false) {
             $this->seatingPlanCache = $this->seating_plan_id
-                ? \App\Models\SeatingPlan::where('is_deleted', false)->find($this->seating_plan_id)
+                ? SeatingPlan::where('is_deleted', false)->find($this->seating_plan_id)
                 : null;
         }
 
@@ -1060,7 +1068,7 @@ class Event extends Model
             return $plan ? $plan->seatCountForBand($ticket->seating_band) : 0;
         }
 
-        return app(\App\Services\SeatingMapService::class)->availableSeatCount($map, $ticket->id);
+        return app(SeatingMapService::class)->availableSeatCount($map, $ticket->id);
     }
 
     public function promoCodes()
@@ -1805,8 +1813,8 @@ class Event extends Model
      * scopeNotPasswordProtected() for a query that is not an Event builder: a schedule query that
      * joins events, or a DB::table() query that aliases the table.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     * @param  Builder|\Illuminate\Database\Query\Builder  $query
+     * @return Builder|\Illuminate\Database\Query\Builder
      */
     public static function constrainNotPasswordProtected($query, string $table = 'events')
     {
@@ -1963,12 +1971,11 @@ class Event extends Model
      *    because an appointment booking sits at is_accepted null while it awaits approval and
      *    false once cancelled, and paid bookings are meant to appear on the Sales page.
      *
-     *    SCOPED CLAIM: this is a LIST-side rule only. canViewEventData() does not read
-     *    is_accepted, so a declined schedule that still holds an event or sale id can read the
-     *    same data through BoxOfficeController::resolve(), CheckInController::stats() and
-     *    Api/ApiSaleController::show(). That gap predates this scope and closing it means teaching
-     *    canEditEvent() the rule too (canScanEvent delegates to it), which the Requests tab's Edit
-     *    button relies on staying open while a pivot is pending. Its own change.
+     *    canViewEventData() asks the same of somebody else's event since 2026-11
+     *    (GHSA-4pvq-gfvr-g847): a declined OR still-pending schedule no longer reads the buyers
+     *    through BoxOfficeController::resolve(), CheckInController::stats() or
+     *    Api/ApiSaleController::show(). canEditEvent() is left open while a pivot is pending,
+     *    because the Requests tab's Edit button relies on it.
      *
      * Curators are the third rule, inherited from the check: a curator that only LISTS an event
      * does not own the creator's private data, so it qualifies only for what it created.
@@ -2355,7 +2362,7 @@ class Event extends Model
      * do not approximate it with a +/- 1 day window around the app timezone, which breaks once
      * APP_TIMEZONE is set to an extreme offset.
      *
-     * @param  \Illuminate\Support\Collection<int, Event>  $events
+     * @param  Collection<int, Event>  $events
      * @return string[]
      */
     public static function scheduleTodayDates($events, ?Carbon $now = null): array
@@ -3651,9 +3658,9 @@ class Event extends Model
      * forward is the caller's decision. $viewingRole may be an empty model, which the guest
      * layout's container fills in when a view passes none: that is no schedule.
      *
-     * @return \Illuminate\Support\Collection<int, Role>
+     * @return Collection<int, Role>
      */
-    public function pagePhotoRoles(?Role $viewingRole = null): \Illuminate\Support\Collection
+    public function pagePhotoRoles(?Role $viewingRole = null): Collection
     {
         $roles = $this->members()->filter(fn (Role $role) => $role->profile_image_url)->values();
         $venue = $this->venue;
@@ -3839,7 +3846,7 @@ class Event extends Model
         // priceWording(): the event page's price line and a newsletter's row ask the same rule.
         $says = self::priceWording($prices->min(), $prices->max());
         $free = $says === 'free';
-        $lowest = \App\Utils\MoneyUtils::format($prices->min(), $this->ticket_currency_code);
+        $lowest = MoneyUtils::format($prices->min(), $this->ticket_currency_code);
         $from = match ($says) {
             'free' => null,
             'from' => __('messages.price_from', ['price' => $lowest]),
@@ -4481,7 +4488,7 @@ class Event extends Model
             ? $viewingRole->displayLanguageCode()
             : (showing_translation($this) ? $this->getTranslationLanguageCode() : $this->getLanguageCode());
 
-        return \App\Utils\GuestSeo::eventDescription($this, is_string($date) ? $date : null, $want, $viewingRole);
+        return GuestSeo::eventDescription($this, is_string($date) ? $date : null, $want, $viewingRole);
     }
 
     /**
