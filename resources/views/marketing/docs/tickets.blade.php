@@ -1445,7 +1445,7 @@
                     </tr>
                     <tr>
                         <td>Find someone at the door</td>
-                        <td>On an <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated seating</a> event, type a seat (C14), a name or an email to see who holds a seat and whether they have arrived. It only looks; admitting somebody is still done by scanning.</td>
+                        <td>Type a name or an email to see whether that person's order is paid for the date you picked and how many of its tickets are in. On an <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated seating</a> event you can also type a seat (C14) to see who holds it. It only looks; admitting somebody is still done by scanning.</td>
                     </tr>
                     <tr>
                         <td>Ticket types</td>

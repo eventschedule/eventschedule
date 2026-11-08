@@ -1,18 +1,82 @@
 <x-marketing-layout :hp="true">
-    {{-- Leads with the search Google shows this page for most ("luma vs eventbrite", position 7-9
-         with no clicks in October 2026), and keeps its keyword (config/marketing_keywords.php). --}}
-    <x-slot name="title">Luma vs Eventbrite &amp; {{ count($headToHead) - 2 }} More: Compare Event Platforms</x-slot>
-    <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Meetup and {{ count($headToHead) - 3 }} more platforms: feature by feature, a fee calculator at published rates, and 0% platform fees.</x-slot>
+    {{-- Leads with the searches Google shows this page for ("luma vs eventbrite" at position 7-9,
+         "eventbrite vs ticket tailor" at 16, with no clicks into November 2026), which the two
+         match-up sections below answer, and keeps its keyword (config/marketing_keywords.php). --}}
+    <x-slot name="title">Luma vs Eventbrite vs Ticket Tailor: Compare Event Platforms</x-slot>
+    <x-slot name="description">Luma vs Eventbrite and Eventbrite vs Ticket Tailor, with fees worked out per ticket, then Event Schedule against {{ count($headToHead) }} platforms feature by feature.</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
 
     @php
+        // The two match-ups between OTHER platforms that people search this page for ("luma vs
+        // eventbrite", "eventbrite vs ticket tailor"). Every figure is worked from TicketFees, the
+        // same rates /ticket-fee-calculator reads, per ticket, one ticket per order, fees absorbed.
+        // Ticket prices avoid our own plan amounts so no line reads like a plan price.
+        $stripeRate = $rates['stripe'];
+        $lumaFree = array_merge(['name' => 'Luma'], $rates['luma']['plans'][0]);
+        $lumaPlusMonthly = (float) $rates['luma']['plans'][1]['monthly'];
+        $usd = fn (float $amount) => '$'.number_format($amount, 2);
+        $usdWhole = fn (float $amount) => '$'.number_format($amount, 0);
+        // What a platform's own fee is on one ticket, without the card processing.
+        $platformFee = fn (array $rate, float $price) => \App\Utils\TicketFees::costOf(
+            array_merge($rate, ['stripe' => false, 'processing' => 0]), $stripeRate, 1, $price
+        );
+        // Everything taken from one ticket: the platform's fee plus processing (its own, or Stripe's).
+        $allIn = fn (array $rate, float $price) => \App\Utils\TicketFees::costOf($rate, $stripeRate, 1, $price);
+        $matchupPrices = [10, 25, 75];
+        $esPerTicket = fn (float $price) => \App\Utils\TicketFees::costOf(['name' => 'Event Schedule'], $stripeRate, 1, $price);
+
+        // Where Luma's free plan (a share of the price, plus Stripe) stops being cheaper per ticket
+        // than Eventbrite (a share plus a fixed fee, plus its own processing). Null if the rates
+        // ever change so that one is cheaper at every price.
+        $eb = $rates['eventbrite'];
+        $lumaSlope = (float) $lumaFree['percent'] + (float) $stripeRate['percent'];
+        $ebSlope = (float) $eb['percent'] + (float) ($eb['processing'] ?? 0);
+        $lumaEbCrossover = $lumaSlope > $ebSlope
+            ? ((float) $eb['fixed'] - (float) $stripeRate['fixed']) / ($lumaSlope - $ebSlope)
+            : null;
+        // Monthly paid-ticket revenue above which Luma Plus costs less than the free plan's share.
+        $lumaPlusBreakEven = $lumaPlusMonthly / (float) $lumaFree['percent'];
+
+        $tt = $rates['ticket-tailor'];
+        $ttBand = trim(str_replace(['per ticket', '(not re-checked)'], '', $tt['label']));
+
+        $matchupTables = [
+            'luma-vs-eventbrite' => [
+                ['name' => 'Luma, free plan', 'note' => (int) round($lumaFree['percent'] * 100).'% of the price, plus Stripe', 'fee' => $lumaFree],
+                ['name' => 'Luma Plus', 'note' => 'No per-ticket fee, '.$usdWhole($lumaPlusMonthly).' a month billed annually, plus Stripe', 'fee' => ['name' => 'Luma Plus'], 'monthly' => $lumaPlusMonthly],
+                ['name' => 'Eventbrite', 'note' => $eb['label'], 'fee' => $eb],
+            ],
+            'eventbrite-vs-ticket-tailor' => [
+                ['name' => 'Eventbrite', 'note' => $eb['label'], 'fee' => $eb],
+                ['name' => 'Ticket Tailor', 'note' => 'The middle of '.$ttBand.' per ticket, plus Stripe', 'fee' => $tt],
+            ],
+        ];
+
         // Both the visible FAQ and its JSON-LD read this one array, so the two
         // can no longer drift. The fee question deliberately does not restate
         // /pricing's FAQ answer; it points at the calculator on this page.
         $compareFaqs = [
             [
+                'q' => 'Luma vs Eventbrite: which should I use?',
+                'a' => 'Luma if your audience already knows you: it has polished event pages, can host the stream for an online event, and lets three admins run a calendar on its free plan. Eventbrite if you need buyers who have never heard of you: its marketplace sends people to your listing, and it takes the card payment itself, so you do not need a payment account of your own. Luma costs less per ticket at ordinary prices; Eventbrite has recurring events and password-protected events, which Luma does not.',
+            ],
+            [
+                'q' => 'Is Luma cheaper than Eventbrite for paid tickets?',
+                'a' => 'At most prices, yes. On a '.$usdWhole(25).' ticket, Luma\'s free plan and Stripe take '.$usd($allIn($lumaFree, 25)).' between them, and Eventbrite takes '.$usd($allIn($eb, 25)).' including its own processing.'
+                    .($lumaEbCrossover ? ' Eventbrite\'s fee is partly fixed, so above about '.$usdWhole(ceil($lumaEbCrossover)).' a ticket it becomes the cheaper of the two.' : '')
+                    .' Once you sell more than about '.$usdWhole($lumaPlusBreakEven).' of tickets a month, Luma Plus at '.$usdWhole($lumaPlusMonthly).' a month, billed annually, costs less than the free plan\'s '.(int) round($lumaFree['percent'] * 100).'%.',
+            ],
+            [
+                'q' => 'Eventbrite vs Ticket Tailor: which costs less?',
+                'a' => 'Ticket Tailor, at every ticket price we can work out. It charges a flat fee per ticket ('.$ttBand.' in the last US band we recorded, which we could not re-check, so confirm it on tickettailor.com) and your own Stripe, PayPal or Square account charges its processing. On a '.$usdWhole(25).' ticket that comes to about '.$usd($allIn($tt, 25)).', against '.$usd($allIn($eb, 25)).' on Eventbrite, and the gap grows with the price. What Eventbrite gives back for the difference is its marketplace and a checkout you do not have to set up.',
+            ],
+            [
+                'q' => 'Does Luma or another event platform work better for paid ticketed events?',
+                'a' => 'Luma sells tickets, but its free plan takes '.(int) round($lumaFree['percent'] * 100).'% of each one, and removing that costs '.$usdWhole($lumaPlusMonthly).' a month on Plus, billed annually. A platform priced for ticketing usually costs less: Ticket Tailor charges a flat fee per ticket, and Event Schedule takes no platform fee on any plan, so the only deduction is Stripe\'s or PayPal\'s own ('.$usd($esPerTicket(25)).' on a '.$usdWhole(25).' ticket with Stripe) and a priced ticket needs Pro at '.plan_price($rates['eventschedule']['monthly']).'/mo. Eventbrite costs the most at ordinary prices, and is the one that brings buyers through its marketplace.',
+            ],
+            [
                 'q' => 'Does Event Schedule really charge no platform fees?',
-                'a' => 'Correct. We never take a percentage of your ticket sales on any plan. You pay your payment processor directly, and on Stripe that is '.$rates['stripe']['label'].'. Money from ticket sales goes straight to your own Stripe or PayPal account, not through us.',
+                'a' => 'Correct. We never take a percentage of your ticket sales on any plan. You pay your payment processor directly, and on Stripe that is '.str_replace(' per ticket', ' a payment', $rates['stripe']['label']).' in the US. Money from ticket sales goes straight to your own Stripe or PayPal account, not through us.',
             ],
             [
                 'q' => 'Can buyers pay with PayPal, and can I refund them from Event Schedule?',
@@ -324,6 +388,14 @@
                     Start for free
                 </a>
             </div>
+
+            {{-- For the visitor who searched a match-up between two other platforms: the answer is
+                 lower down, and this says so before they decide the page is not for them. --}}
+            <nav class="es-fade-up es-d-3 mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-sm" aria-label="Platform match-ups on this page">
+                <span class="text-gray-500 dark:text-gray-400">Comparing two others?</span>
+                <a href="#luma-vs-eventbrite" class="rounded-lg border border-gray-200 bg-white/70 px-3 py-1.5 font-semibold text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-200 dark:hover:border-blue-400/40 dark:hover:text-blue-300">Luma vs Eventbrite</a>
+                <a href="#eventbrite-vs-ticket-tailor" class="rounded-lg border border-gray-200 bg-white/70 px-3 py-1.5 font-semibold text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-200 dark:hover:border-blue-400/40 dark:hover:text-blue-300">Eventbrite vs Ticket Tailor</a>
+            </nav>
         </div>
     </section>
 
@@ -412,6 +484,204 @@
             </div>
         </div>
     </section>
+
+    <!-- ============================================================ -->
+    <!-- Match-ups between two other platforms                       -->
+    <!-- ============================================================ -->
+    {{-- People reach this page searching "luma vs eventbrite" and "eventbrite vs ticket tailor",
+         a question about two platforms that are not us. Each section answers it fairly first, from
+         the facts in each platform's comparison entry and TicketFees, and says where Event Schedule
+         fits only at the end. The fee tables are worked out at the top of this view. --}}
+    @php
+        $matchups = [
+            [
+                'id' => 'luma-vs-eventbrite',
+                'left' => 'Luma',
+                'right' => 'Eventbrite',
+                'bg' => 'bg-white dark:bg-[#0a0a0f]',
+                'lead' => 'Luma is built for communities that run their own events: polished pages, a stream it can host for online sessions, and a tech and startup crowd already on it. Eventbrite is built for selling to strangers: a marketplace that sends its own buyers to your listing, with the card payment handled for you. Luma takes less per ticket at ordinary prices'
+                    .($lumaEbCrossover ? ', and Eventbrite only becomes the cheaper of the two above about '.$usdWhole(ceil($lumaEbCrossover)).' a ticket.' : '.'),
+                'cards' => [
+                    [
+                        'name' => 'Luma',
+                        'picks' => [
+                            'Your audience already knows you, and you need good-looking pages and RSVPs more than discovery.',
+                            'You run online sessions and want the stream hosted for you rather than a link to a room somewhere else.',
+                            'Several people run the calendar: three admins on the free plan, five on Plus.',
+                            'You sell more than about '.$usdWhole($lumaPlusBreakEven).' of tickets a month, where Plus at '.$usdWhole($lumaPlusMonthly).' a month costs less than the free plan\'s '.(int) round($lumaFree['percent'] * 100).'%.',
+                        ],
+                        'lacks' => 'a repeating series (each date is a copy of the last), password-protected events (unlisted is as private as it gets), and a custom domain, the API or webhooks without Plus.',
+                        'route' => 'marketing.compare_luma',
+                    ],
+                    [
+                        'name' => 'Eventbrite',
+                        'picks' => array_values(array_filter([
+                            'You need buyers who have never heard of you: the marketplace and its promotion tools, paid ads included, bring them.',
+                            'You would rather not open a payment account: Eventbrite takes the card payment itself.',
+                            $lumaEbCrossover ? 'Your tickets are expensive: above about '.$usdWhole(ceil($lumaEbCrossover)).' its partly fixed fee costs less than Luma\'s percentage.' : null,
+                            'You want recurring events, password-protected events and a team on one account, all of which it has.',
+                        ])),
+                        'lacks' => 'your own domain, or a page without Eventbrite\'s branding, at any price; two-way calendar sync; and fees that are the highest of the two at ordinary prices, which buyers pay by default unless you absorb them.',
+                        'route' => 'marketing.compare_eventbrite',
+                    ],
+                ],
+                'aside' => [
+                    'title' => 'And Partiful?',
+                    'text' => 'Partiful is a free invite and RSVP app for social events, with themed pages, text blasts and reminders. Hosts in the US and UK can sell tickets, with fees that depend on the event\'s size and price, and there are no repeating events. It suits a party; for a run of ticketed dates, the two above are the closer match.',
+                    'route' => 'marketing.compare_partiful',
+                    'link' => 'Partiful compared with Event Schedule',
+                ],
+                'fit' => 'Event Schedule sits between the two. Like Luma, the audience is yours to bring, because there is no marketplace sending buyers in. Unlike either, there is no platform fee on any plan: the buyer pays through your own Stripe or PayPal account, the processor\'s rate is the only deduction, and a priced ticket needs Pro at '.plan_price($rates['eventschedule']['monthly']).'/mo. Events repeat as a real series on every plan, and password-protected events come with Enterprise.',
+            ],
+            [
+                'id' => 'eventbrite-vs-ticket-tailor',
+                'left' => 'Eventbrite',
+                'right' => 'Ticket Tailor',
+                'bg' => 'bg-gray-50 dark:bg-[#0f0f14]',
+                'lead' => 'Both are built for selling tickets, and they charge in opposite ways. Eventbrite takes a share of every ticket plus a fixed fee, and processes the payment itself. Ticket Tailor charges a flat fee per ticket whatever it costs, and you connect your own Stripe, PayPal or Square account, which charges its own processing. Per ticket, Ticket Tailor costs less at every price we can work out, and the gap grows with the price.',
+                'cards' => [
+                    [
+                        'name' => 'Eventbrite',
+                        'picks' => [
+                            'Discovery matters: the marketplace brings buyers who were not looking for you, from a brand buyers already recognise.',
+                            'You want the payment handled for you, with no processor account to open or connect.',
+                            'You want promotion tools, paid ads included, in the same place you sell.',
+                        ],
+                        'lacks' => 'your own domain or unbranded pages at any price, and two-way calendar sync. Its fee rises with the ticket price and has no cap.',
+                        'route' => 'marketing.compare_eventbrite',
+                    ],
+                    [
+                        'name' => 'Ticket Tailor',
+                        'picks' => [
+                            'You want a cost you can predict: the same flat fee on a cheap ticket and an expensive one.',
+                            'You already take payments through Stripe, PayPal or Square and want to keep that account.',
+                            'You need box office tools, a custom domain or unbranded pages, the last two as paid options.',
+                        ],
+                        'lacks' => 'built-in newsletters and calendar sync. It sells tickets and not much else, so your mailing list and your calendar live somewhere else.',
+                        'route' => 'marketing.compare_ticket_tailor',
+                    ],
+                ],
+                'aside' => null,
+                'fit' => 'Event Schedule takes Ticket Tailor\'s side of the argument one step further: no fee per ticket at all, only the processor\'s rate on your own account and a flat '.plan_price($rates['eventschedule']['monthly']).'/mo for Pro, whether you sell ten tickets or ten thousand. It adds newsletters and two-way calendar sync on every plan. It does not take Square, and holds and phone bookings live in the box office that comes with allocated seating on Enterprise.',
+            ],
+        ];
+    @endphp
+
+    @foreach ($matchups as $m)
+        <section id="{{ $m['id'] }}" class="relative scroll-mt-24 overflow-hidden {{ $m['bg'] }} py-16 lg:py-24">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-10 text-center">
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                        {{ $m['left'] }} <span class="es-vs">vs</span> <span class="text-gradient-compare">{{ $m['right'] }}</span>
+                    </h2>
+                    <p class="mx-auto mt-4 max-w-3xl text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                        {{ $m['lead'] }}
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2" data-reveal="panel">
+                    @foreach ($m['cards'] as $card)
+                        <div class="flex flex-col rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.04] sm:p-8">
+                            <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Pick {{ $card['name'] }} if</h3>
+                            <ul class="mb-6 space-y-3">
+                                @foreach ($card['picks'] as $pick)
+                                    <li class="flex gap-3 text-gray-700 dark:text-gray-300">
+                                        <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        <span>{{ $pick }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <div class="mb-6 rounded-2xl bg-gray-50 p-4 text-sm text-gray-600 dark:bg-white/[0.03] dark:text-gray-400">
+                                <span class="font-semibold text-gray-800 dark:text-gray-200">What it lacks:</span> {{ $card['lacks'] }}
+                            </div>
+                            <a href="{{ route($card['route']) }}" class="group mt-auto inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-all hover:gap-3 dark:text-blue-400">
+                                {{ $card['name'] }} compared with Event Schedule
+                                <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Per ticket, one ticket per order, the organizer absorbing the fees: the model
+                     every calculator on the site uses (App\Utils\TicketFees). --}}
+                <div class="mt-4 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[34rem] text-sm">
+                            <caption class="px-6 pt-5 text-start text-base font-bold text-gray-900 dark:text-white">What comes out of one ticket</caption>
+                            <thead>
+                                <tr class="border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500 dark:border-white/10 dark:text-gray-400">
+                                    <th scope="col" class="px-6 py-3 text-start font-semibold">Platform</th>
+                                    @foreach ($matchupPrices as $price)
+                                        <th scope="col" class="px-4 py-3 text-end font-semibold">{{ $usdWhole($price) }} ticket</th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-white/5">
+                                @foreach ($matchupTables[$m['id']] as $row)
+                                    <tr>
+                                        <th scope="row" class="px-6 py-3.5 text-start font-normal">
+                                            <span class="block font-semibold text-gray-900 dark:text-white">{{ $row['name'] }}</span>
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $row['note'] }}</span>
+                                        </th>
+                                        @foreach ($matchupPrices as $price)
+                                            <td class="px-4 py-3.5 text-end tabular-nums text-gray-800 dark:text-gray-200">
+                                                <span class="font-semibold">{{ $usd($allIn($row['fee'], $price)) }}</span>
+                                                @php $ownFee = $platformFee($row['fee'], $price); @endphp
+                                                <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $ownFee > 0 ? $usd($ownFee) : '0%' }} platform</span>
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                                <tr class="bg-gray-50/70 dark:bg-white/[0.02]">
+                                    <th scope="row" class="px-6 py-3.5 text-start font-normal">
+                                        <span class="block font-semibold text-gray-900 dark:text-white">Event Schedule</span>
+                                        <span class="block text-xs text-gray-500 dark:text-gray-400">0% platform fee, plus Stripe, and Pro at {{ plan_price($rates['eventschedule']['monthly']) }}/mo</span>
+                                    </th>
+                                    @foreach ($matchupPrices as $price)
+                                        <td class="px-4 py-3.5 text-end tabular-nums text-gray-800 dark:text-gray-200">
+                                            <span class="es-keep font-semibold">{{ $usd($esPerTicket($price)) }}</span>
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400">0% platform</span>
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="border-t border-gray-200 px-6 py-4 text-xs text-gray-500 dark:border-white/10 dark:text-gray-400">
+                        The large figure is everything taken from one ticket, the platform's fee and card processing together; the small one is the platform's fee alone. Published US rates, one ticket per order, with the organizer absorbing the fees.
+                        Stripe's card rate ({{ $stripeRate['label'] }}) is added where the platform does not process the payment itself.
+                        @if ($m['id'] === 'luma-vs-eventbrite')
+                            Luma Plus's monthly charge is not in the per-ticket figure.
+                        @else
+                            Ticket Tailor is shown at the middle of {{ $ttBand }} per ticket, the last US band we recorded; it could not be re-checked, so confirm it on tickettailor.com.
+                        @endif
+                        The <x-link href="{{ marketing_url('/ticket-fee-calculator') }}">ticket fee calculator</x-link> works out a whole event from the same rates.
+                    </p>
+                </div>
+
+                <div class="mt-4 grid gap-4 {{ $m['aside'] ? 'md:grid-cols-2' : '' }}" data-reveal="panel">
+                    <div class="flex flex-col rounded-3xl border border-blue-200 bg-blue-50/60 p-6 dark:border-blue-400/20 dark:bg-blue-500/[0.06] sm:p-8">
+                        <h3 class="mb-3 text-lg font-bold text-gray-900 dark:text-white">Where Event Schedule fits</h3>
+                        <p class="mb-6 text-gray-700 dark:text-gray-300">{{ $m['fit'] }}</p>
+                        <a href="{{ app_url('/sign_up') }}" class="group mt-auto inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-all hover:gap-3 dark:text-blue-400">
+                            Start for free
+                            <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                    @if ($m['aside'])
+                        <div class="flex flex-col rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.04] sm:p-8">
+                            <h3 class="mb-3 text-lg font-bold text-gray-900 dark:text-white">{{ $m['aside']['title'] }}</h3>
+                            <p class="mb-6 text-gray-700 dark:text-gray-300">{{ $m['aside']['text'] }}</p>
+                            <a href="{{ route($m['aside']['route']) }}" class="group mt-auto inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-all hover:gap-3 dark:text-blue-400">
+                                {{ $m['aside']['link'] }}
+                                <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </section>
+    @endforeach
 
     <!-- ============================================================ -->
     <!-- What it actually costs                                      -->
@@ -819,6 +1089,8 @@
         $dotSections = [
             ['top', 'Top'],
             ['head-to-head', 'Head to head'],
+            ['luma-vs-eventbrite', 'Luma vs Eventbrite'],
+            ['eventbrite-vs-ticket-tailor', 'Eventbrite vs Ticket Tailor'],
             ['fees', 'What it costs'],
             ['matrix', 'The whole grid'],
             ['why', 'Where we differ'],

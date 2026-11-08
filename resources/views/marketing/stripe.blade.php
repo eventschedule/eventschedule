@@ -1,13 +1,13 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Stripe Payments for Tickets | The Money Goes Straight to You</x-slot>
-    <x-slot name="description">Sell tickets through your own connected Stripe account. The charge is created on your account, there is no platform fee in it, and Stripe pays you out.</x-slot>
+    <x-slot name="title">How to Sell Tickets with Stripe | Stripe Payments for Tickets</x-slot>
+    <x-slot name="description">Sell event tickets with your own Stripe account: what a Payment Link does alone, what a ticket needs on top, Stripe's fee at real prices, and setup in five steps.</x-slot>
     <x-slot name="breadcrumbTitle">Stripe</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
-        name="Event Schedule - Stripe Payments"
-        description="Sell tickets through your own connected Stripe account. The charge is created on your account with no platform fee, and Stripe pays you out on its own schedule."
-        keywords="stripe ticket payments, stripe connect event tickets, zero platform fee ticketing, stripe checkout tickets, direct payouts" />
+        name="How to Sell Tickets with Stripe"
+        description="How to sell event tickets with your own Stripe account: Stripe Payment Links compared with a ticketing layer, Stripe's fee at five ticket prices, and setup in five steps, with no platform fee."
+        keywords="sell tickets with stripe, stripe ticketing, stripe payment links for events, stripe event tickets, stripe ticket fees, stripe connect tickets" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -591,28 +591,137 @@
             .es-payout-pulse { animation: none !important; opacity: 0.85; }
             .es-payout-btn:hover { transform: none; }
         }
+
+        /* --- Stripe on its own vs a ticketing layer -----------------
+           A real table from a tablet up. On a phone each row becomes a
+           card and every cell says its column from data-label, because
+           display:block drops the table's meaning (hence the explicit
+           roles on the markup). */
+        .es-payout-compare { width: 100%; border-collapse: collapse; }
+        .es-payout-compare th,
+        .es-payout-compare td {
+            padding: 0.95rem 1rem;
+            text-align: start;
+            vertical-align: top;
+            border-bottom: 1px solid rgba(14, 21, 25, 0.1);
+        }
+        .dark .es-payout-compare th,
+        .dark .es-payout-compare td { border-bottom-color: rgba(232, 237, 241, 0.1); }
+        .es-payout-compare thead th {
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #4a555e;
+        }
+        .dark .es-payout-compare thead th { color: #98a4ae; }
+        .es-payout-compare tbody th { width: 22%; font-size: 0.92rem; font-weight: 700; color: #0e1519; }
+        .dark .es-payout-compare tbody th { color: #e8edf1; }
+        .es-payout-compare td { font-size: 0.9rem; line-height: 1.55; color: #4a555e; }
+        .dark .es-payout-compare td { color: #98a4ae; }
+        .es-payout-compare td.es-payout-ours { color: #0e1519; }
+        .dark .es-payout-compare td.es-payout-ours { color: #e8edf1; }
+        .es-payout-compare tbody tr:last-child th,
+        .es-payout-compare tbody tr:last-child td { border-bottom: 0; }
+        @media (max-width: 767px) {
+            .es-payout-compare,
+            .es-payout-compare tbody { display: block; width: 100%; }
+            .es-payout-compare thead { display: none; }
+            .es-payout-compare tr { display: block; padding: 0.9rem 0; border-bottom: 1px solid rgba(14, 21, 25, 0.1); }
+            .dark .es-payout-compare tr { border-bottom-color: rgba(232, 237, 241, 0.1); }
+            .es-payout-compare tbody tr:last-child { border-bottom: 0; }
+            .es-payout-compare th,
+            .es-payout-compare td { display: block; width: auto; padding: 0.3rem 1rem; border-bottom: 0; }
+            .es-payout-compare tbody th { width: auto; padding-bottom: 0.5rem; }
+            .es-payout-compare td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 0.15rem;
+                font-size: 0.62rem;
+                font-weight: 700;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+                color: #0f4c81;
+            }
+            .dark .es-payout-compare td::before { color: #8fc4ee; }
+        }
+
+        /* --- The price ladder: Stripe's fee at five ticket prices ---- */
+        .es-payout-ladder { width: 100%; border-collapse: collapse; }
+        .es-payout-ladder th,
+        .es-payout-ladder td {
+            padding: 0.6rem 0.75rem;
+            text-align: end;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(14, 21, 25, 0.08);
+            color: #4a555e;
+        }
+        .dark .es-payout-ladder th,
+        .dark .es-payout-ladder td { border-bottom-color: rgba(232, 237, 241, 0.08); color: #98a4ae; }
+        .es-payout-ladder th:first-child,
+        .es-payout-ladder td:first-child { text-align: start; }
+        .es-payout-ladder thead th {
+            font-family: inherit;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+        .es-payout-ladder tbody th { color: #0e1519; font-weight: 700; }
+        .dark .es-payout-ladder tbody th { color: #e8edf1; }
+        .es-payout-ladder .es-payout-keep { color: #0e1519; font-weight: 700; }
+        .dark .es-payout-ladder .es-payout-keep { color: #e8edf1; }
+        .es-payout-ladder .es-payout-nil { color: #0f4c81; font-weight: 700; }
+        .dark .es-payout-ladder .es-payout-nil { color: #8fc4ee; }
+        .es-payout-ladder tbody tr:last-child th,
+        .es-payout-ladder tbody tr:last-child td { border-bottom: 0; }
+
+        /* --- Setup steps: a numbered card per step ------------------ */
+        .es-payout-setup-num {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #0f4c81;
+        }
+        .dark .es-payout-setup-num { color: #8fc4ee; }
     </style>
 
     @php
-        // One ticket, itemised. Every figure on the statement is derived
-        // from these four values in cents, so the rows, the stub and the
-        // prose can never quote different numbers. The processing rate is
-        // Stripe's published US card rate, the same figure the /compare
-        // fee calculator uses (App\Utils\TicketFees::rates()).
-        $stmt = [
-            'currency'    => 'USD',
-            'grossCents'  => 2500,
-            'ratePercent' => 0.029,
-            'rateFixed'   => 30,
-        ];
-        $stmt['feeCents'] = (int) round($stmt['grossCents'] * $stmt['ratePercent']) + $stmt['rateFixed'];
-        $stmt['netCents'] = $stmt['grossCents'] - $stmt['feeCents'];
+        // Stripe's published US card rate, read from the one place the /ticket-fee-calculator
+        // reads it from (App\Utils\TicketFees::rates()['stripe']), so this page and the
+        // calculator cannot quote different figures. Every figure below is worked in cents
+        // from these two values.
+        $stripeRate = \App\Utils\TicketFees::rates()['stripe'];
+        $ratePercent = (float) $stripeRate['percent'];
+        $rateFixedCents = (int) round($stripeRate['fixed'] * 100);
+        $feeCentsFor = fn (int $cents) => (int) round($cents * $ratePercent) + $rateFixedCents;
         $money = fn ($cents) => number_format($cents / 100, 2);
+        $rateLabel = rtrim(rtrim(number_format($ratePercent * 100, 2), '0'), '.').'% + '.$money($rateFixedCents);
+
+        // One ticket, itemised, for the statement sheet.
+        $stmt = ['currency' => 'USD', 'grossCents' => 2500];
+        $stmt['feeCents'] = $feeCentsFor($stmt['grossCents']);
+        $stmt['netCents'] = $stmt['grossCents'] - $stmt['feeCents'];
+
+        // The ladder: the same arithmetic at five prices, one ticket per order.
+        $ladder = array_map(function (int $cents) use ($feeCentsFor) {
+            $fee = $feeCentsFor($cents);
+
+            return [
+                'price' => $cents,
+                'fee' => $fee,
+                'keep' => $cents - $fee,
+                'share' => number_format($fee / $cents * 100, 1),
+            ];
+        }, [1000, 2000, 2500, 5000, 10000]);
 
         $statementLines = [
             [
                 'line'   => 'Ticket price',
-                'note'   => 'The buyer is charged on your connected account.',
+                'note'   => 'The buyer is charged on your own Stripe account.',
                 'amount' => '+' . $money($stmt['grossCents']),
                 'who'    => 'Buyer',
                 'zero'   => false,
@@ -626,7 +735,7 @@
             ],
             [
                 'line'   => 'Event Schedule platform fee',
-                'note'   => 'No application fee is added to the charge, so there is nothing on this line.',
+                'note'   => 'No platform fee is added to the charge, so there is nothing on this line.',
                 'amount' => $money(0),
                 'who'    => 'Nobody',
                 'zero'   => true,
@@ -638,7 +747,7 @@
         // figure Event Schedule collects on a sale.
         $remit = [
             ['Our cut of each sale', $money(0), 'There is no fee field in the charge we create.'],
-            ['The Pro plan, monthly', plan_price($proMonthly), 'Optional: it is what lets you sell a ticket that carries a price. Nothing further is charged on a sale.'],
+            ['The Pro plan, monthly', plan_price($proMonthly), 'What lets a ticket carry a price. Nothing further is charged on a sale.'],
             ['Card processing', "Stripe's rate", 'Stripe sets it, per country and method.'],
         ];
 
@@ -646,21 +755,95 @@
         // dashed one. Event Schedule appears on the dashed lane only.
         $moneyLane = [
             ['Buyer pays', 'Card, Apple Pay or Google Pay on Stripe Checkout.', false],
-            ['Your Stripe account', 'The charge is created on your connected account.', true],
+            ['Your Stripe account', 'The charge is created on your own Stripe account.', true],
             ['Your bank', 'Stripe pays out to the account you gave Stripe.', false],
         ];
         $receiptLane = [
-            ['Stripe signs a webhook', 'A payment event, not money.', false],
-            ['Event Schedule reads it', 'Verifies it, reconciles the amount, marks the sale paid.', true],
+            ['Stripe confirms it', 'A signed message that the payment went through.', false],
+            ['Event Schedule checks it', 'The right account, the right amount, once.', true],
             ['The ticket goes out', 'Confirmation email with the QR code.', false],
+        ];
+
+        // Stripe on its own vs Event Schedule on the same Stripe account.
+        // Every Stripe cell is from Stripe's own documentation, checked 2026-11-08:
+        //   docs.stripe.com/payment-links/customize (payment limit counts completed Checkout
+        //     Sessions and deactivates the link; custom fields text / numbers only / dropdown;
+        //     customisable deactivation message)
+        //   docs.stripe.com/payment-links/post-payment (confirmation message or redirect;
+        //     receipts automatic or manual; refunds full or partial from the Dashboard;
+        //     fulfillment through a partner such as Zapier or your own webhooks)
+        //   docs.stripe.com/apple-pay ("For Payment Links or hosted Checkout, Apple Pay works
+        //     with no additional configuration.")
+        //   docs.stripe.com/payments/checkout/payment-methods (methods shown from the Dashboard)
+        // Our side: docs/FEATURES.md (QR scanning, check-in, refunds, waitlist, ticket-type
+        // fields) and marketing/docs/tickets (quantity per date, Sell tickets tile).
+        $compare = [
+            [
+                'Taking the payment',
+                'Stripe\'s hosted checkout page, with the cards and wallets you have turned on in the Stripe Dashboard. Apple Pay works there with no extra setup.',
+                'The same Stripe Checkout page, created on your own Stripe account, with the same methods.',
+            ],
+            [
+                'Stopping when it sells out',
+                'A link can stop after a set number of payments and then deactivate. The limit counts completed checkouts, not tickets, so one buyer taking four uses one of them.',
+                'A quantity for each ticket type, counted in tickets. On a recurring event it is kept per date, so Friday selling out leaves Saturday on sale.',
+            ],
+            [
+                'Asking buyers questions',
+                'Custom fields on the payment page: free text, numbers only, or a dropdown.',
+                'Questions on a ticket type, such as a meal choice on the dinner ticket, on every plan. Your own questions for the whole order are Pro.',
+            ],
+            [
+                'What the buyer gets',
+                'A confirmation message or a redirect to your site, and a Stripe receipt by email when receipts are on.',
+                'A confirmation email with the ticket and its QR code, on the schedule\'s own name and colours.',
+            ],
+            [
+                'At the door',
+                'Not part of a Payment Link. Stripe\'s suggestion for anything after the payment is an automation you build yourself (Stripe calls it a webhook) or a partner such as Zapier.',
+                'Scan the QR with any phone from the Sales tab, free on every plan. Each ticket admits once, and a second scan warns you.',
+            ],
+            [
+                'Who is coming',
+                'The link\'s payments, listed in the Stripe Dashboard.',
+                'A Sales list with every buyer, the tickets they hold and whether they have paid. CSV export is Pro.',
+            ],
+            [
+                'When it is full',
+                'The link deactivates and shows a message you can write yourself.',
+                'A waitlist that emails the next people when tickets come back. Pro for tickets, free for free registration.',
+            ],
+            [
+                'Refunds',
+                'From the Stripe Dashboard, in full or in part.',
+                'From the Sales page, in full or in part, on Pro. The money goes back through Stripe and a fully refunded ticket stops scanning.',
+            ],
+            [
+                'A page for the event',
+                'Not part of a Payment Link: you link to it from wherever you announce the event.',
+                'An event page with the date, the venue and the buy button, on a schedule people can follow.',
+            ],
+            [
+                'What it costs',
+                'Stripe\'s processing fee.',
+                'Stripe\'s processing fee, and the Pro plan once a ticket carries a price. Nothing per sale.',
+            ],
+        ];
+
+        $setup = [
+            ['01', 'Make a schedule', 'Sign up and create the schedule your events will live on. It is free and asks for no card.'],
+            ['02', 'Connect Stripe', 'In Settings, open Payment Methods and press Connect Stripe. Stripe\'s own onboarding asks for the details it needs to pay you. Until Stripe has what it needs, the row reads Setup not finished and Stripe is not offered on your events. If Stripe finishes its review after you come back, press Connect Stripe again to pick it up.'],
+            ['03', 'Add your tickets', 'On the event\'s Tickets tab press Sell tickets, add a ticket type for each price (early bird, standard, VIP) with how many exist, and pick the event\'s currency. Charging for a ticket is the Pro plan.'],
+            ['04', 'Choose Stripe for the event', 'In the Payment row, pick Stripe. The method is chosen per event, so a paid workshop can take cards while a community night takes cash at the door.'],
+            ['05', 'Share it, then scan it', 'Publish the event and share its page. Buyers pay on Stripe Checkout and get the ticket with its QR code by email; at the door you scan it from the Sales tab.'],
         ];
 
         // Verified in StripeController::webhook() and success().
         $gate = [
-            ['01', 'The signature is checked against the right key', 'A webhook is verified against the Connect signing secret first and the platform secret second. A Connect sale that arrives signed with the platform key is refused rather than trusted.'],
-            ['02', 'The charged amount is reconciled', 'The amount Stripe reports is compared with what the ticket should have cost, including any promo code, volume discount or gift card applied. Anything more than a cent apart is parked as a mismatch.'],
-            ['03', 'The sale flips to paid once, under a lock', 'The row is locked and the status change happens exactly once. Stripe can send more than one event for a single payment, and the buyer is being redirected back at the same moment, so the lock is what stops a second ticket being issued.'],
-            ['04', 'Then the ticket is emailed', 'Only after that does the confirmation email with the QR code go out, and the sale reach your Sales tab and your revenue figures.'],
+            ['01', 'Only Stripe can say a ticket is paid', 'The confirmation comes to us from Stripe, signed, never from the buyer\'s browser. A message without Stripe\'s signature for the right account is refused rather than trusted.'],
+            ['02', 'The amount has to match', 'What Stripe charged is compared with what the tickets should have cost after any promo code, volume discount or gift card. More than a cent apart and the sale is held for review as an amount mismatch, shown on your Sales tab, with no ticket sent.'],
+            ['03', 'One payment, one set of tickets', 'Stripe can confirm the same payment more than once, and the buyer is landing back on your page at the same moment. The sale is marked paid exactly once, so nobody is sent their tickets twice.'],
+            ['04', 'The buyer can close the tab', 'Because the confirmation comes from Stripe and not from the page, a buyer who closes the tab after paying still gets the ticket by email, and the sale still reaches your Sales tab.'],
         ];
 
         // Event.payment_method, per event. TicketController::checkout() resolves it through
@@ -669,7 +852,7 @@
             [
                 'name'  => 'Stripe',
                 'held'  => 'Your own Stripe account',
-                'desc'  => 'Stripe Checkout handles the card, the wallet and the receipt. The charge is created on your connected account and settles there.',
+                'desc'  => 'Stripe Checkout handles the card, the wallet and the receipt. The charge is created on your own Stripe account and settles there.',
                 'micro' => 'Cards and wallets',
             ],
             [
@@ -699,7 +882,7 @@
             [
                 'name'  => 'Payment link',
                 'held'  => 'Whatever the link points at',
-                'desc'  => 'Any URL you own. Buyers are sent there to pay, and you reconcile the sale yourself on the Sales tab.',
+                'desc'  => 'Any URL you own, a Stripe Payment Link included. Buyers are sent there to pay, and you reconcile the sale yourself on the Sales tab.',
                 'micro' => 'Bring your own',
             ],
             [
@@ -716,49 +899,66 @@
         // the same Stripe account. Each traced in the report.
         $sameRail = [
             ['Promo codes', 'A percentage or a fixed discount, with usage limits and an expiry, priced into the line items before the charge is created.', 'Pro'],
-            ['Volume discounts', 'Buy more of one ticket type and the per-unit price drops. The reconciliation spreads the rounding a cent at a time so the charge matches the total exactly.', 'Free'],
-            ['Gift cards', 'Sold through the same Stripe account and redeemed against a later ticket. A gift-card payment is checked harder still: the connected account that paid has to be the one selling the card, and the currency has to match.', 'Pro'],
+            ['Volume discounts', 'Buy more of one ticket type and the per-unit price drops. The rounding is spread a cent at a time so the charge matches the total exactly.', 'Free'],
+            ['Gift cards', 'Sold through the same Stripe account and redeemed against a later ticket. A card is redeemed only on events of the same owner that sold it, and only in the card\'s currency.', 'Pro'],
             ['Add-ons', 'A drink, a programme, a workshop place. Priced as its own line on the same charge rather than a second checkout.', 'Pro'],
-            ['Appointments', 'A bookable slot can take payment through the same connected account, or a payment link, or cash. Every plan carries one free booking type; putting a price on one is Pro.', 'Pro'],
+            ['Appointments', 'A bookable slot can take payment through the same Stripe account, or a payment link, or cash. Every plan carries one free booking type; putting a price on one is Pro.', 'Pro'],
             ['Installments', 'Split a ticket into monthly payments. The first is taken at checkout on the same Stripe account and the ticket is valid at once; the rest are charged to the saved card on schedule. No other route can do it.', 'Pro'],
         ];
 
+        // Stripe figures here: stripe.com/pricing (2.9% + 30c domestic, +1.5% international
+        // cards, +1% currency conversion, processing fees not returned on a refund),
+        // docs.stripe.com/payouts (first payout typically 7-14 days; daily, weekly, monthly or
+        // manual schedules), docs.stripe.com/payment-links/post-payment (refunds typically take
+        // 5-10 business days to reach the statement), stripe.com/global (country list).
         $faqs = [
             [
+                'q' => 'Can I sell event tickets with Stripe alone?',
+                'a' => 'Yes, with a Stripe Payment Link. You create it in the Stripe Dashboard, share the address, and buyers pay on Stripe\'s checkout page at Stripe\'s normal processing fee. A link can stop after a set number of payments and ask buyers a few questions. What it does not do is produce a ticket: there is no QR code for each buyer, no separate count for each date and nothing to scan at the door, and Stripe\'s own suggestion for anything after the payment is an automation you build yourself (Stripe calls it a webhook) or a partner such as Zapier. For one price on one date with a guest list read out at the door, a Payment Link is enough. Past that, a ticketing tool that charges through your own Stripe account adds the ticket without adding a fee.',
+            ],
+            [
+                'q' => 'How much does Stripe charge per ticket?',
+                'a' => 'In the United States Stripe\'s published rate for a domestic card is '.$rateLabel.' per successful charge, plus 1.5% for an international card and 1% when the currency has to be converted. A '.$money($stmt['grossCents']).' ticket therefore costs '.$money($stmt['feeCents']).'. Stripe charges per payment, not per ticket, so an order of four tickets pays the fixed '.$money($rateFixedCents).' once. Other countries have their own rates on Stripe\'s pricing page, and Event Schedule adds nothing to any of them.',
+            ],
+            [
                 'q' => 'Does Event Schedule take a cut of ticket sales?',
-                'a' => 'No. On the hosted platform the charge is created on your own connected Stripe account and no application fee is added to it, so there is no line where a platform cut could be taken. You pay Stripe its processing fee and keep the rest. Selling tickets that carry a price is on the Pro plan at '.plan_price($proMonthly).' a month, and that subscription is the whole of what Event Schedule charges.',
+                'a' => 'No. On the hosted platform the charge is created on your own Stripe account and no platform fee is added to it, so there is no line where a platform cut could be taken. You pay Stripe its processing fee and keep the rest. Selling tickets that carry a price is on the Pro plan at '.plan_price($proMonthly).' a month, and that subscription is the whole of what Event Schedule charges.',
             ],
             [
-                'q' => 'How do I connect Stripe, and what happens if it is not finished?',
-                'a' => 'One button hands you to Stripe\'s own onboarding. When you come back, Event Schedule checks a single thing: whether your account can accept charges. Until that is true the account reads as Pending and Stripe is not offered as a payment method on an event. The only details kept here are the account id, the business name Stripe reports and the date the account was confirmed. Unlinking drops the id and the confirmation, and Stripe stops being offered on your events.',
+                'q' => 'Can buyers pay with Apple Pay or Google Pay?',
+                'a' => 'Yes, when your Stripe account offers them. Event Schedule sends buyers to Stripe\'s hosted Checkout without fixing the list of methods, so Stripe shows the ones you have turned on in your Dashboard that suit the buyer\'s device, currency and amount. Stripe\'s documentation says Apple Pay works on hosted Checkout with no extra setup. Buyers never type card details into an Event Schedule page.',
             ],
             [
-                'q' => 'How do payouts reach my bank?',
-                'a' => 'Stripe pays you, not us, because the money was never in an Event Schedule account. Your payout schedule, your balance and your payout history all live in your Stripe Dashboard, on whatever terms Stripe applies to your account and country.',
+                'q' => 'Can I take Stripe payments for appointments?',
+                'a' => 'Yes. A booking type can take payment through the same connected Stripe account, a payment link or cash. Every plan includes one free booking type; putting a price on a booking type, or offering more than one, is Pro. A paid booking is refunded from the Sales page like a ticket.',
             ],
             [
-                'q' => 'Which payment methods can buyers use?',
-                'a' => 'Whatever your Stripe account has switched on. Event Schedule sends buyers to Stripe Checkout without pinning the method list, so cards, Apple Pay, Google Pay and the local methods Stripe enables for you all appear. Buyers never type card details into an Event Schedule page.',
-            ],
-            [
-                'q' => 'Which currency are tickets priced in?',
-                'a' => 'You pick a currency per event from a list of 28, including USD, EUR, GBP, CAD, AUD, JPY, INR, BRL, ILS, ZAR and SGD. Stripe is charged in that currency, and zero-decimal currencies such as JPY and KRW are handled in whole units rather than cents.',
-            ],
-            [
-                'q' => 'Can buyers pay in installments?',
-                'a' => 'Yes, on the Pro plan, and only through Stripe, because it is the one route that can charge a saved card again later. The buyer pays the first installment at checkout and the ticket is valid straight away; the rest are charged to the same card on schedule. If a payment is missed, the ticket is held at the door until the plan is settled.',
-            ],
-            [
-                'q' => 'What happens if the buyer closes the tab on the way back?',
-                'a' => 'Nothing is lost. The redirect back from Stripe only records the payment reference; it is the signed webhook that marks the sale paid and sends the ticket. If Stripe delivers more than one event for the same payment, the row lock means the sale still transitions exactly once.',
+                'q' => 'When does the money reach my bank?',
+                'a' => 'When Stripe pays it out: the money is in your Stripe balance and never passes through an Event Schedule account. Stripe\'s documentation says a first payout typically arrives 7 to 14 days after your first live payment, depending on your industry, country and risk level, and after that follows the schedule you choose in the Stripe Dashboard (daily, weekly, monthly or manual, where your country allows it).',
             ],
             [
                 'q' => 'How do refunds work?',
-                'a' => 'From the Sales page, in full or in part, on Pro. The money goes back through Stripe first, and only then does the sale change here. A full refund invalidates the tickets, puts the seats back on sale and takes the sale out of your revenue figures. A partial refund leaves the sale paid and its tickets valid, and the Sales page shows how much has gone back so far. An installment plan is refunded payment by payment, and only in full.',
+                'a' => 'From the Sales page, in full or in part, on Pro. The money goes back through Stripe first, and only then does the sale change here. A full refund invalidates the tickets, puts the seats back on sale and takes the sale out of your revenue figures. A partial refund leaves the sale paid and its tickets valid, and the Sales page shows how much has gone back so far. Stripe does not return its processing fee on a refund, and says a refund typically takes 5 to 10 business days to reach the buyer\'s statement. An installment plan is refunded payment by payment, and only in full.',
             ],
             [
                 'q' => 'Can I refund from the Stripe Dashboard instead?',
                 'a' => 'You can, but Event Schedule will not hear about it: no refund event comes back from Stripe, so the sale here would still read as paid and its tickets would still scan. Refunding from the Sales page keeps the two in step, and the refund still shows in your Stripe Dashboard. Outside installment plans, which remember the account that took each payment, it is issued on the Stripe account you are connected to now, so if you have switched accounts since the sale it fails rather than coming out of the wrong one.',
+            ],
+            [
+                'q' => 'Which countries and currencies does it work in?',
+                'a' => 'Anywhere you can open a Stripe account, which is Stripe\'s own list of countries. Each event is priced in one of '.count(\App\Utils\MoneyUtils::currencies()).' currencies, including USD, EUR, GBP, CAD, AUD, JPY, INR, BRL, ILS, ZAR and SGD. Stripe is charged in that currency, and zero-decimal currencies such as JPY and KRW are handled in whole units rather than cents.',
+            ],
+            [
+                'q' => 'Does it handle sales tax or VAT?',
+                'a' => 'No. Event Schedule does not calculate or collect sales tax or VAT, and does not switch on Stripe Tax for the charge. Price tickets to include what you owe, and on Pro export the sales as CSV when it is time to file.',
+            ],
+            [
+                'q' => 'What happens if Stripe setup is not finished?',
+                'a' => 'Until Stripe has what it needs, the Stripe row under Payment Methods reads Setup not finished and Stripe is not offered as a payment method on an event, so nothing can go on sale that cannot be paid for. If Stripe finishes its review after you leave its onboarding, press Connect Stripe again and the row picks it up. Disconnect removes the link to your Stripe account here without touching the account itself.',
+            ],
+            [
+                'q' => 'Can buyers pay in installments?',
+                'a' => 'Yes, on the Pro plan, and only through Stripe, because it is the one route that can charge a saved card again later. The buyer pays the first installment at checkout and the ticket is valid straight away; the rest are charged to the same card on schedule. If a payment is missed, the ticket is held at the door until the plan is settled.',
             ],
             [
                 'q' => 'Can a selfhosted install take Stripe payments?',
@@ -767,12 +967,13 @@
         ];
 
         $dotSections = [
-            ['top', 'The route'],
-            ['statement', 'The statement'],
-            ['wiring', 'The wiring'],
-            ['gate', 'The gate'],
+            ['top', 'The answer'],
+            ['compare', 'Stripe on its own'],
+            ['statement', 'What it costs'],
+            ['setup', 'Setup'],
+            ['gate', 'Before a ticket'],
             ['routes', 'Other routes'],
-            ['more', 'Same rail'],
+            ['more', 'Same charge'],
             ['faq', 'Questions'],
             ['claim', 'Get started'],
         ];
@@ -780,10 +981,10 @@
 
     <div id="es-payout-page" class="es-payout-page">
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero: the two lanes                                       -->
-    <!-- ============================================================ -->
-    {{-- The nav overlays the top of the page, so the hero carries extra
+    {{-- ============================================================
+         1. Hero: the direct answer, and the two lanes
+         ============================================================
+         The nav overlays the top of the page, so the hero carries extra
          top padding rather than letting the card sit under it. --}}
     <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden pb-16 pt-28">
         <div class="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -797,14 +998,19 @@
                 <div>
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
                         <x-marketing.hero-eyebrow class="block es-payout-tag es-fade-up es-d-1 mb-5">Stripe payments for tickets</x-marketing.hero-eyebrow>
-                        <span class="es-mask"><span class="es-mask-line">The money never</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-payout-grad">lands with us</span>.</span></span>
+                        <span class="es-mask"><span class="es-mask-line">Sell tickets with Stripe.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">Keep all of it <span class="es-payout-grad">but Stripe's fee</span>.</span></span>
                     </h1>
 
-                    <p class="es-payout-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
-                        The charge for a ticket is created on your own connected Stripe account, and no
-                        application fee is added to it. Zero platform fees is not a promise we make about
-                        our pricing. It is a line on the statement with nothing on it.
+                    <p class="es-payout-muted es-fade-up es-d-2 mb-5 max-w-xl text-lg sm:text-xl">
+                        Stripe can take the money for a ticket on its own. What it does not do is issue the
+                        ticket: a QR code for the door, a count of what is left for each night, a list of who
+                        is coming. Event Schedule does that part, on your own Stripe account, and adds nothing
+                        to the charge.
+                    </p>
+                    <p class="es-payout-muted es-fade-up es-d-2 mb-9 max-w-xl text-sm">
+                        Free to start, and free registration stays free. A ticket with a price is the Pro
+                        plan, {{ plan_price($proMonthly) }} a month, with no fee on any sale.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
@@ -812,15 +1018,15 @@
                             Get started free
                             <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
-                        <a href="#statement" class="es-payout-ghost inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
-                            Read the statement
+                        <a href="#compare" class="es-payout-ghost inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
+                            Compare with Stripe alone
                             <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                         </a>
                     </div>
                 </div>
 
-                <!-- The two lanes. Money on the solid rule, receipt on
-                     the dashed one. We are only on the dashed one. -->
+                {{-- The two lanes. Money on the solid rule, receipt on the
+                     dashed one. We are only on the dashed one. --}}
                 <div class="es-fade-up es-d-4" data-reveal>
                     <div class="es-payout-card p-6 sm:p-7">
                         <div class="grid gap-8 sm:grid-cols-2 sm:gap-6">
@@ -838,7 +1044,7 @@
                             </div>
 
                             <div>
-                                <p class="es-payout-tag mb-4">The receipt</p>
+                                <p class="es-payout-tag mb-4">The ticket</p>
                                 <div class="es-payout-lane es-payout-lane-data">
                                     @foreach ($receiptLane as [$stopName, $stopNote, $stopFill])
                                         <div class="es-payout-stop {{ $stopFill ? 'es-payout-stop-fill' : '' }}">
@@ -860,55 +1066,155 @@
                     </div>
 
                     <p class="es-payout-muted mt-5 text-xs">
-                        Event Schedule appears on the dashed lane only. It reads a signed payment event and
-                        issues a ticket; it is never a stop the money passes through.
+                        Event Schedule appears on the dashed lane only. It hears from Stripe that a payment
+                        went through and issues the ticket; it is never a stop the money passes through.
                     </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 2. The statement (01)                                        -->
-    <!-- ============================================================ -->
+    {{-- ============================================================
+         2. Stripe on its own (01): the honest table
+         ============================================================ --}}
+    <section id="compare" class="es-payout-edge scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">01</div>
+                <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Stripe on its own</p>
+                <h2 class="es-balance es-payout-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    What Stripe does by itself, and <span class="es-payout-grad">what a ticket needs on top</span>.
+                </h2>
+                <p class="es-payout-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The quickest way to sell anything with Stripe is a Payment Link: you make it in the
+                    Stripe Dashboard, share the address, and buyers pay on Stripe's own checkout page. Here
+                    is how that compares with selling the same event through Event Schedule, which uses
+                    Stripe Checkout underneath.
+                </p>
+            </div>
+
+            <div class="es-payout-card overflow-hidden" data-reveal="panel">
+                <table class="es-payout-compare" role="table">
+                    <caption class="sr-only">A Stripe Payment Link on its own compared with Event Schedule charging through your own Stripe account</caption>
+                    <thead role="rowgroup">
+                        <tr role="row">
+                            <th scope="col" role="columnheader"><span class="sr-only">What you need</span></th>
+                            <th scope="col" role="columnheader">A Stripe Payment Link</th>
+                            <th scope="col" role="columnheader">Event Schedule, on your Stripe account</th>
+                        </tr>
+                    </thead>
+                    <tbody role="rowgroup">
+                        @foreach ($compare as [$need, $stripeAlone, $ours])
+                            <tr role="row">
+                                <th scope="row" role="rowheader">{{ $need }}</th>
+                                <td role="cell" data-label="A Stripe Payment Link">{{ $stripeAlone }}</td>
+                                <td role="cell" class="es-payout-ours" data-label="Event Schedule">{{ $ours }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                <div class="es-payout-sub p-5" data-reveal>
+                    <p class="es-payout-tag mb-2">When a Payment Link is enough</p>
+                    <p class="es-payout-ink text-sm">
+                        One price, one date, and a guest list you can read out at the door. It costs nothing
+                        beyond Stripe's fee, and you can set it up in minutes.
+                    </p>
+                </div>
+                <div class="es-payout-sub p-5" data-reveal>
+                    <p class="es-payout-tag mb-2">When it stops being enough</p>
+                    <p class="es-payout-ink text-sm">
+                        A ticket for each person, separate stock for each price and each night, a scanner at
+                        the door. With Stripe alone that is an automation you build and run yourself,
+                        which is the part Event Schedule already is.
+                    </p>
+                </div>
+            </div>
+
+            <p class="es-payout-muted mt-6 text-center text-xs" data-reveal>
+                Stripe's side of the table is from Stripe's documentation on
+                <x-link href="https://docs.stripe.com/payment-links" target="_blank">Payment Links</x-link>,
+                checked in November 2026.
+            </p>
+        </div>
+    </section>
+
+    {{-- ============================================================
+         3. What it costs (02): the ladder and the statement
+         ============================================================ --}}
     <section id="statement" class="es-payout-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-14 lg:grid-cols-2 lg:gap-16">
-                <div>
-                    <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">01</div>
-                    <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The statement</p>
+                <div class="min-w-0">
+                    <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">02</div>
+                    <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What it costs</p>
                     <h2 class="es-balance es-payout-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         One ticket, <span class="es-payout-grad">itemised</span>.
                     </h2>
                     <p class="es-payout-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
                         Two parties touch a ticket sale, and only one of them takes anything. Stripe deducts
                         its processing fee from the charge. Event Schedule deducts nothing, because there is
-                        no fee field in the charge we ask Stripe to create.
+                        no fee field in the charge we ask Stripe to create. Here is Stripe's fee at five
+                        ticket prices, at its published US card rate of {{ $rateLabel }}.
                     </p>
 
-                    <ul class="mb-8 space-y-4" data-reveal-group="90">
+                    <div class="es-payout-card mb-6 overflow-x-auto p-2 sm:p-3" data-reveal>
+                        <table class="es-payout-ladder">
+                            <caption class="sr-only">Stripe's processing fee and what you keep at five ticket prices, in US dollars, one ticket per order</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Ticket (USD)</th>
+                                    <th scope="col">Stripe</th>
+                                    <th scope="col">Share</th>
+                                    <th scope="col">Our fee</th>
+                                    <th scope="col">You keep</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($ladder as $rung)
+                                    <tr>
+                                        <th scope="row">{{ $money($rung['price']) }}</th>
+                                        <td>{{ $money($rung['fee']) }}</td>
+                                        <td>{{ $rung['share'] }}%</td>
+                                        <td class="es-payout-nil">{{ $money(0) }}</td>
+                                        <td class="es-payout-keep">{{ $money($rung['keep']) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <ul class="mb-8 space-y-3 text-sm" data-reveal-group="90">
                         @foreach ([
-                            ['Charged on your account', 'The Checkout session is created against your connected account id, so the payment is yours from the first cent rather than something we forward on.'],
-                            ['No application fee', 'The parameter that would let a platform skim a charge is simply not in our code. It cannot be switched on for your schedule and not another.'],
-                            ['Nothing to withdraw', 'A pricing page can change its mind about a percentage. Wiring is harder to change quietly, and this is wiring.'],
-                        ] as [$claimTitle, $claimBody])
+                            ['The fixed part weighs most on cheap tickets.', 'Stripe charges per payment, not per ticket, so an order of four tickets pays the fixed '.$money($rateFixedCents).' once, not four times.'],
+                            ['Some cards cost more.', 'Stripe adds 1.5% for an international card and 1% when the currency has to be converted. Other countries have their own rates.'],
+                            ['A refund does not return Stripe\'s fee.', 'Stripe keeps the processing fee of the original payment, so a refunded ticket costs you that much.'],
+                        ] as [$noteTitle, $noteBody])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-payout-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span><span class="es-payout-ink font-semibold">{{ $claimTitle }}</span> <span class="es-payout-muted">- {{ $claimBody }}</span></span>
+                                <span><span class="es-payout-ink font-semibold">{{ $noteTitle }}</span> <span class="es-payout-muted">{{ $noteBody }}</span></span>
                             </li>
                         @endforeach
                     </ul>
 
-                    <p data-reveal>
+                    <p class="mb-4" data-reveal>
                         <span class="es-payout-plan es-payout-plan-pro">Pro</span>
-                        <span class="es-payout-muted ms-2 text-sm">Selling tickets that carry a price is {{ plan_price($proMonthly) }} a month, and that is the entire bill from us.</span>
+                        <span class="es-payout-muted ms-2 text-sm">Selling tickets that carry a price is {{ plan_price($proMonthly) }} a month, and that is the entire bill from us, however many you sell.</span>
+                    </p>
+                    <p class="es-payout-muted text-sm" data-reveal>
+                        Weighing this against a ticketing platform that takes a share? The
+                        <x-link :href="marketing_url('/ticket-fee-calculator')">ticket fee calculator</x-link>
+                        works out Eventbrite, Luma, Ticket Tailor and others for your own numbers. Rates
+                        from <x-link href="https://stripe.com/pricing" target="_blank">stripe.com/pricing</x-link>.
                     </p>
                 </div>
 
-                <!-- The statement sheet. A printed document: it renders
+                {{-- The statement sheet. A printed document: it renders
                      identically in light and dark mode, so no descendant
-                     here may carry a dark variant. -->
-                <div class="min-w-0" data-reveal="panel">
+                     here may carry a dark variant. --}}
+                <div class="min-w-0 lg:sticky lg:top-28" data-reveal="panel">
                     <div class="es-payout-sheet min-w-0">
                         <div class="es-payout-sheet-head flex flex-wrap items-baseline justify-between gap-2 px-5 py-4 sm:px-7">
                             <p class="es-payout-sheet-title">Statement</p>
@@ -951,8 +1257,7 @@
                                 <span class="es-payout-stamp es-payout-stamp-ink">No platform fee</span>
                             </div>
                             <p class="es-payout-sheet-foot mt-5">
-                                Worked at Stripe's published card rate in the United States,
-                                {{ number_format($stmt['ratePercent'] * 100, 1) }}% plus {{ $money($stmt['rateFixed']) }}.
+                                Worked at Stripe's published card rate in the United States, {{ $rateLabel }}.
                                 Stripe sets that rate itself, per country and per payment method, and Event
                                 Schedule adds nothing to it.
                             </p>
@@ -963,88 +1268,65 @@
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 3. The wiring (02)                                           -->
-    <!-- ============================================================ -->
-    <section id="wiring" class="es-payout-edge scroll-mt-24 py-20 lg:py-28">
+    {{-- ============================================================
+         4. Setup (03): five steps, and the selfhosted variant
+         ============================================================ --}}
+    <section id="setup" class="es-payout-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">02</div>
-                <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The wiring</p>
+                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">03</div>
+                <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Setup</p>
                 <h2 class="es-balance es-payout-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Two installs, <span class="es-payout-grad">one owner</span>.
+                    From a Stripe account to <span class="es-payout-grad">a ticket at the door</span>.
                 </h2>
                 <p class="es-payout-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Hosted or on your own server, the account the money lands in belongs to you. Only the
-                    way you attach it differs.
+                    Five steps on the hosted platform, and only the second one happens on Stripe's side.
+                    A selfhosted install skips Connect and uses your own keys.
                 </p>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="100">
-                <div class="es-payout-card es-payout-hover p-7" data-reveal>
-                    <p class="es-payout-tag mb-3">Hosted at eventschedule.com</p>
-                    <h3 class="es-payout-ink mb-3 text-xl font-bold">Stripe Connect, one button</h3>
-                    <p class="es-payout-muted mb-5 text-sm">
-                        Connect Stripe and you are handed to Stripe's own onboarding. Coming back, Event
-                        Schedule checks a single thing: whether the account can accept charges yet.
-                    </p>
-                    <div class="es-payout-sub p-4">
-                        <dl class="space-y-2.5 text-sm">
-                            <div class="flex justify-between gap-4">
-                                <dt class="es-payout-muted">Until charges are enabled</dt>
-                                <dd class="es-payout-ink es-payout-num text-xs font-semibold uppercase">Pending</dd>
-                            </div>
-                            <div class="flex justify-between gap-4">
-                                <dt class="es-payout-muted">What we store</dt>
-                                <dd class="es-payout-ink text-end">Account id, business name</dd>
-                            </div>
-                            <div class="flex justify-between gap-4">
-                                <dt class="es-payout-muted">Unlink</dt>
-                                <dd class="es-payout-ink text-end">Drops the link, one click</dd>
-                            </div>
-                        </dl>
-                    </div>
-                    <p class="es-payout-muted mt-4 text-xs">
-                        While an account is pending, Stripe is not offered as a payment method on an event,
-                        so nothing can be put on sale that cannot be paid for.
-                    </p>
-                </div>
+            <ol class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($setup as [$stepNum, $stepTitle, $stepBody])
+                    <li class="es-payout-card flex flex-col p-6" data-reveal>
+                        <p class="es-payout-setup-num mb-3">Step {{ $stepNum }}</p>
+                        <h3 class="es-payout-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                        <p class="es-payout-muted text-sm">{{ $stepBody }}</p>
+                    </li>
+                @endforeach
 
-                <div class="es-payout-card es-payout-hover p-7" data-reveal>
-                    <p class="es-payout-tag mb-3">Selfhosted on your server</p>
-                    <h3 class="es-payout-ink mb-3 text-xl font-bold">Your keys, your account</h3>
-                    <p class="es-payout-muted mb-5 text-sm">
+                {{-- The sixth cell closes the grid at three columns: the
+                     selfhosted route, which has no Connect step at all. --}}
+                <li class="es-payout-sub flex flex-col p-6" data-reveal>
+                    <p class="es-payout-setup-num mb-3">Selfhosted</p>
+                    <h3 class="es-payout-ink mb-2 text-lg font-bold">Your keys, your account</h3>
+                    <p class="es-payout-muted mb-4 text-sm">
                         No Connect layer at all. Put your own Stripe keys and webhook signing secret in the
                         environment file and the install charges through that account directly.
                     </p>
-                    <div class="es-payout-sub p-4">
-                        <ul class="es-payout-num es-payout-env space-y-1.5 text-xs">
-                            <li class="es-payout-ink">STRIPE_PLATFORM_KEY</li>
-                            <li class="es-payout-ink">STRIPE_PLATFORM_SECRET</li>
-                            <li class="es-payout-ink">STRIPE_PLATFORM_WEBHOOK_SECRET</li>
-                        </ul>
-                    </div>
-                    <p class="es-payout-muted mt-4 text-xs">
-                        The Payment Methods settings report whether the server is configured, so you can see
-                        it is live without reading a log.
-                        <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="es-payout-accent font-semibold underline">Selfhosted Stripe setup</a>
+                    <ul class="es-payout-num es-payout-env mb-5 space-y-1.5 text-xs">
+                        <li class="es-payout-ink">STRIPE_PLATFORM_KEY</li>
+                        <li class="es-payout-ink">STRIPE_PLATFORM_SECRET</li>
+                        <li class="es-payout-ink">STRIPE_PLATFORM_WEBHOOK_SECRET</li>
+                    </ul>
+                    <p class="mt-auto text-sm">
+                        <x-link :href="route('marketing.docs.selfhost.stripe')">Selfhosted Stripe setup</x-link>
                     </p>
-                </div>
-            </div>
+                </li>
+            </ol>
 
-            <div class="mt-8 text-center" data-reveal>
-                <span class="es-payout-plan es-payout-plan-free">Free</span>
-                <span class="es-payout-muted ms-2 text-sm">
-                    Connecting Stripe costs nothing and is not gated, on the hosted platform or on a
-                    selfhosted install. Taking payment for a priced ticket is what needs Pro.
-                </span>
-            </div>
+            <p class="es-payout-muted mt-8 text-center text-sm" data-reveal>
+                <span class="es-payout-plan es-payout-plan-free me-2">Free</span>
+                Connecting Stripe costs nothing and is not gated. Every screen named here is in the
+                <x-link :href="route('marketing.docs.account_settings').'#stripe'">Payment Methods guide</x-link>
+                and the
+                <x-link :href="route('marketing.docs.tickets').'#payment'">selling tickets guide</x-link>.
+            </p>
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 4. The gate (03, fixed dark band)                            -->
-    <!-- ============================================================ -->
+    {{-- ============================================================
+         5. Before a ticket exists (04, fixed dark band)
+         ============================================================ --}}
     <section id="gate" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-payout-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -1053,14 +1335,15 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">03</div>
-                    <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gate</p>
+                    <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">04</div>
+                    <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before a ticket exists</p>
                     <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        No ticket until <span class="es-payout-grad">the numbers agree</span>.
+                        No ticket until <span class="es-payout-grad">the money is really there</span>.
                     </h2>
                     <p class="text-lg text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
-                        A ticket is not issued because a browser came back from Stripe looking pleased. It is
-                        issued because a signed payment event arrived and survived four checks.
+                        A ticket that scans is worth money, so one is never issued because a browser came back
+                        from Stripe looking pleased. It waits for Stripe to confirm the payment itself, and
+                        then it checks four things.
                     </p>
                 </div>
 
@@ -1083,8 +1366,8 @@
                             <div class="mb-5">
                                 <span class="es-payout-stamp es-payout-stamp-lit">Paid</span>
                                 <p class="mt-3 text-sm text-gray-400">
-                                    The signature matched, the amount matched, the lock was taken. The ticket,
-                                    the QR code and the confirmation email follow.
+                                    Stripe confirmed it, the amount matched, and it was not already paid. The
+                                    ticket, the QR code and the confirmation email follow.
                                 </p>
                             </div>
 
@@ -1094,13 +1377,13 @@
                                 <span class="es-payout-stamp es-payout-stamp-mute">Held</span>
                                 <p class="mt-3 text-sm text-gray-400">
                                     The figures disagreed by more than a cent. The sale is recorded as a
-                                    mismatch, the discrepancy is logged, and no ticket is sent. Nothing is
+                                    mismatch for review and no ticket is sent. Nothing is
                                     quietly rounded into place.
                                 </p>
                             </div>
 
                             <p class="mt-6 text-xs text-gray-400">
-                                Free tickets and RSVPs skip Stripe entirely; there is no charge to reconcile.
+                                Free tickets and RSVPs skip Stripe entirely; there is no charge to check.
                             </p>
                         </div>
                     </div>
@@ -1109,20 +1392,20 @@
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 5. Other routes (04)                                         -->
-    <!-- ============================================================ -->
+    {{-- ============================================================
+         6. Other routes (05)
+         ============================================================ --}}
     <section id="routes" class="es-payout-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">04</div>
+                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">05</div>
                 <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Other routes</p>
                 <h2 class="es-balance es-payout-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Seven lanes, <span class="es-payout-grad">all of them yours</span>.
+                    Stripe is one of seven, <span class="es-payout-grad">all of them yours</span>.
                 </h2>
                 <p class="es-payout-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Every event carries its own route, and a new one starts on cash at the door until you
-                    change it. A paid workshop can take cards while a community night takes money at the desk.
+                    Every event carries its own route, and a new one starts on cash at the door unless your
+                    default ticket preset says otherwise. Not one of these passes through an Event Schedule account.
                 </p>
             </div>
 
@@ -1142,27 +1425,27 @@
 
             <div class="mt-8 text-center" data-reveal>
                 <span class="es-payout-muted text-sm">
-                    Not one of these routes passes through an Event Schedule account.
-                    <a href="{{ marketing_url('/invoiceninja') }}" class="es-payout-accent font-semibold underline">See the Invoice Ninja integration</a>
+                    Invoices and books kept for you:
+                    <x-link :href="marketing_url('/invoiceninja')">see the Invoice Ninja integration</x-link>.
                 </span>
             </div>
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 6. Same rail (05)                                            -->
-    <!-- ============================================================ -->
+    {{-- ============================================================
+         7. Same charge (06)
+         ============================================================ --}}
     <section id="more" class="es-payout-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">05</div>
-                <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Same rail</p>
+                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">06</div>
+                <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Same charge</p>
                 <h2 class="es-balance es-payout-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything else rides <span class="es-payout-grad">the same charge</span>.
+                    Everything else rides <span class="es-payout-grad">the same Stripe payment</span>.
                 </h2>
                 <p class="es-payout-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Discounts, gift cards and add-ons are priced into the line items before the charge is
-                    created, which is why the reconciliation at the gate can be exact.
+                    Discounts, gift cards and add-ons are priced into the order before Stripe is asked to
+                    charge it, which is why the amount check before a ticket can be exact.
                 </p>
             </div>
 
@@ -1177,19 +1460,12 @@
                     </div>
                 @endforeach
             </div>
-
-            <div class="mt-8 text-center" data-reveal>
-                <span class="es-payout-muted text-sm">
-                    Event Schedule does not calculate or collect sales tax. Price tickets inclusive of what
-                    you owe, and export the sales as CSV when it is time to file.
-                </span>
-            </div>
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
-    <!-- ============================================================ -->
+    {{-- ============================================================
+         8. Key features
+         ============================================================ --}}
     <section class="es-payout-edge scroll-mt-24 py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <h2 class="es-payout-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
@@ -1200,13 +1476,13 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Embed Tickets" description="Put the purchase form on the website you already have" :url="marketing_url('/features/embed-tickets')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
+                    <x-feature-link-card name="QR Check-in" description="Scan tickets at the door from any phone, free on every plan" :url="marketing_url('/features/check-in')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Gift Cards" description="Sell balance through the same account, redeem against later tickets" :url="marketing_url('/features/gift-cards')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Embed Tickets" description="Put the purchase form on the website you already have" :url="marketing_url('/features/embed-tickets')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
@@ -1215,8 +1491,8 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Revenue, sales and views without a third-party tracker" :url="marketing_url('/features/analytics')" icon-color="amber">
-                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Ticket Fee Calculator" description="What each ticketing platform would take from your own event" :url="marketing_url('/ticket-fee-calculator')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
@@ -1231,11 +1507,13 @@
         </div>
     </section>
 
-    @include('marketing.partials.pricing-nudge')
+    {{-- The shared pricing-nudge partial used to sit here. It repeated the
+         plan cards word for word on dozens of pages, and this page already
+         states its one price in the statement, the hero and the closing stub. --}}
 
-    <!-- ============================================================ -->
-    <!-- 8. Stripe's own site, and the integrations index              -->
-    <!-- ============================================================ -->
+    {{-- ============================================================
+         9. Stripe's own site, and the integrations index
+         ============================================================ --}}
     <section class="es-payout-edge py-16">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="grid gap-4 md:grid-cols-2" data-reveal-group="80">
@@ -1274,16 +1552,16 @@
 
     <x-marketing.related-pages />
 
-    <!-- ============================================================ -->
-    <!-- 9. FAQ (06)                                                  -->
-    <!-- ============================================================ -->
+    {{-- ============================================================
+         10. FAQ (07)
+         ============================================================ --}}
     <section id="faq" class="es-payout-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">06</div>
+                <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">07</div>
                 <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-payout-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Asked <span class="es-payout-grad">before signing up</span>.
+                    Selling tickets with Stripe, <span class="es-payout-grad">answered</span>.
                 </h2>
             </div>
 
@@ -1303,16 +1581,16 @@
 
             <p class="es-payout-muted mt-8 text-center text-sm">
                 Setting prices, currencies and payment methods is covered in the
-                <a href="{{ route('marketing.docs.tickets') }}#payment" class="es-payout-accent font-semibold underline">selling tickets guide</a>.
+                <x-link :href="route('marketing.docs.tickets').'#payment'">selling tickets guide</x-link>.
             </p>
         </div>
     </section>
 
     <x-seo.faq-schema :items="$faqs" />
 
-    <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
-    <!-- ============================================================ -->
+    {{-- ============================================================
+         11. Finale
+         ============================================================ --}}
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
             <div class="es-payout-band noise relative overflow-hidden rounded-[2rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">

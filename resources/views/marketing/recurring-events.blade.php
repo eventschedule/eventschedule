@@ -1,12 +1,12 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Recurring Events | Weekly, Monthly & Yearly - Event Schedule</x-slot>
-    <x-slot name="description">Repeat events daily, weekly, biweekly, monthly or yearly. Skip or add dates, count tickets per date, and give guests a calendar feed that updates itself.</x-slot>
+    <x-slot name="title">Recurring Events: Schedule and Ticket a Series | Event Schedule</x-slot>
+    <x-slot name="description">How to schedule recurring events: weekly, every other week, the 2nd Tuesday, holidays skipped, tickets per date, season passes and calendar feeds.</x-slot>
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Recurring Events"
-        description="Repeat events daily, weekly, biweekly, monthly or yearly. Skip or add dates, count tickets per date, and give guests a calendar feed that updates itself." />
+        description="How to schedule recurring events: weekly, every other week, the 2nd Tuesday, holidays skipped, tickets per date, season passes and calendar feeds." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -609,8 +609,20 @@
 
         $faqs = [
             [
+                'q' => 'What is a recurring event?',
+                'a' => 'One event that happens again on a pattern: a weekly class, a monthly market, an annual festival. It is set up once, as a repeat rule (which days, and how often), an end (never, a last date or a number of dates) and its exceptions (dates taken out, dates added), and every date after that is generated from it. Editing the event changes every date, while each date keeps its own page, its own ticket count and its own check-in.',
+            ],
+            [
+                'q' => 'How do I set up a recurring event?',
+                'a' => 'Create the event with its first date and start time and choose Recurring beside the date. Pick a frequency (daily, weekly, every N weeks, monthly on the same date, monthly on the same weekday, or yearly), tick the days for the two weekly patterns, choose when it ends, and add any dates to exclude or include. All of it is free on every plan, and the Events guide walks through each field.',
+            ],
+            [
                 'q' => 'What recurrence patterns are available?',
                 'a' => 'Six. Daily, weekly on the days of the week you tick, every N weeks on the days you tick (from 2 to 52 weeks), monthly on the same date, monthly on the same weekday, and yearly. The day-of-week checkboxes only appear for the weekly and every-N-weeks patterns; the monthly and yearly patterns take their day from the event\'s own start date, so a monthly event that starts on the second Tuesday keeps landing on the second Tuesday.',
+            ],
+            [
+                'q' => 'Can an event repeat on the last Friday of the month?',
+                'a' => 'Not as one setting. Monthly on the same weekday means the nth weekday counted from the start of the month, so there is a fourth Friday but no "last". The workaround takes a minute a year: start the series on a fourth Friday, then in each month that has five Fridays, exclude the fourth and include the fifth. "The second and fourth Tuesday" needs a different fix: two series, one starting on a second Tuesday and one on a fourth.',
             ],
             [
                 'q' => 'Can I change a single date without changing the rest?',
@@ -625,8 +637,16 @@
                 'a' => 'Nothing. The date is simply not on the calendar. There is no struck-through row and no cancellation notice, so an excluded date reads as "we are not on that week" rather than as something having gone wrong.',
             ],
             [
+                'q' => 'What happens to tickets already sold when I change a recurring event?',
+                'a' => 'Every sold ticket keeps the date it was bought for. Change the start time and those tickets take the new time, and because the time belongs to the whole series, every date moves together. A series sends no automatic notice for a change of time, so write to the buyers of the dates it affects. Taking out a date that has sales leaves those tickets on a night that is no longer on the calendar, so refund or talk to those buyers first.',
+            ],
+            [
                 'q' => 'Can two sittings on the same day be one recurring event?',
                 'a' => 'No, and that is worth saying plainly. A recurring event carries one start time and one length, so it produces at most one date per day it falls on. A matinee and an evening, or a morning class and a lunchtime class, are two events with two patterns. It is slightly more setup, and it keeps the two start times and their tickets properly apart.',
+            ],
+            [
+                'q' => 'How do I sell tickets for a recurring event?',
+                'a' => 'Add ticket types to the series and each date sells from its own allowance, so one night selling out does not close the next, and a buyer buys from the page of the date they want. Free registration with a capacity limit is free on every plan. Tickets with a price, a season pass for the whole run and the waitlist for paid tickets are Pro, and Event Schedule takes no platform fee on any of them.',
             ],
             [
                 'q' => 'How do recurring events reach other calendars?',
@@ -638,17 +658,86 @@
             ],
             [
                 'q' => 'Can someone ask to hear about just one date?',
-                'a' => 'Yes, once you switch on the "Notify me" card. On that date\'s page a guest can then leave an email address, with no account and no name, under "Tell me when tickets go on sale", or "Tell me if anything changes" once the date is already selling. They hear about that date and no other: one email when its tickets go on sale, if they were not on sale already, and a reminder shortly before it starts. If you save a venue change or cancel the event and choose to notify people, that reaches them too. Every email carries a one-click unsubscribe, and it is free on every plan.',
+                'a' => 'Yes, once you switch on the "Notify me" card. On that date\'s page a guest can then leave an email address, with no account and no name, under "Tell me when tickets go on sale", or "Tell me if anything changes" once the date is already selling. They hear about that date and no other: one email when its tickets go on sale, if they were not on sale already, and a reminder shortly before it starts. If you save a venue change or cancel the event and choose to notify people, that reaches them too. Every email carries a one-click unsubscribe, and signing up is free on every plan.',
             ],
             [
                 'q' => 'Can one ticket cover every date of the loop?',
                 'a' => 'Yes, on the Pro plan. A season pass can be set to cover every date of the loop, once per date, and it is sold alongside single-date tickets rather than instead of them. Advance booking is off by default, which means the pass is scan-at-the-door until you switch it on; switching it on is also what lets you cap how many seats pass holders may reserve on a given date.',
+            ],
+            [
+                'q' => 'Does a recurring event keep its time when the clocks change?',
+                'a' => 'Yes. Each date is worked out from the start time in the schedule\'s own timezone, so a weekly 19:30 is 19:30 on both sides of daylight saving, on the event page and in the calendar feed. A repeat stored as a single UTC time is the usual reason a series turns up an hour off for half the year.',
+            ],
+            [
+                'q' => 'Can I bring a repeating event in from Google Calendar or another calendar?',
+                'a' => 'Yes, free on every plan, from a connected Google Calendar or from a calendar link (.ics or webcal). When the import can express the repeat rule exactly, it arrives as one recurring event with its skipped and added dates. When it cannot, as with the last Friday, every three days, or a series with nights moved to other times, its next dates arrive one by one and the import preview groups them so you can pick them together.',
+            ],
+        ];
+
+        // The field guide. Each pattern as people say it, as the iCalendar standard
+        // writes it (RFC 5545 RRULE, what Google, Outlook and Apple all read), and as
+        // it is set here. Every "here" cell is checked against Event::matchesFrequency():
+        // monthly_weekday is the nth weekday by ceil(day / 7), so there is no "last",
+        // and monthly_date is an exact day of the month, so the 31st skips short months.
+        // RecurrenceMapper's docblock lists the same limits for imports.
+        $plainPatterns = [
+            ['Every Tuesday', 'FREQ=WEEKLY;BYDAY=TU', 'Weekly, with Tuesday ticked.'],
+            ['Tuesdays and Thursdays', 'FREQ=WEEKLY;BYDAY=TU,TH', 'Weekly, with both days ticked. Both share one start time.'],
+            ['Every weekday', 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', 'Weekly, with Monday to Friday ticked.'],
+            ['Every other Friday', 'FREQ=WEEKLY;INTERVAL=2;BYDAY=FR', 'Every N weeks set to 2, with Friday ticked. The count runs from the week of the first date.'],
+            ['The first Saturday of the month', 'FREQ=MONTHLY;BYDAY=1SA', 'Monthly, same weekday, with the first date on a first Saturday. The day comes from the start date.'],
+            ['The 15th of every month', 'FREQ=MONTHLY;BYMONTHDAY=15', 'Monthly, same date, with the first date on a 15th.'],
+            ['Once a year, on 3 March', 'FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=3', 'Yearly, with the first date on 3 March.'],
+            ['Every day of festival week', 'FREQ=DAILY;COUNT=7', 'Daily, ending after 7 dates.'],
+            ['Every Tuesday until the end of term', 'FREQ=WEEKLY;BYDAY=TU;UNTIL=20261215T235959Z', 'Weekly, ending on a date.'],
+            ['The second and fourth Tuesday', 'FREQ=MONTHLY;BYDAY=2TU,4TU', 'Two series, one starting on a second Tuesday and one on a fourth. Every other week is not the same thing: in a month with five Tuesdays it drifts off the pattern.'],
+            ['The last Friday of the month', 'FREQ=MONTHLY;BYDAY=-1FR', 'No single setting for "last". Start on a fourth Friday, and in the months that have five Fridays, exclude the fourth and include the fifth.'],
+        ];
+
+        // Six decisions, product-neutral first, then one line on what happens here.
+        // The "here" lines are sourced: per-date counts and pages (the turns section),
+        // season pass and advance booking (PassBookingService, Pro in FEATURES.md),
+        // exclude/include (Event::matchesDate()), a time change on a series sends no
+        // automatic notice (EventRepo::detectMaterialChanges() skips date changes when
+        // days_of_week is set), the feed (FeedController::icalFeed, 90 days, UID per
+        // date), and the local clock (Event::occurrenceStartUtc()).
+        $guideCards = [
+            [
+                'title' => 'One series, or one event per night',
+                'body' => 'A series shares everything but the date: one name, one start time, one length, one description, one set of ticket types. Keep it one series while that holds, because one listing gathers the shared links, the bookmarks and the search traffic that fifty copies would split. Split it when a night differs in what people are buying: another line-up, price or start time. A matinee and an evening show are two series, not one series with two times.',
+                'here' => 'Every date still has its own page, so you can send someone the link to one Thursday.',
+            ],
+            [
+                'title' => 'Count the room per night, sell the run as a pass',
+                'body' => 'Capacity belongs to the date. Forty places means forty every week, not forty across the season. Selling the whole run is a second product beside the single tickets, not a replacement for them, and it wants its own limit on any one night, or pass holders can fill a date the single buyers were counting on.',
+                'here' => 'Ticket counts start from zero on each date. A season pass covers every date once (Pro), and advance booking caps the seats pass holders reserve on one night.',
+            ],
+            [
+                'title' => 'Take the holidays out before you publish',
+                'body' => 'Go through the season once with the venue\'s closures, the public holidays and the week the room is booked, and remove them now. A night nobody can buy is better than a sold ticket for a locked door. A night that moves to another day at the same time can stay in the series: take the old date out and put the new one in. If the time changes as well, make it an event of its own.',
+                'here' => 'Exclude Dates and Include Dates. A removed date is simply not on the calendar.',
+            ],
+            [
+                'title' => 'Know what a change does to tickets already sold',
+                'body' => 'The description, the picture and the price for future buyers can change whenever you like. The start time and the days cannot be changed for one night only: they move the whole run, including nights people have paid for. Before you change either, look at what has sold on the dates it touches, and refund or talk to those buyers before you take a sold date out.',
+                'here' => 'A sold ticket keeps its date and takes the new start time. A series sends no automatic notice of a time change, so write to those buyers yourself.',
+            ],
+            [
+                'title' => 'Send calendars dates, not only a rule',
+                'body' => 'A series reaches somebody\'s calendar in one of two shapes: one entry carrying a repeat rule, or a separate entry for each date. A rule is compact, but every skipped week and moved night has to travel as an exception to it, and calendar apps apply those with varying care. Separate dates say exactly what is on. Either way, give each date an identifier that never changes, so an edit updates the entry already there instead of adding a second one.',
+                'here' => 'The subscribe feed writes one entry per date for the next 90 days, each with its own fixed id and a link to that date\'s page.',
+            ],
+            [
+                'title' => 'Keep the clock on local time',
+                'body' => 'A weekly night at 19:30 should still say 19:30 the week the clocks change. A series stored as one UTC time slides an hour for half the year, and so does a feed that stamps every date with the same offset. Keep the time of day in the event\'s local timezone and work each date out from that.',
+                'here' => 'Each date is worked out in the schedule\'s own timezone, so 19:30 stays 19:30 through daylight saving, on the page and in the feed.',
             ],
         ];
 
         $dotSections = [
             ['top', 'The loop'],
             ['unit', 'One record'],
+            ['guide', 'Field guide'],
             ['shape', 'The shape'],
             ['length', 'The length'],
             ['gaps', 'The gaps'],
@@ -681,14 +770,14 @@
                             <svg aria-hidden="true" class="h-5 w-5 text-[#046b4f] dark:text-[#34d399]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
-                            <span class="es-loop-muted text-sm font-medium tracking-wide">Recurring events</span>
+                            <span class="es-loop-muted text-sm font-medium tracking-wide">Scheduling recurring events</span>
                         </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">It comes round.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">Type it <span class="es-loop-accent">once.</span></span></span>
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-loop-muted mb-10 max-w-xl text-lg sm:text-xl">
-                        A weekly quiz, a monthly market, a class on Tuesdays and Thursdays. Give the loop a shape, a length and its gaps, and every date after that draws itself.
+                        A recurring event is one event with a repeat rule: a pattern (every Tuesday, the second Saturday of the month), an end, and the weeks it skips. Set those once and every date draws itself, each with its own page, its own ticket count and its own place in your guests' calendars.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -705,7 +794,7 @@
                     </div>
 
                     <p class="es-fade-up es-d-4 es-loop-muted mt-6 text-sm">
-                        <a href="#shape" class="es-loop-link font-semibold hover:underline">See the six patterns on one ruler</a>
+                        <a href="#guide" class="es-loop-link font-semibold hover:underline">How to write any pattern, from "every other Friday" to "the last Friday"</a>
                     </p>
                 </div>
 
@@ -825,12 +914,79 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. The shape: six patterns on one ruler                      -->
+    <!-- 3. The field guide: patterns in words, then six decisions    -->
+    <!-- ============================================================ -->
+    <section id="guide" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-loop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The field guide</p>
+                <h2 class="es-balance es-loop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    How to schedule a recurring event <span class="es-loop-accent">that holds up.</span>
+                </h2>
+                <p class="es-loop-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most of the work is saying the pattern exactly, before it goes into any app. Here are the patterns real series run on, written three ways, and then six decisions worth making before the first date goes on sale. None of it depends on which tool you use.
+                </p>
+            </div>
+
+            <div class="es-loop-card p-5 sm:p-8" data-reveal="panel">
+                <table class="es-loop-table">
+                    <caption class="es-loop-muted mb-4 text-start text-xs">
+                        Eleven patterns, as people say them, as the iCalendar standard writes them (the RRULE line that Google Calendar, Outlook and Apple Calendar all read), and as you set them here.
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="es-loop-th text-start">The pattern, and its RRULE</th>
+                            <th scope="col" class="es-loop-th text-start">In Event Schedule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($plainPatterns as [$plainSaid, $plainRule, $plainHere])
+                            <tr>
+                                <th scope="row" class="es-loop-td es-loop-ink w-[45%] align-top text-sm font-bold">
+                                    {{ $plainSaid }}
+                                    <code class="es-loop-muted es-loop-num mt-1 block text-[0.7rem] font-normal [overflow-wrap:anywhere]">{!! str_replace([';', ','], [';<wbr>', ',<wbr>'], e($plainRule)) !!}</code>
+                                </th>
+                                <td class="es-loop-td es-loop-muted align-top text-sm">{{ $plainHere }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="es-loop-muted mx-auto mt-6 max-w-3xl text-sm" data-reveal>
+                <span class="es-loop-ink font-semibold">Two traps in the wording.</span>
+                "Every third Tuesday" is every third week; "the third Tuesday" is once a month, and the two part company after the very first date. And a monthly date of the 29th, 30th or 31st skips the months that do not have one, here and in the standard, so a series meant to run every month is safer on the 28th or earlier, or on a weekday rule.
+            </p>
+
+            <div class="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($guideCards as $guideIndex => $guideCard)
+                    <div class="es-loop-card flex flex-col p-6" data-reveal="panel">
+                        <p class="es-loop-accent es-loop-num mb-3 font-bold" aria-hidden="true">{{ str_pad($guideIndex + 1, 2, '0', STR_PAD_LEFT) }}</p>
+                        <h3 class="es-loop-ink mb-3 text-lg font-bold">{{ $guideCard['title'] }}</h3>
+                        <p class="es-loop-muted mb-5 text-sm leading-relaxed">{{ $guideCard['body'] }}</p>
+                        <p class="es-loop-hr mt-auto pt-4 text-sm">
+                            <span class="es-loop-tag me-1">Here</span>
+                            <span class="es-loop-ink">{{ $guideCard['here'] }}</span>
+                        </p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-loop-muted mt-10 text-center text-sm" data-reveal>
+                Every field is described in the
+                <a href="{{ route('marketing.docs.creating_events') }}#recurring" class="es-loop-link font-semibold hover:underline">recurring events section of the Events guide</a>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The shape: six patterns on one ruler                      -->
     <!-- ============================================================ -->
     <section id="shape" class="es-loop-ruled scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                 <p class="es-loop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The shape</p>
                 <h2 class="es-balance es-loop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Six patterns, <span class="es-loop-accent">one ruler.</span>
@@ -909,7 +1065,7 @@
     <section id="length" class="es-loop-rule-y scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
                 <p class="es-loop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The length</p>
                 <h2 class="es-balance es-loop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Give the loop <span class="es-loop-accent">an end.</span>
@@ -965,7 +1121,7 @@
     <section id="gaps" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                 <p class="es-loop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gaps</p>
                 <h2 class="es-balance es-loop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     A week off is <span class="es-loop-accent">a gap</span>, not a notice.
@@ -1065,7 +1221,7 @@
     <section id="turns" class="es-loop-ruled es-loop-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                 <p class="es-loop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Every turn</p>
                 <h2 class="es-balance es-loop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     One record. <span class="es-loop-accent">Separate counts.</span>
@@ -1177,7 +1333,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                     <p class="es-loop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Leaving the building</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         One record here. <span class="es-loop-lit">Ninety days out there.</span>
@@ -1259,7 +1415,7 @@
     <section id="rest" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                 <p class="es-loop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Everything else</p>
                 <h2 class="es-balance es-loop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Once the loop is running.
@@ -1544,7 +1700,7 @@
     <section id="faq" class="es-loop-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <div class="es-loop-mark mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <h2 class="es-balance es-loop-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

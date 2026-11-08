@@ -53,7 +53,7 @@ return [
     '/google-calendar' => ['keyword' => 'Google Calendar sync'],
     '/outlook-calendar' => ['keyword' => 'Outlook calendar sync', 'match' => ['Outlook & Microsoft 365 calendar sync', 'Outlook and Microsoft 365 calendar sync']],
     '/caldav' => ['keyword' => 'CalDAV calendar sync'],
-    '/stripe' => ['keyword' => 'Stripe payments for tickets'],
+    '/stripe' => ['keyword' => 'sell tickets with Stripe', 'match' => ['Stripe payments for tickets']],
     '/paypal' => ['keyword' => 'sell event tickets with PayPal'],
     '/invoiceninja' => ['keyword' => 'Invoice Ninja ticketing'],
 
