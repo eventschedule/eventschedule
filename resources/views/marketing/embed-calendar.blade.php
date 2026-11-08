@@ -512,6 +512,10 @@
                 'a' => 'Open your schedule in the admin portal and choose Embed Schedule. The panel shows the embed URL, the iframe tag and a live preview of the calendar before you take it anywhere. Copy the tag and paste it into your page\'s HTML wherever the calendar belongs. Any CMS block that accepts raw HTML or an embed will take it.',
             ],
             [
+                'q' => 'Is there a calendar widget or plugin to install?',
+                'a' => 'No. The embeddable calendar is a single iframe, so there is nothing to install, update or patch on your website. You paste one tag into a block that accepts HTML (a Custom HTML block on WordPress, a Code block on Squarespace, Embed HTML on Wix) and the calendar inside it reads your live schedule.',
+            ],
+            [
                 'q' => 'Can I customize the embedded calendar\'s appearance?',
                 'a' => 'The frame renders your schedule, so your own appearance settings come with it: background, colours, font, and whether events show as a month calendar or a list. On top of that the URL takes ?layout=calendar or ?layout=list to pin the layout for that frame, ?dark=true to force dark mode, ?schedule= to show a single sub-schedule and ?lang= to pick one of 12 languages. Custom CSS, on the Pro plan, applies inside the frame as well.',
             ],
@@ -865,6 +869,40 @@
                         <div class="es-paste-accent es-paste-mono mb-3 text-2xl font-black">{{ $stepNum }}</div>
                         <h3 class="es-paste-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
                         <p class="es-paste-muted text-sm leading-relaxed">{{ $stepBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Where step two happens on the builders people search for by name ("add event
+                 calendar to website", "embed calendar on website", "iframe calendar widget"). Only
+                 the name of the block each builder takes raw HTML in, nothing about their plans:
+                 the WordPress caveats are sourced on /wordpress-event-calendar, which this links. --}}
+            <div class="mx-auto mt-16 mb-8 max-w-3xl text-center">
+                <h3 class="es-balance es-paste-ink text-2xl font-black tracking-tight md:text-3xl" data-reveal>
+                    Adding the calendar to WordPress, Squarespace, Wix and the rest
+                </h3>
+                <p class="es-paste-muted mt-4" data-reveal>
+                    Every website builder has one block that takes raw HTML, and that block is where the iframe goes. Here is its name on the common ones.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ([
+                    ['WordPress', 'In the block editor, add a Custom HTML block where the calendar belongs and paste the tag into it.', ['label' => 'The WordPress guide', 'href' => route('marketing.wordpress_event_calendar')]],
+                    ['Squarespace', 'Add a Code block to the section that should hold the calendar, and paste the tag into the block.', null],
+                    ['Wix', 'From Add Elements choose Embed Code, then Embed HTML, and paste the tag in as code.', null],
+                    ['Webflow', 'Drag a Code Embed element onto the page where the calendar goes and paste the tag into it.', null],
+                    ['Google Sites', 'Choose Insert, then Embed, switch to the Embed code tab, and paste the tag.', null],
+                    ['Any other page', 'Paste the tag into the HTML where the calendar should sit. A builder that offers an HTML, code or embed block takes it the same way.', null],
+                ] as [$builder, $builderHow, $builderLink])
+                    <div class="es-paste-card flex flex-col p-6" data-reveal="panel">
+                        <h4 class="es-paste-ink mb-2 font-bold">{{ $builder }}</h4>
+                        <p class="es-paste-muted text-sm leading-relaxed">{{ $builderHow }}</p>
+                        @if ($builderLink)
+                            <p class="mt-auto pt-4 text-sm">
+                                <x-link href="{{ $builderLink['href'] }}">{{ $builderLink['label'] }}</x-link>
+                            </p>
+                        @endif
                     </div>
                 @endforeach
             </div>

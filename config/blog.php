@@ -12,6 +12,12 @@
 
 return [
     /*
+    | The days between two posts from app:generate-sub-audience-blog (0 for no gap). It runs
+    | first each morning, and any post holds the planned daily post back for 25 hours.
+    */
+    'sub_audience_every_days' => (int) env('BLOG_SUB_AUDIENCE_EVERY_DAYS', 7),
+
+    /*
     | Where the daily post looks for its topic, one a day in turn. Each is close to something
     | the product does, so the advice in a post can end in something the reader can do. The
     | old topic prompt was given "event planning, community building, or hosting successful

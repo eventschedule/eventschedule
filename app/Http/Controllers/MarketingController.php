@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Middleware\TrackMarketingVisit;
 use App\Models\DiscoveryHiddenSchedule;
 use App\Models\Event;
+use App\Models\FederatedEvent;
+use App\Models\FederationClicksDaily;
 use App\Models\PageView;
 use App\Models\Role;
 use App\Services\AuditService;
@@ -12,8 +14,11 @@ use App\Utils\AdminReauthUtils;
 use App\Utils\BrowseWall;
 use App\Utils\DiscoveryUtils;
 use App\Utils\DocsUtils;
+use App\Utils\ExampleSchedules;
+use App\Utils\GitHubUtils;
 use App\Utils\HeroExperiment;
 use App\Utils\HomeQuotes;
+use App\Utils\MoneyUtils;
 use App\Utils\PlatformPricing;
 use App\Utils\TicketFees;
 use App\Utils\UrlUtils;
@@ -21,6 +26,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class MarketingController extends Controller
@@ -78,6 +84,67 @@ class MarketingController extends Controller
                 'ours' => ! empty($row['ours']),
             ];
         }, $rows);
+    }
+
+    /**
+     * A feeExample() row for a platform whose published rates TicketFees::rates() records, so a
+     * comparison page's worked month and /ticket-fee-calculator cannot quote different rates.
+     * A platform that runs the payment itself ('stripe' => false) carries its own processing
+     * fee; one that settles into the organizer's own account pays Stripe's on top.
+     */
+    private function ratesFeeRow(string $key, ?string $name = null): array
+    {
+        $rates = TicketFees::rates();
+        $rate = $rates[$key];
+        $stripe = $rates['stripe'];
+        $ownProcessing = ($rate['stripe'] ?? true) === false;
+
+        return [
+            'name' => $name ?? $rate['name'],
+            'charges' => $rate['label'].($ownProcessing ? '' : ', and Stripe\'s own fee'),
+            'platform_percent' => $rate['percent'] ?? 0,
+            'platform_fixed' => $rate['fixed'] ?? 0,
+            'processing_percent' => $ownProcessing ? $rate['processing'] : $stripe['percent'],
+            'processing_fixed' => $ownProcessing ? 0 : $stripe['fixed'],
+        ];
+    }
+
+    /**
+     * Our own row of a worked month: no platform fee, Stripe's fee, and the Pro subscription.
+     */
+    private function ourFeeRow(): array
+    {
+        $stripe = TicketFees::rates()['stripe'];
+
+        return [
+            'name' => 'Event Schedule Pro',
+            'charges' => '0% platform fee, Stripe\'s own fee, and Pro at '.plan_price($this->planPrice()).'/mo',
+            'processing_percent' => $stripe['percent'],
+            'processing_fixed' => $stripe['fixed'],
+            'monthly' => $this->planPrice(),
+            'ours' => true,
+        ];
+    }
+
+    /**
+     * What one ticket costs its seller in fees on a row, platform and processing together.
+     */
+    private function feePerTicket(array $row, float $price): float
+    {
+        return $price * (($row['platform_percent'] ?? 0) + ($row['processing_percent'] ?? 0))
+            + ($row['platform_fixed'] ?? 0) + ($row['processing_fixed'] ?? 0);
+    }
+
+    /**
+     * How many tickets at $price a month take before Pro costs less than the platform's
+     * per-ticket fees: past this many, the row with the subscription is the cheaper one.
+     */
+    private function feeBreakEven(array $theirs, float $price): int
+    {
+        $ours = $this->ourFeeRow();
+        $saved = $this->feePerTicket($theirs, $price) - $this->feePerTicket($ours, $price);
+
+        return $saved > 0 ? (int) floor($this->planPrice() / $saved) : 0;
     }
 
     /**
@@ -215,7 +282,7 @@ class MarketingController extends Controller
     public function about()
     {
         return view('marketing.about', [
-            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+            'githubStars' => GitHubUtils::getStars(),
         ]);
     }
 
@@ -604,7 +671,7 @@ class MarketingController extends Controller
     public function openSource()
     {
         return view('marketing.open-source', [
-            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+            'githubStars' => GitHubUtils::getStars(),
         ]);
     }
 
@@ -990,7 +1057,7 @@ class MarketingController extends Controller
             'rates' => TicketFees::rates(),
             // The open-source card renders the live star badge, which is a
             // no-op without this and leaves the card visibly empty.
-            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+            'githubStars' => GitHubUtils::getStars(),
         ]);
     }
 
@@ -1352,7 +1419,7 @@ class MarketingController extends Controller
     public function contact()
     {
         return view('marketing.contact', [
-            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+            'githubStars' => GitHubUtils::getStars(),
         ]);
     }
 
@@ -1394,7 +1461,7 @@ class MarketingController extends Controller
     public function selfHost()
     {
         return view('marketing.selfhost', [
-            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+            'githubStars' => GitHubUtils::getStars(),
         ]);
     }
 
@@ -1404,7 +1471,7 @@ class MarketingController extends Controller
     public function saas()
     {
         return view('marketing.saas', [
-            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+            'githubStars' => GitHubUtils::getStars(),
         ]);
     }
 
@@ -2201,6 +2268,26 @@ class MarketingController extends Controller
                     ['title' => 'Bring your list across', 'description' => 'Export your Eventbrite attendees and paste them in or upload a CSV, up to ten thousand rows, on any plan.'],
                     ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Payouts land in your own Stripe or PayPal account, with zero platform fees instead of 3.7% + $1.79 a ticket.'],
                 ],
+                // Eventbrite's rates from TicketFees::rates() (eventbrite.com/organizer/pricing, checked
+                // 2026-09-24), the same reader /ticket-fee-calculator uses, so the two cannot disagree.
+                'fee_example' => [
+                    'tag' => 'Eventbrite fees, worked out',
+                    'title' => 'What 100 tickets at $20 cost you on Eventbrite',
+                    'lead' => 'Eventbrite charges a 3.7% + $1.79 service fee on each paid ticket and a separate 2.9% payment processing fee on each order, with no cap on either. Buyers pay both on top by default. The table shows them absorbed, which is what it costs to keep the price you advertise the price people pay.',
+                    'total_label' => 'Fees on $2,000',
+                    'caption' => 'Fees on 100 tickets at $20, each bought in its own order, on Event Schedule Pro, Eventbrite and Luma Free.',
+                    'rows' => $this->feeExample(100, 20, [$this->ourFeeRow(), $this->ratesFeeRow('eventbrite'), ['name' => 'Luma Free', 'charges' => '5% platform fee, and Stripe\'s own fee', 'platform_percent' => 0.05, 'processing_percent' => 0.029, 'processing_fixed' => 0.30]]),
+                    'notes' => [
+                        'On a $20 ticket Eventbrite\'s two fees come to $'.number_format($this->feePerTicket($this->ratesFeeRow('eventbrite'), 20), 2).', against $'.number_format($this->feePerTicket($this->ourFeeRow(), 20), 2).' in Stripe fees on Event Schedule, so Pro costs less once a month passes '.$this->feeBreakEven($this->ratesFeeRow('eventbrite'), 20).' paid tickets.',
+                        'A free event carries no Eventbrite fee, and free registration is unlimited on Event Schedule\'s free plan, so a month of free events costs nothing on either.',
+                        'These are Eventbrite\'s published US rates as checked in September 2026. Each ticket is counted as its own order, the dearest case for any fee charged per payment.',
+                    ],
+                ],
+                'limits' => [
+                    ['tag' => 'Eventbrite\'s buyers stay there', 'title' => 'Nobody browses in for you', 'text' => 'Eventbrite\'s marketplace sends its own buyers to an event, and that audience does not come across with your listings. The people who turn up here are the ones you bring: your schedule\'s followers, the subscribers who get its digest of new events, and visitors to the calendar you embed on your own site.'],
+                    ['tag' => 'Bring a payment account', 'title' => 'Eventbrite processes, we do not', 'text' => 'Eventbrite takes the card payment itself, so selling there needs no account of your own. Here the money is taken by a Stripe, PayPal, Payfast or Razorpay account in your name, connected once in Settings, and that processor\'s fee and payout timing apply.'],
+                    ['tag' => 'Pro for priced tickets', 'title' => 'A monthly plan, sales or not', 'text' => 'Publishing on Eventbrite costs nothing until a ticket sells, because its fee comes out of each sale. Here a ticket with a price needs the Pro plan, which costs '.plan_price($this->planPrice()).'/mo even in a month with no sales, while free registration stays unlimited on the free plan.'],
+                ],
                 'faq' => [
                     ['question' => 'Can I import my existing Eventbrite events?', 'answer' => 'Yes. With the Pro plan, you can connect your Eventbrite account and import your events in bulk. Event details, ticket types, venues, and images are all transferred automatically.'],
                     ['question' => 'Is it easy to switch from Eventbrite to Event Schedule?', 'answer' => 'Yes. There is no need to migrate your Eventbrite history. Create a free schedule, add your upcoming events (or use AI import to paste and parse them), and share your new schedule URL with your audience.'],
@@ -2379,6 +2466,11 @@ class MarketingController extends Controller
                     ['title' => 'Bring your guests across', 'description' => 'Export your guest list from Luma as a CSV and upload it to your newsletter list, up to ten thousand rows, on any plan.', 'doc' => 'newsletters#importing-emails'],
                     ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Paid tickets settle into your own account with no platform fee on top, where Luma\'s free plan takes 5%. Selling a ticket with a price is on Pro.', 'doc' => 'tickets#payment'],
                 ],
+                'limits' => [
+                    ['tag' => 'No built-in streaming', 'title' => 'Bring your own video room', 'text' => 'Luma can host the stream for a virtual event itself, and Event Schedule cannot. An online event here carries the link to the meeting or stream you run somewhere else, and a schedule synced with Outlook can add a Teams meeting link to it.'],
+                    ['tag' => 'No tech-scene network', 'title' => 'Luma\'s crowd stays on Luma', 'text' => 'Part of Luma\'s pull is the tech and startup community already using it, which a new schedule here does not inherit. People find you through the follow link and its QR code, the live calendar feed, and the "Notify me" card on each event.'],
+                    ['tag' => 'Co-hosts are Enterprise', 'title' => 'Three free admins there, one here', 'text' => 'Luma lets three admins run a calendar on its free plan and five on Plus. On Event Schedule\'s Free and Pro plans one person runs a schedule, and admins or viewers beside the owner come with Enterprise, up to five on the hosted service.'],
+                ],
                 'faq' => [
                     ['question' => 'Is Luma free?', 'answer' => 'Luma\'s free plan has no monthly charge, but on paid tickets it takes a 5% platform fee, and Stripe\'s processing fee (typically 2.9% + 30 cents) is charged on top. Luma Plus removes the platform fee for $59 a month, billed annually. Event Schedule takes no platform fee on any plan: free registration is unlimited on the free plan, and selling a ticket with a price on it is on Pro at '.plan_price($this->planPrice()).'/mo.'],
                     ['question' => 'What does Luma Plus cost, and what does it add?', 'answer' => 'Luma Plus is $59 a month, billed annually, which is $708 a year. It removes the 5% platform fee, raises calendar admins from three to five, and raises invites and newsletters from 500 a week to 5,000. Stripe\'s processing fee still applies. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with a '.$this->trialDays().'-day free trial and no platform fee.'],
@@ -2530,6 +2622,17 @@ class MarketingController extends Controller
                         'Stripe or PayPal checkout, one cart across several events, and refunds from the Sales page, on Pro',
                         'Gift cards, passes and installment payments on Pro, and allocated seating on Enterprise',
                     ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Pick the schedule type', 'description' => 'A Venue schedule if you sell for one room, a Talent schedule if the act travels. The type decides which sections the form offers, and making one is free with no card.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Copy your upcoming events', 'description' => 'Copy the details of each upcoming event from your Ticket Tailor box office and paste them into the import box, or upload the flyer, then check what it read before anything is saved.', 'doc' => 'ai-import#text-import'],
+                    ['title' => 'Set your ticket types up once', 'description' => 'Rebuild your usual ticket types, prices and sales dates and keep them as a ticket preset, so each new event starts from it. Presets are on every plan.', 'doc' => 'tickets#ticket-presets'],
+                    ['title' => 'Reconnect Stripe or PayPal', 'description' => 'Sold through Stripe or PayPal on Ticket Tailor? Connect that same account here. Square is not one of our gateways, so a Square seller opens a Stripe or PayPal account first.', 'doc' => 'account-settings#payments'],
+                ],
+                'limits' => [
+                    ['tag' => 'No Square', 'title' => 'Square is not offered', 'text' => 'Ticket Tailor lets a seller take payments through Square, besides Stripe and PayPal, and that is one gateway missing here. A seller here picks from Stripe, PayPal, Razorpay, Payfast, Invoice Ninja, a payment link of their own, or cash at the door.'],
+                    ['tag' => 'Box office is Enterprise', 'title' => 'Holds and phone bookings sit with seating', 'text' => 'Holding seats back, taking a booking over the phone and moving a buyer are done in the box office console that comes with allocated seating on Enterprise. On Pro a buyer can choose to pay cash at the door, where you mark the order paid and scan it.'],
+                    ['tag' => 'Own domain is Enterprise', 'title' => 'A custom domain takes the top plan', 'text' => 'Ticket Tailor sells a custom domain as a paid option, and here it is part of Enterprise. Pro already removes the Event Schedule branding, and every schedule has its own address on our domain from the day it is made.'],
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Ticket Tailor to Event Schedule?', 'answer' => 'Yes. If you are familiar with Ticket Tailor, Event Schedule will feel natural. Create a free schedule, set up your ticket types, and connect Stripe or PayPal. The ticketing workflow is straightforward and you can be selling tickets within minutes.'],
@@ -2684,6 +2787,17 @@ class MarketingController extends Controller
                         'A live calendar feed people subscribe to once, and an interest list that emails them when tickets go on sale',
                     ],
                 ],
+                'switch_steps' => [
+                    ['title' => 'Create a schedule for the public side', 'description' => 'Google Calendar keeps your meetings. The schedule is the page the public sees, at an address of its own, and it is free.', 'doc' => 'getting-started#create-schedule'],
+                    ['title' => 'Give public events their own calendar', 'description' => 'Make a separate calendar in Google for what you want published. The form warns you if you pick your main calendar, because that one usually holds meetings and reminders.', 'doc' => 'creating-schedules#integrations-google'],
+                    ['title' => 'Choose the direction and the deletes', 'description' => 'Bidirectional Sync carries an edit made on either side to the other. You also decide whether an event deleted in Google is kept, marked cancelled or deleted here.', 'doc' => 'creating-schedules#delete-sync'],
+                    ['title' => 'Hand out the feed, not invites', 'description' => 'Share the schedule\'s live calendar feed. People subscribe once in their own calendar app, and a date you move reaches them without anyone sending an invitation.', 'doc' => 'sharing#calendar-feeds'],
+                ],
+                'limits' => [
+                    ['tag' => 'Not a personal calendar', 'title' => 'Meetings stay in Google', 'text' => 'Event Schedule does not send meeting invitations to a guest list or keep your own reminders. Keep Google Calendar for that, and let the two-way sync carry the public events between the two.'],
+                    ['tag' => 'No Meet rooms', 'title' => 'Video links come from elsewhere', 'text' => 'Google Calendar is tied into Meet, Gmail and Drive, and Event Schedule hosts no video. For an online event you paste the address of the meeting, wherever it is held, and the Outlook sync can create a Teams meeting for one.'],
+                    ['tag' => 'Shared editing is Enterprise', 'title' => 'One editor on Free and Pro', 'text' => 'Google lets several people work on one calendar at no cost. Here more than one team member on a schedule is an Enterprise feature, at most five on the hosted platform, and each member can then point the schedule at a Google calendar of their own.'],
+                ],
                 'faq' => [
                     ['question' => 'Can I use Event Schedule alongside Google Calendar?', 'answer' => 'Yes. Event Schedule offers two-way Google Calendar sync on the free plan. Your events stay in sync between both platforms, so you can use Google Calendar as your personal view while Event Schedule powers your public schedule and ticketing.'],
                     ['question' => 'Is Event Schedule free like Google Calendar?', 'answer' => 'Event Schedule has a free plan that includes unlimited events, two-way Google Calendar sync, newsletters and a live calendar feed your audience can subscribe to. Free registration is unlimited and every ticket scans at the door. Selling paid tickets is on the Pro plan at '.plan_price($this->planPrice()).'/mo, which also adds the live check-in dashboard and branding removal.'],
@@ -2820,11 +2934,35 @@ class MarketingController extends Controller
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Against Meetup it comes down to who holds the members and what hosting a group costs. Meetup charges the organizer a subscription; here running the group is free, and the people who sign up are on your own list.',
+                    'points' => [
+                        'Running the group costs nothing on the free plan, against Meetup\'s organizer subscription from $16.79/mo',
+                        'Members who sign up by email are on your list, and the confirmed ones get a digest of each batch of new events automatically',
+                        'A monthly meetup is one recurring event, on the 2nd Tuesday or any other pattern, on every plan',
+                        'Free registration with an optional limit per date, and a QR scan at the door, which Meetup does not have',
+                        'The group\'s calendar embeds on your own website, so visitors never have to leave it to see what is next',
+                        'Paid meetups on Pro, settled into a payment account in your name, with promo codes and a waitlist for sold-out tickets',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Choose a type for the group', 'description' => 'A group that meets in different places usually fits a Curator schedule, and one with a regular room a Venue schedule. The type cannot be changed once it is saved.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Set up the regular night once', 'description' => 'A meetup on the 2nd Tuesday of each month is one recurring event, with single dates skipped or added when the room is taken.', 'doc' => 'creating-events#recurring'],
+                    ['title' => 'Swap RSVPs for free registration', 'description' => 'Guests register with a name and an email, capped per date if the room has a limit. It is unlimited on the free plan and needs no payment account.', 'doc' => 'tickets#registration'],
+                    ['title' => 'Invite members from inside Meetup', 'description' => 'Send the group a message with your schedule\'s sign-up link or QR code, so members join your list themselves and nothing has to be exported.', 'doc' => 'sharing#qr-code'],
+                ],
+                'limits' => [
+                    ['tag' => 'No member network', 'title' => 'Nobody finds the group by browsing', 'text' => 'Meetup\'s members find new groups through its own discovery, and a new schedule here starts without that pull. Growth comes from the sign-up link and QR code you hand out, the calendar you embed, and your public events on the Event Schedule browse pages.'],
+                    ['tag' => 'No discussions or profiles', 'title' => 'Comments, not a forum', 'text' => 'There are no member profiles and no group discussion boards. People can comment on an event and send photos and videos to it, each one approved by you before it shows.'],
+                    ['tag' => 'Newsletters have an allowance', 'title' => 'Group messages are counted', 'text' => 'A newsletter you write here counts every recipient, up to ten a month on the free plan, a hundred on Pro and a thousand on Enterprise, with no ceiling when it goes out through your own email server, while the automatic new-event digest is not counted at all.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Meetup to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your recurring or one-time events, then share its URL with your community. Members can sign up by email for a digest of the new events you create or subscribe to your live calendar feed, and newsletters keep the group engaged between meetups.'],
                     ['question' => 'How does Event Schedule pricing compare to Meetup?', 'answer' => 'Meetup charges organizers a subscription starting at $16.79/mo for basic groups, with higher tiers for larger communities. Event Schedule has a free plan with unlimited events. The Pro plan is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
                     ['question' => 'Can Event Schedule handle community events and recurring meetups?', 'answer' => 'Yes. Event Schedule supports recurring events, fan engagement features like videos and comments, newsletters with A/B testing, and embeddable calendar widgets. All designed for building and maintaining community.'],
                     ['question' => 'How will my members hear about new events?', 'answer' => 'People who sign up by email and confirm get an occasional digest of the new public events you create, at most one every 72 hours per schedule. Anyone can subscribe to your live calendar feed, which needs no email address and updates itself when a date moves. On a single event, the interest list emails people when tickets go on sale, reminds them before it starts and tells them if it is cancelled. Newsletters you write reach whoever you choose, within your plan\'s monthly recipient allowance.'],
+                    ['question' => 'Can I bring my Meetup members with me?', 'answer' => 'If you hold their addresses with their consent, a CSV of up to 10,000 rows goes into your newsletter list on any plan. Otherwise post your schedule\'s sign-up link in a group message: people who confirm get the automatic digest of new events, and anyone can subscribe to the live calendar feed without giving an email address.'],
+                    ['question' => 'Is there a fee on a paid meetup?', 'answer' => 'Event Schedule takes no platform fee on a paid event. A priced ticket is a Pro feature ('.plan_price($this->planPrice()).'/mo), and the money lands in the Stripe or PayPal account you connect, whose processing fee applies. A meetup that only takes free registrations costs nothing.'],
                 ],
             ],
             'dice' => [
@@ -2957,11 +3095,35 @@ class MarketingController extends Controller
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                 ],
+                'why_choose' => [
+                    'summary' => 'For a promoter or venue weighing DICE, two things decide it: who holds the ticket money, and whether fans have to install an app. Here tickets open in a browser and payments land in your own account.',
+                    'points' => [
+                        'Fans buy and open their tickets in any browser, with nothing to install',
+                        'Ticket money settles into your own Stripe or PayPal account on Pro',
+                        'No service fee from us on top of your price, so the figure you set is the one fans see',
+                        'Free registration for guest-list nights and free-entry shows, which DICE does not offer',
+                        'Promo codes, and a waitlist that emails fans when a sold-out show frees up, on Pro',
+                        'A weekly club night set up once, on chosen days, as one recurring event on every plan',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Set up the room or the act', 'description' => 'A club or venue takes a Venue schedule, with its address and a map; a DJ or band takes a Talent schedule that lists shows wherever they play.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Bring the line-up across', 'description' => 'Upload a show\'s poster or paste its listing, and the parser reads the act, date, time and venue for you to check before saving.', 'doc' => 'ai-import#image-import'],
+                    ['title' => 'Price the tiers', 'description' => 'Give each ticket type its own sales dates, so an early-bird tier closes by itself on the day you choose. Taking payment for them is on Pro.', 'doc' => 'tickets#ticket-types'],
+                    ['title' => 'Catch fans before the on-sale', 'description' => 'Switch on the Notify me card, and fans can leave an address on an announced show and get an email when its tickets go on sale. Collecting the addresses is free on every plan; the paid tickets themselves are Pro.', 'doc' => 'creating-schedules#engagement-mailing-list'],
+                ],
+                'limits' => [
+                    ['tag' => 'Tickets can be forwarded', 'title' => 'No mobile-only lock', 'text' => 'DICE ties each ticket to the fan\'s phone to stop scalping, and Event Schedule has no such lock: a ticket is a QR code in an email and on a page, and it can be passed on. What stops a copy getting in twice is the door scanner, which admits each ticket once and warns on a second scan.'],
+                    ['tag' => 'No discovery app', 'title' => 'Fans will not find you in a feed', 'text' => 'DICE puts shows in front of fans inside its own app, and there is no app audience of that kind here. You reach fans through your schedule page, its followers, the new-event digest and newsletters, which arrive by email rather than as push notifications.'],
+                    ['tag' => 'No livestreaming', 'title' => 'Streams are hosted elsewhere', 'text' => 'DICE can stream a show itself. Here you stream on the service of your choice and the event page links to it, because Event Schedule hosts no video.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from DICE to Event Schedule?', 'answer' => 'Yes. Unlike DICE, Event Schedule works in any browser so your audience does not need to download an app. Create a free schedule, add your events, and share a direct link. Your fans can browse and buy tickets instantly.'],
                     ['question' => 'How does Event Schedule pricing compare to DICE?', 'answer' => 'DICE absorbs its fees into ticket prices, meaning fans pay more than your listed price. Event Schedule charges zero platform fees and connects directly to your own Stripe or PayPal account, so you control exactly what attendees pay.'],
                     ['question' => 'Does Event Schedule support music and nightlife events like DICE?', 'answer' => 'Yes. Event Schedule handles any event type including concerts, festivals, and nightlife. You get ticketing with QR check-ins, event graphics generation, and a shareable schedule page, without being locked into a single event genre.'],
                     ['question' => 'Do my fans need an app to get their tickets?', 'answer' => 'No. The ticket opens in any browser, from the confirmation email or the ticket page, each with its QR code, and buyers can also add it to Google Wallet where Wallet is switched on. The free scanner reads that same code at the door.'],
+                    ['question' => 'Can Event Schedule stop ticket touts?', 'answer' => 'Not the way DICE does, because there is no mobile-only ticket. Each ticket is a QR code that admits once, and a second scan warns the door. A per-order limit on each ticket type caps how many one buyer can take in a single order.'],
+                    ['question' => 'Can one show have a guest list and paid tickets?', 'answer' => 'Yes. A ticket type priced at zero can sit beside paid ones, so a guest-list tier and a paid tier share one event, and the $0 tier works on every plan. The paid tier needs Pro. A night with no paid entry at all can use free registration instead.'],
                 ],
             ],
             'brown-paper-tickets' => [
@@ -3094,11 +3256,35 @@ class MarketingController extends Controller
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                     ['name' => 'DICE', 'route' => 'marketing.compare_dice'],
                 ],
+                'why_choose' => [
+                    'summary' => 'With Brown Paper Tickets being retired, the real question is where to settle next. Event Schedule is actively developed, adds no platform fee, and its code is open source, so the software cannot be taken away from you a second time.',
+                    'points' => [
+                        'No $0.99 + 5% service fee on each ticket: Event Schedule adds no platform fee to what buyers pay',
+                        'Payouts on your processor\'s own timetable, straight into the Stripe or PayPal account you connect',
+                        'Promo codes, a ticket waitlist and a sales CSV export on Pro, none of which Brown Paper Tickets has',
+                        'A door scanner that runs on a phone on every plan, and a live check-in count on Pro',
+                        'Cash at the door still works: a buyer can choose to pay there, and you mark the order paid',
+                        'Selfhosting under an open source license, which resolves to Enterprise, if you never want to be moved on again',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Copy your events while the pages are up', 'description' => 'Open each upcoming Brown Paper Tickets event page, copy its text and paste it into AI import, which fills in the event for you to check. Do it before those pages come down.', 'doc' => 'ai-import#text-import'],
+                    ['title' => 'Recreate the ticket types', 'description' => 'A name, price and quantity for each type, with dates sales open and close, so an early-bird price ends on its own.', 'doc' => 'tickets#ticket-types'],
+                    ['title' => 'Connect a payment account', 'description' => 'Brown Paper Tickets processed the cards itself. Here Stripe or PayPal does, into an account in your name, and cash at the door can stay as a second option.', 'doc' => 'account-settings#payments'],
+                    ['title' => 'Scan at the door', 'description' => 'The scanner runs in a phone\'s browser on every plan, and each ticket admits once.', 'doc' => 'tickets#check-in'],
+                ],
+                'limits' => [
+                    ['tag' => 'No printed tickets', 'title' => 'Will-call becomes a QR code', 'text' => 'Brown Paper Tickets offered will-call and physical tickets, and Event Schedule does not print or post tickets. Every ticket is a QR code in the buyer\'s email and on a ticket page, which scans from a phone screen or a printout.'],
+                    ['tag' => 'No history import', 'title' => 'Past orders stay behind', 'text' => 'There is no Brown Paper Tickets importer, so past events, orders and buyer records do not come across. Upcoming events can be copied from their pages with AI import while those pages still load.'],
+                    ['tag' => 'Pro for selling', 'title' => 'The organizer pays, not the buyer', 'text' => 'Brown Paper Tickets put its fee on the buyer, so listing cost the organizer nothing. Selling priced tickets here is Pro at '.plan_price($this->planPrice()).'/mo, a flat charge that does not grow with the number sold, and free registration stays free.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Brown Paper Tickets to Event Schedule?', 'answer' => 'Yes. Many organizers are moving away from Brown Paper Tickets as the platform is being retired and migrated to Events.com. Create a free schedule, add your events (AI import speeds this up), and share your new URL. You can be up and running in minutes.'],
                     ['question' => 'How does Event Schedule pricing compare to Brown Paper Tickets?', 'answer' => 'Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. Free registration is unlimited, and selling paid tickets is on Pro. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo for unlimited ticketing, with payouts straight into your own Stripe or PayPal account.'],
                     ['question' => 'Is Event Schedule actively maintained?', 'answer' => 'Yes. Brown Paper Tickets is being retired and migrated to Events.com. Event Schedule is built with a modern tech stack and receives regular updates. It is fully open source, so you can inspect the code, track development activity, and even selfhost it for complete control over your platform.'],
                     ['question' => 'Can a buyer get tickets to several shows in one order?', 'answer' => 'Yes, on every plan. Tickets for several of your events go into one cart and are paid once, through Stripe or PayPal, with one order page listing every ticket.'],
+                    ['question' => 'What happens to tickets I already sold on Brown Paper Tickets?', 'answer' => 'They stay with Brown Paper Tickets, or Events.com where it now sends organizers, because there is no importer for them. If those buyers are coming to a show you now run here and you have their details, the attendee import on Pro adds them from a CSV or by hand, up to 5,000 rows at a time.'],
+                    ['question' => 'Can I keep my events if Event Schedule ever changes course?', 'answer' => 'The code is open source under the Attribution Assurance License, so the hosted service is not the only way to run it. You can download a backup of your schedule at any time, and the same software can be installed on your own server, where every feature is included.'],
                 ],
             ],
             'splash' => [
@@ -3231,11 +3417,35 @@ class MarketingController extends Controller
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Accelevents', 'route' => 'marketing.compare_accelevents'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Splash is sold through a sales team on enterprise terms. Event Schedule publishes its prices, starts free, and gives a team branded registration pages without a procurement process.',
+                    'points' => [
+                        'Published prices: a free plan, and Pro at '.plan_price($this->planPrice()).'/mo after a '.$this->trialDays().'-day trial, with no annual contract',
+                        'Unlimited free registration on every plan, with questions asked once per order on Pro',
+                        'Custom CSS on Pro for whatever the theme settings do not cover, which Splash does not allow',
+                        'A ticket waitlist, promo codes and post-event feedback emails on Pro',
+                        'The REST API on Pro, where Splash keeps it for enterprise, and webhooks, which Splash does not have',
+                        'The open source code can be selfhosted, so attendee data can stay on your company\'s own servers',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Sign up, no demo', 'description' => 'Make an account and a schedule in a few minutes, free and without a card. Nobody from sales has to be involved.', 'doc' => 'getting-started#create-account'],
+                    ['title' => 'Match the company brand', 'description' => 'Set the schedule\'s colors, fonts, header and background to your own, and add custom CSS on Pro for anything left over.', 'doc' => 'schedule-styling#color-scheme'],
+                    ['title' => 'Build the registration form', 'description' => 'Choose free registration, then add up to ten questions under Custom Fields (Per Order) in its Registration form row, such as company or dietary needs. Those questions are on Pro.', 'doc' => 'tickets#checkout-fields'],
+                    ['title' => 'Put sign-up on your own site', 'description' => 'Embed the registration form for free, or the ticket form on Pro, so people sign up without leaving the company website.', 'doc' => 'tickets#embed-widget'],
+                ],
+                'limits' => [
+                    ['tag' => 'No drag-and-drop builder', 'title' => 'Pages are styled, not built', 'text' => 'Splash designs an event page in a drag-and-drop builder. Here the layout of a page is set, and you style it with colors, fonts, header images and backgrounds, plus custom CSS on Pro.'],
+                    ['tag' => 'No marketing automation', 'title' => 'Email you write, not journeys', 'text' => 'Splash runs marketing automation around an event; Event Schedule has no automated email journeys and no contact database. What it has is newsletters with A/B testing and repeats, the digest that goes out when you publish new events, and the Notify me list, all sent to your own followers and subscribers.'],
+                    ['tag' => 'Analytics per schedule', 'title' => 'Counts, not attendee profiles', 'text' => 'Splash tracks how each attendee engages. The built-in analytics here count page views, followers and sales for a schedule, and the Realtime view shows visits without naming anyone.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Splash to Event Schedule?', 'answer' => 'Yes. Unlike Splash, there is no enterprise onboarding or sales process required. Just sign up, create a free schedule, add your events, and share your schedule URL. AI import can speed up event creation too.'],
                     ['question' => 'How does Event Schedule pricing compare to Splash?', 'answer' => 'Splash uses custom enterprise pricing that requires contacting sales, with contracts typically running thousands of dollars per year. Event Schedule Pro is a transparent '.plan_price($this->planPrice()).'/mo with zero platform fees and no annual commitment.'],
                     ['question' => 'Can Event Schedule handle corporate events like Splash?', 'answer' => 'Yes. Event Schedule supports custom branding, embeddable widgets, custom CSS, and a REST API with webhooks on Pro for integration with your existing tools. Custom domains and multiple team members are on Enterprise.'],
                     ['question' => 'Can my team work on the same schedule?', 'answer' => 'Yes, on Enterprise, capped at five members on the hosted platform. An admin runs the schedule day to day and sees its ticket sales, waitlist and check-in dashboard; a viewer is read-only and sees no sales, but can scan tickets at the door. The free and Pro plans are one person per schedule.'],
+                    ['question' => 'Can registrations go straight into our own systems?', 'answer' => 'Yes, through webhooks on Pro, which POST each new order (a free registration included), each published event change and each check-in to an address you choose. The REST API on the same plan reads and writes events and sales. There is no ready-made connector to a named CRM, so the receiving end is yours to build.'],
+                    ['question' => 'Where is attendee data kept?', 'answer' => 'On the hosted platform it sits in Event Schedule\'s own database, and you can download a backup of a schedule at any time. A company that needs it on its own servers can selfhost the open source code instead, which includes every Enterprise feature.'],
                 ],
             ],
             'sched' => [
@@ -3367,11 +3577,35 @@ class MarketingController extends Controller
                     ['name' => 'Accelevents', 'route' => 'marketing.compare_accelevents'],
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Sched is built around one conference agenda at a time. Event Schedule is a standing calendar a conference can live on, with tracks as sub-schedules, sessions as agenda parts, and ticketing that takes no platform fee.',
+                    'points' => [
+                        'No attendee ceiling on the free plan, where Sched\'s free tier is for events under 50 people',
+                        'Tracks or rooms as sub-schedules, each with its own color and address for filtering the program',
+                        'Sessions as the parts of an event\'s agenda, open to comments, free on every plan',
+                        'Ticketing built in on Pro rather than sold as an add-on, with no platform fee',
+                        'Recurring events, which Sched does not support, for a meetup series that runs between conferences',
+                        'A ticket waitlist and sale notifications, both on Pro, where Sched has neither',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Read in the Sched program', 'description' => 'Paste your Sched event\'s iCal export link into the import box. A calendar feed is read directly, so it does not count against the daily AI allowance.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Turn tracks into sub-schedules', 'description' => 'Make one sub-schedule per track, stage or room. Each is given a color, and the calendar can be filtered down to any one of them.', 'doc' => 'creating-schedules#customize-subschedules'],
+                    ['title' => 'Name the speakers', 'description' => 'List each speaker on the sessions they give, under Participants. A speaker with no page yet is given one, and claims it later by signing in with the email you entered.', 'doc' => 'creating-events#participants'],
+                    ['title' => 'Sell one ticket for the conference', 'description' => 'A festival pass on Pro admits once to each session it covers. For a free conference, make it one multi-day event with free registration.', 'doc' => 'subscriptions#types'],
+                ],
+                'limits' => [
+                    ['tag' => 'No personal agendas', 'title' => 'Attendees do not build their own schedule', 'text' => 'Sched lets each attendee pick sessions into a personal agenda, and there is no equivalent here. Attendees filter the calendar by sub-schedule and add sessions to their own calendar, or subscribe to the whole feed.'],
+                    ['tag' => 'No speaker management', 'title' => 'Speakers are named, not managed', 'text' => 'There are no speaker or exhibitor profiles to collect and approve, which is a large part of what Sched does. A speaker is added to a session as a participant with a page they can claim, and sponsors show as tiered logos on Pro.'],
+                    ['tag' => 'Agenda scanning is Enterprise', 'title' => 'Typed agendas on Free and Pro', 'text' => 'Reading a printed program into an event\'s agenda with AI is an Enterprise feature. On Free and Pro the parts are typed in by hand, or each session becomes its own event, which AI import can fill from pasted text.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Sched to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your conference sessions or events. AI import lets you paste event details to populate your schedule quickly. No migration needed.'],
                     ['question' => 'How does Event Schedule pricing compare to Sched?', 'answer' => 'Sched charges per-event or annual pricing that scales with attendee count. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees on ticket sales.'],
                     ['question' => 'Can Event Schedule handle conference agendas like Sched?', 'answer' => 'Yes. Event Schedule supports multi-day events, sub-schedules for organizing tracks or sessions, and embeddable calendar widgets. Attendees can browse your full conference agenda from a single schedule page.'],
                     ['question' => 'Can attendees buy one pass for several sessions?', 'answer' => 'Yes, on Pro. A pass admits to several events: a festival pass covers each event once, a visit pass gives a set number of visits, a membership is unlimited until it expires, and a season pass covers a recurring event, with every use tracked on the Subscriptions tab. On every plan, buyers can also put tickets for several sessions in one cart and pay once.'],
+                    ['question' => 'Can attendees comment on or rate a session?', 'answer' => 'Comments are open on events and on each part of an event\'s agenda on every plan, and each one waits for your approval before it shows. Post-event feedback, on Pro, emails attendees for a star rating and a comment after the event ends; on the hosted platform it needs your schedule\'s own email settings.'],
+                    ['question' => 'Is the free plan enough for a small event?', 'answer' => 'For a free event, yes, at any size: registration has no attendee cap on the free plan, and every ticket scans at the door. Sched\'s free tier is for events under 50 attendees. Charging for tickets is what needs Pro.'],
                 ],
             ],
             'whova' => [
@@ -3504,11 +3738,35 @@ class MarketingController extends Controller
                     ['name' => 'Accelevents', 'route' => 'marketing.compare_accelevents'],
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Whova is built around a conference app, and its price is a quote. When what your events need most is a public list of sessions, registration and a mailing list, Event Schedule covers it at a price listed on the page.',
+                    'points' => [
+                        'Free to start and Pro at '.plan_price($this->planPrice()).'/mo, with no sales call before you see a number',
+                        'No 3% + $0.99 on each paid ticket: on Pro only Stripe\'s or PayPal\'s own fee comes off',
+                        'Tracks as sub-schedules of one conference schedule, which visitors can filter by, on Free',
+                        'An agenda on each event page with a start and end time per part, added by hand on every plan',
+                        'A calendar of every session to embed on the conference website, where Whova offers an agenda widget',
+                        'Newsletters with A/B testing, plus a digest that mails subscribers each batch of new sessions, rather than announcements alone',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Give each track a sub-schedule', 'description' => 'Make one schedule for the conference and a sub-schedule for each track or hall, so a visitor can narrow the program to the talks they came for. Neither costs anything.', 'doc' => 'creating-schedules#customize-subschedules'],
+                    ['title' => 'Paste the agenda in', 'description' => 'Copy the session list from Whova or your website into AI import, or add a photo of the printed agenda, and the sessions come back as a list to check.', 'doc' => 'ai-import#text-import'],
+                    ['title' => 'Name your speakers', 'description' => 'List each session\'s speakers on its Participants tab. A speaker who has no account yet is given a speaker page, theirs to claim whenever they sign in.', 'doc' => 'creating-events#participants'],
+                    ['title' => 'Swap the agenda widget for the embed', 'description' => 'Replace the Whova widget on your site with the schedule\'s embed code, free, and every change you make shows up there by itself.', 'doc' => 'sharing#embed'],
+                ],
+                'limits' => [
+                    ['tag' => 'No attendee app', 'title' => 'Guests use the web', 'text' => 'There is no native mobile app for attendees to download. Guests use the schedule and event pages in a phone browser, with nothing to install, and open their ticket\'s QR code from the confirmation email.'],
+                    ['tag' => 'No matchmaking', 'title' => 'Attendees do not message each other', 'text' => 'Event Schedule has no attendee directory, matchmaking or one-to-one messaging, which is where Whova is strongest. What guests can do is comment on an event and post photos and videos to it, on every plan, once you approve them.'],
+                    ['tag' => 'No virtual venue', 'title' => 'Streams happen elsewhere', 'text' => 'There is no built-in stage for virtual or hybrid sessions. A session held online shows the join link from your own video service, and with Outlook connected each one can be created as a Teams meeting.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Whova to Event Schedule?', 'answer' => 'Yes. Unlike Whova, there is no sales process or demo required. Just sign up, create a free schedule, and start adding events. AI import can parse pasted event details to speed things up.'],
                     ['question' => 'How does Event Schedule pricing compare to Whova?', 'answer' => 'Whova uses quote-based enterprise pricing that requires a sales call, with costs typically running thousands of dollars per event. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees on ticket sales.'],
                     ['question' => 'Does Event Schedule offer attendee engagement features like Whova?', 'answer' => 'Yes. Fan videos and comments and newsletters with A/B testing are on every plan, and event polls and post-event feedback are on Pro, all without per-event pricing.'],
                     ['question' => 'Can I refund an attendee?', 'answer' => 'Yes, on Pro, alongside the paid ticketing that took the money. From the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part and the money goes back through the provider; a partial refund keeps the ticket valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead.'],
+                    ['question' => 'Can I bring my Whova attendee list across?', 'answer' => 'Whova can export your sales data, and the email addresses in it can go into a schedule\'s newsletter list from a spreadsheet of up to 10,000 rows, on any plan. Holding them costs nothing; what is metered is each email sent, with a monthly allowance that grows with the plan and lifts entirely when the schedule uses its own mail server.'],
+                    ['question' => 'Does a conference of several days fit on one event?', 'answer' => 'Yes. Switch on Multi-day event and the event runs across its dates, with the Agenda tab listing each part in order on the event page. When sessions need their own tickets or their own pages, make each one an event instead and gather them under sub-schedules.'],
                 ],
             ],
             'accelevents' => [
@@ -3642,11 +3900,35 @@ class MarketingController extends Controller
                     ['name' => 'Splash', 'route' => 'marketing.compare_splash'],
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Accelevents is priced for mid-to-large organizations, from $7,500 for its Professional plan, with badge printing and CRM connectors to match. A team that needs a calendar, registration and ticket sales running this week can have them on Event Schedule without signing a contract.',
+                    'points' => [
+                        'Free registration and QR check-in from day one, and Pro at '.plan_price($this->planPrice()).'/mo once a ticket needs a price',
+                        'Developer access on Pro, the REST API and webhooks both, where Accelevents keeps them for Enterprise',
+                        'Online events on the free plan, rather than a paid add-on',
+                        'Repeating series for online events as well as in-person ones',
+                        'Payment lands in an account you hold with Stripe, PayPal, Payfast or Razorpay, and a refund is issued from the Sales page on Pro',
+                        'Open source code to selfhost when policy says event data stays in-house, with every Enterprise feature included',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Publish without an implementation', 'description' => 'A schedule is live the moment you create it, with no onboarding project in front of it. Build the first event while the old platform is still running.', 'doc' => 'getting-started#create-schedule'],
+                    ['title' => 'Copy each event over by link', 'description' => 'Give import from a link the address of an Accelevents event. The parser reads that page and hands back an event to review, using one request of the daily allowance.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Export attendees, upload subscribers', 'description' => 'Take the attendee export from Accelevents and load its addresses into the newsletter list, ten thousand at most per file, on Free as well.', 'doc' => 'newsletters#importing-emails'],
+                    ['title' => 'Point your CRM at webhooks', 'description' => 'Where Accelevents synced Salesforce or HubSpot for you, send sale and check-in webhooks to your own endpoint or an automation tool that writes to the CRM, on Pro.', 'doc' => 'developer/webhooks#setup'],
+                ],
+                'limits' => [
+                    ['tag' => 'No badge printing', 'title' => 'Nothing to print at the door', 'text' => 'There are no badge templates, kiosks or onsite printing stations. Check-in is a phone camera reading the QR code on each ticket, on every plan, with a live check-in count on Pro.'],
+                    ['tag' => 'No native CRM sync', 'title' => 'Salesforce and HubSpot need your own glue', 'text' => 'Event Schedule does not connect to Salesforce, HubSpot or Marketo out of the box. The REST API and webhooks on Pro expose sales, events and check-ins to whoever builds the link.'],
+                    ['tag' => 'Teams of five', 'title' => 'Not an unlimited admin roster', 'text' => 'Accelevents allows unlimited admins, while team members here are an Enterprise feature capped at five per schedule on the hosted service. A selfhosted install has no such cap.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Accelevents to Event Schedule?', 'answer' => 'Yes. Unlike Accelevents, there is no enterprise onboarding or implementation process. Sign up, create a free schedule, and start adding events immediately. AI import can parse pasted event details to speed things up.'],
                     ['question' => 'How does Event Schedule pricing compare to Accelevents?', 'answer' => 'Accelevents\' Professional plan starts from $7,500 and Business from $13,500, with no transaction fees on those plans. Event Schedule has a free plan with unlimited events and free registration; paid ticket sales come with Pro, a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees.'],
                     ['question' => 'Can Event Schedule handle virtual and hybrid events like Accelevents?', 'answer' => 'Yes. Event Schedule supports online events with video links and integrates with any streaming platform. Combined with ticketing, QR check-ins, and newsletters, it covers both virtual and in-person needs.'],
                     ['question' => 'Does Event Schedule do reserved seating and payment plans?', 'answer' => 'Yes. Allocated seating is on Enterprise: a venue schedule draws its room once and buyers pick seats from the map, with a box office view for holds and phone bookings. Installment payments are on Pro and run on Stripe: the buyer pays the first part at checkout, the ticket is valid at once, and the rest is charged monthly to the saved card.'],
+                    ['question' => 'Can staff have different levels of access?', 'answer' => 'Yes, on Enterprise. Admins handle the daily running, sales, waitlist and check-in dashboard included, while viewers can only look, see no sales and can still scan tickets at the door. Levels are the owner\'s to change, and the hosted service allows five members per schedule.'],
+                    ['question' => 'What does a ticketed event cost to run, all in?', 'answer' => 'On Pro, '.plan_price($this->planPrice()).' a month plus your payment processor\'s own fee on each sale, such as Stripe\'s 2.9% + $0.30 per US card charge. There is no platform percentage and no implementation fee, and the '.$this->trialDays().'-day free trial lets you sell before the first charge.'],
                 ],
             ],
             'tito' => [
@@ -3780,11 +4062,35 @@ class MarketingController extends Controller
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                     ['name' => 'Pretix', 'route' => 'marketing.compare_pretix'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Tito fits a tech conference that sells its tickets once a year and wants nothing else. A schedule that runs events all year, with a calendar and a mailing list beside the checkout, is where a flat monthly plan starts to beat 3% a ticket.',
+                    'points' => [
+                        'Pro at '.plan_price($this->planPrice()).'/mo costs less than Tito\'s 3% once a month\'s ticket sales pass '.plan_price($this->planPrice() / 0.03),
+                        'Recurring events with dates added or skipped, on Free, where Tito has no repeating series',
+                        'Payfast for South African rand and Razorpay for Indian rupees, beside Stripe and PayPal',
+                        'Individual tickets on Pro, so each attendee in a group order gets a QR code of their own',
+                        'A calendar of all your events to embed, where Tito embeds a checkout widget',
+                        'Code you can read and selfhost, next to an API and webhooks on Pro for the scripts Tito users already write',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Keep Tito selling for now', 'description' => 'Add the event with the Tickets elsewhere tile and its button links to your Tito checkout, on every plan, so nothing already on sale has to move.', 'doc' => 'tickets#external'],
+                    ['title' => 'Copy the event page across', 'description' => 'Hand the address of your Tito event to import from a link, and confirm the name, dates, venue and description it picked up.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Bring registrations to the door', 'description' => 'Export registrations from Tito and import them as attendees on Pro, as many as 5,000 in one file. With Send Email on, each paid one gets a ticket your scanner reads.', 'doc' => 'tickets#importing-attendees'],
+                    ['title' => 'Move your scripts to the API', 'description' => 'Create an API key, then point whatever listened to Tito\'s webhooks at ours, which fire on a sale, an event change or a check-in, on Pro.', 'doc' => 'developer/api#authentication'],
+                ],
+                'limits' => [
+                    ['tag' => 'A monthly plan', 'title' => 'Quiet months still cost Pro', 'text' => 'Tito charges nothing in a month with no paid sales, whereas a priced ticket on Event Schedule rides on a '.plan_price($this->planPrice()).'/mo Pro plan whether or not anything sells. Below '.plan_price($this->planPrice() / 0.03).' of ticket sales a month, Tito\'s 3% is the smaller bill.'],
+                    ['tag' => 'Branding is Pro', 'title' => 'Tito drops its name for free', 'text' => 'Tito removes its own branding at no charge, but a free schedule here carries Event Schedule branding. Pro takes it off every page, and custom CSS on Pro changes the rest of the look.'],
+                    ['tag' => 'No scanning app', 'title' => 'The door runs in a browser', 'text' => 'Tito has check-in apps for iOS and Android, and Event Schedule has no app to install. Its scanner is a page in the phone\'s browser, on every plan, and it needs a connection to record each scan.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Tito to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events right away. AI import lets you paste event details to populate your listings quickly. No migration scripts required.'],
                     ['question' => 'How does Event Schedule pricing compare to Tito?', 'answer' => 'Tito charges per-ticket fees on each sale. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo for unlimited ticketing and events.'],
                     ['question' => 'Does Event Schedule support developer-friendly features like Tito?', 'answer' => 'Yes. Event Schedule offers a REST API, webhooks, custom CSS, and is fully open source. You can selfhost it, fork it, or integrate it with your own tools and workflows.'],
                     ['question' => 'Can I take PayPal as well as Stripe?', 'answer' => 'Yes, on Pro, which is the plan that lets a ticket carry a price at all. Connect your own PayPal account in Settings > Payment Methods, next to Stripe if you like, and choose the method per event; the credentials are checked with PayPal before they are saved. Refunds, full or partial, go back through PayPal or Stripe from the Sales page. Installment plans run on Stripe only.'],
+                    ['question' => 'Does Event Schedule cap its fee per ticket the way Tito does?', 'answer' => 'There is no per-ticket fee to cap. Tito\'s 3% stops at 25 EUR on an expensive ticket, while Event Schedule takes nothing from any ticket, so a 500 EUR workshop and a 10 EUR meetup both carry 0%. Your payment processor\'s own fee still applies.'],
+                    ['question' => 'Can one event carry several ticket types and a timetable of talks?', 'answer' => 'Yes. One event holds several ticket types, each with its own quantity and sales dates, and the priced ones sell on Pro along with promo codes and add-ons. The Agenda tab lists each talk with its time on the event page, free on every plan.'],
                 ],
             ],
             'addevent' => [
@@ -3913,11 +4219,35 @@ class MarketingController extends Controller
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                 ],
+                'why_choose' => [
+                    'summary' => 'AddEvent puts a calendar button on pages that live somewhere else. Event Schedule is the page itself: the listing, the sign-up form and the checkout, with a calendar subscription built in.',
+                    'points' => [
+                        'Free registration with no cap on sign-ups, where AddEvent\'s free plan stops at 20 RSVPs',
+                        'Priced tickets on Pro and QR scanning at the door on every plan, neither of which AddEvent offers',
+                        'Google, Outlook and CalDAV kept in step in both directions, not imported one way',
+                        'A live feed followers subscribe to once, and a one-date calendar file on each event page as well',
+                        'Newsletters to everyone who follows the schedule, rather than RSVP emails alone',
+                        'Webhooks on Pro that post straight to your own address, without routing through Zapier',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Read your events in from a link', 'description' => 'Run import from a link on the page or calendar address where your events are listed. An .ics or webcal address is copied directly, a year ahead, and costs nothing from the AI allowance.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Switch on registration', 'description' => 'Where AddEvent collected RSVPs, press Free registration on the event\'s Tickets tab. Leave the limit blank for unlimited sign-ups.', 'doc' => 'tickets#registration'],
+                    ['title' => 'Give subscribers the new feed', 'description' => 'Each schedule has a public iCal feed. Share it where your AddEvent subscription link used to go, and calendars that add it re-read it on their own.', 'doc' => 'sharing#calendar-feeds'],
+                    ['title' => 'Embed the calendar on your site', 'description' => 'Put the schedule\'s embed code where the AddEvent widget sat. It loads live, so an event you add or move appears on your site with nothing to update.', 'doc' => 'sharing#embed'],
+                ],
+                'limits' => [
+                    ['tag' => 'No buttons for other sites', 'title' => 'Add to Calendar lives on our pages', 'text' => 'Event Schedule does not make standalone calendar buttons to paste into your own pages, emails or ads. Add to Calendar sits on each of its event pages, and the embeddable calendar and live feed cover your website and your subscribers.'],
+                    ['tag' => 'No marketing connectors', 'title' => 'Webhooks, not integrations', 'text' => 'There are no ready-made connectors for email marketing or CRM platforms, and no Zapier app. On Pro, a REST API and webhooks let you wire one up yourself.'],
+                    ['tag' => 'Domains are Enterprise', 'title' => 'Your own address is the top plan', 'text' => 'Serving a schedule from your own domain is part of Enterprise, where AddEvent sets one up through its support team. On Free and Pro every schedule has an address of its own on a subdomain.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from AddEvent to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Event Schedule provides a full event management platform, not just a calendar widget.'],
                     ['question' => 'How does Event Schedule pricing compare to AddEvent?', 'answer' => 'AddEvent\'s Small Business plan is $36/mo on monthly billing, and less when paid yearly. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, unlimited free registration and newsletters.'],
                     ['question' => 'How is Event Schedule different from AddEvent?', 'answer' => 'AddEvent focuses on calendar add-to-calendar buttons and embeds. Event Schedule is a complete event management platform with ticketing, QR check-ins, newsletters, AI import, and public schedule pages.'],
                     ['question' => 'Can people subscribe to my calendar, like an AddEvent subscription calendar?', 'answer' => 'Yes, free. Every schedule has a live calendar feed that visitors subscribe to from the sign-up panel or an event\'s Add to Calendar menu, and every event page offers Add to Calendar for a single date. Their calendar re-reads the feed, so a moved date updates itself. AddEvent remains the specialist for calendar buttons placed on other sites and in email campaigns.'],
+                    ['question' => 'Can events I keep in Google Calendar stay there?', 'answer' => 'Yes. Connect the calendar under Integrations and pick a sync direction: from Google, to Google, or both ways. Events that arrive from Google can wait as drafts until you publish them, and Outlook offers the same choices, free on every plan.'],
+                    ['question' => 'Can visitors join my mailing list from my own site?', 'answer' => 'Yes, free. The embed dialog offers a sign-up form beside the calendar, so visitors to your site can join the schedule\'s mailing list without leaving it. Once they confirm, an automatic digest tells them about new events.'],
                 ],
             ],
             'pretix' => [
@@ -4051,11 +4381,35 @@ class MarketingController extends Controller
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Pretix publishes its code too, and either one can be run on hardware you control, which leaves scope and upkeep to decide it. Pretix sells tickets; Event Schedule adds the public calendar and the mailing list around the shop, on a PHP and MySQL stack.',
+                    'points' => [
+                        'No 2.5% per ticket on the hosted service: Pro is '.plan_price($this->planPrice()).'/mo with 0% on every sale',
+                        'A selfhosted install that needs a PHP host and a MySQL database, and updates itself in one click from inside the app',
+                        'A browsable public calendar with search and filters, and an embed of it, where Pretix embeds a ticket widget',
+                        'Newsletters sent from the app itself, and subscribers told about new dates without you writing to them',
+                        'Event polls and post-event feedback on Pro, neither of which Pretix has',
+                        'AI import that turns a pasted listing, a link or a flyer into events, 50 a day on Free and unlimited when selfhosted',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Pick where it runs', 'description' => 'Open a free account on eventschedule.com, or put the release on a PHP and MySQL server of your own, where every Enterprise feature comes included.', 'doc' => 'selfhost/installation#requirements'],
+                    ['title' => 'Import the shop\'s events', 'description' => 'Give import from a link your Pretix shop address and look over what it found. A single read can return as many as 100 events.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Turn an event series into one recurring event', 'description' => 'A Pretix event series becomes one recurring event here: pick the pattern, from daily to yearly or the second Tuesday of each month, then add or drop single dates.', 'doc' => 'creating-events#recurring'],
+                    ['title' => 'Rebuild products and vouchers', 'description' => 'Each product with a quota becomes a ticket type with a quantity, and vouchers become promo codes with usage limits and expiry dates, on Pro.', 'doc' => 'tickets#promo-codes'],
+                ],
+                'limits' => [
+                    ['tag' => 'Online-only scanner', 'title' => 'No offline check-in app', 'text' => 'pretixSCAN keeps working without a connection, and the Event Schedule scanner does not: it is a browser page that records each scan as it happens. It runs on any phone with a camera, free on every plan, but the door needs Wi-Fi or mobile data.'],
+                    ['tag' => 'No point of sale', 'title' => 'No till for the counter', 'text' => 'There is no point-of-sale system for selling at a desk or bar. Door sales go through the same online checkout as any other, or are added afterwards with the attendee import on Pro.'],
+                    ['tag' => 'No Mollie', 'title' => 'Stripe, PayPal, Payfast or Razorpay', 'text' => 'Mollie is one of the payment providers Pretix supports, and Event Schedule has no Mollie connection. Organizers who rely on it can use Stripe, PayPal or an Invoice Ninja payment link instead.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Pretix to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events immediately. No data migration or server setup required. AI import can parse pasted event details to speed up the process.'],
                     ['question' => 'How does Event Schedule pricing compare to Pretix?', 'answer' => 'Pretix Hosted charges per-ticket fees on each sale. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees. Both platforms are open source, but Event Schedule is simpler to selfhost.'],
                     ['question' => 'Is Event Schedule easier to selfhost than Pretix?', 'answer' => 'Yes. Pretix selfhosting requires Docker, PostgreSQL, Redis, and significant server administration. Event Schedule runs on standard PHP hosting with MySQL, making it accessible to a much wider range of hosting environments.'],
                     ['question' => 'Does Event Schedule have seating plans?', 'answer' => 'Yes, on Enterprise, and a selfhosted install resolves to Enterprise, so seating is included when you run it yourself. A venue schedule draws its room once, with sections, rows, tables, standing areas and wheelchair spaces, and buyers pick their seats from the map. On the hosted Free and Pro plans, ticket types have a name, a price and a quantity, without assigned seats.'],
+                    ['question' => 'How do the two open source licences differ?', 'answer' => 'Pretix is published under the AGPLv3. Event Schedule\'s licence is the Attribution Assurance License, which is why a selfhosted install carries a small Event Schedule credit on its pages. Under both you can read the code, change it and run it yourself.'],
+                    ['question' => 'Can a festival sell one pass for every day?', 'answer' => 'Yes, on Pro. A festival pass admits its holder once to each event it covers, a season pass covers the dates of a recurring event, and every use is tracked per pass. Without a pass, a buyer can still add several days to one cart and check out once.'],
                 ],
             ],
 
@@ -4190,11 +4544,35 @@ class MarketingController extends Controller
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                     ['name' => 'Eventzilla', 'route' => 'marketing.compare_eventzilla'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Humanitix pays for its giving out of the fee each buyer is charged. Here nothing is added to the ticket at all, so what would have gone in fees stays with you, and where it goes is your decision.',
+                    'points' => [
+                        'No booking fee on a paid ticket, where Humanitix adds one (under $3 for most tickets)',
+                        'Newsletters from your own schedule, which Humanitix does not have, and a digest of new events mailed to subscribers',
+                        'Branding removal and custom CSS on Pro, where Humanitix offers neither',
+                        'Your own domain on Enterprise, which Humanitix does not support',
+                        'Two-way calendar sync with Google, Outlook or CalDAV, free',
+                        'Event polls and post-event ratings on Pro, so you hear from the people who came',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Leave live events where they are', 'description' => 'An event already selling on Humanitix can sit on your schedule with the Tickets elsewhere tile, its button linking to the Humanitix page, until its sales close.', 'doc' => 'tickets#external'],
+                    ['title' => 'Import the next ones by link', 'description' => 'For events not yet on sale, give each Humanitix address to import from a link and fix whatever the parser misread.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Set up your own payment account', 'description' => 'Humanitix processed payments inside its fee. Here buyers pay into a Stripe or PayPal account in your name, connected once under Settings > Payment Methods.', 'doc' => 'tickets#payment-setup'],
+                    ['title' => 'Bring past attendees onto your list', 'description' => 'Export attendee data from Humanitix and upload the addresses as newsletter subscribers, one file holding as many as ten thousand.', 'doc' => 'newsletters#importing-emails'],
+                ],
+                'limits' => [
+                    ['tag' => 'No built-in giving', 'title' => 'Fees do not go to charity', 'text' => 'Event Schedule does not pass a share of its revenue to a cause, the way Humanitix gives away its profits. With no booking fee on your tickets, any donation is yours to make, to the cause you pick.'],
+                    ['tag' => 'Paid tickets need Pro', 'title' => 'A subscription instead of pay-as-you-go', 'text' => 'Humanitix asks for no subscription, while charging for a ticket here takes Pro at '.plan_price($this->planPrice()).'/mo. Free registration stays free and unlimited on every plan.'],
+                    ['tag' => 'Processing is separate', 'title' => 'You hold the payment account', 'text' => 'Humanitix folds payment processing into its fee, but here Stripe or PayPal charge their own fee to the account you connect. You need that account before the first paid sale, and the money settles straight into it.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Humanitix to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events right away. With zero platform fees, you keep more of your ticket revenue and can donate directly to causes you care about on your own terms.'],
                     ['question' => 'How does Event Schedule pricing compare to Humanitix?', 'answer' => 'Humanitix charges a per-ticket booking fee on every paid event (under $3 for most tickets). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo regardless of ticket volume.'],
                     ['question' => 'Does Humanitix donate to charity while Event Schedule does not?', 'answer' => 'Humanitix donates its profits to charity, which is funded by per-ticket fees on your sales. With Event Schedule, you keep 100% of your ticket revenue (minus Stripe or PayPal processing) and can donate to causes you choose directly.'],
                     ['question' => 'Can buyers pay in installments?', 'answer' => 'Yes, on Pro, with Stripe. You switch it on per event; the buyer pays the first part at checkout, the ticket is valid at once, and the rest is charged monthly to the saved card. A plan that falls behind shows a hold at the door instead of admitting the ticket, and a refund is issued payment by payment, in full.'],
+                    ['question' => 'Can I offer a lower price for groups?', 'answer' => 'Yes, and it costs nothing extra. A ticket type can carry volume discounts, so a buyer taking several tickets in one order pays less for each, and every type can open and close on its own sales dates. Promo codes, with their own usage limits and expiry, are on Pro.'],
+                    ['question' => 'Will my attendees still get a ticket with a QR code?', 'answer' => 'Yes. Every ticket and every free registration comes with a confirmation email carrying a QR code, and the door scanner reads it on any plan. A guest can cancel a free registration from the ticket page linked in that email, which frees the place for someone else.'],
                 ],
             ],
 
@@ -4329,11 +4707,35 @@ class MarketingController extends Controller
                     ['name' => 'Humanitix', 'route' => 'marketing.compare_humanitix'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Eventzilla bills by the registration and adds a percentage on its Pro and Plus plans, with badge printing and CRM links aimed at larger conferences. For organizers who mostly need sign-ups, a calendar and a checkout, a flat plan with no cut is the simpler bill.',
+                    'points' => [
+                        'No $1.50 a ticket and no percentage on top: a paid ticket on Pro carries only your processor\'s fee',
+                        'A Participants tab for speakers and an Agenda tab for timed sessions on every event, both free',
+                        'A built-in newsletter, where Eventzilla hands email off to Mailchimp or HubSpot',
+                        'Custom CSS on Pro, which Eventzilla does not offer',
+                        'Fan photos, videos and comments on each event, free, shown once you approve them',
+                        'Google, Outlook and CalDAV sync in both directions on the free plan',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Read in your Eventzilla pages', 'description' => 'Paste the address of an Eventzilla listing into import from a link. A page with several events on it comes back as a list to tick through.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Move speakers and sessions', 'description' => 'Add each speaker on the Participants tab and each session as a line on the Agenda tab, with its own start and end time.', 'doc' => 'creating-events#participants'],
+                    ['title' => 'Recreate the registration questions', 'description' => 'A question attached to a ticket type works on every plan. Questions for the whole order, or for each attendee, are part of custom fields on Pro.', 'doc' => 'tickets#checkout-fields'],
+                    ['title' => 'Import people already registered', 'description' => 'Registrants for upcoming dates can be imported as attendees from a CSV on Pro, matched to your ticket types by name, without charging anyone again.', 'doc' => 'tickets#importing-attendees'],
+                ],
+                'limits' => [
+                    ['tag' => 'No badges', 'title' => 'No badge templates to print', 'text' => 'Eventzilla prints name badges from templates with QR codes on them, and Event Schedule has no badge design or printing. Each guest\'s QR code arrives on the ticket in their confirmation email instead.'],
+                    ['tag' => 'Password events are Enterprise', 'title' => 'A password needs the top plan', 'text' => 'Eventzilla can protect an event with a password; here Unlisted events with an optional password, and Internal events for members only, are on Enterprise. Free and Pro offer Public and Draft.'],
+                    ['tag' => 'No live streaming', 'title' => 'Bring your own stream', 'text' => 'Eventzilla can stream an online event itself, and Event Schedule does not host video. An online event here shows the meeting or stream link from whatever service you already use.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Eventzilla to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Share your new schedule URL and start selling tickets immediately. No complex migration needed.'],
                     ['question' => 'How does Event Schedule pricing compare to Eventzilla?', 'answer' => 'Eventzilla charges $1.50/ticket plus up to 2.9% in platform fees depending on the plan. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, making costs predictable regardless of ticket volume.'],
                     ['question' => 'Can Event Schedule handle registration features like Eventzilla?', 'answer' => 'Yes. Ticketing and QR check-in are on every plan. Custom fields, the live check-in dashboard, ticket waitlists and sales CSV export are on Pro. It also adds features Eventzilla lacks, like two-way Google Calendar sync, newsletters and AI event import.'],
                     ['question' => 'Can someone buy tickets for several events in one order?', 'answer' => 'Yes, on every plan. A buyer adds tickets for several of your events to one cart and pays once, through Stripe or PayPal, and gets one order page with every ticket on it. Each event in the cart is checked on its own, so a priced ticket needs that schedule to be on Pro.'],
+                    ['question' => 'What does a year cost next to Eventzilla Unlimited?', 'answer' => 'Eventzilla\'s Unlimited plan is $5,999 a year. Here the Pro plan runs '.plan_price($this->planPrice()).' a month and the Enterprise plan '.plan_price($this->planPrice(true)).' a month, and neither takes a share of ticket sales. A selfhosted install has no subscription at all.'],
+                    ['question' => 'Does each person in a group booking get their own ticket?', 'answer' => 'Yes, with Individual tickets on Pro: every attendee in the order gives their own details and receives their own confirmation and QR code. For free registration the same per-guest option is free on every plan.'],
                 ],
             ],
 
@@ -4452,11 +4854,35 @@ class MarketingController extends Controller
                     ['name' => 'Tockify', 'route' => 'marketing.compare_tockify'],
                     ['name' => 'AddEvent', 'route' => 'marketing.compare_addevent'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Timely is calendar software for institutions, billed by the year, with registration and ticketing sold as an add-on. Event Schedule starts on a free plan, and the embed, calendar sync and unlimited free registration are part of it rather than extras.',
+                    'points' => [
+                        'A free plan with no trial clock, where every Timely plan is paid once its 30 days are up',
+                        'Free registrations cost nothing per person, against $0.90 each on Timely\'s ticketing add-on',
+                        'Sub-schedules for departments or programs, free, and an embed that can show just one of them',
+                        'A request form for community submissions on every plan, with your approval before a submitted event goes live',
+                        'Edits made in Google Calendar, Outlook or a CalDAV calendar come back to the schedule, and edits made here go out',
+                        'Pro billed by the month at '.plan_price($this->planPrice()).' after a '.$this->trialDays().'-day trial, with the REST API and webhooks that Timely keeps for Enterprise',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Open a schedule for the calendar', 'description' => 'One schedule for each public calendar, free. Departments, venues or programs become sub-schedules, and each one gets a page of its own.', 'doc' => 'creating-schedules#customize-subschedules'],
+                    ['title' => 'Read the feeds Timely was reading', 'description' => 'If your Timely calendar pulls from a Google or Outlook calendar or an .ics feed, paste that same address into Import from a link. A feed is read without AI and uses none of the daily allowance.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Swap the embed code', 'description' => 'Replace the Timely embed on your website with the iframe from Embed Schedule, set to the month calendar or the list. Embedding is free on every plan.', 'doc' => 'sharing#embed'],
+                    ['title' => 'Move ticketing off the add-on', 'description' => 'Free registration needs no plan and has no charge per person. Priced tickets are on Pro and settle into your own Stripe or PayPal account.', 'doc' => 'tickets#registration'],
+                ],
+                'limits' => [
+                    ['tag' => 'Two calendar layouts', 'title' => 'Month or list, not posterboard', 'text' => 'Timely can show a calendar as a stream, tiles, a posterboard, a map or a whole year. A schedule here has a month calendar and a list, and a page can embed both, each in its own frame.'],
+                    ['tag' => 'No single sign-on', 'title' => 'Staff keep their own logins', 'text' => 'Timely\'s Enterprise plan signs staff in through SSO, and Event Schedule has no SAML or SSO connection. Each team member signs in to an account of their own, with two-factor sign-in available.'],
+                    ['tag' => 'No badge printing', 'title' => 'QR tickets, not name badges', 'text' => 'Timely\'s ticketing add-on prints attendee badges, which Event Schedule does not do. Every registration comes with a QR ticket that the door scanner checks on any plan, and the live check-in count is on Pro.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Timely to Event Schedule?', 'answer' => 'Yes. Create a free schedule, then paste event details or upload a flyer and the AI parser fills in the event for you to check. Visitors can follow the schedule, sign up by email, or subscribe to its live calendar feed.'],
                     ['question' => 'How does Event Schedule pricing compare to Timely?', 'answer' => 'Timely plans start at $9/mo billed annually, with no free plan, and its ticketing add-on charges 2.5% + $0.90 per paid ticket. Event Schedule has a free plan, and Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
                     ['question' => 'Can I embed the calendar on my website like Timely?', 'answer' => 'Yes, on every plan. The embeddable calendar shows your upcoming events on any website, and each event links to its own page, where people can register or buy tickets.'],
                     ['question' => 'Are free registrations charged per person?', 'answer' => 'No. Free registration and RSVP are unlimited on every plan, with no per-registration fee. You can set a capacity, and each guest gets a ticket with a QR code that is scanned at the door.'],
+                    ['question' => 'My Timely calendar is fed from Google Calendar. Can Event Schedule use it?', 'answer' => 'Yes. Connect that Google calendar, or an Outlook one, under Integrations and it syncs both ways on the free plan, so a change made in either place reaches the other. A CalDAV calendar works the same way.'],
+                    ['question' => 'Can a university or nonprofit split one calendar by department?', 'answer' => 'Yes, with sub-schedules, free. Each sub-schedule has its own page and can be embedded on its own, so a department\'s website shows only its events while the main calendar shows everything. A curator schedule can also gather the events that other schedules publish.'],
                 ],
             ],
 
@@ -4574,11 +5000,35 @@ class MarketingController extends Controller
                     ['name' => 'Tockify', 'route' => 'marketing.compare_tockify'],
                     ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Against a WordPress plugin, the question is who keeps the event system running. Event Schedule is hosted for you, includes recurring events and door check-in on its free plan, where the plugin keeps them for paid tiers, and still lets you run your own copy.',
+                    'points' => [
+                        'Recurring series on the free plan, where the plugin keeps them for its paid tiers',
+                        'QR tickets scanned at the door on Free, where the plugin\'s check-in starts at its Pro tier',
+                        'Newsletters to your followers on every plan, with no move up to Elite',
+                        'Nothing added to your WordPress install: no plugin to update and no tables in its database, just one Custom HTML block',
+                        'Pro at '.plan_price($this->planPrice()).' a month, where the plugin\'s paid tiers start at $259 and renew each year',
+                        'Open source on both sides, but here as its own PHP and MySQL app, and a selfhosted copy resolves to Enterprise',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Start a schedule beside the site', 'description' => 'Free and hosted, so nothing changes on your WordPress site until you swap the calendar. The plugin can keep running while you check the copy.', 'doc' => 'getting-started#create-schedule'],
+                    ['title' => 'Read the plugin\'s calendar export', 'description' => 'Paste the iCal export address of your events calendar into Import from a link. A calendar feed is read directly, for the next twelve months, with no AI involved.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Replace the calendar page with one block', 'description' => 'Copy the iframe from Embed Schedule and paste it into a Custom HTML block on your Events page. In the classic editor, paste it on the Text tab.', 'doc' => 'sharing#embed'],
+                    ['title' => 'Move Event Tickets to the Tickets tab', 'description' => 'Free registrations carry on at no cost. Priced tickets are Pro, through your own Stripe or PayPal account and without the 2% application fee.', 'doc' => 'tickets#payment'],
+                ],
+                'limits' => [
+                    ['tag' => 'Not inside your theme', 'title' => 'Events live on the schedule\'s pages', 'text' => 'The plugin runs inside your WordPress site and wears your theme. Here the calendar arrives in an iframe styled by the schedule\'s own colors and typeface, and each event page sits at the schedule\'s address rather than on your WordPress domain.'],
+                    ['tag' => 'No Square or WooCommerce', 'title' => 'A different set of payment options', 'text' => 'The plugin can take payment through Square, or through WooCommerce on its Pro tier, and Event Schedule supports neither. Payment goes to your own Stripe, PayPal, Payfast or Razorpay account instead, and Invoice Ninja can bill a sale as an invoice.'],
+                    ['tag' => 'Selfhost is its own app', 'title' => 'Not an upload to WordPress hosting', 'text' => 'A selfhosted Event Schedule is a Laravel application that needs PHP 8.2 or newer, MySQL or MariaDB and a cron entry, not a plugin you add to an existing WordPress host. If that is more server than you want, the hosted service has nothing to install.'],
+                ],
                 'faq' => [
                     ['question' => 'Do I need a WordPress site to use Event Schedule?', 'answer' => 'No. Your schedule gets its own page and an embeddable calendar, so it works with WordPress or any other website builder. On a WordPress site, the calendar goes on a page with one iframe tag.'],
                     ['question' => 'How does Event Schedule pricing compare to The Events Calendar?', 'answer' => 'The core plugin is free, and the paid tiers are $259, $399 and $599 a year. Event Schedule has a free plan, and Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
                     ['question' => 'Is Event Schedule open source like The Events Calendar?', 'answer' => 'Yes, both are. The Events Calendar is GPL-licensed and runs inside WordPress. Event Schedule is a standalone app you can selfhost on PHP and MySQL, and a selfhosted install resolves to Enterprise.'],
                     ['question' => 'Can I move my events off WordPress?', 'answer' => 'Yes. Paste your event listings or upload flyers and the AI parser fills in the details for you to check, fifty a day on the free and Pro plans. Then embed the new calendar on your WordPress page, or link to your schedule instead.'],
+                    ['question' => 'Can the embedded calendar match my WordPress site?', 'answer' => 'Mostly. The embed can follow each visitor\'s light or dark setting or be pinned to either, and you choose the month calendar or the list for it. The schedule\'s own colors and typeface style what is inside the frame, and custom CSS for the schedule\'s pages is on Pro.'],
+                    ['question' => 'Can visitors submit their own events to the calendar?', 'answer' => 'Yes, on every plan. A venue or curator schedule takes requests through a form, and you decide whether a submitted event needs your approval, or an account, before it appears. Requests wait for you on the Requests tab.'],
                 ],
             ],
 
@@ -4688,11 +5138,35 @@ class MarketingController extends Controller
                     ['name' => 'DICE', 'route' => 'marketing.compare_dice'],
                     ['name' => 'Posh', 'route' => 'marketing.compare_posh'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Bandsintown is where fans hear about a date, not where they buy a ticket for it. Event Schedule gives the act a page that registers or sells for each show, and keeps those dates in step with the calendar you plan the tour in.',
+                    'points' => [
+                        'A booking form on a Talent schedule, free, so promoters and venues can ask you for a date',
+                        'Sell a show yourself on Pro, or point any date at an outside seller with Tickets elsewhere on every plan',
+                        'Fans can add videos and photos from the night to its event page, shown once you approve them',
+                        'An email digest to everyone who signed up, sent automatically when you publish new dates',
+                        'A graphic of your upcoming dates for social posts, generated from the schedule, free',
+                        'A live calendar feed fans subscribe to once, which their calendar app re-reads when a date moves',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Make a Talent schedule', 'description' => 'Pick Talent when you create the schedule, free. It is the act\'s own page, and the type that takes booking requests.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Paste the tour', 'description' => 'Copy your list of dates, or a link to a page that lists them, into AI import and look over every show before saving. Name the venue on each date and the show appears on that venue\'s schedule too.', 'doc' => 'ai-import'],
+                    ['title' => 'Keep or replace the ticket links', 'description' => 'A date sold elsewhere keeps its outside link under Tickets elsewhere, on any plan. Selling a date yourself is Pro, with the buyers paying your own Stripe or PayPal account.', 'doc' => 'tickets#external'],
+                    ['title' => 'Swap the widget on your site', 'description' => 'Replace the tour-date widget with the schedule\'s embed, pinned to the list for a dates page. Each date links to its own event page.', 'doc' => 'sharing#embed'],
+                ],
+                'limits' => [
+                    ['tag' => 'No fan alert network', 'title' => 'Fans follow you one by one', 'text' => 'Bandsintown already has fans who follow artists and get alerts about new dates. A schedule here reaches only the people who followed it or signed up, so the follow link belongs on every post and on the merch table.'],
+                    ['tag' => 'No streaming-app listings', 'title' => 'Dates are not sent to Spotify', 'text' => 'Event Schedule does not pass your shows on to Spotify, Apple Music, Shazam or Amazon Music the way Bandsintown does. What it publishes is your own page, a calendar feed and an embed, all kept current from one place.'],
+                    ['tag' => 'A smaller email allowance', 'title' => '10,000 free emails there, fewer here', 'text' => 'On the hosted service a newsletter counts each recipient against 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, where Bandsintown gives artists 10,000 a month free. Connecting the schedule to your own mail server lifts that cap, and the automatic new-date digest never counts against it.'],
+                ],
                 'faq' => [
                     ['question' => 'Can I use Event Schedule alongside Bandsintown?', 'answer' => 'Yes. Many artists keep a Bandsintown listing for its fan alerts and use an Event Schedule page as the home for their dates, with their own tickets, followers and calendar feed. Paste your dates in and the AI parser fills in each show for you to check.'],
                     ['question' => 'How does Event Schedule pricing compare to Bandsintown?', 'answer' => 'Bandsintown is free for artists, with paid extras for email beyond 10,000 a month, promoted emails and SMS. Event Schedule is free for listing dates, registrations and newsletters, and Pro is '.plan_price($this->planPrice()).'/mo for paid tickets with zero platform fees.'],
                     ['question' => 'Can I sell tickets to my own shows?', 'answer' => 'Yes, on Pro, through your own Stripe or PayPal account, with zero platform fees. Each buyer gets a ticket with a QR code, scanned at the door on any plan.'],
                     ['question' => 'Can I put my tour dates on my website?', 'answer' => 'Yes. The embeddable calendar shows your upcoming dates on any website, free, and each date links to its own event page.'],
+                    ['question' => 'Can promoters ask to book me?', 'answer' => 'Yes. A Talent schedule has a booking form on the free plan. A promoter sends the details through it, the request waits on your Requests tab, and you can require your approval before anything appears on your schedule.'],
+                    ['question' => 'Do fans need an account to hear about new dates?', 'answer' => 'No. A fan types an email address into the sign-up panel, confirms it, and gets a digest whenever you publish new dates. The live calendar feed needs no email address at all.'],
                 ],
             ],
 
@@ -4802,11 +5276,34 @@ class MarketingController extends Controller
                     ['name' => 'DICE', 'route' => 'marketing.compare_dice'],
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Posh takes a service fee on each ticket and finds buyers through its explore feed. Event Schedule charges one flat plan for paid tickets, takes no cut of them, and treats a weekly night as one event with many dates.',
+                    'points' => [
+                        'A residency set up once as a weekly or monthly series, with closed nights skipped, on Free',
+                        'Guest lists and free entry as RSVPs with no cap and no fee per head',
+                        'One cart for tickets to several of your nights, paid in a single checkout',
+                        'A waitlist that emails people when a sold-out ticket frees up, and promo codes, on Pro',
+                        'A graphic of the coming nights for your story, generated from the schedule for free',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Set up the brand\'s schedule', 'description' => 'A Venue schedule if you run the room, a Curator schedule if you throw parties in other people\'s, free either way.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Make the regular night a series', 'description' => 'Create the night once with its weekly or monthly pattern and leave out the dates you are closed. Every date in the series sells and checks in on its own.', 'doc' => 'creating-events#recurring'],
+                    ['title' => 'Hand the door a scanner', 'description' => 'Whoever runs the schedule opens the scanner and checks QR tickets at the door, on any plan. Separate logins for door staff need team members, which is Enterprise.', 'doc' => 'tickets#check-in'],
+                    ['title' => 'Price the tickets on Pro', 'description' => 'Connect Stripe or PayPal, then add ticket tiers with a quantity each. Nothing is added to the buyer\'s total or kept back from yours as a platform fee.', 'doc' => 'tickets#payment'],
+                ],
+                'limits' => [
+                    ['tag' => 'No SMS', 'title' => 'Email reaches the crowd, not texts', 'text' => 'Posh can text past attendees, and Event Schedule sends no SMS to guests at all. Your reach here is email: newsletters, the automatic digest of new nights, and the "Notify me" list on each event.'],
+                    ['tag' => 'No promoter links', 'title' => 'Commissions are tracked elsewhere', 'text' => 'There is no promoter program here: no unique link per promoter and no commission ledger. Promo codes on Pro are the nearest tool, with a code for each promoter and a usage limit if you want one.'],
+                    ['tag' => 'Door staff are Enterprise', 'title' => 'One login on Free and Pro', 'text' => 'Posh gives door staff a login of their own. Here a viewer, who scans tickets without seeing sales, is a team member, and team members come with Enterprise, at most five on the hosted service.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Posh to Event Schedule?', 'answer' => 'Yes. Create a free schedule, paste your upcoming nights or upload a flyer and the AI parser fills in each event, then connect Stripe or PayPal and move to Pro to sell paid tickets.'],
                     ['question' => 'How does Event Schedule pricing compare to Posh?', 'answer' => 'Posh has no subscription and adds a service fee to every ticket. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so what you pay does not grow with the number of tickets you sell.'],
                     ['question' => 'Can I run guest lists and free entry?', 'answer' => 'Yes. Free registration and RSVP are unlimited on every plan, each guest gets a QR code, and the door scans it on any plan. The live check-in dashboard is on Pro.'],
                     ['question' => 'Can I set up a weekly club night once?', 'answer' => 'Yes. A recurring event repeats weekly, every few weeks or monthly, on every plan, and you can skip the dates you are closed. Each date keeps its own tickets and guest list.'],
+                    ['question' => 'Can a night be free before midnight and paid after?', 'answer' => 'Yes. Each ticket type has its own sales start and end, on every plan, so a free early tier can stop selling at a set time while a priced tier carries on. A ticket priced at zero sells on any plan, and the priced tiers need Pro.'],
+                    ['question' => 'Can I see how a night is filling up?', 'answer' => 'Yes. With sale notifications switched on, Pro tells you about every sale by email, once the schedule has its own email settings. On the night, the check-in dashboard on Pro shows a running count, broken down by ticket type.'],
                 ],
             ],
 
@@ -4917,11 +5414,35 @@ class MarketingController extends Controller
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Facebook Events', 'route' => 'marketing.compare_facebook_events'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Partiful is built around one invite at a time. Event Schedule is built around the host: one public page for everything you run, dates that repeat, and people who follow you hear about the next event without being invited again.',
+                    'points' => [
+                        'A weekly or monthly event set up once, on Free, instead of a clone for every date',
+                        'Followers get an email digest when you publish new events, with no invite to send',
+                        'Paid tickets on Pro wherever your Stripe, PayPal, Payfast or Razorpay account can take payments, not only in the US and UK',
+                        'A calendar embed for a club or collective website, free',
+                        'Events created in your Google or Outlook calendar can come into the schedule, and the other way round, free',
+                        'Fan photos and videos on each event page once you approve them, 25 photos per schedule on Free',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Turn the organization profile into a schedule', 'description' => 'Your group\'s Partiful profile becomes a schedule: one free public page that lists every event you host.', 'doc' => 'getting-started#create-schedule'],
+                    ['title' => 'Read the subscription feed', 'description' => 'Partiful\'s calendar subscription link goes into the import box as it is. Being a calendar feed, it is read without the AI and costs nothing from the daily allowance.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Fold the clones into a series', 'description' => 'Delete the copies you cloned week by week and set one event to repeat instead. A date you are skipping can be left out on its own.', 'doc' => 'creating-events#recurring'],
+                    ['title' => 'Ask guests to follow', 'description' => 'Share the schedule link or print its QR code. Guests who follow hear about new events by email, with nothing for you to send.', 'doc' => 'sharing#qr-code'],
+                ],
+                'limits' => [
+                    ['tag' => 'No per-event themes', 'title' => 'One look for the whole schedule', 'text' => 'Partiful lets each invite pick its own theme, font, effects and music. Here the look is set once for the schedule, with its colors, background, header and typeface, and every event page follows it.'],
+                    ['tag' => 'No text blasts', 'title' => 'Guests hear from you by email', 'text' => 'Partiful texts guests and sends them reminders, and Event Schedule sends guests no text messages. A registration arrives as an email with its QR ticket, and the "Notify me" list on an event gets an email reminder shortly before it starts.'],
+                    ['tag' => 'Private events are Enterprise', 'title' => 'Password events need the top plan', 'text' => 'A Partiful invite can be private or sit behind a password. Here Public and Draft are on every plan, while an unlisted event with an optional password, or an internal one for members only, is Enterprise.'],
+                ],
                 'faq' => [
                     ['question' => 'Is Event Schedule free like Partiful?', 'answer' => 'Yes. Unlimited events, free RSVPs with QR tickets, newsletters and calendar sync are on the free plan. Pro at '.plan_price($this->planPrice()).'/mo adds paid tickets with zero platform fees, promo codes and the check-in dashboard.'],
                     ['question' => 'Can guests RSVP without an account?', 'answer' => 'Yes. A guest registers with a name and an email address and gets a ticket with a QR code. They can follow your schedule to hear about your next event.'],
                     ['question' => 'Can I host the same event every week?', 'answer' => 'Yes. Recurring events repeat weekly, every few weeks or monthly on every plan, and each date keeps its own guest list and capacity.'],
                     ['question' => 'Can I keep an event private?', 'answer' => 'Yes, on Enterprise: an event can be unlisted or protected with a password, so only people you share it with can register.'],
+                    ['question' => 'Can I host with friends?', 'answer' => 'On Enterprise, yes: a schedule can have up to five team members on the hosted service, as admins who run events or viewers who see the calendar and scan tickets. On Free and Pro a schedule is run by one person.'],
+                    ['question' => 'Can I sell tickets outside the US or UK?', 'answer' => 'Yes. Free RSVPs work anywhere, on any plan. Priced tickets are on Pro and go through your own Stripe, PayPal, Payfast or Razorpay account, so they work wherever that account takes payments; Payfast settles in South African rand and Razorpay in Indian rupees.'],
                 ],
             ],
 
@@ -5031,11 +5552,34 @@ class MarketingController extends Controller
                     ['name' => 'Partiful', 'route' => 'marketing.compare_partiful'],
                     ['name' => 'Mobilizon', 'route' => 'marketing.compare_mobilizon'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Facebook Events works inside Facebook, for the people who are on it. An Event Schedule page works on the open web: nothing to sign in to before reading it, a register button on the page itself, and an email list that belongs to you.',
+                    'points' => [
+                        'Guests register on the event page itself and each gets a QR code, where Facebook stops at Interested or Going',
+                        'Your followers\' names and email addresses on your own Followers tab, so the list stays yours',
+                        'A feed of the whole schedule that a subscriber\'s calendar re-reads, rather than one .ics file per event',
+                        'Curator schedules for a community calendar that collects the events venues and acts publish, free',
+                        'Sub-schedules that split a Page\'s events by series or category, each with its own address',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Make a schedule for the Page', 'description' => 'A Page that runs events becomes a schedule: Venue for a place, Talent for an act, Curator for a group that lists other people\'s events. All three are free.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Screenshot the events, not the link', 'description' => 'Facebook links cannot be read by other sites, so add a screenshot of each event, or paste its text, into AI import and check what comes back.', 'doc' => 'ai-import#image-import'],
+                    ['title' => 'Replace Interested with Register', 'description' => 'Turn on free registration so each guest gets a QR ticket, with a capacity if the room has one. Priced tickets go on Pro.', 'doc' => 'tickets#registration'],
+                    ['title' => 'Post links that lead home', 'description' => 'Keep posting on Facebook, but post the event page link, so the people who follow the schedule from it join a list you can email.', 'doc' => 'sharing#followers'],
+                ],
+                'limits' => [
+                    ['tag' => 'No friends network', 'title' => 'Nobody is invited for you', 'text' => 'On Facebook an event can go out to friends, groups and past guests in a few taps. Event Schedule has no social network behind it, so people arrive through the links, QR codes and emails you put out.'],
+                    ['tag' => 'Facebook links are refused', 'title' => 'Bringing events over is by hand', 'text' => 'Facebook does not let other sites read its pages, so the importer turns those links down and cannot pull a Page\'s events in. A screenshot or the pasted text of each event is read instead, within the daily allowance of 50 on Free and Pro.'],
+                    ['tag' => 'Group-only is Enterprise', 'title' => 'Private events cost more here', 'text' => 'Facebook can make an event private or keep it inside a group at no charge. Here an event only the schedule\'s members can see, or one hidden from the page and reached by link, is part of Enterprise.'],
+                ],
                 'faq' => [
                     ['question' => 'Can people see my events without a Facebook account?', 'answer' => 'Yes. Your schedule and each event page are public web pages, so anyone with the link can read the details, register and add the event to their calendar, with no account.'],
                     ['question' => 'Is Event Schedule free like Facebook Events?', 'answer' => 'Yes. Unlimited events, free registration with QR tickets, newsletters, the embeddable calendar and calendar sync are on the free plan. Pro at '.plan_price($this->planPrice()).'/mo adds paid tickets with zero platform fees.'],
                     ['question' => 'Can I still share my events on Facebook?', 'answer' => 'Yes. Share each event page link on Facebook as you would any other link, and the event graphic generator makes an image for the post, free. Boost can also run a paid Facebook and Instagram ad for an event, on Pro.'],
                     ['question' => 'Can I bring my Facebook events across?', 'answer' => 'Yes. Paste the event details or upload the flyer and the AI parser fills in the name, date, time and venue for you to check, fifty a day on the free and Pro plans.'],
+                    ['question' => 'Will the people who said Going on Facebook come across?', 'answer' => 'There is no import of a Facebook guest list. Post the new event page on the Facebook event and ask guests to register there; each one gets a QR ticket, and every registration shows on your Sales page.'],
+                    ['question' => 'Can I run a community calendar of other people\'s events?', 'answer' => 'Yes, with a curator schedule, free. Add the venue and talent schedules you want as sources and every event they publish is listed on yours automatically. Visitors can also submit events through a request form, held for your approval if you require it.'],
                 ],
             ],
 
@@ -5151,11 +5695,35 @@ class MarketingController extends Controller
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                     ['name' => 'Hi.Events', 'route' => 'marketing.compare_hi_events'],
                 ],
+                'why_choose' => [
+                    'summary' => 'What decides it is who may sign up and what the page is for. Event Schedule takes any organizer in any country, puts every event on one public schedule with followers and calendar sync, and asks the buyer for nothing beyond the ticket price.',
+                    'points' => [
+                        'No charity status to prove: clubs, venues, bands and businesses sign up the same way',
+                        'A checkout without a tip request, so the buyer pays the ticket price and nothing more',
+                        'Payfast for rand and Razorpay for rupees beside Stripe and PayPal, on Pro',
+                        'Free registration with QR tickets for a gala or a volunteer evening, with no plan needed',
+                        'A season pass or a membership that buyers redeem across your events, on Pro',
+                        'Two-way calendar sync and a subscribable feed, so volunteers see the dates in their own calendar',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Sign the organization up', 'description' => 'Free, and no charity number is asked for. Its public page lists every event you run, the fundraiser and the volunteer night alike.', 'doc' => 'getting-started#create-schedule'],
+                    ['title' => 'Bring each campaign\'s event over', 'description' => 'Paste the text of a Zeffy event page, or its link, into AI import and check the name, date, venue and description before saving.', 'doc' => 'ai-import'],
+                    ['title' => 'Keep donations where they are', 'description' => 'Event Schedule has no donation form, so keep your Zeffy donation page and add its address to the schedule\'s social links, where it shows as a link on your page.', 'doc' => 'creating-schedules#social-links'],
+                    ['title' => 'Decide on Pro for priced tickets', 'description' => 'Free events need no plan. A priced ticket is Pro, paid into your own Stripe or PayPal account at its standard card rate, the fee Zeffy was covering.', 'doc' => 'tickets#payment'],
+                ],
+                'limits' => [
+                    ['tag' => 'No fundraising tools', 'title' => 'Tickets, not donations', 'text' => 'Zeffy runs donation forms, raffles, auctions and an online store, and Event Schedule has none of them. What it sells is tickets, passes, add-ons and gift cards, on Pro.'],
+                    ['tag' => 'Card fees are yours', 'title' => 'Nobody covers Stripe for you', 'text' => 'Zeffy pays the card fees on a nonprofit\'s sales and is funded by tips. Here the processor\'s own fee comes out of each sale at your account\'s rate, and selling a priced ticket needs Pro.'],
+                    ['tag' => 'Five seats, on Enterprise', 'title' => 'Not unlimited volunteers', 'text' => 'Zeffy gives a nonprofit unlimited users, with permissions per campaign. A schedule here is run by one person on Free and Pro, and team members are Enterprise, capped at five on the hosted service.'],
+                ],
                 'faq' => [
                     ['question' => 'Can a group that is not a registered nonprofit use Event Schedule?', 'answer' => 'Yes. Any organizer can use Event Schedule: community groups, clubs, venues, artists and businesses, in any country. Zeffy is limited to nonprofits and charities in six countries.'],
                     ['question' => 'How does Event Schedule pricing compare to Zeffy?', 'answer' => 'Zeffy is free for nonprofits and asks buyers for an optional tip at checkout. Event Schedule has a free plan with free registration, and Pro at '.plan_price($this->planPrice()).'/mo adds paid tickets with zero platform fees and no tip prompt.'],
                     ['question' => 'Does Event Schedule take donations like Zeffy?', 'answer' => 'No. Event Schedule is built for events, not fundraising, so there are no donation forms, raffles or auctions. If fundraising is the heart of what you do, Zeffy covers more of it.'],
                     ['question' => 'Who pays the card fees?', 'answer' => 'Paid tickets go through your own Stripe or PayPal account at its standard rates. Event Schedule adds no platform fee on top, and refunds go back through the same account from the Sales page.'],
+                    ['question' => 'Can volunteers check people in at the door?', 'answer' => 'On Enterprise, yes: a viewer on the schedule\'s team scans tickets without seeing sales, with up to five members on the hosted service. On Free and Pro, scanning is done from the owner\'s account.'],
+                    ['question' => 'Can I sell memberships?', 'answer' => 'Yes, as a pass, on Pro. A pass can stand for a membership, a season or a number of visits, buyers redeem it across your events, and each use is tracked on the Subscriptions tab.'],
                 ],
             ],
 
@@ -5267,11 +5835,35 @@ class MarketingController extends Controller
                     ['name' => 'The Events Calendar', 'route' => 'marketing.compare_the_events_calendar'],
                     ['name' => 'AddEvent', 'route' => 'marketing.compare_addevent'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Tockify draws a good-looking calendar and then sends people to another site to pay. Event Schedule keeps the registration, the ticket and the door scan on the page each calendar entry opens.',
+                    'points' => [
+                        'Free registration with a QR ticket for each guest on the free plan, where Tockify keeps RSVP forms for Premium',
+                        'Repeating events on Free: daily, weekly on chosen days, monthly by date or weekday, with dates left out',
+                        'Sub-schedules split one schedule into programmes, each with its own page and its own embed, at no extra cost',
+                        'Events the public sends in arrive as requests you accept or turn down, on every plan',
+                        'Visitors can subscribe to the schedule\'s live calendar feed, so a moved date updates in their own calendar',
+                        'Priced tickets on Pro at '.plan_price($this->planPrice()).'/mo, charged through your own Stripe or PayPal account with no platform fee',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'One schedule, or one with sub-schedules', 'description' => 'Each Tockify calendar can become a schedule of its own, or a sub-schedule when several share one audience, such as a museum\'s talks and family days. Both are free.', 'doc' => 'creating-schedules#customize-subschedules'],
+                    ['title' => 'Connect the Google Calendar it reads', 'description' => 'If Tockify reads your events from Google Calendar, connect that calendar here. The sync runs both ways on the free plan, so you keep entering events where you do now.', 'doc' => 'creating-schedules#integrations-google'],
+                    ['title' => 'Replace the ticket links', 'description' => 'Where an event linked out, choose Free registration on its Tickets tab, or keep the link with Tickets elsewhere, which every plan has. A ticket with a price is Pro.', 'doc' => 'tickets#registration'],
+                    ['title' => 'Swap the embed code', 'description' => 'From the Actions menu choose Embed Schedule, pick the month calendar or the list, and paste the iframe where the Tockify embed sat.', 'doc' => 'sharing#embed-code'],
+                ],
+                'limits' => [
+                    ['tag' => 'Two layouts', 'title' => 'A month grid and a list', 'text' => 'Tockify offers agenda, pinboard, month and mini views of one calendar. Event Schedule draws two, the month calendar and the list, and an embed can pin either one or follow the schedule\'s own default.'],
+                    ['tag' => 'Custom domain on Enterprise', 'title' => 'Your own domain is the top plan', 'text' => 'Tockify puts event links on your domain with its White Label plan. Here a custom domain is Enterprise, and a schedule on Free or Pro lives at its eventschedule.com address while the embed shows it on your own site.'],
+                    ['tag' => 'Passwords on Enterprise', 'title' => 'Private events cost more', 'text' => 'An event that is members-only, or reachable by link behind a password, is Enterprise. Free and Pro have Drafts, which stay off the public calendar until you publish them.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Tockify to Event Schedule?', 'answer' => 'Yes. Create a free schedule, connect Google Calendar or paste your event details for the AI parser, then swap the embed code on your website for the Event Schedule calendar.'],
                     ['question' => 'How does Event Schedule pricing compare to Tockify?', 'answer' => 'Tockify\'s free plan is an agenda view with Tockify branding, Premium is $8/mo per calendar and White Label is $40/mo. Event Schedule\'s free plan includes the embeddable calendar, and Pro is '.plan_price($this->planPrice()).'/mo, which also removes our branding.'],
                     ['question' => 'Can people register for events on my calendar?', 'answer' => 'Yes. Free registration and RSVP are unlimited on every plan, each guest gets a ticket with a QR code, and paid tickets are on Pro with zero platform fees, paid into your own Stripe or PayPal account.'],
                     ['question' => 'Can I keep my events in Google Calendar?', 'answer' => 'Yes. Google Calendar sync runs both ways on every plan, so an event added in either place shows up in the other. Outlook and CalDAV calendars sync the same way.'],
+                    ['question' => 'Can one account run several calendars?', 'answer' => 'Yes. Make a schedule for each, or keep one schedule and divide it into sub-schedules, which are free and each get their own page. To embed one sub-schedule on its own, add ?schedule= and its slug to the embed address. Tockify prices each calendar separately.'],
+                    ['question' => 'Can visitors suggest events for my calendar?', 'answer' => 'Yes, on every plan. A visitor sends an event through your schedule\'s request form by pasting its details or uploading a flyer. With Require Approval on, it waits on the Requests tab until you accept it, and you can ask submitters to sign in first.'],
                 ],
             ],
 
@@ -5385,11 +5977,49 @@ class MarketingController extends Controller
                     ['name' => 'Mobilizon', 'route' => 'marketing.compare_mobilizon'],
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                 ],
+                // Hi.Events Cloud's rate from TicketFees::rates() (hi.events/pricing, checked 2026-09-24).
+                'fee_example' => [
+                    'tag' => 'Hi.Events fees, worked out',
+                    'title' => 'What 100 tickets at $20 cost you on Hi.Events Cloud',
+                    'lead' => 'Hi.Events Cloud has no subscription. It charges 1.25% + $0.60 on each paid ticket, and Stripe\'s processing fee is charged on top. Event Schedule charges nothing per ticket and asks for Pro instead. Here is one month of $2,000 in ticket sales on each.',
+                    'total_label' => 'Fees on $2,000',
+                    'caption' => 'Fees on 100 tickets at $20, each bought in its own order, on Event Schedule Pro, Hi.Events Cloud and Eventbrite.',
+                    'rows' => $this->feeExample(100, 20, [$this->ourFeeRow(), $this->ratesFeeRow('hi-events', 'Hi.Events Cloud'), $this->ratesFeeRow('eventbrite')]),
+                    'notes' => [
+                        'The Hi.Events fee on a $20 ticket is $'.number_format(20 * 0.0125 + 0.60, 2).', so Event Schedule Pro costs less once a month passes '.$this->feeBreakEven($this->ratesFeeRow('hi-events'), 20).' paid tickets. Below that, a quiet month is cheaper on Hi.Events.',
+                        'Both are open source, so either can run on your own server instead. The rows above compare the two hosted services.',
+                        'The rate is the one Hi.Events published in September 2026. Stripe\'s 30 cents is counted on every ticket because each ticket is its own order here.',
+                    ],
+                ],
+                'why_choose' => [
+                    'summary' => 'Both projects publish their code, so open source does not separate them. What does is how you pay, a cut of each ticket on Hi.Events Cloud against one flat month here, and what surrounds the checkout: a public schedule with followers, calendar sync and newsletters.',
+                    'points' => [
+                        'Pro at '.plan_price($this->planPrice()).'/mo in place of 1.25% + $0.60 on every ticket, so the platform\'s share does not grow with a sold-out month',
+                        'Questions on a ticket type are free, as they are on Hi.Events; add-ons and promo codes come with Pro',
+                        'A month or list calendar of every event for your own website, free, beside the ticket widget on Pro',
+                        'People who follow or subscribe to the schedule hear about each new event before they have bought anything',
+                        'A selfhosted install runs on PHP and MySQL, or in Docker, and includes every Enterprise feature',
+                        'Start on the hosted service and move to your own server later with a backup of your schedules and their events',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Decide where it runs', 'description' => 'The hosted service needs nothing installed. To selfhost, ordinary PHP hosting with MySQL is enough, with no PostgreSQL or Redis to run beside it.', 'doc' => 'selfhost/installation#requirements'],
+                    ['title' => 'Read each event page', 'description' => 'Paste the link to a Hi.Events event page into Import from a link. The page is read and the event comes back filled in for you to check.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Rebuild the ticket types', 'description' => 'Per-ticket questions become questions on a ticket type, free. Product add-ons become add-ons, and discount codes become promo codes, both on Pro.', 'doc' => 'tickets#add-ons'],
+                    ['title' => 'Connect Stripe and open the door', 'description' => 'Connect your own Stripe or PayPal account and sell with no per-ticket fee. At the event, tickets are scanned in any phone\'s browser, with no check-in app to install.', 'doc' => 'tickets#payment'],
+                ],
+                'limits' => [
+                    ['tag' => 'A monthly price', 'title' => 'A quiet month still costs Pro', 'text' => 'Hi.Events Cloud charges nothing until a ticket sells, while a priced ticket here needs Pro at '.plan_price($this->planPrice()).'/mo whatever you sell. An organizer who sells only a few paid tickets a year may pay less per ticket there; registering for a free event is free with both.'],
+                    ['tag' => 'No affiliates', 'title' => 'No affiliate tracking', 'text' => 'Hi.Events tracks affiliates who sell tickets on your behalf, and Event Schedule has nothing like it. The closest tool is a promo code on Pro, one per partner if you want, each with its own usage limit.'],
+                    ['tag' => 'Credit stays on selfhost', 'title' => 'No licence takes our credit off', 'text' => 'Hi.Events sells a licence, from 499 EUR a year, that removes its link from a selfhosted install. Our license requires an attribution credit on every selfhosted install and nothing removes it there, though on the hosted service Pro takes the Event Schedule branding off.'],
+                ],
                 'faq' => [
                     ['question' => 'Are both platforms open source?', 'answer' => 'Yes. Hi.Events is AGPL-3.0 with additional terms that require a visible "Powered by Hi.Events" link unless you buy a licence. Event Schedule is open source under the Attribution Assurance License, and a selfhosted install resolves to Enterprise. It carries an attribution credit too: the license requires it, and no plan removes it on a selfhosted install.'],
                     ['question' => 'How does Event Schedule pricing compare to Hi.Events Cloud?', 'answer' => 'Hi.Events Cloud has no monthly fee and charges 1.25% + $0.60 per ticket, paid by buyers by default. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so the saving grows with every ticket you sell.'],
                     ['question' => 'Which is easier to selfhost?', 'answer' => 'Event Schedule runs on standard PHP hosting with MySQL. Hi.Events ships an all-in-one Docker image and uses PostgreSQL and Redis, which suits a server you already run Docker on.'],
                     ['question' => 'Does Event Schedule have a check-in app?', 'answer' => 'Scanning works in the browser on any phone, free on every plan, with no app to install. The live check-in dashboard, which shows the room filling up, is on Pro.'],
+                    ['question' => 'Does Event Schedule have add-ons and ticket questions?', 'answer' => 'Yes. Questions attached to a ticket type are asked once per order at checkout and are free on every plan. Add-ons, sold beside a ticket with their own stock and a per-order maximum, are on Pro, as are event custom fields and answers collected for each guest.'],
+                    ['question' => 'Can buyers pay offline?', 'answer' => 'Yes, on Pro. An event can take cash or a payment link instead of a card checkout, and you mark the sale paid when the money comes in. To be paid online, the choices are Stripe, PayPal, Payfast, Razorpay and Invoice Ninja.'],
                 ],
             ],
 
@@ -5495,11 +6125,35 @@ class MarketingController extends Controller
                     ['name' => 'Facebook Events', 'route' => 'marketing.compare_facebook_events'],
                     ['name' => 'Hi.Events', 'route' => 'marketing.compare_hi_events'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Mobilizon and Event Schedule are both open source and both run on your own server if you want. The difference shows once people turn up: here an event takes registrations with QR tickets, can sell tickets on Pro, and keeps your own calendars in step.',
+                    'points' => [
+                        'A registration limit per date, a QR ticket in each guest\'s inbox and a scanner for the door, all on the free plan',
+                        'Events that repeat daily, weekly on chosen days, every few weeks or monthly by date or weekday, with exceptions',
+                        'Google, Outlook and CalDAV calendars kept in step both ways, where Mobilizon publishes ICS and RSS feeds one way',
+                        'A hosted service with a free plan, for a group that would rather not look after an instance',
+                        'Paid tickets on Pro, or on any selfhosted install, into your own Stripe or PayPal account',
+                        'Curator schedules that collect other organizers\' events onto one listing, the way a local events guide would',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Read your Mobilizon feed', 'description' => 'Paste the ICS feed Mobilizon publishes for your events into Import from a link. A calendar feed is read as written, with no AI, for the next 12 months.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'Keep it in sync while you move', 'description' => 'Press Keep this link in sync and the feed is read about once an hour, so events still posted on Mobilizon arrive too. Feeds are Enterprise on the hosted service and included when you selfhost.', 'doc' => 'managing-schedules#feeds'],
+                    ['title' => 'Turn place limits into registration', 'description' => 'Where an event had a place limit, choose Free registration and set a Registration Limit, which counts each date of a series on its own.', 'doc' => 'tickets#registration'],
+                    ['title' => 'Give people the new address', 'description' => 'Share the schedule page or embed it on your site. People can leave an email for new events or subscribe to its calendar feed, which needs no address at all.', 'doc' => 'sharing#calendar-feeds'],
+                ],
+                'limits' => [
+                    ['tag' => 'No ActivityPub', 'title' => 'Not on the fediverse', 'text' => 'Mobilizon events can be followed from Mastodon and other fediverse apps, and Event Schedule does not speak ActivityPub. A selfhosted install can instead share the public events of chosen schedules with the eventschedule.com listings, each one linking back to the original.'],
+                    ['tag' => 'Name and email', 'title' => 'No anonymous sign-ups', 'text' => 'Registering for an event takes a name and an email address, and one person has one identity here, not several. The lightest way in is an event\'s "Notify me" card, which asks for an email address and nothing else.'],
+                    ['tag' => 'Teams on Enterprise', 'title' => 'Team members cost extra on hosted', 'text' => 'A Mobilizon group has member roles on any instance. On the hosted service, adding team members to a schedule is Enterprise and capped at five, while a selfhosted install has it built in.'],
+                ],
                 'faq' => [
                     ['question' => 'Are both platforms open source?', 'answer' => 'Yes. Mobilizon is AGPLv3 and written in Elixir with PostgreSQL. Event Schedule is open source under the Attribution Assurance License and runs on PHP with MySQL, and a selfhosted install resolves to Enterprise.'],
                     ['question' => 'Does Event Schedule federate like Mobilizon?', 'answer' => 'Not over ActivityPub. A selfhosted Event Schedule install can share its public events with the eventschedule.com listings, one schedule at a time and only when the owner opts in, and every listing links back to the original event.'],
                     ['question' => 'Can I sell tickets on Event Schedule?', 'answer' => 'Yes, on Pro at '.plan_price($this->planPrice()).'/mo, through your own Stripe or PayPal account with zero platform fees. Free registration with QR tickets is on every plan.'],
                     ['question' => 'Do I have to run a server?', 'answer' => 'No. The hosted service has a free plan with nothing to install. Self-hosting is there if you want your events on your own server.'],
+                    ['question' => 'Can I bring my Mobilizon events across?', 'answer' => 'Yes. Mobilizon publishes an ICS feed, and Import from a link reads a calendar feed directly, listing the next 12 months of events for you to tick. To keep importing as new ones appear, turn the link into a feed, which is Enterprise on eventschedule.com and included when you selfhost.'],
+                    ['question' => 'Can people take part without giving their name?', 'answer' => 'Not when they register: that asks for a name and an email address, and the QR ticket goes to that address. An event\'s interest list takes an email address only, and the live calendar feed takes nothing. There is no equivalent of Mobilizon\'s anonymous participation.'],
                 ],
             ],
 
@@ -5613,6 +6267,43 @@ class MarketingController extends Controller
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                     ['name' => 'Brown Paper Tickets', 'route' => 'marketing.compare_brown_paper_tickets'],
                 ],
+                // TicketLeap's rates from TicketFees::rates() (ticketleap.com/info/pricing, checked 2026-09-24).
+                // At $20 neither the $0.49 flat fee (tickets of $5 or less) nor the $20 cap applies.
+                'fee_example' => [
+                    'tag' => 'TicketLeap fees, worked out',
+                    'title' => 'What 100 tickets at $20 cost you on TicketLeap',
+                    'lead' => 'TicketLeap has no subscription. It takes $1 + 2% of the price on each ticket and a 3% online transaction fee on each order, and it runs the payment itself, so no Stripe fee is added. Here is a month of $2,000 in ticket sales on each, at the published rates.',
+                    'total_label' => 'Fees on $2,000',
+                    'caption' => 'Fees on 100 tickets at $20, each bought in its own order, on Event Schedule Pro, TicketLeap and Eventbrite.',
+                    'rows' => $this->feeExample(100, 20, [$this->ourFeeRow(), $this->ratesFeeRow('ticketleap'), $this->ratesFeeRow('eventbrite')]),
+                    'notes' => [
+                        'Counting the card fee on both sides, a $20 ticket costs $'.number_format($this->feePerTicket($this->ratesFeeRow('ticketleap'), 20), 2).' on TicketLeap and $'.number_format($this->feePerTicket($this->ourFeeRow(), 20), 2).' on Event Schedule, so Pro pays for itself once a month passes '.$this->feeBreakEven($this->ratesFeeRow('ticketleap'), 20).' tickets.',
+                        'On a ticket of $'.number_format(TicketFees::rates()['ticketleap']['low_price']).' or less TicketLeap charges a flat $'.number_format(TicketFees::rates()['ticketleap']['low_fixed'], 2).' instead, and its per-ticket fee never passes $20, so its share is lighter on cheap tickets and capped on dear ones. The 3% per order has no cap.',
+                        'These are TicketLeap\'s US rates as published in September 2026.',
+                    ],
+                ],
+                'why_choose' => [
+                    'summary' => 'Against TicketLeap the question is who holds the money, and for how long. TicketLeap takes its fees out and pays you days after each event; Event Schedule takes no fee and never holds the money at all.',
+                    'points' => [
+                        'No $1 + 2% on each ticket and no 3% on each order, on any plan',
+                        'Each order is charged through your own Stripe or PayPal account the moment it is placed',
+                        'Prices in any of '.count(MoneyUtils::currencies()).' currencies, from the euro and the pound to the rupee and the rand, not only US, Canadian and Australian dollars',
+                        'A full calendar of your dates for your own website, free, where TicketLeap gives you a Buy Tickets button',
+                        'Free events take registrations with QR tickets, scanned in a phone browser, on every plan',
+                        'A REST API and webhooks on Pro, and Google, Outlook and CalDAV calendars synced both ways for free',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Let current sales run out', 'description' => 'Leave the events already on sale at TicketLeap until they are over, and put the next ones here, so nobody who has bought is asked to buy again.', 'doc' => 'getting-started#create-schedule'],
+                    ['title' => 'Paste in the coming dates', 'description' => 'Copy the text of a TicketLeap event page, or your own list of dates, into AI import. A run of shows can be one recurring event, with each date counted on its own.', 'doc' => 'ai-import#text-import'],
+                    ['title' => 'Recreate ticket types and codes', 'description' => 'Ticket types, prices and sales start and end dates go on the event\'s Tickets tab, and promo codes are on Pro. A house with numbered seats needs Enterprise for a seating plan.', 'doc' => 'tickets#ticket-types'],
+                    ['title' => 'Connect your own payment account', 'description' => 'Upgrade to Pro and connect Stripe or PayPal. Orders settle into that account as they are placed, rather than by direct deposit after the event date.', 'doc' => 'tickets#payment'],
+                ],
+                'limits' => [
+                    ['tag' => 'Seating is Enterprise', 'title' => 'The free chart builder is theirs', 'text' => 'TicketLeap includes its seating chart builder, with tables and held seats, at no charge. Here allocated seating is on Enterprise, and Free and Pro sell general admission ticket types.'],
+                    ['tag' => 'No card readers', 'title' => 'Nothing to swipe a card on', 'text' => 'TicketLeap sells at the door with box office apps and card readers. Event Schedule has no card hardware: the door scans tickets in a phone browser, and a walk-up buyer pays on their own phone through the event page.'],
+                    ['tag' => 'No waivers', 'title' => 'Terms are a link, not a signature', 'text' => 'TicketLeap can put a waiver into its checkout. A ticket here can carry a link to your own terms, printed on every ticket, but buyers are not asked to accept it when they pay.'],
+                ],
                 'faq' => [
                     ['question' => 'How does Event Schedule pricing compare to TicketLeap?', 'answer' => 'TicketLeap has no subscription and charges $1 + 2% on each paid ticket, plus a 3% transaction fee per order, passed on to buyers or absorbed by you. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so you pay only Stripe\'s or PayPal\'s own processing.'],
                     ['question' => 'When does the money from ticket sales reach me?', 'answer' => 'On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed and follows their normal payout schedule. TicketLeap pays organizers by direct deposit 4 to 6 business days after each event date, or weekly once approved for its FastPay advances.'],
@@ -5620,6 +6311,8 @@ class MarketingController extends Controller
                     ['question' => 'Does Event Schedule have reserved seating like TicketLeap?', 'answer' => 'Yes, on Enterprise. A venue schedule draws its room once, with sections, rows, tables, standing areas and wheelchair spaces, and buyers pick their seats from the map at checkout. TicketLeap includes its seating chart builder at no extra cost.'],
                     ['question' => 'Can I put my events on my own website?', 'answer' => 'Yes. The embeddable calendar shows your upcoming events on any website, free, and each event links to its own page. On Pro, the ticket widget puts checkout on your site too. TicketLeap offers a Buy Tickets button that links to its own event page.'],
                     ['question' => 'Is it easy to switch from TicketLeap?', 'answer' => 'Yes. Create a free schedule, paste your event details or upload a flyer and the AI parser fills in each event for you to check. Then connect Stripe or PayPal and move to Pro to sell paid tickets.'],
+                    ['question' => 'Can door staff scan tickets without seeing sales?', 'answer' => 'Yes. A team member at the viewer level can scan tickets and sees no sales, while an admin runs the schedule day to day. Adding team members is on Enterprise, up to five on eventschedule.com. TicketLeap has six user roles to choose from.'],
+                    ['question' => 'What about events already on sale at TicketLeap?', 'answer' => 'Leave them there until they are over. Meanwhile an event here can point to its TicketLeap page with Tickets elsewhere, which is on every plan, so your schedule shows every date in one place.'],
                 ],
             ],
 
@@ -5728,12 +6421,36 @@ class MarketingController extends Controller
                     ['name' => 'DICE', 'route' => 'marketing.compare_dice'],
                     ['name' => 'Facebook Events', 'route' => 'marketing.compare_facebook_events'],
                 ],
+                'why_choose' => [
+                    'summary' => 'Songkick is where fans learn that a date exists. Event Schedule is where the date lives: one page of your own that takes the guest list, sells the ticket on Pro, and is the same page wherever a fan found the link.',
+                    'points' => [
+                        'The ticket link in Tourbox can point to your own event page, so a fan who finds you there buys from you',
+                        'Free registration with a QR ticket, for guest-list nights and free shows',
+                        'A booking form on every talent schedule, which venues and promoters use to ask you for a date, free',
+                        'Fans can post their videos and photos from a show to its page once you approve them',
+                        'A digest of your new dates goes to email subscribers by itself and is not counted against your newsletter allowance',
+                        'Paid tickets on Pro at '.plan_price($this->planPrice()).'/mo, with no platform fee on top of Stripe or PayPal',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Start a talent schedule', 'description' => 'Pick Talent when you create it. That type comes with the booking form, and every show on it can name the venue it is at.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Copy your dates over', 'description' => 'Paste your tour dates as text, or upload the tour poster, into AI import, and check each show before it is saved.', 'doc' => 'ai-import#image-import'],
+                    ['title' => 'Name the venues', 'description' => 'A venue that is not on Event Schedule yet gets a schedule created for it, which the venue can claim by signing in with the address on it.', 'doc' => 'creating-events#claim'],
+                    ['title' => 'Point Tourbox at your pages', 'description' => 'Add each event page as the ticket link in Tourbox, and put the embeddable calendar on your own website beside the Tourbox widget or in its place.', 'doc' => 'sharing#embed-code'],
+                ],
+                'limits' => [
+                    ['tag' => 'No alerts network', 'title' => 'Nobody is tracking you here yet', 'text' => 'Songkick alerts fans about any artist they track, across its whole app. Here only the people who signed up on your schedule hear about a new date, so the list is the one you build.'],
+                    ['tag' => 'No streaming partners', 'title' => 'Your dates stay on your pages', 'text' => 'Tourbox sends dates on to partners such as Deezer, Bandcamp and SoundCloud, and Event Schedule has no such partners. Your dates reach fans through your schedule page, the embed on your website and the calendar feed they subscribe to.'],
+                    ['tag' => 'Your page only', 'title' => 'No data on fans elsewhere', 'text' => 'Songkick\'s fan insights draw on people who track an artist inside its app. The analytics here count the views of your own schedule and event pages and where those visitors came from, free, and know nothing about anyone who has not been there.'],
+                ],
                 'faq' => [
                     ['question' => 'Does Songkick sell tickets?', 'answer' => 'No. Songkick lists dates from hundreds of sources and links fans to outside ticket sellers, so orders and refunds are handled by whoever sold the ticket. Event Schedule takes free registrations with QR tickets on every plan, and paid tickets on Pro with zero platform fees.'],
                     ['question' => 'Can I use Event Schedule alongside Songkick?', 'answer' => 'Yes. Keep your Songkick listing for its fan alerts and add your Event Schedule event page as the ticket link in Tourbox, so fans who find a date there land on your own page. Paste your dates in and the AI parser fills in each show for you to check.'],
                     ['question' => 'Can venues and promoters use Event Schedule?', 'answer' => 'Yes. Venues, talent and curators each get their own schedule, and a show a venue lists can appear on the performer\'s schedule too. Songkick\'s Tourbox is only for artist teams, and venues and promoters cannot add ticket links themselves.'],
                     ['question' => 'How does Event Schedule pricing compare to Songkick?', 'answer' => 'Songkick is free for artists, with paid email campaigns to their fans. Event Schedule is free for listing dates, registrations and newsletters, and Pro is '.plan_price($this->planPrice()).'/mo for paid tickets with zero platform fees.'],
                     ['question' => 'Can I put my tour dates on my website?', 'answer' => 'Yes. The embeddable calendar shows your upcoming dates on any website, free, and each date links to its own event page. Fans can also subscribe to your schedule\'s live calendar feed, so a moved date updates in their own calendar.'],
+                    ['question' => 'Will my fans be told when I add a date?', 'answer' => 'The ones who signed up on your schedule will. People who leave their email address get a digest of the new dates you publish, at most one every 72 hours, and fans who subscribe to the calendar feed see new dates in their own calendar. Nobody who has never visited your page is alerted.'],
+                    ['question' => 'Can a promoter or festival list several artists?', 'answer' => 'Yes. A curator schedule lists events from other schedules, and can take talent and venue schedules as sources so every date they publish appears on it automatically. It is free on every plan, which suits a promoter running a season or a festival line-up.'],
                 ],
             ],
 
@@ -5851,6 +6568,42 @@ class MarketingController extends Controller
                     ['name' => 'Meetup', 'route' => 'marketing.compare_meetup'],
                     ['name' => 'Facebook Events', 'route' => 'marketing.compare_facebook_events'],
                 ],
+                // AllEvents' booking fee from TicketFees::rates() (allevents.in pricing feed, checked 2026-09-24).
+                'fee_example' => [
+                    'tag' => 'AllEvents fees, worked out',
+                    'title' => 'What 100 tickets at $20 cost you on AllEvents',
+                    'lead' => 'AllEvents adds a $1 booking fee to each paid ticket sold online, charged to the buyer unless you absorb it. Outside India the ticket money settles into your own Stripe or PayPal account, whose fee comes on top. The table absorbs the booking fee, which is what keeping your advertised price costs.',
+                    'total_label' => 'Fees on $2,000',
+                    'caption' => 'Fees on 100 tickets at $20, each bought in its own order, on Event Schedule Pro, AllEvents and Eventbrite.',
+                    'rows' => $this->feeExample(100, 20, [$this->ourFeeRow(), $this->ratesFeeRow('allevents'), $this->ratesFeeRow('eventbrite')]),
+                    'notes' => [
+                        'Both settle through your own Stripe account, so the card fee is the same on each, and the difference is $1 a ticket against Pro\'s '.plan_price($this->planPrice()).' a month: Pro costs less once a month passes '.$this->feeBreakEven($this->ratesFeeRow('allevents'), 20).' paid tickets.',
+                        'Passed to the buyer instead, the booking fee costs you nothing and costs every buyer $1, so a $20 ticket checks out at $21.',
+                        'Events priced in Indian rupees pay 10% + INR 10 a ticket instead, collected by AllEvents itself. The table uses the US dollar rate published in September 2026.',
+                    ],
+                ],
+                'why_choose' => [
+                    'summary' => 'AllEvents is a city feed you post into, with a cap on upcoming events and a dollar on each paid ticket. Event Schedule is a page that holds only your events, as many as you like, with nothing added to the price a buyer sees.',
+                    'points' => [
+                        'No USD 1 booking fee for buyers to pay or for you to absorb',
+                        'As many upcoming events as you want on the free plan, where AllEvents lists 5 at a time',
+                        'Rupee prices through Razorpay on Pro, settled into your own Razorpay account rather than collected by AllEvents',
+                        'A curator schedule that gathers other organizers\' events, for a city guide that is yours',
+                        'Registration and door scanning in a phone browser on every plan, with no Event Manager app',
+                        'A Facebook and Instagram ad for an event, set up from inside the app, on Pro',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Pull your listings across', 'description' => 'Paste the link to an AllEvents event page into Import from a link, check what it fills in, and save. A page the AI has to read counts once against the daily import allowance.', 'doc' => 'ai-import#link-import'],
+                    ['title' => 'List other organizers too', 'description' => 'If you posted other people\'s events to AllEvents, make a curator schedule and add the ones already on Event Schedule as sources, so their dates arrive as they publish them.', 'doc' => 'creating-schedules#event-sources'],
+                    ['title' => 'Take payment without the booking fee', 'description' => 'Connect Stripe or PayPal, or Razorpay for events priced in rupees, and tickets carry no booking fee. Paid tickets are on Pro.', 'doc' => 'tickets#razorpay'],
+                    ['title' => 'Build an audience of your own', 'description' => 'Show the follower QR code at your events. Whoever scans it can sign up to hear about your next ones from you, not from a city feed.', 'doc' => 'sharing#qr-code'],
+                ],
+                'limits' => [
+                    ['tag' => 'No city feed', 'title' => 'Strangers will not stumble on you', 'text' => 'AllEvents says it reaches 20 million event seekers a month, in listings across more than 40,000 cities. The Event Schedule browse page shows one upcoming event per schedule, a far smaller window, so most of your audience will arrive through links you share.'],
+                    ['tag' => 'No promotion team', 'title' => 'Nobody runs a campaign for you', 'text' => 'AllEvents sells promotion run by its own marketing team. The nearest thing here is boosting an event on Pro, a Facebook and Instagram ad that you set up and pay for yourself.'],
+                    ['tag' => 'Newsletter allowance', 'title' => 'Sends are counted per recipient', 'text' => 'On eventschedule.com a newsletter counts each recipient against a monthly allowance: 10 on Free, 100 on Pro and 1,000 on Enterprise. The limit lifts once the schedule sends through its own email settings, and the automatic digest of new events never counts against it.'],
+                ],
                 'faq' => [
                     ['question' => 'How does Event Schedule pricing compare to AllEvents?', 'answer' => 'AllEvents adds a booking fee of USD 1 to each paid ticket sold online (10% + INR 10 on events priced in rupees), charged to buyers unless you absorb it, and its paid plans at USD 12, 60 and 200 a month raise how many upcoming events you can list at once. Event Schedule has no booking fee, and Pro at '.plan_price($this->planPrice()).'/mo adds paid tickets with zero platform fees.'],
                     ['question' => 'Do I need a paid plan to list more events?', 'answer' => 'No. The free plan has no limit on events, and free registration with QR tickets is unlimited too. The AllEvents free plan allows 5 upcoming events at a time, and its paid plans raise that to 20, 100 or more.'],
@@ -5858,6 +6611,8 @@ class MarketingController extends Controller
                     ['question' => 'Can Event Schedule promote my event like AllEvents?', 'answer' => 'Event Schedule is built around your own schedule page rather than a shared marketplace. People who sign up on your schedule get an email when you add events, you can send newsletters, and on Pro you can boost an event with a Facebook and Instagram ad. If reaching strangers in your city matters most, AllEvents does more of that.'],
                     ['question' => 'Can I sell tickets on my own website?', 'answer' => 'Yes, on Pro. The ticket widget puts checkout on your own site, and the embeddable calendar, which is free, lists every upcoming event. AllEvents offers event list plugins and a ticket embed as well.'],
                     ['question' => 'Are the API and webhooks included?', 'answer' => 'Yes, both are on Pro at '.plan_price($this->planPrice()).'/mo, with a REST API for events, schedules and sales. AllEvents includes webhooks from its Professional plan at USD 60 a month, and its API is a data product for event listings rather than for managing your own events.'],
+                    ['question' => 'Can people who do not know me still find my events?', 'answer' => 'Some can. Public events can appear on the Event Schedule browse page, which shows one upcoming event from each schedule, and every public event page can be listed by search engines. That is a much smaller audience than AllEvents\' city listings.'],
+                    ['question' => 'Can I sell tickets for an event priced in rupees?', 'answer' => 'Yes, on Pro, through Razorpay, which settles Indian rupees into your own Razorpay account with no platform fee from us. AllEvents charges 10% + INR 10 a ticket on rupee events and pays them out 3 to 5 business days after the event.'],
                 ],
             ],
 
@@ -5976,6 +6731,43 @@ class MarketingController extends Controller
                     ['name' => 'DICE', 'route' => 'marketing.compare_dice'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                 ],
+                // Universe's US Starter rates from TicketFees::rates() (support.universe.com, checked 2026-09-24).
+                // At $20 the $19.95 cap on the service fee does not apply.
+                'fee_example' => [
+                    'tag' => 'Universe fees, worked out',
+                    'title' => 'What 100 tickets at $20 cost you on Universe',
+                    'lead' => 'On its US Starter tier Universe charges a 2% + $0.79 service fee on each ticket, capped at $'.number_format(TicketFees::rates()['universe']['cap'], 2).', and a 3% processing fee through Universe Payments. Here is one month of $2,000 in ticket sales on each, with every fee absorbed by the organizer.',
+                    'total_label' => 'Fees on $2,000',
+                    'caption' => 'Fees on 100 tickets at $20, each bought in its own order, on Event Schedule Pro, Universe Starter and Eventbrite.',
+                    'rows' => $this->feeExample(100, 20, [$this->ourFeeRow(), $this->ratesFeeRow('universe', 'Universe Starter'), $this->ratesFeeRow('eventbrite')]),
+                    'notes' => [
+                        'A $20 ticket costs $'.number_format($this->feePerTicket($this->ratesFeeRow('universe'), 20), 2).' in fees on Universe and $'.number_format($this->feePerTicket($this->ourFeeRow(), 20), 2).' on Event Schedule, so Pro costs less once a month passes '.$this->feeBreakEven($this->ratesFeeRow('universe'), 20).' tickets.',
+                        'Connect your own Stripe account to Universe and the service fee stays, with Stripe\'s rate in place of the 3%. The table uses Universe Payments.',
+                        'These are the US Starter rates in Universe\'s help center as of September 2026.',
+                    ],
+                ],
+                'why_choose' => [
+                    'summary' => 'On Universe Payments a paid ticket carries a service fee and a processing fee, and the money waits in a Universe balance until 48 hours after the event ends. Event Schedule adds no fee of its own and charges each order through your own account as it comes in.',
+                    'points' => [
+                        'No 2% + $0.79 service fee on each ticket, and no 3% processing fee on top of it',
+                        'Seat maps for venue schedules on Enterprise, something Universe stopped offering in 2019',
+                        'Each date of a recurring event keeps its own tickets and capacity, on the free plan',
+                        'Followers and email subscribers who hear about your next event, not only the people who bought for the last one',
+                        'Free registration and door scanning on every plan, with no BoxOffice app to install',
+                        'Open source, with a selfhosted install that includes every Enterprise feature',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Bring the events in', 'description' => 'Paste each Universe listing, as a link or as its text, into AI import, which fills in the event for you to check before it is saved.', 'doc' => 'ai-import'],
+                    ['title' => 'Turn timeslots into dates', 'description' => 'An event that repeated on Universe becomes one recurring event, daily or weekly on chosen days, with each date\'s tickets and capacity counted on their own.', 'doc' => 'creating-events#recurring'],
+                    ['title' => 'Recreate questions and codes', 'description' => 'Checkout questions become questions on a ticket type, free. Discount codes become promo codes, and the waitlist for sold-out tickets switches on, both on Pro.', 'doc' => 'tickets#checkout-fields'],
+                    ['title' => 'Connect your own Stripe', 'description' => 'If you connected your own Stripe account to Universe, connect it here as well, or use PayPal. Selling a priced ticket is on Pro, and no service fee is added.', 'doc' => 'tickets#stripe'],
+                ],
+                'limits' => [
+                    ['tag' => 'No timed entry', 'title' => 'Dates, not half-hour slots', 'text' => 'Universe\'s timed-entry tools give an attraction many entry times a day, each with its own price and capacity. A recurring event here repeats by date at one start time, so it suits a weekly class or a nightly show better than an attraction that admits a group every half hour.'],
+                    ['tag' => 'No Ticketmaster', 'title' => 'Tickets sell where you put them', 'text' => 'Universe\'s custom Pro plans can list your tickets on Ticketmaster. Event Schedule has no distribution partner: tickets sell on your schedule and event pages, and on Pro in the ticket widget on your own website.'],
+                    ['tag' => 'No Mailchimp sync', 'title' => 'The mailing list lives here', 'text' => 'Universe can sync attendees to Mailchimp, and Event Schedule does not connect to Mailchimp at all. Buyers who tick the box at checkout join your email subscribers, and newsletters to them are written and sent from inside the app.'],
+                ],
                 'faq' => [
                     ['question' => 'How does Event Schedule pricing compare to Universe?', 'answer' => 'Universe charges US organizers 2% + $0.79 per paid ticket on its Starter plan, plus a 3% processing fee through Universe Payments, passed on to buyers or absorbed by you. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so you pay only Stripe\'s or PayPal\'s own processing.'],
                     ['question' => 'When do I get paid?', 'answer' => 'On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed. With Universe Payments, funds reach your Universe balance 48 hours after the event ends, and connecting your own Stripe account is its option for money before the event.'],
@@ -5983,6 +6775,8 @@ class MarketingController extends Controller
                     ['question' => 'Can I run a long series of dates?', 'answer' => 'Yes. Recurring events repeat daily, weekly on chosen days, every few weeks or monthly, with dates you can skip, and each date keeps its own tickets and capacity. For attractions with many entry times a day, Universe\'s timed-entry events go further.'],
                     ['question' => 'Can I keep my events in Google Calendar?', 'answer' => 'Yes. Google Calendar sync runs both ways on every plan, and Outlook and CalDAV calendars sync the same way. Anyone can also subscribe to your schedule\'s live calendar feed.'],
                     ['question' => 'Is it easy to switch from Universe?', 'answer' => 'Yes. Create a free schedule, paste your event details or upload a flyer and the AI parser fills in each event for you to check, then connect Stripe or PayPal and move to Pro to sell paid tickets.'],
+                    ['question' => 'Does Event Schedule have a door app like BoxOffice?', 'answer' => 'There is nothing to install: tickets are scanned in the browser on any phone, free on every plan, and each ticket admits once. Pro adds a live count of arrivals, broken down by ticket type. Taking a card payment in person is not something Event Schedule does.'],
+                    ['question' => 'Can I keep some tickets for invited guests only?', 'answer' => 'Not with a password on one ticket type, as Universe allows. On Enterprise a whole event can be Unlisted, reachable only by its link and optionally behind a password, and on Pro a promo code gives the people you choose a lower price.'],
                 ],
             ],
         ];
@@ -6886,7 +7680,7 @@ class MarketingController extends Controller
         ];
 
         return array_merge($tools[$tool], [
-            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+            'githubStars' => GitHubUtils::getStars(),
         ]);
     }
 
@@ -6895,17 +7689,17 @@ class MarketingController extends Controller
      */
     public function demos()
     {
-        $categories = \App\Utils\ExampleSchedules::byCategory();
+        $categories = ExampleSchedules::byCategory();
         $allSchedules = collect($categories)->flatten(1);
         // What app:generate-example-shots wrote: the schedules' pictures at the size the wall
         // uses, and the photographs of their pages. Empty on an install that has not run it.
-        $pictures = \App\Utils\ExampleSchedules::shots();
+        $pictures = ExampleSchedules::shots();
 
         return view('marketing.demos', [
             'categories' => $categories,
             'scheduleCount' => $allSchedules->count(),
             'allSchedules' => $allSchedules->toArray(),
-            'walls' => \App\Utils\ExampleSchedules::walls($categories, $pictures['art']),
+            'walls' => ExampleSchedules::walls($categories, $pictures['art']),
             'art' => $pictures['art'],
             'shots' => $pictures['shots'],
             'xray' => $pictures['xray'],
@@ -7073,7 +7867,7 @@ class MarketingController extends Controller
             : '';
         $federatedInstanceId = (int) ($federatedInstance !== '' ? UrlUtils::decodeId($federatedInstance) : 0);
 
-        $federatedQuery = \App\Models\FederatedEvent::listable()
+        $federatedQuery = FederatedEvent::listable()
             ->when($federatedCountry !== '', fn ($q) => $q->where('country_code', $federatedCountry))
             ->when($federatedLanguage !== '', fn ($q) => $q->where('language', $federatedLanguage))
             // Keyed on the raw string, NEVER on the decoded id. decodeId() returns null
@@ -7131,7 +7925,7 @@ class MarketingController extends Controller
      * picks again, so an event that has ended or been unpublished since is gone at once and
      * only a NEW event waits out the cache.
      *
-     * @return array{0: \Illuminate\Support\Collection, 1: array<string, bool>}
+     * @return array{0: Collection, 1: array<string, bool>}
      */
     private function browseWall(Carbon $now): array
     {
@@ -7199,7 +7993,7 @@ class MarketingController extends Controller
      */
     private function federatedFilterValues(string $column): array
     {
-        return \App\Models\FederatedEvent::listable()
+        return FederatedEvent::listable()
             ->whereNotNull($column)
             ->where($column, '!=', '')
             ->distinct()
@@ -7222,12 +8016,12 @@ class MarketingController extends Controller
 
         // Resolved through listable() so counts cannot be inflated by posting hashes for
         // listings that are blocked, expired, or from an unapproved instance.
-        $event = \App\Models\FederatedEvent::listable()
+        $event = FederatedEvent::listable()
             ->whereKey(UrlUtils::decodeId($hash))
             ->first();
 
         if ($event) {
-            \App\Models\FederationClicksDaily::incrementClick($event->federated_instance_id);
+            FederationClicksDaily::incrementClick($event->federated_instance_id);
         }
 
         return response()->noContent();
@@ -7323,7 +8117,7 @@ class MarketingController extends Controller
             return back()->with('error', __('messages.admin_confirm_password'));
         }
 
-        $listing = \App\Models\FederatedEvent::findOrFail(UrlUtils::decodeIdOrFail($hash));
+        $listing = FederatedEvent::findOrFail(UrlUtils::decodeIdOrFail($hash));
         $listing->isBlocked() ? $listing->unblock() : $listing->block();
 
         AuditService::log(

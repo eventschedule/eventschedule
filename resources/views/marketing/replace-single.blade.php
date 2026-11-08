@@ -905,7 +905,9 @@
         </div>
     </section>
 
-    @include('marketing.partials.pricing-nudge')
+    {{-- No pricing-nudge here: the plan cards above already say what each plan carries, and the
+         nudge said it again a section later on all twelve of these pages, which share most of
+         their text and which Google had mostly left unindexed (Search Console, 2026-11-08). --}}
 
     <!-- ============================================================ -->
     <!-- 6. Both tools, side by side across the seam                  -->

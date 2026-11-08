@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\BlogPost;
 use App\Models\User;
+use App\Services\Blog\BlogLinks;
+use App\Utils\AdminReauthUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -428,7 +430,7 @@ class BlogSeoTest extends TestCase
         $this->assertStringNotContainsString('href="[', $prompt);
         $this->assertStringContainsString('no [text](address)', $prompt);
 
-        foreach (array_keys(\App\Services\Blog\BlogLinks::targets()) as $url) {
+        foreach (array_keys(BlogLinks::targets()) as $url) {
             $this->assertStringNotContainsString('www.', $url);
             $this->assertStringNotContainsString('[', $url);
         }
@@ -562,6 +564,26 @@ class BlogSeoTest extends TestCase
     }
 
     /**
+     * Audience posts are a week apart: running first each morning, one a day held the planned
+     * daily post back on every one of those days.
+     */
+    public function test_the_sub_audience_generator_waits_a_week_after_its_last_post(): void
+    {
+        config(['app.hosted' => true, 'blog.sub_audience_every_days' => 7]);
+
+        $slug = collect(config('sub_audiences'))->first()['sub_audiences'];
+        $slug = collect($slug)->first()['slug'];
+        $recent = $this->makePost(['title' => 'Audience Post From Three Days Ago', 'slug' => $slug]);
+        DB::table('blog_posts')->where('id', $recent->id)->update(['created_at' => now()->subDays(3)]);
+
+        $this->artisan('app:generate-sub-audience-blog')
+            ->expectsOutput('An audience post was already created in the last 7 days. Skipping.')
+            ->assertExitCode(0);
+
+        $this->assertSame(1, BlogPost::count());
+    }
+
+    /**
      * And the other way round: yesterday's 03:00 sub-audience post is 21 hours old at the next
      * midnight and must still hold the daily generator off. 24 hours is the edge case a 23-hour
      * window missed.
@@ -611,7 +633,7 @@ class BlogSeoTest extends TestCase
         $this->travel(1)->hours();
 
         // The /admin area sits behind EnsureUserIsAdmin's password re-confirmation.
-        $this->withSession([\App\Utils\AdminReauthUtils::SESSION_KEY => now()->timestamp]);
+        $this->withSession([AdminReauthUtils::SESSION_KEY => now()->timestamp]);
 
         $this->actingAs($admin)->get('/admin/blog')->assertOk()->assertSee('321');
 

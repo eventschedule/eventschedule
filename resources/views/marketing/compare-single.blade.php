@@ -127,6 +127,16 @@
             'Open source under the Attribution Assurance License, and selfhostable, which resolves to Enterprise',
         ];
 
+        // What the card does not claim. A competitor can name the three limits that matter
+        // against it (`limits`: tag, title, text); these are the ones true against anybody.
+        // Every alternative page printing the same three was a third of the text they shared,
+        // and Google indexed almost none of them (Search Console, 2026-11-08).
+        $limitCards = $limits ?? [
+            ['tag' => 'No marketplace', 'title' => 'You bring the audience', 'text' => 'Your public events can be listed on the Event Schedule browse and search pages, but a listing is not a marketplace\'s built-in audience. What actually fills a room is your own schedule page, an embeddable calendar, a follower QR code, newsletters, and an interest list that emails people when tickets go on sale.'],
+            ['tag' => 'Seat maps are Enterprise', 'title' => 'Ticket types, then seats', 'text' => 'On Free and Pro a ticket type has a name, a price and a quantity, and buyers are not choosing a specific seat. A reserved-seating house needs Enterprise, where a venue schedule draws the room once and buyers pick their seats from the map.'],
+            ['tag' => 'One team member on Free', 'title' => 'Extra members are Enterprise', 'text' => 'The free plan is one person per schedule. Adding team members is on Enterprise and is capped at five on the hosted platform, so do not plan on inviting a whole staff for nothing.'],
+        ];
+
         // The same steps as the HowTo schema reads them. One list, so the visible
         // steps and the structured data cannot say different things.
         $switchHowTo = array_map(fn ($step) => ['name' => $step['title'], 'text' => $step['description']], $switchSteps);
@@ -1195,26 +1205,22 @@
                         Three lines <span class="es-score-lit">we do not claim.</span>
                     </h2>
                     <p class="es-score-band-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        A card you can trust has to name what is missing from it. These three are true about Event Schedule no matter which platform you are holding it against.
+                        @if (! empty($limits))
+                            A card you can trust has to name what is missing from it. These are the three that matter most if you are coming from {{ $name }}.
+                        @else
+                            A card you can trust has to name what is missing from it. These three are true about Event Schedule no matter which platform you are holding it against.
+                        @endif
                     </p>
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-3" data-reveal-group="110">
-                    <div class="es-score-card flex flex-col p-6" data-reveal="panel">
-                        <p class="es-score-tag mb-3">No marketplace</p>
-                        <h3 class="es-score-band-ink mb-2 text-lg font-bold">You bring the audience</h3>
-                        <p class="es-score-band-muted text-sm">Your public events can be listed on the Event Schedule browse and search pages, but a listing is not a marketplace's built-in audience. What actually fills a room is your own schedule page, an embeddable calendar, a follower QR code, newsletters, and an interest list that emails people when tickets go on sale.</p>
-                    </div>
-                    <div class="es-score-card flex flex-col p-6" data-reveal="panel">
-                        <p class="es-score-tag mb-3">Seat maps are Enterprise</p>
-                        <h3 class="es-score-band-ink mb-2 text-lg font-bold">Ticket types, then seats</h3>
-                        <p class="es-score-band-muted text-sm">On Free and Pro a ticket type has a name, a price and a quantity, and buyers are not choosing a specific seat. A reserved-seating house needs Enterprise, where a venue schedule draws the room once and buyers pick their seats from the map.</p>
-                    </div>
-                    <div class="es-score-card flex flex-col p-6" data-reveal="panel">
-                        <p class="es-score-tag mb-3">One team member on Free</p>
-                        <h3 class="es-score-band-ink mb-2 text-lg font-bold">Extra members are Enterprise</h3>
-                        <p class="es-score-band-muted text-sm">The free plan is one person per schedule. Adding team members is on Enterprise and is capped at five on the hosted platform, so do not plan on inviting a whole staff for nothing.</p>
-                    </div>
+                    @foreach ($limitCards as $limitCard)
+                        <div class="es-score-card flex flex-col p-6" data-reveal="panel">
+                            <p class="es-score-tag mb-3">{{ $limitCard['tag'] }}</p>
+                            <h3 class="es-score-band-ink mb-2 text-lg font-bold">{{ $limitCard['title'] }}</h3>
+                            <p class="es-score-band-muted text-sm">{{ $limitCard['text'] }}</p>
+                        </div>
+                    @endforeach
                 </div>
 
                 <p class="es-score-band-muted mt-10 text-center" data-reveal>

@@ -66,6 +66,21 @@ class GenerateSubAudienceBlog extends Command
             return 0;
         }
 
+        // One audience post a week at most (config blog.sub_audience_every_days). This runs at
+        // 03:00 ahead of app:generate-daily-blog-post, whose 25-hour window then skipped the
+        // planned post every day an audience post went out, and the audience posts are the
+        // weaker set: by 2026-11 more than half of the 165 had no search impressions at all.
+        $everyDays = (int) config('blog.sub_audience_every_days', 7);
+        if (! $generateAll && ! $targetAudience && ! $targetSubAudience && $everyDays > 0) {
+            $slugs = collect($config)->flatMap(fn ($audience) => collect($audience['sub_audiences'])->pluck('slug'))->all();
+
+            if (BlogPost::whereIn('slug', $slugs)->where('created_at', '>=', now()->subDays($everyDays))->exists()) {
+                $this->info("An audience post was already created in the last {$everyDays} days. Skipping.");
+
+                return 0;
+            }
+        }
+
         $missing = [];
         $generated = 0;
 
