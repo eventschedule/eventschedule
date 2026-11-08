@@ -10,7 +10,7 @@ return [
     'features_title' => 'Software für Veranstaltungsmanagement: alle Funktionen, ohne Plattformgebühren',
     'features_description' => 'Alle Funktionen in fünf Kapiteln: Tickets über Stripe oder PayPal ohne Plattformgebühr, Kalendersynchronisierung in beide Richtungen, Newsletter, KI-Import und Analysen.',
 
-    'about_title' => 'Über Event Schedule | Open-Source-Plattform für Veranstaltungsmanagement',
+    'about_title' => 'Open-Source-Plattform für Veranstaltungsmanagement | Über Event Schedule',
     'about_description' => 'Wer Event Schedule entwickelt, unter welcher Lizenz es erscheint, wo der Quellcode liegt und eine Liste dessen, was es nicht kann. Open Source und ohne Plattformgebühren.',
 
     'selfhost_title' => 'Selbst gehosteter Veranstaltungskalender | Alle Funktionen kostenlos auf deinem Server',

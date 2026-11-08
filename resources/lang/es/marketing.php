@@ -10,7 +10,7 @@ return [
     'features_title' => 'Software de gestión de eventos: todas las funciones, sin comisiones de plataforma',
     'features_description' => 'Todas las funciones en cinco capítulos: entradas con Stripe o PayPal sin comisión de plataforma, sincronización bidireccional del calendario, boletines, importación con IA y analíticas.',
 
-    'about_title' => 'Acerca de Event Schedule | Plataforma de gestión de eventos de código abierto',
+    'about_title' => 'Plataforma de gestión de eventos de código abierto | Acerca de Event Schedule',
     'about_description' => 'Quién desarrolla Event Schedule, con qué licencia se publica, dónde está el código fuente y una lista de lo que no hace. Código abierto y sin comisiones de plataforma.',
 
     'selfhost_title' => 'Calendario de eventos autoalojado | Todas las funciones gratis en tu servidor',

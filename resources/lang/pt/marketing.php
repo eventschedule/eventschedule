@@ -10,7 +10,7 @@ return [
     'features_title' => 'Software de gestão de eventos: todos os recursos, sem taxas de plataforma',
     'features_description' => 'Todos os recursos em cinco capítulos: ingressos pelo Stripe ou PayPal sem taxa de plataforma, sincronização de calendário nos dois sentidos, newsletters, importação com IA e análises.',
 
-    'about_title' => 'Sobre o Event Schedule | Plataforma open source de gestão de eventos',
+    'about_title' => 'Plataforma open source de gestão de eventos | Sobre o Event Schedule',
     'about_description' => 'Quem desenvolve o Event Schedule, sob qual licença é distribuído, onde fica o código-fonte e uma lista do que ele não faz. Open source, sem taxas de plataforma.',
 
     'selfhost_title' => 'Calendário de eventos auto-hospedado | Todos os recursos grátis no seu servidor',

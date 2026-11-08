@@ -10,7 +10,7 @@ return [
     'features_title' => 'Software de gestionare a evenimentelor: toate funcțiile, fără comisioane de platformă',
     'features_description' => 'Toate funcțiile în cinci capitole: bilete prin Stripe sau PayPal fără comision de platformă, sincronizare bidirecțională a calendarului, buletine informative, import cu AI și statistici.',
 
-    'about_title' => 'Despre Event Schedule | Platformă open source pentru gestionarea evenimentelor',
+    'about_title' => 'Platformă open source pentru gestionarea evenimentelor | Despre Event Schedule',
     'about_description' => 'Cine dezvoltă Event Schedule, sub ce licență este distribuit, unde se află codul sursă și o listă cu ce nu face. Open source, fără comisioane de platformă.',
 
     'selfhost_title' => 'Calendar de evenimente găzduit de tine | Toate funcțiile gratuit pe serverul tău',

@@ -10,7 +10,7 @@ return [
     'features_title' => 'Logiciel de gestion d\'événements : toutes les fonctionnalités, sans frais de plateforme',
     'features_description' => 'Toutes les fonctionnalités en cinq chapitres : billets via Stripe ou PayPal sans frais de plateforme, synchronisation bidirectionnelle du calendrier, newsletters, import par IA et statistiques.',
 
-    'about_title' => 'À propos d\'Event Schedule | Plateforme open source de gestion d\'événements',
+    'about_title' => 'Plateforme open source de gestion d\'événements | À propos d\'Event Schedule',
     'about_description' => 'Qui développe Event Schedule, sous quelle licence il est publié, où se trouve le code source et la liste de ce qu\'il ne fait pas. Open source, sans frais de plateforme.',
 
     'selfhost_title' => 'Calendrier d\'événements auto-hébergé | Toutes les fonctionnalités gratuites sur votre serveur',

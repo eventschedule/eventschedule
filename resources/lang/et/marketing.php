@@ -10,7 +10,7 @@ return [
     'features_title' => 'Sündmuste haldamise tarkvara: kõik funktsioonid, ilma platvormitasudeta',
     'features_description' => 'Kõik funktsioonid viies peatükis: piletid Stripe\'i või PayPali kaudu ilma platvormitasuta, kahesuunaline kalendri sünkroonimine, uudiskirjad, tehisintellektiga import ja analüütika.',
 
-    'about_title' => 'Event Schedule\'ist | Avatud lähtekoodiga sündmuste haldamise platvorm',
+    'about_title' => 'Avatud lähtekoodiga sündmuste haldamise platvorm | Event Schedule\'ist',
     'about_description' => 'Kes Event Schedule\'it arendab, millise litsentsi all see ilmub, kus asub lähtekood ja loetelu sellest, mida see ei tee. Avatud lähtekood ja platvormitasudeta.',
 
     'selfhost_title' => 'Isemajutatav sündmuste kalender | Kõik funktsioonid tasuta sinu serveris',

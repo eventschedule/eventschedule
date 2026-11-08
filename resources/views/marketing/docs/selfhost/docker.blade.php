@@ -1,7 +1,7 @@
 <x-docs-page
     key="selfhost/docker"
     title="Selfhost Event Schedule with Docker Compose - Event Schedule"
-    description="Run Event Schedule with Docker Compose: build the image, fix the application key, serve it over HTTPS behind a reverse proxy, add email and Stripe, back up and update."
+    description="Run Event Schedule with Docker Compose: build the image, keep the app key, serve it over HTTPS behind a proxy, add email and Stripe, back up and update."
     lede="Run your own event calendar and ticketing with Docker Compose: four containers, one .env file, and no PHP or cron to set up on the host."
 >
     <x-slot:toc>

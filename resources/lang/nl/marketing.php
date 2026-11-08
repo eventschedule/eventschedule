@@ -10,7 +10,7 @@ return [
     'features_title' => 'Software voor evenementenbeheer: alle functies, zonder platformkosten',
     'features_description' => 'Alle functies in vijf hoofdstukken: tickets via Stripe of PayPal zonder platformkosten, tweerichtingssynchronisatie met je agenda, nieuwsbrieven, AI-import en statistieken.',
 
-    'about_title' => 'Over Event Schedule | Open source platform voor evenementenbeheer',
+    'about_title' => 'Open source platform voor evenementenbeheer | Over Event Schedule',
     'about_description' => 'Wie Event Schedule bouwt, onder welke licentie het verschijnt, waar de broncode staat en een lijst van wat het niet doet. Open source, zonder platformkosten.',
 
     'selfhost_title' => 'Zelf gehoste evenementenkalender | Alle functies gratis op je eigen server',

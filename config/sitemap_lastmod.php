@@ -66,7 +66,7 @@ return [
     '/docs/selfhost/admin' => '2026-10-26',
     '/docs/selfhost/ai' => '2026-10-23',
     '/docs/selfhost/boost' => '2026-10-23',
-    '/docs/selfhost/docker' => '2026-11-06',
+    '/docs/selfhost/docker' => '2026-11-08',
     '/docs/selfhost/email' => '2026-10-23',
     '/docs/selfhost/federation' => '2026-10-23',
     '/docs/selfhost/google-calendar' => '2026-10-23',
