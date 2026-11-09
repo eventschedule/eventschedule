@@ -865,6 +865,8 @@ return [
     'sold' => 'Vândut',
     'sold_out' => 'Epuizat',
     'price_from' => 'De la :price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'Gratuit - :max',
     'few_left' => 'Ultimele locuri',
     'month_more' => 'încă :count',
     'month_earlier' => ':count mai devreme azi',

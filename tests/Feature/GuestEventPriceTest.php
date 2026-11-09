@@ -58,13 +58,67 @@ class GuestEventPriceTest extends TestCase
         $this->assertStringNotContainsString(__('messages.price_from', ['price' => '']), $row);
     }
 
-    public function test_several_prices_are_from_the_lowest_in_the_events_own_currency(): void
+    public function test_several_prices_are_the_range_in_the_events_own_currency(): void
     {
         $event = $this->event(['ticket_currency_code' => 'EUR']);
         $this->createTicket($event, ['type' => 'Balcony', 'price' => 12, 'quantity' => 50]);
         $this->createTicket($event, ['type' => 'Stalls', 'price' => 30, 'quantity' => 50]);
 
-        $this->assertStringContainsString(__('messages.price_from', ['price' => MoneyUtils::format(12, 'EUR')]), $this->priceRow($event));
+        $this->assertStringContainsString(e(__('messages.price_range', ['min' => MoneyUtils::format(12, 'EUR'), 'max' => MoneyUtils::format(30, 'EUR')])), $this->priceRow($event));
+    }
+
+    /**
+     * An organizer sold admission at lei 250 and lei 280 beside a free voucher pass (three
+     * visits and a discount at the restaurant), and the page said Free entry. A pass is priced
+     * for several visits, so it speaks for the event only when passes are all it sells; an
+     * add-on is never a way in at all.
+     */
+    public function test_a_free_pass_or_an_add_on_beside_admission_is_not_the_price(): void
+    {
+        $event = $this->event(['ticket_currency_code' => 'RON']);
+        $this->createTicket($event, ['type' => 'Standard', 'price' => 280, 'quantity' => 50]);
+        $this->createTicket($event, ['type' => 'Early Bird', 'price' => 250, 'quantity' => 50]);
+        $this->createTicket($event, ['type' => 'Voucher', 'price' => 0, 'quantity' => 50, 'is_pass' => true, 'pass_max_uses' => 3]);
+        $this->createTicket($event, ['type' => 'Parking', 'price' => 5, 'quantity' => 50, 'is_addon' => true]);
+
+        $row = $this->priceRow($event);
+        $this->assertStringContainsString(e(__('messages.price_range', ['min' => MoneyUtils::format(250, 'RON'), 'max' => MoneyUtils::format(280, 'RON')])), $row);
+        $this->assertStringNotContainsString($this->role->customLabel('free_entry'), $row);
+
+        // Passes are all it sells: then the pass is the price.
+        $passes = $this->event();
+        $this->createTicket($passes, ['type' => 'Ten visits', 'price' => 90, 'quantity' => 50, 'is_pass' => true, 'pass_max_uses' => 10]);
+        $this->assertSame(90.0, $passes->fresh()->ticketPriceSummary()['min']);
+
+        // Admission no longer on sale while the pass still is: the pass is what can be bought.
+        $late = $this->event();
+        $this->createTicket($late, ['type' => 'Early', 'price' => 40, 'quantity' => 50, 'sales_end_at' => now()->subDay()]);
+        $this->createTicket($late, ['type' => 'Season', 'price' => 120, 'quantity' => 50, 'is_pass' => true, 'pass_max_uses' => 5]);
+        $this->assertSame(120.0, $late->fresh()->ticketPriceSummary()['min']);
+    }
+
+    public function test_a_free_type_beside_paid_ones_is_free_to_the_top_price(): void
+    {
+        $event = $this->event();
+        $this->createTicket($event, ['type' => 'Standing', 'price' => 0, 'quantity' => 50]);
+        $this->createTicket($event, ['type' => 'Table', 'price' => 40, 'quantity' => 50]);
+        $this->createTicket($event, ['type' => 'Booth', 'price' => 90, 'quantity' => 50]);
+
+        $row = $this->priceRow($event);
+        $this->assertStringContainsString(e(__('messages.price_free_to', ['max' => MoneyUtils::format(90, 'USD')])), $row);
+        $this->assertStringNotContainsString($this->role->customLabel('free_entry'), $row);
+    }
+
+    /** Two left-to-right amounts in a right-to-left line: each is isolated, or the higher reads first. */
+    public function test_a_range_isolates_its_amounts_in_a_right_to_left_language(): void
+    {
+        app()->setLocale('he');
+        $text = Event::priceText('from', 12, 30, 'USD', true);
+        $this->assertSame(__('messages.price_range', ['min' => "\u{2068}".MoneyUtils::format(12, 'USD')."\u{2069}", 'max' => "\u{2068}".MoneyUtils::format(30, 'USD')."\u{2069}"]), $text);
+
+        app()->setLocale('en');
+        $this->assertStringNotContainsString("\u{2068}", Event::priceText('from', 12, 30, 'USD', true));
+        $this->assertSame(__('messages.price_from', ['price' => MoneyUtils::format(12, 'USD')]), Event::priceText('from', 12, 30, 'USD', false));
     }
 
     public function test_free_is_said_in_the_owners_words(): void

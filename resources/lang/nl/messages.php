@@ -385,6 +385,8 @@ return [
     'sold' => 'Verkocht',
     'sold_out' => 'Uitverkocht',
     'price_from' => 'Vanaf :price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'Gratis - :max',
     'few_left' => 'Nog maar enkele',
     'month_more' => '+:count meer',
     'month_earlier' => ':count eerder vandaag',

@@ -860,6 +860,8 @@ return [
     'sold' => 'Müüdud',
     'sold_out' => 'Välja müüdud',
     'price_from' => 'Alates :price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'Tasuta - :max',
     'few_left' => 'Vähe alles',
     'month_more' => '+:count veel',
     'month_earlier' => ':count varem täna',

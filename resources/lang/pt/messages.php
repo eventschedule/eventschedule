@@ -385,6 +385,8 @@ return [
     'sold' => 'Vendido',
     'sold_out' => 'Esgotado',
     'price_from' => 'A partir de :price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'Grátis - :max',
     'few_left' => 'Últimas vagas',
     'month_more' => '+:count mais',
     'month_earlier' => ':count mais cedo hoje',

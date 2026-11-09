@@ -868,6 +868,8 @@ return [
     'sold' => 'Sold',
     'sold_out' => 'Sold Out',
     'price_from' => 'From :price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'Free - :max',
     'few_left' => 'Few left',
     'month_more' => '+:count more',
     'month_earlier' => ':count earlier today',

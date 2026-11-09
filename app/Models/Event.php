@@ -3381,19 +3381,18 @@ class Event extends Model
      * The page used to say nothing about price until the form was opened. The line is drawn from
      * the rows a visitor could be shown: the ones on sale, or, when none is, every row only if the
      * owner chose "show unavailable tickets" (an owner who hides tickets before sales open has not
-     * published their prices either). Passes count like any other row: the cheapest way in is
-     * what "from" means.
+     * published their prices either). Add-ons are never a way in, and a pass counts only when
+     * passes are all the event sells: it is priced for several visits, not for this one.
      *
      *  - free: every such row costs nothing.
-     *  - min / from: the lowest price, and whether there is a higher one.
-     *  - says: how the line is worded (priceWording()): 'free', 'from' or 'price'. A free
-     *          type beside paid ones is 'free' here while `free` stays false, because there
-     *          is still something to pay for.
+     *  - min / max / from: the lowest and highest price, and whether they differ.
+     *  - says: how the line is worded (priceWording()): 'free', 'free_range', 'from' or
+     *          'price'; priceText() turns it into words.
      *  - low:  tickets can be bought and few are left: a tenth of the house or fewer, and never
      *          more than ten. Only where the house has a size (not unlimited, not a seat map).
      *          Never a number: the page says "Few left", not how many.
      *
-     * @return array{free: bool, min: float, from: bool, says: string, currency: ?string, low: bool}|null
+     * @return array{free: bool, min: float, max: float, from: bool, says: string, currency: ?string, low: bool}|null
      */
     public function ticketPriceSummary($date = null): ?array
     {
@@ -3401,7 +3400,8 @@ class Event extends Model
             return null;
         }
 
-        $rows = $this->tickets->filter(fn ($ticket) => $ticket->setRelation('event', $this)->isSellable());
+        $rows = $this->tickets->reject(fn ($ticket) => $ticket->is_addon)
+            ->filter(fn ($ticket) => $ticket->setRelation('event', $this)->isSellable());
         $onSale = $rows->filter(fn ($ticket) => ! $ticket->isSalesEnded() && ! $ticket->isSalesNotStarted());
         // "From $10" has to be a price somebody can still pay: an early-bird type that sold out
         // with no end date is still "on sale" by its dates. ticketSale() asks the same of stock.
@@ -3418,6 +3418,12 @@ class Event extends Model
             return null;
         }
 
+        // A pass is priced for several visits (and may carry a perk of its own), so it is not the
+        // price of this night: it speaks for the event only when passes are all that is shown. A
+        // free voucher pass beside paid admission made the line say Free entry.
+        $entries = $shown->reject(fn ($ticket) => $ticket->is_pass);
+        $shown = $entries->isNotEmpty() ? $entries : $shown;
+
         $prices = $shown->map(fn ($ticket) => (float) $ticket->price);
         $capacity = $this->seatCapacity();
         $left = $capacity !== null ? $this->seatsRemainingForSale($date) : null;
@@ -3425,6 +3431,7 @@ class Event extends Model
         return [
             'free' => $prices->max() <= 0,
             'min' => $prices->min(),
+            'max' => $prices->max(),
             'from' => $prices->min() < $prices->max(),
             'says' => self::priceWording($prices->min(), $prices->max()),
             'currency' => $this->ticket_currency_code,
@@ -3435,18 +3442,53 @@ class Event extends Model
     }
 
     /**
-     * How a set of ticket prices is worded in one line: 'free' where the cheapest way in costs
-     * nothing, 'from' where prices differ, 'price' where there is one.
+     * How a set of ticket prices is worded in one line: 'free' where every way in costs nothing,
+     * 'free_range' where a free type sits beside paid ones, 'from' where paid prices differ,
+     * 'price' where there is one.
      *
      * One rule for the three places that say it: a card or a row of the list and the month
      * (cardTicketFields()), the event page's price line (event/show-guest) and a newsletter's
-     * event row (NewsletterService::eventRow()). Each used to read "the lowest price, and
-     * whether there is a higher one" for itself, and a free type beside paid ones (free entry,
-     * a paid table) came out as "From $0" in all three.
+     * event row (NewsletterService::eventRow()). A free type beside paid ones came out as
+     * "From $0" in all three, and then as "Free entry", which hid what the paid types cost
+     * (an organizer selling admission at lei 250 and lei 280 beside a free voucher was shown
+     * as free). It is "Free - lei 280" now: true in both cases, and never a zero.
      */
     public static function priceWording(float $min, float $max): string
     {
-        return $min <= 0 ? 'free' : ($min < $max ? 'from' : 'price');
+        if ($max <= 0) {
+            return 'free';
+        }
+        if ($min <= 0) {
+            return 'free_range';
+        }
+
+        return $min < $max ? 'from' : 'price';
+    }
+
+    /**
+     * The words of a price line for every wording but 'free', which each place says in its own
+     * words (the owner's "Free entry" label, or "Free"). $range: a place with room (the event
+     * page, a newsletter) says paid prices that differ as "lei 250 - lei 280"; a narrow chip
+     * says "From lei 250". In a right-to-left language each amount is isolated, or the two
+     * left-to-right amounts pull the hyphen between them into one run and the higher price
+     * reads first.
+     */
+    public static function priceText(string $says, float $min, float $max, ?string $currency, bool $range): ?string
+    {
+        $amount = function (float $value) use ($currency) {
+            $text = MoneyUtils::format($value, $currency);
+
+            return is_rtl() ? "\u{2068}".$text."\u{2069}" : $text;
+        };
+
+        return match ($says) {
+            'free' => null,
+            'free_range' => __('messages.price_free_to', ['max' => $amount($max)]),
+            'from' => $range
+                ? __('messages.price_range', ['min' => $amount($min), 'max' => $amount($max)])
+                : __('messages.price_from', ['price' => MoneyUtils::format($min, $currency)]),
+            default => MoneyUtils::format($min, $currency),
+        };
     }
 
     /**
@@ -3846,12 +3888,9 @@ class Event extends Model
         // priceWording(): the event page's price line and a newsletter's row ask the same rule.
         $says = self::priceWording($prices->min(), $prices->max());
         $free = $says === 'free';
-        $lowest = MoneyUtils::format($prices->min(), $this->ticket_currency_code);
-        $from = match ($says) {
-            'free' => null,
-            'from' => __('messages.price_from', ['price' => $lowest]),
-            default => $lowest,
-        };
+        // A free type beside paid ones is "Free - lei 280" in the chip's plain style, never the
+        // green Free entry, which would hide that the rest cost something.
+        $from = self::priceText($says, $prices->min(), $prices->max(), $this->ticket_currency_code, false);
 
         $soldOut = [];
         $low = [];

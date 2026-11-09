@@ -701,6 +701,8 @@ return [
     'sold' => 'Verkauft',
     'sold_out' => 'Ausverkauft',
     'price_from' => 'Ab :price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'Kostenlos - :max',
     'few_left' => 'Nur noch wenige',
     'month_more' => '+:count mehr',
     'month_earlier' => ':count früher heute',

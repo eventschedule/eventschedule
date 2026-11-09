@@ -12,7 +12,6 @@ use App\Models\NewsletterUnsubscribe;
 use App\Models\Role;
 use App\Repos\EventRepo;
 use App\Utils\MarkdownUtils;
-use App\Utils\MoneyUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -1382,10 +1381,10 @@ class NewsletterService
             'price' => match (true) {
                 $state === 'sold_out' => __('messages.sold_out'),
                 ! $summary => null,
-                // Event::priceWording(): a free type beside paid ones is Free, never "From $0".
+                // Event::priceWording(): Free only where every type is; beside paid ones it is
+                // "Free - $20", and paid prices that differ are the range, as on the event page.
                 $summary['says'] === 'free' => __('messages.free'),
-                $summary['says'] === 'from' => __('messages.price_from', ['price' => MoneyUtils::format($summary['min'], $summary['currency'])]),
-                default => MoneyUtils::format($summary['min'], $summary['currency']),
+                default => Event::priceText($summary['says'], $summary['min'], $summary['max'], $summary['currency'], true),
             },
             'soldOut' => $state === 'sold_out',
             'low' => $state === 'open' && ($summary['low'] ?? false) ? __('messages.few_left') : null,

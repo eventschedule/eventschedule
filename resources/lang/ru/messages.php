@@ -860,6 +860,8 @@ return [
     'sold' => 'Продано',
     'sold_out' => 'Распроданный',
     'price_from' => 'От :price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'Бесплатно - :max',
     'few_left' => 'Осталось мало',
     'month_more' => 'ещё :count',
     'month_earlier' => ':count ранее сегодня',

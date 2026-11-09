@@ -1232,12 +1232,12 @@
           </div>
           <div class="flex flex-col">
             <span class="text-lg font-semibold text-gray-900 dark:text-white" data-ticket-price>
+              {{-- The owner's "Free entry" only where every way in is free: beside paid types it
+                   is "Free - lei 280", and paid prices that differ are the whole range. --}}
               @if ($ticketPrice['says'] === 'free')
                 {{ $role->customLabel('free_entry') }}
-              @elseif ($ticketPrice['says'] === 'from')
-                {{ __('messages.price_from', ['price' => \App\Utils\MoneyUtils::format($ticketPrice['min'], $ticketPrice['currency'])]) }}
               @else
-                {{ \App\Utils\MoneyUtils::format($ticketPrice['min'], $ticketPrice['currency']) }}
+                {{ \App\Models\Event::priceText($ticketPrice['says'], $ticketPrice['min'], $ticketPrice['max'], $ticketPrice['currency'], true) }}
               @endif
             </span>
             @if ($ticketPrice['low'])

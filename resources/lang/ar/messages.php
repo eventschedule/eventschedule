@@ -699,6 +699,8 @@ return [
     'sold' => 'تم البيع',
     'sold_out' => 'نفذت الكمية',
     'price_from' => 'ابتداءً من :price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'مجاني - :max',
     'few_left' => 'بقي القليل',
     'month_more' => '+:count أخرى',
     'month_earlier' => ':count في وقت سابق اليوم',

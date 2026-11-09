@@ -379,6 +379,8 @@ return [
     'sold' => 'נמכר',
     'sold_out' => 'אזלו הכרטיסים',
     'price_from' => 'החל מ-:price',
+    'price_range' => ':min - :max',
+    'price_free_to' => 'חינם - :max',
     'few_left' => 'נותרו מעטים',
     'month_more' => 'עוד :count',
     'month_earlier' => ':count מוקדם יותר היום',
