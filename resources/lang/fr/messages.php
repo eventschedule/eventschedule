@@ -5912,6 +5912,9 @@ return [
     'short_link_clicks' => '{1} :count clic|[2,*] :count clics',
     'short_link_change_warning' => 'Ce lien court a été cliqué :count fois. Le modifier cassera les liens déjà partagés.',
     'add_to_google_wallet' => 'Ajouter à Google Wallet',
+    'add_to_apple_wallet' => 'Ajouter à Apple Wallet',
+    'wallet_ticket_number' => 'Numéro de billet',
+    'wallet_seats' => 'Places',
     'wallet_pass_unavailable' => 'Le billet Wallet n\'a pas pu être créé. Veuillez réessayer.',
 
     // Claiming a schedule the app created while somebody entered an event.

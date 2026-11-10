@@ -536,6 +536,9 @@ Route::get('/ticket/status/{event_id}/{secret}', [TicketController::class, 'stat
 // at whichever limit is tightest. Note ThrottleRequests short-circuits when app.is_testing, so no
 // test can catch a regression here.
 Route::get('/ticket/wallet/google/{event_id}/{secret}', [TicketController::class, 'googleWalletPass'])->name('ticket.wallet.google')->middleware('throttle:60,1,wallet_pass');
+// "Add to Apple Wallet": the signed .pkpass file itself, built on tap. Same credential and the same
+// prefixed throttle bucket as Google's. A 404 while Apple Wallet is not configured.
+Route::get('/ticket/wallet/apple/{event_id}/{secret}', [TicketController::class, 'appleWalletPass'])->name('ticket.wallet.apple')->middleware('throttle:60,1,wallet_pass');
 // One checkout that spanned several events. Keyed on the order primary's own secret, so it grants
 // no more than the ticket page that secret already opens.
 Route::get('/ticket/order/{order_id}/{secret}', [TicketController::class, 'viewOrder'])->name('ticket.order')->middleware('throttle:100,1');
@@ -1609,6 +1612,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
         Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
         Route::get('/docs/selfhost/google-wallet', [MarketingController::class, 'docsSelfhostGoogleWallet'])->name('marketing.docs.selfhost.google_wallet');
+        Route::get('/docs/selfhost/apple-wallet', [MarketingController::class, 'docsSelfhostAppleWallet'])->name('marketing.docs.selfhost.apple_wallet');
         Route::get('/docs/selfhost/microsoft-calendar', [MarketingController::class, 'docsSelfhostMicrosoftCalendar'])->name('marketing.docs.selfhost.microsoft_calendar');
         Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
         Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
@@ -1898,6 +1902,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
             Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
             Route::get('/docs/selfhost/google-wallet', [MarketingController::class, 'docsSelfhostGoogleWallet'])->name('marketing.docs.selfhost.google_wallet');
+            Route::get('/docs/selfhost/apple-wallet', [MarketingController::class, 'docsSelfhostAppleWallet'])->name('marketing.docs.selfhost.apple_wallet');
             Route::get('/docs/selfhost/microsoft-calendar', [MarketingController::class, 'docsSelfhostMicrosoftCalendar'])->name('marketing.docs.selfhost.microsoft_calendar');
             Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
             Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
@@ -2112,6 +2117,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/stripe', fn () => redirect('https://'._base_domain().'/docs/selfhost/stripe', 301));
             Route::get('/docs/selfhost/google-calendar', fn () => redirect('https://'._base_domain().'/docs/selfhost/google-calendar', 301));
             Route::get('/docs/selfhost/google-wallet', fn () => redirect('https://'._base_domain().'/docs/selfhost/google-wallet', 301));
+            Route::get('/docs/selfhost/apple-wallet', fn () => redirect('https://'._base_domain().'/docs/selfhost/apple-wallet', 301));
             Route::get('/docs/selfhost/microsoft-calendar', fn () => redirect('https://'._base_domain().'/docs/selfhost/microsoft-calendar', 301));
             Route::get('/docs/selfhost/boost', fn () => redirect('https://'._base_domain().'/docs/selfhost/boost', 301));
             Route::get('/docs/selfhost/admin', fn () => redirect('https://'._base_domain().'/docs/selfhost/admin', 301));
@@ -2290,6 +2296,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/selfhost/stripe', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.stripe');
     Route::get('/docs/selfhost/google-calendar', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.google_calendar');
     Route::get('/docs/selfhost/google-wallet', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.google_wallet');
+    Route::get('/docs/selfhost/apple-wallet', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.apple_wallet');
     Route::get('/docs/selfhost/microsoft-calendar', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.microsoft_calendar');
     Route::get('/docs/selfhost/boost', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.boost');
     Route::get('/docs/selfhost/admin', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.admin');

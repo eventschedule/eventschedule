@@ -37,7 +37,7 @@
                 <tbody>
                     <tr>
                         <td>The ticket page</td>
-                        <td>The badge in its own row along the bottom of the ticket</td>
+                        <td>The badge under the QR code, beside <a href="{{ route('marketing.docs.selfhost.apple_wallet') }}" class="doc-link">Apple Wallet</a>'s button when that is on too</td>
                     </tr>
                     <tr>
                         <td>The order page</td>

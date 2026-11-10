@@ -1465,13 +1465,13 @@
     <!-- Wallet Passes -->
     <section id="wallet-passes" class="doc-section">
         <h3 class="doc-subheading">Wallet Passes</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Ticket buyers can save their ticket into Google Wallet from the ticket page, from the order page of a multi-event purchase, or from the confirmation email. The pass carries the same QR code the ticket page shows, so it scans at the door exactly like any other ticket, and it works offline once saved.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Ticket buyers can save their ticket into Google Wallet or Apple Wallet from the ticket page (the buttons sit under the QR code, Apple's first on an iPhone, iPad or Mac), from the order page of a multi-event purchase, or from the confirmation and reminder emails. Each wallet is switched on by whoever runs the install, so a button appears only for the wallets that are set up. The pass carries the same QR code the ticket page shows, so it scans at the door exactly like any other ticket, and it works offline once saved.</p>
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Event details on the pass</strong> - name, venue, date and time, attendee name, ticket type and seat</li>
-            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has map coordinates, Google can notify the attendee as they arrive nearby</li>
+            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has map coordinates, Google can notify the attendee as they arrive nearby; Apple Wallet raises the pass on the lock screen around the event's start</li>
             <li><strong class="text-gray-900 dark:text-white">One pass per event</strong> - a multi-event order gets a separate pass for each event, since each is scanned with its own code. A single order for several people is one pass showing the number it admits, unless the event issues individual tickets</li>
-            <li><strong class="text-gray-900 dark:text-white">Passes and registrations too</strong> - a <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass or subscription</a> of any type saves as one undated pass rather than one per date, and shows how many people it admits at each event when that is more than one. If the pass has an expiry, Google Wallet archives it once that date passes. Free registrations get a wallet pass on the same terms as a paid ticket</li>
+            <li><strong class="text-gray-900 dark:text-white">Passes and registrations too</strong> - a <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass or subscription</a> of any type saves as one undated pass rather than one per date, and shows how many people it admits at each event when that is more than one. If the pass has an expiry, Google Wallet archives it and Apple Wallet greys it out once that date passes. Free registrations get a wallet pass on the same terms as a paid ticket</li>
             <li><strong class="text-gray-900 dark:text-white">Not for every order</strong> - there is no wallet button for an appointment booking, on an event you have cancelled, or while an <a href="#installments" class="doc-link">installment plan</a> is behind on its payments</li>
         </ul>
 
@@ -1481,7 +1481,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Turned on by the operator</div>
-            <p>Wallet passes need a Google Wallet issuer account, so the button appears only once the person running the installation has connected one. On a selfhosted install that is a one-time <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">setup step</a>; with nothing configured, no button is shown and nothing is sent to Google. It is free on every plan. There is no per-schedule setting: if you are unsure whether it is on, open a paid ticket and look for the badge.</p>
+            <p>Each wallet is switched on by the person running the installation: Google Wallet needs a Google Wallet issuer account, Apple Wallet an Apple Developer Program membership. On a selfhosted install each is a one-time setup step (<a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a>, <a href="{{ route('marketing.docs.selfhost.apple_wallet') }}" class="doc-link">Apple Wallet</a>); with nothing configured, no button is shown and nothing is sent anywhere. It is free on every plan. There is no per-schedule setting: if you are unsure whether it is on, open a paid ticket and look under the QR code.</p>
         </div>
     </section>
 

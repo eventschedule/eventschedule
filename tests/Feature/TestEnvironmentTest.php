@@ -167,6 +167,17 @@ class TestEnvironmentTest extends TestCase
     }
 
     /**
+     * No ticket page here draws an Apple Wallet button from the developer's own Pass Type ID
+     * certificate, which CI never has. Mutation: drop the phpunit.xml entries on a machine with one.
+     */
+    public function test_no_test_signs_apple_wallet_passes_with_the_developers_certificate(): void
+    {
+        $this->assertSame('', (string) config('services.apple.wallet_certificate'), 'phpunit.xml must pin APPLE_WALLET_CERTIFICATE empty.');
+        $this->assertSame('', (string) config('services.apple.wallet_pass_type_id'), 'phpunit.xml must pin APPLE_WALLET_PASS_TYPE_ID empty.');
+        $this->assertFalse(\App\Services\Wallet\AppleWalletService::isConfigured());
+    }
+
+    /**
      * The other half of the harness that only CI can disprove.
      *
      * public/build is gitignored and .github/workflows/test.yml never builds assets, so the real

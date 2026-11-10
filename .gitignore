@@ -25,3 +25,7 @@ phpunit.dusk.xml
 database.sqlite
 
 phpunit.shard.xml
+
+# Apple's "Add to Apple Wallet" badges are licensed per developer account: an operator installs
+# them, the public repository never ships them (partials/wallet-buttons).
+/public/images/wallet/apple/

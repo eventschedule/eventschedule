@@ -91,6 +91,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Appointment booking (1 free appointment type)' => [self::ABOVE, '/features/appointments'],
         'QR code scanning at the door' => [self::ABOVE, '/features/check-in'],
         'Add to Google Wallet' => [self::ROW, 'Add to Google Wallet'],
+        'Add to Apple Wallet' => [self::LEFT_OUT, 'off until the operator switches it on; the wallet row says "Google and Apple Wallet" on an install where Apple is configured'],
         "Subscribe to a schedule's calendar" => [self::ROW, 'Live calendar and RSS feeds'],
         'iCal download' => [self::ROW, 'Live calendar and RSS feeds'],
         'Fan photos on events (25 per schedule)' => [self::ABOVE, '/features/fan-videos'],

@@ -3032,6 +3032,52 @@ class TicketController extends Controller
     }
 
     /**
+     * "Add to Apple Wallet": the signed .pkpass file for the ticket (AppleWalletService). A 404 while
+     * Apple Wallet is not configured, so a hand-built address finds nothing; a ticket that may not
+     * be a pass, or a pass that could not be built, lands back on the ticket as Google's does.
+     */
+    public function appleWalletPass($eventId, $secret)
+    {
+        if (! \App\Services\Wallet\AppleWalletService::isConfigured()) {
+            abort(404);
+        }
+
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        // Not filtered on is_deleted, for the reason googleWalletPass() gives: canOffer() refuses.
+        $sale = Sale::with('saleTickets.ticket')
+            ->where('event_id', $event->id)
+            ->where('secret', $secret)
+            ->firstOrFail();
+
+        $ticketUrl = route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'secret' => $secret,
+        ]);
+
+        if (! \App\Services\Wallet\AppleWalletService::canOffer($sale, $event)) {
+            return redirect($ticketUrl);
+        }
+
+        try {
+            $pass = app(\App\Services\Wallet\AppleWalletService::class)->pass($sale, $event);
+        } catch (\Throwable $e) {
+            report($e);
+            $pass = null;
+        }
+
+        if (! $pass) {
+            return redirect($ticketUrl)->with('error', __('messages.wallet_pass_unavailable'));
+        }
+
+        return response($pass, 200, [
+            'Content-Type' => 'application/vnd.apple.pkpass',
+            'Content-Disposition' => 'attachment; filename="ticket.pkpass"',
+            'Cache-Control' => 'no-store, private',
+            'X-Robots-Tag' => 'noindex',
+        ]);
+    }
+
+    /**
      * Redirect to a freshly signed "Add to Google Wallet" save link.
      *
      * A redirect rather than a link built into the page: the JWT is short-lived and roughly 1300

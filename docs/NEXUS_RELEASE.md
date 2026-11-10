@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-apple-wallet-passes-2026-11-11) | not yet | Nothing until you choose to switch it on (env vars in the app spec) |
 | [Unreleased](#unreleased-ticket-reminders-2026-11-10) | not yet | One migration (in the start command); after: watch the first hourly run's mail volume and bounces |
 | [Unreleased](#unreleased-a-custom-domains-main-address-2026-10-22) | not yet | One migration (in the start command); after: one Direct domain set to its subdomain |
 | [Unreleased](#unreleased-backgrounds-on-a-window-sized-layer-and-aurora-2026-10-22) | not yet | Two migrations (in the start command); after: optionally the background backfill in batches, then look at three schedule pages |
@@ -98,6 +99,21 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: Apple Wallet passes (2026-11-11)
+
+**What ships:** "Add to Apple Wallet" beside Google's button (ticket page under the QR code, order
+page, confirmation and reminder emails), a signed `.pkpass` built on tap. **Off until configured**:
+with the variables unset nothing shows and `/ticket/wallet/apple/...` answers 404. The ticket
+page's wallet row moved from the bottom of the ticket to under the QR code (Google's too).
+
+**To switch it on (your decision, no deadline):** in the app spec, as app-level variables,
+`APPLE_WALLET_PASS_TYPE_ID`, `APPLE_WALLET_TEAM_ID`, `APPLE_WALLET_CERTIFICATE` (the `.p12`
+base64-encoded, encrypted) and `APPLE_WALLET_CERTIFICATE_PASSWORD` (encrypted); see
+`docs/APPLE_WALLET_SETUP.md`. On the hosted install the button is plain text: Apple's badge files
+are licensed per developer account and must never be committed to this public repository (the
+folder is in `.gitignore`), and the app platform builds from git. Then add a pass from a real
+ticket on an iPhone and scan it at `/scan`.
 
 ## Unreleased: ticket reminders (2026-11-10)
 

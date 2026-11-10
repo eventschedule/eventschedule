@@ -25,6 +25,9 @@
 @endif
 
 {!! $isRsvp ? __('messages.view_registration') : __('messages.view_your_tickets') !!}: {!! $ticketUrl !!}
+@if ($appleWalletUrl ?? null)
+{!! __('messages.add_to_apple_wallet') !!}: {!! $appleWalletUrl !!}
+@endif
 @if ($googleWalletUrl)
 {!! __('messages.add_to_google_wallet') !!}: {!! $googleWalletUrl !!}
 @endif

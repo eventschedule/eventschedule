@@ -5907,6 +5907,9 @@ return [
     'short_link_clicks' => '{1} نقرة واحدة|[2,*] :count نقرة',
     'short_link_change_warning' => 'تم النقر على هذا الرابط المختصر :count مرة. تغييره سيعطل الروابط التي شاركتها بالفعل.',
     'add_to_google_wallet' => 'إضافة إلى Google Wallet',
+    'add_to_apple_wallet' => 'إضافة إلى Apple Wallet',
+    'wallet_ticket_number' => 'رقم التذكرة',
+    'wallet_seats' => 'المقاعد',
     'wallet_pass_unavailable' => 'تعذّر إنشاء بطاقة المحفظة. يرجى المحاولة مرة أخرى.',
 
     // Claiming a schedule the app created while somebody entered an event.

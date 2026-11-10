@@ -32,18 +32,7 @@
 
 <x-email.button :href="$ticketUrl">@if ($isRsvp){{ __('messages.view_registration') }}@else{{ __('messages.view_your_tickets') }}@endif</x-email.button>
 
-@if ($googleWalletUrl && $googleWalletBadge && is_file($googleWalletBadge))
-    @php($badgeSize = getimagesize($googleWalletBadge) ?: [283, 50])
-    {{-- Embedded, never hotlinked, as in the confirmation (emails/ticket_purchase). --}}
-    <x-email.text align="center" :gap="24">
-        <a href="{{ $googleWalletUrl }}" target="_blank" rel="noopener" style="text-decoration: none;">
-            <img src="{{ $message->embedData(file_get_contents($googleWalletBadge), 'add-to-google-wallet.png', 'image/png') }}"
-                 alt="{{ __('messages.add_to_google_wallet') }}"
-                 width="{{ (int) round($badgeSize[0] * 50 / max(1, $badgeSize[1])) }}" height="50"
-                 style="display: inline-block; height: 50px; width: auto; border: 0;" />
-        </a>
-    </x-email.text>
-@endif
+@include('emails.partials.wallet-badges')
 
 @php($ticketNotes = $event->parsedTicketNotesHtml($sale->event_date, $role))
 @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')

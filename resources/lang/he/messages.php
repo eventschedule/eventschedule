@@ -5906,6 +5906,9 @@ return [
     'short_link_clicks' => '{1} לחיצה אחת|[2,*] :count לחיצות',
     'short_link_change_warning' => 'הקישור המקוצר הזה נלחץ :count פעמים. שינוי שלו ישבור קישורים ששיתפתם כבר.',
     'add_to_google_wallet' => 'הוסף ל-Google Wallet',
+    'add_to_apple_wallet' => 'הוסף ל-Apple Wallet',
+    'wallet_ticket_number' => 'מספר כרטיס',
+    'wallet_seats' => 'מושבים',
     'wallet_pass_unavailable' => 'לא ניתן היה ליצור את הכרטיס בארנק. נסה שוב.',
 
     // Claiming a schedule the app created while somebody entered an event.

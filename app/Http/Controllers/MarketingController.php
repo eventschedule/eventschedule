@@ -1849,6 +1849,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Apple Wallet documentation page
+     */
+    public function docsSelfhostAppleWallet()
+    {
+        return view('marketing.docs.selfhost.apple-wallet');
+    }
+
+    /**
      * Outlook / Microsoft Calendar documentation page
      */
     public function docsSelfhostMicrosoftCalendar()
@@ -8523,6 +8531,7 @@ class MarketingController extends Controller
             'selfhost_stripe' => route('marketing.docs.selfhost.stripe'),
             'selfhost_google_calendar' => route('marketing.docs.selfhost.google_calendar'),
             'selfhost_google_wallet' => route('marketing.docs.selfhost.google_wallet'),
+            'selfhost_apple_wallet' => route('marketing.docs.selfhost.apple_wallet'),
             'selfhost_microsoft_calendar' => route('marketing.docs.selfhost.microsoft_calendar'),
             'selfhost_email' => route('marketing.docs.selfhost.email'),
             'selfhost_ai' => route('marketing.docs.selfhost.ai'),
@@ -8790,7 +8799,7 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'Export Sales Data', 'description' => 'Export ticket sales as CSV.', 'url' => $r['tickets'].'#export', 'category' => 'User Guide', 'keywords' => 'export csv download data'],
             ['page' => 'Selling Tickets', 'section' => 'Check-In System', 'description' => 'QR code-based check-in for attendees.', 'url' => $r['tickets'].'#check-in', 'category' => 'User Guide', 'keywords' => 'check-in qr code scan attendee camera door'],
             ['page' => 'Selling Tickets', 'section' => 'Check-In Dashboard', 'description' => 'Dashboard for managing event check-ins.', 'url' => $r['tickets'].'#checkin-dashboard', 'category' => 'User Guide', 'keywords' => 'dashboard check-in manage'],
-            ['page' => 'Selling Tickets', 'section' => 'Wallet Passes', 'description' => 'Let buyers save their ticket to Google Wallet and scan it at the door.', 'url' => $r['tickets'].'#wallet-passes', 'category' => 'User Guide', 'keywords' => 'google wallet pass phone add to wallet apple passbook qr'],
+            ['page' => 'Selling Tickets', 'section' => 'Wallet Passes', 'description' => 'Let buyers save their ticket to Google Wallet or Apple Wallet and scan it at the door.', 'url' => $r['tickets'].'#wallet-passes', 'category' => 'User Guide', 'keywords' => 'google wallet pass phone add to wallet apple passbook qr'],
             ['page' => 'Selling Tickets', 'section' => 'Waitlist', 'description' => 'Manage waitlists for sold-out events.', 'url' => $r['tickets'].'#waitlist', 'category' => 'User Guide', 'keywords' => 'waitlist waiting list sold out'],
             ['page' => 'Selling Tickets', 'section' => 'Interest List', 'description' => 'Switch on the "Notify me" card so visitors can leave an email to hear when an event\'s tickets go on sale, if it is cancelled, and shortly before it starts.', 'url' => $r['tickets'].'#interest-list', 'category' => 'User Guide', 'keywords' => 'interest notify me tell me when tickets go on sale tell me if anything changes remind reminder cancelled change notice email capture waiting turn on enable show notify me card'],
             ['page' => 'Selling Tickets', 'section' => 'Post-Event Feedback', 'description' => 'Collect star ratings and comments from attendees after events.', 'url' => $r['tickets'].'#feedback', 'category' => 'User Guide', 'keywords' => 'feedback rating stars review comment post-event'],
@@ -8985,6 +8994,10 @@ class MarketingController extends Controller
             ['page' => 'Google Wallet', 'section' => 'What is sent to Google', 'description' => 'The attendee data a saved wallet pass carries.', 'url' => $r['selfhost_google_wallet'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'google wallet privacy data sent attendee secret'],
             ['page' => 'Google Wallet', 'section' => 'How it works', 'description' => 'Pass classes, snapshots and when a pass expires.', 'url' => $r['selfhost_google_wallet'].'#behaviour', 'category' => 'Selfhost', 'keywords' => 'google wallet pass class snapshot expiry archive'],
             ['page' => 'Google Wallet', 'section' => 'Troubleshooting', 'description' => 'Why the Add to Google Wallet button is missing or failing.', 'url' => $r['selfhost_google_wallet'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'google wallet troubleshooting button missing error log'],
+            ['page' => 'Apple Wallet', 'section' => 'Prerequisites', 'description' => 'What you need before enabling Apple Wallet passes.', 'url' => $r['selfhost_apple_wallet'].'#prerequisites', 'category' => 'Selfhost', 'keywords' => 'apple wallet pkpass prerequisites developer program'],
+            ['page' => 'Apple Wallet', 'section' => 'Setup Instructions', 'description' => 'Pass Type ID, certificate and env keys for Apple Wallet passes.', 'url' => $r['selfhost_apple_wallet'].'#setup', 'category' => 'Selfhost', 'keywords' => 'apple wallet pass type id certificate p12 pem team id env'],
+            ['page' => 'Apple Wallet', 'section' => 'What is sent to Apple', 'description' => 'Nothing: the pass is a signed file the buyer\'s device opens.', 'url' => $r['selfhost_apple_wallet'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'apple wallet privacy data'],
+            ['page' => 'Apple Wallet', 'section' => 'Troubleshooting', 'description' => 'Why the Add to Apple Wallet button is missing, or the pass will not add.', 'url' => $r['selfhost_apple_wallet'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'apple wallet button missing pass cannot be added badge'],
             ['page' => 'Google Wallet', 'section' => 'Overview', 'description' => 'Where the Add to Google Wallet badge appears, and what switches it on.', 'url' => $r['selfhost_google_wallet'].'#overview', 'category' => 'Selfhost', 'keywords' => 'overview badge add to google wallet'],
             ['page' => 'Google Calendar', 'section' => 'Prerequisites', 'description' => 'Google Cloud project requirements for calendar sync.', 'url' => $r['selfhost_google_calendar'].'#prerequisites', 'category' => 'Selfhost', 'keywords' => 'google cloud project prerequisites'],
             ['page' => 'Google Calendar', 'section' => 'Setup Instructions', 'description' => 'Step-by-step OAuth2 setup for Google Calendar.', 'url' => $r['selfhost_google_calendar'].'#setup', 'category' => 'Selfhost', 'keywords' => 'setup oauth2 credentials'],

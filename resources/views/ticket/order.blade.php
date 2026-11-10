@@ -92,8 +92,8 @@
                        already returns false for a released leg, so this follows $isReleased without
                        restating it. The condensed badge is Google's own narrow variant, for exactly
                        this kind of list. --}}
-                  @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $legEvent))
-                    <div class="gk-tk-leg-extra gk-tk-noprint">
+                  @if (\App\Services\Wallet\WalletPasses::anyOffered($sale, $legEvent))
+                    <div class="gk-tk-leg-extra gk-tk-leg-wallets gk-tk-noprint">
                       @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $legEvent, 'condensed' => true])
                     </div>
                   @endif

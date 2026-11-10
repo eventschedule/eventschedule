@@ -5909,6 +5909,9 @@ return [
     'short_link_clicks' => '{1} :count klik|[2,*] :count kliks',
     'short_link_change_warning' => 'Op deze korte link is :count keer geklikt. Wijzigen breekt links die je al hebt gedeeld.',
     'add_to_google_wallet' => 'Toevoegen aan Google Wallet',
+    'add_to_apple_wallet' => 'Toevoegen aan Apple Wallet',
+    'wallet_ticket_number' => 'Ticketnummer',
+    'wallet_seats' => 'Plaatsen',
     'wallet_pass_unavailable' => 'Het wallet-pasje kon niet worden aangemaakt. Probeer het opnieuw.',
 
     // Claiming a schedule the app created while somebody entered an event.

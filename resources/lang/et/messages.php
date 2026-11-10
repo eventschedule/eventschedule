@@ -5908,6 +5908,9 @@ return [
     'short_link_clicks' => '{1} :count klõps|[2,*] :count klõpsu',
     'short_link_change_warning' => 'Sellel lühilingil on :count klõpsu. Muutmine rikub juba jagatud lingid.',
     'add_to_google_wallet' => 'Lisa Google Walletisse',
+    'add_to_apple_wallet' => 'Lisa Apple Walletisse',
+    'wallet_ticket_number' => 'Pileti number',
+    'wallet_seats' => 'Kohad',
     'wallet_pass_unavailable' => 'Wallet\'i pääset ei õnnestunud luua. Palun proovi uuesti.',
 
     // Claiming a schedule the app created while somebody entered an event.

@@ -105,6 +105,24 @@ return [
         'wallet_id_prefix' => env('GOOGLE_WALLET_ID_PREFIX') ?: 'es',
     ],
 
+    // Apple Wallet passes ("Add to Apple Wallet" on a ticket, a signed .pkpass file). Unset = the
+    // feature is off: no button, no link in an email, and the pass address answers 404; see
+    // App\Services\Wallet\AppleWalletService::isConfigured(). Nothing is ever sent to Apple: the
+    // pass is a file the buyer's device opens, and it carries no web service for live updates.
+    //
+    // wallet_certificate holds the Pass Type ID certificate WITH its private key, as EITHER an
+    // absolute path to the .p12 (or a PEM file holding both) OR that file base64-encoded, because
+    // hosted production config is the DigitalOcean app spec and it has no writable file mount.
+    // wallet_wwdr overrides the Apple WWDR G4 intermediate the repository ships
+    // (resources/wallet/AppleWWDRCAG4.pem). Setup: docs/APPLE_WALLET_SETUP.md.
+    'apple' => [
+        'wallet_pass_type_id' => env('APPLE_WALLET_PASS_TYPE_ID'),
+        'wallet_team_id' => env('APPLE_WALLET_TEAM_ID'),
+        'wallet_certificate' => env('APPLE_WALLET_CERTIFICATE'),
+        'wallet_certificate_password' => env('APPLE_WALLET_CERTIFICATE_PASSWORD'),
+        'wallet_wwdr' => env('APPLE_WALLET_WWDR_CERTIFICATE'),
+    ],
+
     'microsoft' => [
         'client_id' => env('MICROSOFT_CLIENT_ID'),
         'client_secret' => env('MICROSOFT_CLIENT_SECRET'),

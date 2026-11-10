@@ -67,7 +67,7 @@ Event Schedule gives a venue, a performer or a community one place to publish a 
 - **Direct payments:** Paid tickets through Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, payment links or cash, straight into your own accounts. The payment processor's fee is the only fee. Full and partial refunds.
 - **Advanced options:** Multiple ticket types, sales windows, group discounts, promo codes, add-ons, waitlists, multi-event carts, installment plans, gift cards and multi-use passes.
 - **Reserved seating:** A drag-and-drop seating plan builder, a guest seat picker and a box office console.
-- **Door management:** QR code tickets, a browser-based door scanner, a live check-in dashboard and Google Wallet passes.
+- **Door management:** QR code tickets, a browser-based door scanner, a live check-in dashboard and Google Wallet and Apple Wallet passes.
 - **Attendee data:** Per-attendee tickets, custom checkout questions, bulk attendee import and CSV export of sales.
 - **Sell anywhere:** Embed the ticket form on any website.
 
@@ -166,6 +166,7 @@ Everything optional is switched on by adding your own credentials to `.env`. Unt
 | Google Calendar sync | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | [Google Calendar](https://eventschedule.com/docs/selfhost/google-calendar) |
 | Outlook / Microsoft 365 sync | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | [Microsoft Calendar](https://eventschedule.com/docs/selfhost/microsoft-calendar) |
 | Google Wallet passes | `GOOGLE_WALLET_ISSUER_ID`, `GOOGLE_WALLET_SERVICE_ACCOUNT` | [Google Wallet](https://eventschedule.com/docs/selfhost/google-wallet) |
+| Apple Wallet passes | `APPLE_WALLET_PASS_TYPE_ID`, `APPLE_WALLET_TEAM_ID`, `APPLE_WALLET_CERTIFICATE` | [Apple Wallet](https://eventschedule.com/docs/selfhost/apple-wallet) |
 | Event boosting (Meta Ads) | `META_*` | [Boost](https://eventschedule.com/docs/selfhost/boost) |
 | Web push notifications | `ONESIGNAL_APP_ID`, `ONESIGNAL_REST_API_KEY` | [`.env.example`](.env.example) |
 | Bot protection (Cloudflare Turnstile) | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | [`.env.example`](.env.example) |

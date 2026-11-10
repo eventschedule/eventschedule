@@ -1428,7 +1428,8 @@
             ['Individual tickets', 'Every guest on an order gets their own email and their own QR code', 'Pro', '/features/ticketing#individual-tickets'],
             ['Refunds, full or partial', 'Money goes back through Stripe, PayPal or Razorpay, straight from the Sales page', 'Pro', '/features/ticketing#refunds'],
             ['Interest list', 'A "tell me when tickets go on sale" option that asks only for an email', 'Free', '/features/ticketing#interest-list'],
-            ['Add to Google Wallet', 'Buyers save the ticket, QR and all, once the site operator switches it on', 'Free', '/features/integrations#google-wallet'],
+            // Apple named only where it is configured (env only, so safe in edge-cached HTML).
+            [\App\Services\Wallet\AppleWalletService::isConfigured() ? 'Google and Apple Wallet' : 'Add to Google Wallet', 'Buyers save the ticket, QR and all, once the site operator switches it on', 'Free', '/features/integrations#google-wallet'],
             ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro', '/features/ticketing#attendee-import'],
             ['Sales CSV export', 'Every sale across every schedule you own, custom fields included', 'Pro', '/features/ticketing#sales-export'],
             ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the type and the amount', 'Pro', '/features/ticketing#sale-notifications'],

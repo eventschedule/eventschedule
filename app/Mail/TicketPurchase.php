@@ -92,6 +92,17 @@ class TicketPurchase extends Mailable
             ? public_path('images/wallet/google/'.GoogleWalletService::badgeLocale().'.png')
             : null;
 
+        // Apple's pass is the .pkpass itself, built on tap by our own route (AppleWalletService).
+        $appleWalletUrl = \App\Services\Wallet\AppleWalletService::canOffer($this->sale, $this->event)
+            ? canonical_url(route('ticket.wallet.apple', [
+                'event_id' => UrlUtils::encodeId($this->event->id),
+                'secret' => $this->sale->secret,
+            ], false))
+            : null;
+        $appleWalletBadge = $appleWalletUrl && ($badge = \App\Services\Wallet\AppleWalletService::badge('png'))
+            ? public_path($badge)
+            : null;
+
         // Gift card feedback for the buyer: their deduction plus the balance left on the
         // card at send time (the live balance stays on the card page).
         $giftCardAmount = $this->sale->legTotalGiftCard();
@@ -111,6 +122,8 @@ class TicketPurchase extends Mailable
                 'ticketUrl' => $ticketUrl,
                 'googleWalletUrl' => $googleWalletUrl,
                 'googleWalletBadge' => $googleWalletBadge,
+                'appleWalletUrl' => $appleWalletUrl,
+                'appleWalletBadge' => $appleWalletBadge,
                 'giftCardAmount' => $giftCardAmount,
                 'giftCard' => $giftCard,
             ]

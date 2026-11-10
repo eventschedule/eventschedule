@@ -85,21 +85,7 @@
 
 <x-email.button :href="$ticketUrl">@if ($sale->isPass()){{ __('messages.manage_my_pass') }}@elseif ($sale->isRsvp()){{ __('messages.view_registration') }}@else{{ __('messages.view_your_tickets') }}@endif</x-email.button>
 
-@if ($googleWalletUrl && $googleWalletBadge && is_file($googleWalletBadge))
-    @php($badgeSize = getimagesize($googleWalletBadge) ?: [283, 50])
-    {{-- embedData, not a hotlink: this app never asks a recipient's mail client to fetch an
-         asset from someone else's server. Google's badge may not be recoloured or rebuilt, so
-         it ships as their own artwork under public/images/wallet/google. A sent mail carries it
-         as cid:, and the preview (Mailer::render()) as a data: URI. --}}
-    <x-email.text align="center" :gap="24">
-        <a href="{{ $googleWalletUrl }}" target="_blank" rel="noopener" style="text-decoration: none;">
-            <img src="{{ $message->embedData(file_get_contents($googleWalletBadge), 'add-to-google-wallet.png', 'image/png') }}"
-                 alt="{{ __('messages.add_to_google_wallet') }}"
-                 width="{{ (int) round($badgeSize[0] * 50 / max(1, $badgeSize[1])) }}" height="50"
-                 style="display: inline-block; height: 50px; width: auto; border: 0;" />
-        </a>
-    </x-email.text>
-@endif
+@include('emails.partials.wallet-badges')
 
 @if ($ticketRows)
 <x-email.section :label="__('messages.ticket_details')" />

@@ -204,6 +204,14 @@
                 @include('ticket.partials.icon', ['icon' => 'zoom'])
                 {{ __('messages.ticket_enlarge_code') }}
               </button>
+              {{-- The wallets, under the code they carry: a pass is how a phone gets in at the door.
+                   Only for a valid ticket, as the route itself decides (WalletPasses::eligible()).
+                   No inline display here: it would outrank the print sheet's "not on paper". --}}
+              @if (\App\Services\Wallet\WalletPasses::anyOffered($sale, $event))
+                <div class="gk-tk-wallets gk-tk-noprint">
+                  @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $event])
+                </div>
+              @endif
             @else
               <div class="gk-tk-qr gk-tk-qr-void">
                 <img src="{{ $qrUrl }}" alt="">
@@ -617,14 +625,6 @@
                     @endif
                   @endforeach
                 </ul>
-              </div>
-            @endif
-
-            {{-- Google's badge keeps its own white ground (partials/wallet-buttons says why). --}}
-            @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $event))
-              {{-- No inline display here: it would outrank the print sheet's "not on paper". --}}
-              <div class="gk-tk-sec gk-tk-center gk-tk-noprint">
-                @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $event])
               </div>
             @endif
 

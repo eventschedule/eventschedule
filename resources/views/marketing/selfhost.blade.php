@@ -2333,6 +2333,7 @@
                     ['Google Calendar', 'marketing.docs.selfhost.google_calendar'],
                     ['Outlook and Microsoft 365', 'marketing.docs.selfhost.microsoft_calendar'],
                     ['Google Wallet passes', 'marketing.docs.selfhost.google_wallet'],
+                    ['Apple Wallet passes', 'marketing.docs.selfhost.apple_wallet'],
                 ],
             ],
             [

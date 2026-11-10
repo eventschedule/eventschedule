@@ -67,6 +67,16 @@ class TicketReminder extends Mailable
             ], false))
             : null;
 
+        $appleWalletUrl = ! $this->preview && \App\Services\Wallet\AppleWalletService::canOffer($this->sale, $this->event)
+            ? canonical_url(route('ticket.wallet.apple', [
+                'event_id' => UrlUtils::encodeId($this->event->id),
+                'secret' => $this->sale->secret,
+            ], false))
+            : null;
+        $appleWalletBadge = $appleWalletUrl && ($badge = \App\Services\Wallet\AppleWalletService::badge('png'))
+            ? public_path($badge)
+            : null;
+
         return new Content(
             view: 'emails.ticket_reminder',
             text: 'emails.ticket_reminder_text',
@@ -82,6 +92,8 @@ class TicketReminder extends Mailable
                 'googleWalletBadge' => $googleWalletUrl
                     ? public_path('images/wallet/google/'.GoogleWalletService::badgeLocale().'.png')
                     : null,
+                'appleWalletUrl' => $appleWalletUrl,
+                'appleWalletBadge' => $appleWalletBadge,
             ],
         );
     }

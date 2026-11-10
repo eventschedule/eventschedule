@@ -124,6 +124,14 @@
     .gk-tk-btn-block { display: flex; width: 100%; }
     .gk-tk-btn-danger { border-color: rgb(252 165 165 / .4); color: #fecaca; }
     .gk-tk-enlarge { display: flex; width: max-content; max-width: calc(100% - 2.5rem); margin: .875rem auto 0; }
+    {{-- The wallet badges under the code: one row that wraps on a narrow phone, each badge its own height. --}}
+    .gk-tk-wallets { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .75rem; margin: 1rem auto 0; padding: 0 1.25rem; }
+    {{-- Apple Wallet's button while the operator has not installed Apple's badge: white like
+         Google's ground, the same height, and nothing that imitates Apple's artwork. --}}
+    .gk-wallet-text { display: inline-flex; align-items: center; justify-content: center; height: 66px; padding: 0 1.25rem; border-radius: 1rem; background: #fff; color: #111827; font-weight: 600; font-size: 15px; text-decoration: none; box-shadow: 0 10px 15px -3px rgb(0 0 0 / .2); }
+    .gk-wallet-text.is-condensed { height: 64px; }
+    .gk-tk-leg-wallets { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+    .gk-wallet-text:hover { box-shadow: 0 20px 25px -5px rgb(0 0 0 / .2); }
 
     {{-- The organizer's own words about the day, directly under the code. --}}
     .gk-tk-info { margin: 1.125rem 1.25rem 0; padding: .875rem 1rem; border: 1px solid var(--tk-line); border-radius: .875rem; background: var(--tk-well); }

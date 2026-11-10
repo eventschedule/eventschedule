@@ -178,6 +178,12 @@
              real site's search data. A test that needs the client sets its own key with
              Http::fake(), as SearchConsoleTest does. -->
         <env name="SEARCH_CONSOLE_CREDENTIALS" value="" force="true"/>
+        <!-- And for Apple Wallet: a developer's .env may hold the real Pass Type ID certificate, and
+             with it every ticket page here would draw the badge it does not draw on CI. A test that
+             needs the pass sets its own certificate (AppleWalletPassTest makes one). -->
+        <env name="APPLE_WALLET_PASS_TYPE_ID" value="" force="true"/>
+        <env name="APPLE_WALLET_TEAM_ID" value="" force="true"/>
+        <env name="APPLE_WALLET_CERTIFICATE" value="" force="true"/>
         <!-- Hosted admins must use two-factor authentication (auth.admin_requires_two_factor).
              Off here so admin tests need no 2FA fixture; AdminTwoFactorRequiredTest turns it on. -->
         <env name="ADMIN_REQUIRE_2FA" value="false" force="true"/>

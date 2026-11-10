@@ -5927,6 +5927,9 @@ return [
     'short_link_clicks' => '{1} :count clic|[2,*] :count clicuri',
     'short_link_change_warning' => 'Acest link scurt a fost accesat de :count ori. Modificarea lui va strica linkurile deja distribuite.',
     'add_to_google_wallet' => 'Adaugă în Google Wallet',
+    'add_to_apple_wallet' => 'Adaugă în Apple Wallet',
+    'wallet_ticket_number' => 'Numărul biletului',
+    'wallet_seats' => 'Locuri',
     'wallet_pass_unavailable' => 'Biletul pentru portofel nu a putut fi creat. Încearcă din nou.',
 
     // Claiming a schedule the app created while somebody entered an event.
