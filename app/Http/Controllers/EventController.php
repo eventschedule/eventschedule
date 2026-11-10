@@ -832,7 +832,7 @@ class EventController extends Controller
         $event = Event::with(['creatorRole', 'curators', 'parts', 'promoCodes', 'addons'])->findOrFail($event_id);
 
         if ($user->cannot('update', $event)) {
-            return redirect()->back();
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         // Appointment bookings are managed from the Appointments tab, not the full event form

@@ -282,4 +282,30 @@ class EventListingRightsTest extends TestCase
             $this->assertTrue($venueOwner->canEditEvent($event->fresh()), var_export($answer, true));
         }
     }
+
+    /**
+     * The calendar offers Edit Event only where the edit page opens. It worked the answer out
+     * with a looser rule (the event is on a schedule I run), so a curator's owner was shown Edit
+     * on an event they only list, and the page sent them back to the calendar with nothing said.
+     */
+    public function test_the_calendar_offers_edit_only_where_the_edit_page_opens(): void
+    {
+        [, , $event, $stranger, $lister] = $this->listedByAStranger();
+        $own = $this->createEvent($lister, ['name' => 'The Curator Show', 'creator_role_id' => $lister->id]);
+
+        $when = now()->addDays(7);
+        $rows = collect($this->actingAs($stranger)->getJson('/'.$lister->subdomain.'/api/calendar-events?year='.$when->year.'&month='.$when->month)->assertOk()->json('events'))->keyBy('name');
+
+        $this->assertTrue($rows['The Curator Show']['can_edit'], 'what the curator made is still its to edit');
+        $this->assertTrue($rows->has('The Owner Show'), 'the listed event is on the curator calendar');
+        $this->assertFalse($rows['The Owner Show']['can_edit'], 'but nothing offers to edit it');
+        $this->assertNull($rows['The Owner Show']['edit_url']);
+
+        // And the page, opened anyway, says why it sent you back.
+        $this->actingAs($stranger)
+            ->from('/'.$lister->subdomain.'/schedule')
+            ->get(route('event.edit', ['subdomain' => $lister->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.not_authorized'));
+    }
 }

@@ -37,13 +37,30 @@ trait CalendarDataTrait
 
         $user = auth()->user();
         $canEdit = false;
-        if ($user && $userAdminRoleIds !== null) {
-            $onOwnSchedule = $event->roles->contains(fn ($r) => in_array($r->id, $userAdminRoleIds));
+        if ($user && $userAdminRoleIds !== null && $event->creator_role_id) {
+            // User::canEditEvent() worked out in memory, because the edit page asks that and
+            // nothing looser: a curator that only LISTS somebody else's event, a schedule that
+            // declined it, and a team on a plan without team access were offered Edit Event, and
+            // the page sent them back to the calendar with nothing said.
+            $owning = (int) $event->creator_role_id;
+            $runsOwning = in_array($owning, $userAdminRoleIds);
+            $madeIt = $user->id == $event->user_id && $runsOwning;
+            $onOwnSchedule = $event->roles->contains(function ($r) use ($userAdminRoleIds, $owning) {
+                if (! in_array($r->id, $userAdminRoleIds)) {
+                    return false;
+                }
+                if ((int) $r->id === $owning) {
+                    return true;
+                }
+                $answer = $r->pivot->is_accepted ?? null;
+
+                return ! $r->isCurator() && ($answer === null || $answer);
+            });
             // With no schedule in hand (the dashboard) the link is event.edit_admin, which looks
             // for a schedule the event is on that this person edits: "I made it" alone opens
             // nothing there. An event sent to somebody else's schedule was offered Edit Event,
             // on the card's main button, and the page answered 403.
-            $canEdit = $role ? ($user->id == $event->user_id || $onOwnSchedule) : $onOwnSchedule;
+            $canEdit = $role ? ($madeIt || $onOwnSchedule) : $onOwnSchedule;
         } elseif ($user) {
             $canEdit = $user->canEditEvent($event);
         }
@@ -262,8 +279,10 @@ trait CalendarDataTrait
         $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek($lastDay);
 
         $user = auth()->user();
+        // The schedules this person may edit on, plan included (planAllowsTeamAccess()), as
+        // User::canEditEvent() counts them.
         $userAdminRoleIds = $user
-            ? $user->roles()->wherePivotIn('level', ['owner', 'admin'])->pluck('roles.id')->all()
+            ? $user->manageableRoles()->pluck('id')->all()
             : [];
 
         // Bulk-load creator roles so `Event::resolveCategoryName()` doesn't trigger an N+1
