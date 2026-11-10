@@ -314,7 +314,9 @@ class StripeGateway extends PaymentGatewayDriver
         }
 
         if (! $plan) {
-            $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoLegs, $giftTotal, $expectedTotal);
+            // The donation rides on the primary (a cart carries none: checkout() refuses it there).
+            $donationTotal = $isOrder ? 0.0 : (float) ($sale->donation_amount ?? 0);
+            $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoLegs, $giftTotal, $expectedTotal, $donationTotal);
         }
 
         $data = [
@@ -451,7 +453,7 @@ class StripeGateway extends PaymentGatewayDriver
      *                                       each with its ticket relation and event set.
      * @return array<int, array> Stripe line_items
      */
-    private function buildStripeLineItems($stripeSaleTickets, $event, array $promoLegs, float $giftTotal, float $expectedTotal): array
+    private function buildStripeLineItems($stripeSaleTickets, $event, array $promoLegs, float $giftTotal, float $expectedTotal, float $donationTotal = 0.0): array
     {
         // Discount ratio per eligible ticket line (add-ons excluded); base is post-volume line
         // totals. Resolved PER LEG rather than once for the session: a cart is one Stripe session
@@ -465,7 +467,8 @@ class StripeGateway extends PaymentGatewayDriver
         // line proportionally. Absorbing the deduction into one line could push its
         // unit_amount negative; the ratio keeps all lines valid, and the rounding
         // reconciliation below pins the session total to payment_amount exactly.
-        $preGiftTotal = 0.0;
+        // The donation is part of what the card pays for, so it is in the ratio's base too.
+        $preGiftTotal = $donationTotal;
         if ($giftTotal > 0) {
             foreach ($stripeSaleTickets as $saleTicket) {
                 $qty = (int) $saleTicket->quantity;
@@ -510,6 +513,21 @@ class StripeGateway extends PaymentGatewayDriver
                     'unit_amount' => $unitAmountCents,
                 ],
                 'quantity' => $saleTicket->quantity,
+            ];
+        }
+
+        // The donation, its own line: promo codes never discounted it, and a gift card pays it in the
+        // same proportion as everything else.
+        if ($donationTotal > 0) {
+            $donationCents = (int) round($donationTotal * ($giftRatio < 1 ? $giftRatio : 1) * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
+            $totalCents += $donationCents;
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => $event->ticket_currency_code,
+                    'product_data' => ['name' => __('messages.donation')],
+                    'unit_amount' => $donationCents,
+                ],
+                'quantity' => 1,
             ];
         }
 

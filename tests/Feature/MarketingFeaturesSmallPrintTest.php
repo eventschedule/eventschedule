@@ -134,6 +134,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Carpool matching' => [self::ABOVE, '/features/carpool'],
         'Embed ticket widget' => [self::ABOVE, '/features/embed-tickets'],
         'Promo/discount codes' => [self::ABOVE, '/features/promo-codes'],
+        'Donations at checkout (pay what you want)' => [self::LEFT_OUT, 'a checkout option described in the tickets guide (#donations); a row waits for the grid\'s next set of six'],
         'Gift cards' => [self::ABOVE, '/features/gift-cards'],
         'Installment payments' => [self::ABOVE, '/features/installments'],
         'Eventbrite import' => [self::ROW, 'Eventbrite import'],

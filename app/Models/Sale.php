@@ -781,6 +781,11 @@ class Sale extends Model
             $data->discount_amount = $this->discount_amount !== null ? (float) $this->discount_amount : null;
             $data->gift_card_amount = $this->gift_card_amount !== null ? (float) $this->gift_card_amount : null;
         }
+        // The buyer's donation, already inside payment_amount. Only the primary of a group ever
+        // carries one, so a guest row reports none and nobody counts it twice.
+        $data->donation_amount = $this->donation_amount !== null && (! $this->group_id || $this->isPrimarySale())
+            ? (float) $this->donation_amount
+            : null;
         // Rows a buyer paid for in one checkout that spanned several events share this. Exposed as
         // its own field rather than by widening payment_amount: the primary/guest contract above
         // is what stops a subscriber double-counting, and inflating a leg primary's total to the

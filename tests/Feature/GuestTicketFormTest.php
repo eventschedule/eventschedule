@@ -73,7 +73,7 @@ class GuestTicketFormTest extends TestCase
         $this->assertSame([$ticket, $browser, $consent, $check], collect([$ticket, $browser, $consent, $check])->sort()->values()->all());
         // Every one of them stops the form before it says anything.
         $start = strpos($html, 'validateForm(e) {');
-        $this->assertSame(5, substr_count(substr($html, $start, $check - $start + 200), 'e.preventDefault();'), 'seats, a ticket, the fields, the authorisation, the check');
+        $this->assertSame(6, substr_count(substr($html, $start, $check - $start + 200), 'e.preventDefault();'), 'seats, a ticket, a donation out of range, the fields, the authorisation, the check');
         // The button is not disabled for the authorisation any more: greyed out at the foot of
         // the screen, with its reason scrolled away, it could not say why.
         $this->assertStringContainsString('v-bind:disabled="isSubmitting"', $html);

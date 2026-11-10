@@ -82,6 +82,7 @@ class EventRepo
         'coupon_code', 'coupon_discount_type', 'coupon_discount',
         'payment_method', 'payment_instructions',
         'installments_enabled', 'installment_count', 'installment_final_days_before', 'installment_min_order_amount',
+        'donations_enabled', 'donation_amounts', 'donation_custom', 'donation_line',
         'ask_phone', 'require_phone', 'country_code_phone',
         'individual_tickets', 'individual_ticket_fields',
         'sell_after_start', 'show_unavailable_tickets',
@@ -1322,6 +1323,7 @@ class EventRepo
             'sell_after_start', 'show_unavailable_tickets',
             'is_draft', 'is_private', 'is_internal',
             'installments_enabled',
+            'donations_enabled', 'donation_custom',
         ] as $boolField) {
             if ($request->has($boolField)) {
                 $event->$boolField = $request->boolean($boolField);
@@ -1363,6 +1365,28 @@ class EventRepo
         // billing.
         if (! $ticketExtrasAllowed && $event->installments_enabled && ! $event->getOriginal('installments_enabled')) {
             $event->installments_enabled = false;
+        }
+
+        // Donations take money, so they are Pro on the same terms: only turning them ON is scrubbed,
+        // and checkout asks the plan again on every order (Event::offersDonations()).
+        if (! $ticketExtrasAllowed && $event->donations_enabled && ! $event->getOriginal('donations_enabled')) {
+            $event->donations_enabled = false;
+        }
+
+        // Up to three suggested amounts, positive, in what the currency can charge; anything else
+        // dropped rather than refusing the save. None at all reads as the currency's defaults.
+        if ($request->has('donation_amounts')) {
+            $decimals = \App\Utils\MoneyUtils::decimalsFor($event->ticket_currency_code ?: 'USD');
+            $amounts = array_values(array_unique(array_filter(array_map(
+                fn ($amount) => Event::parseMoneyText(is_scalar($amount) ? $amount : '', $decimals) ?? 0,
+                (array) $request->input('donation_amounts', [])
+            ), fn ($amount) => $amount > 0 && $amount <= 100000000), SORT_REGULAR));
+            $event->donation_amounts = $amounts ? array_slice($amounts, 0, 3) : null;
+        }
+
+        if ($request->has('donation_line')) {
+            $line = trim(strip_tags((string) $request->input('donation_line')));
+            $event->donation_line = $line !== '' ? mb_substr($line, 0, 120) : null;
         }
 
         // Clamp the collection runway. A zero here would let the final payment fall due the day

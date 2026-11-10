@@ -47,7 +47,7 @@
   // promo code or a payment method used to come back with every tab looking fine. A key that
   // matches nothing belongs to the Event tab.
   $errorTabPrefixes = [
-      'section-tickets' => ['tickets', 'promo_codes', 'addons', 'payment_', 'installment', 'ticket_', 'rsvp_', 'coupon_', 'registration_url', 'terms_url', 'expire_unpaid', 'custom_fields', 'seating_plan', 'total_tickets'],
+      'section-tickets' => ['tickets', 'promo_codes', 'addons', 'payment_', 'installment', 'ticket_', 'rsvp_', 'coupon_', 'registration_url', 'terms_url', 'expire_unpaid', 'custom_fields', 'seating_plan', 'total_tickets', 'donation'],
       'section-participants' => ['members', 'member_'],
       'section-agenda' => ['event_parts', 'agenda_'],
       'section-listing' => ['slug', 'category_id', 'event_password', 'curators', 'curator_', 'is_draft', 'is_private', 'is_internal'],
@@ -75,7 +75,7 @@
   foreach ([
       'promo_codes' => 'promo_codes', 'addons' => 'add_ons',
       'payment_' => 'payment', 'installment' => 'payment', 'ticket_currency_code' => 'payment',
-      'terms_url' => 'checkout', 'custom_fields' => 'checkout', 'ticket_notes' => 'checkout', 'expire_unpaid' => 'sales_rules',
+      'terms_url' => 'checkout', 'custom_fields' => 'checkout', 'ticket_notes' => 'checkout', 'donation' => 'checkout', 'expire_unpaid' => 'sales_rules',
       'tickets' => 'tickets', 'seating_plan' => 'tickets', 'total_tickets' => 'tickets',
   ] as $prefix => $innerTab) {
       if (collect($errors->keys())->contains(fn ($key) => str_starts_with($key, $prefix))) {
@@ -173,6 +173,7 @@
           'ask_phone' => __('messages.summary_phone_number'),
           'custom_fields' => __('messages.checkout_custom_fields'),
           'individual_tickets' => __('messages.individual_tickets'),
+          'donations' => __('messages.donations'),
           'terms_url' => __('messages.summary_terms'),
           'ticket_notes' => __('messages.ticket_notes'),
           'registration_notes' => __('messages.registration_notes'),
@@ -429,6 +430,7 @@
           'individual_tickets' => 'switch', 'individual_ticket_fields' => 'switch',
           'sell_after_start' => 'switch', 'show_unavailable_tickets' => 'switch',
           'expire_unpaid_tickets' => 'number', 'ticket_notes' => 'text', 'terms_url' => 'text',
+          'donations_enabled' => 'switch', 'donation_custom' => 'switch', 'donation_line' => 'text',
       ];
       foreach ($typedKinds as $typedField => $typedKind) {
           if (! array_key_exists($typedField, $postedNow) || is_array($postedNow[$typedField])) {
@@ -450,6 +452,10 @@
               'number' => is_numeric($typedValue) ? $typedValue + 0 : null,
               default => $typedValue === null ? null : (string) $typedValue,
           };
+      }
+      // The suggested donation amounts are a list, which the loop above passes by.
+      if (array_key_exists('donation_amounts', $postedNow) && is_array($postedNow['donation_amounts'])) {
+          $ticketFieldsTyped['donation_amounts'] = array_values(array_map(fn ($amount) => is_scalar($amount) ? (string) $amount : '', $postedNow['donation_amounts']));
       }
   }
   $ticketFieldNow = fn (string $field) => array_key_exists($field, $ticketFieldsTyped) ? $ticketFieldsTyped[$field] : $event->$field;
@@ -4204,6 +4210,67 @@
                                 </button>
                                 <div id="ticket-pane-checkout" v-show="activeTicketTab === 'checkout'" data-ticket-pane="checkout" class="event-subrow-body">
 
+                                <!-- Donations (Event::offersDonations()): on free registration they need a ticket, so the pane says how. -->
+                                <div class="mb-6" v-if="event.rsvp_enabled && isPro">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.donations_need_tickets') }}</p>
+                                </div>
+                                {{-- Disabled with tickets off ("Tickets elsewhere", "Not needed"): the row is hidden then, and a
+                                     field nobody can see must never refuse the save. --}}
+                                <fieldset class="mb-6" v-else-if="! event.rsvp_enabled" :disabled="! event.tickets_enabled">
+                                    {{-- Below Pro the switch is locked on its way ON only: a schedule that left Pro can still switch donations off. --}}
+                                    <div class="flex items-center gap-3" :class="(isPro || event.donations_enabled) ? '' : 'opacity-60'">
+                                        <label class="relative w-11 h-6 flex-shrink-0" :class="(isPro || event.donations_enabled) ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                            <input id="donations_enabled_checkbox" type="checkbox"
+                                                :checked="event.donations_enabled"
+                                                @change="event.donations_enabled = $event.target.checked"
+                                                :disabled="! isPro && ! event.donations_enabled"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="donations_enabled_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300" :class="(isPro || event.donations_enabled) ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                            {{ __('messages.donations_toggle') }}
+                                        </label>
+                                        <template v-if="! isPro"><x-lock-badge tier="pro" /></template>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.donations_help') }}</p>
+                                    <input type="hidden" name="donations_enabled" :value="event.donations_enabled ? 1 : 0">
+                                    <input type="hidden" name="donation_custom" :value="event.donation_custom ? 1 : 0">
+
+                                    <div v-if="event.donations_enabled" class="mt-3 ms-14 space-y-4">
+                                        <div v-if="! donationGatewayOk" class="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                            <svg class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                            <p class="text-sm text-amber-800 dark:text-amber-200">
+                                                {{ __('messages.donations_need_online_payment') }}
+                                                <button type="button" class="event-link ms-2" @click="activeTicketTab = 'payment'">{{ __('messages.payment') }}</button>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <x-input-label :value="__('messages.donation_suggested_amounts')" />
+                                            <div class="mt-1 grid grid-cols-3 gap-2 max-w-xs">
+                                                <input v-for="(amount, index) in event.donation_amounts" :key="'donation-' + index"
+                                                    type="text" inputmode="decimal" name="donation_amounts[]"
+                                                    v-model="event.donation_amounts[index]"
+                                                    :placeholder="donationPlaceholders[index]"
+                                                    :aria-label="@json(__('messages.donation_suggested_amounts')) + ' ' + (index + 1)"
+                                                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm">
+                                            </div>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.donation_suggested_amounts_help') }}</p>
+                                            <x-input-error class="mt-2" :messages="$errors->get('donation_amounts.*')" />
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="donation_custom_checkbox" :checked="event.donation_custom" @change="event.donation_custom = $event.target.checked" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                            <label for="donation_custom_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.donation_custom') }}</label>
+                                        </div>
+                                        <div class="max-w-md">
+                                            <x-input-label for="donation_line" :value="__('messages.donation_line')" />
+                                            <x-text-input id="donation_line" name="donation_line" type="text" maxlength="120" class="mt-1 block w-full"
+                                                v-model="event.donation_line" :placeholder="__('messages.donation_line_placeholder')" />
+                                            <x-input-error class="mt-2" :messages="$errors->get('donation_line')" />
+                                        </div>
+                                    </div>
+                                </fieldset>
+
                                 <!-- Phone Number -->
                                 <div class="mb-6">
                                     <div class="flex items-center gap-3">
@@ -6679,6 +6746,11 @@
           installment_count: {{ (int) ($event->installment_count ?: 4) }},
           installment_final_days_before: {{ (int) ($event->installment_final_days_before ?? 14) }},
           installment_min_order_amount: @json($canSeeTicketData ? $event->installment_min_order_amount : null),
+          donations_enabled: @json($canSeeTicketData && (bool) $event->donations_enabled),
+          // Three boxes, always: the ones the owner left empty show the currency's suggestions.
+          donation_amounts: @json(array_pad(array_map(fn ($amount) => (string) $amount, array_slice((array) ($canSeeTicketData ? ($event->donation_amounts ?? []) : []), 0, 3)), 3, '')),
+          donation_custom: @json(! $canSeeTicketData || $event->donation_custom === null || (bool) $event->donation_custom),
+          donation_line: @json($canSeeTicketData ? $event->donation_line : null),
           // Last, so it wins: the Tickets tab's fields as they were typed before a refused save
           // ($ticketFieldsTyped). An empty object on an ordinary load.
           ...@json((object) $ticketFieldsTyped), // typed
@@ -7429,9 +7501,12 @@
             field._easyMDE.value(e[id] || '');
           }
         });
-        ['ask_phone', 'require_phone', 'country_code_phone', 'individual_tickets', 'individual_ticket_fields', 'sell_after_start', 'show_unavailable_tickets', 'installments_enabled'].forEach(function (field) {
+        ['ask_phone', 'require_phone', 'country_code_phone', 'individual_tickets', 'individual_ticket_fields', 'sell_after_start', 'show_unavailable_tickets', 'installments_enabled', 'donations_enabled', 'donation_custom'].forEach(function (field) {
           e[field] = !! input[field];
         });
+        // The preset's donation ask, in the three boxes the Checkout row draws.
+        e.donation_amounts = [0, 1, 2].map(function (i) { var a = (input.donation_amounts || [])[i]; return a === undefined || a === null ? '' : String(a); });
+        e.donation_line = input.donation_line || null;
         ['installment_count', 'installment_final_days_before', 'installment_min_order_amount', 'terms_url', 'total_tickets_mode'].forEach(function (field) {
           e[field] = input[field];
         });
@@ -9719,6 +9794,8 @@
         var C = this.tabLabels.checkout;
         var asked = [];
         if (e.ask_phone) { asked.push(C.ask_phone); }
+        // Donations first: they change what a buyer pays, the rest only what they are asked.
+        if (e.donations_enabled && e.tickets_enabled && ! e.rsvp_enabled) { asked.push(C.donations); }
         if ((this.isPro || this.eventExists) && this.eventCustomFields && Object.keys(this.eventCustomFields).length) { asked.push(C.custom_fields); }
         if (this.individualTicketsOn) { asked.push(C.individual_tickets); }
         if (e.tickets_enabled && (e.terms_url || '').trim()) { asked.push(C.terms_url); }
@@ -9808,7 +9885,17 @@
         return (exists ? this.presetWords.updates : this.presetWords.adds).split(':preset').join(name);
       },
       anyTicketPriced() {
-        return this.tickets.some(function (ticket) { return parseFloat(ticket.price) > 0; });
+        return this.tickets.some(function (ticket) { return parseFloat(ticket.price) > 0; })
+          // A free ticket with a donation takes money too, so it needs a way to pay as much.
+          || (!! this.event.donations_enabled && ! this.event.rsvp_enabled);
+      },
+      // Donations are paid only through a gateway that charges the whole order online
+      // (Event::DONATION_GATEWAYS).
+      donationGatewayOk() {
+        return @json(\App\Models\Event::DONATION_GATEWAYS).indexOf(this.event.payment_method) !== -1;
+      },
+      donationPlaceholders() {
+        return @json(\App\Models\Event::defaultDonationAmounts($event->ticket_currency_code ?: 'USD'));
       },
       // EventRepo::saveEvent() turns Individual tickets off when any ticket type is a pass.
       hasPassTicket() {

@@ -197,6 +197,19 @@
                     promoCodeMessage: '',
                     discountAmount: 0,
                     isValidatingPromo: false,
+                    {{-- Donations (Event::offersDonations()). No amount is chosen until the buyer
+                         picks one, and pressing the chosen one again clears it: a pre-filled tip is
+                         the complaint everyone has about the checkouts that do it. --}}
+                    donationOffered: @json($event->offersDonations()),
+                    donationAmounts: @json(array_map('floatval', $event->donationAmounts())),
+                    donationCustom: @json($event->donation_custom === null || (bool) $event->donation_custom),
+                    donationLimits: @json($event->donationLimits()),
+                    {{-- Beside a priced ticket the gateway's minimum is met by the ticket, as on the server. --}}
+                    donationMinWithTickets: @json($event->donationLimits(1.0)[0]),
+                    {{-- After a refused checkout the donation comes back as it was chosen, or the
+                         total would quietly drop: a suggested amount as itself, anything else as "Other". --}}
+                    donationChoice: @json(is_numeric(old('donation_amount')) && (float) old('donation_amount') > 0 ? (in_array((float) old('donation_amount'), array_map('floatval', $event->donationAmounts()), true) ? (float) old('donation_amount') : 'other') : null),
+                    donationOther: @json(is_numeric(old('donation_amount')) && ! in_array((float) old('donation_amount'), array_map('floatval', $event->donationAmounts()), true) ? (string) old('donation_amount') : ''),
                     giftCardCode: '',
                     giftCardValid: false,
                     giftCardMessage: '',
@@ -525,11 +538,45 @@
                     }
                     return sum;
                 },
+                // What the buyer chose to give, in the currency's decimals; nothing until they choose.
+                donationAmount() {
+                    // Nothing to give towards until a ticket is chosen (the block is hidden then).
+                    if (!this.donationOffered || this.donationChoice === null || this.totalSelectedTickets === 0) {
+                        return 0;
+                    }
+                    if (this.donationChoice === 'other' && !this.donationCustom) {
+                        return 0;
+                    }
+                    var raw = this.donationChoice === 'other' ? this.parseDonation(this.donationOther) : this.donationChoice;
+                    if (!isFinite(raw) || raw <= 0) {
+                        return 0;
+                    }
+                    var factor = Math.pow(10, this.currencyDecimals);
+                    return Math.round(raw * factor) / factor;
+                },
+                donationMinimum() {
+                    // As the server: beside priced tickets only the smallest unit, unless a promo code
+                    // left the tickets owing less than the gateway's minimum, which the donation then
+                    // makes up. A gift card's own draw keeps that rule (giftCardApplied).
+                    var ticketsTotal = this.tickets.reduce((total, ticket) => total + (ticket.price * ticket.selectedQty), 0);
+                    if (ticketsTotal <= 0) {
+                        return this.donationLimits[0];
+                    }
+                    if (this.giftCardValid) {
+                        return this.donationMinWithTickets;
+                    }
+                    var ticketsNet = Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount);
+                    return Math.max(this.donationMinWithTickets, this.donationLimits[0] - ticketsNet);
+                },
+                donationOutOfRange() {
+                    return this.donationAmount > 0 && (this.donationAmount < this.donationMinimum || this.donationAmount > this.donationLimits[1]);
+                },
                 giftCardApplied() {
                     if (!this.giftCardValid || this.giftCardBalance <= 0) {
                         return 0;
                     }
-                    const orderTotal = Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount);
+                    // The donation is part of what a gift card may pay, as on the server.
+                    const orderTotal = Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount) + this.donationAmount;
                     let applied = Math.min(this.giftCardBalance, orderTotal);
                     // Mirror the server: Stripe refuses charges below ~50 smallest currency
                     // units, so leave either nothing to pay or at least the minimum.
@@ -545,7 +592,7 @@
                     return Math.max(0, this.giftCardBalance - this.giftCardApplied);
                 },
                 totalAmount() {
-                    return Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount - this.giftCardApplied);
+                    return Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount + this.donationAmount - this.giftCardApplied);
                 },
                 showGuestForms() {
                     return this.individualTickets && this.totalSelectedTickets > 1;
@@ -674,6 +721,25 @@
                         || root.querySelector('.seating-picker-mount')
                         || root.querySelector('select[id^="ticket-"]');
                 },
+                // What the buyer typed in "Other", read the way people write money: "1,000" and
+                // "1.000" are a thousand where the currency has no decimals or three digits follow the
+                // only separator; "5,50" is five and a half.
+                parseDonation(text) {
+                    var value = String(text || '').trim().replace(/[\s\u00a0']/g, '');
+                    if (value === '') return NaN;
+                    var lastComma = value.lastIndexOf(','), lastDot = value.lastIndexOf('.');
+                    var decimalAt = Math.max(lastComma, lastDot);
+                    if (decimalAt !== -1) {
+                        var tail = value.length - decimalAt - 1;
+                        var single = (value.split(/[.,]/).length - 1) === 1;
+                        if (this.currencyDecimals === 0 || (single && tail === 3)) {
+                            value = value.replace(/[.,]/g, '');
+                        } else {
+                            value = value.slice(0, decimalAt).replace(/[.,]/g, '') + '.' + value.slice(decimalAt + 1);
+                        }
+                    }
+                    return /^\d+(\.\d+)?$/.test(value) ? parseFloat(value) : NaN;
+                },
                 validateForm(e) {
                     // The button carries aria-disabled rather than disabled, so the submit still
                     // has to be stopped here. Nothing is lost by trying: claimForSale() refuses
@@ -688,6 +754,13 @@
                     if (!this.isPaymentLinkMode && !this.tickets.some(t => t.selectedQty > 0)) {
                         e.preventDefault();
                         this.say(@json(__('messages.please_select_ticket')), this.firstTicketControl(), 'ticket');
+                        return;
+                    }
+                    // A donation the server would refuse: said here, beside the amount, not after a trip.
+                    if (this.donationOutOfRange) {
+                        e.preventDefault();
+                        const other = document.getElementById('donation-other');
+                        if (other) { other.focus(); other.scrollIntoView({ block: 'center' }); }
                         return;
                     }
                     // The fields: the browser marks the first one that is missing, says what is
@@ -1363,7 +1436,7 @@
                     <p v-if="ticket.is_pass && ticket.pass_allow_booking" class="text-xs text-[var(--brand-blue)] mt-1">{{ __('messages.pass_book_after_purchase') }}</p>
                     <p v-if="ticket.is_pass && ticket.pass_allow_booking && passCancelPolicyHintText(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ passCancelPolicyHintText(ticket) }}</p>
                     <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
-                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
+                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price && donationOffered">{{ __('messages.free_donations_welcome') }}</template><template v-else-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
                     <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>
                     {{-- The affordability hook, on the price line where the sticker shock is. This
                          is what BNPL checkouts put next to a price and the reason the option
@@ -1892,6 +1965,42 @@
         </p>
         @endif
 
+        {{-- Donation. Below the promo code and gift card, beside the total it changes, and above the
+             payment plan, whose split includes it. A radiogroup of the owner's amounts, and "Other"
+             when the owner allows it; nothing chosen to begin with. --}}
+        <div v-if="donationOffered && !isPaymentLinkMode && !isAllSoldOut && totalSelectedTickets > 0" class="mb-6">
+            {{-- The owner's line (text, so v-pre), and whom the money goes to: the event's own schedule,
+                 whose account is paid, not the page it is bought from. Escaped: a schedule's name is
+                 somebody's text. --}}
+            <p id="donation-heading" class="text-sm font-medium text-gray-900 dark:text-gray-100" v-pre><bdi>{{ $event->donation_line ?: __('messages.donation_heading') }}</bdi></p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2" v-pre>{{ __('messages.donation_optional', ['organizer' => ($event->creatorRole ?? $role)->translatedName()]) }}</p>
+            {{-- Toggle buttons rather than radios: pressing the chosen amount again clears it, which a
+                 radio never does. --}}
+            <div role="group" aria-labelledby="donation-heading" class="flex flex-wrap gap-2">
+                <button v-for="amount in donationAmounts" :key="'d' + amount" type="button"
+                    :aria-pressed="donationChoice === amount ? 'true' : 'false'"
+                    @click="donationChoice = donationChoice === amount ? null : amount"
+                    class="px-4 py-2 rounded-lg border-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                    :class="donationChoice === amount ? 'text-gray-900 dark:text-gray-100' : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'"
+                    :style="donationChoice === amount ? 'border-color: var(--es-accent-readable)' : ''"><bdi dir="ltr">@{{ formatPrice(amount) }}</bdi></button>
+                <button v-if="donationCustom" type="button"
+                    :aria-pressed="donationChoice === 'other' ? 'true' : 'false'"
+                    @click="donationChoice = donationChoice === 'other' ? null : 'other'"
+                    class="px-4 py-2 rounded-lg border-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                    :class="donationChoice === 'other' ? 'text-gray-900 dark:text-gray-100' : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'"
+                    :style="donationChoice === 'other' ? 'border-color: var(--es-accent-readable)' : ''">@lang('messages.donation_other')</button>
+            </div>
+            <div v-if="donationChoice === 'other' && donationCustom" class="mt-2 flex items-center gap-2 max-w-[12rem]">
+                <span class="text-sm text-gray-600 dark:text-gray-400" aria-hidden="true">{{ \App\Utils\MoneyUtils::symbol($event->ticket_currency_code) }}</span>
+                <input id="donation-other" type="text" inputmode="decimal" v-model="donationOther" :aria-label="@json(__('messages.donation_other_amount'))"
+                    :aria-invalid="donationOutOfRange ? 'true' : 'false'" aria-describedby="donation-range"
+                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-sm">
+            </div>
+            <p id="donation-range" v-if="donationOutOfRange" role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">@{{ @json(__('messages.donation_out_of_range')).replace(':min', formatPrice(donationMinimum)).replace(':max', formatPrice(donationLimits[1])) }}</p>
+            <p v-if="donationAmount > 0 && cartEligible" class="mt-2 text-xs text-gray-500 dark:text-gray-400">@lang('messages.donation_no_cart')</p>
+            <input type="hidden" name="donation_amount" :value="donationAmount > 0 ? donationAmount.toFixed(currencyDecimals) : ''">
+        </div>
+
         {{-- Installments. Rendered HERE, below the promo and gift-card block, because the split is
              computed on the post-discount total: anything shown above this point would change
              under the buyer as soon as they applied a code.
@@ -1959,7 +2068,7 @@
 
         <!-- Total -->
         <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
-            <template v-if="volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0">
+            <template v-if="volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 || donationAmount > 0">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.subtotal')</span>
                     <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(subtotalAmount) }}</span>
@@ -1971,6 +2080,10 @@
                 <div v-if="discountAmount > 0" class="flex justify-between items-center mb-1">
                     <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.promo_discount')</span>
                     <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(discountAmount) }}</span>
+                </div>
+                <div v-if="donationAmount > 0" class="flex justify-between items-center mb-1">
+                    <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.donation')</span>
+                    <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(donationAmount) }}</span>
                 </div>
                 <div v-if="giftCardApplied > 0" class="flex justify-between items-center mb-1">
                     <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.gift_card')</span>
@@ -1984,7 +2097,7 @@
                 <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.total')</span>
                 <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
             </div>
-            <div class="flex justify-between items-center" :class="{ 'pt-2 mt-1 border-t border-gray-200 dark:border-gray-600': volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 || (payMonthly && installmentsOffered) }">
+            <div class="flex justify-between items-center" :class="{ 'pt-2 mt-1 border-t border-gray-200 dark:border-gray-600': volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 || donationAmount > 0 || (payMonthly && installmentsOffered) }">
                 <span class="text-gray-600 dark:text-gray-400">
                     @{{ payMonthly && installmentsOffered ? @json(__('messages.due_today')) : @json(__('messages.total')) }}
                 </span>
@@ -2092,7 +2205,7 @@
             {{-- Adds this event to the cart instead of paying for it now, so the buyer can carry on
                  browsing. The cart widget in the guest layout owns the storage and the checkout. --}}
             <button type="button" dusk="add-to-cart"
-                v-if="cartEligible && selectedTicketCount > 0 && !(payMonthly && installmentsOffered)"
+                v-if="cartEligible && selectedTicketCount > 0 && !(payMonthly && installmentsOffered) && donationAmount === 0"
                 @click="addToCart"
                 v-bind:aria-disabled="seatsBlocked ? 'true' : null"
                 v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"

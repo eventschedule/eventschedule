@@ -8612,7 +8612,7 @@
             "Unique Features": [
                 [
                     "Fundraising & donations",
-                    "No",
+                    "Donations at checkout and pay what you want (Pro); no raffles or auctions",
                     "Yes (donations, raffles, auctions)",
                     false
                 ],
@@ -8744,7 +8744,7 @@
             },
             {
                 "title": "Keep donations where they are",
-                "description": "Event Schedule has no donation form, so keep your Zeffy donation page and add its address to the schedule's social links, where it shows as a link on your page.",
+                "description": "Event Schedule takes a donation only at an event's checkout (on Pro), so keep your Zeffy donation page for giving that is not tied to an event, and add its address to the schedule's social links, where it shows as a link on your page.",
                 "doc": "creating-schedules#social-links"
             },
             {
@@ -8757,7 +8757,7 @@
             {
                 "tag": "No fundraising tools",
                 "title": "Tickets, not donations",
-                "text": "Zeffy runs donation forms, raffles, auctions and an online store, and Event Schedule has none of them. What it sells is tickets, passes, add-ons and gift cards, on Pro."
+                "text": "Zeffy runs donation forms, raffles, auctions and an online store. Event Schedule takes a donation only beside a ticket at checkout, and sells tickets, passes, add-ons and gift cards, on Pro."
             },
             {
                 "tag": "Card fees are yours",
@@ -8781,7 +8781,7 @@
             },
             {
                 "question": "Does Event Schedule take donations like Zeffy?",
-                "answer": "No. Event Schedule is built for events, not fundraising, so there are no donation forms, raffles or auctions. If fundraising is the heart of what you do, Zeffy covers more of it."
+                "answer": "At an event's checkout, yes: on Pro a buyer can add a donation to their tickets, and a free ticket with donations on is pay what you want. There are no standalone donation forms, raffles or auctions, so if fundraising is the heart of what you do, Zeffy covers more of it."
             },
             {
                 "question": "Who pays the card fees?",

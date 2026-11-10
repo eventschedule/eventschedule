@@ -161,7 +161,12 @@ class ReleaseTickets extends Command
             })
             ->whereRaw('TIMESTAMPDIFF(HOUR, sales.created_at, NOW()) >= 48')
             ->where(function ($q) {
-                $q->where('sales.gift_card_amount', '>', 0)
+                // A donation checkout left unpaid, on the same 48 hours. Pay what you want is a free
+                // ticket with a donation, and before donations a free ticket never waited for a
+                // payment: abandoned ones must not hold the seats of a capped free event for ever,
+                // whatever the event's own expire_unpaid_tickets says. Only a primary carries one.
+                $q->where('sales.donation_amount', '>', 0)
+                    ->orWhere('sales.gift_card_amount', '>', 0)
                     ->orWhereExists(function ($sub) {
                         $sub->selectRaw('1')->from('sales as gs')
                             ->whereColumn('gs.group_id', 'sales.id')

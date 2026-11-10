@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-donations-at-checkout-2026-11-11) | not yet | One migration (in the start command); nothing after |
 | [Unreleased](#unreleased-apple-wallet-passes-2026-11-11) | not yet | Nothing until you choose to switch it on (env vars in the app spec) |
 | [Unreleased](#unreleased-ticket-reminders-2026-11-10) | not yet | One migration (in the start command); after: watch the first hourly run's mail volume and bounces |
 | [Unreleased](#unreleased-a-custom-domains-main-address-2026-10-22) | not yet | One migration (in the start command); after: one Direct domain set to its subdomain |
@@ -99,6 +100,19 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: donations at checkout (2026-11-11)
+
+**What ships:** Tickets > Checkout gains "Ask for a donation at checkout" (Pro): up to three
+suggested amounts, an optional own amount and a line above them; buyers add a donation under
+their tickets, and a free ticket with donations on is pay what you want. Paid through Stripe,
+PayPal, Payfast or Razorpay only; refused in a cart. Off on every event until its owner turns it
+on, so nothing changes for anyone at deploy.
+
+**Migration** (the start command runs it):
+- `2026_11_11_000001_add_donations`: four columns on `events` (a switch, the amounts as JSON, a
+  switch, a 120-character line) and a nullable `sales.donation_amount`. Both are columns added at
+  the end with defaults or NULL, which MySQL 8 does in place without copying the tables.
 
 ## Unreleased: Apple Wallet passes (2026-11-11)
 

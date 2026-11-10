@@ -274,7 +274,7 @@
             ],
             [
                 'q' => 'Can we take donations through Event Schedule?',
-                'a' => 'No, and it is better to know that now. Event Schedule sells tickets and takes registrations; it does not process standalone donations, issue tax receipts or keep a donor database. What it does well is the event side of fundraising: the gala with a supporter ticket and a table of eight, the sponsored walk with capped places, and the page people keep coming back to for the next date. If your donations run through another tool, link to it from the event description.',
+                'a' => 'At an event\'s checkout, yes, and only there. On Pro a buyer can add a donation to their tickets, and a free ticket with donations switched on lets people pay what they want. Event Schedule does not process standalone donations, issue tax receipts or keep a donor database. What it does well is the event side of fundraising: the gala with a supporter ticket and a table of eight, the sponsored walk with capped places, and the page people keep coming back to for the next date. If your donations run through another tool, link to it from the event description.',
             ],
             [
                 'q' => 'Where does the ticket money go?',
@@ -667,7 +667,7 @@
                     </h2>
                     <p class="es-cause-muted mb-6 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
                         Better to say it here than after you have moved the gala over. Event Schedule sells
-                        tickets and takes registrations. It does not process standalone donations, issue tax
+                        tickets, takes registrations and, on Pro, a donation added at checkout. It does not process standalone donations, issue tax
                         receipts or keep a CRM of giving history. Keep the tools you use for those, and link
                         to your donation page from the event description.
                     </p>

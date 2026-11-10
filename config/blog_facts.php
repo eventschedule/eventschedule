@@ -58,6 +58,7 @@ return [
 
     // On the Pro plan and above (not on Free)
     'paid-tickets' => ['tier' => 'pro', 'says' => 'Selling tickets that have a price: priced ticket types, paid through Stripe, PayPal, Payfast (South African rand only), Razorpay (Indian rupees only), Invoice Ninja, a payment link or cash at the door. Pro starts with a :trial_days-day free trial when you subscribe, once per account.', 'url' => '/features/ticketing', 'guide' => 'tickets', 'match' => ['ticket type', 'price', 'payment', 'stripe', 'sell tickets']],
+    'donations' => ['tier' => 'pro', 'says' => 'Donations at checkout: buyers can add an amount of their choosing, from up to three suggested amounts or their own. With a free ticket that is pay what you want. Paid through Stripe, PayPal, Payfast or Razorpay.', 'guide' => 'tickets', 'match' => ['donation', 'pay what you want']],
     'refunds' => ['tier' => 'pro', 'says' => 'Full and partial refunds through Stripe, PayPal and Razorpay.', 'guide' => 'tickets', 'match' => ['refund']],
     'promo' => ['tier' => 'pro', 'says' => 'Promo codes: a percentage or a fixed amount off, with a usage limit and an expiry date.', 'url' => '/features/promo-codes', 'guide' => 'tickets', 'match' => ['promo']],
     'addons' => ['tier' => 'pro', 'says' => 'Add-ons sold beside a ticket, with their own stock.', 'guide' => 'tickets', 'match' => ['add-on']],

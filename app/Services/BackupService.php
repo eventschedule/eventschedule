@@ -776,6 +776,7 @@ class BackupService
                 'transaction_reference' => $sale->transaction_reference,
                 'discount_amount' => $sale->discount_amount,
                 'gift_card_amount' => $sale->gift_card_amount,
+                'donation_amount' => $sale->donation_amount,
                 'utm_source' => $sale->utm_source,
                 'utm_medium' => $sale->utm_medium,
                 'utm_campaign' => $sale->utm_campaign,
@@ -2594,6 +2595,8 @@ class BackupService
             $sale->gift_card_id = $idMap['gift_cards'][$giftCardRefId];
             $sale->gift_card_amount = $data['gift_card_amount'] ?? null;
         }
+        // The donation is already inside payment_amount; this keeps it as its own figure.
+        $sale->donation_amount = is_numeric($data['donation_amount'] ?? null) && (float) $data['donation_amount'] > 0 ? (float) $data['donation_amount'] : null;
 
         // newsletter_id is remapped in the second pass after newsletters are imported
 

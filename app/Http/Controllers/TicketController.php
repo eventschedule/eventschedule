@@ -972,7 +972,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Order ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires', 'Seats'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Donation', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Order ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires', 'Seats'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -1005,6 +1005,7 @@ class TicketController extends Controller
                     $sale->discount_amount ? number_format($sale->discount_amount, 2, '.', '') : '',
                     CsvUtils::sanitizeCell($sale->giftCard ? $sale->giftCard->formattedCode() : ''),
                     $sale->gift_card_amount ? number_format($sale->gift_card_amount, 2, '.', '') : '',
+                    $sale->donation_amount ? number_format($sale->donation_amount, 2, '.', '') : '',
                     CsvUtils::sanitizeCell($sale->transaction_reference),
                     CsvUtils::sanitizeCell($sale->payment_method),
                     $sale->status,
@@ -1201,6 +1202,34 @@ class TicketController extends Controller
                 return $isCart
                     ? $this->refuseCartLeg($leg, $event->translatedName())
                     : back()->withInput()->with('error', __('messages.tickets_not_available'));
+            }
+
+            // A donation: only where the event asks for one, on its own checkout (the cart panel
+            // offers none, so this is a hand-built request), within its limits, and rounded to
+            // what its currency can charge. Refused rather than dropped: a buyer who chose to give
+            // must never pay less, or more, than they saw.
+            if ($leg['donation'] > 0) {
+                if ($isCart || ! $event->offersDonations()) {
+                    return back()->withInput()->with('error', __('messages.donation_not_available'));
+                }
+
+                $ticketsTotal = collect($leg['tickets'])->map(fn ($quantity, $hash) => (float) ($event->tickets->firstWhere('id', UrlUtils::decodeId($hash))?->price ?? 0) * (int) $quantity)->sum();
+                [$minimum, $maximum] = $event->donationLimits($ticketsTotal);
+                $donation = round($leg['donation'], \App\Utils\MoneyUtils::decimalsFor($event->ticket_currency_code ?: 'USD'));
+
+                // An owner who offers only their suggested amounts gets only those.
+                if ($event->donation_custom === false && ! in_array($donation, array_map(fn ($amount) => round((float) $amount, \App\Utils\MoneyUtils::decimalsFor($event->ticket_currency_code ?: 'USD')), $event->donationAmounts()), true)) {
+                    return back()->withInput()->with('error', __('messages.donation_not_available'));
+                }
+
+                if ($donation < $minimum || $donation > $maximum) {
+                    return back()->withInput()->with('error', __('messages.donation_out_of_range', [
+                        'min' => \App\Utils\MoneyUtils::format($minimum, $event->ticket_currency_code),
+                        'max' => \App\Utils\MoneyUtils::format($maximum, $event->ticket_currency_code),
+                    ]));
+                }
+
+                $legs[$index]['donation'] = $donation;
             }
 
             $legs[$index]['event'] = $event;
@@ -1440,6 +1469,7 @@ class TicketController extends Controller
                 'ticket_custom_values' => $request->input('ticket_custom_values', []),
                 'guest_ticket_custom_values' => $request->input('guest_ticket_custom_values', []),
                 'promo_code' => $request->input('promo_code'),
+                'donation_amount' => $request->input('donation_amount'),
             ]];
         }
 
@@ -1456,6 +1486,7 @@ class TicketController extends Controller
             'ticket_custom_values' => (array) ($leg['ticket_custom_values'] ?? []),
             'guest_ticket_custom_values' => (array) ($leg['guest_ticket_custom_values'] ?? []),
             'promo_code' => $leg['promo_code'] ?? null,
+            'donation' => is_numeric($leg['donation_amount'] ?? null) ? max(0.0, (float) $leg['donation_amount']) : 0.0,
         ], array_values($raw));
     }
 
@@ -2023,12 +2054,32 @@ class TicketController extends Controller
             // Draw down the gift card resolved for the whole order (deducted after volume + promo).
             // The card is validated once, up front, in resolveOrderGiftCard(); each leg simply
             // spends whatever is left, and a leg that finds nothing left just pays its own way.
+            // The buyer's donation (validated in checkout()): after the volume and promo discounts,
+            // which never touch it, and before the gift card, which may pay it like anything else.
+            $donation = (float) ($leg['donation'] ?? 0);
+
+            // checkout() waived the gateway's minimum for a donation beside a priced ticket, from
+            // list prices. A promo code can still bring the tickets to nothing, and then the
+            // donation alone is the charge: it must reach the minimum, or the gateway refuses the
+            // order after the seats are held. With a gift card the draw below keeps that rule.
+            if ($donation > 0 && ! $giftCard) {
+                $ticketsNet = max(0, $subtotalAfterVolume - $discountTotal);
+                $minCharge = (float) (payment_gateways()->get($event->payment_method)
+                    ?->amountLimits($event->ticket_currency_code ?: 'USD')[0] ?? 0);
+                if ($ticketsNet + $donation < $minCharge) {
+                    throw new BusinessException(__('messages.donation_out_of_range', [
+                        'min' => \App\Utils\MoneyUtils::format($minCharge - $ticketsNet, $event->ticket_currency_code),
+                        'max' => \App\Utils\MoneyUtils::format($event->donationLimits()[1], $event->ticket_currency_code),
+                    ]));
+                }
+            }
+
             $giftCardId = null;
             $giftCardApplied = 0.0;
             if ($giftCard) {
                 // Re-read through the locked instance: earlier legs of this order have already
                 // decremented it in memory and in the row.
-                $orderTotal = max(0, $subtotalAfterVolume - $discountTotal);
+                $orderTotal = max(0, $subtotalAfterVolume - $discountTotal) + $donation;
                 $giftCardApplied = min((float) $giftCard->remaining_amount, $orderTotal);
 
                 // A gateway with a floor (Stripe refuses under ~50 smallest units) must be left
@@ -2075,7 +2126,8 @@ class TicketController extends Controller
                 // Gift card allocation: greedy waterfall over per-seat nets (primary first).
                 // Proportional shares could push a seat negative when a ticket-restricted
                 // promo skews the nets; greedy sums exactly with no rounding residue.
-                $primaryNet = $seatPrices[0] - $seatVolumeShares[0] - $seatPromoShares[0] + $addonTotal;
+                // The primary holds seat[0], every add-on and the donation.
+                $primaryNet = $seatPrices[0] - $seatVolumeShares[0] - $seatPromoShares[0] + $addonTotal + $donation;
                 $seatGiftShares = array_fill(0, $seatCount, 0.0);
                 if ($giftCardApplied > 0) {
                     $remainingGift = $giftCardApplied;
@@ -2109,8 +2161,9 @@ class TicketController extends Controller
                     $sale->gift_card_id = $giftCardId;
                     $sale->gift_card_amount = $giftCardApplied;
                 }
-                $sale->payment_amount = max(0, $subtotalAfterVolume - $discountTotal - $giftCardApplied);
+                $sale->payment_amount = max(0, $subtotalAfterVolume - $discountTotal + $donation - $giftCardApplied);
             }
+            $sale->donation_amount = $donation > 0 ? $donation : null;
 
             // Create guest sales for individual tickets
             if ($isIndividualTickets) {

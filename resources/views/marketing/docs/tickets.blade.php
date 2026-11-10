@@ -843,6 +843,11 @@
                 </thead>
                 <tbody>
                     <tr>
+                        <td><a href="#donations" class="doc-link">Ask for a donation at checkout</a></td>
+                        <td>Buyers can add an amount of their choosing to their order: up to three suggested amounts, and their own when you allow it. See below. Not on the Registration form.</td>
+                        <td>Pro</td>
+                    </tr>
+                    <tr>
                         <td>Ask for phone number</td>
                         <td>Adds a phone field to the form. Two tick boxes appear once it is on: <strong class="text-gray-900 dark:text-white">Required</strong> and <strong class="text-gray-900 dark:text-white">Country code</strong>. The number is stored on the sale, shown in the Sales list and included in the <a href="#export" class="doc-link">CSV export</a>.</td>
                         <td>Free</td>
@@ -872,6 +877,16 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Terms URL belongs to ticket sales and is not on the Registration form. <strong class="text-gray-900 dark:text-white">Individual tickets</strong> is free on the Registration form. When the event sells tickets, the form locks it below Pro, with a <strong class="text-gray-900 dark:text-white">See what Pro adds</strong> link under it. An event that switches from Free registration to selling tickets on a free schedule loses it on the next save.</p>
+
+        <h3 id="donations" class="doc-subheading">Donations and Pay What You Want <x-doc-badge plan="pro" /></h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Switch on <strong class="text-gray-900 dark:text-white">Ask for a donation at checkout</strong> in the Checkout row and buyers see <em>Add a donation</em> under their tickets, with your suggested amounts (three boxes; leave all three empty for the amounts shown in them, which suit the event's currency) and <strong class="text-gray-900 dark:text-white">Other</strong> for an amount of their own unless you turn that off. Nothing is chosen until the buyer chooses, and pressing a chosen amount again clears it. The line above the amounts is yours to write, for example <em>Support the choir</em>.</p>
+        <ul class="doc-list mb-4">
+            <li><strong class="text-gray-900 dark:text-white">Pay what you want</strong>: give the event a free ticket type and switch donations on. The ticket reads <em>Free · donations welcome</em>, and each buyer pays what they choose, or nothing</li>
+            <li><strong class="text-gray-900 dark:text-white">On top of a price</strong>: with a priced ticket the donation is added to the order. Promo codes never discount it, and a gift card can pay it</li>
+            <li><strong class="text-gray-900 dark:text-white">Paid online</strong>: donations are taken through Stripe, PayPal, Payfast or Razorpay, the gateways that charge the whole order; with cash, a payment link or Invoice Ninja the Checkout row says to choose one of them. A donation is at least the gateway's smallest charge, and at most two thousand times the currency's first suggested amount (10,000 in dollars or euros)</li>
+            <li><strong class="text-gray-900 dark:text-white">One event at a time</strong>: a donation is added on the event's own checkout, so <em>Add to cart</em> steps aside while one is chosen</li>
+            <li><strong class="text-gray-900 dark:text-white">Where it shows</strong>: as its own line in the buyer's total and confirmation email, which thanks them for it, and in the <strong class="text-gray-900 dark:text-white">Donation</strong> column of the sales export. It is part of the sale's amount, so a refund includes it</li>
+        </ul>
 
         <h3 id="checkout-fields" class="doc-subheading">Custom Checkout Fields <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout: dietary requirements, a T-shirt size, a company name, an emergency contact, how they heard about the event. Fields added here, under <strong class="text-gray-900 dark:text-white">Custom Fields (Per Order)</strong>, are asked once for the whole order, and an event takes up to 10 of them.</p>

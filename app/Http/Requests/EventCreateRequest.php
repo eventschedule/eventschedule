@@ -30,6 +30,12 @@ class EventCreateRequest extends FormRequest
             // naming a field that is not on screen. Its ceiling is the model saving hook instead.
             'event_url' => ['nullable', 'string', 'max:500'],
             'terms_url' => ['nullable', 'string', 'max:255'],
+            'donations_enabled' => ['sometimes', 'boolean'],
+            'donation_custom' => ['sometimes', 'boolean'],
+            'donation_amounts' => ['nullable', 'array', 'max:3'],
+            // Text, not numeric: an owner who writes "5,50" is understood (EventRepo::saveEvent()).
+            'donation_amounts.*' => ['nullable', 'string', 'max:20'],
+            'donation_line' => ['nullable', 'string', 'max:120'],
             'coupon_code' => ['nullable', 'string', 'max:255'],
             'event_password' => ['nullable', 'string', 'max:255'],
 

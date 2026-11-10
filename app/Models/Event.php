@@ -113,6 +113,10 @@ class Event extends Model
         'payment_instructions',
         'expire_unpaid_tickets',
         'installments_enabled',
+        'donations_enabled',
+        'donation_amounts',
+        'donation_custom',
+        'donation_line',
         'installment_count',
         'installment_final_days_before',
         'installment_min_order_amount',
@@ -153,6 +157,9 @@ class Event extends Model
     protected $hidden = ['event_password', 'contact_name', 'contact_email', 'contact_phone'];
 
     protected $casts = [
+        'donations_enabled' => 'boolean',
+        'donation_amounts' => 'array',
+        'donation_custom' => 'boolean',
         'tickets_grandfathered_at' => 'datetime',
         'duration' => 'float',
         'is_private' => 'boolean',
@@ -3189,6 +3196,109 @@ class Event extends Model
         }
 
         return $this->canSellPaidTickets();
+    }
+
+    /**
+     * The gateways a donation may be paid through: the ones that charge the order's total online.
+     * Cash and a payment link would turn a free ticket with a donation into an unpaid order that
+     * expires (or a sum nobody collects), and Invoice Ninja's payment-link mode prices the order
+     * from its products, which would drop the donation.
+     */
+    public const DONATION_GATEWAYS = ['stripe', 'paypal', 'payfast', 'razorpay'];
+
+    /** Suggested amounts where the owner has typed none, by currency; anything else uses USD's. */
+    private const DONATION_DEFAULTS = [
+        'USD' => [5, 10, 20], 'EUR' => [5, 10, 20], 'GBP' => [5, 10, 20], 'CAD' => [5, 10, 20],
+        'AUD' => [5, 10, 20], 'NZD' => [5, 10, 20], 'CHF' => [5, 10, 20],
+        'JPY' => [500, 1000, 3000], 'INR' => [100, 250, 500], 'ILS' => [20, 50, 100],
+        'HUF' => [1000, 2500, 5000], 'ZAR' => [50, 100, 200], 'KRW' => [5000, 10000, 20000],
+        'SEK' => [50, 100, 200], 'NOK' => [50, 100, 200], 'DKK' => [50, 100, 200],
+        'PLN' => [20, 50, 100], 'CZK' => [100, 250, 500], 'RON' => [20, 50, 100], 'BRL' => [20, 50, 100],
+        'MXN' => [100, 200, 500], 'HKD' => [50, 100, 200], 'SGD' => [5, 10, 20], 'MYR' => [20, 50, 100],
+        'PHP' => [200, 500, 1000], 'THB' => [200, 500, 1000], 'TRY' => [100, 250, 500],
+        'IDR' => [50000, 100000, 200000],
+    ];
+
+    /**
+     * Whether a buyer may add a donation at this event's checkout: the owner asked for one, the
+     * event sells tickets here (free ones count: a free ticket with a donation is pay what you want),
+     * its schedule may take money, and its gateway charges the total online and is set up.
+     */
+    public function offersDonations(): bool
+    {
+        if (! $this->donations_enabled || ! $this->tickets_enabled || $this->rsvp_enabled || $this->appointment_type_id) {
+            return false;
+        }
+
+        // Pro, as add-ons and installments are: hasProTicketingPlan() and not canSellPaidTickets(),
+        // whose grandfather stamp and selling trial would keep a lapsed schedule taking donations.
+        if (! in_array($this->payment_method, self::DONATION_GATEWAYS, true) || ! $this->hasProTicketingPlan()) {
+            return false;
+        }
+
+        return (bool) payment_gateways()->get($this->payment_method)?->isConfiguredFor($this->user);
+    }
+
+    /** The suggested amounts a buyer is offered: the owner's, or the currency's defaults. */
+    public function donationAmounts(): array
+    {
+        $amounts = array_values(array_unique(array_filter(array_map('floatval', (array) ($this->donation_amounts ?? [])), fn ($amount) => $amount > 0), SORT_REGULAR));
+
+        return array_slice($amounts ?: self::defaultDonationAmounts($this->ticket_currency_code), 0, 3);
+    }
+
+    /**
+     * An amount as an owner types it, read the way the checkout reads a buyer's (parseDonation() in
+     * event/tickets): spaces and apostrophes are grouping; with one separator followed by exactly
+     * three digits it is grouping too ("1,000" and "1.000" are a thousand), otherwise the LAST
+     * separator is the decimal point ("5,50", "1.500,50"). A currency with no minor unit reads every
+     * separator as grouping. Null when it is not a number.
+     */
+    public static function parseMoneyText(mixed $text, int $decimals): ?float
+    {
+        $value = preg_replace("/[\\s\x{00a0}']/u", '', trim((string) $text));
+        if ($value === '' || ! preg_match('/^\d[\d.,]*\d$|^\d$|^[.,]\d+$/', $value)) {
+            return null;
+        }
+
+        $decimalAt = max((int) strrpos($value, ','), (int) strrpos($value, '.'));
+        $hasSeparator = strpbrk($value, '.,') !== false;
+        if ($hasSeparator) {
+            $tail = strlen($value) - $decimalAt - 1;
+            $single = preg_match_all('/[.,]/', $value) === 1;
+            if ($decimals === 0 || ($single && $tail === 3)) {
+                $value = str_replace([',', '.'], '', $value);
+            } else {
+                $value = str_replace([',', '.'], '', substr($value, 0, $decimalAt)).'.'.substr($value, $decimalAt + 1);
+            }
+        }
+
+        return is_numeric($value) ? round((float) $value, $decimals) : null;
+    }
+
+    public static function defaultDonationAmounts(?string $currency): array
+    {
+        return self::DONATION_DEFAULTS[strtoupper((string) $currency)] ?? self::DONATION_DEFAULTS['USD'];
+    }
+
+    /**
+     * The smallest and largest donation one order may carry, in the event's currency. At least the
+     * gateway's own minimum charge when the tickets themselves cost nothing (a 20-cent donation on
+     * free tickets would fail at Stripe; beside a priced ticket the order is over it anyway), and at
+     * most two thousand times the currency's first suggested amount (10,000 in dollars or euros,
+     * 1,000,000 in yen) or ten times the owner's largest, whichever is more, so a slip of the
+     * keyboard is caught before a card is charged and none of the owner's own amounts is refused.
+     *
+     * @return array{0: float, 1: float}
+     */
+    public function donationLimits(float $ticketsTotal = 0.0): array
+    {
+        $currency = $this->ticket_currency_code ?: 'USD';
+        $smallest = 1 / max(1, \App\Utils\MoneyUtils::getSmallestUnitMultiplier($currency));
+        $gatewayMinimum = $ticketsTotal > 0 ? 0.0 : (float) (payment_gateways()->get($this->payment_method)?->amountLimits($currency)[0] ?? 0);
+        $ownLargest = max(array_merge([0], array_map('floatval', (array) ($this->donation_amounts ?? []))));
+
+        return [max($smallest, $gatewayMinimum), max((float) self::defaultDonationAmounts($currency)[0] * 2000, $ownLargest * 10)];
     }
 
     /**

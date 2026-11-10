@@ -51,6 +51,18 @@
     // already carries it.
     $showTotal = ! $sale->isRsvp() && ! $isFreeReservation && ! $hasPlan && ! $sale->group_id && ! $sale->order_id;
 
+    // The donation, a line of its own directly above the total it is part of, which sits under the
+    // add-ons when there are any (Event::offersDonations()).
+    $donation = (float) ($sale->donation_amount ?? 0);
+    if ($donation > 0) {
+        $donationRow = ['name' => __('messages.donation'), 'value' => \App\Utils\MoneyUtils::format($donation, $currency)];
+        if ($addonRows) {
+            $addonRows[] = $donationRow;
+        } else {
+            $ticketRows[] = $donationRow;
+        }
+    }
+
     // A gift card's deduction sits directly above the total it explains, as at checkout, so
     // "-$30" then "Total $70" reads as what was charged. Printed after the total, it read as a
     // second deduction from it. The card's remaining balance stays in its own section below.
@@ -72,7 +84,7 @@
 <x-email.heading :eyebrow="$eyebrow" auto>{{ $event->name }}</x-email.heading>
 
 <x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
-<x-email.text>{{ $thanks }}</x-email.text>
+<x-email.text>{{ $thanks }}@if ($donation > 0) {{ __('messages.donation_thanks', ['amount' => \App\Utils\MoneyUtils::format($donation, $currency)]) }}@endif</x-email.text>
 
 <x-email.event :event="$event" :date="$sale->event_date" :role="$role ?? null" />
 

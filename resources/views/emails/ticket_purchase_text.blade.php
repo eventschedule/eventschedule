@@ -38,6 +38,11 @@ $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket
 @endforeach
 @endif
 
+@if ((float) ($sale->donation_amount ?? 0) > 0)
+{{ __('messages.donation') }}: {{ \App\Utils\MoneyUtils::format($sale->donation_amount, $event->ticket_currency_code ?: 'USD') }}
+{{ __('messages.donation_thanks', ['amount' => \App\Utils\MoneyUtils::format($sale->donation_amount, $event->ticket_currency_code ?: 'USD')]) }}
+
+@endif
 @if (($giftCardAmount ?? 0) > 0 && $giftCard)
 {{ __('messages.gift_card_applied_summary') }}: -{{ \App\Utils\MoneyUtils::format($giftCardAmount, $giftCard->currency_code) }}
 {{ __('messages.gift_card_remaining_balance') }}: {{ \App\Utils\MoneyUtils::format($giftCard->remaining_amount, $giftCard->currency_code) }}

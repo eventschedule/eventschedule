@@ -146,6 +146,11 @@ class TicketCheckoutRequest extends FormRequest
 
         $rules['gift_card_code'] = ['nullable', 'string', 'max:20'];
 
+        // A donation (Event::offersDonations()). Only its shape here: the event's own limits, its
+        // currency's decimals and whether it asks at all are TicketController::checkout()'s.
+        $rules['donation_amount'] = ['nullable', 'numeric', 'min:0', 'max:100000000'];
+        $rules['legs.*.donation_amount'] = ['nullable', 'numeric', 'min:0', 'max:100000000'];
+
         if (! auth()->user() && $this->create_account && config('app.hosted')) {
             $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoFakeEmail];
             $rules['password'] = ['required', 'string', 'min:8'];
