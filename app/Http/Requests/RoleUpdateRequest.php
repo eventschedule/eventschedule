@@ -273,6 +273,8 @@ class RoleUpdateRequest extends FormRequest
             'show_sponsors' => ['sometimes', 'boolean'],
             'show_venues_map' => ['sometimes', 'boolean'],
             'show_next_event' => ['sometimes', 'boolean'],
+            'ticket_reminders_enabled' => ['sometimes', 'boolean'],
+            'ticket_reminders_hours' => ['sometimes', 'integer', 'in:'.implode(',', \App\Models\TicketReminderSetting::HOURS_OPTIONS)],
             'venues_map_open' => ['sometimes', 'boolean'],
             'show_event_interest' => ['sometimes', 'boolean'],
             'default_category_id' => ['nullable', 'integer', $allowedDefaultIds ? 'in:'.implode(',', $allowedDefaultIds) : 'in:'.implode(',', array_keys(config('app.event_categories', [])))],

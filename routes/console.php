@@ -191,6 +191,13 @@ Schedule::call(function () {
     Artisan::call('app:send-event-interest-mail', ['--apply' => true]);
 })->hourly()->name('send-event-interest-mail')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Keep in sync with AppController::translateData(). Not gated on config('app.hosted'): a ticket
+// holder's reminder is the same promise on every install. The claim on sales.reminder_sent_at is a
+// conditional UPDATE, so the two rails cannot both send one (SendTicketReminders).
+Schedule::call(function () {
+    Artisan::call('app:send-ticket-reminders', ['--apply' => true]);
+})->hourly()->name('send-ticket-reminders')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // withoutOverlapping() is not decoration here: this command initiates card charges, so two
 // concurrent runs would attempt the same installment. The Stripe idempotency key is the second
 // line of defence; this is the first.

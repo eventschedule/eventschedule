@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-ticket-reminders-2026-11-10) | not yet | One migration (in the start command); after: watch the first hourly run's mail volume and bounces |
 | [Unreleased](#unreleased-a-custom-domains-main-address-2026-10-22) | not yet | One migration (in the start command); after: one Direct domain set to its subdomain |
 | [Unreleased](#unreleased-backgrounds-on-a-window-sized-layer-and-aurora-2026-10-22) | not yet | Two migrations (in the start command); after: optionally the background backfill in batches, then look at three schedule pages |
 | [Unreleased](#unreleased-the-admin-dashboard-is-the-live-view-2026-10-22) | not yet | Nothing; open `/admin` and scroll |
@@ -97,6 +98,32 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: ticket reminders (2026-11-10)
+
+**What ships:**
+- `app:send-ticket-reminders`, hourly on both rails: one email to every paid sale (tickets, free
+  tickets, registrations) before its date. **On for every schedule, existing ones included**,
+  a day before, until the owner changes it at Schedule settings > Tickets > Reminders (3 hours,
+  1, 2 or 3 days, or off). Decided on 2026-11-10.
+- The interest list's reminder stands down for an address the ticket reminder will reach.
+
+**Migration** (the start command runs it):
+- `2026_11_11_000000_create_ticket_reminder_settings_table`: a new table with a foreign key to
+  `roles` (a ten-second lock wait). No row reads as on, a day before.
+
+**The first run after the deploy** reminds every eligible sale whose date starts within about the
+next 24 to 36 hours (36 because a reminder that would land at night goes at 20:00 the evening
+before): roughly a day's worth at once, through the shared platform mailer for every schedule
+without its own email settings. It is capped at 2,000 a run (`TICKET_REMINDER_RECIPIENT_BATCH`)
+and staggered 50 every 15 seconds; the rest follow on the next hourly runs.
+
+**After the deploy:**
+- The Scheduler card on `/admin/queue` lists `send-ticket-reminders`.
+- Watch the mail provider's volume and bounces, and the failed-jobs count on `/admin/queue`,
+  over the first two hours.
+- To stop every reminder at once without a rollback, set `TICKET_REMINDERS=false` in the app spec
+  (app-level, both components) and redeploy.
 
 ## Unreleased: a custom domain's main address (2026-10-22)
 

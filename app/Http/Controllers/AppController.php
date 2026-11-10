@@ -404,6 +404,13 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:send-event-interest-mail failed: '.$e->getMessage());
                     report($e);
                 }
+                // Keep in sync with routes/console.php: ticket holders' reminders, every install.
+                try {
+                    \Artisan::call('app:send-ticket-reminders', ['--apply' => true]);
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-ticket-reminders failed: '.$e->getMessage());
+                    report($e);
+                }
                 try {
                     \Artisan::call('app:send-carpool-reminders');
                 } catch (\Throwable $e) {

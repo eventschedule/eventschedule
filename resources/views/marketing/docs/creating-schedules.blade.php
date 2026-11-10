@@ -44,6 +44,7 @@
         <x-doc-nav-group label="Tickets" href="#tickets">
             <x-doc-nav-link href="#ticket-presets">Ticket presets</x-doc-nav-link>
             <x-doc-nav-link href="#gift-cards">Gift cards</x-doc-nav-link>
+            <x-doc-nav-link href="#ticket-reminders">Reminders</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Settings" href="#settings">
             <x-doc-nav-link href="#settings-general">Schedule URL</x-doc-nav-link>
@@ -888,9 +889,9 @@
             </svg>
             Tickets
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Each event sells its own tickets, on the <a href="{{ route('marketing.docs.tickets') }}#general" class="doc-link">Tickets tab</a> of the event form. The schedule's <strong class="text-gray-900 dark:text-white">Tickets</strong> section holds the setups new events start from, and gift cards, in two rows: <strong class="text-gray-900 dark:text-white">Ticket presets</strong> and <strong class="text-gray-900 dark:text-white">Gift cards</strong>. In the list of sections, Tickets names the presets, and adds Gift cards while gift cards are on.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Each event sells its own tickets, on the <a href="{{ route('marketing.docs.tickets') }}#general" class="doc-link">Tickets tab</a> of the event form. The schedule's <strong class="text-gray-900 dark:text-white">Tickets</strong> section holds the setups new events start from, gift cards and the reminder ticket holders get, in three rows: <strong class="text-gray-900 dark:text-white">Ticket presets</strong>, <strong class="text-gray-900 dark:text-white">Gift cards</strong> and <strong class="text-gray-900 dark:text-white">Reminders</strong>. In the list of sections, Tickets names the presets, and adds Gift cards while gift cards are on.</p>
 
-        <x-doc-screenshot id="creating-schedules--section-tickets" alt="The Tickets section of the schedule form: a line saying each event sells its own tickets, then the Ticket presets and Gift cards rows" />
+        <x-doc-screenshot id="creating-schedules--section-tickets" alt="The Tickets section of the schedule form: a line saying each event sells its own tickets, then the Ticket presets, Gift cards and Reminders rows" />
 
         <!-- Ticket presets -->
         <h3 id="ticket-presets" class="doc-subheading">Ticket presets</h3>
@@ -907,7 +908,18 @@
         <!-- Gift cards -->
         <h3 id="gift-cards" class="doc-subheading">Gift cards <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Gift cards</strong> row sells gift cards that buyers send to someone by email and that are redeemed toward tickets for any event on the schedule. It opens on one switch, <strong class="text-gray-900 dark:text-white">Enable gift cards</strong>; the amounts, the currency, how long a card stays valid and the payment method appear once that is on. Closed, the row says whether gift cards are on, and for which amounts. Below Pro the row carries a lock, and opens on an upgrade prompt. On eventschedule.com a card is delivered by email, so the row asks you to set up <a href="#integrations-email" class="doc-link">Email Settings</a> first.</p>
-        <p class="text-gray-600 dark:text-gray-300">Gift cards have a guide of their own: see <a href="{{ route('marketing.docs.gift_cards') }}#setup" class="doc-link">setting up gift cards</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Gift cards have a guide of their own: see <a href="{{ route('marketing.docs.gift_cards') }}#setup" class="doc-link">setting up gift cards</a>.</p>
+
+        <!-- Reminders -->
+        <h3 id="ticket-reminders" class="doc-subheading">Reminders</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Before each event, everyone with a ticket or a registration for it gets one email: the event's name, the day and time, the place, the QR code to show at the door, a button to their ticket or registration, the join link for an online event, and your ticket notes. The subject says when, for example <em>Jazz Night is tomorrow at 8:00 PM</em>. A free ticket or registration that the guest can give up carries a <strong class="text-gray-900 dark:text-white">Can't make it?</strong> link to their ticket page, where they can cancel and free the place. Reminders are on for every schedule, on every plan, and go out <strong class="text-gray-900 dark:text-white">1 day before</strong> unless you change it.</p>
+        <ul class="list-disc ml-6 mb-4 text-gray-600 dark:text-gray-300 space-y-1">
+            <li><strong class="text-gray-900 dark:text-white">Email ticket holders before each event</strong> turns them on or off for every event the schedule owns.</li>
+            <li><strong class="text-gray-900 dark:text-white">Send</strong>: 3 hours, 1 day, 2 days or 3 days before the event starts, in the schedule's timezone. A reminder of a day or more that would arrive during the night (10 PM to 8 AM) goes out at 8 PM the evening before instead.</li>
+            <li><strong class="text-gray-900 dark:text-white">Preview the email</strong> opens the reminder for the schedule's next event, with your own name in it. Nothing is sent.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each ticket is reminded once for its date; if you move a one-off event to another day, its holders are reminded again for the new day. Someone who gets their ticket after the reminder time is not sent one, since their confirmation has just arrived. Imported attendees, season pass holders, an order whose payment plan is behind, a cancelled event and appointment bookings (which have <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">reminders of their own</a>) are not sent one either. Somebody who both asked to hear about an event and holds a ticket this reminder will reach gets this one, not the one for people who only asked.</p>
+        <p class="text-gray-600 dark:text-gray-300">The reminder comes from the schedule, like the ticket confirmation: on eventschedule.com it uses your <a href="#integrations-email" class="doc-link">Email Settings</a> when you have them, and our mail server otherwise.</p>
     </section>
 
     <!-- Settings -->

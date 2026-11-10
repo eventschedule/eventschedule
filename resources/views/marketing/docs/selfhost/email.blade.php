@@ -37,7 +37,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Guest notifications</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Waitlist openings when a spot frees up, the emails to an event's interest list, change and cancellation notices to ticket buyers, the confirmation link a visitor gets after using a schedule's sign-up panel, post-event feedback requests, and carpool messages between attendees. See <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Reminders to ticket holders and registered guests before an event, waitlist openings when a spot frees up, the emails to an event's interest list, change and cancellation notices to ticket buyers, the confirmation link a visitor gets after using a schedule's sign-up panel, post-event feedback requests, and carpool messages between attendees. See <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Account and owner emails</h4>
@@ -56,7 +56,7 @@
         <div class="doc-fields doc-fields--2">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Skipped, with nothing logged</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Ticket and pass confirmations, appointment emails, gift card emails, sale alerts, feedback requests, carpool messages, installment notices, poll suggestion notices, change and cancellation notices to ticket buyers, the new-event digest and the interest list's on-sale and reminder emails.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Ticket and pass confirmations, ticket reminders, appointment emails, gift card emails, sale alerts, feedback requests, carpool messages, installment notices, poll suggestion notices, change and cancellation notices to ticket buyers, the new-event digest and the interest list's on-sale and reminder emails.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Written to the log instead of sent</h4>
@@ -97,6 +97,11 @@
                         <td>New-event digest</td>
                         <td>A schedule's confirmed email subscribers</td>
                         <td>Checked every hour. While <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> is on (the default), the schedule sends one digest of the public events it has created since the last one, at most one every 72 hours. Events another schedule lists on it are not included. See <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">Email subscribers</a>.</td>
+                    </tr>
+                    <tr>
+                        <td>Ticket reminder</td>
+                        <td>Everyone with a paid ticket, a free ticket or a registration for an event</td>
+                        <td>Checked every hour. One email before each date they hold a ticket for, a day before unless the schedule chose 3 hours, 2 days or 3 days, or turned it off (Schedule settings &gt; Tickets &gt; Reminders; on for every schedule until its owner changes it). A day-based reminder that would arrive between 10 PM and 8 AM in the schedule's timezone goes at 8 PM the evening before. Not sent to imported attendees, season pass holders, or a ticket bought after the reminder was due. <code class="doc-inline-code">TICKET_REMINDERS=false</code> stops them for the whole install. See <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-reminders" class="doc-link">Reminders</a>.</td>
                     </tr>
                     <tr>
                         <td>Tickets on sale, and a reminder</td>
@@ -203,6 +208,16 @@
                         <td><code class="doc-inline-code">EVENT_INTEREST_RECIPIENT_BATCH</code></td>
                         <td><code class="doc-inline-code">2000</code></td>
                         <td>The most interest-list emails one hourly run queues. The rest go out on the next run.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">TICKET_REMINDER_RECIPIENT_BATCH</code></td>
+                        <td><code class="doc-inline-code">2000</code></td>
+                        <td>The most ticket reminders one hourly run queues. The rest go out on the next run.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">TICKET_REMINDERS</code></td>
+                        <td><code class="doc-inline-code">true</code></td>
+                        <td>Set to <code class="doc-inline-code">false</code> to stop every ticket reminder on the install, whatever each schedule chose.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">EVENT_INTEREST_TICKETS_MAX_AGE_DAYS</code></td>
@@ -551,7 +566,7 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Nothing arrives and nothing is logged</h4>
                 <ul class="doc-list text-sm">
-                    <li>With <code class="doc-inline-code">MAIL_MAILER=log</code> the app treats itself as having no mail transport and skips ticket, appointment, gift card, sale-alert and feedback emails, change and cancellation notices to ticket buyers, the new-event digest and the interest list's on-sale and reminder emails outright, so there is no error to find. Configure a real driver</li>
+                    <li>With <code class="doc-inline-code">MAIL_MAILER=log</code> the app treats itself as having no mail transport and skips ticket, ticket reminder, appointment, gift card, sale-alert and feedback emails, change and cancellation notices to ticket buyers, the new-event digest and the interest list's on-sale and reminder emails outright, so there is no error to find. Configure a real driver</li>
                     <li>Confirmation emails are also skipped for addresses on the reserved test domains listed under <a href="#testing" class="doc-link">Testing</a>. Buy a test ticket with a real address</li>
                 </ul>
             </div>

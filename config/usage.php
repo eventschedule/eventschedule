@@ -115,4 +115,15 @@ return [
     // ever satisfy must not occupy the window for ever - see the starvation guard in
     // SendEventInterestMail::candidates().
     'event_interest_tickets_max_age_days' => (int) (env('EVENT_INTEREST_TICKETS_MAX_AGE_DAYS') ?: 180),
+
+    // Ticket reminders (app:send-ticket-reminders): the ceiling on reminders one run may queue,
+    // counted in recipients for the same reason as the interest batch above. What is not sent this
+    // run is picked up by the next one, an hour later.
+    'ticket_reminder_recipient_batch' => (int) (env('TICKET_REMINDER_RECIPIENT_BATCH') ?: 2000),
+
+    // The operator's switch for the whole install: false stops every ticket reminder, whatever each
+    // schedule has chosen. On unless set to false.
+    // An EMPTY value is on, as everywhere in this file: only an explicit false stops them.
+    'ticket_reminders_enabled' => in_array(env('TICKET_REMINDERS'), [null, ''], true)
+        || (filter_var(env('TICKET_REMINDERS'), FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? true),
 ];

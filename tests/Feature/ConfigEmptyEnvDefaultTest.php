@@ -39,6 +39,7 @@ class ConfigEmptyEnvDefaultTest extends TestCase
             'announcement batch' => ['usage.php', 'AUDIENCE_ANNOUNCEMENT_BATCH'],
             'announcement recipient batch' => ['usage.php', 'AUDIENCE_ANNOUNCEMENT_RECIPIENT_BATCH'],
             'event interest recipient batch' => ['usage.php', 'EVENT_INTEREST_RECIPIENT_BATCH'],
+            'ticket reminder recipient batch' => ['usage.php', 'TICKET_REMINDER_RECIPIENT_BATCH'],
             // The sharpest of the three: `env('X', 48)` would let a BLANK value through as 0, and
             // max(1, 0) is 1 - turning "remind people 48 hours before" into "remind them an hour
             // before", hourly, on the shared mailer.

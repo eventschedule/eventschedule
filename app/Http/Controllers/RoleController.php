@@ -6778,6 +6778,17 @@ class RoleController extends Controller
             \App\Models\GuestPageSetting::store($role, ['show_next_event' => $request->boolean('show_next_event')]);
         }
 
+        // When ticket holders are reminded (ticket_reminder_settings), beside the schedule for the
+        // same reason. Only fields the save carried: absent is not off.
+        $reminders = [];
+        if ($request->has('ticket_reminders_enabled')) {
+            $reminders['enabled'] = $request->boolean('ticket_reminders_enabled');
+        }
+        if ($request->filled('ticket_reminders_hours')) {
+            $reminders['hours_before'] = (int) $request->input('ticket_reminders_hours');
+        }
+        \App\Models\TicketReminderSetting::store($role, $reminders);
+
         // The main address of a schedule served directly on its own domain, which lives beside
         // the schedule (custom_domain_settings) as Aurora's settings do. Only on a save that drew
         // the choice, for Direct mode, and on Enterprise, where every custom domain field is
@@ -9291,6 +9302,56 @@ class RoleController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * The ticket reminder as this schedule's guests will get it (Tickets > Reminders), drawn for its
+     * next event with the editor's own name in it. Nothing is sent and nothing is stored: the sale is
+     * a model that is never saved.
+     */
+    public function ticketReminderPreview(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            abort(403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $upcoming = fn ($query) => $query->where('events.is_cancelled', false)->whereNull('events.appointment_type_id')->whereNotNull('events.starts_at');
+        $event = $upcoming($role->ownEvents())->where('events.starts_at', '>=', now())->orderBy('events.starts_at')->first()
+            ?? $upcoming($role->ownEvents())->whereNotNull('events.days_of_week')->where('events.days_of_week', '!=', '')->orderByDesc('events.starts_at')->first();
+
+        if (! $event) {
+            return response(__('messages.ticket_reminders_preview_none'), 200)->header('Content-Type', 'text/plain; charset=UTF-8');
+        }
+
+        $user = auth()->user();
+        $sale = new Sale([
+            'name' => $user->name ?: __('messages.attendee'),
+            'email' => $user->email,
+            // The series' next real date, or the one-off's own day in the schedule's zone.
+            'event_date' => $event->days_of_week
+                ? ($event->nextOccurrenceFrom(now($event->scheduleTimezone())->format('Y-m-d')) ?? now($event->scheduleTimezone())->format('Y-m-d'))
+                : $event->getStartDateTime(null, true)->format('Y-m-d'),
+            'status' => 'paid',
+            'payment_method' => $event->rsvp_enabled ? 'rsvp' : 'stripe',
+        ]);
+
+        // The sender the real reminder would have (SendTicketReminders::remindOccurrence()).
+        $mailRole = $event->getRoleWithEmailSettings();
+        if (! $mailRole || $mailRole->is_deleted) {
+            $mailRole = \App\Console\Commands\SendTicketReminders::owningSchedule($event) ?? $role;
+        }
+        $previous = app()->getLocale();
+        app()->setLocale($mailRole->language_code ?: config('app.locale'));
+
+        try {
+            $html = (new \App\Mail\TicketReminder($sale, $event, $mailRole, preview: true))->render();
+        } finally {
+            app()->setLocale($previous);
+        }
+
+        return response($html)->header('X-Robots-Tag', 'noindex');
     }
 
     public function testEmail(Request $request, $subdomain): JsonResponse

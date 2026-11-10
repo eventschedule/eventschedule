@@ -389,7 +389,7 @@
                         <td>Every 15 minutes</td>
                     </tr>
                     <tr>
-                        <td>Release unpaid ticket reservations, expire waitlist offers, charge installment payments, send feedback requests, appointment and carpool reminders, event graphic emails, the new-event digest to confirmed subscribers, interest-list emails (tickets on sale, and the reminder before the event), send your events to the Event Schedule network when <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">federation</a> is on, and, with <code class="doc-inline-code">CACHE_STORE=database</code>, delete expired cache entries</td>
+                        <td>Release unpaid ticket reservations, expire waitlist offers, charge installment payments, send feedback requests, ticket, appointment and carpool reminders, event graphic emails, the new-event digest to confirmed subscribers, interest-list emails (tickets on sale, and the reminder before the event), send your events to the Event Schedule network when <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">federation</a> is on, and, with <code class="doc-inline-code">CACHE_STORE=database</code>, delete expired cache entries</td>
                         <td>Hourly</td>
                     </tr>
                     <tr>

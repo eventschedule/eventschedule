@@ -924,6 +924,7 @@
             'accommodation' => __('messages.accommodation'),
             'ticket_presets' => __('messages.ticket_presets'),
             'gift_cards' => __('messages.tickets_row_gift_cards'),
+            'reminders' => __('messages.ticket_reminders'),
             'mailing_list' => __('messages.engagement_row_mailing_list'),
             'auto_import' => __('messages.auto_import_settings'),
             'banner_is_pro' => $role->isPro(),
@@ -4517,6 +4518,45 @@
                         @endif
                         </div>
                         <!-- End Tab Content: Gift cards -->
+
+                        {{-- Ticket reminders (ticket_reminder_settings, app:send-ticket-reminders): every plan, on a
+                             day before when the owner has chosen nothing. Inside the saved-schedule branch,
+                             because the preview draws its next event. --}}
+                        @php
+                            $reminderSetting = $role->ticketReminderSetting;
+                            $reminderOn = (bool) old('ticket_reminders_enabled', $reminderSetting->enabled);
+                            $reminderHours = (int) old('ticket_reminders_hours', $reminderSetting->hours_before);
+                            $reminderOptions = [
+                                3 => __('messages.ticket_reminders_3_hours'),
+                                24 => __('messages.ticket_reminders_1_day'),
+                                48 => __('messages.ticket_reminders_2_days'),
+                                72 => __('messages.ticket_reminders_3_days'),
+                            ];
+                        @endphp
+                        <x-form-row group="tickets" tab="reminders" :title="__('messages.ticket_reminders')" :summary="$reminderOn ? ($reminderOptions[$reminderHours] ?? __('messages.ticket_reminders')) : __('messages.summary_off')" :muted="! $reminderOn" class="tickets-tab" />
+                        <div id="tickets-tab-reminders" class="event-subrow-body tickets-tab-content" hidden>
+                            <x-toggle name="ticket_reminders_enabled" id="ticket_reminders_enabled"
+                                :checked="$reminderOn"
+                                label="{{ __('messages.ticket_reminders_toggle') }}"
+                                help="{{ __('messages.ticket_reminders_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('ticket_reminders_enabled')" />
+
+                            <div class="mt-5 max-w-xs">
+                                <x-input-label for="ticket_reminders_hours" :value="__('messages.ticket_reminders_send')" />
+                                <select id="ticket_reminders_hours" name="ticket_reminders_hours" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    @foreach ($reminderOptions as $hours => $label)
+                                    <option value="{{ $hours }}" @selected($reminderHours === $hours)>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('ticket_reminders_hours')" />
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ticket_reminders_night') }}</p>
+
+                            <p class="mt-4 text-sm">
+                                <x-link href="{{ route('role.ticket_reminder_preview', ['subdomain' => $role->subdomain]) }}" target="_blank">{{ __('messages.ticket_reminders_preview') }}</x-link>
+                            </p>
+                        </div>
+                        <!-- End Tab Content: Reminders -->
                         </div>
                     </div>
                 </div>
@@ -8303,8 +8343,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     kit.summary('section-tickets', function() {
         var names = presetPlainNames();
+        // Reminders are left out: they are on by default, so naming them would take every tab's
+        // quiet "Not set up" away. Their row says what they do.
         var held = kit.join([names.join(', '), kit.on('gift_cards_enabled') ? words.gift_cards : '']);
         return held || { text: words.not_set_up, empty: true };
+    });
+    // On and when ("1 day before"), or Off: the select's own label says the when.
+    kit.summary('tickets:reminders', function() {
+        if (! kit.on('ticket_reminders_enabled')) {
+            return { text: words.off, empty: true };
+        }
+        var select = byId('ticket_reminders_hours');
+        return select && select.selectedIndex >= 0 ? select.options[select.selectedIndex].text : words.reminders;
     });
     // Whether the calendar entries carry text of the schedule's own, then the two feeds, which a
     // saved schedule always has. Its field names read as a list of things switched on.

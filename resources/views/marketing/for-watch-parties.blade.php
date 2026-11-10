@@ -2000,7 +2000,7 @@
                                 A screening you add does reach confirmed email subscribers on its own, as a batched digest. What never sends itself is the newsletter: no automation builder, no branching sequence, no drip. You write that one and you send it, which is slower and also the reason your list does not quietly rot. Open and click rates come back afterwards so you can tell whether Friday's note actually landed.
                             </p>
                             <p>
-                                Automatic mail is kept for the things a person asked for: the confirmation every registrant gets the moment they take a place, the note to the waitlist when a full night frees up, and a reminder before the night for anybody who left an address with "Tell me if anything changes" instead of registering. And notifications run the other way too: when somebody asks you to add their screening to your calendar, you are the one who gets the email.
+                                Automatic mail is kept for the things a person asked for: the confirmation every registrant gets the moment they take a place, a reminder before the night with their QR code, the note to the waitlist when a full night frees up, and a reminder for anybody who left an address with "Tell me if anything changes" instead of registering. And notifications run the other way too: when somebody asks you to add their screening to your calendar, you are the one who gets the email.
                             </p>
                         </div>
                         <div class="wp-card" data-reveal style="--reveal-delay: 0.1s;">

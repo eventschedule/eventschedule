@@ -4563,6 +4563,15 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * When the schedule's ticket holders are reminded of their event (Tickets > Reminders). No row
+     * reads as the defaults: on, a day before (app:send-ticket-reminders).
+     */
+    public function ticketReminderSetting()
+    {
+        return $this->hasOne(TicketReminderSetting::class)->withDefault(TicketReminderSetting::DEFAULTS);
+    }
+
+    /**
      * The schedule's venue map settings (Page content > Venue map). Not columns here because this
      * table is at MySQL's row-size limit; a schedule with no row has its map off, which the
      * default model says. Read through App\Services\VenueMap, which also knows whether the

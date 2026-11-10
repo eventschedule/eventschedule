@@ -837,6 +837,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/subscription/swap', [SubscriptionController::class, 'swap'])->name('subscription.swap');
     Route::post('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
+    // The ticket reminder as the schedule's guests will get it (Tickets > Reminders), for its editors.
+    Route::get('/{subdomain}/ticket-reminder-preview', [RoleController::class, 'ticketReminderPreview'])->name('role.ticket_reminder_preview')->middleware('throttle:30,1');
     // How a schedule's venues are placed on its venue map, for its editors.
     Route::get('/{subdomain}/venue-map/status', [\App\Http\Controllers\VenueMapController::class, 'status'])->name('role.venue_map.status');
     Route::put('/{subdomain}/venue-map/marks/{venue}', [\App\Http\Controllers\VenueMapController::class, 'mark'])->name('role.venue_map.mark');

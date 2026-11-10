@@ -34,6 +34,7 @@ use App\Models\SeatingSeat;
 use App\Models\SeatingSection;
 use App\Models\SeatingTable;
 use App\Models\Ticket;
+use App\Models\TicketReminderSetting;
 use App\Models\TicketWaitlist;
 use App\Utils\Aurora;
 use App\Utils\CountryUtils;
@@ -222,6 +223,12 @@ class BackupService
         // What the guest page shows lives beside the schedule too (guest_page_settings).
         $roleData['guest_page_settings'] = [
             'show_next_event' => (bool) $role->guestPageSetting->show_next_event,
+        ];
+
+        // When ticket holders are reminded lives beside the schedule too (ticket_reminder_settings).
+        $roleData['ticket_reminder_settings'] = [
+            'enabled' => (bool) $role->ticketReminderSetting->enabled,
+            'hours_before' => (int) $role->ticketReminderSetting->hours_before,
         ];
 
         if ($includeImages) {
@@ -1912,6 +1919,18 @@ class BackupService
 
         if (is_array($data['guest_page_settings'] ?? null) && array_key_exists('show_next_event', $data['guest_page_settings'])) {
             \App\Models\GuestPageSetting::store($role, ['show_next_event' => (bool) $data['guest_page_settings']['show_next_event']]);
+        }
+
+        if (is_array($data['ticket_reminder_settings'] ?? null)) {
+            $reminders = $data['ticket_reminder_settings'];
+            $values = [];
+            if (array_key_exists('enabled', $reminders)) {
+                $values['enabled'] = (bool) $reminders['enabled'];
+            }
+            if (in_array((int) ($reminders['hours_before'] ?? 0), TicketReminderSetting::HOURS_OPTIONS, true)) {
+                $values['hours_before'] = (int) $reminders['hours_before'];
+            }
+            TicketReminderSetting::store($role, $values);
         }
 
         return $role;

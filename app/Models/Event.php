@@ -610,6 +610,12 @@ class Event extends Model
                         });
 
                         $model->sales->each(function ($sale) use ($newDate) {
+                            // A reminder sent for the old day said the wrong day, so the holder is
+                            // reminded again for the new one (app:send-ticket-reminders). The time
+                            // alone moving within the day changes nothing here.
+                            if ($sale->event_date !== $newDate && $sale->reminder_sent_at) {
+                                $sale->reminder_sent_at = null;
+                            }
                             $sale->event_date = $newDate;
                             $sale->save();
                         });
@@ -1670,7 +1676,11 @@ class Event extends Model
             return null;
         }
 
-        $text = html_entity_decode(strip_tags($this->ticket_notes_html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // A paragraph, a line break or a list item is a new line in the text part too: stripped bare,
+        // "Doors open at 7:30 PM.<br>Bring a photo ID." read as one run-on line.
+        $html = preg_replace('#(<br\s*/?>|</p>|</li>|</h[1-6]>|</div>)#i', "$1\n", $this->ticket_notes_html) ?? $this->ticket_notes_html;
+        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = trim(preg_replace("/\n{3,}/", "\n\n", $text) ?? $text);
 
         $role = $role ?? $this->getRoleWithEmailSettings() ?? $this->roles->first();
         if (! $role) {

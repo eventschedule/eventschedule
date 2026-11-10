@@ -71,6 +71,7 @@ class HelpUtils
                 'section-tickets' => '/docs/creating-schedules#tickets',
                 'tickets-tab-presets' => '/docs/creating-schedules#ticket-presets',
                 'tickets-tab-gift-cards' => '/docs/gift-cards#setup',
+                'tickets-tab-reminders' => '/docs/creating-schedules#ticket-reminders',
                 'section-settings' => '/docs/creating-schedules#settings',
                 'settings-tab-general' => '/docs/creating-schedules#settings-general',
                 'settings-tab-events' => '/docs/creating-schedules#settings-new-events',

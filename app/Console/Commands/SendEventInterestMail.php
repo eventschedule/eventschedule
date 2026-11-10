@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\EventInterestNotification;
 use App\Models\EventInterest;
+use App\Models\Sale;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -68,6 +69,9 @@ class SendEventInterestMail extends Command
 
     /** Per-event memo of the guest-visibility check, for the same reason. */
     private array $visible = [];
+
+    /** Per-occurrence memo of the addresses that hold a ticket (holdsTicket()). */
+    private array $ticketHolders = [];
 
     public function handle(): int
     {
@@ -174,6 +178,19 @@ class SendEventInterestMail extends Command
                 continue;
             }
 
+            // Somebody who asked about the event and then got a ticket for it is reminded by
+            // app:send-ticket-reminders, which says more (their ticket, their QR code). Two
+            // reminders for one night is one too many. Stamped rather than skipped, so the row
+            // leaves the window instead of being looked at again every hour; only while the
+            // schedule's ticket reminders are on, or nobody would remind them.
+            if ($kind === EventInterestNotification::KIND_REMINDER && $this->holdsTicket($interest, $role)) {
+                if ($apply) {
+                    DB::table('event_interests')->where('id', $interest->id)->whereNull($column)->update([$column => now(), 'updated_at' => now()]);
+                }
+
+                continue;
+            }
+
             if (! $apply) {
                 $this->line(sprintf('[dry] %s -> %s (%s)', $kind, $interest->email, $event->name));
                 $this->queued++;
@@ -226,7 +243,7 @@ class SendEventInterestMail extends Command
 
         $query = EventInterest::confirmed()
             ->whereNull($column)
-            ->with(['event.creatorRole', 'event.venue'])
+            ->with(['event.creatorRole.ticketReminderSetting', 'event.venue'])
             // A cancelled event owes its list a cancellation notice, which EventChangeNotifier
             // sends. It will never owe them either of these, so its rows must not sit in the window
             // for ever - see the starvation note below.
@@ -306,6 +323,44 @@ class SendEventInterestMail extends Command
 
         // Inside the window and not already gone.
         return $starts->isFuture() && $starts->lte(now()->addHours($hours));
+    }
+
+    /**
+     * Whether app:send-ticket-reminders will remind this address of this occurrence: a paid, live
+     * ticket or registration under the same address, not imported (an import's mail is the owner's
+     * choice), bought before the ticket reminder's moment, on a schedule and an install that send
+     * ticket reminders. Anything less, and this interest reminder is the only one they would get.
+     */
+    private function holdsTicket(EventInterest $interest, $role): bool
+    {
+        $setting = $role->ticketReminderSetting;
+        $event = $interest->event;
+
+        if (! config('usage.ticket_reminders_enabled') || ! $setting->enabled || ! $event->starts_at) {
+            return false;
+        }
+
+        // One query per occurrence, not per row: the addresses holding such a ticket.
+        $key = $interest->event_id.'|'.$interest->event_date;
+
+        if (! isset($this->ticketHolders[$key])) {
+            $start = $event->occurrenceStartUtc((string) $interest->event_date);
+            $moment = SendTicketReminders::reminderMoment($start, (int) $setting->hours_before, $event->scheduleTimezone());
+
+            // The ticket reminder's own filter (SendTicketReminders::remindable()), so the two cannot
+            // disagree about who it reaches: season passes and imports never are.
+            $this->ticketHolders[$key] = array_flip(SendTicketReminders::remindable(Sale::query(), unremindedOnly: false)
+                ->where('sales.event_id', $interest->event_id)
+                ->when($interest->event_date, fn ($q) => $q->where('sales.event_date', $interest->event_date))
+                ->where('sales.created_at', '<', $moment)
+                ->with('installmentPlan')
+                ->get()
+                ->reject(fn (Sale $sale) => $sale->isInstallmentDelinquent())
+                ->map(fn (Sale $sale) => mb_strtolower((string) $sale->email))
+                ->all());
+        }
+
+        return isset($this->ticketHolders[$key][mb_strtolower((string) $interest->email)]);
     }
 
     private function dispatchOne(string $kind, EventInterest $interest, $event, $role): void
