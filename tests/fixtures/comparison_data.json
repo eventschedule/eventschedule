@@ -8209,7 +8209,7 @@
             {
                 "tag": "No text blasts",
                 "title": "Guests hear from you by email",
-                "text": "Partiful texts guests and sends them reminders, and Event Schedule sends guests no text messages. A registration arrives as an email with its QR ticket, and the \"Notify me\" list on an event gets an email reminder shortly before it starts."
+                "text": "Partiful texts guests and sends them reminders, and Event Schedule sends guests no text messages. A registration arrives as an email with its QR ticket, and every registered guest and ticket holder gets an email reminder before the event."
             },
             {
                 "tag": "Private events are Enterprise",

@@ -80,6 +80,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Newsletter management' => [self::ABOVE, '/features/newsletters'],
         'Email subscribers (audience capture)' => [self::ABOVE, '/features/newsletters'],
         'Event interest capture ("tell me when tickets go on sale")' => [self::ROW, 'Interest list'],
+        'Ticket reminders' => [self::LEFT_OUT, 'an email every guest gets with nothing to choose, described in the user guide (creating-schedules#ticket-reminders); a row waits for the grid\'s next set of six'],
         'Automatic new-event announcements' => [self::ABOVE, '/features/newsletters'],
         'Embed calendar on website' => [self::ABOVE, '/features/embed-calendar'],
         'Free event registration / RSVP' => [self::ABOVE, '/features/registration'],
