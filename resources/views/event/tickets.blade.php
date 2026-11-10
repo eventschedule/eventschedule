@@ -1992,7 +1992,7 @@
             </div>
             <div v-if="donationChoice === 'other' && donationCustom" class="mt-2 flex items-center gap-2 max-w-[12rem]">
                 <span class="text-sm text-gray-600 dark:text-gray-400" aria-hidden="true">{{ \App\Utils\MoneyUtils::symbol($event->ticket_currency_code) }}</span>
-                <input id="donation-other" type="text" inputmode="decimal" v-model="donationOther" :aria-label="@json(__('messages.donation_other_amount'))"
+                <input id="donation-other" type="text" inputmode="decimal" v-model="donationOther" aria-label="{{ __('messages.donation_other_amount') }}"
                     :aria-invalid="donationOutOfRange ? 'true' : 'false'" aria-describedby="donation-range"
                     class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-sm">
             </div>

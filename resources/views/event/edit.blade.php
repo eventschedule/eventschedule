@@ -4252,7 +4252,7 @@
                                                     type="text" inputmode="decimal" name="donation_amounts[]"
                                                     v-model="event.donation_amounts[index]"
                                                     :placeholder="donationPlaceholders[index]"
-                                                    :aria-label="@json(__('messages.donation_suggested_amounts')) + ' ' + (index + 1)"
+                                                    :aria-label='@json(__('messages.donation_suggested_amounts')) + " " + (index + 1)'
                                                     class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm">
                                             </div>
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.donation_suggested_amounts_help') }}</p>
