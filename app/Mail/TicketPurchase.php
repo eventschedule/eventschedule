@@ -7,7 +7,9 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Services\Wallet\GoogleWalletService;
+use App\Utils\IcsUtils;
 use App\Utils\QrCodeUtils;
+use App\Utils\TicketInvite;
 use App\Utils\UrlUtils;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -128,9 +130,18 @@ class TicketPurchase extends Mailable
         // body's QR block was hidden (cd43333dc): nothing showed in the body, but mail clients still
         // listed the image. Now it is deliberate, a named attachment every client shows, and the
         // body stays as that commit decided.
-        return [
+        $attachments = [
             Attachment::fromData(fn () => QrCodeUtils::png($this->ticketUrl()), 'ticket-qr-code.png')->withMime('image/png'),
         ];
+
+        // The calendar invitation: the mail app shows it with its own add button, and the change
+        // and cancellation mails later move it or take it off (TicketInvite).
+        $invite = TicketInvite::forSale($this->sale, $this->event, $this->role, 'REQUEST');
+        if ($invite !== null) {
+            $attachments[] = IcsUtils::attachment($invite, 'REQUEST', 'event.ics');
+        }
+
+        return $attachments;
     }
 
     private function ticketUrl(): string

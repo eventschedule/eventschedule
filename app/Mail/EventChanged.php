@@ -4,10 +4,12 @@ namespace App\Mail;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\TicketInvite;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -15,6 +17,15 @@ use Illuminate\Queue\SerializesModels;
 class EventChanged extends Mailable
 {
     use Queueable, SerializesModels;
+
+    /**
+     * The buyer this copy of the mail goes to, for the calendar update it carries (TicketInvite).
+     * Set by EventChangeNotifier through forAttendee(); a copy without it (the owner's preview of
+     * a change) attaches nothing. A property with a default rather than a constructor argument: a
+     * mail queued before it existed unserializes without it, and an uninitialised typed property
+     * would throw.
+     */
+    protected ?string $attendeeEmail = null;
 
     /**
      * @param  array  $changes  ['date' => ['old_starts_at','old_duration','old_timezone'], 'location' => ['variant','old_venue','new_venue']]
@@ -28,6 +39,25 @@ class EventChanged extends Mailable
         protected string $icalUrl = '',
         protected ?string $recipientName = null,
     ) {}
+
+    public function forAttendee(string $email): static
+    {
+        $this->attendeeEmail = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return array<int, Attachment>
+     */
+    public function attachments(): array
+    {
+        if (! $this->attendeeEmail) {
+            return [];
+        }
+
+        return TicketInvite::attachmentsFor($this->event, $this->role, $this->attendeeEmail, 'REQUEST');
+    }
 
     public function envelope(): Envelope
     {

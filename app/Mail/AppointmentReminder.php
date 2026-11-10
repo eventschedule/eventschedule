@@ -82,9 +82,10 @@ class AppointmentReminder extends Mailable
      */
     public function attachments(): array
     {
+        // An invitation (method=REQUEST), so the guest's mail app offers to add it, and a later move
+        // updates the same entry instead of adding a second one.
         return [
-            Attachment::fromData(fn () => IcsUtils::buildInvite($this->event, $this->role, $this->sale), 'appointment.ics')
-                ->withMime('text/calendar'),
+            IcsUtils::attachment(fn () => IcsUtils::buildInvite($this->event, $this->role, $this->sale, 'REQUEST'), 'REQUEST', 'appointment.ics'),
         ];
     }
 }

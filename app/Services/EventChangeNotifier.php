@@ -56,7 +56,7 @@ class EventChangeNotifier
             $icalUrl = $event->getAppleCalendarUrl($sale->event_date, false, true);
 
             SendQueuedEmail::dispatch(
-                new EventChanged($event, $role, $changes, $eventUrl, $note, $icalUrl, $sale->name),
+                (new EventChanged($event, $role, $changes, $eventUrl, $note, $icalUrl, $sale->name))->forAttendee((string) $sale->email),
                 $sale->email,
                 $role->id,
                 $locale
@@ -100,7 +100,7 @@ class EventChangeNotifier
             SendQueuedEmail::dispatch(
                 // A leg of a multi-event order: say the rest of the purchase stands, or the
                 // buyer has no way to tell whether one cancellation voided everything.
-                new EventCancelled($event, $role, $eventUrl, $note, $sale->name, (bool) $sale->order_id, $sale->event_date),
+                (new EventCancelled($event, $role, $eventUrl, $note, $sale->name, (bool) $sale->order_id, $sale->event_date))->forAttendee((string) $sale->email),
                 $sale->email,
                 $role->id,
                 $locale

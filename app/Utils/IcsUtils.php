@@ -5,35 +5,29 @@ namespace App\Utils;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use Carbon\Carbon;
+use Illuminate\Mail\Mailables\Attachment;
 
 /**
- * Single-event iCalendar (.ics) invite for appointment emails. Ported from
- * FeedController::buildVevent with METHOD:PUBLISH so mail clients render an add-to-calendar action.
+ * Single-event iCalendar (.ics) invite for appointment emails, plus the pieces TicketInvite shares
+ * (escaping, folding, the organizer and the attachment itself). Ported from FeedController::buildVevent.
  */
 class IcsUtils
 {
     /**
-     * @param  string  $method  `PUBLISH` (default) or `REQUEST`.
+     * @param  string  $method  `PUBLISH` (default), `REQUEST` or `CANCEL`.
      *
-     * `PUBLISH` is an "add this to your calendar" file: mail clients offer a button and each import
-     * creates a NEW entry, so re-sending after a time change leaves the guest holding two.
+     * `PUBLISH` is an "add this to your calendar" file, which is what the download on the manage page
+     * serves: each import creates a NEW entry.
      *
-     * `REQUEST` is a real iTIP invitation. Combined with the stable UID, a bumped SEQUENCE and an
-     * ORGANIZER/ATTENDEE pair - all three are required, SEQUENCE alone does nothing under PUBLISH - a
-     * client CAN update the entry it already has instead of adding another. Used for the reschedule
-     * mail; confirmation and reminder stay on PUBLISH so their long-standing behaviour is untouched.
+     * `REQUEST` is a real iTIP invitation, which is what every appointment mail attaches. With the
+     * stable UID, a bumped SEQUENCE and an ORGANIZER/ATTENDEE pair, a client updates the entry it
+     * already has instead of adding another. `CANCEL` takes that entry off the guest's calendar.
      *
-     * Two limits on that, stated here rather than left as an implied promise:
-     *
-     * 1. The MIME part is plain `text/calendar` with no `method=REQUEST` parameter, because Laravel's
-     *    Attachment cannot express a parameterised content type. Outlook and Apple Mail decide
-     *    invitation-versus-attachment on that parameter, not on the METHOD: line in the body, so they
-     *    may still present the file as a download.
-     * 2. The entry being updated was created by a PUBLISH invite that carried no ORGANIZER, and RFC 5546
-     *    does not require a client to match an update REQUEST against an organizer-less item.
-     *
-     * So treat in-place update as best-effort. `update_your_calendar_note` is rendered in the mail for
-     * exactly this reason and should stay there.
+     * A mail client decides invitation-versus-file on the MIME part's `method=` parameter, not on the
+     * METHOD: line in the body, so a mailed invite goes through attachment(), never a bare
+     * `text/calendar` attachment. (This class once said Laravel could not express that parameter; it
+     * can, Symfony writes it to the header as given. `CalendarInviteMailTest` holds it.)
      */
     public static function buildInvite(Event $event, ?Role $role = null, ?Sale $sale = null, string $method = 'PUBLISH'): string
     {
@@ -53,7 +47,7 @@ class IcsUtils
         $start = $startAt->format('Ymd\THis\Z');
         $end = $startAt->copy()->addMinutes(Event::durationHoursToMinutes($duration))->format('Ymd\THis\Z');
 
-        $method = $method === 'REQUEST' ? 'REQUEST' : 'PUBLISH';
+        $method = in_array($method, ['REQUEST', 'CANCEL'], true) ? $method : 'PUBLISH';
         // A booking awaiting the owner's approval is genuinely tentative - saying CONFIRMED would put a
         // solid entry on the guest's calendar for a time nobody has agreed to yet.
         $awaitingApproval = $event->appointment_type_id && $event->isAwaitingCreatorApproval();
@@ -76,7 +70,7 @@ class IcsUtils
             $ics .= 'LOCATION:'.self::escape($location)."\r\n";
         }
 
-        if ($method === 'REQUEST') {
+        if ($method !== 'PUBLISH') {
             // escapeParam, NOT escape: CN is a param-value (RFC 5545 3.1), where backslash escaping is
             // undefined. TEXT-escaping it left a colon untouched, and a parser splits a property at the
             // first unquoted colon - so a guest called "Dr: Smith" produced a CAL-ADDRESS of
@@ -88,12 +82,14 @@ class IcsUtils
 
             if ($sale?->email) {
                 $partstat = $awaitingApproval ? 'NEEDS-ACTION' : 'ACCEPTED';
+                // RSVP=FALSE: nobody reads a reply. A Yes or No pressed in the guest's mail app
+                // would go to the sender's address and change nothing here.
                 $ics .= 'ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT='.$partstat
-                    .';CN='.self::escapeParam((string) $sale->name).':mailto:'.$sale->email."\r\n";
+                    .';RSVP=FALSE;CN='.self::escapeParam((string) $sale->name).':mailto:'.$sale->email."\r\n";
             }
         }
 
-        if ($event->is_cancelled) {
+        if ($method === 'CANCEL' || $event->is_cancelled) {
             $ics .= "STATUS:CANCELLED\r\n";
         } elseif ($awaitingApproval) {
             $ics .= "STATUS:TENTATIVE\r\n";
@@ -106,11 +102,33 @@ class IcsUtils
     }
 
     /**
+     * The invite as a mail attachment, with the `method=` parameter that makes a mail client show it
+     * as an invitation (with its own add button) rather than a file to download.
+     */
+    public static function attachment(\Closure|string $ics, string $method, string $filename = 'invite.ics'): Attachment
+    {
+        $data = $ics instanceof \Closure ? $ics : fn () => $ics;
+
+        return Attachment::fromData($data, $filename)
+            ->withMime('text/calendar; method='.$method.'; charset=UTF-8');
+    }
+
+    /**
+     * Whether the guest was ever sent an entry for this booking: a confirmation, or a move (which
+     * mails a tentative one even while the booking waits for approval). A cancellation for an entry
+     * nobody was given would show up in their mail as a cancelled event they never had.
+     */
+    public static function guestHoldsInvite(Event $event, ?Sale $sale): bool
+    {
+        return (bool) ($sale?->confirmed_at || $event->rescheduled_at);
+    }
+
+    /**
      * A param-value per RFC 5545 3.1: quoted when it contains a character that would otherwise end the
      * value or the parameter, with any embedded DQUOTE stripped since the grammar provides no escape for
      * one inside a quoted string.
      */
-    private static function escapeParam(string $text): string
+    public static function escapeParam(string $text): string
     {
         $clean = str_replace(['"', "\r", "\n"], ['', ' ', ' '], $text);
 
@@ -127,7 +145,7 @@ class IcsUtils
      * receiver unfolds before parsing) but measured to leave a line that is not valid UTF-8 on its own in
      * 39 of 120 Hebrew/Arabic/CJK names, which breaks line-oriented tooling for no benefit.
      */
-    private static function fold(string $ics): string
+    public static function fold(string $ics): string
     {
         $out = [];
 
@@ -162,10 +180,13 @@ class IcsUtils
      *
      * @return array{0:string, 1:string}
      */
-    private static function organizer(?Role $role): array
+    public static function organizer(?Role $role): array
     {
         $email = config('mail.from.address');
-        $name = config('mail.from.name');
+        // The schedule's own sender name, else the schedule's name, and the platform's only when
+        // there is no schedule: a calendar shows the organizer, and guest mail never names the
+        // platform (docs/BRANDING_MATRIX.md rule 5). Only the ADDRESS must match the From header.
+        $name = filled($role?->name) ? $role->name : config('mail.from.name');
 
         if ($role && $role->hasEmailSettings()) {
             $settings = $role->getEmailSettings();
@@ -177,7 +198,7 @@ class IcsUtils
             }
         }
 
-        return [$email, $name ?: ($role->name ?? 'Event Schedule')];
+        return [$email, $name ?: 'Event Schedule'];
     }
 
     /**
@@ -222,7 +243,7 @@ class IcsUtils
         return $event->appointmentType?->name ?: $event->name;
     }
 
-    /** @return array{0: \Carbon\Carbon, 1: \Carbon\Carbon} UTC start/end of the booking. */
+    /** @return array{0: Carbon, 1: Carbon} UTC start/end of the booking. */
     private static function window(Event $event): array
     {
         $duration = $event->duration > 0 ? $event->duration : 2;
@@ -255,7 +276,7 @@ class IcsUtils
         };
     }
 
-    private static function escape(string $text): string
+    public static function escape(string $text): string
     {
         return str_replace(
             ['\\', ';', ',', "\r\n", "\r", "\n"],

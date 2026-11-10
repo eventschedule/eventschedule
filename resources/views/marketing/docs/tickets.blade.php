@@ -56,7 +56,7 @@
             </svg>
             General
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and a QR code on every ticket. What each plan includes is in <a href="#plan-table" class="doc-link">the plan table</a> below.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails with a calendar invite, and a QR code on every ticket. What each plan includes is in <a href="#plan-table" class="doc-link">the plan table</a> below.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Ticketing is set up and run in three places:</p>
         <ul class="doc-list mb-6">
@@ -238,7 +238,7 @@
             <li>Save the event</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors then see a <strong class="text-gray-900 dark:text-white">Register</strong> button on your event page. After registering they receive a confirmation email with a QR code for check-in, and the registration appears in your <a href="#managing-sales" class="doc-link">Sales</a> list, where its total reads <em>Registered</em>. Whatever you write in <strong class="text-gray-900 dark:text-white">Registration notes</strong> (directions, parking, a dress code) goes into that email and onto their ticket.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors then see a <strong class="text-gray-900 dark:text-white">Register</strong> button on your event page. After registering they receive a confirmation email with a QR code for check-in and a calendar invite, and the registration appears in your <a href="#managing-sales" class="doc-link">Sales</a> list, where its total reads <em>Registered</em>. Whatever you write in <strong class="text-gray-900 dark:text-white">Registration notes</strong> (directions, parking, a dress code) goes into that email and onto their ticket.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Registrants can cancel themselves from the ticket page linked in their email, which frees the spot again.</p>
 
@@ -468,7 +468,7 @@
             <li>Save the event</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors take a free ticket through the same checkout, with nothing to pay, and the button on the event page reads <strong class="text-gray-900 dark:text-white">Get Tickets</strong>. They receive a confirmation email with a QR code, and you have a list of who is coming. Add <strong class="text-gray-900 dark:text-white">Ticket notes</strong> (in the <a href="#checkout" class="doc-link">Checkout</a> row) to include directions or other instructions in that email. A holder of a free ticket can cancel it themselves from their ticket page, which releases the spot; paid orders are cancelled by you from the <a href="#managing-sales" class="doc-link">Sales</a> page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors take a free ticket through the same checkout, with nothing to pay, and the button on the event page reads <strong class="text-gray-900 dark:text-white">Get Tickets</strong>. They receive a confirmation email with a QR code and a calendar invite, and you have a list of who is coming. Add <strong class="text-gray-900 dark:text-white">Ticket notes</strong> (in the <a href="#checkout" class="doc-link">Checkout</a> row) to include directions or other instructions in that email. A holder of a free ticket can cancel it themselves from their ticket page, which releases the spot; paid orders are cancelled by you from the <a href="#managing-sales" class="doc-link">Sales</a> page.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">A ticket type priced at zero sells on <a href="#plan-table" class="doc-link">every plan</a>, Free included. On a Free schedule whose event mixes a free tier with paid ones, the free tier stays on sale and only the paid rows sit out until you subscribe.</p>
 
