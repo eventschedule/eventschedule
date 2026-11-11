@@ -183,6 +183,18 @@
                 'a' => 'Yes, as sub-schedules. Main stage, rooftop bar, private room - give each one a name and a colour, and it gets its own filterable view and its own page within your calendar. Visitors can filter by space or see everything at once. A sub-schedule labels an event rather than reserving a space, so it will not warn you if two things land in the same room.',
             ],
             [
+                'q' => 'How do I stop double bookings at my venue?',
+                'a' => 'Give every date one home before you agree to it. Keep each room as a sub-schedule, check that room\'s day on the calendar before you say yes, save the date as a Draft the moment it is offered, and let one person turn drafts into confirmed dates. Event Schedule does not warn you about two events in the same room at the same time, so that routine is the check. Private hire is the exception: the booking page only offers times that nothing else on the schedule overlaps.',
+            ],
+            [
+                'q' => 'What is the difference between a hold and a confirmed booking?',
+                'a' => 'A hold, or pencil, keeps a date for someone while something is still open: a contract, a deposit, an agent\'s answer. A confirmed booking is one you are ready to announce. In Event Schedule a hold is a Draft event, which your team sees and nobody else does, and confirming it is pressing Publish, which puts it on your public calendar, your website embed and the calendar feed. A venue that takes a first and a second hold on one night can save both as drafts, name them that way, and delete the one that is released.',
+            ],
+            [
+                'q' => 'Do booking requests show on my public calendar before I accept them?',
+                'a' => 'Not while Require Approval is on, which is the default. A request waits on the Requests tab, with the sender\'s details when it came from the Booking Form, until you press Accept, which publishes it, or Decline, which removes it. Turn Require Approval off and requests go straight onto your public calendar, which only suits a venue that trusts everyone who has the link. Schedules you name under Approved Schedules skip the queue for events they add from their own schedule.',
+            ],
+            [
                 'q' => 'How do performers request to play at my venue?',
                 'a' => 'Enable the booking inbox on your schedule, and musicians, DJs, and other performers can submit requests to play at your venue. You review each request and approve or decline from your dashboard. Approved events are automatically added to your calendar.',
             ],
@@ -195,12 +207,16 @@
                 'a' => 'Yes. Copy a simple embed code and paste it into your website. The calendar updates automatically whenever you add or change events. It works with any website builder including WordPress, Squarespace, and Wix.',
             ],
             [
+                'q' => 'Can each room have its own calendar on our website?',
+                'a' => 'Yes. Every sub-schedule has its own address, such as yourvenue.eventschedule.com/back-room, and you can embed one room on its own by adding schedule= and the room\'s slug to the embed address. Put the main stage\'s calendar on its page of your website, the studio\'s on another, and the whole building on the home page. Each one updates itself when you change an event. Embedding is free on every plan.',
+            ],
+            [
                 'q' => 'Can multiple staff members manage the calendar?',
-                'a' => 'Your schedule includes one team member on the free plan, and the Enterprise plan adds up to five. Each member is either an admin, who can add and edit events and sees the schedule\'s ticket sales, or a viewer, who can see the schedule without changing it. Anyone with access to the schedule can scan tickets at the door from their own phone.',
+                'a' => 'On the Free and Pro plans a schedule has one member: you. The Enterprise plan lets you add a team, up to five members in total on eventschedule.com. Each member is either an admin, who can add and edit events, answer booking requests and see the schedule\'s ticket sales, or a viewer, who can see the schedule without changing it or seeing its sales. Admins and viewers alike can scan tickets at the door from their own phone.',
             ],
             [
                 'q' => 'Can people book our function room or studio time?',
-                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours you are available, add per-date overrides for holidays, and charge for it through Stripe, PayPal, Payfast, Razorpay, a payment link or cash if you want to. The free plan carries one bookable type and Pro removes the cap. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
+                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours it is available, and guests pick a time on your public booking page. The free plan carries one bookable type, free to book. Pro adds more types, a price paid through Stripe, PayPal, Payfast, Razorpay, a payment link or cash, per-date overrides for holidays, and approval before anything is confirmed.',
             ],
             [
                 'q' => 'Can we use our own domain and remove Event Schedule branding?',
@@ -229,6 +245,8 @@
             ['week', 'Your week'],
             ['front-of-house', 'Front of house'],
             ['back-of-house', 'Back of house'],
+            ['checklist', 'Buyer\'s checklist'],
+            ['holds', 'Holds and clashes'],
             ['venues', 'Every kind of venue'],
             ['faq', 'Questions'],
             ['claim', 'Get started'],
@@ -238,6 +256,8 @@
             ['#week', 'Your week'],
             ['#front-of-house', 'Front of house'],
             ['#back-of-house', 'Back of house'],
+            ['#checklist', 'Checklist'],
+            ['#holds', 'Holds'],
             ['#venues', 'Venues'],
             ['#faq', 'FAQ'],
         ];
@@ -485,7 +505,7 @@
         accent="teal"
         badge="Private hire"
         heading="Let people book the room"
-        lede="The function room, the studio, the back bar, a venue tour. Publish the hours each space is free and let people pick a time themselves, with the price paid up front if you want it."
+        lede="The function room, the studio, the back bar, a venue tour. Publish the hours each space is free and let people pick a time themselves. On Pro, take the price up front and approve each booking before it is confirmed."
         :chips="['Bookable spaces', 'Weekly hours', 'Holiday overrides', 'Paid online or in cash', 'Approval required', 'Reschedule links']"
         :flip="true"
         frame="panel"
@@ -755,7 +775,7 @@
         accent="teal"
         badge="The numbers"
         heading="What sold, what did not, and where they came from"
-        lede="See which nights pull, which channels send people, and what your room earned. Export the sales with every custom field, and collect star ratings from the people who actually turned up."
+        lede="See which nights pull, which channels send people, and what your room earned. On Pro, export the sales with every custom field and collect star ratings from the people who actually turned up."
         :chips="['Page views', 'Traffic sources', 'Appearance views', 'Sales CSV export', 'Post-event feedback']"
         :flip="true"
         frame="browser"
@@ -882,6 +902,184 @@
                     </li>
                 @endforeach
             </ol>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- The buyer's checklist: the house lights come back up         -->
+    <!-- ============================================================ -->
+    @php
+        $checklist = [
+            [
+                'job' => 'A public calendar that stays right',
+                'ask' => 'When I move a date, does every copy move with it: my website, the link in my bio, the calendars people subscribed to?',
+                'why' => 'A date that is right on Instagram and wrong on your website sends somebody to a locked door. If the website copy is pasted in by hand, it will be wrong by the second month.',
+                'here' => 'One schedule page, a website embed that loads live on every view, and a calendar feed people subscribe to, so a moved date is right everywhere without re-pasting anything. Free on every plan.',
+                'href' => marketing_url('/docs/sharing') . '#embed',
+                'label' => 'Embedding, in the guide',
+            ],
+            [
+                'job' => 'Holds kept apart from confirmed dates',
+                'ask' => 'Can I pencil a date in so my team sees it and the public does not?',
+                'why' => 'Much of a venue diary is maybes: a promoter waiting on an agent, a couple choosing between two Saturdays, a second hold behind a first. A tool that cannot keep a maybe private pushes it into a spreadsheet beside the calendar, and the two drift apart.',
+                'here' => 'Save the event as a Draft. Your team sees it on the admin calendar marked Draft, and it stays off your public page, the calendar feed, the subscriber digest and synced calendars until you press Publish. Free on every plan.',
+                'href' => marketing_url('/docs/creating-events') . '#draft',
+                'label' => 'Event visibility',
+            ],
+            [
+                'job' => 'One front door for booking requests',
+                'ask' => 'Where does a request from a band or a promoter land, and does it arrive with their contact details and the answers I need?',
+                'why' => 'Requests that arrive by email, by direct message and through whoever was behind the bar are how one Friday gets promised twice.',
+                'here' => 'Switch on Accept requests and choose the Booking Form, and each one lands on the Requests tab with the date, the sender\'s name, email and message, and a phone number if you ask for one. Your own questions, such as backline or expected head count, are custom fields on Pro. With Require Approval on, the default, nothing reaches your public calendar until you press Accept.',
+                'href' => marketing_url('/docs/creating-schedules') . '#engagement-requests',
+                'label' => 'Request settings',
+            ],
+            [
+                'job' => 'Ticketing that does not take a cut',
+                'ask' => 'What does one ticket cost me, all in, once the platform fee and the card fee are taken off?',
+                'why' => 'A per-ticket platform fee looks small on one sale and large across a year of shows. Ask for the figure at your usual ticket price, not the headline percentage.',
+                'here' => 'Event Schedule charges no platform fee. You connect your own Stripe or PayPal account and pay only its processing fee, or take cash. Putting a price on a ticket needs Pro. Free registration and zero-price tickets work on every plan.',
+                'href' => marketing_url('/features/ticketing'),
+                'label' => 'Ticketing',
+            ],
+            [
+                'job' => 'More than one room',
+                'ask' => 'Can each room or stage have its own calendar and its own web address, without a second account?',
+                'why' => 'A visitor looking for the Sunday jazz brunch should not scroll past three club nights to find it, and your own staff want one room\'s week at a glance.',
+                'here' => 'Each room is a sub-schedule with its own colour and address. Visitors filter the calendar by room, and you can embed a single room on its own page of your website. Free on every plan.',
+                'href' => marketing_url('/docs/sharing') . '#embed-parameters',
+                'label' => 'Embed one room',
+            ],
+            [
+                'job' => 'Staff access that fits the job',
+                'ask' => 'Can door staff scan tickets without seeing the takings, and can a booker answer requests without touching the billing?',
+                'why' => 'A single shared login is how a bartender who left in spring can still edit the calendar in autumn.',
+                'here' => 'On Enterprise, add team members as Admins, who run events, requests and sales, or Viewers, who see the calendar and scan tickets but never the sales. eventschedule.com allows five members in total. On Free and Pro the schedule has one member: you.',
+                'href' => marketing_url('/docs/managing-schedules') . '#team',
+                'label' => 'Team access levels',
+            ],
+            [
+                'job' => 'A straight answer on clashes',
+                'ask' => 'If I save two shows in the same room at the same time, will it stop me?',
+                'why' => 'Plenty of tools say they prevent double bookings. Ask what they actually compare: the room and the time, or only the time.',
+                'here' => 'It will not. Event Schedule does not compare events for clashes, so two events can be saved in the same room at the same hour. The routine below is what prevents it. The one place times close on their own is the booking page for private hire.',
+                'href' => '#holds',
+                'label' => 'The routine',
+            ],
+            [
+                'job' => 'Your history, on the way out',
+                'ask' => 'If we leave, what can we take with us, and in what format?',
+                'why' => 'A venue diary is years of history: who played, what sold, who came. It should not be locked in a tool you have stopped paying for.',
+                'here' => 'Backup & Restore exports each schedule as a .zip with its sub-schedules and every event, ticket type and sale, and the images if you want them, on every plan. On Pro the sales export is a CSV that carries every custom field.',
+                'href' => marketing_url('/docs/account-settings') . '#backup',
+                'label' => 'Backup & Restore',
+            ],
+        ];
+    @endphp
+    <section id="checklist" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 max-w-3xl" data-reveal>
+                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 dark:border-sky-400/30 dark:bg-sky-500/10">
+                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Buyer's checklist</span>
+                </div>
+                <h2 class="es-balance mb-3 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
+                    What venue calendar software <span class="text-gradient-house">should do for you</span>
+                </h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Most venues go looking for calendar software the week after a double booking, or after a month of answering "what's on Friday?" in direct messages. Before you sit through a demo, write down the jobs. These are the eight a room with a public programme runs into, the question that tests each one in any tool, and the plain answer for Event Schedule.</p>
+            </div>
+
+            {{-- Eight cards: four complete rows of two from a tablet up, one column on a phone. --}}
+            <ol class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="55">
+                @foreach ($checklist as $i => $item)
+                    <li data-reveal class="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/[0.04] sm:p-6">
+                        <div class="mb-3 flex items-center gap-3">
+                            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-cyan-500 text-sm font-black text-white">{{ $i + 1 }}</span>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $item['job'] }}</h3>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Ask: "{{ $item['ask'] }}"</p>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $item['why'] }}</p>
+                        <div class="mt-auto pt-4">
+                            <div class="rounded-xl bg-sky-50 px-4 py-3 dark:bg-sky-500/10">
+                                <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300"><span class="font-semibold text-sky-700 dark:text-sky-300">Event Schedule:</span> {{ $item['here'] }}</p>
+                                <p class="mt-2 text-sm"><x-link href="{{ $item['href'] }}">{{ $item['label'] }}</x-link></p>
+                            </div>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Holds, confirmations and double bookings                     -->
+    <!-- ============================================================ -->
+    @php
+        $dateStages = [
+            ['The enquiry', '"Are you free on the 13th?" Log it the moment it arrives. A request sent through your form is already waiting on the Requests tab; one that came by phone or email, you type in yourself.'],
+            ['The hold', 'Save a Draft in the right room, with the act\'s name and the real length of the night. Your team sees it marked Draft on the admin calendar. Nobody outside does.'],
+            ['The confirmation', 'Contract signed or deposit in: press Publish. The night appears on your page, your website embed and the calendar feed, and your email subscribers hear about it in the next new-event digest.'],
+            ['The on-sale', 'Add ticket types, or free registration with a capacity. Priced tickets are Pro, and the only deduction is the payment processor\'s fee.'],
+            ['The night, and after', 'Scan tickets at the door from any phone, free on every plan. On Pro, watch the check-in count rise live and export the sales the next morning.'],
+        ];
+
+        $clashHabits = [
+            ['One room, one sub-schedule.', 'File every event under the room it uses, the weekly regulars included. An event with no room is an event nobody checks against.'],
+            ['Filter before you say yes.', 'Open Filter Events on the admin calendar, pick the room, and look at the whole day, including the afternoon load-in, not only the evening.'],
+            ['Pencil it within the hour.', 'A Draft takes less time than the reply you were about to send, and it is the only thing that stops a colleague promising the same night.'],
+            ['Save the real length.', 'Changeover and load-out count. A night saved with no length closes only two hours on the private-hire booking page, which may be shorter than the gig.'],
+            ['One person publishes.', 'Anyone on the team can pencil a Draft; one named person turns holds into confirmed dates. The software will not enforce that, so agree it out loud.'],
+            ['Skip the regular when the room is hired.', 'When the weekly quiz gives way to a private party, take that date out of the recurring event as an exception, so the calendar never shows both.'],
+        ];
+    @endphp
+    <section id="holds" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 max-w-3xl" data-reveal>
+                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 dark:border-sky-400/30 dark:bg-sky-500/10">
+                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Holds and clashes</span>
+                </div>
+                <h2 class="es-balance mb-3 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
+                    Holds, confirmed dates and <span class="text-gradient-house">double bookings</span>
+                </h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Every date at a venue passes through the same five stages before the doors open. Give each stage one place to live and most double bookings never happen, because the second promise has nowhere to hide.</p>
+            </div>
+
+            {{-- Five stages: one column on a phone, one row of five on a desktop. No
+                 in-between count divides five, so there is none. --}}
+            <ol class="grid grid-cols-1 gap-3 lg:grid-cols-5" data-reveal-group="60">
+                @foreach ($dateStages as $i => [$stageName, $stageText])
+                    <li data-reveal class="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-2 text-xs font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300">Stage {{ $i + 1 }}</div>
+                        <h3 class="mb-2 text-base font-bold text-gray-900 dark:text-white">{{ $stageName }}</h3>
+                        <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $stageText }}</p>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div data-reveal="panel" class="rounded-3xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04] lg:p-7">
+                    <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Six habits that stop double bookings</h3>
+                    <ol class="space-y-3">
+                        @foreach ($clashHabits as $i => [$habitLead, $habitText])
+                            <li class="flex gap-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                                <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-xs font-bold text-sky-700 dark:bg-sky-500/20 dark:text-sky-300">{{ $i + 1 }}</span>
+                                <span><span class="font-semibold text-gray-900 dark:text-white">{{ $habitLead }}</span> {{ $habitText }}</span>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <div data-reveal="panel" class="flex-1 rounded-3xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-700/60 dark:bg-amber-500/10 lg:p-7">
+                        <h3 class="mb-2 text-lg font-bold text-amber-900 dark:text-amber-100">What the calendar will not catch</h3>
+                        <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">Event Schedule does not compare events for clashes. Two events in the same sub-schedule at the same time save without a warning, because a sub-schedule labels where an event happens; it does not reserve the room. The habits beside this are the check, and they work whatever software you end up using.</p>
+                    </div>
+                    <div data-reveal="panel" class="flex-1 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-500/30 dark:bg-emerald-500/10 lg:p-7">
+                        <h3 class="mb-2 text-lg font-bold text-emerald-800 dark:text-emerald-300">Where times do close by themselves</h3>
+                        <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">On the private-hire booking page. A bookable time disappears when anything on your schedule overlaps it: your events, recurring nights included, events synced in from Google, Outlook or CalDAV, other bookings, and requests still waiting for your answer. It works across the whole schedule rather than room by room, so a show in the main room also closes the back room's hire times. An all-day entry with no start time does not close anything, so save a closure as a timed event.</p>
+                        <p class="mt-3 text-sm"><x-link href="{{ marketing_url('/docs/appointments') }}#weekly-hours">What blocks a bookable time</x-link></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

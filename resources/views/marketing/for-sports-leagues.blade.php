@@ -301,7 +301,19 @@
         $faqs = [
             [
                 'q' => 'Should each team have its own calendar, or should the league have one?',
-                'a' => 'Both, from one schedule. Each team, division or age group is a sub-schedule with its own colour and its own link, so the Under-12 parents only ever see Under-12 dates, while the league page shows every fixture at once. Sub-schedules are free, and there is no cap on how many you add. If each club in the league already runs its own schedule for its home ground, the league can be a curator schedule that lists those clubs as sources and picks up every fixture they publish, with nobody entering a date twice.',
+                'a' => 'Both, from one schedule. Each team, division or age group is a sub-schedule with its own colour and its own link, so the Under-12 parents only ever see Under-12 dates, while the league page shows every fixture at once. Sub-schedules are free, and there is no cap on how many you add. If each club in the league already runs its own schedule for its home ground, the league can be a curator schedule that lists those clubs as sources and picks up every fixture they publish, with nobody entering a date twice. One thing to know: the calendar feed families subscribe to carries the whole schedule. If they want only their own team in their phone\'s calendar, give each team a schedule of its own and let the league\'s curator schedule list them as sources.',
+            ],
+            [
+                'q' => 'Can parents subscribe to only their own child\'s team?',
+                'a' => 'Not from one shared schedule: its calendar feed carries every public event on it, all teams together. A team\'s sub-schedule link shows that team alone, but as a page to open rather than entries in a phone calendar. If families want one team in their calendar app, run each team as its own schedule, which gives each its own feed, and make the league a curator schedule that lists the teams as sources, so the league page still shows every fixture. Both ways are free.',
+            ],
+            [
+                'q' => 'How do you make a round-robin schedule for a sports league?',
+                'a' => 'Number the teams, adding a "bye" if the count is odd, and pair them in two rows: the first half left to right on top, the second half right to left underneath, each column a match. For the next round keep team 1 fixed and move everyone else one place round, and repeat until team 1 has played everyone. An even number of teams needs one round fewer than there are teams, so 10 teams play 9 rounds of 5 matches, 45 in all; an odd number needs as many rounds as teams, with one team resting each round. Play everyone home and away and the rounds double.',
+            ],
+            [
+                'q' => 'How many weeks does a league season need?',
+                'a' => 'Work it out from the rounds and the slots. Halve the number of teams for the matches a round, multiply pitches by kick-off times for the slots a match day has, and see how many rounds fit in one day. Ten teams on two pitches with three kick-offs fit one round a Saturday, so a home-and-away season is 18 Saturdays. Leave two to four blank weekends as make-up dates before you publish, because a wet spell can take more than one.',
             ],
             [
                 'q' => 'What happens when a match is postponed?',
@@ -309,11 +321,15 @@
             ],
             [
                 'q' => 'Do parents need an account to see the fixtures?',
-                'a' => 'No. The league page and every team link are public, so a parent can read them on a phone without signing in. To keep the fixtures in their own calendar they subscribe to the live feed from the sign-up panel or any event\'s Add to Calendar menu, which costs them no email address at all. A parent who leaves an email address and confirms it gets a short digest when you put new dates up, at most one every few days.',
+                'a' => 'No. The league page and every team link are public, so a parent can read them on a phone without signing in. To keep the fixtures in their own calendar they subscribe to the live feed from the sign-up panel, or from the Add to Calendar menu of a match that is not selling tickets or taking registrations, which costs them no email address at all. The feed carries every public event on the schedule, not one team. A parent who leaves an email address and confirms it gets a short digest when you put new dates up, at most one every few days.',
             ],
             [
                 'q' => 'Can we collect season fees through Event Schedule?',
-                'a' => 'Yes, as a season pass on the Pro plan, at '.plan_price($proMonthly).' a month. A pass is a multi-use ticket on one QR code, and you can point it at a single sub-schedule, so an Under-14 season pass covers every Under-14 home game, including the ones you add later. The money goes to your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, with no platform fee on top. It is paid once rather than billed monthly, so there is no card on file to chase.',
+                'a' => 'Yes, as a pass on the Pro plan, at '.plan_price($proMonthly).' a month. A pass is a multi-use ticket on one QR code. Sell it as a festival pass, which admits once to each covered match, or a membership, which admits to every covered match until it expires, and set its covered events to a team\'s sub-schedule: an Under-14 pass then covers every Under-14 match, including the ones you add later. The money goes to your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, with no platform fee on top. It is paid once rather than billed monthly, so there is no card on file to chase.',
+            ],
+            [
+                'q' => 'What should a league do when a game is rained out?',
+                'a' => 'Follow a rule everyone knew before the season: one named person decides by a set time, the fixture on the league page is changed first, and the message that goes out points to it. Say whether the match is postponed, which needs a new date from the spare weekends, or cancelled. Do not rely on subscribed calendars for a same-day call-off: the feed is cached for up to an hour, and Google Calendar can take several hours to read it again.',
             ],
             [
                 'q' => 'How does the carpool for away games work?',
@@ -321,7 +337,7 @@
             ],
             [
                 'q' => 'Can our coaches manage their own team\'s fixtures?',
-                'a' => 'On the free plan a schedule has one team member. Adding more people, with admins who run the schedule day to day and viewers who can only look and scan tickets at the gate, is part of Enterprise. For a league of separate clubs there is another way that works on every plan: each club runs its own schedule for its home ground with its own login, and the league\'s curator schedule lists those clubs as sources, so every fixture a club publishes appears on the league page without the league secretary entering it.',
+                'a' => 'On the Free and Pro plans a schedule has one team member: you. Adding more people, with admins who run the schedule day to day and viewers who can only look and scan tickets at the gate, is part of Enterprise. For a league of separate clubs there is another way that works on every plan: each club runs its own schedule for its home ground with its own login, and the league\'s curator schedule lists those clubs as sources, so every fixture a club publishes appears on the league page without the league secretary entering it.',
             ],
             [
                 'q' => 'Is Event Schedule free for a sports league?',
@@ -336,8 +352,11 @@
         $dotSections = [
             ['top', 'The fixture list'],
             ['teams', 'The teams'],
+            ['calendars', 'Their calendars'],
             ['season', 'Training'],
+            ['fixtures', 'The fixtures'],
             ['moved', 'Postponed'],
+            ['calloffs', 'Call-offs'],
             ['gate', 'The gate'],
             ['away', 'Away games'],
             ['club', 'The club'],
@@ -534,7 +553,79 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Training sets itself (02)                                 -->
+    <!-- 3. Which calendar each family gets (02)                      -->
+    <!-- ============================================================ -->
+    <section id="calendars" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">02</div>
+                <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Their calendars</p>
+                <h2 class="es-balance es-league-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Which calendar <span class="es-league-grad">each family gets</span>.
+                </h2>
+                <p class="es-league-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A parent can follow a team in three ways, and they do different things. Pick
+                    the one that fits the club before the first link goes out: changing it in
+                    October means asking every family to start again.
+                </p>
+            </div>
+            {{-- Three cards: one column on a phone, one row of three from a laptop up. --}}
+            <div class="grid gap-4 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ([
+                    [
+                        'The team link',
+                        'riverside / under-14s',
+                        'A page with the fixtures filed under that team and nothing else, always current, readable on a phone without signing in.',
+                        'The parent who checks on a Friday night what time Saturday\'s kick-off is.',
+                        'It is a page they open, not entries in their phone\'s calendar. A match between two of your own teams is filed under one of them, so it shows on one team\'s link only.',
+                        'Free plan', 'free',
+                    ],
+                    [
+                        'The league feed',
+                        'Subscribe to all events',
+                        'Every public fixture and training session on the schedule lands in their calendar app, and a moved match moves there too. It costs them no account and no email address.',
+                        'A small club, or a family with children in several teams.',
+                        'The feed is the whole schedule. A family with one child in the Under-12s also gets the Seniors\' Sundays.',
+                        'Free plan', 'free',
+                    ],
+                    [
+                        'A schedule per team',
+                        'League lists teams as sources',
+                        'Each team runs its own schedule, so each has its own feed, and the league\'s curator schedule lists the teams as sources and shows every fixture together.',
+                        'A league where families want one team in their calendar, or where each team\'s volunteer keeps its own fixtures.',
+                        'Each team is set up as a Talent schedule, one of the two types a curator can list as a source. The league\'s email digest announces only events the league creates itself, so a family that wants new fixtures by email follows its team\'s schedule.',
+                        'Free plan', 'free',
+                    ],
+                ] as [$cName, $cWhere, $cWhat, $cFor, $cWatch, $cPlan, $cKey])
+                    <div class="es-league-card flex flex-col p-6 sm:p-7" data-reveal>
+                        <h3 class="es-league-ink text-lg font-bold">{{ $cName }}</h3>
+                        <p class="es-league-muted es-league-num mb-5 text-xs">{{ $cWhere }}</p>
+                        <p class="es-league-muted text-sm leading-relaxed">{{ $cWhat }}</p>
+                        <div class="es-league-sub mt-4 p-3.5">
+                            <p class="es-league-ink text-xs font-bold uppercase tracking-wider">Best for</p>
+                            <p class="es-league-muted mt-1 text-sm">{{ $cFor }}</p>
+                        </div>
+                        <div class="es-league-sub mt-2 p-3.5">
+                            <p class="es-league-ink text-xs font-bold uppercase tracking-wider">Know this</p>
+                            <p class="es-league-muted mt-1 text-sm">{{ $cWatch }}</p>
+                        </div>
+                        <p class="mt-auto pt-5">
+                            <span class="es-league-plan es-league-plan-{{ $cKey }}">{{ $cPlan }}</span>
+                        </p>
+                    </div>
+                @endforeach
+            </div>
+            <p class="es-league-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                Most clubs send both of the first two: the team link for a quick look, and the
+                feed for families who want the dates in their phone. How the feed is offered,
+                and what it leaves out, is in the
+                <x-link href="{{ marketing_url('/docs/sharing') }}#calendar-feeds" class="es-league-accent font-medium">guide to calendar feeds</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. Training sets itself (03)                                 -->
     <!-- ============================================================ -->
     <section id="season" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -574,7 +665,7 @@
                 </div>
 
                 <div class="order-1 lg:order-2">
-                    <div class="es-league-chip mb-6" data-reveal aria-hidden="true">02</div>
+                    <div class="es-league-chip mb-6" data-reveal aria-hidden="true">03</div>
                     <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Training</p>
                     <h2 class="es-balance es-league-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Tuesday and Thursday, <span class="es-league-grad">all season</span>.
@@ -610,12 +701,158 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. When a match moves (03)                                   -->
+    <!-- 5. Drawing up the fixtures (04)                              -->
+    <!-- ============================================================ -->
+    @php
+        // Single round robin: with n teams (a bye added when n is odd) there are n-1
+        // rounds of n/2 pairings, n(n-1)/2 matches in all. Computed, so the table cannot
+        // drift from the rule written under it.
+        $roundRobin = [];
+        foreach ([6, 8, 9, 10, 12] as $rrTeams) {
+            $rrSlots = $rrTeams % 2 === 0 ? $rrTeams : $rrTeams + 1;
+            $roundRobin[] = [
+                'teams' => $rrTeams,
+                'rounds' => $rrSlots - 1,
+                'perRound' => intdiv($rrTeams, 2),
+                'perTeam' => $rrTeams - 1,
+                'total' => intdiv($rrTeams * ($rrTeams - 1), 2),
+                'bye' => $rrTeams % 2 === 1,
+            ];
+        }
+    @endphp
+    <section id="fixtures" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">04</div>
+                <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The fixtures</p>
+                <h2 class="es-balance es-league-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Draw up the season <span class="es-league-grad">before you publish it</span>.
+                </h2>
+                <p class="es-league-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Event Schedule publishes a fixture list; it does not draw one up for you. The
+                    arithmetic behind a fair league schedule is short, and an hour on it in
+                    preseason saves a week of emails in the middle of the season.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+                <div class="es-league-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-league-ink text-lg font-bold">Everyone plays everyone once</h3>
+                        <span class="es-league-muted es-league-num text-xs">single round robin</span>
+                    </div>
+                    <p class="es-league-muted mb-5 text-sm">How many rounds and matches a division needs.</p>
+                    <div class="es-league-sub grid grid-cols-5 gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider">
+                        <span class="es-league-ink">Teams</span>
+                        <span class="es-league-ink text-right">Rounds</span>
+                        <span class="es-league-ink text-right">A round</span>
+                        <span class="es-league-ink text-right">Each</span>
+                        <span class="es-league-ink text-right">Total</span>
+                    </div>
+                    <div class="mt-1 space-y-1">
+                        @foreach ($roundRobin as $rr)
+                            <div class="es-league-rule grid grid-cols-5 gap-2 border-b px-3 py-2 text-sm">
+                                <span class="es-league-ink es-league-num font-semibold">{{ $rr['teams'] }}{{ $rr['bye'] ? ' + bye' : '' }}</span>
+                                <span class="es-league-muted es-league-num text-right">{{ $rr['rounds'] }}</span>
+                                <span class="es-league-muted es-league-num text-right">{{ $rr['perRound'] }}</span>
+                                <span class="es-league-muted es-league-num text-right">{{ $rr['perTeam'] }}</span>
+                                <span class="es-league-ink es-league-num text-right font-semibold">{{ $rr['total'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-league-muted mt-5 text-sm leading-relaxed">
+                        With an even number of teams there is one round fewer than there are
+                        teams. With an odd number, add a "bye" as an extra team: whoever draws
+                        it rests that round, so there are as many rounds as teams. Home and
+                        away, everyone twice, doubles the rounds and the totals.
+                    </p>
+                </div>
+
+                <div class="es-league-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-league-ink text-lg font-bold">The circle method</h3>
+                        <span class="es-league-muted es-league-num text-xs">by hand, in four steps</span>
+                    </div>
+                    <p class="es-league-muted mb-5 text-sm">The way most fixture generators work underneath.</p>
+                    <ol class="space-y-3">
+                        @foreach ([
+                            'Number the teams, adding the bye if the count is odd.',
+                            'Write the first half in a row from left to right, and the second half underneath from right to left. Each column is a match: with six teams, 1 v 6, 2 v 5, 3 v 4.',
+                            'For the next round, keep team 1 where it is and move every other team one place round the circle.',
+                            'Repeat until team 1 has met everyone. Then read down the home and away columns: nobody should be away three weeks running, and over a double round robin everyone should end up even.',
+                        ] as $i => $step)
+                            <li class="flex items-start gap-3">
+                                <span class="es-league-accent es-league-num shrink-0 text-sm font-bold">{{ $i + 1 }}</span>
+                                <span class="es-league-muted text-sm leading-relaxed">{{ $step }}</span>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+
+                <div class="es-league-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-league-ink text-lg font-bold">Will it fit the weekends you have?</h3>
+                        <span class="es-league-muted es-league-num text-xs">a worked example</span>
+                    </div>
+                    <p class="es-league-muted mb-5 text-sm">Ten teams, one division, Saturdays only.</p>
+                    <div class="space-y-2">
+                        @foreach ([
+                            ['Matches a round', '10 teams / 2 = 5'],
+                            ['Slots a Saturday', '2 pitches x 3 kick-offs = 6'],
+                            ['Rounds a Saturday', '6 slots fit 5 matches: 1 round'],
+                            ['Once each', '9 rounds = 9 Saturdays'],
+                            ['Home and away', '18 rounds = 18 Saturdays'],
+                            ['Plus spare dates', '2 to 4 blank Saturdays'],
+                        ] as [$wLabel, $wValue])
+                            <div class="es-league-sub flex items-baseline justify-between gap-3 p-3">
+                                <span class="es-league-muted shrink-0 text-xs uppercase tracking-wider">{{ $wLabel }}</span>
+                                <span class="es-league-ink es-league-num min-w-0 text-right text-sm font-semibold">{{ $wValue }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-league-muted mt-5 text-sm leading-relaxed">
+                        Count pitch time, not only pitches: two halves, a warm-up and the
+                        changeover between matches all have to fit inside one slot. Then leave
+                        blank Saturdays as make-up dates before the season starts, because a wet
+                        winter rarely takes just one.
+                    </p>
+                </div>
+
+                <div class="es-league-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-league-ink text-lg font-bold">Then put it in</h3>
+                        <span class="es-league-plan es-league-plan-free">Free plan</span>
+                    </div>
+                    <p class="es-league-muted mb-5 text-sm">One match carefully, then copies of it.</p>
+                    <ul class="space-y-3">
+                        @foreach ([
+                            'Enter the first match on its team\'s sub-schedule, with the ground as its venue and a length that covers the whole match.',
+                            'A match sits in one sub-schedule, so where both sides are your own teams, file it under the division, or run each team as its own schedule so the match can be on both.',
+                            'Use Clone Event for the rest of that team\'s fixtures and change the date, the opponent and the ground on each copy.',
+                            'Name every match the same way, such as "U14: Riverside v Ashford", so a parent scanning the list reads it at a glance.',
+                            'Fixtures already in a calendar file or a public Google Calendar? Import Events reads the link directly, with no AI involved, lists them for you to tick, and can undo the import for 24 hours.',
+                        ] as $point)
+                            <li class="flex items-start gap-3">
+                                <span class="es-league-muted text-sm leading-relaxed">{{ $point }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="es-league-muted es-league-rule mt-auto border-t pt-4 text-xs">
+                        Standings, scores and referee lists are not part of Event Schedule. It
+                        keeps the dates, the grounds and the people coming.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. When a match moves (05)                                   -->
     <!-- ============================================================ -->
     <section id="moved" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">03</div>
+                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">05</div>
                 <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Postponed</p>
                 <h2 class="es-balance es-league-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Change it once. <span class="es-league-grad">Tell nobody twice</span>.
@@ -656,7 +893,7 @@
                     <ul class="space-y-3">
                         @foreach ([
                             'A subscribed calendar re-reads the live feed, so the old date disappears from their phone on its own.',
-                            'Subscribing needs no account and no email address: one tap from the Add to Calendar menu.',
+                            'Subscribing needs no account and no email address: one tap in the sign-up panel, or in the Add to Calendar menu of a match that is not selling tickets or taking registrations.',
                         ] as $point)
                             <li class="flex items-start gap-3">
                                 <svg aria-hidden="true" class="es-league-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -689,12 +926,79 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. The gate (04)                                             -->
+    <!-- 7. A call-off policy (06)                                    -->
+    <!-- ============================================================ -->
+    <section id="calloffs" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid gap-14 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <div class="es-league-chip mb-6" data-reveal aria-hidden="true">06</div>
+                    <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Call-offs</p>
+                    <h2 class="es-balance es-league-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        A call-off policy <span class="es-league-grad">written before it rains</span>.
+                    </h2>
+                    <p class="es-league-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Postponements are part of every season. What makes them painful is
+                        finding out at the ground. Agree these five rules at the preseason
+                        meeting, put them on the league page, and keep to them.
+                    </p>
+                    <ol class="space-y-4" data-reveal-group="90">
+                        @foreach ([
+                            ['One person decides, by a set time.', 'Name who calls a match off, whether the home club, the league or the groundskeeper, and the latest time they will do it: say 8pm the night before, or two hours before an evening kick-off.'],
+                            ['One place says so.', 'The fixture on the league page is the truth. Change it there first, then send the message that points to it. A group chat that disagrees with the page is how a team ends up at the wrong ground.'],
+                            ['Postponed or cancelled: say which.', 'A postponed match still has to be played and needs a new date; a cancelled one does not. A new date is an edit to the match. Cancel event, in the Actions menu, keeps the page up with a notice that it is off.'],
+                            ['Make-up dates come from the spare weekends.', 'Re-date matches into the blank Saturdays you left in the plan, in the order the matches were lost, before anyone starts asking for midweek evenings.'],
+                            ['Money follows the decision.', 'If a match was ticketed, say in advance whether tickets stand for the new date or are refunded. Cancelling does not refund anyone by itself; on Pro, a Stripe, PayPal or Razorpay sale is refunded from the Sales page.'],
+                        ] as $i => [$rLead, $rText])
+                            <li class="flex items-start gap-3" data-reveal>
+                                <span class="es-league-accent es-league-num shrink-0 pt-0.5 text-sm font-bold">{{ $i + 1 }}</span>
+                                <span><span class="es-league-ink font-semibold">{{ $rLead }}</span> <span class="es-league-muted">{{ $rText }}</span></span>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+                <div class="lg:pt-24">
+                    <div class="es-league-card p-6 sm:p-7" data-reveal="panel">
+                        <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-league-ink text-lg font-bold">How fast the news travels</h3>
+                            <span class="es-league-muted es-league-num text-xs">after you save</span>
+                        </div>
+                        <p class="es-league-muted mb-5 text-sm">Not every copy of the fixture changes at the same speed.</p>
+                        <div class="space-y-2.5">
+                            @foreach ([
+                                ['League page and team links', 'At once'],
+                                ['The calendar on the club website', 'Next time the page loads'],
+                                ['Ticket holders and sign-ups', 'When you choose to notify them'],
+                                ['Families who subscribed', 'Within hours, not minutes'],
+                            ] as [$tWhere, $tWhen])
+                                <div class="es-league-sub flex items-center justify-between gap-3 p-3.5">
+                                    <span class="es-league-ink min-w-0 flex-1 text-sm font-semibold">{{ $tWhere }}</span>
+                                    <span class="es-league-accent shrink-0 text-right text-xs font-semibold">{{ $tWhen }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="es-league-muted es-league-rule mt-5 border-t pt-4 text-sm leading-relaxed">
+                            The feed is cached for up to an hour, and calendar apps re-read it on
+                            their own timetable: Google Calendar can take several hours. So a
+                            morning call-off goes on the page and out as a message as well. The
+                            feed is for the season, not for the morning of the match. Saving a new
+                            date for a one-off match asks whether to email the people who signed up
+                            or bought a ticket; on eventschedule.com that email needs the
+                            schedule's own email settings.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. The gate (07)                                             -->
     <!-- ============================================================ -->
     <section id="gate" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">04</div>
+                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">07</div>
                 <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gate</p>
                 <h2 class="es-balance es-league-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Count them in, <span class="es-league-grad">charge where it counts</span>.
@@ -737,7 +1041,7 @@
                     <p class="es-league-muted mb-5 text-sm">When the money is part of the fixture.</p>
                     <ul class="space-y-3">
                         @foreach ([
-                            'A season pass on one QR code, pointed at a team\'s sub-schedule so it covers every home game, including ones added later.',
+                            'A pass on one QR code, set to cover a team\'s sub-schedule, so it admits to every match in it, including ones added later.',
                             'Match-day tickets with separate prices for adults, juniors and concessions.',
                             'Paid into your own Stripe or PayPal account, or by Invoice Ninja, a payment link or cash, with no platform fee on top.',
                             'The live check-in dashboard shows the gate count filling up as the codes are scanned.',
@@ -755,13 +1059,13 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Away games (05)                                           -->
+    <!-- 9. Away games (08)                                           -->
     <!-- ============================================================ -->
     <section id="away" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <div class="es-league-chip mb-6" data-reveal aria-hidden="true">05</div>
+                    <div class="es-league-chip mb-6" data-reveal aria-hidden="true">08</div>
                     <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Away games</p>
                     <h2 class="es-balance es-league-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Where is it, and <span class="es-league-grad">who has a seat</span>?
@@ -829,12 +1133,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. The club around the fixtures (06)                         -->
+    <!-- 10. The club around the fixtures (09)                        -->
     <!-- ============================================================ -->
     <section id="club" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">06</div>
+                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">09</div>
                 <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The club</p>
                 <h2 class="es-balance es-league-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything that happens <span class="es-league-grad">off the pitch</span>.
@@ -903,12 +1207,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Who it is for (07)                                        -->
+    <!-- 11. Who it is for (10)                                       -->
     <!-- ============================================================ -->
     <section id="who" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">07</div>
+                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">10</div>
                 <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
                 <h2 class="es-balance es-league-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Anyone with a season <span class="es-league-grad">to keep straight</span>.
@@ -972,7 +1276,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. How it works (08, dark band)                              -->
+    <!-- 12. How it works (11, dark band)                             -->
     <!-- ============================================================ -->
     <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-league-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -982,7 +1286,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-league-chip mb-6" data-reveal aria-hidden="true">08</div>
+                    <div class="es-league-chip mb-6" data-reveal aria-hidden="true">11</div>
                     <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Set up in preseason, <span class="es-league-grad">left alone till the final</span>.
@@ -993,7 +1297,7 @@
                     @foreach ([
                         ['01', 'Set up the teams', 'One schedule for the league or club, and a sub-schedule for each team, division or age group, each with its own colour and link.'],
                         ['02', 'Put the season in', 'Training as a recurring event with the closed weeks taken out, and every match day as its own event at its ground.'],
-                        ['03', 'Send the links once', 'Families subscribe to their team\'s feed, confirmed subscribers get new fixtures in a digest, and the gate scans whatever you issued.'],
+                        ['03', 'Send the links once', 'Families bookmark their team\'s link or subscribe to the league feed, confirmed subscribers get new fixtures in a digest, and the gate scans whatever you issued.'],
                     ] as [$n, $t, $d])
                         <div class="rounded-lg border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
                             <p class="es-league-lit es-league-num mb-3 text-sm font-bold">{{ $n }}</p>
@@ -1007,7 +1311,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. Key features                                             -->
+    <!-- 13. Key features                                             -->
     <!-- ============================================================ -->
     <section class="es-league-rule scroll-mt-24 border-t py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
@@ -1024,7 +1328,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Passes & Subscriptions" description="A season pass on one QR code that covers a team's home games, on the Pro plan" :url="marketing_url('/features/passes')" icon-color="amber">
+                    <x-feature-link-card name="Passes & Subscriptions" description="A pass on one QR code that covers every match in a team's sub-schedule, on the Pro plan" :url="marketing_url('/features/passes')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
@@ -1053,7 +1357,7 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 11. Related audience pages                                   -->
+    <!-- 14. Related audience pages                                   -->
     <!-- ============================================================ -->
     <section class="es-league-rule border-t py-16">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
@@ -1090,12 +1394,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 12. FAQ (09)                                                 -->
+    <!-- 15. FAQ (12)                                                 -->
     <!-- ============================================================ -->
     <section id="faq" class="es-league-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">09</div>
+                <div class="es-league-chip mb-6" data-reveal aria-hidden="true">12</div>
                 <p class="es-league-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-league-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked at <span class="es-league-grad">the committee meeting</span>.
@@ -1121,7 +1425,7 @@
     <x-seo.faq-schema :items="$faqs" />
 
     <!-- ============================================================ -->
-    <!-- 13. Finale                                                   -->
+    <!-- 16. Finale                                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">

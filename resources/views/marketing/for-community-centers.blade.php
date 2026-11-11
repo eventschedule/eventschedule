@@ -460,6 +460,8 @@
         .cm-notice { margin-top: 1.75rem; padding: 1.25rem 1.4rem 1.35rem; border-radius: 1.4rem 1.25rem 1.5rem 1.2rem; background: color-mix(in srgb, var(--cm-sun) 24%, var(--cm-ground)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cm-sun) 70%, var(--cm-ink)); }
         .cm-notice strong { display: block; font-family: var(--cm-display); font-weight: 400; font-size: 1.2rem; color: var(--cm-ink); }
         .cm-notice span { display: block; margin-top: 0.35rem; color: var(--cm-ink-2); font-size: 1.0625rem; max-width: 52rem; }
+        /* Inline links: the page's ink with a tomato underline, as in the plans block. */
+        #cm .cm-inline-link { color: var(--cm-ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--cm-tomato); text-decoration-thickness: 2px; text-underline-offset: 3px; }
         .cm-freeline { margin-top: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; color: var(--cm-ink-2); font-size: 1.0625rem; }
 
         /* ---------------------------------------------------------------
@@ -869,7 +871,7 @@
             ],
             [
                 'On the calendar they already check',
-                'Every event page\'s Add to Calendar menu, and the sign-up panel, offer the center\'s live calendar feed. Subscribe once and the next ninety days of every weekly program land in the phone\'s own calendar, and move when you move them. Two-way Google, Outlook and CalDAV sync is for your own calendar, one entry per program.',
+                'The sign-up panel, and the Add to Calendar menu of any program that is not taking sign-ups or selling places, offer the center\'s live calendar feed. Subscribe once and the next ninety days of every weekly program land in the phone\'s own calendar, and move when you move them. Two-way Google, Outlook and CalDAV sync is for your own calendar, one entry per program.',
                 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
             ],
             [
@@ -895,16 +897,24 @@
                 'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, a live calendar feed, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Charging for a class is the part that needs Pro at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on the sale whatever plan you are on.',
             ],
             [
+                'q' => 'How do I set up a community center calendar?',
+                'a' => 'Create one schedule for the center and add a sub-schedule for each strand, sorted by who it is for: families, youth, over-60s, learning. Enter each regular program once as a recurring event on the days it runs, take the holidays out as exceptions, and decide for each one whether people drop in, sign up for free with a limit, or pay for a place on Pro. Then switch on requests for outside groups, embed the calendar on your website and print the QR code for the board. Everything in that list is free except charging for places.',
+            ],
+            [
                 'q' => 'Can I organize classes, meetings, and events by category?',
                 'a' => 'Yes. Sub-schedules group and color-code the strands, so wellbeing, youth, learning and sport read apart at a glance, and each strand has its own shareable link, which means you can send a family a link that shows only the youth programs. Being straight about one thing: a sub-schedule has no visibility setting of its own and cannot hide anything. To keep a program off the public calendar until you are ready, save it as a Draft.',
             ],
             [
                 'q' => 'How do community members stay informed about programs?',
-                'a' => 'Through as many doors as you care to open. People who leave an email address and confirm it hear about the new dates you put up, on their own, as one digest rather than a message per program; the newsletter is the one you compose and press send on, for when there is something to say beyond the listing. The calendar embeds into the website you already have. Anyone can subscribe to the center\'s live calendar feed from an event page\'s Add to Calendar menu or the sign-up panel, and it carries the next ninety days of every weekly program, moving a date when you move it. Your own calendar syncs both ways with Google, Outlook and CalDAV, one entry per event. And your schedule has a QR code you can download and print for the board in the lobby.',
+                'a' => 'Through as many doors as you care to open. People who leave an email address and confirm it hear about the new dates you put up, on their own, as one digest rather than a message per program; the newsletter is the one you compose and press send on, for when there is something to say beyond the listing. The calendar embeds into the website you already have. Anyone can subscribe to the center\'s live calendar feed from the sign-up panel, or from the Add to Calendar menu of a program that is not taking sign-ups or selling places, and it carries the next ninety days of every weekly program, moving a date when you move it. Your own calendar syncs both ways with Google, Outlook and CalDAV, one entry per event. And your schedule has a QR code you can download and print for the board in the lobby.',
             ],
             [
                 'q' => 'Can we handle event registration and payments?',
                 'a' => 'Yes. Free sign-up with an optional capacity is on the free plan, and the capacity is counted per date, so a full Monday session does not stop the following Monday filling up. For a paid class, take payment through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash at the desk: the money goes to you, Event Schedule takes no cut, and every ticket carries a QR code you can scan at the door on any plan. Charging for a place is a Pro feature; free sign-up stays free however many people come. Pro adds the rest of the paid-class kit too: asking your own questions at checkout, and selling one pass that covers a whole term of a class.',
+            ],
+            [
+                'q' => 'What happens when a free class fills up?',
+                'a' => 'That date stops taking names and offers a waitlist instead, free on every plan. When someone cancels from the ticket page their confirmation email links to, the place opens and the first person on the waitlist is emailed, with 24 hours before the next in line is told. The place is not held for them: it goes to whoever signs up first. The limit is counted per date, so a full Wednesday does not affect the next one.',
             ],
             [
                 'q' => 'Can we refund a class?',
@@ -912,7 +922,15 @@
             ],
             [
                 'q' => 'Can people ask to hear when a class opens for booking?',
-                'a' => 'Yes. Switch on the free "Notify me" card, put the class or the summer camp up before it sells, and its event page offers "Tell me when tickets go on sale". A parent leaves only an email address, and hears once when booking opens, once if it is cancelled and again shortly before it starts, plus any change notice you choose to send. It is free on every plan and it is not a sign-up to the center\'s emails, so it never touches the newsletter allowance. The Tickets panel in the event editor shows how many people are waiting.',
+                'a' => 'Yes. Switch on the free "Notify me" card, put the class or the summer camp up before it sells, and its event page offers "Tell me when tickets go on sale". A parent leaves only an email address, and hears once when booking opens, once if it is cancelled and again shortly before it starts, plus any change notice you choose to send. The booking-opens email goes out when the class starts selling tickets on Event Schedule, so a class that takes free sign-up rather than tickets never sends that one. It is free on every plan and it is not a sign-up to the center\'s emails, so it never touches the newsletter allowance. The Tickets panel in the event editor shows how many people are waiting.',
+            ],
+            [
+                'q' => 'Can the calendar be shown in more than one language?',
+                'a' => 'Yes, in two. Write the schedule in one of the twelve languages Event Schedule supports and switch on Offer a second language to visitors under Details, Language and time. Every program is translated for you, in the background, so allow up to an hour, and visitors switch between the two languages with a button. An embed on your website can be pinned to the second language. It is free on every plan.',
+            ],
+            [
+                'q' => 'How should we show accessibility information for each program?',
+                'a' => 'Put what is true of the whole building, such as the step-free entrance, accessible toilets and parking, in the schedule\'s description once. Put what belongs to one session, such as a hearing loop in that room or an interpreter on that date, in the program\'s own description and, if it takes sign-ups, in its Registration notes, which go into the confirmation email. Switch on the accessibility widget and visitors can enlarge the text, raise the contrast and stop motion on your pages. On Pro, a dropdown custom field can be printed on each event page and used as a filter on the calendar.',
             ],
             [
                 'q' => 'Can outside groups request the hall?',
@@ -926,6 +944,8 @@
             ['doors', 'The doors'],
             ['hall', 'Hall hire'],
             ['signup', 'Sign-ups'],
+            ['term', 'Plan the term'],
+            ['reach', 'For everyone'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -1201,7 +1221,7 @@
                             ['A short form or a pasted listing', 'Ask for the details on a booking form, or let people paste what they already wrote and have it read for you.'],
                             ['Your conditions on the form', 'The terms a hirer has to agree to go on the request itself, so they are answered before the conversation starts.'],
                             ['Groups you already trust', 'Name the schedules whose requests you want posted without review, and leave everyone else pending.'],
-                            ['You are told, not the followers', 'A scheduled check emails you when requests are waiting. Nobody on your follower list hears about it.'],
+                            ['You are told when one arrives', 'An email tells you a request is waiting and spells it out: the date, who is asking and, from the Booking Form, how to reach them.'],
                         ] as $cmHallIndex => [$hTitle, $hBody])
                             <li data-reveal>
                                 <i class="cm-mk cm-k-{{ array_values($strands)[$cmHallIndex % 4] }}" aria-hidden="true"></i>
@@ -1349,7 +1369,7 @@
                         <ul class="cm-ticks" style="--c: var(--cm-tomato);">
                             @foreach ([
                                 'Every ticket carries a QR code you scan at the door, on any plan.',
-                                'Passes, discount codes and a waitlist when a class fills are Pro.',
+                                'Passes, discount codes and a waitlist when a ticketed class sells out are Pro.',
                                 'So are your own questions at checkout and a CSV of the whole list.',
                             ] as $pItem)
                                 <li><i aria-hidden="true">{!! $cmTick !!}</i><span>{{ $pItem }}</span></li>
@@ -1361,20 +1381,207 @@
                 <p class="cm-proline" data-reveal>
                     <span class="cm-tag cm-tag-pro">Pro</span>
                     <span>At {{ plan_price($proMonthly) }} a month Pro opens paid tickets and adds
-                    passes, discount codes, the waitlist and the sales CSV. Free sign-up with a capacity never
-                    needs it, and for a lot of centers that is the whole requirement.</span>
+                    passes, discount codes, a waitlist for a sold-out ticketed class and the sales CSV. Free sign-up
+                    with a capacity, and its own waitlist, never needs it, and for a lot of centers that is the whole requirement.</span>
                 </p>
             </div>
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Who it is for (05)                                        -->
+        <!-- 6. Plan the term (05): one sitting, in order                 -->
+        <!-- ============================================================ -->
+        <section id="term" class="cm-sec" style="scroll-margin-top: 4rem;">
+            <div class="cm-wrap">
+                <div class="cm-head cm-head-row">
+                    <div class="cm-head-copy">
+                        <p class="cm-sign" style="--paper: var(--cm-sun);" data-reveal><b aria-hidden="true">05 &rarr;</b> Plan the term</p>
+                        <h2 class="cm-h cm-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            A whole term, <span class="cm-hl" style="--hl: var(--cm-teal);">set up in one sitting</span>.
+                        </h2>
+                        <p class="cm-lede" data-reveal style="--reveal-delay: 0.16s;">
+                            A community center calendar is many small calendars sharing one building: a
+                            toddler group, a youth club, the over-60s lunch, a hirer's AGM. Set them up in
+                            this order and the board looks after itself until the next holiday.
+                        </p>
+                    </div>
+                    <div class="cm-cluster" aria-hidden="true">
+                        <i class="cm-cut cm-arch" style="--c: var(--cm-sun); width: 4.6em; right: 6.8em; top: 1.2em;"></i>
+                        <i class="cm-cut cm-quarter" style="--c: var(--cm-teal); width: 4em; right: 2.4em; top: 3.4em;"></i>
+                        <i class="cm-cut cm-circle" style="--c: var(--cm-leaf); width: 2.6em; right: 0.4em; top: 0.8em;"></i>
+                    </div>
+                </div>
+
+                <div class="cm-two" data-reveal-group="110">
+                    <div class="cm-card" data-reveal="panel">
+                        <div class="cm-card-top">
+                            <h3 class="cm-h cm-h3">Six steps, in this order</h3>
+                            <span class="cm-tag cm-tag-free">Free</span>
+                        </div>
+                        <ol class="cm-list">
+                            @foreach ([
+                                ['Sort by who it is for, not by room.', 'Families, Over-60s, Youth, Learning. A visitor knows who they are; few know which room the class is in. Each strand is a sub-schedule with a colour and a link of its own, and an event sits in one sub-schedule, so pick one way of sorting and keep to it.'],
+                                ['One recurring event per program.', 'Senior fitness is one event that repeats on Monday, Wednesday and Friday, not a hundred separate dates. Set its time, length, strand and sign-up once.'],
+                                ['Take the breaks out before you publish.', 'Remove half-term week and the holiday Mondays from each pattern as exceptions, so nobody walks to a locked door.'],
+                                ['Name things the way the board does.', '"Toddler group (0 to 4s, drop in)" can be read at a glance on a phone. "Wednesday group" cannot.'],
+                                ['Write the practical details once.', 'The schedule\'s description holds what is true of the whole building: the address, the parking, the step-free entrance. Each program\'s description holds what is true of that session: who leads it, what to bring, what it costs.'],
+                                ['Give hirers their own lane.', 'Switch on requests, put your hire conditions in Request Terms, and keep Require Approval on. Before you accept, look at that day on your admin calendar: nothing warns you that two bookings share the hall.'],
+                            ] as $cmStepIndex => [$tLead, $tBody])
+                                <li>
+                                    <i class="cm-mk cm-k-{{ array_values($strands)[$cmStepIndex % 4] }}" aria-hidden="true"></i>
+                                    <span><strong>{{ $tLead }}</strong> <span>{{ $tBody }}</span></span>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </div>
+
+                    <div class="cm-card cm-class" data-reveal="panel">
+                        <div class="cm-card-top">
+                            <h3 class="cm-h cm-h3">Drop in, sign up or pay?</h3>
+                        </div>
+                        <p class="cm-class-intro">Decide this for each program before it goes up. Changing it after people have booked is the awkward way round.</p>
+                        <div class="cm-notes" style="grid-template-columns: minmax(0, 1fr);">
+                            @foreach ([
+                                ['var(--cm-leaf)', 'Just turn up', 'The room holds whoever comes and you do not need names: the community lunch, open gym. Leave sign-up off and the listing is the invitation.'],
+                                ['var(--cm-teal)', 'Free sign-up', 'Space or safety sets a limit, or you need to know who is in the building. Set the limit per date, and count carers as well as children when both come in.'],
+                                ['var(--cm-tomato)', 'Paid places', 'The session has costs to cover: a tutor, materials, a room you rent in. Priced tickets are Pro, and a term pass bought once covers every date of a weekly class.'],
+                            ] as [$dColour, $dTitle, $dBody])
+                                <p class="cm-note" style="--c: {{ $dColour }};"><strong>{{ $dTitle }}</strong><span>{{ $dBody }}</span></p>
+                            @endforeach
+                        </div>
+                        <ul class="cm-ticks" style="margin-top: 1.5rem;">
+                            @foreach ([
+                                'A full date offers a waitlist on free sign-up, on every plan.',
+                                'People cancel from the ticket page their confirmation email links to, which frees the place for the next person.',
+                                'Registration notes, such as what to bring or which door to use, go into the confirmation email and onto the ticket.',
+                            ] as $dItem)
+                                <li><i aria-hidden="true">{!! $cmTick !!}</i><span>{{ $dItem }}</span></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7. A listing everyone can use (06): access, language, wall   -->
+        <!-- ============================================================ -->
+        <section id="reach" class="cm-sec cm-wall" style="scroll-margin-top: 4rem;">
+            <div class="cm-wrap">
+                <div class="cm-head cm-head-row">
+                    <div class="cm-head-copy">
+                        <p class="cm-sign" style="--paper: var(--cm-teal);" data-reveal><b aria-hidden="true">06 &rarr;</b> For everyone</p>
+                        <h2 class="cm-h cm-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            A listing everyone <span class="cm-hl" style="--hl: var(--cm-sun);">can actually use</span>.
+                        </h2>
+                        <p class="cm-lede" data-reveal style="--reveal-delay: 0.16s;">
+                            The people a center serves include wheelchair users, people who read the board
+                            in their second language, and people who will never open the website at all.
+                            A few habits make one calendar work for every one of them, on a screen and on
+                            the wall.
+                        </p>
+                    </div>
+                    <div class="cm-cluster" aria-hidden="true">
+                        <i class="cm-cut cm-petal" style="--c: var(--cm-tomato); width: 3.4em; right: 7.6em; top: 1.6em;"></i>
+                        <i class="cm-cut cm-half" style="--c: var(--cm-teal); width: 5.4em; right: 1.8em; top: 4.6em;"></i>
+                        <i class="cm-cut cm-circle" style="--c: var(--cm-sun); width: 3.2em; right: 2.6em; top: 0.4em;"></i>
+                    </div>
+                </div>
+
+                <div class="cm-two" data-reveal-group="110">
+                    <div class="cm-card cm-class" data-reveal="panel">
+                        <div class="cm-card-top">
+                            <h3 class="cm-h cm-h3">Access, said up front</h3>
+                            <span class="cm-tag cm-tag-free">Free</span>
+                        </div>
+                        <p class="cm-class-intro">Someone deciding whether they can come needs these answers on the listing, not at reception. Say each one plainly, including when the answer is no.</p>
+                        <ul class="cm-ticks" style="margin-top: 1.25rem;">
+                            @foreach ([
+                                'The step-free way in, and which door it is.',
+                                'Lifts, accessible toilets, and how far the nearest one is from the room.',
+                                'A hearing loop, captions or a sign language interpreter, and whether they must be booked ahead.',
+                                'Seating: chairs with arms, space for a wheelchair, a quiet room to step into.',
+                                'Drop-off or parking near the entrance, and the nearest bus stop.',
+                                'Who to ask about anything else, by name or by job title.',
+                            ] as $aItem)
+                                <li><i aria-hidden="true">{!! $cmTick !!}</i><span>{{ $aItem }}</span></li>
+                            @endforeach
+                        </ul>
+                        <p class="cm-mock-note" style="margin-top: 1.25rem;">
+                            Building-wide facts go in the schedule's description once; a session's own
+                            details go in that program's description, and in its Registration notes when it
+                            takes sign-ups. Switch on Show Accessibility Widget, under Settings and Advanced,
+                            and visitors can enlarge the text, raise the contrast and stop the motion on your
+                            pages for themselves. On Pro, a dropdown custom field such as "Access" can be
+                            printed on each event page and offered as a filter on the calendar.
+                        </p>
+                    </div>
+
+                    <div class="cm-card cm-class" data-reveal="panel">
+                        <div class="cm-card-top">
+                            <h3 class="cm-h cm-h3">Two languages, one calendar</h3>
+                            <span class="cm-tag cm-tag-free">Free</span>
+                        </div>
+                        <p class="cm-class-intro">
+                            Write the calendar in the language most of your staff write in, then switch on
+                            Offer a second language to visitors and pick the other one. Every program is
+                            translated for you, and visitors get a button to switch between the two. It is
+                            on every plan.
+                        </p>
+                        <ul class="cm-ticks" style="margin-top: 1.25rem; --c: var(--cm-teal);">
+                            @foreach ([
+                                'Translations are made in the background, so allow up to an hour after you publish.',
+                                'Read the translation of anything about safety, cost or eligibility yourself, and correct the wording where it matters.',
+                                'An embed can be pinned to the second language with lang= in its address, so a Spanish page of your website shows the calendar in Spanish when Spanish is the second language.',
+                                'One schedule carries two languages: the one you write in and one more.',
+                            ] as $lItem)
+                                <li><i aria-hidden="true">{!! $cmTick !!}</i><span>{{ $lItem }}</span></li>
+                            @endforeach
+                        </ul>
+                        <p class="cm-mock-note" style="margin-top: 1.25rem;">
+                            The language setting lives under Edit schedule, Details, Language and time.
+                            <x-link href="{{ marketing_url('/docs/creating-schedules') }}#details-localization" class="cm-inline-link">How the second language works</x-link>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="cm-card" style="margin-top: 1.75rem;" data-reveal="panel">
+                    <div class="cm-card-top">
+                        <h3 class="cm-h cm-h3">From the website to the lobby noticeboard</h3>
+                        <span class="cm-tag cm-tag-free">Free</span>
+                    </div>
+                    <ul class="cm-list">
+                        @foreach ([
+                            ['On the website, choose the list.', 'Paste the embed once, on the page people already visit. In a narrow column pick the List layout: the month grid needs about 768 pixels of width and turns into a day-by-day agenda below that.'],
+                            ['One strand per page.', 'The youth page of your website can show only the youth programs, by adding schedule= and the strand\'s slug to the embed address.'],
+                            ['The QR code is on the Followers tab.', 'It opens your calendar with the email sign-up ready, so a scan in the corridor can turn into someone who hears about the next term (on a selfhosted install the tab appears with your first subscriber).'],
+                            ['Print it big enough.', 'The download is about 300 pixels square: print it at least 3 cm (just over an inch) wide on a handout, and much larger on a poster read from across the corridor. A common rule of thumb is a code a tenth as wide as the distance it is scanned from.'],
+                            ['Test it before you laminate.', 'Scan the printed sheet with two different phones, one of them on mobile data, from where people will really stand.'],
+                            ['Print the pattern, let the code carry the changes.', 'Put the term\'s regular programs on paper and leave the one-off dates to the online calendar, so the sheet on the board is never out of date.'],
+                        ] as $cmWallIndex => [$wLead, $wBody])
+                            <li>
+                                <i class="cm-mk cm-k-{{ array_values($strands)[$cmWallIndex % 4] }}" aria-hidden="true"></i>
+                                <span><strong>{{ $wLead }}</strong> <span>{{ $wBody }}</span></span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="cm-card-foot">
+                        Every address the embed takes is listed in the
+                        <x-link href="{{ marketing_url('/docs/sharing') }}#embed-parameters" class="cm-inline-link">embedding guide</x-link>,
+                        and the QR code in its
+                        <x-link href="{{ marketing_url('/docs/sharing') }}#qr-code" class="cm-inline-link">QR section</x-link>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. Who it is for (07)                                        -->
         <!-- ============================================================ -->
         <section id="who" class="cm-sec" style="scroll-margin-top: 4rem;">
             <div class="cm-wrap">
                 <div class="cm-head cm-head-row">
                     <div class="cm-head-copy">
-                        <p class="cm-sign" style="--paper: var(--cm-teal);" data-reveal><b aria-hidden="true">05 &rarr;</b> Who it is for</p>
+                        <p class="cm-sign" style="--paper: var(--cm-teal);" data-reveal><b aria-hidden="true">07 &rarr;</b> Who it is for</p>
                         <h2 class="cm-h cm-h2" data-reveal style="--reveal-delay: 0.08s;">
                             Anywhere with a board <span class="cm-hl">by the door</span>.
                         </h2>
@@ -1451,12 +1658,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 7. How it works (06): three steps up                         -->
+        <!-- 9. How it works (08): three steps up                         -->
         <!-- ============================================================ -->
         <section id="how" class="cm-sec cm-wall" style="scroll-margin-top: 4rem;">
             <div class="cm-wrap">
                 <div class="cm-head">
-                    <p style="justify-self: start;"><span class="cm-sign" style="--paper: var(--cm-sun);" data-reveal><b aria-hidden="true">06 &rarr;</b> How it works</span></p>
+                    <p style="justify-self: start;"><span class="cm-sign" style="--paper: var(--cm-sun);" data-reveal><b aria-hidden="true">08 &rarr;</b> How it works</span></p>
                     <h2 class="cm-h cm-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Put it up, pin it, <span class="cm-hl" style="--hl: var(--cm-teal);">open the doors</span>.
                     </h2>
@@ -1480,7 +1687,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 8. Key features: the directory by the door                   -->
+        <!-- 10. Key features: the directory by the door                  -->
         <!-- ============================================================ -->
         <section class="cm-sec">
             <div class="cm-wrap cm-dir-grid">
@@ -1526,7 +1733,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- 9. Related pages: four more doors down the road              -->
+        <!-- 11. Related pages: four more doors down the road             -->
         <!-- ============================================================ -->
         <section class="cm-sec">
             <div class="cm-wrap">
@@ -1554,12 +1761,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 10. FAQ (07)                                                 -->
+        <!-- 12. FAQ (09)                                                 -->
         <!-- ============================================================ -->
         <section id="faq" class="cm-sec cm-wall" style="scroll-margin-top: 4rem;">
             <div class="cm-wrap cm-faq-grid">
                 <div class="cm-faq-side">
-                    <p class="cm-sign" style="--paper: var(--cm-tomato);" data-reveal><b aria-hidden="true">07 &rarr;</b> Questions</p>
+                    <p class="cm-sign" style="--paper: var(--cm-tomato);" data-reveal><b aria-hidden="true">09 &rarr;</b> Questions</p>
                     <h2 class="cm-h cm-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Asked at <span class="cm-hl">the front desk</span>.
                     </h2>
@@ -1587,7 +1794,7 @@
         <x-seo.faq-schema :items="$faqs" />
 
         <!-- ============================================================ -->
-        <!-- 11. Finale: the newest card on the board                     -->
+        <!-- 13. Finale: the newest card on the board                     -->
         <!-- ============================================================ -->
         <section id="claim" class="cm-fin" style="scroll-margin-top: 4rem;">
             <i class="cm-cut cm-circle" style="--c: #ff5a4e; width: clamp(9rem, 22vw, 19rem); left: -4rem; top: -4rem;" aria-hidden="true"></i>
