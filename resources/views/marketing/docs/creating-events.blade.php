@@ -453,7 +453,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Private</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Hides the value from the guest portal. Private fields show a small lock icon next to their label on the event form. The value stays visible in the admin portal and can still be rendered into graphic templates and slug patterns via <code class="doc-inline-code">{custom_N}</code>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Hides the value from the guest portal. Private fields show a small lock icon next to their label on the event form. The value stays visible in the admin portal, but it is never written into anything other people see: its <code class="doc-inline-code">{custom_N}</code> comes out empty in graphic templates and slug patterns.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On request form</h4>
@@ -959,7 +959,7 @@
             <li><strong class="text-gray-900 dark:text-white">Members only on Draft and Internal events</strong> - only members of your schedule can vote on those. On an Unlisted event, anyone signed in who has the link can vote, after entering the event's password if it has one.</li>
             <li><strong class="text-gray-900 dark:text-white">One click to vote</strong> - guests click the option they want.</li>
             <li><strong class="text-gray-900 dark:text-white">One vote per poll</strong> - votes cannot be changed afterwards. On a recurring event, votes are counted per date, so a regular can vote again for the next occurrence.</li>
-            <li><strong class="text-gray-900 dark:text-white">Instant results</strong> - the results come back as soon as the vote is cast, so guests immediately see how others voted.</li>
+            <li><strong class="text-gray-900 dark:text-white">Instant results</strong> - the results come back as soon as the vote is cast, so guests immediately see how others voted. They show the count at that moment and do not refresh while the page stays open.</li>
         </ul>
 
         <h3 class="doc-subheading">Viewing Results</h3>
@@ -967,7 +967,7 @@
             Once a guest has voted, results are shown as bars with the count and percentage for each option, and the leading option is highlighted.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            As the organizer you can always see the results and the total vote count on the event form, whether or not you voted. Once a poll has votes its options are locked, so retitling the choices cannot change what people voted for.
+            As the organizer you can always see the results and the total vote count on the event form, whether or not you voted. On a recurring event, the form's count adds the votes of every date together. Once a poll has votes its options are locked, so retitling the choices cannot change what people voted for.
         </p>
 
         <h3 class="doc-subheading">User-Suggested Options</h3>
@@ -984,7 +984,7 @@
             Each saved poll carries an <strong class="text-gray-900 dark:text-white">Active</strong> or <strong class="text-gray-900 dark:text-white">Closed</strong> badge showing its current state:
         </p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Active polls</strong> - guests can vote, and results update as votes arrive.</li>
+            <li><strong class="text-gray-900 dark:text-white">Active polls</strong> - guests can vote, and see the results once they have voted.</li>
             <li><strong class="text-gray-900 dark:text-white">Closed polls</strong> - results are still visible, but no new votes are accepted.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">

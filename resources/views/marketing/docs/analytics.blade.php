@@ -556,7 +556,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Tickets Sold</span></td>
-                        <td>Tickets from paid sales for events dated in the selected range, including free registrations. The ones for shows still to come are counted under it, as For upcoming events.</td>
+                        <td>Tickets from paid sales for events dated in the selected range, free ticket types included. A free registration has no ticket to scan, so it is not counted here. The ones for shows still to come are counted under it, as For upcoming events.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">No-Shows</span></td>

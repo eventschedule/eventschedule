@@ -137,7 +137,7 @@
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">A wheelchair space needs an Accessibility only section</div>
-            <p>Wheelchair spaces are only sellable from a section with <strong>Accessibility only</strong> switched on. That is deliberate - it keeps them from being handed out as the next available seat. But it also means a wheelchair space marked inside an ordinary section is bookable by <em>nobody at all</em>. If you mark wheelchair seats, put them in their own section and turn the switch on. The <a href="#build-issues" class="doc-link">issues panel</a> lists any section that has it wrong.</p>
+            <p>Wheelchair spaces are only sellable from a section with <strong>Accessibility only</strong> switched on. That is deliberate - it keeps them from being handed out as the next available seat. But it also means a wheelchair space marked inside an ordinary section is bookable by <em>nobody at all</em>. If you mark wheelchair seats, put them in their own section and turn the switch on. Give that section a ticket type of its own, too: best available can hand a wheelchair space to anyone buying the section's ticket type, and a companion seat is only held back while the wheelchair space beside it is free. The <a href="#build-issues" class="doc-link">issues panel</a> lists any section that has it wrong.</p>
         </div>
 
         <h3 id="build-issues" class="doc-subheading">The issues panel</h3>

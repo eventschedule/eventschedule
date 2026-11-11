@@ -806,7 +806,7 @@
             When a member leaves, is removed, or is changed to a viewer, they keep no hold on what they set up here:
         </p>
         <ul class="doc-list mb-6">
-            <li>The events they created on this schedule pass to the owner, except an event that has already taken money, which stays with them so its refunds still reach the right payment account</li>
+            <li>The events they created on this schedule pass to the owner, except an event that already has sales or sign-ups, which stays with them so its refunds still reach the right payment account</li>
             <li>Any <a href="{{ route('marketing.docs.appointments') }}#hosts" class="doc-link">appointment type</a> they host is switched off, and the owner is emailed so they can give it a new host</li>
             <li>When they leave or are removed, a <a href="#feeds" class="doc-link">feed</a> they added is paused until someone still on the team looks at it, and their own calendar sync for this schedule is deleted</li>
         </ul>

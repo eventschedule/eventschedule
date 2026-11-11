@@ -309,7 +309,7 @@
                 <tbody>
                     <tr>
                         <td>CNAME</td>
-                        <td><code class="doc-inline-code">@</code> or subdomain (e.g., <code class="doc-inline-code">events</code>)</td>
+                        <td>A subdomain (e.g., <code class="doc-inline-code">events</code>), or <code class="doc-inline-code">@</code> where the DNS provider supports CNAME flattening or ALIAS records (many refuse a CNAME at the root, see below)</td>
                         <td>Your <code class="doc-inline-code">DO_APP_HOSTNAME</code> value</td>
                     </tr>
                 </tbody>

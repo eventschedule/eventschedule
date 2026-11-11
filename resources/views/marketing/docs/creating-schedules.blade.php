@@ -1022,7 +1022,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default curator schedules</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If you also run Curator schedules, tick the ones new events should be shared to automatically, instead of choosing them on every event. Shown on Talent and Venue schedules that have at least one Curator schedule to offer.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If you also run Curator schedules, or follow ones that accept requests, tick the ones new events should be shared to automatically, instead of choosing them on every event. Shown on Talent and Venue schedules that have at least one Curator schedule to offer.</p>
             </div>
         </div>
         <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-6">AI Import</h4>

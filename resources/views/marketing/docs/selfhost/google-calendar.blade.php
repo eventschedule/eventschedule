@@ -147,7 +147,7 @@
             <li><code class="doc-inline-code">openid</code>, <code class="doc-inline-code">email</code> and <code class="doc-inline-code">profile</code> to identify the connecting account</li>
         </ul>
         <p>A connection started on the import page asks for read access only: <code class="doc-inline-code">calendar.readonly</code> and the three identity scopes. Every other connection asks for all five.</p>
-        <p>While the project is in testing mode, add each account that will connect a calendar as a test user. Event Schedule always requests offline access and forces the consent prompt, so a refresh token is issued on every connect.</p>
+        <p>While the project is in testing mode, add each account that will connect a calendar as a test user. Event Schedule always requests offline access and forces the consent prompt, so a refresh token is issued on every connect. Google expires those refresh tokens after seven days while the consent screen's user type is <strong>External</strong> and its publishing status is <strong>Testing</strong>, so set the status to <strong>In production</strong> before people rely on the sync.</p>
 
         <h3 id="setup-credentials" class="doc-subheading">3. OAuth 2.0 Credentials</h3>
         <ol class="doc-list doc-list-numbered">
