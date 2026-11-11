@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Event Scheduling Software for Any Industry | Event Schedule</x-slot>
-    <x-slot name="description">Event scheduling software for musicians, venues, curators, theaters and online events. Sell tickets with zero platform fees. Free forever, open source.</x-slot>
+    <x-slot name="description">Event scheduling software for performers, venues, curators and communities: what it should do, eight questions to ask before you choose, and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Use Cases</x-slot>
 
     @php
@@ -32,6 +32,10 @@
         ];
 
         $faqs = [
+            ['q' => 'What is event scheduling software?', 'a' => 'Software for publishing a set of dates and running what happens around them: a public calendar people can browse and subscribe to, a page for each event, registration or ticket sales with a limit on places, repeating events, sync with the calendars you already use, and check-in at the door. It sits between a plain shared calendar, which cannot take sign-ups or money, and full event management suites, which add budgets, suppliers and staff rotas.'],
+            ['q' => 'How much does event scheduling software cost?', 'a' => 'It is priced in three ways, often mixed: a monthly subscription, a fee taken from each ticket sold, or a free plan with paid extras. Compare them at your own ticket price and volume, because a per-ticket fee grows with every sale while a subscription does not. Event Schedule is free for calendars, free registration and door scanning; Pro, which lets a ticket carry a price, is '.plan_price($proMonthly).' a month per schedule, and Enterprise is '.plan_price($entMonthly).' a month. There is no platform fee on any plan, only your payment processor\'s own, and a selfhosted install has every feature at no cost.'],
+            ['q' => 'What should I look for when choosing event scheduling software?', 'a' => 'Start with the jobs you actually need: a calendar people can use, sign-ups or ticket sales, repeating events, calendar sync, a way to reach your audience, and check-in. Then ask each tool what one ticket costs you at your price, where the money lands, whether each date of a repeating event has its own capacity, whether buyers must create an account, how the free plan is limited and in what unit, whether it can carry your own name, and how you would take your data with you if you left.'],
+            ['q' => 'Can event scheduling software handle recurring classes and weekly nights?', 'a' => 'Good ones can, and it is worth testing before you commit. In Event Schedule a repeating event can run daily, weekly on chosen days, every few weeks, monthly by date or by weekday, or yearly, with single dates skipped or added, and each date keeps its own registration limit and ticket count. Repeating events are free on every plan. Class packs and memberships sold as passes are a Pro feature.'],
             ['q' => 'Is Event Schedule free?', 'a' => 'Yes. Event Schedule is free forever for creating and sharing your event calendar, and free registration is unlimited on it, scanned at the door like any other ticket. Charging for a ticket is a Pro feature, and Pro adds the API and the live check-in dashboard too; Enterprise adds custom domains and extra team members. There are no platform fees on ticket sales, so the only fee is your payment provider\'s own, such as Stripe\'s or PayPal\'s.'],
             ['q' => 'What types of events can I manage?', 'a' => 'Any kind. Musicians share gig schedules, bars list their weekly lineups, theaters manage their season calendars, fitness instructors schedule classes, and conference organizers run multi-day programs. Event Schedule works for in-person events, online events, and hybrid events across every industry.'],
             // No gateway is gated by tier - there is no isPro() anywhere in app/Services/Payments/.
@@ -694,6 +698,35 @@
         .uc-doc p { margin-top: 0.3rem; font-size: 0.9rem; line-height: 1.5; color: var(--hp-ink-2); }
         .uc-doc small { margin-top: auto; padding-top: 0.7rem; font-size: 0.78rem; line-height: 1.5; color: var(--hp-ink-3); }
 
+        {{-- ==============================================================
+           The buyer's guide under the night: the jobs, the questions, and
+           the six groups' rows. Kit cards and kit inks only, so both modes
+           follow the kit; a row's dot and name take its group's colour.
+           ============================================================== --}}
+        .uc-guide-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: clamp(2rem, 4vw, 3rem); }
+        @media (min-width: 768px) { .uc-guide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1100px) { .uc-guide-grid.is-four { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .uc-job { display: flex; flex-direction: column; padding: clamp(1.25rem, 2.2vw, 1.6rem); }
+        {{-- On the alternate ground (white in light mode) a card takes the page's paper, as .uc-doc does. --}}
+        .hp-alt .uc-job { background: var(--hp-bg); }
+        .dark .hp-alt .uc-job { background: var(--hp-bg-2); }
+        .uc-job-num { font-family: var(--hp-mono); font-size: 0.72rem; font-weight: 700; font-variation-settings: normal; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hp-ink-3); }
+        #hp .uc-job h3 { margin-top: 0.55rem; font-size: 1.1rem; font-variation-settings: 'wght' 760; letter-spacing: -0.02em; line-height: 1.25; color: var(--hp-ink); }
+        .uc-job p { margin-top: 0.6rem; font-size: 0.95rem; line-height: 1.55; color: var(--hp-ink-2); }
+        .uc-job p b { font-weight: 700; font-variation-settings: 'wght' 700; color: var(--hp-ink); }
+        .uc-job .uc-job-here { margin-top: auto; padding-top: 0.85rem; border-top: 1px solid var(--hp-line); font-size: 0.9rem; }
+        .uc-job > p:nth-last-child(2) { margin-bottom: 1rem; }
+        .uc-guide-foot { max-width: 46rem; margin-top: 2rem; color: var(--hp-ink-2); }
+
+        .uc-fits { margin-top: clamp(2rem, 4vw, 3rem); border-bottom: 1px solid var(--hp-line); }
+        .uc-fit { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.85rem 2rem; padding-block: 1.4rem; border-top: 1px solid var(--hp-line); }
+        @media (min-width: 900px) { .uc-fit { grid-template-columns: 13rem repeat(3, minmax(0, 1fr)); } }
+        .uc-fit-name { display: inline-flex; align-items: flex-start; align-self: start; gap: 0.6rem; font-size: 1.05rem; font-weight: 700; font-variation-settings: 'wght' 760; letter-spacing: -0.015em; color: var(--uc-a); }
+        .uc-fit-name i { flex: none; width: 0.6rem; height: 0.6rem; margin-top: 0.45em; border-radius: 999px; background: var(--uc-dot); }
+        .uc-fit-name:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+        .uc-fit p { font-size: 0.95rem; line-height: 1.55; color: var(--hp-ink-2); }
+        .uc-fit .uc-fit-label { margin-bottom: 0.3rem; font-family: var(--hp-mono); font-size: 0.7rem; font-weight: 700; font-variation-settings: normal; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hp-ink-3); }
+
         @media (prefers-reduced-motion: reduce) {
             .uc-act,
             .uc-act-name,
@@ -1201,9 +1234,133 @@
     </section>
 
     {{-- ============================================================
+         The buyer's guide: what event scheduling software is for,
+         what to ask before choosing one, and how the answer moves
+         with what you run. Plain server-drawn text on the kit's cards;
+         the script never touches it. The third part wears the six
+         groups' colours, so a reader finds their own row by the same
+         dot they followed on the list above.
+         ============================================================ --}}
+    @php
+        // Every "Here" line is checked against docs/FEATURES.md and config/blog_facts.php,
+        // tier named where the job is not free.
+        $ucJobs = [
+            ['Publish a calendar people can use', 'One page at an address you can share, listing what is coming in order, readable on a phone, with a page of its own for every event so each one can be passed on.', 'Can a visitor search it, filter it and add one event to their own calendar?', 'A schedule at its own address, with search and filters by sub-schedule, category, venue, free entry and online. Free.'],
+            ['Take registrations and sell tickets', 'Knowing who is coming, stopping sign-ups when the room is full, and taking money for the events that cost something.', 'Where does the money land, and what is taken from each ticket on the way?', 'Free registration with a limit per date on every plan. Priced tickets on Pro, paid into your own Stripe, PayPal or other account, with no platform fee.'],
+            ['Repeat without retyping', 'A weekly class or a monthly quiz is set up once, keeps its own count per date, and lets you skip the week the room is closed.', 'Which patterns does it handle, and can one date be skipped or moved?', 'Daily, weekly on chosen days, every few weeks, monthly by date or by weekday, and yearly, with single dates added or skipped. Free.'],
+            ['Stay in step with other calendars', 'An event that lives in two places goes stale in one of them. Sync keeps the work calendar and the public one the same.', 'Does it sync both ways, and can people subscribe to it?', 'Two-way sync with Google Calendar, Outlook and Microsoft 365, and CalDAV, plus a live iCal feed anyone can subscribe to. Free.'],
+            ['Reach people where they already are', 'Your website, their inbox and their calendar. The tool should do the repeating so you are not copying dates into three places.', 'Does the website copy update itself, and who gets emailed when you add a date?', 'A calendar embed that follows your changes, free. Confirmed subscribers hear about new events on their own, and newsletters are counted per recipient each month.'],
+            ['Run the door', 'Checking people in quickly with the phones you already have, and catching the ticket that has been used before.', 'What does the scanner show for a second scan, and what does it cost?', 'QR scanning on any phone, free on every plan, and a second scan of one ticket warns. The live check-in dashboard is Pro.'],
+            ['Share the work', 'More than one person, more than one room, and events that other people run but you want listed.', 'Who can edit, who can only look, and can the public send you events?', 'Sub-schedules, booking requests and Curator listings are free. More than one team member, as an admin or a viewer, is Enterprise.'],
+            ['Know what it is not', 'Event scheduling software publishes and sells dates. It is not a video platform, a volunteer rota or a contact database, and it is worth knowing which of those you will still need beside it.', 'Which of the jobs you need are outside the category altogether?', 'Event Schedule does not host video (an online event carries your stream link) and has no volunteer shift sign-ups or text-message marketing. Prices change only when you change them: an early-bird price is a ticket type with a sales end date.'],
+        ];
+
+        // A worked fee at the example price, from the same rates the fee calculator reads.
+        $ucStripe = \App\Utils\TicketFees::rates()['stripe'];
+        $ucExamplePrice = \App\Utils\TicketFees::EXAMPLE_PRICE;
+        $ucExampleFee = number_format(round($ucExamplePrice * $ucStripe['percent'] + $ucStripe['fixed'], 2), 2);
+
+        $ucQuestions = [
+            ['What does one ticket cost me, at my price?', 'Work it out at your real price and volume, not the headline rate. On a $'.$ucExamplePrice.' ticket, Stripe\'s standard US card rate ('.$ucStripe['label'].') comes to $'.$ucExampleFee.'. Some platforms add a fee of their own on top of that, often passed to the buyer at checkout.', 'No platform fee on any plan. A priced ticket needs Pro, at '.plan_price($proMonthly).' a month for the schedule.'],
+            ['Where does the money land, and when?', 'Ask whether payments go straight into an account in your own name as each order is paid, or are collected by the platform and paid out to you later. It decides your cash flow before an event, and who handles a refund.', 'Paid to you directly: into your own Stripe, PayPal, Payfast, Razorpay or Invoice Ninja account, or by a payment link or cash at the door.'],
+            ['Can each date of a repeating event have its own capacity?', 'A weekly class of 20 needs 20 places every week, not 20 across the term. Some tools only count per event.', 'Yes. The registration limit and ticket quantities are per date.'],
+            ['Do buyers need an account?', 'Every extra step at checkout costs sales, and a forced sign-up is the biggest one. Check what a first-time buyer is asked for.', 'No. A name and an email address.'],
+            ['Does it sync with the calendar your team already uses?', 'One-way imports drift. Ask whether a change made on either side reaches the other.', 'Two-way with Google Calendar, Outlook and CalDAV, free.'],
+            ['What happens when you outgrow the free plan?', 'Find the limits and the unit each is counted in: events, sign-ups, emails a month. A limit counted in recipients is a very different size from one counted in campaigns.', 'Unlimited events and free registrations on every plan. Newsletters: 10 recipients a month on Free, 100 on Pro, 1,000 on Enterprise.'],
+            ['Can it carry your name rather than its own?', 'Your audience should remember you. Check whether the tool\'s logo stays on your pages and whether your own domain is possible.', 'Branding comes off on Pro. A custom domain is Enterprise.'],
+            ['Can you take your data and leave?', 'Ask about exports, an API, and what happens to your pages if you stop paying. The easiest tool to leave is usually the safest one to join.', 'Backup and restore on every plan, sales export and the API on Pro, and the code is open source, so it can be selfhosted.'],
+        ];
+
+        // id of the group on the list above, label, what matters most, what to check, how it is done here.
+        $ucFits = [
+            ['performers', 'Performers and artists', 'blue', 'One calendar for every venue you play, kept current without typing each date twice, and a way for fans to hear about the next one.', 'Can a venue add you to its event and have the date appear on your own page? Can fans follow you?', 'A venue adds you to its event, you accept, and the date is on your page. Calendar sync and following are free.'],
+            ['venues', 'Venues and event spaces', 'amber', 'Selling the room, running the door, regular nights, and acts asking for dates.', 'Capacity per date, recurring nights, a booking request form, and seat maps if your room is seated.', 'Booking requests and recurring nights are free, priced tickets are Pro, and reserved seating is Enterprise.'],
+            ['curators', 'Curators and promoters', 'emerald', 'A listing of other people\'s events that stays current without you copying them in.', 'Can it pull events from other calendars on its own? Can the public submit events for you to approve?', 'Name other Event Schedule schedules as sources and their public events appear automatically, free, and submissions wait for your approval. Reading an outside calendar or feed on its own is Feeds, an Enterprise feature on eventschedule.com.'],
+            ['online', 'Online events', 'cyan', 'Getting the join link to the people who registered, and only to them.', 'Is the link on the ticket or on the public page? Does it work with the streaming service you already use?', 'The full link is printed on the ticket and the public listing shows only its domain. Any service works, because it is a link.'],
+            ['communities', 'Communities and organizations', 'teal', 'Free sign-ups, several programmes under one roof, several people helping, and a list of people to tell.', 'What the free plan really includes, who can edit and who can only look, and how many emails a month you can send.', 'Free registration is unlimited, and sub-schedules split the programmes. A team of more than one is Enterprise.'],
+            ['developers', 'Developers', 'slate', 'Getting events and sales in and out of your own systems.', 'Is there a documented API, signed webhooks, and a feed that needs no key?', 'REST API and webhooks on Pro and every selfhosted install. iCal and RSS feeds on every schedule, free.'],
+        ];
+    @endphp
+
+    <section id="what-it-does" class="hp-sec">
+        <div class="uc-wrap">
+            <div class="hp-head" data-reveal>
+                <span class="hp-kicker">A buyer's guide</span>
+                <h2 class="hp-h2">What event scheduling software <span class="hp-ink-grad">should do for you.</span></h2>
+                <p class="hp-lead">Strip away the feature lists and every tool in this category does some of the same seven jobs. Knowing which ones you need, and what each is worth to you, is most of choosing well.</p>
+            </div>
+
+            <ol class="uc-guide-grid is-four">
+                @foreach ($ucJobs as $ucJobIndex => [$ucJobName, $ucJobWhat, $ucJobAsk, $ucJobHere])
+                    <li class="hp-card uc-job" data-reveal="panel">
+                        <span class="uc-job-num">{{ $ucJobIndex < 7 ? sprintf('%02d', $ucJobIndex + 1) : 'And' }}</span>
+                        <h3>{{ $ucJobName }}</h3>
+                        <p>{{ $ucJobWhat }}</p>
+                        <p class="uc-job-ask"><b>Ask:</b> {{ $ucJobAsk }}</p>
+                        <p class="uc-job-here"><b>Here:</b> {{ $ucJobHere }}</p>
+                    </li>
+                @endforeach
+            </ol>
+        </div>
+    </section>
+
+    <section id="before-you-choose" class="hp-sec hp-alt">
+        <div class="uc-wrap">
+            <div class="hp-head" data-reveal>
+                <span class="hp-kicker">Before you choose</span>
+                <h2 class="hp-h2">Eight questions to ask <span class="hp-ink-grad">any tool you try.</span></h2>
+                <p class="hp-lead">Put the same questions to every option, this one included. The answers are usually on a pricing page or in the help pages, and the ones that are hard to find are the ones worth asking twice.</p>
+            </div>
+
+            <ol class="uc-guide-grid">
+                @foreach ($ucQuestions as $ucQIndex => [$ucQ, $ucQWhy, $ucQHere])
+                    <li class="hp-card uc-job" data-reveal="panel">
+                        <span class="uc-job-num">Q{{ $ucQIndex + 1 }}</span>
+                        <h3>{{ $ucQ }}</h3>
+                        <p>{{ $ucQWhy }}</p>
+                        <p class="uc-job-here"><b>Event Schedule:</b> {{ $ucQHere }}</p>
+                    </li>
+                @endforeach
+            </ol>
+
+            <p class="uc-guide-foot" data-reveal>Comparing prices side by side? The <a href="{{ marketing_url('/ticket-fee-calculator') }}" class="hp-inline">ticket fee calculator</a> works out what a sale costs on several platforms at your own price, and <a href="{{ marketing_url('/why-create-account') }}#free-plan" class="hp-inline">what a free account includes</a> sets out where the free plan stops.</p>
+        </div>
+    </section>
+
+    <section id="by-organizer" class="hp-sec">
+        <div class="uc-wrap">
+            <div class="hp-head" data-reveal>
+                <span class="hp-kicker">It depends what you run</span>
+                <h2 class="hp-h2">The same software, <span class="hp-ink-grad">six different shopping lists.</span></h2>
+                <p class="hp-lead">A venue and a touring act can use the same tool and care about opposite ends of it. Find your row: what matters most, what to check in any tool, and how it is done here.</p>
+            </div>
+
+            <div class="uc-fits">
+                @foreach ($ucFits as [$ucFitId, $ucFitName, $ucFitAccent, $ucFitMatters, $ucFitCheck, $ucFitHere])
+                    <div class="uc-fit" data-accent="{{ $ucFitAccent }}" data-reveal="panel">
+                        <a href="#{{ $ucFitId }}" class="uc-fit-name"><i aria-hidden="true"></i>{{ $ucFitName }}</a>
+                        <div>
+                            <p class="uc-fit-label">What matters most</p>
+                            <p>{{ $ucFitMatters }}</p>
+                        </div>
+                        <div>
+                            <p class="uc-fit-label">Check in any tool</p>
+                            <p>{{ $ucFitCheck }}</p>
+                        </div>
+                        <div>
+                            <p class="uc-fit-label">Here</p>
+                            <p>{{ $ucFitHere }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ============================================================
          FAQ, the related strip and the finale: the page's one ending
          ============================================================ --}}
-    <x-marketing.hp-faq :items="$faqs" lead="Common questions about Event Schedule.">Frequently asked <span class="hp-ink-grad">questions</span></x-marketing.hp-faq>
+    <x-marketing.hp-faq class="hp-alt" :items="$faqs" lead="Common questions about event scheduling software, and about Event Schedule.">Frequently asked <span class="hp-ink-grad">questions</span></x-marketing.hp-faq>
 
     <x-marketing.related-pages />
 

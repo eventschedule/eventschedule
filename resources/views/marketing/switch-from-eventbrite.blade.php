@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Migrate from Eventbrite to Event Schedule | Switching Guide</x-slot>
-    <x-slot name="description">What the Eventbrite import brings across, what stays behind, and how payments and refunds work once you sell from your own page with no platform fee.</x-slot>
+    <x-slot name="description">How to migrate from Eventbrite: what to export first, what the import brings across, when to switch, and how to move buyers and old links without losing a sale.</x-slot>
     <x-slot name="breadcrumbTitle">Switch from Eventbrite</x-slot>
 
     <x-slot name="structuredData">
@@ -255,12 +255,59 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 2. The import                                                -->
+        <!-- 2. Before you start: what to export                          -->
+        <!-- ============================================================ -->
+        <section id="export" class="es-move-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                    <p class="es-move-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before you start</p>
+                    <h2 class="es-balance es-move-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Take your copy out <span class="es-move-accent">while the door is open.</span>
+                    </h2>
+                    <p class="es-move-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        The import reads your events straight from Eventbrite, but it does not read your buyers, your money or your old addresses. Those you download yourself, and the time to do it is before you close anything.
+                    </p>
+                </div>
+
+                @php
+                    // Exports a migration needs. Only general, well-known facts about Eventbrite's
+                    // own screens; everything about this side is the attendee import in docs/tickets.
+                    $moveExports = [
+                        ['The orders for every event still to come', 'For each upcoming event that has sold anything, download its orders and attendee list from Eventbrite as a spreadsheet. You want the buyer\'s name and email, the ticket type and the quantity. That file is what puts those people on the door list here, so download it after sales on Eventbrite have closed, not before.'],
+                        ['A list of everyone who has bought before', 'Export the attendee lists of your past events too, while you still have the account. It is the only record of who came, and it is how you tell regulars where you have gone. Keep a note of which people agreed to hear from you, because that decides whether they can go on a mailing list.'],
+                        ['Every event address you have shared', 'Copy the address of each Eventbrite event page into one list, along with where you posted it: your website, a social profile, a printed poster with a QR code. That list is the job sheet for the links section below, and it is easy to forget the poster on a noticeboard.'],
+                        ['Your money and tax records', 'Download whatever sales, fee and payout records Eventbrite gives you, and keep the figures your accountant will ask for. Leave the account open until the last event sold there has happened and its final payout has arrived, because refunds on those orders are still made on Eventbrite.'],
+                    ];
+                @endphp
+                <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">
+                    @foreach ($moveExports as [$meName, $meBody])
+                        <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-move-ink text-base font-bold">{{ $meName }}</h3>
+                            <p class="es-move-muted mt-2 text-sm leading-relaxed">{{ $meBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="es-move-panel mt-8 p-6" data-reveal="panel">
+                    <h3 class="es-move-ink text-base font-bold">Shape the buyer file before you import it</h3>
+                    <p class="es-move-muted mt-2 text-sm leading-relaxed">
+                        The attendee import (Sales, then Import, on Pro) needs one column: Email. It also reads Name, Phone, Ticket Type (matched by name to the event's ticket types), Quantity, Amount and Status (paid or unpaid), and it detects each from the header. Two of its rules matter for an Eventbrite file. A second row with the same email in one import is skipped, so a buyer who ordered four tickets should be one row with a Quantity of 4, not four rows; a per-attendee export needs folding into one row per buyer first, and a buyer who took two different ticket types needs the second type in a separate import. And a row that would take a ticket type past what is left of it is skipped too, so check the quantities on the imported event before you import the people. Quantity is at most 100 per row (a larger one stops the whole save), up to 5,000 rows go in at a time, and a row with no ticket type falls back to the one you pick on the page.
+                    </p>
+                    <a href="{{ marketing_url('/docs/tickets#importing-attendees') }}" class="es-move-accent mt-4 inline-block text-sm font-semibold hover:underline">
+                        Importing attendees, step by step
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3. The import                                                -->
         <!-- ============================================================ -->
         <section id="import" class="es-move-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
                     <p class="es-move-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The import</p>
                     <h2 class="es-balance es-move-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         A move, <span class="es-move-accent">not a sync.</span>
@@ -289,12 +336,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 3. What does not travel                                      -->
+        <!-- 4. What does not travel                                      -->
         <!-- ============================================================ -->
         <section id="gaps" class="es-move-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                     <p class="es-move-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gaps</p>
                     <h2 class="es-balance es-move-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         What you have to <span class="es-move-accent">carry yourself.</span>
@@ -335,12 +382,119 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. What is different once you are here                       -->
+        <!-- 5. Timing the switch                                         -->
+        <!-- ============================================================ -->
+        <section id="timing" class="es-move-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-move-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Timing</p>
+                    <h2 class="es-balance es-move-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Switch between events, <span class="es-move-accent">not during one.</span>
+                    </h2>
+                    <p class="es-move-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Most migrations that go wrong go wrong on one event that was half sold in one place and half in the other. Decide event by event, using where each one is in its sale.
+                    </p>
+                </div>
+
+                @php
+                    // Three states an event can be in on switch day, and what to do with each.
+                    $moveTiming = [
+                        ['Nothing on sale yet', 'The easy case, and the one to aim for. Import the event, check its Tickets tab, connect your payment account and sell it here from the first ticket. Do not open sales on Eventbrite as well, even for a week: one listing per event keeps the count honest.'],
+                        ['Already selling on Eventbrite', 'Leave it there until it is over. Add it to your schedule anyway with the free Tickets elsewhere option, which puts a View Event button on the event page that opens its Eventbrite page. Your calendar is complete from the first day, buyers land where the tickets really are, and after the night there is nothing to undo.'],
+                        ['Selling, and you want it moved now', 'Close sales on Eventbrite first, then export the orders, import the event and import the buyers. Both places must never be on sale at once, because each one would sell the same remaining seats. Expect a short gap with nothing on sale, and do it on a quiet weekday morning rather than the week of the show.'],
+                    ];
+                @endphp
+                <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                    @foreach ($moveTiming as [$mtName, $mtBody])
+                        <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-move-ink text-base font-bold">{{ $mtName }}</h3>
+                            <p class="es-move-muted mt-2 text-sm leading-relaxed">{{ $mtBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="grid gap-4 mt-8 lg:grid-cols-2">
+                    <div class="es-move-panel p-6" data-reveal="panel">
+                        <h3 class="es-move-ink text-base font-bold">Moving a half-sold event: the arithmetic</h3>
+                        <p class="es-move-muted mt-2 text-sm leading-relaxed">
+                            Say a show has 200 general admission tickets and 120 have sold on Eventbrite. The import copies each ticket type's total quantity, so the event arrives here with 200. Import the 120 buyers from your order export, marked paid, and they count against that 200, which leaves 80 on sale on your own page. The imported rows are recorded as a manual import, so nothing is charged on the way in, and their refunds still happen on Eventbrite.
+                        </p>
+                        <p class="es-move-muted mt-3 text-sm leading-relaxed">
+                            Turn on Send Email in the import and each paid row gets the same confirmation a checkout sends, with a QR code the door scanner reads. The automatic ticket reminder before the event is not sent to imported attendees, so send those buyers a short note yourself in the week of the show.
+                        </p>
+                    </div>
+                    <div class="es-move-panel p-6" data-reveal="panel">
+                        <h3 class="es-move-ink text-base font-bold">A season, not a weekend</h3>
+                        <p class="es-move-muted mt-2 text-sm leading-relaxed">
+                            If you run a series, pick a cutover date: the first event that has not gone on sale yet. Everything before it finishes on Eventbrite, listed on your schedule with Tickets elsewhere; everything from it onward is sold here. A weekly night that came across as separate one-time dates is worth setting up once as a <x-link href="{{ marketing_url('/features/recurring-events') }}" class="text-blue-700 dark:text-blue-300">recurring event</x-link>, which is free, so each date keeps its own ticket count and you stop copying the same event every week.
+                        </p>
+                        <p class="es-move-muted mt-3 text-sm leading-relaxed">
+                            Plan the door as well. Tickets sold or imported here are scanned with a phone, which is free on every plan. If one night does end up sold in both places, import its Eventbrite buyers with Send Email on before the doors open, so each of them has a QR code from here and the door works from one list and one scanner. Their Eventbrite tickets will not scan here.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. Links and people                                          -->
+        <!-- ============================================================ -->
+        <section id="links" class="es-move-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-move-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Links and people</p>
+                    <h2 class="es-balance es-move-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Point every road <span class="es-move-accent">at the new door.</span>
+                    </h2>
+                    <p class="es-move-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        An Eventbrite address is on Eventbrite's domain, so you cannot redirect it. What you can do is change every link you own, leave a sign on the pages you cannot, and tell the people who bought before.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                    <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-move-ink text-base font-bold">Links you own</h3>
+                        <p class="es-move-muted mt-2 text-sm leading-relaxed">
+                            Work through the list you made of every event address: the Tickets button on your website, social bios and link-in-bio pages, email signatures, your map listing, and any QR code on print. Point each one at your schedule's address rather than at a single event, so it never needs changing again. A website can show the whole calendar with the free embed, which updates itself whenever you add a date.
+                        </p>
+                        <a href="{{ marketing_url('/features/embed-calendar') }}" class="es-move-accent mt-auto pt-4 text-sm font-semibold hover:underline">Embedding your calendar</a>
+                    </div>
+                    <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-move-ink text-base font-bold">Pages you do not own</h3>
+                        <p class="es-move-muted mt-2 text-sm leading-relaxed">
+                            Old Eventbrite pages stay where they are, and search results can keep showing them for a while. Where Eventbrite still lets you edit a page, add a line near the top of its description saying where future dates are sold, with your schedule's address. Never leave a moved event on sale there as well: a buyer who finds the old listing is an order you have to refund and explain by hand.
+                        </p>
+                    </div>
+                    <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-move-ink text-base font-bold">People who bought before</h3>
+                        <p class="es-move-muted mt-2 text-sm leading-relaxed">
+                            Tell them in one short message: where you sell now, that tickets they already hold are still good, and that the next tickets arrive by email with a QR code. Message attendees from Eventbrite if it offers that for the event, or write from your own list. Addresses that agreed to hear from you can go into a newsletter segment with Import Emails, up to 10,000 at a time on every plan.
+                        </p>
+                        <a href="{{ marketing_url('/docs/newsletters#importing-emails') }}" class="es-move-accent mt-auto pt-4 text-sm font-semibold hover:underline">Importing emails</a>
+                    </div>
+                </div>
+
+                <div class="es-move-panel mt-8 p-6" data-reveal="panel">
+                    <h3 class="es-move-ink text-base font-bold">Keep the people who find you after the move</h3>
+                    <p class="es-move-muted mt-2 text-sm leading-relaxed">
+                        A ticket buyer is not the same as somebody who agreed to your newsletter, and in many places the difference is the law, so put only the people who opted in on a list. For everyone else, give them a reason to opt in on your new page: the sign-up panel on your schedule takes a name and an email address, and the people who confirm hear automatically when you publish new events, a digest that does not count against the newsletter allowance. Buyers at checkout can tick a box to join the same list. Within a season the list is yours rather than a marketplace's.
+                    </p>
+                    <a href="{{ marketing_url('/features/newsletters') }}" class="es-move-accent mt-4 inline-block text-sm font-semibold hover:underline">
+                        Newsletters and your audience
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7. What is different once you are here                       -->
         <!-- ============================================================ -->
         <section id="after" class="es-move-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                     <p class="es-move-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Afterwards</p>
                     <h2 class="es-balance es-move-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         The first week <span class="es-move-accent">feels different.</span>
@@ -385,16 +539,81 @@
             </div>
         </section>
 
+        <!-- ============================================================ -->
+        <!-- 8. The migration checklist                                   -->
+        <!-- ============================================================ -->
+        <section id="checklist" class="es-move-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-move-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <p class="es-move-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The checklist</p>
+                    <h2 class="es-balance es-move-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Three lists, <span class="es-move-accent">in the order you need them.</span>
+                    </h2>
+                    <p class="es-move-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        The same packing list as the top of the page, turned into jobs. Every box is hollow because every one is yours to tick.
+                    </p>
+                </div>
+
+                @php
+                    // Hollow boxes only: these are jobs, which is what a hollow box means on this page.
+                    $moveChecklist = [
+                        ['Two weeks before', [
+                            'Pick the cutover event: the first one with nothing sold on Eventbrite',
+                            'Export orders for upcoming events and attendee lists for past ones',
+                            'List every Eventbrite address you have shared, and where',
+                            'Create your schedule and set its name, web address, logo and colours',
+                            'Connect Stripe or PayPal in Settings, under Payment Methods',
+                        ]],
+                        ['Switch day', [
+                            'Run the Eventbrite import for the events you are moving',
+                            'For an event you are moving mid-sale, import its Eventbrite buyers before it goes on sale here, with Send Email on',
+                            'Open each one\'s Tickets tab and check the Payment row, prices and quantities',
+                            'Add back promo codes and checkout questions, and turn a weekly night into one recurring event',
+                            'Buy a ticket yourself on a phone, check the email and its QR code, then refund it from Sales',
+                            'Change every link you own, and add a note to the Eventbrite pages you can still edit',
+                        ]],
+                        ['After the last Eventbrite night', [
+                            'Check every moved event\'s remaining count matches what Eventbrite did not sell',
+                            'Tell past buyers where you sell now, using lists they agreed to',
+                            'Scan the first night here with a phone and watch the door list fill',
+                            'Download the last payout and fee records from Eventbrite',
+                            'Only then close the Eventbrite account, if you still want to',
+                        ]],
+                    ];
+                @endphp
+                <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                    @foreach ($moveChecklist as [$mcTitle, $mcItems])
+                        <div class="es-move-crate flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-move-crate-ink text-base font-bold">{{ $mcTitle }}</h3>
+                            <ul class="mt-5 space-y-3.5">
+                                @foreach ($mcItems as $mcItem)
+                                    <li class="flex items-start gap-3">
+                                        <span class="es-move-box mt-0.5" aria-hidden="true"></span>
+                                        <span class="es-move-crate-muted text-sm leading-relaxed">{{ $mcItem }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
         @include('marketing.partials.pricing-nudge')
 
         <!-- ============================================================ -->
-        <!-- 5. FAQ                                                       -->
+        <!-- 9. FAQ                                                       -->
         <!-- ============================================================ -->
         @php
             $moveFaqs = [
                 ['q' => 'Does the import keep running in the background?', 'a' => 'No, and that is deliberate. It runs when you press the button. A background sync would keep an account you are leaving as the source of truth, which is the opposite of what a move is for.'],
                 ['q' => 'What exactly comes across with an event?', 'a' => 'Its name and description, its start time and duration, its venue with the full address, its ticket types with their prices and quantities, its image, its currency and a mapped category. An online event also keeps a link back to its Eventbrite page. Discount codes, checkout questions and seat maps do not come across, and every event arrives as a one-time date.'],
                 ['q' => 'What about people who already bought a ticket?', 'a' => 'They do not come with the import. Export them from Eventbrite and use the bulk attendee import, a Pro feature that takes a CSV of up to 5,000 rows, so people who already paid end up with a ticket and a QR code here as well. Their payments stay with Eventbrite, so a refund on one of those orders is made there.'],
+                ['q' => 'How do I move my Eventbrite attendee list?', 'a' => 'Download the event\'s orders and attendee list from Eventbrite once its sales there have closed, and save them as a CSV file. Here, go to Sales, choose Import, pick the event and switch to Upload CSV. Email is the only column it needs; it also reads Name, Phone, Ticket Type (matched by name), Quantity, Amount and Status, and you map each column before anything is saved. Make it one row per buyer with a Quantity, because a second row with the same email in one import is skipped. Turn on Send Email and each paid row gets a confirmation with a QR code. The attendee import is a Pro feature and takes up to 5,000 rows at a time.'],
+                ['q' => 'Can I redirect my old Eventbrite event links?', 'a' => 'No. An Eventbrite page lives on Eventbrite\'s domain, so only Eventbrite can redirect it. Change every link you control instead (your website, social profiles, email signature, printed QR codes) and point them at your schedule\'s address rather than a single event, so they never need changing again. Where Eventbrite still lets you edit a page you leave behind, add a line to its description saying where future dates are sold.'],
+                ['q' => 'Can I sell the same event on Eventbrite and here at the same time?', 'a' => 'Not safely. Two places selling one event each count only their own sales, so both can sell the last seats. Either leave an event on Eventbrite until it is over, listed on your schedule with the free Tickets elsewhere option so the event page sends buyers there, or close sales on Eventbrite, import its buyers here and sell the rest from your own page. Different events can be on different platforms during the move without any problem.'],
+                ['q' => 'When is the best time to switch?', 'a' => 'Between events. Pick the first event that has nothing sold on Eventbrite and sell it here from its first ticket. Let events already on sale finish where they are, keep the Eventbrite account open until the last one has happened and paid out, and download your payout and fee records before you close it.'],
                 ['q' => 'Do I have to move everything at once?', 'a' => 'No. Pick the events you want, and run it again later for the ones you skipped. One way is to move the next season across and leave the current one where it is until it has finished.'],
                 ['q' => 'Where does the ticket money go?', 'a' => 'Into your own Stripe or PayPal account, which you connect once. Event Schedule adds no fee of its own on any plan, so what you receive is the ticket price minus your processor\'s charge.'],
                 ['q' => 'Can buyers pay with PayPal?', 'a' => 'Yes, on Pro, which is the plan that lets a ticket carry a price at all. Connect your own PayPal account in Settings under Payment Methods and choose PayPal for the event, and the money goes to that account. Stripe is there for cards, and PayPal also works when a buyer takes tickets to several of your events in one checkout. Installment plans, a Pro feature, run on Stripe only.'],
@@ -426,7 +645,7 @@
         <x-seo.faq-schema :items="$moveFaqs" />
 
         <!-- ============================================================ -->
-        <!-- 6. Claim                                                     -->
+        <!-- 10. Claim                                                    -->
         <!-- ============================================================ -->
         <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
             <div class="mx-auto max-w-6xl">

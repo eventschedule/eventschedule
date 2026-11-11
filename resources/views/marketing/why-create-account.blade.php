@@ -434,7 +434,7 @@
         $ledger = [
             [
                 'Buy a ticket',
-                'Confirmed by email. The order is stored with no owner, so it lives in that email and nowhere else.',
+                'Confirmed by email. The order is filed under your email address with no account attached, so for now it lives in that email. Sign up later with the same address and it moves onto your Tickets page.',
                 'The same order, listed on your Tickets page with everything else you have bought, upcoming and past.',
             ],
             [
@@ -492,10 +492,61 @@
             'Backup and restore',
         ];
 
+        // Door by door: does this need an account? Each answer is the code's, not a policy.
+        // Checkout + RSVP: TicketController (sales.user_id null when signed out; the Create Account
+        // box is hosted and not in embeds), User::claimSalesByEmail() on sign-up. Fan content:
+        // EventController::submitComment() + fan_content_require_account. Polls: docs
+        // creating-events "Sign in required". Carpool: CarpoolController::storeOffer() aborts
+        // signed out. Appointments and the waitlist validate a name and an email only.
+        $doors = [
+            ['Buy a ticket', 'No', 'A name and an email address. The ticket and its QR code arrive by email, and the order moves onto your Tickets page if you later sign up with that address.'],
+            ['Register for a free event', 'No', 'The same as a ticket: a name and an email, a confirmation with a QR code, and a link to your ticket page, where you can cancel your place yourself.'],
+            ['Join the waitlist for a full date', 'No', 'A name and an email address, and you are told when a spot becomes available.'],
+            ['Hear when tickets go on sale', 'No', 'An email address only, on events whose organizer has switched on the "Notify me" card.'],
+            ['Put the schedule in your calendar app', 'No', 'Subscribe to its calendar feed, offered in the schedule\'s sign-up panel and in the Add to Calendar menu of many event pages. No address is asked for, and a moved date updates itself.'],
+            ['Get new events by email', 'No', 'Give a name and an email in the sign-up panel and confirm the link it sends. Confirming usually sets up a passwordless account for you as well, which you are free to ignore.'],
+            ['Follow a schedule', 'Made for you', 'Signed in, it is one click. Signed out on eventschedule.com, Follow asks for a name and an email, and confirming it sets up the account, already following.'],
+            ['Comment, or share a photo or video', 'Depends', 'By default a name and an email, and the email is never shown publicly. A schedule can turn on Require an account for its fan content.'],
+            ['Book an appointment', 'No', 'A name and an email address on the booking page, and the confirmation comes by email.'],
+            ['Send an event to a schedule', 'Depends', 'Each schedule decides with its Require Account switch, which is on by default for Curator schedules and off for Venue schedules. A Talent schedule never asks: its requests come through the Booking Form with a name and an email.'],
+            ['Vote in a poll', 'Yes', 'A vote counts once per person, and the account is how it knows.'],
+            ['Offer or ask for a lift', 'Yes', 'Carpool offers and seat requests are made from an account, so a driver knows who is asking.'],
+            ['Publish a schedule of your own', 'Yes', 'Free, with no card. Where the free plan stops is set out further down this page.'],
+            ['Help run somebody else\'s schedule', 'Yes', 'An owner or admin adds you by name and email address, on a schedule with the Enterprise plan, and it appears on your account.'],
+        ];
+        // Where the free plan stops, for somebody who publishes. Units copied from docs/FEATURES.md
+        // (newsletter limits count recipients; Role::newsletterLimit() is null with email settings).
+        $freeLimits = [
+            ['Events', 'Unlimited', 'No cap on events. One account can own up to 50 schedules on eventschedule.com.'],
+            ['Free sign-ups and free tickets', 'Unlimited', 'Every plan takes unlimited registrations. Putting a price on a ticket is what needs Pro.'],
+            ['Door scanning', 'Every ticket', 'Scanning QR codes with a phone is free. The live check-in dashboard is Pro.'],
+            ['Newsletters', '10 emails a month', 'Each recipient counts as one email: 100 a month on Pro and 1,000 on Enterprise, and no limit once the schedule sends through its own email settings, which any plan can set up.'],
+            ['AI import', '50 AI requests a day', 'Per schedule, the same on Pro. Enterprise has 100 a day, and a calendar feed link uses none.'],
+            ['Fan photos', '25 per schedule', 'Pro removes the cap and adds a download of every photo at once.'],
+            ['Appointment types', '1, and free', 'Pro adds more types, a price on a booking and the advanced scheduling rules.'],
+            ['Team', 'Just you', 'Adding anyone else to a schedule is Enterprise, up to five members in all on eventschedule.com.'],
+        ];
+
         $faqs = [
             [
                 'q' => 'Do I need an account to buy a ticket?',
-                'a' => 'No. Checkout asks for a name and an email, and the ticket and its QR code arrive by email. What signing in first changes is where the order lives afterwards: it appears on your Tickets page along with everything else you have bought, upcoming and past, rather than only in that one email.',
+                'a' => 'No. Checkout asks for a name and an email, and the ticket and its QR code arrive by email. What signing in first changes is where the order lives afterwards: it appears on your Tickets page along with everything else you have bought, upcoming and past, rather than only in that one email. On eventschedule.com the checkout also has a Create Account box that sets a password as you buy, and an order bought without one is not lost: sign up later with the same email address and it moves onto your Tickets page.',
+            ],
+            [
+                'q' => 'Do I need an account to RSVP to a free event?',
+                'a' => 'No. Registering for a free event asks for a name and an email address, the same as buying a ticket. You get a confirmation email with a QR code for the door and a calendar invite, and the ticket page it links to lets you cancel your place yourself, which frees it for somebody else. If the date is full, you can join its waitlist with a name and an email too.',
+            ],
+            [
+                'q' => 'I bought tickets before I had an account. Can I see them all in one place?',
+                'a' => 'Yes. Orders made signed out are kept under the email address you used. Sign up with that same address, confirm it, and those orders move onto your Tickets page beside everything you buy afterwards. An order made with a different address stays with that address, so it pays to use one email for tickets.',
+            ],
+            [
+                'q' => 'What can I only do with an account?',
+                'a' => 'Vote in an event poll, offer or ask for a seat in a carpool, publish a schedule of your own and help run somebody else\'s. Two more depend on the schedule: sending it an event (Curator schedules ask for an account by default, Venue schedules do not, and a Talent schedule\'s Booking Form never does) and posting comments, photos or videos (allowed with a name and an email unless the schedule turns on Require an account). Buying, registering, joining a waitlist, booking an appointment and subscribing to a calendar never need one.',
+            ],
+            [
+                'q' => 'Is the free plan a trial?',
+                'a' => 'No. The free plan has no end date and takes no card, and you can publish unlimited events on it. The only trial is the '.config('app.trial_days').'-day free trial when you first subscribe a schedule to Pro or Enterprise, one per account: a card is saved and not charged until it ends. You can start it from the schedule\'s plan page, or from the event editor when you first put a price on a ticket.',
             ],
             [
                 'q' => 'Do I need an account to hear when tickets go on sale?',
@@ -534,7 +585,9 @@
         $dotSections = [
             ['top', 'The ring'],
             ['ledger', 'Two records'],
+            ['doors', 'Door by door'],
             ['keys', 'The keys'],
+            ['free-plan', 'Where free stops'],
             ['faq', 'Questions'],
             ['claim', 'Claim a name'],
         ];
@@ -674,12 +727,68 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. The keys on the ring: bento                               -->
+    <!-- 3. Door by door: do I need an account for this?              -->
+    <!-- ============================================================ -->
+    <section id="doors" class="es-key-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">03</span>
+                <p class="es-key-tagline mb-4" data-reveal style="--reveal-delay: 0.05s;">Door by door</p>
+                <h2 class="es-balance es-key-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Do I need an account <span class="es-key-accent">for this?</span>
+                </h2>
+                <p class="es-key-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The short answers, for everything a visitor can do on a schedule or an event page. Most need an email address and nothing more; four need an account, and two are up to the schedule.
+                </p>
+            </div>
+
+            <div class="es-key-card overflow-x-auto p-4 sm:p-6" data-reveal="panel">
+                <table class="es-key-table text-left">
+                    <caption class="sr-only">Things a visitor can do, whether each one needs an account, and what it asks for instead</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="es-key-tagline pb-3 pe-3 font-bold">To do this</th>
+                            <th scope="col" class="es-key-tagline pb-3 pe-3 font-bold">Account?</th>
+                            <th scope="col" class="es-key-tagline pb-3 font-bold">What it takes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($doors as [$doorAct, $doorNeeds, $doorHow])
+                            <tr>
+                                <th scope="row" class="es-key-ink py-4 pe-3 text-sm font-bold">{{ $doorAct }}</th>
+                                <td class="{{ $doorNeeds === 'Yes' ? 'es-key-ink' : 'es-key-accent' }} whitespace-nowrap py-4 pe-3 text-sm font-bold">{{ $doorNeeds }}</td>
+                                <td class="es-key-muted py-4 text-sm leading-relaxed">{{ $doorHow }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="es-key-card flex flex-col p-6" data-reveal="panel">
+                    <h3 class="es-key-ink mb-3 text-lg font-bold">Bought before you had an account?</h3>
+                    <p class="es-key-muted text-sm leading-relaxed">
+                        Nothing is lost. A ticket or registration made signed out is kept under the email address you gave. When you sign up with that same address and confirm it, those orders move onto your Tickets page with everything you buy afterwards. The same holds if you confirmed an email sign-up on somebody's schedule: that left an account on your address with no password yet, and on eventschedule.com signing up with the address completes it, follows and all.
+                    </p>
+                </div>
+                <div class="es-key-card flex flex-col p-6" data-reveal="panel">
+                    <h3 class="es-key-ink mb-3 text-lg font-bold">Use the same address every time</h3>
+                    <p class="es-key-muted text-sm leading-relaxed">
+                        The email address is the thread that ties it all together. Buy with a work address and sign up with a personal one, and the work orders stay in the work inbox. If you are not sure which one you used, the confirmation email says it, and the "Download my data" option in your settings later lists every ticket and booking held under your account's address, including ones bought before the account existed.
+                    </p>
+                    <a href="{{ marketing_url('/docs/account-settings#your-data') }}" class="es-key-link mt-auto pt-4 text-sm font-semibold hover:underline">Your data, in the user guide</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The keys on the ring: bento                               -->
     <!-- ============================================================ -->
     <section id="keys" class="es-key-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">03</span>
+                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">04</span>
                 <p class="es-key-tagline mb-4" data-reveal style="--reveal-delay: 0.05s;">On the ring</p>
                 <h2 class="es-balance es-key-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Six keys, <span class="es-key-accent">one login.</span>
@@ -746,7 +855,7 @@
                                 <span class="es-key-plan">Free</span>
                             </div>
                             <h3 class="es-key-ink mb-3 text-xl font-bold">Not in a search of your inbox</h3>
-                            <p class="es-key-muted">Buy or register while signed in and the order joins one list, upcoming and past, with the event it belongs to. Buy signed out and it exists only in the confirmation email.</p>
+                            <p class="es-key-muted">Buy or register while signed in and the order joins one list, upcoming and past, with the event it belongs to. Buy signed out and the order waits under your email address, in the confirmation email, until you create an account with that same address: then it joins the list as well.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -818,17 +927,67 @@
         </div>
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 5. Where the free plan stops                                 -->
+    <!-- ============================================================ -->
+    <section id="free-plan" class="es-key-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">05</span>
+                <p class="es-key-tagline mb-4" data-reveal style="--reveal-delay: 0.05s;">If you publish</p>
+                <h2 class="es-balance es-key-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Where the free plan <span class="es-key-accent">stops.</span>
+                </h2>
+                <p class="es-key-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    "Free account" is easy to say. These are the numbers behind it on eventschedule.com, with the unit each one is counted in, so you can tell before you start whether your events fit.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="70">
+                @foreach ($freeLimits as [$limitName, $limitValue, $limitNote])
+                    <div class="es-key-card flex flex-col p-6" data-reveal="panel">
+                        <p class="es-key-tagline mb-2">{{ $limitName }}</p>
+                        <p class="es-key-ink mb-3 text-2xl font-black tracking-tight">{{ $limitValue }}</p>
+                        <p class="es-key-muted text-sm leading-relaxed">{{ $limitNote }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div class="es-key-card flex flex-col p-6" data-reveal="panel">
+                    <h3 class="es-key-ink mb-3 text-lg font-bold">A community calendar</h3>
+                    <p class="es-key-muted text-sm leading-relaxed">
+                        A weekly meetup, a club or a library listing free events never needs to leave the free plan. Registrations are unlimited, a capacity per date stops sign-ups when the room is full, the waitlist on a full free date works on every plan, and the door is scanned with a phone.
+                    </p>
+                </div>
+                <div class="es-key-card flex flex-col p-6" data-reveal="panel">
+                    <h3 class="es-key-ink mb-3 text-lg font-bold">The first paid ticket</h3>
+                    <p class="es-key-muted text-sm leading-relaxed">
+                        Charging for a ticket is the point where a schedule needs Pro, at {{ plan_price($proMonthly) }} a month for that schedule. Pro starts with a {{ config('app.trial_days') }}-day free trial, one per account, and Event Schedule takes no platform fee on any plan: what you pay per ticket is your payment processor's own charge.
+                    </p>
+                </div>
+                <div class="es-key-card flex flex-col p-6" data-reveal="panel">
+                    <h3 class="es-key-ink mb-3 text-lg font-bold">A team, or your own domain</h3>
+                    <p class="es-key-muted text-sm leading-relaxed">
+                        Enterprise, at {{ plan_price($entMonthly) }} a month, adds team members and a custom domain. Or run the open source code on your own server: a selfhosted install includes every feature, with no plan to buy.
+                    </p>
+                    <a href="{{ marketing_url('/pricing') }}" class="es-key-link mt-auto pt-4 text-sm font-semibold hover:underline">Compare the plans</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 4. FAQ                                                       -->
+    <!-- 6. FAQ                                                       -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="es-key-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">04</span>
+                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">06</span>
                 <h2 class="es-balance es-key-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>
@@ -855,7 +1014,7 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 5. Finale: cut the key                                       -->
+    <!-- 7. Finale: cut the key                                       -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
