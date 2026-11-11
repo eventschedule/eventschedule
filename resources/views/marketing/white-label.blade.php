@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">White Label | Remove Event Schedule Branding on Pro</x-slot>
-    <x-slot name="description">On Pro, Event Schedule branding comes off seven surfaces at once, from the foot of your page to both embeds and your newsletters. Here is what stays, too.</x-slot>
+    <x-slot name="description">How to remove Event Schedule branding: Pro takes it off seven surfaces at once, from your page to both embeds and newsletters. What stays, and a full checklist.</x-slot>
     <x-slot name="breadcrumbTitle">White Label</x-slot>
 
     <x-slot name="structuredData">
@@ -89,7 +89,7 @@
            is on EVERY tenant's pages, free and paid: until 2026-10-20 it
            stood down for an operator's free tier, which carried the
            operator's own footer strip instead, and that strip is gone.
-           Section 03's closing line, section 05, and BOTH the selfhost
+           Section 03's closing line, section 06, and BOTH the selfhost
            FAQ and the operator FAQ have to keep saying so - a page
            selling white-label that overclaims gets found out on day one.
            TWO MORE STAY OFF THE PAGE, and section 03 has a card for
@@ -612,16 +612,32 @@
                 'a' => 'Upgrade the schedule to Pro or Enterprise. There is no switch to find afterwards: the check reads the plan itself, so the chip in the corner of your page is gone as soon as the plan is active, on every surface at once.',
             ],
             [
+                'q' => 'Is there a free way to remove the branding?',
+                'a' => 'Not on eventschedule.com: the branding follows the plan, and the free plan carries it. The free route is to selfhost. Event Schedule is open source, and every schedule on an install of your own behaves like a paid one, with no card beside your events, no line under your embeds or in your newsletters, and no ads. The small credit chip in the corner of the public pages stays even there, because the licence asks for it in return for the software.',
+            ],
+            [
+                'q' => 'If I run two schedules, do I upgrade both?',
+                'a' => 'Yes. A plan belongs to a schedule, not to your account, and every surface in the register reads the plan of the schedule it is showing. Upgrade the one your audience sees, or both if both are public. A curator schedule that lists other schedules\' events answers for itself too, whatever plan those schedules are on.',
+            ],
+            [
                 'q' => 'What exactly is removed?',
                 'a' => 'Seven surfaces: the small "Event Schedule" chip in the corner of your public schedule; the "Create your own event schedule!" card beside your event details; the "Powered by Event Schedule" line in the calendar embed snippet; the same line on the embedded ticket widget, which carries it twice, once inside the widget and once in the snippet; the line in the footer of the newsletters you send; the Event Schedule tab icon, which your own logo replaces; and ads or promotions, which never appear above the free tier.',
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'On a schedule hosted here, one line in the page head, and on one kind of plan the chip in the corner. First, the head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is one uploaded for the page - the event\'s flyer, a photo of its act or venue, or your own header, logo or background - or, failing that, whatever your page already shows, never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, the small Event Schedule chip a free schedule carries stays in the corner of your public pages; customers who pay through Stripe lose it, and so do plans earned through the referral programme. '.($walletLive ? 'Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own.' : 'One more thing is not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan.').' On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
+                'a' => 'On a schedule hosted here, one line in the page head, and on one kind of plan the chip in the corner. First, the head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is one uploaded for the page - the event\'s flyer, a photo of its act or venue, or your own header, logo or background - or, failing that, whatever your page already shows, never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, the small Event Schedule chip a free schedule carries stays in the corner of your public pages; customers who pay through Stripe lose it, and so do plans earned through the referral programme. '.($walletLive ? 'Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own.' : 'One more thing is not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan.').' On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan - see the two selfhost questions further down.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
                 'a' => 'Yes, if you had already pasted one. Both snippets, calendar and tickets, bake the "Powered by" line into the HTML you copy, so that copy sits on your site rather than on ours and we cannot reach it. Copy each snippet again from the schedule and paste over the old one. The ticket widget also has a footer inside the frame itself, and that one is rendered by us, so it disappears without you touching anything.',
+            ],
+            [
+                'q' => 'Do my ticket emails mention Event Schedule?',
+                'a' => 'Not in the body. Ticket confirmations and the other mail your guests get carry your schedule\'s name, your logo and your accent colour, on every plan, free included. The one place the platform can show is the From line: until you add your own email settings, that mail is sent from the platform\'s address. Add your SMTP server under Integrations, on any plan, and the From Address and From Name are yours. Newsletters are the exception on the free plan: their footer carries a "Powered by Event Schedule" line until you upgrade.',
+            ],
+            [
+                'q' => 'What is a white-label event platform?',
+                'a' => 'It is event software you run under your own brand and sell to other organizers: your sign-up page, your prices, your billing, many customers. That is a different and much bigger thing than removing a vendor\'s name from your own schedule. If it is what you are after, Event Schedule can run that way on your own servers, and the white-label ticketing platform page explains how. If the events are your own, Pro, or Enterprise for your own domain, is all you need.',
             ],
             [
                 'q' => 'Is white labeling available on selfhosted installations?',
@@ -647,7 +663,9 @@
             ['switch', 'No switch'],
             ['stays', 'What stays'],
             ['yours', 'Your space'],
+            ['which', 'Which one'],
             ['selfhost', 'Selfhost'],
+            ['checklist', 'Checklist'],
             ['faq', 'Questions'],
             ['claim', 'Get started'],
         ];
@@ -1043,7 +1061,7 @@
                     eventschedule.com, whether you selfhost for yourself or run a platform of your own
                     for other people, it sits in the corner of the public pages. On a selfhost or a
                     platform of your own, that is every page, whatever the schedule's plan. The licence puts the chip there rather than the plan, so there is
-                    nothing to upgrade past - section 05 has the detail. One thing beside all of it: mail leaves our server
+                    nothing to upgrade past - section 06 has the detail. One thing beside all of it: mail leaves our server
                     unless you point the schedule at your own SMTP settings, which any plan can do.
                     If any of it matters for your case,
                     <a href="{{ marketing_url('/contact') }}" class="es-slate2-lit font-medium underline">ask us</a>
@@ -1221,12 +1239,90 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Selfhost (05)                                             -->
+    <!-- 5b. Which white label (05)                                   -->
+    <!-- ============================================================ -->
+    {{-- Three products answer the word "white label". This page sells the first, the custom
+         domain page the second and /saas the third, so the cards say which need each one meets
+         and send the reader on, rather than compete with those pages. --}}
+    <section id="which" class="es-slate2-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-slate2-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-slate2-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Which one</p>
+                <h2 class="es-balance es-slate2-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Three things people call <span class="es-slate2-grad">white label</span>.
+                </h2>
+                <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Search for white label and you meet three different products under one name.
+                    They solve different problems and cost very different amounts, so decide which
+                    one you need before you pay for any of them.
+                </p>
+            </div>
+
+            @php
+                $whiteLabelKinds = [
+                    [
+                        'plan' => 'Pro',
+                        'planClass' => 'es-slate2-plan es-slate2-plan-pro',
+                        'title' => 'Your page, without our name',
+                        'body' => 'Our name comes off the pages, both embeds and the newsletters. The address stays a subdomain of the service, which is fine for most organizers, because people reach the page from your own links anyway.',
+                        'pick' => 'Pick it when you run your own events and want the page, the widget on your site and your mail to read as yours.',
+                        'href' => '#register',
+                        'link' => 'The seven surfaces',
+                    ],
+                    [
+                        'plan' => 'Enterprise',
+                        'planClass' => 'es-slate2-plan es-slate2-plan-enterprise',
+                        'title' => 'Your page, at your own address',
+                        'body' => 'A custom domain serves the schedule from an address you own, such as whatson.northgatehall.com. Enterprise also includes everything Pro removes, so with your own email settings this is the fullest own-brand setup for one organization (section 03 lists the little that stays).',
+                        'pick' => 'Pick it when the address is printed on posters and tickets, or a client wants nothing on the page to point anywhere else.',
+                        'href' => marketing_url('/features/custom-domain'),
+                        'link' => 'Custom domain',
+                    ],
+                    [
+                        'plan' => 'Selfhost',
+                        'planClass' => 'es-slate2-plan es-slate2-plan-free',
+                        'title' => 'A platform of your own to sell',
+                        'body' => 'This one is the software itself, run under your brand for other organizers: your sign-up page, your prices, your Stripe account, many schedules. Event Schedule is open source and runs that way on your own servers. The corner credit stays on every page of it, as section 06 explains.',
+                        'pick' => 'Pick it when you are an agency, a network or a ticketing business that will charge other people for schedules.',
+                        'href' => marketing_url('/saas'),
+                        'link' => 'White-label ticketing platform',
+                    ],
+                ];
+            @endphp
+
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ($whiteLabelKinds as $kind)
+                    <div class="es-slate2-card es-slate2-hover flex flex-col p-6 sm:p-7" data-reveal>
+                        <div class="mb-4">
+                            <span class="{{ $kind['planClass'] }}">{{ $kind['plan'] }}</span>
+                        </div>
+                        <h3 class="es-slate2-ink mb-3 text-lg font-bold">{{ $kind['title'] }}</h3>
+                        <p class="es-slate2-muted mb-4 text-sm">{{ $kind['body'] }}</p>
+                        <p class="es-slate2-sub es-slate2-ink mb-5 p-3 text-sm">{{ $kind['pick'] }}</p>
+                        <a href="{{ $kind['href'] }}" class="es-slate2-accent mt-auto inline-flex items-center gap-1.5 text-sm font-medium hover:underline">
+                            {{ $kind['link'] }}
+                            <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-slate2-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                A rule of thumb: if the events on the page are your own, you want one of the first two.
+                The third is a business in its own right, with servers to keep up, customers to
+                support and billing to run, and it only pays when other organizers are paying you.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Selfhost (06)                                             -->
     <!-- ============================================================ -->
     <section id="selfhost" class="es-slate2-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-slate2-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <div class="es-slate2-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                 <p class="es-slate2-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Selfhost</p>
                 <h2 class="es-balance es-slate2-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Run it yourself and it arrives <span class="es-slate2-grad">near enough blank</span>.
@@ -1271,12 +1367,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Three steps (06)                                          -->
+    <!-- 7. Three steps (07)                                          -->
     <!-- ============================================================ -->
     <section class="es-slate2-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-slate2-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <div class="es-slate2-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                 <p class="es-slate2-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Start to finish</p>
                 <h2 class="es-balance es-slate2-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Three steps, <span class="es-slate2-grad">none of them a setting</span>.
@@ -1296,6 +1392,108 @@
                     </div>
                 @endforeach
             </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7b. The own-brand checklist (08)                             -->
+    <!-- ============================================================ -->
+    {{-- Every row is checked: the Schedule URL's Edit button (docs/creating-schedules, Settings);
+         the guest mail's sender name, logo and button colour (App\Utils\EmailTheme::guest, built
+         from the schedule's name, profile image and accent colour); the tab icon
+         (app-guest.blade.php, isPro() and a profile image); the wallet passes' fallback
+         (GoogleWalletService::classPayload(), AppleWalletService::drawImages()); the From line
+         (every guest Mailable uses config('mail.from') unless the schedule has email settings,
+         which are on every hosted plan); Direct mode's Main address (docs/creating-schedules
+         #custom-domain-main-address); the graphic credit (AbstractEventDesign::renderBranding()). --}}
+    <section id="checklist" class="es-slate2-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-slate2-mark mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-slate2-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The full checklist</p>
+                <h2 class="es-balance es-slate2-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Every place a guest <span class="es-slate2-grad">meets your brand</span>.
+                </h2>
+                <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Taking our name off is one line of this list. A schedule reads as yours when every
+                    place a guest meets it carries your name: the page, the link they forward, the
+                    email in their inbox and the ticket on their phone. Work down it once, in this
+                    order, and settle the address before anything goes to print.
+                </p>
+            </div>
+
+            @php
+                $brandChecklist = [
+                    ['Choose the address', 'Free', 'es-slate2-plan es-slate2-plan-free', 'Pick a subdomain that is your name, not an abbreviation of it, with Edit beside the Schedule URL in Settings. Do it before you print a poster or a QR code, because those carry the address for as long as they hang on a wall.'],
+                    ['Upload your logo', 'Free', 'es-slate2-plan es-slate2-plan-free', 'The profile image heads every email your guests receive and stands in for you on the page. On Pro it also becomes the browser tab icon. Where buyers can save a ticket to a phone wallet, the pass carries it too, and shows the platform\'s own icon if you have none, so use a PNG or JPG rather than an SVG.'],
+                    ['Set colour, font and background', 'Free', 'es-slate2-plan es-slate2-plan-free', 'The accent colour reaches further than the page: it is also the colour of the buttons in the confirmation and reminder emails your guests get.'],
+                    ['Upgrade the schedule', 'Pro', 'es-slate2-plan es-slate2-plan-pro', 'Our name comes off the seven surfaces in the register. Each schedule has its own plan, so a second schedule you run is upgraded on its own.'],
+                    ['Copy both embed snippets again', 'Your side', 'es-slate2-plan es-slate2-plan-free', 'Only if you pasted one while on the free plan. The old copy on your site still prints the line underneath until you replace it.'],
+                    ['Add your own email settings', 'Any plan', 'es-slate2-plan es-slate2-plan-free', 'Without them, guest email goes out from the platform\'s sending address, with your name, logo and colour inside. With your SMTP server under Integrations, the From Address and From Name are yours as well. On eventschedule.com they are also what lets change and cancellation emails reach your buyers.'],
+                    ['Rename the words', 'Pro', 'es-slate2-plan es-slate2-plan-pro', 'Custom labels turn "Events" into Classes or Sessions, so the page speaks your vocabulary, not a generic one.'],
+                    ['Point your domain at it', 'Enterprise', 'es-slate2-plan es-slate2-plan-enterprise', 'In Direct mode the schedule is served at your address with SSL. Leave your domain as the Main address and emails, shared links and the QR code all use it.'],
+                    ['Write Custom CSS', 'Pro', 'es-slate2-plan es-slate2-plan-pro', 'Last rather than first: it is for the details the settings cannot reach, and is easier to write once everything above is in place.'],
+                    ['Decide about graphics', 'Any plan', 'es-slate2-plan es-slate2-plan-free', 'An event graphic made on eventschedule.com carries a small eventschedule.com credit on every plan. Where a post must carry nothing of ours, post your own flyer instead.'],
+                ];
+            @endphp
+
+            <div class="es-slate2-card overflow-hidden p-5 sm:p-7" data-reveal="panel">
+                <div class="overflow-x-auto">
+                    <table class="es-slate2-reg w-full border-collapse text-left">
+                        <caption class="sr-only">Ten steps to a fully own-brand schedule, the plan each one needs, and what it changes</caption>
+                        <thead>
+                            <tr class="es-slate2-tag">
+                                <th scope="col" class="pb-3 pe-4 font-bold">Step</th>
+                                <th scope="col" class="pb-3 pe-4 font-bold">Plan</th>
+                                <th scope="col" class="pb-3 font-bold">What it changes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($brandChecklist as $i => [$step, $plan, $planClass, $why])
+                                <tr class="es-slate2-rule border-t">
+                                    <th scope="row" class="es-slate2-ink w-1/4 py-4 pe-4 align-top text-sm font-bold">
+                                        <span class="es-slate2-accent es-slate2-num me-1.5">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                        {{ $step }}
+                                    </th>
+                                    <td class="py-4 pe-4 align-top"><span class="{{ $planClass }}">{{ $plan }}</span></td>
+                                    <td class="es-slate2-muted py-4 align-top text-sm">{{ $why }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="es-slate2-muted mt-4 text-xs sm:hidden">Scroll the table sideways to see the third column.</p>
+            </div>
+
+            <h3 class="es-slate2-ink mb-2 mt-14 text-center text-2xl font-black tracking-tight" data-reveal>Then check it the way a guest meets it</h3>
+            <p class="es-slate2-muted mx-auto mb-8 max-w-2xl text-center text-sm" data-reveal>
+                Ten minutes on these four checks shows you what your guests get, outside the editor
+                and away from your own account.
+            </p>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ([
+                    ['Open it on a phone, signed out', 'Use a private window. Look at the corner of the schedule page, the column beside an event\'s details, and the icon in the tab. On Pro, with a logo uploaded, all three should be yours or empty.'],
+                    ['Share the link with yourself', 'Paste the schedule\'s address into a chat app. The preview should read your schedule\'s name and show a picture you uploaded. If the picture is not one you would choose, upload a header image for the schedule, or a flyer for an event\'s own page.'],
+                    ['Put an email in your own inbox', 'Send yourself a test newsletter with Send a Test, and register for one of your own free events. Read the footer, and the From line at the top: that is the one your email settings decide.'],
+                    ['Look at your own website', 'Open the page where you pasted the calendar or the ticket widget and look under each frame. A "Powered by" line there means the old snippet is still on the page.'],
+                ] as [$t, $d])
+                    <div class="es-slate2-card es-slate2-hover p-6" data-reveal>
+                        <h4 class="es-slate2-ink mb-2 text-lg font-bold">{{ $t }}</h4>
+                        <p class="es-slate2-muted text-sm">{{ $d }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-slate2-muted mt-8 text-center text-sm" data-reveal>
+                Each step has a page in the user guide:
+                <x-link href="{{ route('marketing.docs.schedule_styling') }}#profile-image" class="es-slate2-accent font-medium underline">images</x-link>,
+                <x-link href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="es-slate2-accent font-medium underline">email settings</x-link>,
+                <x-link href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-labels" class="es-slate2-accent font-medium underline">custom labels</x-link>,
+                <x-link href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="es-slate2-accent font-medium underline">custom domain</x-link>
+                and
+                <x-link href="{{ route('marketing.docs.schedule_styling') }}#remove-branding" class="es-slate2-accent font-medium underline">removing branding</x-link>.
+            </p>
         </div>
     </section>
 
@@ -1391,14 +1589,14 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 10. FAQ (07)                                                 -->
+    <!-- 10. FAQ (09)                                                 -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="es-slate2-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-slate2-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-slate2-mark mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                 <p class="es-slate2-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-slate2-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked before <span class="es-slate2-grad">upgrading</span>.

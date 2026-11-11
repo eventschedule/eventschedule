@@ -620,13 +620,27 @@
         $afterSale = [
             ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the ticket type, the amount, the status and any code used. The first paid sale on an event notifies you, whatever plan you are on.', 'Pro', 'sale-notifications'],
             ['Sales CSV export', 'Buyer, ticket type, amount, promo code, payment method, check-in status and every custom answer.', 'Pro', 'sales-export'],
-            ['Ticket waitlist', 'When a date sells out, guests can join. One person is notified at a time, with a 24 hour link to buy.', 'Pro'],
+            ['Ticket waitlist', 'When a date sells out, guests can join. When a ticket comes back, one person at a time is emailed and gets a 24-hour head start before the next is told; the seat is not held.', 'Pro'],
             ['Bulk attendee import', 'Paste rows or upload a CSV for people who paid out of band. Up to 5,000 in one go.', 'Pro', 'attendee-import'],
             ['Gift cards', 'Sell a balance somebody sends to a recipient by email, redeemable against tickets on your schedule.', 'Pro'],
             ['Post-event feedback', 'Star ratings and comments collected from ticket buyers and registrants after the event ends.', 'Pro'],
             ['Webhooks', 'POST notifications for sales, cancellations and check-ins, into whatever you already run.', 'Pro'],
             ['Embeddable ticket form', 'Put the purchase form on the website you already have, in one iframe. The RSVP embed is free.', 'Pro', null, ['marketing.embed_tickets', 'How the ticket embed works']],
         ];
+
+        // Stripe's published US card rate, read from the one place every fee calculator on the
+        // site reads it (App\Utils\TicketFees::rates()['stripe']), worked in cents the way /stripe
+        // works it, one ticket per order. Our own line is zero on every row: there is no platform fee.
+        $stripeRate = \App\Utils\TicketFees::rates()['stripe'];
+        $feePercent = (float) $stripeRate['percent'];
+        $feeFixedCents = (int) round($stripeRate['fixed'] * 100);
+        $feeMoney = fn (int $cents) => number_format($cents / 100, 2);
+        $feeRateLabel = rtrim(rtrim(number_format($feePercent * 100, 2), '0'), '.').'% + $'.$feeMoney($feeFixedCents);
+        $feeLadder = array_map(function (int $cents) use ($feePercent, $feeFixedCents) {
+            $fee = (int) round($cents * $feePercent) + $feeFixedCents;
+
+            return ['price' => $cents, 'fee' => $fee, 'keep' => $cents - $fee, 'share' => number_format($fee / $cents * 100, 1)];
+        }, [500, 1000, 2500, 5000, 10000]);
 
         $steps = [
             ['01', 'Connect a payment method', 'Your own Stripe or PayPal account, Invoice Ninja, Payfast, Razorpay, a payment URL, or cash at the door. The money settles into your account, not ours.'],
@@ -636,12 +650,24 @@
 
         $faqs = [
             [
+                'q' => 'What is event ticketing software?',
+                'a' => 'Software that sells admission to an event and then checks it at the door: ticket types with prices and quantities, a checkout that takes payment, a ticket with a code the buyer receives by email, and a scanner that admits each code once. Better tools also handle refunds, waitlists, discount codes and a list of buyers you can export. Event Schedule does all of that, the paid parts on Pro, on your own event page, with payment going into your own Stripe or PayPal account.',
+            ],
+            [
                 'q' => 'Can I sell tickets online with Event Schedule?',
                 'a' => 'Yes. It is an online ticketing platform built around your own event page: the buyer picks a ticket type there, pays by card, Apple Pay or Google Pay through your own Stripe account or with PayPal, and gets the ticket by email with a QR code for the door. On Pro the checkout can also sit on your own website, through the ticket embed. Putting a price on a ticket is the Pro plan; free registration works on every plan, and no plan adds a platform fee.',
             ],
             [
                 'q' => 'What are the fees for selling tickets?',
                 'a' => 'Event Schedule charges zero platform fees on ticket sales. Card payments run through your own connected Stripe or PayPal account, so the provider charges you its standard processing rate directly and the rest of the ticket price is yours. Nothing is deducted by us, on any plan, at any volume.',
+            ],
+            [
+                'q' => 'Who pays the card processing fee?',
+                'a' => 'You do, out of the ticket price, the same as at a shop counter. There is no separate booking fee added at checkout, so the price on your event page is the price the buyer pays. If you want the processing covered, build it into the price: at Stripe\'s published US card rate of '.$feeRateLabel.' a charge, a $'.$feeMoney($feeLadder[2]['price']).' ticket costs $'.$feeMoney($feeLadder[2]['fee']).' to process, and you keep $'.$feeMoney($feeLadder[2]['keep']).'.',
+            ],
+            [
+                'q' => 'When do I get paid for the tickets I sell?',
+                'a' => 'As the processor pays you, not when we do, because we never hold the money. A card sale is charged on your own Stripe account and Stripe pays it out to your bank on the payout schedule of that account; a PayPal sale lands in your PayPal account. Cash at the door is in your hand on the night. Nothing waits until after the event.',
             ],
             [
                 'q' => 'Do I need a paid plan to sell tickets?',
@@ -654,7 +680,7 @@
             // Only where the install can issue a pass; see $walletLive.
             ...($walletLive ? [[
                 'q' => 'Can buyers save their tickets to Google Wallet?',
-                'a' => 'Yes, on every plan. The ticket page, the order page and the confirmation email carry an Add to Google Wallet button, and free registrations get one too. The pass holds the same QR code as the ticket page, so it scans with the same free scanner. It is a snapshot that is not updated afterwards, but the door checks the order live, so a cancelled or refunded ticket is still refused. There is no Apple Wallet pass. On a selfhosted install the button appears once the operator adds Google Wallet credentials.',
+                'a' => 'Yes, on every plan. The ticket page, the order page and the confirmation email carry an Add to Google Wallet button'.(\App\Services\Wallet\AppleWalletService::isConfigured() ? ', with an Add to Apple Wallet button beside it,' : '').' and free registrations get one too. The pass holds the same QR code as the ticket page, so it scans with the same free scanner. It is a snapshot that is not updated afterwards, but the door checks the order live, so a cancelled or refunded ticket is still refused. On a selfhosted install the button appears once the operator adds Google Wallet credentials, and an Add to Apple Wallet button appears beside it once the operator adds Apple\'s pass credentials too.',
             ]] : []),
             [
                 'q' => 'Is there a seat map or assigned seating?',
@@ -674,7 +700,7 @@
             ],
             [
                 'q' => 'What happens when tickets sell out?',
-                'a' => 'A Join Waitlist button appears on the event page for that date. Guests leave a name and email, and when tickets come back into the pool because a sale was cancelled, refunded or expired, the next person in line is emailed a 24 hour link to buy. Only one person is notified at a time, so a single returned ticket is not blasted at the whole list; if that link expires unused, the next person is emailed instead. The waitlist is a Pro feature.',
+                'a' => 'A Join Waitlist button appears on the event page for that date. Guests leave a name and email, and when tickets come back into the pool because a sale was cancelled, refunded or expired, the next person in line is emailed and gets a 24-hour head start before the next is told. The seat is not held for them: the date is back on sale, first come, first served. Only one person is notified at a time, so a single returned ticket is not blasted at the whole list; if they have not bought when the 24 hours are up and the date still has room, the next person is emailed. The waitlist is a Pro feature.',
             ],
             [
                 'q' => 'Can people sign up to hear when tickets go on sale?',
@@ -683,6 +709,10 @@
             [
                 'q' => 'How does inventory work on a recurring event?',
                 'a' => 'Per occurrence date. A ticket type with 220 available has 220 for each date the event runs, so a sold-out Saturday does not close the Sunday. A pass is the deliberate exception: one QR code covers the whole series, so a pass draws from a single pool rather than a fresh one per date.',
+            ],
+            [
+                'q' => 'Can I move my existing ticket buyers from another platform?',
+                'a' => 'Yes, on Pro. Export the attendee list from the old platform and load it with Import on the Sales page: up to 5,000 rows at a time, with the email address the only required column, and a Quantity column for buyers with several tickets. Turn on Send Email and each paid attendee receives a confirmation with their own QR code, so the whole room checks in with one scanner. Events themselves come across with Import Events, and Import from Eventbrite brings their ticket types and venues too, but not their orders.',
             ],
             [
                 'q' => 'Can I get notified when tickets sell, and export the data?',
@@ -698,6 +728,8 @@
             ['fee', 'Zero at the gate'],
             ['free', 'Before you upgrade'],
             ['after', 'After the sale'],
+            ['choose', 'Before you choose'],
+            ['switch', 'Switching'],
             ['faq', 'Questions'],
             ['claim', 'Start selling'],
         ];
@@ -1136,6 +1168,67 @@
                     </div>
                 </div>
             </div>
+
+            {{-- The fee, worked at five prices. Figures come from $feeLadder above (TicketFees), so they
+                 match /stripe and the fee calculator to the cent. --}}
+            <div class="mt-14 grid items-start gap-8 lg:grid-cols-[1fr_1.05fr]">
+                <div data-reveal>
+                    <p class="es-turn-tag mb-4">How ticketing software charges</p>
+                    <h3 class="es-turn-ink mb-4 text-2xl font-black tracking-tight">Three ways to be billed, and one bill everyone pays</h3>
+                    <p class="es-turn-muted mb-4 text-sm leading-relaxed">
+                        Every ticketing tool you look at charges in one of three shapes: a percentage plus a fixed
+                        amount on each ticket, a flat amount per ticket, or a monthly subscription with nothing
+                        per ticket. Many tools let you pass their share on to buyers as a service fee, which
+                        changes the price your audience sees, not what the night costs.
+                    </p>
+                    <p class="es-turn-muted mb-4 text-sm leading-relaxed">
+                        On top of any of them sits card processing, which nobody escapes. Here that is the only
+                        deduction: Stripe charges it on your own account, and we add nothing. The table shows
+                        Stripe's published US card rate, {{ $feeRateLabel }} per charge, on one ticket per order.
+                    </p>
+                    <p class="es-turn-muted text-sm leading-relaxed">
+                        Read the last column before you price a cheap ticket. The fixed part of the fee weighs most
+                        on a small price, so a few dollars of entry loses a far bigger share than a hundred-dollar
+                        seat. For a door charge that small, cash at the door or a free registration may serve you
+                        better. To put named platforms side by side at your own price and volume, use the
+                        <x-link href="{{ marketing_url('/ticket-fee-calculator') }}" class="es-turn-link font-semibold">ticket fee calculator</x-link>.
+                    </p>
+                </div>
+
+                <div class="es-turn-card p-4 sm:p-7" data-reveal="panel">
+                    <div class="overflow-x-auto">
+                        <table class="es-turn-table">
+                            <caption class="es-turn-muted mb-4 text-left text-xs">
+                                One ticket per order, USD, at Stripe's published US card rate. The platform fee is zero on every row.
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Ticket</th>
+                                    <th scope="col">Stripe's fee</th>
+                                    <th scope="col">Platform fee</th>
+                                    <th scope="col">You keep</th>
+                                    <th scope="col" class="hidden sm:table-cell">Fee share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($feeLadder as $rung)
+                                    <tr>
+                                        <th scope="row" class="es-turn-ink es-turn-num text-sm font-bold">{{ $feeMoney($rung['price']) }}</th>
+                                        <td class="es-turn-muted es-turn-num text-sm">{{ $feeMoney($rung['fee']) }}</td>
+                                        <td class="es-turn-accent es-turn-num text-sm font-bold">{{ $feeMoney(0) }}</td>
+                                        <td class="es-turn-ink es-turn-num text-sm font-semibold">{{ $feeMoney($rung['keep']) }}</td>
+                                        <td class="es-turn-muted es-turn-num hidden text-xs sm:table-cell">{{ $rung['share'] }}%</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="es-turn-muted mt-4 text-xs leading-relaxed">
+                        A priced ticket needs Pro, at {{ plan_price($proMonthly) }} a month whatever you sell. Stripe's
+                        rate differs by country and card type, and PayPal sets its own; check yours in their dashboards.
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -1238,6 +1331,138 @@
     <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
 
     <!-- ============================================================ -->
+    <!-- 7b. Before you choose: a buyer's guide (08)                  -->
+    <!-- ============================================================ -->
+    {{-- The questions are the ones that hold for any ticketing tool; each card's last line is how
+         this one answers, with the tier from docs/FEATURES.md (priced tickets, refunds, the check-in
+         dashboard, waitlist, promo codes, export: Pro; seating plans: Enterprise, venue schedules;
+         QR scanning and ticket sales windows: every plan) and a link to the page that goes deeper. --}}
+    @php
+        $chooseGuide = [
+            ['What comes off each ticket, and who pays it?', 'A platform fee, card processing, or both. Ask for the fee on your real price, not on an example, and ask whether it is added to what the buyer pays, because that changes the price on your poster.', 'No platform fee on any plan. Stripe or PayPal charge their processing on your own account. A ticket with a price needs Pro.', '#fee', 'The fee, worked'],
+            ['Who holds the money until the event?', 'If the tool collects the payment itself, your ticket money sits in its account until it pays you. Find out when that is before you book a band or pay a deposit on the room.', 'The charge is created on your own Stripe or PayPal account, so the money is never ours to hold. Stripe pays it out to your bank on its usual schedule for your account.', marketing_url('/stripe'), 'Selling with Stripe'],
+            ['Can one event carry several prices?', 'Early bird, standard, student and a table for six are four ticket types with their own price and stock, not four events. Look for sales windows that end on a date and a cap per order.', 'Each ticket type has its own price, quantity, optional sales start and end, and limit per order.', '#types', 'Ticket types'],
+            ['How is capacity counted on a repeating event?', 'A weekly night with one shared pool of 200 can sell 200 seats for Friday and none for the rest. Capacity has to belong to each date.', 'Per date: a quantity of 200 is 200 for every date. A combined limit can cap all ticket types together, and a pass draws from one pool.', marketing_url('/features/recurring-events'), 'Recurring events'],
+            ['What happens at the door?', 'A list on a clipboard does not stop a screenshot being used twice. You want each ticket admitted once, by any phone, without renting hardware.', 'A QR code per ticket and a scanner in the browser on every plan. A second scan is flagged. The live check-in dashboard is Pro.', marketing_url('/features/check-in'), 'Check-in'],
+            ['Does a refund actually send the money back?', 'A refund that only marks the ticket leaves you sending money back by hand. Ask whether the money moves, whether a partial refund exists, and what happens to the ticket afterwards.', 'On Pro, Stripe, PayPal and Razorpay sales are refunded from the Sales list, in full or in part, and the money goes back through the provider. Refund there, not in the provider\'s dashboard, or the ticket keeps scanning.', route('marketing.docs.tickets').'#refunds', 'How refunds work'],
+            ['What happens when it sells out?', 'Returned tickets are the easiest sales you will ever make, if someone is waiting for them. A waitlist that emails everyone at once starts a race instead.', 'On Pro a Join Waitlist button appears for the sold-out date. When a ticket comes back, one person at a time is emailed and gets a 24-hour head start before the next is told; the seat is not held.', marketing_url('/features/waitlist'), 'Waitlist'],
+            ['Can you discount without giving the night away?', 'A code shared once on social media can end up everywhere. Usage limits, an expiry date and codes tied to one ticket type keep a discount where you meant it.', 'On Pro: percentage or fixed codes with usage limits, an expiry and chosen ticket types, plus a volume discount for bigger orders.', marketing_url('/features/promo-codes'), 'Promo codes'],
+            ['Do your buyers need to pick a seat?', 'General admission sells by number. A theatre with numbered rows needs a seat map the buyer clicks, and a box office that can hold and move seats.', 'Seating plans are Enterprise and belong to venue schedules. Every other plan sells by quantity, which suits most rooms.', marketing_url('/features/allocated-seating'), 'Allocated seating'],
+            ['Can you take your buyer list with you?', 'The people who bought are your audience for the next event. Check that you can export every buyer and every answer, not just a total.', 'On Pro the Sales list exports to CSV with buyers, amounts, codes, payment method, check-in status and custom answers. Webhooks are Pro too.', route('marketing.docs.tickets').'#export', 'Exporting sales'],
+        ];
+    @endphp
+
+    <section id="choose" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before you choose</p>
+                <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Ten questions for any <span class="es-turn-accent">ticketing software.</span>
+                </h2>
+                <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Ask them of every tool on your list, this one included. Each card says why the question
+                    matters, then how Event Schedule answers it, so you can hold the others to the same standard.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                @foreach ($chooseGuide as $gi => [$gQ, $gWhy, $gHere, $gHref, $gLink])
+                    <div class="es-turn-card flex flex-col p-6" data-reveal="panel">
+                        <p class="es-turn-accent es-turn-num mb-2 text-xs font-bold">{{ str_pad($gi + 1, 2, '0', STR_PAD_LEFT) }}</p>
+                        <h3 class="es-turn-ink mb-2 text-base font-bold">{{ $gQ }}</h3>
+                        <p class="es-turn-muted mb-4 text-sm leading-relaxed">{{ $gWhy }}</p>
+                        <hr class="es-turn-perf mb-4" aria-hidden="true">
+                        <p class="es-turn-ink mb-4 text-sm leading-relaxed"><span class="es-turn-tag me-1">Here</span> {{ $gHere }}</p>
+                        <a href="{{ $gHref }}" class="es-turn-link mt-auto inline-flex items-center gap-1 text-sm font-semibold transition-colors">
+                            {{ $gLink }}
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-12" data-reveal>
+                <h3 class="es-turn-ink mb-6 text-center text-xl font-black">Or start from the event in front of you</h3>
+                <div class="grid gap-4 md:grid-cols-3" data-reveal-group="80">
+                    @foreach ([
+                        ['A free community night', 'You need registration, not ticketing: a name, an email and a QR code for the door. That costs nothing here, whatever your plan. Nor is there a payment method to connect.', marketing_url('/features/registration'), 'Free registration'],
+                        ['A paid night every week', 'Check that capacity belongs to each date and that you can skip or move one date without touching the rest. Then work out what the fixed part of the card fee does to your price.', marketing_url('/features/recurring-events'), 'Recurring events'],
+                        ['A seated show', 'Numbered seats need a seat map and a box office that can hold and move seats. Without one, sell sections as separate ticket types with their own stock.', marketing_url('/features/allocated-seating'), 'Allocated seating'],
+                    ] as [$eTitle, $eBody, $eHref, $eLink])
+                        <div class="es-turn-card flex flex-col p-6" data-reveal="panel">
+                            <h4 class="es-turn-ink mb-2 text-base font-bold">{{ $eTitle }}</h4>
+                            <p class="es-turn-muted mb-4 text-sm leading-relaxed">{{ $eBody }}</p>
+                            <a href="{{ $eHref }}" class="es-turn-link mt-auto inline-flex items-center gap-1 text-sm font-semibold transition-colors">
+                                {{ $eLink }}
+                                <svg aria-hidden="true" class="h-3.5 w-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
+    <!-- 7c. Switching from another tool (09)                         -->
+    <!-- ============================================================ -->
+    {{-- Checked: Import from Eventbrite copies events, ticket types and venues, not orders, and
+         needs Pro (docs/ai-import #eventbrite-import); a calendar feed or a page's own event data is
+         read without AI (#link-import); Import Attendees is Pro, 5,000 rows, Email the only required
+         column, repeated emails in one import skipped, Send Email mails each paid row the checkout
+         confirmation (docs/tickets #importing-attendees, FEATURES.md "Bulk attendee import"); the
+         currency locks once an event has taken money (docs/tickets #currency-lock). --}}
+    <section id="switch" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Switching</p>
+                <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Moving tickets mid-season, <span class="es-turn-accent">without a second door.</span>
+                </h2>
+                <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The risk in changing ticketing tools is not the setup. It is a night where some guests hold
+                    the old ticket, some hold the new one, and the door has two lists. Five steps avoid it.
+                </p>
+            </div>
+
+            <ol class="space-y-4" data-reveal-group="80">
+                @foreach ([
+                    ['01', 'Pick the moment sales move', 'Decide which event is the first one sold here and stop selling it on the old platform before you open it here. Two systems selling one room will sell the same seats twice.'],
+                    ['02', 'Bring the events over', 'Import from Eventbrite, on Pro, copies your events with their ticket types and venues. From anywhere else, paste the link to your events page into Import Events: a calendar feed, or a page that publishes its events as data, is read directly. Set each event\'s currency before the first sale, because it locks once an event has taken money.'],
+                    ['03', 'Bring the people who already bought', 'Orders do not travel with the events. Export the attendee list from the old system and load it with Import, on the Sales page (Pro): up to 5,000 rows at a time, with Email the only required column. Give a buyer with several tickets one row and a Quantity, because a repeated email in one import is skipped. Turn on Send Email and each paid attendee gets the same confirmation, QR code included, as somebody who bought here.'],
+                    ['04', 'Run one door', 'With the earlier buyers imported, every ticket for the night is on one list. One scanner admits them all, and the check-in count is the whole room, not the half that bought last.'],
+                    ['05', 'Move the links last', 'Swap the buy links on your website, your social profiles and your mailing list for the event page, or put the ticket embed where the old widget was. Leave the old event page up with a line pointing here until its date has passed.'],
+                ] as [$mNum, $mTitle, $mBody])
+                    <li class="es-turn-card flex gap-5 p-6" data-reveal>
+                        <span class="es-turn-accent es-turn-num flex-none text-2xl font-black" aria-hidden="true">{{ $mNum }}</span>
+                        <div>
+                            <h3 class="es-turn-ink mb-1.5 text-base font-bold">{{ $mTitle }}</h3>
+                            <p class="es-turn-muted text-sm leading-relaxed">{{ $mBody }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <p class="es-turn-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                The details are in the user guide:
+                <x-link href="{{ route('marketing.docs.ai_import') }}#eventbrite-import" class="es-turn-link font-semibold">Import from Eventbrite</x-link>,
+                <x-link href="{{ route('marketing.docs.tickets') }}#importing-attendees" class="es-turn-link font-semibold">importing attendees</x-link>
+                and
+                <x-link href="{{ route('marketing.docs.tickets') }}#currency-lock" class="es-turn-link font-semibold">the currency lock</x-link>.
+                Leaving Eventbrite in particular?
+                <x-link href="{{ marketing_url('/switch-from-eventbrite') }}" class="es-turn-link font-semibold">Switching from Eventbrite</x-link>
+                walks through it.
+            </p>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
     <!-- 8. Three steps                                               -->
     <!-- ============================================================ -->
     <section class="scroll-mt-24 py-20 lg:py-24">
@@ -1272,7 +1497,7 @@
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <h2 class="es-balance es-turn-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

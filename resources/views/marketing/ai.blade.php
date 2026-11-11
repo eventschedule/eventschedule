@@ -661,6 +661,22 @@
                 'a' => 'Text you paste or type, one image you drop, paste from the clipboard or pick from a file dialog, and a link you paste on your own import screen. Images can be JPEG, PNG, GIF or WebP, so a photo of a poster, a screenshot of a message and an exported flyer all work. A link to a calendar feed, or to a page that publishes its events as data, is read directly and uses no AI at all. Any other page has its text read by the parser, as if you had pasted it yourself. What it cannot read is a page behind a sign-in, which includes Facebook and Instagram, or a page that only loads its events after it opens. For those, add a screenshot instead.',
             ],
             [
+                'q' => 'How accurate is AI event import?',
+                'a' => 'As accurate as the source is legible, and it shows its work before anything is saved. A calendar feed, or a page that publishes its events as data, is copied exactly with no AI involved. Text and images are read by a model, and the mistakes it makes are mostly defaults standing in for missing facts: 8:00 PM when no time is given, a blank end time, a blank date where the date would be more than three days past. Every event comes back as an editable card, rows that look like duplicates start unticked, and nothing is added until you add it.',
+            ],
+            [
+                'q' => 'What is sent to the AI provider when I import?',
+                'a' => 'Only what the read needs: the text you pasted, the image you added or the text of the page behind your link, with your schedule\'s category and custom field names so the answer fits your schedule. Never your password or payment details. A calendar feed or a page\'s own event data is read directly, so none of it goes to a provider. The import box says when what you add will be read by an AI service, and the privacy policy names the provider this service uses. On a selfhosted install it goes to whichever provider\'s API key you configured.',
+            ],
+            [
+                'q' => 'Can I undo an import?',
+                'a' => 'Yes, for 24 hours. When an import finishes, your schedule shows what it added with an Undo this import button, which removes those events and nothing else: events you created by hand and earlier imports stay. An imported event that somebody already holds a ticket or booking for is kept, and the page tells you how many were kept. Undo works in the browser you imported with, while you stay signed in.',
+            ],
+            [
+                'q' => 'How many events can I import a day?',
+                'a' => 'The allowance counts AI reads, not events. Each schedule gets 50 a day on Free and Pro and 100 on Enterprise, and one read of a pasted list or a flyer can return many events. A link to a calendar feed, or to a page that publishes its events as data, uses none of it and returns up to 100 events per read. Separately, a schedule on eventschedule.com can create only so many events in one day, and an import that reaches that limit stops and says so. A selfhosted install has no daily limit on AI reads.',
+            ],
+            [
                 'q' => 'Can one image become several events?',
                 'a' => 'Yes. The parser returns a list, not a single record, and it is told to split distinct performers into separate events. A month grid or a festival line-up comes back as one row per event, each with its own date, venue and performer, and you save them one at a time or all together.',
             ],
@@ -702,15 +718,17 @@
             ],
             [
                 'q' => 'Which models are behind this, and what if I selfhost?',
-                'a' => 'Text parsing, writing and translation go to Google Gemini, and image generation to OpenAI, both configurable. A selfhosted install brings its own API keys, which is why the daily allowances do not apply there: you are paying the model provider directly rather than us.',
+                'a' => 'Text parsing, writing and translation go to Google Gemini by default, or to OpenAI where that is the configured text provider; image generation goes to OpenAI by default. A selfhosted install brings its own API keys, which is why the daily allowances do not apply there: you are paying the model provider directly rather than us.',
             ],
         ];
 
         $dotSections = [
             ['top', 'The gap'],
             ['crosses', 'What crosses'],
+            ['which', 'Which way in'],
             ['manifest', 'The record'],
             ['match', 'The ladder'],
+            ['check', 'Before you add'],
             ['agenda', 'The agenda'],
             ['generate', 'What else it lights'],
             ['languages', 'Languages'],
@@ -890,13 +908,98 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 2b. Which way in, by source                                  -->
+    <!-- ============================================================ -->
+    {{-- Every row is the AI import guide's own table and sections (docs/ai-import: #link-import's
+         "What the link points to", #google-calendar-import, #eventbrite-import, the limits under
+         #daily-limits). "No AI" rows write no usage row (LinkImportService). --}}
+    @php
+        $whichWayIn = [
+            ['A public calendar: Google, Outlook, or any .ics or webcal address', 'Paste the link', false, 'Read as written for the next 12 months. A repeating entry arrives as one repeating event when your schedule can express its rule.'],
+            ['Your own Google Calendar, private', 'Google Calendar, under Other ways to bring events in', false, 'For the schedule\'s owner, and read-only: nothing in your calendar changes. Private entries, declined invitations and out-of-office blocks are left out.'],
+            ['Your website, or a ticketing site that lists your events', 'Paste the link', null, 'Many site builders and ticketing sites publish their events as data for search engines, and that is read directly. A page without it has its text read instead, up to 10,000 characters.'],
+            ['An Eventbrite account', 'Import from Eventbrite (Pro)', false, 'Brings each event\'s ticket types and venue with it. Orders and attendees stay behind.'],
+            ['A Facebook or Instagram event', 'A screenshot of it', true, 'Neither site lets other sites read its pages, so those links are turned down before anything is fetched.'],
+            ['A poster, a flyer or a photo of a listings board', 'Add the image', true, 'JPG, PNG, GIF or WebP, up to 10 MB. The picture becomes the event\'s image as well.'],
+            ['An email, a message or a press release', 'Paste the text', true, 'Up to 10,000 characters. A whole list in one paste comes back as one row per event.'],
+            ['Somebody else\'s calendar you want to follow', 'Read the link, then Keep this link in sync', false, 'Turns the link into a feed that is read about once an hour (Enterprise on eventschedule.com). Offered for calendar feeds and pages with event data.'],
+        ];
+    @endphp
+
+    <section id="which" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">02</span>
+                    <span class="es-spark-arc"></span>
+                </div>
+                <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Which way in</p>
+                <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Start from where the events <span class="es-spark-accent">already live.</span>
+                </h2>
+                <p class="es-spark-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The same box takes all of these, but they are not equal. A source that publishes its
+                    events as data is copied exactly and costs nothing; a picture has to be read, and reading
+                    can be wrong. Work down this list and use the first row that fits.
+                </p>
+            </div>
+
+            <div class="es-spark-card overflow-x-auto p-6 sm:p-8" data-reveal="panel">
+                <table class="es-spark-board">
+                    <caption class="sr-only">Where your events are listed now, which import to use, whether it uses AI, and what to know</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Where your events are</th>
+                            <th scope="col">Use</th>
+                            <th scope="col">AI</th>
+                            <th scope="col" class="hidden md:table-cell">What to know</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($whichWayIn as [$wSource, $wUse, $wAi, $wNote])
+                            <tr>
+                                <th scope="row" class="es-spark-ink pe-3 font-semibold">
+                                    {{ $wSource }}
+                                    <span class="es-spark-muted mt-1 block text-xs font-normal md:hidden">{{ $wNote }}</span>
+                                </th>
+                                <td class="es-spark-ink pe-3">{{ $wUse }}</td>
+                                <td class="pe-3">
+                                    @if ($wAi === false)
+                                        <span class="es-spark-plan">None</span>
+                                    @elseif ($wAi === true)
+                                        <span class="es-spark-plan es-spark-plan-alt">1 request</span>
+                                    @else
+                                        <span class="es-spark-plan es-spark-plan-alt">Sometimes</span>
+                                    @endif
+                                </td>
+                                <td class="es-spark-muted hidden text-sm md:table-cell">{{ $wNote }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h3 class="es-spark-ink mb-3 text-lg font-bold">One request, however many events</h3>
+                    <p class="es-spark-muted text-sm">A text or image submission counts once against the schedule's daily allowance, whether it holds one gig or a month grid of twenty. So paste the whole listing in one go rather than event by event, and a busy month costs a single request.</p>
+                </div>
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h3 class="es-spark-ink mb-3 text-lg font-bold">When a page gives up only some of its events</h3>
+                    <p class="es-spark-muted text-sm">A page's own event data does not always cover everything printed on it. When that happens, Missing some? Read the whole page reads its text with AI instead. A page that loads its events only after it opens, or sits behind a sign-in, gives up nothing: paste its text or add a screenshot.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 3. The record: the field manifest                            -->
     <!-- ============================================================ -->
     <section id="manifest" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                    <span class="es-spark-num">02</span>
+                    <span class="es-spark-num">03</span>
                     <span class="es-spark-arc"></span>
                 </div>
                 <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The far terminal</p>
@@ -993,7 +1096,7 @@
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                    <span class="es-spark-num">03</span>
+                    <span class="es-spark-num">04</span>
                     <span class="es-spark-arc"></span>
                 </div>
                 <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before it creates anything</p>
@@ -1044,6 +1147,81 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 4b. Before you press Add: checking an import                 -->
+    <!-- ============================================================ -->
+    {{-- Every card is from docs/ai-import: 8:00 PM assumed with no time, end time only from a
+         stated length, dates more than three days past left blank, the "Times shown in" line and
+         the talent/curator time zone rule, venue matching rules, blank vs 0 price, performer
+         matching and the page a non-match gets, the rows that start unticked; and from "Undoing an
+         Import" (ImportRun::UNDO_HOURS). The provider card is privacy clause 05 and the line above
+         the import box. --}}
+    @php
+        $checkCards = [
+            ['Time', 'A time nobody wrote', 'When the source gives no time, the card says 8:00 PM. That is a default, not a reading, so check the clock on every row that came from a flyer or a short message.'],
+            ['End', 'An end time left blank', 'An end is filled in only when the source gives one or says how long the event runs. Otherwise it stays blank, and the event has whatever length you save.'],
+            ['Date', 'A date that would be in the past', 'A date more than three days ago is left blank for you to fill in rather than guessed. A blank date is a question for you, so fill it in from the source or leave the row out.'],
+            ['Zone', 'The wrong clock for a date elsewhere', 'A line above the results says which time zone the times are shown in. On a talent or curator schedule, an event that states its own time zone keeps its local clock time, and its row says so.'],
+            ['Venue', 'A venue matched to the wrong room', 'Matched venue means it found an existing venue: one you own, one in the same city with the same name or street address, or one your schedule has used before. Case, accents, punctuation and a leading "the" are ignored. Two venues at one street address are the place to look. If it picked wrong, switch to Create New.'],
+            ['Price', 'Blank is not the same as free', 'A blank price means the source did not say; 0 means free. Set it before you add the event if visitors filter your schedule by free entry.'],
+            ['Name', 'A performer spelled wrong', 'Names are matched against talent schedules in your country, then against talent you already work with. A name that matches nobody gets a page of its own when you save, under that spelling, so correct it on the card first.'],
+            ['Tick', 'The rows that start unticked', 'A row that looks like an event you already have, shows a passcode or dial-in, or reads like an email starts unticked. Open it and decide; do not just press Select all.'],
+        ];
+    @endphp
+
+    <section id="check" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">05</span>
+                    <span class="es-spark-arc"></span>
+                </div>
+                <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before you press Add</p>
+                <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Where an import goes wrong, <span class="es-spark-accent">and where to look.</span>
+                </h2>
+                <p class="es-spark-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The parser can only read what is legible, and most mistakes are not invented facts but
+                    missing ones filled with a default. These are the eight places to look on every card,
+                    roughly in the order they cause trouble on the night.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                @foreach ($checkCards as [$cKey, $cTitle, $cBody])
+                    <div class="es-spark-card p-6" data-reveal="panel">
+                        <p class="es-spark-tag mb-2">{{ $cKey }}</p>
+                        <h3 class="es-spark-ink mb-2 text-base font-bold">{{ $cTitle }}</h3>
+                        <p class="es-spark-muted text-sm">{{ $cBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <h3 class="es-spark-ink mb-6 mt-14 text-center text-2xl font-black tracking-tight" data-reveal>After you press Add</h3>
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h4 class="es-spark-ink mb-3 text-lg font-bold">It is published at once</h4>
+                    <p class="es-spark-muted text-sm">What you add goes on your schedule straight away, not into a drafts folder, so the card is your last look before visitors get theirs. On eventschedule.com a schedule can create only so many events in a day; an import that reaches the limit stops and says so, and the rest can be added the next day.</p>
+                </div>
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h4 class="es-spark-ink mb-3 text-lg font-bold">Undo is there for a day</h4>
+                    <p class="es-spark-muted text-sm">Undo this import removes what that import added, for 24 hours, in the browser you imported with while you stay signed in. Events you made by hand and earlier imports stay, and so does any imported event somebody already holds a ticket or a booking for.</p>
+                </div>
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h4 class="es-spark-ink mb-3 text-lg font-bold">Read the link again for what is new</h4>
+                    <p class="es-spark-muted text-sm">A link is a one-time copy. Read it again next month and the events you already have are left out, or come back unticked, so only the new ones are offered.</p>
+                </div>
+                <div class="es-spark-card flex flex-col p-7" data-reveal="panel">
+                    <h4 class="es-spark-ink mb-3 text-lg font-bold">What the AI provider is sent</h4>
+                    <p class="es-spark-muted text-sm">Only what the read needs: the text you pasted, the image you added or the text of the page behind your link, with your schedule's category and custom field names so the answer fits your schedule. Never your password or payment details. A calendar feed, or a page's own event data, is read without AI, so nothing from it goes to a provider. A line above the import box says when what you add will be read by an AI service.</p>
+                    <p class="mt-auto pt-4">
+                        <x-link href="{{ policy_url('privacy') }}">Privacy policy</x-link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 5. The agenda: a second, finer gap                           -->
     <!-- ============================================================ -->
     <section id="agenda" class="scroll-mt-24 py-20 lg:py-28">
@@ -1051,7 +1229,7 @@
             <div class="grid items-center gap-12 lg:grid-cols-2">
                 <div>
                     <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                        <span class="es-spark-num">04</span>
+                        <span class="es-spark-num">06</span>
                         <span class="es-spark-arc"></span>
                     </div>
                     <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Inside one event</p>
@@ -1138,7 +1316,7 @@
             <div class="relative z-10 mx-auto max-w-6xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
                     <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                        <span class="es-spark-num">05</span>
+                        <span class="es-spark-num">07</span>
                         <span class="es-spark-arc"></span>
                     </div>
                     <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Enterprise generation</p>
@@ -1180,7 +1358,7 @@
             <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
                 <div>
                     <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                        <span class="es-spark-num">06</span>
+                        <span class="es-spark-num">08</span>
                         <span class="es-spark-arc"></span>
                     </div>
                     <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Free on every plan</p>
@@ -1233,7 +1411,7 @@
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                    <span class="es-spark-num">07</span>
+                    <span class="es-spark-num">09</span>
                     <span class="es-spark-arc"></span>
                 </div>
                 <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gap, with no screen</p>
@@ -1294,7 +1472,7 @@
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                    <span class="es-spark-num">08</span>
+                    <span class="es-spark-num">10</span>
                     <span class="es-spark-arc"></span>
                 </div>
                 <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Plans and allowances</p>
@@ -1356,7 +1534,7 @@
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                    <span class="es-spark-num">09</span>
+                    <span class="es-spark-num">11</span>
                     <span class="es-spark-arc"></span>
                 </div>
                 <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
@@ -1410,7 +1588,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
                 <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
-                    <span class="es-spark-num">10</span>
+                    <span class="es-spark-num">12</span>
                     <span class="es-spark-arc"></span>
                 </div>
                 <h2 class="es-balance es-spark-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
