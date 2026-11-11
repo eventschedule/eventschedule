@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Custom CSS | Advanced Schedule Styling - Event Schedule</x-slot>
-    <x-slot name="description">Add your own CSS to your schedule page, event pages and embeds. It loads right after the built-in styles, so a tie goes to you. 10,000 characters on Pro.</x-slot>
+    <x-slot name="title">Custom CSS for Your Event Pages: Recipes, Dark Mode and Limits</x-slot>
+    <x-slot name="description">Style your schedule and event pages with custom CSS: where your rules land, what is stripped, safe habits, dark mode and six recipes that work. On Pro.</x-slot>
     <x-slot name="breadcrumbTitle">Custom CSS</x-slot>
 
     <x-slot name="structuredData">
@@ -530,7 +530,7 @@
         ];
 
         // What a submitted paste looks like after CssUtils::sanitizeCss().
-        // Measured, not guessed: the seven patterns delete the matched FRAGMENT
+        // Measured, not guessed: the patterns delete the matched FRAGMENT
         // only, so `@import url("theme.css");` really does leave
         // ` url("theme.css");` behind, and `url(https:` takes the `url(` with
         // it, leaving `background-image: //cdn.example.com/x.png);`. Both
@@ -630,6 +630,8 @@
             ['@import', 'Pulling in another stylesheet', 'Which is also why custom CSS cannot import a font sheet.'],
             ['behavior: binding: -moz-binding:', 'Legacy browser code hooks', 'All three property names are stripped.'],
             ['url(http: https: data: //)', 'Anything fetched from elsewhere', 'External and protocol-relative URLs and data URIs, so nothing on your page phones out.'],
+            ['image-set( )', 'Image sets', 'Removed, because an image set can name a picture to fetch.'],
+            ['image( )', 'The image() function', 'Removed the same way, for the same reason.'],
             ['@font-face { }', 'Loading a typeface', 'The whole block is removed, not just the source line.'],
             ['@charset', 'Character-set switching', 'Removed outright.'],
         ];
@@ -687,7 +689,7 @@
             ],
             [
                 'q' => 'Is Custom CSS secure?',
-                'a' => 'Your CSS is sanitized on save, before it is stored. HTML tags are stripped first, then CSS escape sequences are decoded so an encoded blocked word cannot slip through, and then seven patterns are removed: expression(), javascript:, @import, behavior, binding and -moz-binding, url() pointing at http, https, a data URI or a protocol-relative //, @font-face blocks, and @charset. Everything else passes: there is no property allowlist.',
+                'a' => 'Your CSS is sanitized on save, before it is stored. HTML tags are stripped first, then CSS escape sequences are decoded so an encoded blocked word cannot slip through, and then nine patterns are removed: expression(), javascript:, @import, behavior, binding and -moz-binding, url() pointing at http, https, a data URI or a protocol-relative //, image-set(), image(), @font-face blocks, and @charset. Everything else passes: there is no property allowlist.',
             ],
             [
                 'q' => 'Can I load a web font with Custom CSS?',
@@ -706,6 +708,22 @@
                 'a' => 'No. The preview panel on the edit page redraws from the colour, typeface, background and header fields, and never reads the CSS box. Save, then open your schedule page to see your CSS applied, which is also how visitors will see it.',
             ],
             [
+                'q' => 'Why is my custom CSS not working?',
+                'a' => 'Work through five checks. Is the schedule on Pro? Below Pro a saved stylesheet is kept but not applied. Are you looking at the real page? The preview beside the Style settings never draws your CSS, so save and use View Schedule. Is something more specific winning? An id beats a class wherever it is written, so anchor your rule on the panel\'s gp- id. Does the rule you are overriding carry !important? The body text colour and font family do, so yours needs it too. Was part of it removed on save? @import, @font-face, @charset, external url() addresses, image-set() and a few legacy patterns are stripped, and the rest of the rule is kept.',
+            ],
+            [
+                'q' => 'How do I style my page differently in dark mode?',
+                'a' => 'Visitors get the light or dark version of your page from their own device, and dark mode puts a dark class on the page\'s html element. Write your normal rule, then a second one prefixed with .dark, for example #gp-about { background-color: #fff8ec; } followed by .dark #gp-about { background-color: #241d12; }. Do not skip the second rule: an id rule outranks the dark-mode colours the page puts on its panels, so a panel colour set once shows in both schemes.',
+            ],
+            [
+                'q' => 'Can I use media queries in custom CSS?',
+                'a' => 'Yes. There is no list of allowed properties or at-rules, so @media, @keyframes, @supports and custom properties all pass the sanitizer. The page itself changes layout at 640 pixels wide, where its panels stop running edge to edge and gain rounded corners, and again for larger screens, so those are good widths to test.',
+            ],
+            [
+                'q' => 'Will my custom CSS break when Event Schedule updates?',
+                'a' => 'Your CSS is stored as you saved it and no update rewrites it. Whether it still matches depends on what it targets. The ids that begin with gp- are the hooks the user guide documents for this purpose. Utility class names and older internal ids inside the calendar describe how a panel happens to be built, and may change, so a rule anchored on a gp- id is the one that lasts.',
+            ],
+            [
                 'q' => 'Which plan includes Custom CSS?',
                 'a' => 'Pro, and every schedule on a selfhosted install. Free plans keep the whole visual styling suite: accent colour, typeface, Aurora, solid, gradient or image backgrounds, header style and the list or calendar layout. If a hosted schedule stops being Pro, the CSS stays saved and stops rendering until the plan is active again.',
             ],
@@ -717,6 +735,8 @@
             ['ledger', 'Rules above yours'],
             ['filter', 'What is removed'],
             ['reach', 'Where it lands'],
+            ['method', 'A safe way to work'],
+            ['recipes', 'Recipes'],
             ['rest', 'Everything else'],
             ['plan', 'The plan'],
             ['faq', 'Questions'],
@@ -921,10 +941,10 @@
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">04</span> what is removed</p>
                 <h2 class="es-balance es-sheet2-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Seven patterns out. <span class="es-sheet2-accent">No allowlist.</span>
+                    Nine patterns out. <span class="es-sheet2-accent">No allowlist.</span>
                 </h2>
                 <p class="es-sheet2-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Your CSS is sanitized when you save it, before it is stored: two preparatory passes, then seven patterns removed. There is no list of approved properties to check your work against, which is the useful part. Grid, custom properties, container queries, <span class="es-sheet2-code">clip-path</span>, keyframes and transitions all pass through untouched.
+                    Your CSS is sanitized when you save it, before it is stored: two preparatory passes, then nine patterns removed. There is no list of approved properties to check your work against, which is the useful part. Grid, custom properties, container queries, <span class="es-sheet2-code">clip-path</span>, keyframes and transitions all pass through untouched.
                 </p>
             </div>
 
@@ -932,7 +952,7 @@
                 <div class="es-sheet2-card overflow-hidden p-2 sm:p-4" data-reveal="panel">
                     <div class="overflow-x-auto">
                         <table class="es-sheet2-table es-sheet2-table-sm">
-                            <caption class="sr-only">Everything the sanitizer does when Custom CSS is saved, in order: two preparatory passes and seven removed patterns</caption>
+                            <caption class="sr-only">Everything the sanitizer does when Custom CSS is saved, in order: two preparatory passes and nine removed patterns</caption>
                             <thead>
                                 <tr>
                                     <th scope="col" class="es-sheet2-th px-3 pb-3">Step</th>
@@ -1041,12 +1061,191 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 5a. A safe way to work                                       -->
+    <!-- ============================================================ -->
+    @php
+        // The order to work in. Every hook named here is in the user guide's
+        // gp- table (marketing/docs/schedule-styling, #hiding-sections), and the
+        // breakpoints are the ones show-guest.blade.php itself uses (sm = 640px).
+        $method = [
+            ['settings first', 'Use the controls before the code', 'Accent colour, typeface, background and header style are free settings, kept working by the app itself rather than by rules you have to maintain. Write CSS only for what they do not reach: spacing, borders, shadows, type details, hiding a panel.'],
+            ['find the hook', 'Inspect, then climb to a gp- id', 'Right-click the thing you want to change and choose Inspect. Walk up the tree to the nearest element whose id starts with gp-. That id is your anchor: #gp-about, #gp-venue, #gp-event-details.'],
+            ['scope', 'Hang every rule off that id', 'A bare a, button or h2 rule reaches the ticket form, the calendar, the language switcher and both embeds at once. #gp-about a reaches the links in your description and nothing else.'],
+            ['try it live', 'Test in the inspector, then save', 'The preview beside the Style settings never draws your CSS. Type the rule into the inspector\'s styles pane until it looks right, paste it into the box, save, and use View Schedule to open the real page.'],
+            ['light and dark', 'Check both colour schemes', 'Each visitor gets the light or dark version of your page from their own device, and the page marks dark mode with a dark class on the html element. Any colour you set needs a .dark partner rule, as in the recipe below.'],
+            ['phone width', 'Check at phone width', 'Below 640 pixels wide the panels run edge to edge with square corners, and the event page\'s buttons move into a bar pinned to the bottom of the screen (#gp-mobile-cta). Put rules meant for one width inside a @media query.'],
+        ];
+
+        // Small token helpers for the recipe sheets, so each line below reads as CSS.
+        $cSel = fn ($s) => '<span class="es-sheet2-sel">'.e($s).'</span> <span class="es-sheet2-com">{</span>';
+        $cDecl = fn ($p, $v) => '<span class="es-sheet2-prop">'.e($p).'</span><span class="es-sheet2-com">:</span> <span class="es-sheet2-val">'.e($v).';</span>';
+        $cEnd = '<span class="es-sheet2-com">}</span>';
+        $cMedia = fn ($q) => '<span class="es-sheet2-bang">@media</span> <span class="es-sheet2-val">'.e($q).'</span> <span class="es-sheet2-com">{</span>';
+        $cNote = fn ($s) => '<span class="es-sheet2-com">/* '.e($s).' */</span>';
+
+        // Each recipe: title, what it is for, lines [indent, html], and the catch.
+        // Sources: ids and classes from event/show-guest.blade.php (#gp-event-title is
+        // text-[28px] sm:text-[36px] lg:text-[44px]; #gp-about, #gp-venue and
+        // #gp-event-details are bg-white/95 dark:bg-gray-900/95 sm:rounded-2xl), the
+        // #gp-about p and .gp-bg examples from the user guide, and darkMode: 'class'
+        // in tailwind.config.js, applied to <html> by partials/theme-script.
+        $recipes = [
+            [
+                'Hide a panel',
+                'The compact list of performer names, the example the user guide uses.',
+                [
+                    [0, $cSel('#gp-talent-list')],
+                    [2, $cDecl('display', 'none')],
+                    [0, $cEnd],
+                ],
+                'Hiding is not switching off. Where a panel has its own switch, such as the Notify me card, videos or sponsors, use the switch.',
+            ],
+            [
+                'A panel colour, in both schemes',
+                'A warmer description panel that still reads at night.',
+                [
+                    [0, $cSel('#gp-about')],
+                    [2, $cDecl('background-color', '#fff8ec')],
+                    [0, $cEnd],
+                    [0, $cSel('.dark #gp-about')],
+                    [2, $cDecl('background-color', '#241d12')],
+                    [0, $cEnd],
+                ],
+                'The id outranks the page\'s own dark background. Without the second rule, dark-mode visitors get a cream panel under pale text.',
+            ],
+            [
+                'Bigger description text',
+                'Easier reading for a long programme note.',
+                [
+                    [0, $cSel('#gp-about p')],
+                    [2, $cDecl('font-size', '1.125rem')],
+                    [2, $cDecl('line-height', '1.7')],
+                    [0, $cEnd],
+                ],
+                'Aim at the paragraphs, not the panel: the description sits in an inner block with its own text size, so a size set on #gp-about never reaches it.',
+            ],
+            [
+                'A title in capitals, sized per screen',
+                'A poster-style event title.',
+                [
+                    [0, $cSel('#gp-event-title')],
+                    [2, $cDecl('text-transform', 'uppercase')],
+                    [2, $cDecl('letter-spacing', '0.03em')],
+                    [2, $cDecl('font-size', '26px')],
+                    [0, $cEnd],
+                    [0, $cMedia('(min-width: 1024px)')],
+                    [2, $cSel('#gp-event-title')],
+                    [4, $cDecl('font-size', '40px')],
+                    [2, $cEnd],
+                    [0, $cEnd],
+                ],
+                'The page sizes the title three times, at 28, 36 and 44 pixels as the screen widens. One id rule replaces all three, so set each width you care about.',
+            ],
+            [
+                'Squarer cards, on wide screens only',
+                'A sharper look for the event page\'s main panels.',
+                [
+                    [0, $cMedia('(min-width: 640px)')],
+                    [2, '<span class="es-sheet2-sel">#gp-event-details, #gp-about, #gp-venue</span> <span class="es-sheet2-com">{</span>'],
+                    [4, $cDecl('border-radius', '6px')],
+                    [2, $cEnd],
+                    [0, $cEnd],
+                ],
+                'On a phone these panels have no rounding at all, because they run to the edges of the screen. Keeping the rule inside the same width keeps it that way.',
+            ],
+            [
+                'Move the background picture',
+                'Keep a face or a stage in view when the picture is cropped.',
+                [
+                    [0, $cNote('the layer your background is drawn on')],
+                    [0, $cSel('.gp-bg')],
+                    [2, $cDecl('background-position', 'top')],
+                    [0, $cEnd],
+                ],
+                'For an Aurora background, the lights are .gp-aurora inside the same layer.',
+            ],
+        ];
+    @endphp
+    <section id="method" class="es-sheet2-hair scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">06</span> a safe way to work</p>
+                <h2 class="es-balance es-sheet2-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Six habits that keep <span class="es-sheet2-accent">custom CSS from breaking.</span>
+                </h2>
+                <p class="es-sheet2-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most custom CSS that goes wrong was written against one screen: a laptop, in light mode, on the page the author happened to have open. These six habits cover the screens your visitors actually use.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($method as $mIndex => [$mTag, $mTitle, $mBody])
+                    <li class="es-sheet2-card flex h-full flex-col p-6" data-reveal="panel">
+                        <p class="es-sheet2-mark mb-4"><span class="es-sheet2-num">{{ str_pad($mIndex + 1, 2, '0', STR_PAD_LEFT) }}</span> {{ $mTag }}</p>
+                        <h3 class="es-sheet2-ink mb-2 text-lg font-bold">{{ $mTitle }}</h3>
+                        <p class="es-sheet2-muted text-sm">{{ $mBody }}</p>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-sheet2-card mt-6 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-sheet2-ink mb-2 text-lg font-bold">What happens when Event Schedule updates</h3>
+                <p class="es-sheet2-muted text-sm">
+                    Your CSS is stored with your schedule exactly as you saved it, and no update rewrites it. What can change is the markup it points at. The ids that begin with <span class="es-sheet2-code">gp-</span> are the hooks the
+                    <x-link href="{{ route('marketing.docs.schedule_styling') }}#hiding-sections" class="text-blue-800 dark:text-blue-300 font-medium">user guide lists for you to use</x-link>.
+                    The utility class names on the same elements, and older internal ids inside the calendar such as <span class="es-sheet2-code">#calendar-app</span>, describe how a panel is built today, and the guide says plainly that those may change. A rule written as <span class="es-sheet2-code">#gp-about p</span> survives a redesign of the panel; a rule written against its utility classes may quietly stop matching.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5b. Recipes                                                  -->
+    <!-- ============================================================ -->
+    <section id="recipes" class="es-sheet2-hair scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">07</span> recipes</p>
+                <h2 class="es-balance es-sheet2-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Six recipes, <span class="es-sheet2-accent">written against the real page.</span>
+                </h2>
+                <p class="es-sheet2-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Each one targets a hook that exists on your pages today, and each comes with the catch that the page's own styles put in your way.
+                </p>
+            </div>
+
+            <div class="es-sheet2-duo grid gap-6 lg:grid-cols-2" data-reveal-group="90">
+                @foreach ($recipes as [$rTitle, $rFor, $rLines, $rCatch])
+                    <div class="flex h-full flex-col" data-reveal="panel">
+                        <div class="es-sheet2-sheet">
+                            <div class="es-sheet2-sheet-head">
+                                <h3 class="es-sheet2-ink text-sm font-bold">{{ $rTitle }}</h3>
+                                <span class="es-sheet2-muted text-xs">{{ $rFor }}</span>
+                            </div>
+                            <div class="es-sheet2-rail">
+                                @foreach ($rLines as [$ind, $html])
+                                    <div class="es-sheet2-line" style="padding-inline-start: {{ 0.9 + $ind * 0.55 }}rem;">{!! $html !!}</div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <p class="es-sheet2-muted mt-3 text-sm">{{ $rCatch }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-sheet2-muted mx-auto mt-10 max-w-3xl text-center text-sm" data-reveal>
+                Fonts are the one recipe that is not here, on purpose: the sanitizer removes <span class="es-sheet2-code">@font-face</span> and <span class="es-sheet2-code">@import</span>, so choose the typeface in the Style settings and use CSS for its size, weight and spacing.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 6. Everything else: bento                                    -->
     <!-- ============================================================ -->
     <section id="rest" class="es-sheet2-hair scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">06</span> everything else</p>
+                <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">08</span> everything else</p>
                 <h2 class="es-balance es-sheet2-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     The parts nobody tells you.
                 </h2>
@@ -1158,7 +1357,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">07</span> the plan</p>
+                    <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">09</span> the plan</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         {{ plan_price($proMonthly) }} a month, <span class="es-sheet2-lit">or selfhost it.</span>
                     </h2>
@@ -1263,7 +1462,7 @@
     <section id="faq" class="es-sheet2-hair scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">08</span> questions</p>
+                <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">10</span> questions</p>
                 <h2 class="es-balance es-sheet2-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

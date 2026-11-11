@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Event Polls: Let Your Audience Vote on the Event Page</x-slot>
-    <x-slot name="description">Add a poll to any event: a question, two to ten choices, one vote per signed-in guest. Guests read no count until they have voted. A Pro feature.</x-slot>
+    <x-slot name="title">Event Polls: What to Ask Attendees and How to Run the Vote</x-slot>
+    <x-slot name="description">Event polls that get answers: what to ask before, during and after, how to word the choices, and how to use the count. One vote per signed-in guest, on Pro.</x-slot>
     <x-slot name="breadcrumbTitle">Event Polls</x-slot>
 
     <x-slot name="structuredData">
@@ -494,7 +494,7 @@
             ],
             [
                 'q' => 'Who can create polls?',
-                'a' => 'Anyone who can edit the event, on a schedule with the Pro plan. Polls live on the Polls tab of the event editor\'s Engagement section, and you can read the results there whenever you like, whether or not you have voted yourself.',
+                'a' => 'Anyone who can edit the event, on a schedule with the Pro plan. Polls live in the Polls row of the event editor\'s Engagement tab, and you can read the results there whenever you like, whether or not you have voted yourself.',
             ],
             [
                 'q' => 'Can guests see the results before voting?',
@@ -506,11 +506,11 @@
             ],
             [
                 'q' => 'Can I see who voted for what?',
-                'a' => 'No. You see what your guests see once they have voted, a count and a share against every choice, and the Polls tab in the event editor shows it at any time. Each vote is stored against the voter\'s account, because that is what keeps it to one per person, but no screen lists who picked what, and a schedule backup carries the counts without the names.',
+                'a' => 'No. You see what your guests see once they have voted, a count and a share against every choice, and the Polls row in the event editor shows it at any time (on a recurring event, every date added together). Each vote is stored against the voter\'s account, because that is what keeps it to one per person, but no screen lists who picked what, and a schedule backup carries the counts without the names.',
             ],
             [
                 'q' => 'Can guests add a choice of their own?',
-                'a' => 'Yes, if you turn write-ins on for that poll. A signed-in guest can add a choice, up to the same ceiling of ten. Turn approval on as well and their suggestion waits in a pending queue on the Polls tab of the event editor until you approve or reject it, and approving it adds the choice with its author\'s vote already attached. A suggestion that duplicates a choice already on the ballot is refused before it reaches you.',
+                'a' => 'Yes, if you turn write-ins on for that poll. A signed-in guest can add a choice, up to the same ceiling of ten. Turn approval on as well and their suggestion waits in a pending queue in the Polls row of the event editor until you approve or reject it, and approving it adds the choice with its author\'s vote already attached. A suggestion that duplicates a choice already on the ballot is refused before it reaches you.',
             ],
             [
                 'q' => 'What happens on a recurring event?',
@@ -521,6 +521,22 @@
                 'a' => 'No, and that is deliberate. Once a poll holds a single vote the option list is locked, so everyone who voted was answering the same ballot. The question text can still be edited, and you can close the poll, reopen it or delete it at any point.',
             ],
             [
+                'q' => 'What are good poll questions to ask at an event?',
+                'a' => 'Questions whose answer decides something you have not decided yet. Before the event: the date or start time, the format, which speaker, act or topic. On the night: something the room can settle in a minute, such as the closing song or which question the panel takes first. Afterwards: which nights to bring back, or how long next season\'s sessions should run. Keep each question to one decision, write choices that cannot overlap, and only list choices you would act on.',
+            ],
+            [
+                'q' => 'How many options should a poll have?',
+                'a' => 'Three to five is the sweet spot. Two works for a straight either-or. Past six, votes spread so thin that the leader can be what a small minority wanted: with eight choices and forty votes, a choice can lead with six. Event Schedule allows between two and ten choices per poll, guest write-ins included.',
+            ],
+            [
+                'q' => 'Should I poll attendees before or after an event?',
+                'a' => 'Both, about different things. Before, poll on what can still change: the date, the format, the lineup. Afterwards, poll on what to repeat or change next time. To hear how the event itself went, use post-event feedback rather than a poll, because a star rating and a comment from each attendee tells you more than a count.',
+            ],
+            [
+                'q' => 'What is the difference between an event poll and post-event feedback?',
+                'a' => 'A poll asks one question with fixed choices and returns a count per choice, from anyone signed in who can see the event, while it is open. Post-event feedback is emailed to ticket buyers and RSVP attendees 1 to 48 hours after the event ends and collects a 1 to 5 star rating and an optional comment from each of them. Both are Pro; on eventschedule.com feedback also needs the schedule\'s own email settings.',
+            ],
+            [
                 'q' => 'Is there a free version of polls?',
                 'a' => 'Polls are a Pro feature at '.plan_price($proMonthly).' a month, included on Enterprise, and selfhosted installations get them too. If you want to ask your audience something on the free plan, newsletters are free at 10 emails a month, counted per recipient rather than per send, and collecting followers costs nothing on any plan.',
             ],
@@ -529,9 +545,12 @@
         $dotSections = [
             ['top', 'The ballot'],
             ['what', 'What a poll is'],
+            ['when', 'What to ask'],
+            ['wording', 'Writing the question'],
             ['states', 'Before and after'],
             ['seal', 'The seal'],
             ['count', 'The declaration'],
+            ['results', 'Using the result'],
             ['writein', 'Write-ins'],
             ['dates', 'One date at a time'],
             ['where', 'Where it appears'],
@@ -694,12 +713,164 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 2a. What to poll attendees about: before, on the night, after -->
+    <!-- ============================================================ -->
+    @php
+        // Three stages of an event, each with the kind of question it can still act on.
+        // [stage, heading, body, example questions, what the answer decides]
+        $pollStages = [
+            [
+                'Weeks before',
+                'Questions that can still change the plan',
+                'Before tickets go on sale or the room is booked, a poll can move the event itself. This is the stage where a count is most useful, because nothing is fixed yet and every choice on the ballot is one you could really deliver.',
+                ['Friday 7pm or Saturday 2pm?', 'Which topic should the March workshop cover?', 'Standing gig or seated show?'],
+                'The date, the format, the lineup or the subject.',
+            ],
+            [
+                'On the night',
+                'Questions a room answers in a minute',
+                'During the event people vote from their phones, so keep it to something they can decide on the spot. Say it from the stage once, put the event page\'s address on the screen, and tell them how long the vote stays open. Voting needs an account, so expect the first minute to go on signing in.',
+                ['Which song closes the set?', 'Which question should the panel take first?', 'Best costume: which table wins?'],
+                'Something you will do before everybody goes home.',
+            ],
+            [
+                'Afterwards',
+                'Questions about what to repeat',
+                'Once it is over, ask about the next one, not about this one. "Which of these should come back?" gives you a decision. "How was it?" gives you a mood, and a mood is better collected as a star rating and a comment from each attendee, which is what post-event feedback is for.',
+                ['Which of this season\'s nights should come back?', '60-minute sessions or 90?', 'Same venue next year, or somewhere bigger?'],
+                'What goes on next season\'s calendar.',
+            ],
+        ];
+    @endphp
+    <section id="when" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What to poll attendees about</p>
+                <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Before, during and after. <span class="es-vote-accent">Each stage decides something different.</span>
+                </h2>
+                <p class="es-vote-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A poll earns its place when its answer decides something you have not decided yet. If you already know what you will do whatever the count says, do not ask: a vote you then ignore costs you more goodwill than not asking at all.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-3" data-reveal-group="110">
+                @foreach ($pollStages as [$stageWhen, $stageTitle, $stageBody, $stageExamples, $stageDecides])
+                    <div class="es-vote-card flex h-full flex-col p-6 sm:p-7" data-reveal="panel">
+                        <p class="es-vote-tag mb-3">{{ $stageWhen }}</p>
+                        <h3 class="es-vote-ink mb-3 text-lg font-bold">{{ $stageTitle }}</h3>
+                        <p class="es-vote-muted mb-5 text-sm leading-relaxed">{{ $stageBody }}</p>
+                        <ul class="mb-5" aria-label="Example questions">
+                            @foreach ($stageExamples as $stageExample)
+                                <li class="es-vote-opt">
+                                    <span class="es-vote-box" aria-hidden="true"></span>
+                                    <span class="es-vote-ink min-w-0 flex-1 text-sm">{{ $stageExample }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p class="es-vote-rule mt-auto border-t pt-4 text-sm">
+                            <span class="es-vote-ink font-semibold">What it decides:</span>
+                            <span class="es-vote-muted">{{ $stageDecides }}</span>
+                        </p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-vote-card mt-6 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-vote-ink text-lg font-bold">When you need each person's answer, it is not a poll</h3>
+                <p class="es-vote-muted mt-2 text-sm leading-relaxed">
+                    A poll gives you a count per choice and no list of who chose what. That is right for "which night", and wrong for a meal choice, a T-shirt size or an access need, where you have to know which answer belongs to which guest. Ask those on the ticket or registration form instead, with
+                    <x-link href="{{ marketing_url('/features/custom-fields') }}" class="text-blue-800 dark:text-blue-300 font-medium">custom fields</x-link>,
+                    so the answer arrives with the order it belongs to.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2b. Writing a poll question people can answer                -->
+    <!-- ============================================================ -->
+    @php
+        // Rules for a question and its choices, each short enough to remember at the keyboard.
+        $wordingRules = [
+            ['One decision per question', '"Which day and time suits you?" asks two things. If Saturday wins and the time splits three ways, you have learned half of what you needed. Ask the day in one poll and the time in another: an event holds up to five.'],
+            ['Choices that cannot overlap', '"1 to 2 hours" and "2 to 3 hours" both claim exactly two hours, so somebody who means two has to guess. "Under an hour, one to two hours, more than two hours" leaves no answer that fits two boxes.'],
+            ['Only choices you would act on', 'Never list an option you cannot deliver to make the ballot look generous. If it wins, you either break your word or explain why the vote did not count.'],
+            ['Three to five choices', 'Two suits a straight either-or. Past six, the vote spreads thin: with eight choices and forty votes, a choice can lead with six votes, so the "winner" is what fifteen percent of voters wanted.'],
+            ['Short enough for a button', 'A choice can run to 200 characters, but on a phone it is a full-width button read at a glance. Aim for a few words and put the detail in the event description, where people can read it before they vote.'],
+            ['Neutral wording', '"Should we keep our brilliant Thursday jam?" tells people the answer you want. "Keep the Thursday jam, or try something new?" lets them give their own.'],
+            ['Dates in full', 'The event page stays up, so "next weekend" means something different every week. Write "Sat 14 March, 2pm". A choice without a date ages badly, and once the first vote is in it cannot be corrected.'],
+            ['Proofread before the first vote', 'The first vote locks the choices for good. You can still reword the question, close the poll or delete it, but a typo in a choice stays until you start a new poll; a choice you forgot can only come back as a write-in.'],
+        ];
+
+        // A weak question, the better version, and why.
+        $rewrites = [
+            ['Did you like the venue?', 'Same venue next time, or somewhere bigger?', 'A yes or no about the past gives a mood. A choice about the future gives a decision.'],
+            ['What time works? Morning, afternoon or evening', 'Which start time? 10am, 2pm or 7pm', 'Name the times you would really book. "Evening" can mean 6pm or 9pm.'],
+            ['Friday or Saturday, and should it be outdoors?', 'Two polls: "Friday or Saturday?" and "Indoors or in the yard?"', 'Two questions, two counts, no guessing which half people were answering.'],
+            ['What should we do differently?', 'Which should we change first? The start time, the sound or the bar queue', 'Open questions belong in feedback. A poll needs choices; switch on write-ins for the one you missed.'],
+        ];
+    @endphp
+    <section id="wording" class="scroll-mt-24 es-vote-rule border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Writing good poll questions</p>
+                <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    A good question has <span class="es-vote-accent">an obvious way to answer it.</span>
+                </h2>
+                <p class="es-vote-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most polls that disappoint were decided at the keyboard: two questions in one, choices that overlap, or a ballot so long that the winner is what a handful of people wanted. Eight rules, then four questions rewritten.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">
+                @foreach ($wordingRules as $ruleIndex => [$ruleTitle, $ruleBody])
+                    <li class="es-vote-card flex h-full gap-4 p-6" data-reveal="panel">
+                        <span class="es-vote-accent flex-none font-mono text-sm font-bold" aria-hidden="true">{{ str_pad($ruleIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="es-vote-ink mb-2 text-base font-bold">{{ $ruleTitle }}</h3>
+                            <p class="es-vote-muted text-sm leading-relaxed">{{ $ruleBody }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-vote-card mt-8 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-vote-ink mb-5 text-lg font-bold">Four poll questions, rewritten</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-sm">
+                        <caption class="sr-only">Weak poll questions, a better version of each, and why the better one works.</caption>
+                        <thead>
+                            <tr class="es-vote-tag">
+                                <th scope="col" class="pb-3 pe-4 font-bold">Instead of</th>
+                                <th scope="col" class="pb-3 pe-4 font-bold">Ask</th>
+                                <th scope="col" class="pb-3 font-bold">Why</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($rewrites as [$rwBefore, $rwAfter, $rwWhy])
+                                <tr class="es-vote-rule border-t">
+                                    <td class="es-vote-muted py-3 pe-4 align-top">{{ $rwBefore }}</td>
+                                    <th scope="row" class="es-vote-ink py-3 pe-4 align-top font-semibold">{{ $rwAfter }}</th>
+                                    <td class="es-vote-muted py-3 align-top">{{ $rwWhy }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 3. Before the mark, after the mark                           -->
     <!-- ============================================================ -->
     <section id="states" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                 <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The two states</p>
                 <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Nobody sees the count <span class="es-vote-accent">until they have voted.</span>
@@ -777,7 +948,7 @@
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-2">
                 <div>
-                    <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>05</span></div>
                     <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The seal</p>
                     <h2 class="es-balance es-vote-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                         The first vote <span class="es-vote-accent">seals the choices.</span>
@@ -840,7 +1011,7 @@
     <section id="count" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                 <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The declaration</p>
                 <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                     Close the poll and <span class="es-vote-accent">read out the count.</span>
@@ -912,12 +1083,97 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 5a. Using the result to plan the next event                  -->
+    <!-- ============================================================ -->
+    @php
+        // From a closed poll to a decision, in the order you do it.
+        $resultSteps = [
+            ['Say when it closes', 'Put the closing day in the question or the event description ("Voting closes Friday at noon"), and close it then. A poll that drifts on forever never gets read out, and people stop believing the next one matters.'],
+            ['Read the turnout before the share', 'A percentage hides its size. 41 percent of 39 votes is 16 people. Hold the total against how many people the poll could have reached, such as tickets sold or the size of the room: on a 300-seat night, 39 votes is a strong hint, not a mandate.'],
+            ['Treat a narrow lead as a tie', 'When two choices are a vote or two apart, the count has not chosen for you. Pick one, say why, and offer the other next time. That is more honest than calling a coin toss a landslide.'],
+            ['Close it to announce it', 'Closing stops new votes and shows the final count to everyone who opens the event, signed in or not. That is your announcement, already on the page people will check.'],
+            ['Then tell the people who were not there', 'The newsletter poll block only ever shows an open poll, so once you have closed it, write the result into a text block of your next newsletter, with a line on what happens now.'],
+            ['Do what it said', 'The next event is where the vote pays off. A cloned event starts with no polls, so the next ballot is written fresh: keep the questions that worked, and drop the choice nobody picked.'],
+        ];
+
+        // Poll or post-event feedback, row by row.
+        $pollVsFeedback = [
+            ['What you get', 'A count and a share for each choice', 'A 1 to 5 star rating and an optional comment from each attendee'],
+            ['Who answers', 'Anyone signed in who can see the event', 'Ticket buyers and RSVP attendees, asked by email'],
+            ['When', 'Whenever the poll is open: before, during or after', 'Automatically, 1 to 48 hours after the event ends'],
+            ['Who sees the answers', 'Each voter after voting, everyone once it closes', 'You, and the event page only if you show feedback publicly'],
+            ['Best for', 'Choosing between options for next time', 'Hearing how this one went, in their words'],
+            ['Plan', 'Pro', 'Pro, and on eventschedule.com the schedule\'s own email settings'],
+        ];
+    @endphp
+    <section id="results" class="scroll-mt-24 es-vote-rule border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Using poll results</p>
+                <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Close it, say what you decided, <span class="es-vote-accent">and then do it.</span>
+                </h2>
+                <p class="es-vote-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The vote is the easy half. What makes people answer your next poll is seeing that this one changed something.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($resultSteps as $stepIndex => [$stepTitle, $stepBody])
+                    <li class="es-vote-card flex h-full flex-col p-6" data-reveal="panel">
+                        <p class="es-vote-tag mb-3">Step {{ $stepIndex + 1 }}</p>
+                        <h3 class="es-vote-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                        <p class="es-vote-muted text-sm leading-relaxed">{{ $stepBody }}</p>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-vote-card mt-6 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-vote-ink text-lg font-bold">On a recurring event, know which count you are reading</h3>
+                <p class="es-vote-muted mt-2 text-sm leading-relaxed">
+                    A guest sees the count for the date they are looking at. The Polls row in your event editor adds every date together. So if the Thursday class splits one way in June and the other way in July, the editor shows you the sum; open the event page for a date to see that date on its own once you have voted there, or once the poll is closed.
+                </p>
+            </div>
+
+            <div class="es-vote-card mt-6 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-vote-ink mb-2 text-lg font-bold">Poll or post-event feedback?</h3>
+                <p class="es-vote-muted mb-5 text-sm leading-relaxed">
+                    They answer different questions, and plenty of events want both: feedback to hear how tonight went, a poll to choose what happens next.
+                    <x-link href="{{ marketing_url('/features/feedback') }}" class="text-blue-800 dark:text-blue-300 font-medium">How post-event feedback works</x-link>
+                </p>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-sm">
+                        <caption class="sr-only">Event polls compared with post-event feedback.</caption>
+                        <thead>
+                            <tr class="es-vote-tag">
+                                <th scope="col" class="pb-3 pe-4 font-bold"><span class="sr-only">Question</span></th>
+                                <th scope="col" class="pb-3 pe-4 font-bold">Poll</th>
+                                <th scope="col" class="pb-3 font-bold">Feedback</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($pollVsFeedback as [$pvfRow, $pvfPoll, $pvfFeedback])
+                                <tr class="es-vote-rule border-t">
+                                    <th scope="row" class="es-vote-ink py-3 pe-4 align-top font-semibold">{{ $pvfRow }}</th>
+                                    <td class="es-vote-muted py-3 pe-4 align-top">{{ $pvfPoll }}</td>
+                                    <td class="es-vote-muted py-3 align-top">{{ $pvfFeedback }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 6. Write-ins                                                 -->
     <!-- ============================================================ -->
     <section id="writein" class="scroll-mt-24 es-vote-rule border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                 <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Write-ins</p>
                 <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                     Let them add the choice <span class="es-vote-accent">you did not think of.</span>
@@ -935,7 +1191,7 @@
                     </div>
                     <div class="es-vote-card flex h-full flex-col p-6" data-reveal="panel">
                         <h3 class="es-vote-ink mb-3 text-lg font-bold">Or into a queue</h3>
-                        <p class="es-vote-muted text-sm">With approval on, it waits in a pending list on the event editor, counted on a badge on the Polls tab. Approve it and it joins the ballot with its author's vote attached. Reject it and it is gone.</p>
+                        <p class="es-vote-muted text-sm">With approval on, it waits in a pending list on the event editor, counted on a badge on the Polls row. Approve it and it joins the ballot with its author's vote attached. Reject it and it is gone.</p>
                     </div>
                     <div class="es-vote-card flex h-full flex-col p-6" data-reveal="panel">
                         <h3 class="es-vote-ink mb-3 text-lg font-bold">Duplicates never reach you</h3>
@@ -973,7 +1229,7 @@
     <section id="dates" class="scroll-mt-24 es-vote-rule border-t py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                 <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Recurring events</p>
                 <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                     A weekly night gets a <span class="es-vote-accent">fresh ballot every week.</span>
@@ -1010,7 +1266,7 @@
     <section id="where" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Where it appears</p>
                 <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Handed out where they already are.
@@ -1088,7 +1344,7 @@
                                 <h3 class="es-vote-ink text-xl font-bold">In the event editor</h3>
                                 <span class="es-vote-plan">Pro</span>
                             </div>
-                            <p class="es-vote-muted">Write the poll, watch the vote count against it, close it, reopen it, or delete it, all from the Polls tab under Engagement.</p>
+                            <p class="es-vote-muted">Write the poll, watch the vote count against it, close it, reopen it, or delete it, all from the Polls row of the Engagement tab.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1123,7 +1379,7 @@
     <section id="spec" class="scroll-mt-24 es-vote-rule border-t py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>11</span></div>
                 <p class="es-vote-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The small print</p>
                 <h2 class="es-balance es-vote-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                     Every number on <span class="es-vote-accent">one page.</span>
@@ -1234,7 +1490,7 @@
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <div class="es-vote-num mb-6" data-reveal aria-hidden="true"><span>12</span></div>
                 <h2 class="es-balance es-vote-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

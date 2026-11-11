@@ -52,8 +52,8 @@
             ],
             [
                 'row',
-                'Row',
-                'One line, and every flyer keeps its own proportions. Use it when the artwork matters more than the tidiness, or when you have two or three pieces and want them large.',
+                'Rows',
+                'Rows of equal height, and every flyer keeps its own proportions, from a tall 1:2 to a wide 3:2, so a poster is not trimmed. On Auto it is one long line; set Flyers per row to wrap it. Use it when the artwork matters more than the tidiness, or when you have two or three pieces and want them large.',
             ],
             [
                 'list',
@@ -76,7 +76,7 @@
             ['Square', '1080 × 1080', '1080 / 1080', '5.4rem', 'Feed posts'],
             ['Portrait', '1080 × 1350', '1080 / 1350', '5.4rem', 'The tallest a feed post gets'],
             ['Story', '1080 × 1920', '1080 / 1920', '5.4rem', 'Stories and statuses'],
-            ['Landscape', '1200 × 630', '1200 / 630', '6rem', 'Link previews and email'],
+            ['Wide', '1200 × 630', '1200 / 630', '6rem', 'Link previews, X and banners'],
         ];
 
         // A curated subset of EventTextGenerator::parseTemplate()'s variables.
@@ -106,7 +106,7 @@
             ],
             [
                 'q' => 'What sizes can the image be?',
-                'a' => 'Square at 1080 by 1080, portrait at 1080 by 1350, story at 1080 by 1920, or landscape at 1200 by 630. The finished graphic is scaled to fit inside the shape you pick and centred, and the padding around it is filled with your schedule\'s own background, so nothing is ever cropped or stretched. Leave it on Auto and the image keeps its natural size, which grows with the number of events.',
+                'a' => 'Square at 1080 by 1080, Portrait at 1080 by 1350, Story at 1080 by 1920, or Wide at 1200 by 630. The finished graphic is scaled to fit inside the shape you pick and centred, and the padding around it is filled with your schedule\'s own background, so nothing is ever cropped or stretched. Leave it on Natural and the image keeps the size the flyers need, which grows with the number of events.',
             ],
             [
                 'q' => 'Can I put my own logo and wording on it?',
@@ -118,11 +118,27 @@
             ],
             [
                 'q' => 'Can it post to Instagram for me?',
-                'a' => 'No, and it does not pretend to. There is no social account connection here. What you get is an image file and a block of text, which is why it works everywhere: Instagram, WhatsApp, Telegram, Facebook, a newsletter, a printed sheet on the door. Asterisks around a word render as bold in WhatsApp and Telegram, which is why the default template uses them.',
+                'a' => 'No, and it does not pretend to. There is no social account connection here. What you get is an image file and a block of text, which is why it works everywhere: Instagram, WhatsApp, Telegram, Facebook, a newsletter, a printed sheet on the door. Asterisks around a word render as bold in WhatsApp, which is why the default template uses them; most other apps, Instagram and Facebook included, show the asterisks as typed, so take them out of a caption meant for somewhere else.',
             ],
             [
                 'q' => 'Can the graphic be emailed out on a schedule?',
-                'a' => 'On the Enterprise plan, yes. Set a daily, weekly or monthly cadence, the day and the hour, and a comma-separated list of recipients, then send yourself a test first to see exactly what lands. For designed campaigns to the people who follow your schedule, use newsletters instead.',
+                'a' => 'On the Enterprise plan, yes. Set a daily, weekly or monthly cadence, the day and the hour, and a comma-separated list of recipients, then press Send it now to check the result: it sends the real email straight away to everyone on the list, so start with your own address. For designed campaigns to the people who follow your schedule, use newsletters instead.',
+            ],
+            [
+                'q' => 'What size should an event graphic be for Instagram?',
+                'a' => 'For the feed, Portrait at 1080 by 1350 pixels takes more room on a phone than a square, and Square at 1080 by 1080 is the safe choice when the same image also goes to Facebook. For Stories, use Story at 1080 by 1920 and keep words away from the top and bottom, where the app draws its own name bar and reply box. Whatever the shape, count the events: nine on a Square post leaves each flyer about a quarter of a phone screen wide, twenty leaves it about a fifth.',
+            ],
+            [
+                'q' => 'How do I make an event flyer readable on a phone?',
+                'a' => 'Make one thing big, usually the event or act name, then the day and the venue a size down, and move everything else to the event page. Use strong contrast rather than thin pale type over a photo, and check that the date is still readable when the flyer is the size of a stamp. On an Event Schedule graphic, keep the lower-left corner clear for the QR code and design at 4:5 (1080 by 1350), which the Grid layout barely trims.',
+            ],
+            [
+                'q' => 'How often should I post event graphics?',
+                'a' => 'Pick a rhythm and keep it: a lineup at the start of each week, a month overview in its first days, and a story on the day of each event cover most series. Regularity matters more than volume, because people learn when to look. Generate again whenever dates are added, since the graphic is drawn fresh from your upcoming events each time.',
+            ],
+            [
+                'q' => 'Can AI design the flyer for me?',
+                'a' => 'On the Enterprise plan, yes, one event at a time: the AI Generator on the event form can draw a flyer image from the event\'s details in a style you describe. The events graphic then composes it with your other flyers like any uploaded image. The AI instruction on the graphic page rewrites the caption only, never the picture.',
             ],
             [
                 'q' => 'Is the event graphics feature free?',
@@ -136,8 +152,11 @@
             ['hang', 'What goes up'],
             ['arrange', 'Three hangs'],
             ['mount', 'The mount'],
+            ['shapes', 'Choosing a size'],
             ['plate', 'The plate'],
             ['extras', 'The signature'],
+            ['readable', 'Readable on a phone'],
+            ['posting', 'Posting it'],
             ['steps', 'Three steps'],
             ['plans', 'What it costs'],
             ['faq', 'Questions'],
@@ -145,14 +164,14 @@
         ];
     @endphp
 
-    <x-slot name="title">Event Graphics | Social Posts From Flyers - Event Schedule</x-slot>
-    <x-slot name="description">Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in.</x-slot>
+    <x-slot name="title">Event Graphics: Sizes, Readable Flyers and Captions That Work</x-slot>
+    <x-slot name="description">Make event graphics people share: the right size for each platform, flyers that read on a phone, captions and a posting rhythm. Free on every plan.</x-slot>
     <x-slot name="breadcrumbTitle">Event Graphics</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Event Graphics"
-        description="Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in." />
+        description="Turn the flyers of your upcoming events into one shareable image and a ready-to-paste caption, sized for Instagram, stories, link previews or print, free on every plan." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
@@ -905,7 +924,7 @@
                             <div class="es-gal-code-dim">&hellip; then the same four lines for every other event</div>
                         </div>
                         <p class="es-gal-dim mt-4 text-sm">
-                            One entry per event, from a template you control. Asterisks are bold in WhatsApp and Telegram. If your schedule accepts event submissions, a short "want to see your event here?" line and its link are added at the end.
+                            One entry per event, from a template you control. Asterisks are bold in WhatsApp. If your schedule accepts event submissions, a short "want to see your event here?" line and its link are added at the end.
                         </p>
                     </div>
                 </div>
@@ -966,7 +985,7 @@
                             <tr>
                                 <th scope="row" class="es-gal-ink font-semibold">How many</th>
                                 <td class="es-gal-muted">Up to 20, earliest first. Set any number from 1 to 20.</td>
-                                <td class="es-gal-muted">The same, or every upcoming event with Show all events on.</td>
+                                <td class="es-gal-muted">The same, or every upcoming event with Include every upcoming event on.</td>
                             </tr>
                             <tr>
                                 <th scope="row" class="es-gal-ink font-semibold">How many from one act or room</th>
@@ -1058,7 +1077,7 @@
             <div class="mt-6 grid gap-6 md:grid-cols-2" data-reveal-group="90">
                 <div class="es-gal-card p-6" data-reveal="panel">
                     <h3 class="es-gal-ink mb-2 text-lg font-bold">The date: none, over the art, or above it</h3>
-                    <p class="es-gal-muted text-sm">On the grid and the row the date strip is off to begin with, so the artwork arrives untouched. Switch it on and it is either a band across the top of each flyer, which keeps the wall tight, or its own strip above the flyer, which leaves the artwork uncovered.</p>
+                    <p class="es-gal-muted text-sm">On Grid and Rows the date strip is off to begin with, so the artwork arrives untouched. Switch it on and it is either a band across the top of each flyer, which keeps the wall tight, or its own strip above the flyer, which leaves the artwork uncovered.</p>
                 </div>
                 <div class="es-gal-card p-6" data-reveal="panel">
                     <h3 class="es-gal-ink mb-2 text-lg font-bold">Flyers per row</h3>
@@ -1096,13 +1115,146 @@
                         @endforeach
                         <div class="es-gal-mount">
                             <div class="es-gal-mount-box es-gal-mount-auto" style="aspect-ratio: 1080 / 1500; width: 5.4rem;" aria-hidden="true"></div>
-                            <p class="es-gal-mount-name">Auto</p>
+                            <p class="es-gal-mount-name">Natural</p>
                             <p class="es-gal-mount-dim">Native</p>
                             <p class="es-gal-muted es-gal-xs mt-0.5">As tall as the wall needs</p>
                         </div>
                     </div>
                 </div>
-                <p class="es-gal-muted mt-5 text-sm">The five shapes above are drawn at their true proportions and at one shared scale, so 1080 pixels across is the same width whether the post is a square or a story. Auto is dashed because it has no fixed shape at all: the canvas grows with the number of events and the arrangement you chose.</p>
+                <p class="es-gal-muted mt-5 text-sm">The five shapes above are drawn at their true proportions and at one shared scale, so 1080 pixels across is the same width whether the post is a square or a story. Natural is dashed because it has no fixed shape at all: the canvas grows with the number of events and the arrangement you chose.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5a. Which shape for which place, and how big a flyer comes out -->
+    <!-- ============================================================ -->
+    @php
+        // Where each shape goes. Pixels and uses are the Shape row's own
+        // (messages.graphic_shape_*_help, AbstractEventDesign::SOCIAL_FORMATS).
+        $shapeGuide = [
+            ['Square', '1080 × 1080', 'An Instagram or Facebook feed post', 'The safe all-rounder when one image has to go everywhere. A 3 by 3 grid of nine events is taller than it is wide, so it is drawn smaller here than on Portrait.'],
+            ['Portrait', '1080 × 1350', 'The Instagram feed', 'A tall feed post, so it takes more room on a phone than a square. The best home for a weekly lineup of six to nine events.'],
+            ['Story', '1080 × 1920', 'Stories and WhatsApp status', 'The app\'s own name bar and reply box sit over the top and bottom, so leave room there. A story is gone after a day: post it on the day it matters.'],
+            ['Wide', '1200 × 630', 'Link previews, X and banners', 'Wide and short, so it suits one row of three to five flyers. Rows on Auto puts every flyer on one line.'],
+            ['Natural', 'Grows with the events', 'A chat message, a printout, your website', 'Nothing is fitted into a frame or padded, so the file is exactly as big as the flyers need: good for print, and for a chat, where people can zoom in.'],
+        ];
+
+        // Worked from GridDesign: on Auto the grid is ceil(sqrt(n)) flyers across,
+        // each tile 400 x 480 with an 18 px margin, and fitIntoFormat() scales the
+        // whole graphic by min(1080 / width, 1080 / height) for Square. No header,
+        // profile image or footer, each of which adds height. The phone column is
+        // the flyer's width at a 390-point-wide feed (x 390 / 1080).
+        $flyerSizes = [
+            ['4', '2 × 2', '426 px', 'about 40%'],
+            ['6', '3 × 2', '340 px', 'about 31%'],
+            ['9', '3 × 3', '286 px', 'about a quarter'],
+            ['12', '4 × 3', '256 px', 'under a quarter'],
+            ['20', '5 × 4', '205 px', 'about a fifth'],
+        ];
+
+        // GridDesign::addEventFlyerImage() centre-crops every flyer to the
+        // 400 x 480 tile, a 5:6 shape. What each common artwork shape loses.
+        $cropGuide = [
+            ['4:5, such as 1080 × 1350', 'About 2% from the top and the bottom'],
+            ['US Letter poster', 'About 4% from the top and the bottom'],
+            ['A4 poster', 'About 8% from the top and the bottom'],
+            ['Square', 'About 8% from each side'],
+            ['16:9 landscape', 'About a quarter from each side'],
+        ];
+    @endphp
+    <section id="shapes" class="es-gal-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <p class="es-gal-mark mb-5" data-reveal>Choosing a size</p>
+                <h2 class="es-balance es-gal-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Pick the shape for the place, <span class="es-gal-accent">then count the events.</span>
+                </h2>
+                <p class="es-gal-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The shape decides where an event graphic fits. The number of events decides how big each flyer is drawn inside it, and that is what decides whether anybody can read it on a phone.
+                </p>
+            </div>
+
+            <div class="es-gal-card p-6 sm:p-8" data-reveal="panel">
+                <div class="es-gal-scroll">
+                    <table class="es-gal-table">
+                        <caption class="sr-only">Each graphic shape, its size in pixels, where to post it and what to watch for</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Shape</th>
+                                <th scope="col">Pixels</th>
+                                <th scope="col">Post it as</th>
+                                <th scope="col">Worth knowing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($shapeGuide as [$sgName, $sgPx, $sgWhere, $sgNote])
+                                <tr>
+                                    <th scope="row" class="es-gal-ink font-semibold">{{ $sgName }}</th>
+                                    <td class="es-gal-mono es-gal-muted whitespace-nowrap">{{ $sgPx }}</td>
+                                    <td class="es-gal-ink">{{ $sgWhere }}</td>
+                                    <td class="es-gal-muted">{{ $sgNote }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-6 grid gap-6 lg:grid-cols-2" data-reveal-group="100">
+                <div class="es-gal-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <h3 class="es-gal-ink mb-2 text-lg font-bold">How big each flyer comes out on a Square post</h3>
+                    <p class="es-gal-muted mb-4 text-sm">A Grid left on Auto, with no header, profile image or footer. The last column is the flyer's width on a phone that shows the post 390 points across.</p>
+                    <div class="es-gal-scroll">
+                        <table class="es-gal-table">
+                            <caption class="sr-only">Number of events, the grid they make, how wide each flyer is drawn in a 1080 pixel square, and how much of a phone screen that is</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Events</th>
+                                    <th scope="col">Grid</th>
+                                    <th scope="col">Each flyer</th>
+                                    <th scope="col">Of the screen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($flyerSizes as [$fsCount, $fsGrid, $fsPx, $fsPhone])
+                                    <tr>
+                                        <th scope="row" class="es-gal-ink es-gal-mono font-semibold">{{ $fsCount }}</th>
+                                        <td class="es-gal-mono es-gal-muted">{{ $fsGrid }}</td>
+                                        <td class="es-gal-mono es-gal-ink">{{ $fsPx }}</td>
+                                        <td class="es-gal-muted">{{ $fsPhone }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="es-gal-muted mt-auto pt-4 text-sm">The working: on Auto the grid is as square as the count allows, each flyer is a 400 by 480 pixel tile with an 18 pixel gap, and the whole block is scaled to fit 1080 pixels. Nine events make a block 1272 wide and 1512 tall, so it is the height that limits it. On Portrait or Story the same nine are drawn at 340 pixels each. A header image, the profile image, header text or footer adds height and shrinks every flyer a little more.</p>
+                </div>
+
+                <div class="es-gal-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <h3 class="es-gal-ink mb-2 text-lg font-bold">What Grid trims from your artwork</h3>
+                    <p class="es-gal-muted mb-4 text-sm">Grid draws every flyer at one size by trimming it to a 5:6 tile around its centre. Rows keeps the artwork's own shape, between 1:2 and 3:2, and List shows a small landscape thumbnail beside the words. So if a flyer is going on a Grid, design it close to 5:6.</p>
+                    <div class="es-gal-scroll">
+                        <table class="es-gal-table">
+                            <caption class="sr-only">Common flyer shapes and how much of each the Grid layout trims off</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Flyer shape</th>
+                                    <th scope="col">What Grid trims</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($cropGuide as [$cgShape, $cgLoss])
+                                    <tr>
+                                        <th scope="row" class="es-gal-ink font-semibold">{{ $cgShape }}</th>
+                                        <td class="es-gal-muted">{{ $cgLoss }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="es-gal-muted mt-auto pt-4 text-sm">A 4:5 flyer at 1080 by 1350 loses almost nothing on a Grid and posts on its own as a Portrait, which makes it the one shape worth designing every flyer at. A landscape flyer up to 3:2 is the one to keep for Rows; anything wider is trimmed there too.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -1129,6 +1281,7 @@
                         <p class="es-gal-code-head mb-2">Default template</p>
                         <div><span class="es-gal-code-b">*<span class="es-gal-code-tok">{day_name}</span>*</span> <span class="es-gal-code-tok">{date_dmy}</span> | <span class="es-gal-code-tok">{time}</span></div>
                         <div><span class="es-gal-code-b">*<span class="es-gal-code-tok">{event_name}</span>*</span>:</div>
+                        <div><span class="es-gal-code-tok">{short_description}</span></div>
                         <div><span class="es-gal-code-tok">{venue}</span> | <span class="es-gal-code-tok">{city}</span></div>
                         <div><span class="es-gal-code-tok">{url}</span></div>
                     </div>
@@ -1136,6 +1289,7 @@
                         <p class="es-gal-code-head mb-2">What it prints</p>
                         <div><span class="es-gal-code-b">*Saturday* 16/5 | 20:00</span></div>
                         <div><span class="es-gal-code-b">*Terra Nova Trio*:</span></div>
+                        <div>New songs from their second album</div>
                         <div>Casa Azul Jazz Club | Lisbon</div>
                         <div><span class="es-gal-code-url">casaazul.eventschedule.com/terra-nova-trio</span></div>
                     </div>
@@ -1245,7 +1399,7 @@
                                 <h3 class="es-gal-ink text-xl font-bold">What the tile says</h3>
                                 <span class="es-gal-plan">Free</span>
                             </div>
-                            <p class="es-gal-muted">Nothing is written on the artwork unless you ask for it. Switch the strip on and it carries the event's date; give it a short template of its own and it says whatever you need instead, using the same event variables as the plate.</p>
+                            <p class="es-gal-muted">Nothing is written on the artwork unless you ask for it. Switch the strip on and it carries the event's date; give it a short template of its own and it says whatever you need instead, using the plate's event variables apart from <span class="es-gal-mono es-gal-accent">{url}</span>, <span class="es-gal-mono es-gal-accent">{number}</span>, <span class="es-gal-mono es-gal-accent">{month_pad}</span> and <span class="es-gal-mono es-gal-accent">{day_pad}</span>.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1291,7 +1445,7 @@
                                 <h3 class="es-gal-ink text-xl font-bold">Have it emailed out for you</h3>
                                 <span class="es-gal-plan es-gal-plan-enterprise">Enterprise</span>
                             </div>
-                            <p class="es-gal-muted mb-4">Daily, weekly or monthly, on the day and at the hour you choose, to a comma-separated list of addresses. Send yourself a test first and you will see exactly what they get.</p>
+                            <p class="es-gal-muted mb-4">Daily, weekly or monthly, on the day and at the hour you choose, to a comma-separated list of addresses. Send it now sends the real email straight away, so put only your own address on the list until you have seen it.</p>
                             <p class="es-gal-muted text-sm">
                                 This is a small recurring email of the graphic, not a campaign.
                                 <a href="{{ marketing_url('/features/newsletters') }}" class="es-gal-link font-semibold hover:underline">Newsletters</a>
@@ -1301,6 +1455,148 @@
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7a. A flyer that reads on a phone                            -->
+    <!-- ============================================================ -->
+    @php
+        // The flyer itself is the organizer's artwork; these are the rules that
+        // survive being drawn at a quarter of a phone screen. The corner and edge
+        // facts are GridDesign's: QR code 70 px square, 10 px in from the lower
+        // left of a 400 x 480 tile; the On the flyer date band is 36 px across the top.
+        $readable = [
+            ['One thing big', 'The event name, or the act, in the largest type on the flyer. At a quarter of a screen wide, one line is all anybody reads before they scroll on.'],
+            ['Then when and where', 'The day and date, and the venue, in the next size down. If it is weekly, say the day ("Every Thursday") rather than a date that is wrong next week.'],
+            ['Leave the rest to the page', 'The full lineup, prices, age limits and small print belong on the event page, which the caption links to and the QR code opens. Every line you cut makes the remaining ones bigger.'],
+            ['Contrast before style', 'Thin pale type over a busy photo vanishes when it is shrunk. Put words on a plain or darkened part of the picture, and check that you can still read the date when the flyer is the size of a stamp.'],
+            ['Keep the corners clear', 'Each flyer gets a QR code in its lower-left corner, about a sixth of the tile across. Choose a date strip On the flyer and it covers the top edge; number the flyers and a badge sits in a top corner. Keep what matters in the middle.'],
+            ['Design at 4:5', '1080 by 1350 pixels, saved as a JPG or PNG under 2.5MB, the limit for a flyer upload. It loses almost nothing on a Grid and still works posted on its own.'],
+        ];
+
+        // Posting rhythms that hold for most event series. The settings named are
+        // the page's own: Number of events, header text with schedule variables.
+        $rhythm = [
+            ['Once a month', 'The first days of the month', 'Header text such as {month_name} at {schedule_name}. Past nine events, try List, which writes each name and date out in text', 'People who plan ahead, and a pinned post that stays true all month.'],
+            ['Once a week', 'The start of your week', 'Portrait or Square, the next six to nine events', 'Regulars deciding what to do this week. Six to nine keeps every flyer readable.'],
+            ['On the day', 'The morning of the event', 'Story, just tonight\'s event or the next few', 'The people who already meant to come. A story is gone in a day, which suits it.'],
+            ['When something changes', 'As soon as dates are added', 'Generate again; nothing is stored as a finished poster', 'Anybody who saw last week\'s graphic and would otherwise plan from it.'],
+        ];
+    @endphp
+    <section id="readable" class="es-gal-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <p class="es-gal-mark mb-5" data-reveal>Readable on a phone</p>
+                <h2 class="es-balance es-gal-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Design each flyer for <span class="es-gal-accent">a quarter of a screen.</span>
+                </h2>
+                <p class="es-gal-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    An event graphic is only as legible as the flyers on it, and on a weekly lineup each flyer is drawn a quarter to a third of a phone's width. Artwork made to be read across a room at A3 has to work at that size too. Six rules that get it there.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($readable as $rdIndex => [$rdTitle, $rdBody])
+                    <li class="es-gal-card flex flex-col p-6" data-reveal="panel">
+                        <div class="es-gal-accent es-gal-mono mb-3 text-xl font-black" aria-hidden="true">{{ str_pad($rdIndex + 1, 2, '0', STR_PAD_LEFT) }}</div>
+                        <h3 class="es-gal-ink mb-2 text-lg font-bold">{{ $rdTitle }}</h3>
+                        <p class="es-gal-muted text-sm leading-relaxed">{{ $rdBody }}</p>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-gal-card mt-6 p-6 sm:p-7" data-reveal="panel">
+                <div class="mb-2 flex flex-wrap items-center gap-2">
+                    <h3 class="es-gal-ink text-lg font-bold">An event with no artwork yet</h3>
+                    <span class="es-gal-plan es-gal-plan-enterprise">Enterprise</span>
+                </div>
+                <p class="es-gal-muted text-sm">
+                    An event without a flyer is left off the picture, though it stays in the caption unless the flyers are numbered. Any image will do as a flyer, a good photo of the act or the room included, and uploading one is free. On Enterprise, the
+                    <x-link href="{{ route('marketing.docs.creating_events') }}#ai-details-generator" class="es-gal-link font-semibold">AI Generator</x-link>
+                    on the event's About section can draw a flyer image from the event's details, in a style you describe, so a new date does not wait for a designer.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7b. Captions, hashtags and a posting rhythm                  -->
+    <!-- ============================================================ -->
+    <section id="posting" class="es-gal-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <p class="es-gal-mark mb-5" data-reveal>Posting it</p>
+                <h2 class="es-balance es-gal-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Captions, hashtags <span class="es-gal-accent">and a rhythm people learn.</span>
+                </h2>
+                <p class="es-gal-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The picture stops the scroll; the caption is what people act on. And a graphic that arrives at the same time every week becomes something your regulars look for.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                <div class="es-gal-card flex flex-col p-6" data-reveal="panel">
+                    <h3 class="es-gal-ink mb-2 text-lg font-bold">Lead with the when</h3>
+                    <p class="es-gal-muted text-sm">The default caption opens each entry with the day in bold, then the date and time, because that is what people scan for. The asterisks that make it bold only work in WhatsApp; for Instagram or Facebook, take them out of the template, or they print as asterisks.</p>
+                </div>
+                <div class="es-gal-card flex flex-col p-6" data-reveal="panel">
+                    <h3 class="es-gal-ink mb-2 text-lg font-bold">Know where links work</h3>
+                    <p class="es-gal-muted text-sm">A pasted link can be tapped in WhatsApp, Telegram, Facebook and email. In an Instagram post caption it cannot, so point people at the link on your profile; the QR code on each flyer is for the graphic once it is printed or on a screen. Shorter links read better, so leave Start with https:// off.</p>
+                </div>
+                <div class="es-gal-card flex flex-col p-6" data-reveal="panel">
+                    <h3 class="es-gal-ink mb-2 text-lg font-bold">Hashtags once, not per event</h3>
+                    <p class="es-gal-muted text-sm">The template is repeated for every event, so a hashtag typed into it appears under every entry. Add a few once, at the end, when you paste. On Enterprise, an AI instruction such as "add relevant hashtags for Instagram" does it for every graphic.</p>
+                </div>
+            </div>
+
+            <div class="es-gal-card mt-6 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-gal-ink mb-2 text-lg font-bold">How often to post event graphics</h3>
+                <p class="es-gal-muted mb-5 text-sm">Pick one or two of these and keep to them. Consistency matters more than volume: a lineup every Monday teaches people to look on Mondays.</p>
+                <div class="es-gal-scroll">
+                    <table class="es-gal-table">
+                        <caption class="sr-only">Posting rhythms for event graphics: when to post, the settings to use and who each one reaches</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Rhythm</th>
+                                <th scope="col">When</th>
+                                <th scope="col">Settings</th>
+                                <th scope="col">Who it is for</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($rhythm as [$rhName, $rhWhen, $rhSettings, $rhWho])
+                                <tr>
+                                    <th scope="row" class="es-gal-ink font-semibold">{{ $rhName }}</th>
+                                    <td class="es-gal-muted">{{ $rhWhen }}</td>
+                                    <td class="es-gal-ink">{{ $rhSettings }}</td>
+                                    <td class="es-gal-muted">{{ $rhWho }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-6 grid gap-6 md:grid-cols-2" data-reveal-group="100">
+                <div class="es-gal-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-2 flex flex-wrap items-center gap-2">
+                        <h3 class="es-gal-ink text-lg font-bold">By hand, every week</h3>
+                        <span class="es-gal-plan">Free</span>
+                    </div>
+                    <p class="es-gal-muted text-sm">Save your settings once and the weekly routine is short: open Events graphic from the schedule's Actions menu, check the picture, press Download and Copy caption, and post. The graphic is drawn fresh from your upcoming events each time, so there is nothing to update first.</p>
+                </div>
+                <div class="es-gal-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-2 flex flex-wrap items-center gap-2">
+                        <h3 class="es-gal-ink text-lg font-bold">Emailed to you on a schedule</h3>
+                        <span class="es-gal-plan es-gal-plan-enterprise">Enterprise</span>
+                    </div>
+                    <p class="es-gal-muted text-sm">
+                        The Scheduled email row sends the current image and caption daily, weekly or monthly, at the hour you choose, to the addresses you type: you, your social media volunteer, the venue's marketing person. It is a reminder with the post ready inside, not a message to your followers, and when no upcoming event has a flyer it is skipped rather than sent empty.
+                        <x-link href="{{ route('marketing.docs.event_graphics') }}#email-scheduling" class="es-gal-link font-semibold">How the scheduled email works</x-link>
+                    </p>
                 </div>
             </div>
         </div>
@@ -1319,7 +1615,7 @@
             </div>
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
-                @foreach ([['01', 'Give the events a flyer', 'The wall is built from the artwork already on your events, so upload a flyer to each one you want hung. Everything else you have entered is already enough.'], ['02', 'Choose the hang and the mount', 'Grid, row or list. Square, portrait, story, landscape or auto. How many events, the date over the art or above it, and your header and footer wording.'], ['03', 'Download and paste', 'Take the PNG, copy the text, and post them wherever you post. Generate again next week and the wall is current.']] as [$stepNum, $stepTitle, $stepBody])
+                @foreach ([['01', 'Give the events a flyer', 'The wall is built from the artwork already on your events, so upload a flyer to each one you want hung. Everything else you have entered is already enough.'], ['02', 'Choose the hang and the mount', 'Grid, rows or list. Square, portrait, story, wide or natural. How many events, the date over the art or above it, and your header and footer wording.'], ['03', 'Download and paste', 'Take the PNG, copy the text, and post them wherever you post. Generate again next week and the wall is current.']] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-gal-card p-7" data-reveal="panel">
                         <div class="es-gal-accent es-gal-mono mb-3 text-2xl font-black">{{ $stepNum }}</div>
                         <h3 class="es-gal-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
@@ -1361,7 +1657,7 @@
                                 ['A public page and its own link for every event', 'Free', 'plan'],
                                 ['Compose the graphic and its text', 'Free', 'plan'],
                                 ['Header image, header and footer text, tile text', 'Free', 'plan'],
-                                ['Square, portrait, story and landscape formats', 'Free', 'plan'],
+                                ['Square, portrait, story and wide shapes', 'Free', 'plan'],
                                 ['Custom fields in the template', 'Free', 'plan'],
                                 ['AI rewrite of the generated text', 'Enterprise', 'plan-enterprise'],
                                 ['Scheduled graphic emails', 'Enterprise', 'plan-enterprise'],
