@@ -24,7 +24,7 @@
                 "@type": "HowToStep",
                 "position": 2,
                 "name": "Click the days you are gone",
-                "text": "Click a date to mark it unavailable and click it again to clear it. Use the month arrows to mark dates further ahead."
+                "text": "Click a date to mark it unavailable and click it again to clear it. To mark dates further ahead, save this month first, then move on with the month arrows."
             },
             {
                 "@type": "HowToStep",
@@ -74,7 +74,7 @@
            TIME AXIS. /features/appointments owns bookable time slots
            and weekly hours; drawing an hour rail here would teach the
            product a thing this tab does not have (there are no times in
-           dates_unavailable, and no half days). Sections 08 and 09 say
+           dates_unavailable, and no half days). Sections 10 and 11 say
            so in words rather than leaving the drawing to imply it.
 
            COLOUR: the page keeps its inherited teal, but spends it as
@@ -589,12 +589,16 @@
 
         $faqs = [
             [
+                'q' => 'What is an availability calendar?',
+                'a' => 'A calendar that records when somebody cannot be booked, so the people who take the bookings can see it before they say yes. For a performer the useful version runs the other way from a shop\'s opening hours: every date starts available and you mark only the days you are out, because most dates are possible and the short list is the one nobody can guess. In Event Schedule it is the Availability tab of a talent schedule, on the Enterprise plan.',
+            ],
+            [
                 'q' => 'How does availability management work?',
                 'a' => 'The Availability tab on a talent schedule is a month calendar. Every date on it starts available. Click a date to mark it unavailable, click it again to clear it, then press Save. Your dates are stored against your own membership of that schedule, and they appear for the rest of your team on the Schedule tab.',
             ],
             [
                 'q' => 'Who can set availability?',
-                'a' => 'The owner and every admin of the schedule mark their own dates, and nobody can edit anyone else\'s. A viewer can read the calendar but cannot mark dates on it. Availability management is an Enterprise plan feature on eventschedule.com and is included on selfhosted deployments.',
+                'a' => 'Every member of the schedule marks their own dates: the owner, each admin and each viewer. Nobody can mark or clear a date for someone else. Availability management is an Enterprise plan feature on eventschedule.com and is included on selfhosted deployments.',
             ],
             [
                 'q' => 'Can I set different availability for different days?',
@@ -610,15 +614,27 @@
             ],
             [
                 'q' => 'Does marking a date stop somebody booking me on it?',
-                'a' => 'No, and this is worth being straight about: a crossed date is a note to your team, not a lock. Nothing is blocked and nothing is checked against it, so a venue or a curator can still add you to an event on a day you marked. They never saw the mark either: the marks are only visible to signed-in members of your own schedule, so the tab is there for the person on your side who answers the email, not for the person sending it.',
+                'a' => 'For events, no, and this is worth being straight about: a crossed date is a note to your team, not a lock. Nothing on your event calendar is checked against it, so a venue or a curator can still add you to an event on a day you marked. They never saw the mark either: the marks are only visible to signed-in members of your own schedule, so the tab is there for the person on your side who answers the email, not for the person sending it. The one exception is an appointment type with a host, on the Enterprise plan: the host\'s marked days close that type\'s times for the whole day.',
             ],
             [
                 'q' => 'Why are the dates on my calendar not clickable?',
                 'a' => 'The Availability calendar becomes clickable once the schedule email address has been verified, and the Save button appears at the same time. The tab itself is only offered on talent schedules: curator schedules are sent back to the Schedule tab, and a venue schedule is never given the tab in its navigation.',
             ],
             [
+                'q' => 'Can my booking agent see my availability?',
+                'a' => 'Yes, once they are a member of your schedule. Add them as an admin if they accept and decline bookings for you, or as a viewer if they only need to read the month. Either way they see every member\'s marked days on the Schedule tab and can mark days of their own, but never yours. Team members and availability are both on the Enterprise plan, with up to five members per schedule on eventschedule.com.',
+            ],
+            [
+                'q' => 'Do my marked days block appointment bookings?',
+                'a' => 'Only for an appointment type you host. On the Enterprise plan an appointment type can name a host, who is an owner or admin of the schedule, and that host\'s marked days on the schedule close the type\'s bookable times for the whole day, alongside their bookings on any schedule. A type with no host does not read the marks, and neither does anything else: your events, requests from venues and curators, and your public calendar all ignore them.',
+            ],
+            [
+                'q' => 'Can I show bookers which dates I am free?',
+                'a' => 'Not from this tab. Availability is never published, and there is no public view of your open dates. What a booker can see is your public schedule, which lists the events you are booked for. If you want people to choose a time themselves, appointment booking publishes open times on a booking page. For gigs, the usual answer is a short list of open dates in your reply, checked against the Schedule tab first.',
+            ],
+            [
                 'q' => 'How far ahead can I mark dates?',
-                'a' => 'As far as you like. Move between months with the calendar arrows and mark dates in each one. Save returns you to the month you were working in, so a run of months takes a few passes rather than one long form.',
+                'a' => 'As far as you like. Mark the dates in one month, press Save, then move on with the calendar arrows: moving to another month loads a new page and drops marks you have not saved. Save returns you to the month you were working in, so a run of months takes a few passes rather than one long form.',
             ],
         ];
 
@@ -630,6 +646,8 @@
             ['team', 'One card each'],
             ['gates', 'Two locks'],
             ['note', 'A note, not a lock'],
+            ['share', 'Bands and agents'],
+            ['routine', 'Keeping it current'],
             ['around', 'Around the card'],
             ['versus', 'Or appointments'],
             ['faq', 'Questions'],
@@ -985,7 +1003,7 @@
                         <h3 class="es-hours-ink text-lg font-bold">Up to five names</h3>
                         <span class="es-hours-plan">Enterprise</span>
                     </div>
-                    <p class="es-hours-muted text-sm leading-relaxed">On the Enterprise plan a schedule on eventschedule.com holds up to five team members, and each one is either an admin who edits the calendar or a viewer who only reads it. Viewers see the marks without being able to change anything. A free or Pro schedule has exactly one member, which is you.</p>
+                    <p class="es-hours-muted text-sm leading-relaxed">On the Enterprise plan a schedule on eventschedule.com holds up to five team members, and each one is either an admin who runs the schedule with you or a viewer who reads it. A viewer cannot change your events, but marks their own days like everyone else. A free or Pro schedule has exactly one member, which is you.</p>
                 </div>
             </div>
 
@@ -1063,7 +1081,7 @@
 
             <div class="es-hours-card p-7 sm:p-8" data-reveal="panel">
                 <p class="es-hours-muted mb-5 leading-relaxed">
-                    A crossed date changes what the shared calendar looks like. It does not change what the software allows. Nothing is validated against your marks, so no event is refused, moved or flagged because of them.
+                    A crossed date changes what the shared calendar looks like. It does not change which events the software allows. No event is refused, moved or flagged because of your marks. There is exactly one place where a mark does close time, and it is the fourth line below.
                 </p>
                 <ul class="es-hours-muted space-y-3 text-sm" data-reveal-group="70">
                     <li class="flex gap-3" data-reveal>
@@ -1078,11 +1096,159 @@
                         <span class="es-hours-accent mt-0.5 flex-none font-mono text-xs font-bold" aria-hidden="true">03</span>
                         <span>Your own events are unaffected. Marking a date does not hide, move or cancel anything already on the calendar for that day.</span>
                     </li>
+                    <li class="flex gap-3" data-reveal>
+                        <span class="es-hours-accent mt-0.5 flex-none font-mono text-xs font-bold" aria-hidden="true">04</span>
+                        <span>The exception is an appointment type with a host. On the Enterprise plan a type can name a host, an owner or admin of the schedule, and that host's marked days on this schedule close the type's bookable times for the whole day, as their bookings on any schedule do. A type with no host does not read the marks.</span>
+                    </li>
                 </ul>
                 <p class="es-hours-muted es-hours-rule mt-6 pt-5 text-sm leading-relaxed">
-                    If what you actually want is for a date to be genuinely untakeable, the thing that does that is appointment booking, where open times are the only times a guest can pick. Section 09 puts the two side by side.
+                    If what you actually want is for a date to be genuinely untakeable, the thing that does that is appointment booking, where open times are the only times a guest can pick. Section 11 puts the two side by side.
                 </p>
             </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7b. Bands, duos and agents                                   -->
+    <!-- ============================================================ -->
+    <section id="share" class="es-hours-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-hours-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-hours-plate mb-4" data-reveal style="--reveal-delay: 0.05s;">Bands, duos and agents</p>
+                <h2 class="es-balance es-hours-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    How an act <span class="es-hours-accent">shares</span> one availability calendar.
+                </h2>
+                <p class="es-hours-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    An availability calendar earns its keep when the person who answers the enquiry is not the person who is away. Three set-ups cover most acts, and the difference between them is who marks and who decides.
+                </p>
+            </div>
+
+            @php
+                $shareSetups = [
+                    [
+                        'The band',
+                        'Every player is a member of the band\'s talent schedule and marks their own days: the drummer\'s cousin\'s wedding, the bassist\'s teaching week. On the Schedule tab a Friday with two people out names both, so whoever answers the venue can decide whether a stand-in covers it or the answer is no. A schedule on eventschedule.com holds up to five members, which fits a four-piece and the person who books it.',
+                        'Everyone',
+                        'The one who books',
+                    ],
+                    [
+                        'The agent or manager',
+                        'Add the person who handles bookings as an admin. They run the schedule day to day, answer the requests that venues and curators send, and read every mark before they reply, so the performer never has to forward a calendar. An agent with several acts is a member of each act\'s schedule, and each act keeps its own month.',
+                        'The act',
+                        'The agent',
+                    ],
+                    [
+                        'The crew who only need to know',
+                        'A sound engineer, a driver or a tour manager can be a viewer. A viewer reads the shared month and marks their own days, and sees no ticket sales. It suits the people a show cannot happen without who do not take the bookings themselves.',
+                        'Themselves',
+                        'Not them',
+                    ],
+                ];
+            @endphp
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                @foreach ($shareSetups as [$shTitle, $shBody, $shMarks, $shDecides])
+                    <div class="es-hours-card flex flex-col p-7" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-hours-ink text-lg font-bold">{{ $shTitle }}</h3>
+                            <span class="es-hours-plan">Enterprise</span>
+                        </div>
+                        <p class="es-hours-muted mb-5 text-sm leading-relaxed">{{ $shBody }}</p>
+                        <div class="es-hours-slip mt-auto p-4">
+                            <div class="es-hours-slip-row py-1 text-xs">
+                                <span class="es-hours-muted">Who marks</span>
+                                <span class="es-hours-ink font-semibold">{{ $shMarks }}</span>
+                            </div>
+                            <div class="es-hours-slip-row es-hours-rule py-1 text-xs">
+                                <span class="es-hours-muted">Who decides</span>
+                                <span class="es-hours-ink font-semibold">{{ $shDecides }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-hours-card mt-6 p-7 sm:p-8" data-reveal="panel">
+                <p class="es-hours-plate mb-3">The booker's routine</p>
+                <h3 class="es-hours-ink mb-5 text-xl font-bold">When an enquiry arrives: four checks before you say yes</h3>
+                <ul class="es-hours-muted space-y-3 text-sm" data-reveal-group="70">
+                    @foreach ([
+                        'Open the Schedule tab on the month of the date. A tinted day means at least one member marked it, and the info icon on that day lists who.',
+                        'Treat a tinted day as a question, not an answer. A mark carries no reason, so ask the person whether it can move before you turn the date down.',
+                        'Look at the days either side. A show 400 miles away the night after a marked day can be the real problem, and the mark will not say so.',
+                        'Answer it where it came from: accept or decline on the Requests tab if a venue or curator sent it through Event Schedule, or reply to the email if they did not. Accepting puts the event on your public schedule, and the marks stay as they were.',
+                    ] as $chkIndex => $chkLine)
+                        <li class="flex gap-3" data-reveal>
+                            <span class="es-hours-accent mt-0.5 flex-none font-mono text-xs font-bold" aria-hidden="true">{{ str_pad($chkIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span>{{ $chkLine }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+                <p class="es-hours-muted es-hours-rule mt-6 pt-5 text-sm leading-relaxed">
+                    For a solo performer with nobody else on the schedule, the tab is a diary only you read. That is still useful when you are the one answering the emails, but its real value starts with the second name.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7c. Keeping it current                                       -->
+    <!-- ============================================================ -->
+    <section id="routine" class="es-hours-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-hours-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <p class="es-hours-plate mb-4" data-reveal style="--reveal-delay: 0.05s;">Keeping it current</p>
+                <h2 class="es-balance es-hours-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    An availability calendar is only as good as its <span class="es-hours-accent">last update.</span>
+                </h2>
+                <p class="es-hours-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A double booking is rarely the calendar's fault. It is a date somebody knew about and never marked. Once a booker has been caught by one, they stop trusting the month, and then it is only decoration. These habits keep it honest.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2" data-reveal-group="110">
+                <div class="es-hours-card flex flex-col p-7" data-reveal="panel">
+                    <p class="es-hours-plate mb-3">What to mark</p>
+                    <h3 class="es-hours-ink mb-4 text-lg font-bold">More than the day itself</h3>
+                    <ul class="es-hours-muted space-y-3 text-sm">
+                        @foreach ([
+                            'Every day you cannot perform at all: travel, family, a shift at the day job you cannot swap.',
+                            'The travel days on either side of anything far away, not only the date of the show.',
+                            'Holds you have promised elsewhere. A mark has no "maybe" state, so agree as a team that a mark means "ask me first", and mark the hold. Turning down a date you could have done costs less than being booked twice on one night.',
+                            'Recovery days after a long run, if you know you will need them.',
+                        ] as $markLine)
+                            <li class="flex gap-3">
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-hours-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>{{ $markLine }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="es-hours-card flex flex-col p-7" data-reveal="panel">
+                    <p class="es-hours-plate mb-3">The routine</p>
+                    <h3 class="es-hours-ink mb-4 text-lg font-bold">Five minutes a week, each</h3>
+                    <ul class="es-hours-muted space-y-3 text-sm">
+                        @foreach ([
+                            'Mark a date the day you know it, not at the next band meeting.',
+                            'Once a week, every member opens the Availability tab and looks eight weeks ahead for anything new.',
+                            'Save before you move to the next month. Moving loads a new page, and marks you have not saved are lost.',
+                            'Take a mark off as soon as a plan falls through, so the date reads open again for whoever is booking.',
+                            'A standing commitment, like every Sunday of a teaching term, is a click per date: do it in one sitting, a month at a time, and save each month.',
+                        ] as $routineIndex => $routineLine)
+                            <li class="flex gap-3">
+                                <span class="es-hours-accent mt-0.5 flex-none font-mono text-xs font-bold" aria-hidden="true">{{ str_pad($routineIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                <span>{{ $routineLine }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <p class="es-hours-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Nobody is notified when a date is marked, so the weekly look is what turns a new mark into something the booker knows. If your booker reads email more than the calendar, a one-line message after a big change is still worth sending.
+            </p>
         </div>
     </section>
 
@@ -1092,7 +1258,7 @@
     <section id="around" class="es-hours-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-hours-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-hours-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <p class="es-hours-plate mb-4" data-reveal style="--reveal-delay: 0.05s;">Around the card</p>
                 <h2 class="es-balance es-hours-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     What the same calendar is already doing.
@@ -1142,7 +1308,7 @@
                                 <h3 class="es-hours-ink text-xl font-bold">Months ahead</h3>
                                 <span class="es-hours-plan">Enterprise</span>
                             </div>
-                            <p class="es-hours-muted">Move with the calendar arrows and mark next spring today. Save brings you back to the month you were in, ready for the next handful of dates.</p>
+                            <p class="es-hours-muted">Move with the calendar arrows and mark next spring today, one month and one Save at a time. Save brings you back to the month you were in, ready for the next handful of dates.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1211,7 +1377,7 @@
     <section id="versus" class="es-hours-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-hours-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <div class="es-hours-num mb-6" data-reveal aria-hidden="true"><span>11</span></div>
                 <p class="es-hours-plate mb-4" data-reveal style="--reveal-delay: 0.05s;">Two tabs, similar names</p>
                 <h2 class="es-balance es-hours-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                     Availability, or <span class="es-hours-accent">appointments</span>?
@@ -1358,7 +1524,7 @@
     <section id="faq" class="es-hours-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-hours-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <div class="es-hours-num mb-6" data-reveal aria-hidden="true"><span>12</span></div>
                 <h2 class="es-balance es-hours-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

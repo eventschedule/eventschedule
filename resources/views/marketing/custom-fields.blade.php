@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Custom Fields | Ask Your Own Questions on Every Form</x-slot>
-    <x-slot name="description">Add your own questions to your ticket form, registration form and public event request form. Six field types, and every answer in your sales export.</x-slot>
+    <x-slot name="description">Add your own questions to ticket, registration and event request forms: which kind of custom field to use, six field types, and what to ask or leave out.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Fields</x-slot>
 
     <x-slot name="structuredData">
@@ -593,7 +593,7 @@
         $flags = [
             ['Required', 'on', 'The form will not submit without an answer. Checked in the browser and checked again on the server, so an empty answer cannot slip past either one.'],
             ['On request form', 'on', 'Ask the question of visitors submitting an event to you. On by default. Uncheck it to keep the field for your own use inside the admin portal.'],
-            ['Private', 'off', 'Keep the answer off your public schedule. It stays visible to you, and it still fills {custom_N} in graphic templates and URL patterns.'],
+            ['Private', 'off', 'Keep the answer to you and your team. It still shows in the admin portal, on the Requests tab and in your request emails, but never anywhere other people see: its {custom_N} comes out empty in graphics and URL patterns, and it is never a filter or shown on the event page.'],
             ['Show as filter', 'on', 'Offer the field as a filter on your schedule page, so a visitor can pick Room A and see only what is on there. On by default for dropdowns and multi-selects, one click away for a text field, and the filtered view is a link you can share.'],
             ['On event page', 'off', 'Print the answer on the public event page, in a row of its own under the venue: the room, the floor, a dress code. Off until you tick it, so nothing you already collect is published by accident, and a private field is never shown.'],
             ['Validation pattern', 'on', 'Text fields can require a format. Pick email address, phone number, web address, numbers only or letters and numbers, or write your own, and test a sample value before you save it.'],
@@ -605,11 +605,15 @@
             ['In the request email', 'The email that tells you a request has arrived spells it out: the event, who asked, when, and what they answered. Search your mailbox for the event and there it is.'],
             ['On the event page', 'Tick On event page and the answer is printed for every visitor, under the venue. Which room, which floor, what to bring.'],
             ['On the order', 'Checkout answers appear beside the sale in your sales table, per order and per ticket.'],
-            ['On the ticket', 'The answers a buyer gave are printed on the ticket itself, so the person on the door reads the same thing you do.'],
-            ['In the export', 'The sales CSV gains one column per field name, so a spreadsheet of dietary counts is a download rather than an afternoon.'],
+            ['On the ticket', 'The answers a buyer gave are listed on their own ticket page, under Details, so they can check what they told you.'],
+            ['In the export', 'On Pro, the sales CSV gains one column per field name, so a spreadsheet of dietary counts is a download rather than an afternoon.'],
         ];
 
         $faqs = [
+            [
+                'q' => 'What are custom fields?',
+                'a' => 'Questions of your own, added to the forms an event already has, so you collect more than a name and an email. In Event Schedule a custom field can belong to a schedule (asked on your own event form and on your public event request form, and able to be shown on the event page or offered as a filter), to an event (asked once per order at checkout or registration) or to a single ticket type (asked when that ticket is bought, or of each guest). Each answer is filed where you can read it: on the request, on the order, on the buyer\'s ticket page and, on Pro, in the sales export.',
+            ],
             [
                 'q' => 'What types of custom field can I create?',
                 'a' => 'Six. Text, long text, Yes or No, date, dropdown and multi-select. Dropdown and multi-select take a comma separated list of choices that you type, and text fields can also require a format such as an email address or a reference code.',
@@ -628,15 +632,27 @@
             ],
             [
                 'q' => 'Can every guest in a group answer for themselves?',
-                'a' => 'Yes, for the questions you define on a ticket type. Turn on Individual tickets for the event and then Collect ticket fields per guest, and each person in the party gets their own confirmation, their own QR code and their own answers, instead of the buyer answering once for six. Questions defined on the event are still asked once per order.',
+                'a' => 'Yes, on Pro, for the questions you define on a ticket type. Turn on Individual tickets for the event and then Collect ticket fields per guest, and each person in the party gets their own confirmation, their own QR code and their own answers, instead of the buyer answering once for six. Each guest needs their own email address. Questions defined on the event are still asked once per order.',
             ],
             [
                 'q' => 'Can I export the answers?',
-                'a' => 'Yes. The sales CSV export adds one column for every custom field name it finds, filled with what each buyer answered. The answers also appear in your sales table and on the ticket itself.',
+                'a' => 'Yes, on Pro. The sales CSV export, from the Export button on the Sales page, adds one column for every custom field name it finds, filled with what each buyer answered, and on an order with individual tickets each guest has a row of their own. On every plan the answers also appear when you open an order on the Sales page, and on the buyer\'s own ticket page.',
             ],
             [
                 'q' => 'Can I collect an answer without publishing it?',
-                'a' => 'Yes. Mark the field private and the value stays off your public schedule while remaining visible to you in the admin portal. A private field can still be dropped into an event graphic or a URL pattern with {custom_N}.',
+                'a' => 'Yes. Mark the field private and the value stays with you and your team: it shows in the admin portal, on the Requests tab and in your request emails, and nowhere public. That includes the places a variable could carry it, so a private field\'s {custom_N} comes out empty in an event graphic, an event URL pattern and a calendar description, and it is never offered as a filter.',
+            ],
+            [
+                'q' => 'Who can see the answers?',
+                'a' => 'The owners and admins of the event\'s schedule, and of a venue or talent schedule that has accepted the event, see every order and what was answered on it, and so does the person who created the event. A viewer on the team sees no sales. Each buyer sees their own answers on their ticket page. Nothing a buyer answers at checkout is published. Schedule fields are different: one ticked On event page is printed on the public event page, one offered as a filter shows its values to visitors, and every schedule field that is not Private is also matched by the search on your schedule page. A field marked Private is never shown outside the admin portal, the Requests tab and your request emails, so mark a field Private when it is for your team only.',
+            ],
+            [
+                'q' => 'Can I add a custom field after tickets are on sale?',
+                'a' => 'Yes, and the new question is asked from the next order on. Orders placed before it have no answer to it, and nobody is asked again, so if you need the answer from everyone, contact the earlier buyers yourself. It is far easier to settle the questions before the first sale.',
+            ],
+            [
+                'q' => 'Can a custom field work as a waiver or consent checkbox?',
+                'a' => 'Not on its own. At checkout a Yes / No field is a menu with Yes and No in it, so making it required means the buyer must answer, not that they must say Yes, and an order can go through with No. If you need agreement, write the question so a No is something you will act on, and read the answers before the event. For your own terms, the Checkout row has a Terms URL, printed on every ticket, though buyers are not asked to accept it at checkout; put what matters in the event\'s description as well, where people read it before they buy.',
             ],
             [
                 'q' => 'What if my schedule is not in English?',
@@ -652,6 +668,7 @@
             ['free', 'Free list, Pro questions'],
             ['column', 'Question and column'],
             ['requests', 'On the request form'],
+            ['well', 'Doing it well'],
             ['slots', 'Ten slots'],
             ['rest', 'Everything else'],
             ['faq', 'Questions'],
@@ -1204,9 +1221,136 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 7b. Doing it well: which field, good questions, what not to ask -->
+    <!-- ============================================================ -->
+    @php
+        // Real jobs, each answered with the place, the type and the plan. Plans
+        // follow docs/FEATURES.md and the tickets guide: a question on a ticket
+        // type is free, a question on the event (once per order) is Pro, per guest is Pro on any event with
+        // tickets, and schedule fields are Pro.
+        $jobs = [
+            ['A meal choice for every guest at a dinner', 'The dinner ticket type, with Individual tickets and Collect ticket fields per guest on', 'Dropdown', 'Pro'],
+            ['A T-shirt size for each runner', 'The race ticket type, asked per guest', 'Dropdown', 'Pro'],
+            ['A note on the one ticket type that needs it, such as a wheelchair space', 'That ticket type, once per order', 'Text, optional', 'Free'],
+            ['A company name for the invoice', 'The event, once per order', 'Text', 'Pro'],
+            ['How people heard about you', 'The event, once per order', 'Dropdown, never free text', 'Pro'],
+            ['Whether a buyer is 18 or over', 'The event, or the ticket type per guest', 'Yes / No, not a date of birth', 'Pro'],
+            ['The room each event is in, shown and filterable', 'The schedule, with On event page and Show as filter', 'Dropdown', 'Pro'],
+            ['The kit a visiting act needs, before you accept them', 'The schedule, with On request form', 'Multi-select', 'Pro'],
+        ];
+    @endphp
+    <section id="well" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Doing it well</p>
+                <h2 class="es-balance es-form-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Ask less, and ask it <span class="es-form-fill">in the right place.</span>
+                </h2>
+                <p class="es-form-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Every question is a little more work for the person buying, and every answer is something you now hold and have to look after. The best forms ask few questions, each in the one place where it is answered exactly once by the right person.
+                </p>
+            </div>
+
+            <div class="es-form-card p-6 sm:p-8" data-reveal="panel">
+                <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 class="es-form-ink text-lg font-bold">Which custom field for which job</h3>
+                    <span class="es-form-key">8 real jobs</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="es-form-table">
+                        <caption class="sr-only">Common jobs for a custom field, where to define each one, which type to use and which plan it needs</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">You need</th>
+                                <th scope="col">Define it on</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Plan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($jobs as [$jobNeed, $jobWhere, $jobType, $jobPlan])
+                                <tr>
+                                    <th scope="row">{{ $jobNeed }}</th>
+                                    <td>{{ $jobWhere }}</td>
+                                    <td>{{ $jobType }}</td>
+                                    <td><span class="es-form-plan @if ($jobPlan === 'Pro') es-form-plan-pro @endif">{{ $jobPlan }}</span></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="es-form-muted mt-5 text-xs">
+                    The rule behind the Plan column: a question on a ticket type is free on every plan, a question on the event, asked once per order, is Pro, and asking a ticket type's questions of each guest is Pro on any event with tickets, free ones included. Schedule fields are Pro. A selfhosted install includes all of it.
+                </p>
+            </div>
+
+            <div class="mt-8 grid gap-6 md:grid-cols-2" data-reveal-group="100">
+                <div class="es-form-card flex h-full flex-col p-7" data-reveal="panel">
+                    <p class="es-form-tag mb-3">Writing the question</p>
+                    <h3 class="es-form-ink mb-4 text-lg font-bold">Questions people answer well</h3>
+                    <ul class="space-y-3">
+                        @foreach ([
+                            'Ask only what somebody will act on before or during the event. If nobody will read the answer, cut the question.',
+                            'Use a dropdown whenever you will count the answers. Typed answers to "Dietary requirements" come back as veggie, vegetarian, veg and V, and the caterer needs one number.',
+                            'One thing per field. "Dietary needs and allergies" returns one muddled answer; two fields return two you can use.',
+                            'Name the field the way you would say it aloud, with its purpose in it: "Name for your badge" gets a better answer than "Name 2".',
+                            'Make a field required only when the event cannot run without it. Everything else can be optional, and the people who have something to tell you will.',
+                            'Choices are typed separated by commas, so a choice cannot contain one. Write "Gluten free" and "Nut allergy" as two choices, not "Gluten, nuts".',
+                        ] as $goodLine)
+                            <li class="es-form-muted flex gap-3 text-sm">
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>{{ $goodLine }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="es-form-card flex h-full flex-col p-7" data-reveal="panel">
+                    <p class="es-form-tag mb-3">Data you do not need</p>
+                    <h3 class="es-form-ink mb-4 text-lg font-bold">What not to ask</h3>
+                    <ul class="space-y-3">
+                        @foreach ([
+                            'Card numbers, passwords or identity numbers. Payment happens with the payment provider, never in a form field.',
+                            'A date of birth when "Are you 18 or over?" settles it. Collect the fact you need, not the record that proves it.',
+                            'Health details beyond what the event must plan for. "Any access needs we should plan for?" is enough. Allergy and access answers are sensitive, and in many places health information carries stricter rules.',
+                            'Anything you would not want published. On a schedule field, On event page prints the answer for every visitor, Show as filter lists its values, and every schedule field that is not Private is matched by the search on your schedule page, so keep those for facts about the event and mark a field Private when it is for your team only.',
+                            'Questions "just in case". Every answer is data you are responsible for keeping safe, and the one you never collected cannot leak.',
+                        ] as $notLine)
+                            <li class="es-form-muted flex gap-3 text-sm">
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                <span>{{ $notLine }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="es-form-muted mt-auto pt-5 text-xs">
+                        Who reads the answers: the owners and admins of the event's schedule, and of a venue or talent schedule that has accepted the event, see orders and what was answered on them, a viewer sees no sales, and each buyer sees their own answers on their ticket page.
+                    </p>
+                </div>
+            </div>
+
+            <div class="es-form-card mt-8 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-form-ink mb-5 text-lg font-bold">Four mistakes that only show up on the day</h3>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    @foreach ([
+                        ['A required Yes / No used as a waiver', 'At checkout a Yes / No field is a menu of Yes and No, so required means answered, not agreed. A buyer can choose No and still check out, so read the No answers before the event.'],
+                        ['Once per order when you needed every guest', 'One buyer answers for a party of six and you get one meal choice. Turn on Individual tickets and Collect ticket fields per guest before sales open.'],
+                        ['A question added after sales open', 'Orders placed before it have no answer to it. Settle the questions before the first sale, or plan to contact the early buyers.'],
+                        ['Free text for something you will count', 'Fifty slightly different spellings of five answers. If the answer has a short list of possibilities, make it a dropdown.'],
+                    ] as [$mistakeTitle, $mistakeBody])
+                        <div class="es-form-well flex h-full flex-col p-5">
+                            <h4 class="es-form-ink mb-2 text-base font-bold">{{ $mistakeTitle }}</h4>
+                            <p class="es-form-muted text-sm leading-relaxed">{{ $mistakeBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 8. Ten slots                                                 -->
     <!-- ============================================================ -->
-    <section id="slots" class="scroll-mt-24 py-20 lg:py-28">
+    <section id="slots" class="scroll-mt-24 es-form-hr py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_7}</span></div>
@@ -1298,10 +1442,10 @@
                     <div class="es-tilt-inner es-form-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
-                                <h3 class="es-form-ink text-xl font-bold">On the door</h3>
-                                <span class="es-form-plan es-form-plan-pro">Pro</span>
+                                <h3 class="es-form-ink text-xl font-bold">On the ticket</h3>
+                                <span class="es-form-plan">Free</span>
                             </div>
-                            <p class="es-form-muted">The answers a buyer gave are printed on their ticket, so whoever is scanning reads the same course choice or access note that you do.</p>
+                            <p class="es-form-muted">The answers a buyer gave are listed on their ticket page, under Details, so a guest can show the door the course choice or access note they gave you. The door scanner itself shows the order, not the answers.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
