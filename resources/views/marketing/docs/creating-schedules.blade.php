@@ -826,7 +826,7 @@
 
         <!-- Fan Content Tab -->
         <h3 id="engagement-fan-content" class="doc-subheading">Fan Content</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Let people who were there add to the event afterwards. Each kind has its own switch, all three are off until you turn them on, and nothing a visitor sends appears in public until you approve it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Let people who were there add to the event afterwards. Each kind has its own switch, all three are on for a new schedule until you turn them off, and nothing a visitor sends appears in public until you approve it.</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Comments</h4>

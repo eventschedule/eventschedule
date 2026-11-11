@@ -1671,7 +1671,7 @@
                                 'Print the QR code from your schedule\'s Followers tab for the merch table: a scan opens your page with the sign-up form ready.',
                             ]],
                             ['After', 'The next morning', 'Let the fans post the show', [
-                                'Switch on fan content in your schedule\'s Engagement settings, and fans\' clips and photos wait for your approval before they appear on the event.',
+                                'With fan content on, the default in your schedule\'s Engagement settings, fans\' clips and photos wait for your approval before they appear on the event.',
                                 'Each social link on your schedule has a short address, like your-band.eventschedule.com/instagram, that counts its clicks, so you can see which post sent people.',
                                 'If a later date moves, change it on the event. For a one-time show, saving asks whether to tell the people who bought or asked to hear about it.',
                             ]],
