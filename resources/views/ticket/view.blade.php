@@ -362,6 +362,9 @@
 
                   $ticketDiscountTotal = $sale->isRsvp() ? 0 : $sale->legTotalDiscount();
                   $ticketGiftCardTotal = $sale->isRsvp() ? 0 : $sale->legTotalGiftCard();
+                  // What the buyer chose to give, inside the total like on the receipt. On the
+                  // order's first row only, so a guest's own ticket shows none.
+                  $ticketDonation = $sale->isRsvp() ? 0 : (float) $sale->donation_amount;
               @endphp
               @if ($sale->isRsvp() || $regularTickets->count() > 0)
               <div class="gk-tk-fact">
@@ -387,11 +390,14 @@
               @endif
             </dl>
 
-            @if ($ticketDiscountTotal > 0 || $ticketGiftCardTotal > 0)
+            @if ($ticketDiscountTotal > 0 || $ticketGiftCardTotal > 0 || $ticketDonation > 0)
               <div class="gk-tk-sec">
                 <ul class="gk-tk-rows">
                   @if ($ticketDiscountTotal > 0)
                     <li class="gk-tk-row gk-tk-good"><span class="gk-tk-good">{{ __('messages.discount') }}@if ($sale->promoCode) (<bdi>{{ $sale->promoCode->code }}</bdi>)@endif</span><span><bdi>-{{ \App\Utils\MoneyUtils::format($ticketDiscountTotal, $event->ticket_currency_code) }}</bdi></span></li>
+                  @endif
+                  @if ($ticketDonation > 0)
+                    <li class="gk-tk-row"><span>{{ __('messages.donation') }}</span><span><bdi>{{ \App\Utils\MoneyUtils::format($ticketDonation, $event->ticket_currency_code) }}</bdi></span></li>
                   @endif
                   @if ($ticketGiftCardTotal > 0)
                     <li class="gk-tk-row gk-tk-good"><span class="gk-tk-good">{{ __('messages.gift_card') }}</span><span><bdi>-{{ \App\Utils\MoneyUtils::format($ticketGiftCardTotal, $event->ticket_currency_code) }}</bdi></span></li>

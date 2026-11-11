@@ -568,6 +568,13 @@
                     var ticketsNet = Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount);
                     return Math.max(this.donationMinWithTickets, this.donationLimits[0] - ticketsNet);
                 },
+                // Something typed under Other that is not an amount: said, never quietly taken as
+                // no donation, or a buyer who typed what they meant to give pays nothing and thinks
+                // they gave.
+                donationUnreadable() {
+                    return this.donationChoice === 'other' && this.donationCustom
+                        && String(this.donationOther || '').trim() !== '' && isNaN(this.parseDonation(this.donationOther));
+                },
                 donationOutOfRange() {
                     return this.donationAmount > 0 && (this.donationAmount < this.donationMinimum || this.donationAmount > this.donationLimits[1]);
                 },
@@ -725,8 +732,16 @@
                 // "1.000" are a thousand where the currency has no decimals or three digits follow the
                 // only separator; "5,50" is five and a half.
                 parseDonation(text) {
-                    var value = String(text || '').trim().replace(/[\s\u00a0']/g, '');
-                    if (value === '') return NaN;
+                    // "$5", "5 €", "kr. 50" and "5,-" are what they say: text before and after the
+                    // number is dropped, never text inside it, and a separator that belongs to a
+                    // word ("kr.") is not a decimal point. A minus anywhere else is refused.
+                    var value = String(text || '').trim().replace(/[.,]-$/, '');
+                    if (value.indexOf('-') !== -1) return NaN;
+                    var lead = (value.match(/^[^0-9]*/) || [''])[0];
+                    var keep = /[.,]$/.test(lead) && ! /\p{L}[.,]$/u.test(lead) ? lead.slice(-1) : '';
+                    value = keep + value.slice(lead.length);
+                    value = value.replace(/[^0-9]+$/, '').replace(/[\s\u00a0']/g, '');
+                    if (value === '' || /[^0-9.,]/.test(value)) return NaN;
                     var lastComma = value.lastIndexOf(','), lastDot = value.lastIndexOf('.');
                     var decimalAt = Math.max(lastComma, lastDot);
                     if (decimalAt !== -1) {
@@ -738,7 +753,7 @@
                             value = value.slice(0, decimalAt).replace(/[.,]/g, '') + '.' + value.slice(decimalAt + 1);
                         }
                     }
-                    return /^\d+(\.\d+)?$/.test(value) ? parseFloat(value) : NaN;
+                    return /^(\d+(\.\d+)?|\.\d+)$/.test(value) ? parseFloat(value) : NaN;
                 },
                 validateForm(e) {
                     // The button carries aria-disabled rather than disabled, so the submit still
@@ -757,7 +772,7 @@
                         return;
                     }
                     // A donation the server would refuse: said here, beside the amount, not after a trip.
-                    if (this.donationOutOfRange) {
+                    if (this.donationOutOfRange || this.donationUnreadable) {
                         e.preventDefault();
                         const other = document.getElementById('donation-other');
                         if (other) { other.focus(); other.scrollIntoView({ block: 'center' }); }
@@ -1997,10 +2012,11 @@
             <div v-if="donationChoice === 'other' && donationCustom" class="mt-2 flex items-center gap-2 max-w-[12rem]">
                 <span class="text-sm text-gray-600 dark:text-gray-400" aria-hidden="true">{{ \App\Utils\MoneyUtils::symbol($event->ticket_currency_code) }}</span>
                 <input id="donation-other" type="text" inputmode="decimal" v-model="donationOther" aria-label="{{ __('messages.donation_other_amount') }}"
-                    :aria-invalid="donationOutOfRange ? 'true' : 'false'" aria-describedby="donation-range"
+                    :aria-invalid="(donationOutOfRange || donationUnreadable) ? 'true' : 'false'" aria-describedby="donation-range"
                     class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-sm">
             </div>
-            <p id="donation-range" v-if="donationOutOfRange" role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">@{{ @json(__('messages.donation_out_of_range')).replace(':min', formatPrice(donationMinimum)).replace(':max', formatPrice(donationLimits[1])) }}</p>
+            <p id="donation-range" v-if="donationUnreadable" role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">@lang('messages.donation_unreadable')</p>
+            <p v-else-if="donationOutOfRange" id="donation-range" role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">@{{ @json(__('messages.donation_out_of_range')).replace(':min', formatPrice(donationMinimum)).replace(':max', formatPrice(donationLimits[1])) }}</p>
             <p v-if="donationAmount > 0 && cartEligible" class="mt-2 text-xs text-gray-500 dark:text-gray-400">@lang('messages.donation_no_cart')</p>
             <input type="hidden" name="donation_amount" :value="donationAmount > 0 ? donationAmount.toFixed(currencyDecimals) : ''">
         </div>

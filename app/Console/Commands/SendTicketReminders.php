@@ -142,7 +142,9 @@ class SendTicketReminders extends Command
     }
 
     /**
-     * The sales this command would ever mail, as SQL: paid, live, not reminded yet, not imported,
+     * The sales this command would ever mail, as SQL: paid (or a "pay the organizer" order, which
+     * stays unpaid until it is paid at the door, and is as much a seat as a paid one), live, not
+     * reminded yet, not imported,
      * with an address that is not a test one, and not a season pass. Shared by the occurrence list,
      * the per-occurrence fetch and the interest list's stand-down (SendEventInterestMail, which asks
      * whether a reminder WILL go, so it leaves the "not reminded yet" condition out), so a row that
@@ -150,7 +152,8 @@ class SendTicketReminders extends Command
      */
     public static function remindable($query, bool $unremindedOnly = true)
     {
-        return $query->where('sales.status', 'paid')
+        return $query->where(fn ($q) => $q->where('sales.status', 'paid')
+            ->orWhere(fn ($q) => $q->where('sales.status', 'unpaid')->where('sales.payment_method', 'cash')))
             ->where('sales.is_deleted', false)
             ->when($unremindedOnly, fn ($q) => $q->whereNull('sales.reminder_sent_at'))
             ->where(fn ($q) => $q->whereNull('sales.payment_method')->orWhere('sales.payment_method', '!=', 'import'))
@@ -189,9 +192,10 @@ class SendTicketReminders extends Command
             return null;
         }
 
-        // A recurring event's sale keeps the date it was bought for; the owner may since have
-        // skipped that date or ended the series.
-        if ($event->days_of_week && ! $event->matchesDate($date)) {
+        // A sale keeps the date it was bought for; the owner may since have skipped that date,
+        // ended the series, or turned the series into a one-off on another day. Asked of every
+        // event: matchesDate() reads a one-off's (and a multi-day event's) own days too.
+        if (! $event->matchesDate($date)) {
             return null;
         }
 
@@ -245,7 +249,8 @@ class SendTicketReminders extends Command
             ->where('sales.event_date', $date)
             // Bought before the reminder was due: a ticket bought two hours before the doors open
             // has its receipt, and a "see you soon" an hour later says nothing new.
-            ->where('sales.created_at', '<', $moment)
+            // created_at is written on the app's clock, $moment is UTC: compared on the same one.
+            ->where('sales.created_at', '<', $moment->copy()->setTimezone(config('app.timezone')))
             ->with(['installmentPlan'])
             ->orderBy('sales.id')
             ->limit($budget - $this->queued)

@@ -8155,4 +8155,5 @@ return [
     'promoter_edit_for' => 'עריכת :name',
     'promoter_archive_for' => 'העברת :name לארכיון',
     'promoter_restore_for' => 'שחזור :name',
+    'donation_unreadable' => 'הזינו סכום במספרים, למשל 10.',
 ];

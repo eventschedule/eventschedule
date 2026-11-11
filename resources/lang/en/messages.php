@@ -8228,4 +8228,5 @@ return [
     'promoter_edit_for' => 'Edit :name',
     'promoter_archive_for' => 'Archive :name',
     'promoter_restore_for' => 'Restore :name',
+    'donation_unreadable' => 'Enter an amount as a number, for example 10.',
 ];

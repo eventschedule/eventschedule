@@ -8157,4 +8157,5 @@ return [
     'promoter_edit_for' => 'Muuda: :name',
     'promoter_archive_for' => 'Arhiveeri: :name',
     'promoter_restore_for' => 'Taasta: :name',
+    'donation_unreadable' => 'Sisesta summa numbrina, näiteks 10.',
 ];

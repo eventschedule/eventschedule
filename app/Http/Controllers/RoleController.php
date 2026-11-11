@@ -3978,6 +3978,9 @@ class RoleController extends Controller
                 'events' => $role->ownEvents()
                     ->with(['roles', 'creatorRole'])
                     ->where(fn ($query) => $query->where('events.tickets_enabled', true)->orWhere('events.rsvp_enabled', true))
+                    // A link a visitor can open: never a draft, nor a cancelled event.
+                    ->where('events.is_draft', false)
+                    ->where('events.is_cancelled', false)
                     ->where(fn ($query) => $query->where('events.starts_at', '>=', now()->subDay())->orWhereNotNull('events.days_of_week'))
                     ->orderBy('events.starts_at')
                     ->limit(50)

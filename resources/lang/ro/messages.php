@@ -8176,4 +8176,5 @@ return [
     'promoter_edit_for' => 'Editează :name',
     'promoter_archive_for' => 'Arhivează :name',
     'promoter_restore_for' => 'Restaurează :name',
+    'donation_unreadable' => 'Introdu o sumă ca număr, de exemplu 10.',
 ];

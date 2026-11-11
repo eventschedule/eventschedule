@@ -8158,4 +8158,5 @@ return [
     'promoter_edit_for' => 'Изменить :name',
     'promoter_archive_for' => 'В архив: :name',
     'promoter_restore_for' => 'Восстановить :name',
+    'donation_unreadable' => 'Введите сумму числом, например 10.',
 ];

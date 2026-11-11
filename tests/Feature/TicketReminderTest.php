@@ -433,4 +433,47 @@ class TicketReminderTest extends TestCase
 
         $this->assertSame(0, Sale::count(), 'the preview stores nothing');
     }
+
+    /** "Pay the organizer" leaves an order unpaid until the door: it holds a seat, and is reminded. */
+    public function test_an_order_to_pay_at_the_door_is_reminded(): void
+    {
+        $event = $this->eventStartingIn(20);
+        $cash = $this->sale($event, ['status' => 'unpaid', 'payment_method' => 'cash']);
+        $this->sale($event, ['status' => 'expired', 'payment_method' => 'cash']);
+        $this->sale($event, ['status' => 'unpaid', 'payment_method' => 'stripe']);
+
+        $this->sendReminders();
+
+        $this->assertSame([$cash->email], $this->remindedEmails());
+    }
+
+    /** A sale whose date the event no longer has (a series made a one-off on another day) is not told a wrong day. */
+    public function test_a_sale_for_a_date_the_event_no_longer_has_is_not_reminded(): void
+    {
+        // The event is the day after tomorrow; a row still carries tomorrow, a date it no longer
+        // has (a series made a one-off without its start changing). Tomorrow's reminder is due now.
+        $event = $this->eventStartingIn(44);
+        $stale = $this->sale($event, ['event_date' => now()->addHours(20)->format('Y-m-d')]);
+
+        $this->sendReminders();
+
+        $this->assertSame([], $this->remindedEmails(), 'never "tomorrow" for a night that is not on');
+        $this->assertNull($stale->fresh()->reminder_sent_at);
+    }
+
+    public function test_moving_an_event_to_another_time_the_same_day_reminds_again(): void
+    {
+        $event = $this->eventStartingIn(20);
+        $sale = $this->sale($event);
+        $this->sendReminders();
+
+        $event->starts_at = Carbon::parse($event->starts_at)->addHours(2)->format('Y-m-d H:i:s');
+        $event->save();
+
+        $this->assertSame(Carbon::parse($event->starts_at)->format('Y-m-d'), $sale->fresh()->event_date, 'the same day');
+        $this->assertNull($sale->fresh()->reminder_sent_at, 'the reminder said the old time');
+
+        $this->sendReminders();
+        $this->assertSame([$sale->email, $sale->email], $this->remindedEmails());
+    }
 }

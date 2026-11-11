@@ -792,12 +792,12 @@ class Sale extends Model
         $data->donation_amount = $this->donation_amount !== null && (! $this->group_id || $this->isPrimarySale())
             ? (float) $this->donation_amount
             : null;
+        // The promoter link the buyer arrived through, as the id the Promoters tab knows it by.
+        $data->promoter_link_id = $this->promoter_link_id ? UrlUtils::encodeId($this->promoter_link_id) : null;
         // Rows a buyer paid for in one checkout that spanned several events share this. Exposed as
         // its own field rather than by widening payment_amount: the primary/guest contract above
         // is what stops a subscriber double-counting, and inflating a leg primary's total to the
         // order's would break it for anyone summing across an order.
-        // The promoter link the buyer arrived through, as the id the Promoters tab knows it by.
-        $data->promoter_link_id = $this->promoter_link_id ? UrlUtils::encodeId($this->promoter_link_id) : null;
         $data->order_id = $this->order_id ? UrlUtils::encodeId($this->order_id) : null;
         $data->is_order_primary = $this->isOrderPrimary();
 

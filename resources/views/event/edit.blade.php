@@ -4258,9 +4258,13 @@
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.donation_suggested_amounts_help') }}</p>
                                             <x-input-error class="mt-2" :messages="$errors->get('donation_amounts.*')" />
                                         </div>
-                                        <div class="flex items-center">
-                                            <input type="checkbox" id="donation_custom_checkbox" :checked="event.donation_custom" @change="event.donation_custom = $event.target.checked" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                            <label for="donation_custom_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.donation_custom') }}</label>
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 flex-shrink-0 cursor-pointer">
+                                                <input id="donation_custom_checkbox" type="checkbox" :checked="event.donation_custom" @change="event.donation_custom = $event.target.checked" class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="donation_custom_checkbox" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.donation_custom') }}</label>
                                         </div>
                                         <div class="max-w-md">
                                             <x-input-label for="donation_line" :value="__('messages.donation_line')" />
@@ -9894,8 +9898,10 @@
       donationGatewayOk() {
         return @json(\App\Models\Event::DONATION_GATEWAYS).indexOf(this.event.payment_method) !== -1;
       },
+      // The amounts checkout offers when none are typed, for the currency chosen on this page.
       donationPlaceholders() {
-        return @json(\App\Models\Event::defaultDonationAmounts($event->ticket_currency_code ?: 'USD'));
+        const defaults = @json(\App\Models\Event::allDefaultDonationAmounts());
+        return defaults[String(this.event.ticket_currency_code || 'USD').toUpperCase()] || defaults.USD;
       },
       // EventRepo::saveEvent() turns Individual tickets off when any ticket type is a pass.
       hasPassTicket() {

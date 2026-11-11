@@ -8156,4 +8156,5 @@ return [
     'promoter_edit_for' => 'Editar :name',
     'promoter_archive_for' => 'Archivar :name',
     'promoter_restore_for' => 'Restaurar :name',
+    'donation_unreadable' => 'Escribe un importe en números, por ejemplo 10.',
 ];

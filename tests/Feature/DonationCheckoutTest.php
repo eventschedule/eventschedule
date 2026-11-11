@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\TicketPurchase;
 use App\Models\Event;
+use App\Models\GiftCard;
 use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
@@ -360,5 +361,64 @@ class DonationCheckoutTest extends TestCase
 
         $this->assertSame(0, Sale::count());
         $this->assertSame(0, (int) PromoCode::where('code', 'FREE')->value('times_used'), 'the promo code is not spent');
+    }
+
+    /** A partial gift card cannot lift an order under the gateway's minimum; one that pays it all can. */
+    public function test_a_gift_card_that_pays_only_part_cannot_leave_a_donation_under_the_minimum(): void
+    {
+        config(['services.stripe_platform.secret' => 'sk_test_donation_minimum']);
+        [$role, $event] = $this->donationEvent(['payment_method' => 'stripe']);
+        $event->user->forceFill(['stripe_account_id' => 'acct_donation_minimum', 'stripe_completed_at' => now()])->save();
+        $event = $event->fresh();
+        $ticket = $this->createTicket($event, ['price' => 10, 'quantity' => 100]);
+        PromoCode::create(['event_id' => $event->id, 'code' => 'FREE', 'type' => 'percentage', 'value' => 100, 'is_active' => true]);
+        $card = new GiftCard;
+        $card->forceFill(['role_id' => $role->id, 'code' => GiftCard::generateCode(), 'secret' => 'secret-'.uniqid(), 'amount' => 1,
+            'remaining_amount' => 0.10, 'currency_code' => 'USD', 'status' => 'active', 'payment_method' => 'cash', 'activated_at' => now(),
+            'purchaser_name' => 'Alice', 'purchaser_email' => 'alice@guests.org', 'recipient_name' => 'Bob', 'recipient_email' => 'bob@guests.org'])->save();
+
+        $this->checkout($role, $event, $ticket, 1, ['donation_amount' => '0.20', 'promo_code' => 'FREE', 'gift_card_code' => $card->code])
+            ->assertSessionHas('error');
+        $this->assertSame(0, Sale::count());
+        $this->assertEquals(0.10, (float) $card->fresh()->remaining_amount, 'the card is untouched');
+
+        // The card pays the whole of it: nothing to charge, nothing for the gateway to refuse.
+        $card->forceFill(['remaining_amount' => 5])->save();
+        $this->checkout($role, $event, $ticket, 1, ['donation_amount' => '0.20', 'promo_code' => 'FREE', 'gift_card_code' => $card->code]);
+        $sale = Sale::where('email', 'dana@guests.org')->firstOrFail();
+        $this->assertSame(0.0, (float) $sale->payment_amount);
+        $this->assertSame(0.2, (float) $sale->donation_amount);
+    }
+
+    /** "$5" is five dollars, on the owner's form and at checkout alike; never a donation quietly dropped. */
+    public function test_an_amount_with_its_symbol_is_read_and_one_that_is_not_an_amount_is_said(): void
+    {
+        $this->assertSame(5.0, Event::parseMoneyText('$5', 2));
+        $this->assertSame(5.0, Event::parseMoneyText('5 €', 2));
+        $this->assertSame(0.5, Event::parseMoneyText('.5', 2));
+        $this->assertSame(50.0, Event::parseMoneyText('kr. 50', 2), 'the dot of "kr." is not a decimal point');
+        $this->assertSame(5.0, Event::parseMoneyText('5,-', 2));
+        $this->assertNull(Event::parseMoneyText('-5', 2));
+        $this->assertNull(Event::parseMoneyText('five', 2));
+
+        [$role, $event] = $this->donationEvent();
+        $this->createTicket($event, ['price' => 0, 'quantity' => 100]);
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
+
+        $this->assertStringContainsString('donationUnreadable()', $html);
+        $this->assertStringContainsString('if (this.donationOutOfRange || this.donationUnreadable)', $html, 'checkout stops on it');
+        $this->assertStringContainsString(e(__('messages.donation_unreadable')), $html);
+        $this->assertStringContainsString("var value = String(text || '').trim().replace(/[.,]-$/, '');", $html, 'the page reads an amount as parseMoneyText() does');
+    }
+
+    public function test_the_buyers_ticket_page_shows_the_donation(): void
+    {
+        [$role, $event] = $this->donationEvent();
+        $ticket = $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+        $sale = $this->createSale($event, $role, ['email' => 'a@guests.org', 'payment_amount' => 25, 'donation_amount' => 5], $ticket, 1);
+
+        $html = $this->get(route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]))->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('/'.preg_quote(__('messages.donation'), '/').'<\/span><span><bdi>\$5<\/bdi>/', $html);
     }
 }

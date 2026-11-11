@@ -8155,4 +8155,5 @@ return [
     'promoter_edit_for' => 'Modifica :name',
     'promoter_archive_for' => 'Archivia :name',
     'promoter_restore_for' => 'Ripristina :name',
+    'donation_unreadable' => 'Inserisci un importo in cifre, per esempio 10.',
 ];

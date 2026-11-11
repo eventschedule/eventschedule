@@ -390,4 +390,53 @@ class PromoterLinkTest extends TestCase
         $this->post(route('role.promoters.archive', ['subdomain' => $role->subdomain, 'hash' => $hash]));
         $this->assertTrue($link->fresh()->isArchived(), 'tidying up stays open');
     }
+
+    /**
+     * Any page on the platform shares the session, and a description may carry an image. An
+     * <img src="...?via=me"> must not make every reader's purchases a promoter's.
+     */
+    public function test_only_a_page_the_visitor_went_to_counts(): void
+    {
+        [$role, $event, $link] = $this->setUpSchedule();
+        $ticket = $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+
+        $this->withHeaders(['Sec-Fetch-Dest' => 'image', 'Sec-Fetch-Mode' => 'no-cors'])
+            ->get(route('role.view_guest', ['subdomain' => $role->subdomain]).'?via=sam');
+        $this->assertSame(0, $link->fresh()->clicks);
+        $this->assertNull($link->fresh()->first_click_at, 'nor is the code locked');
+
+        $this->withHeaders(['Sec-Fetch-Dest' => '', 'Sec-Fetch-Mode' => ''])->checkout($role, $event, $ticket);
+        $this->assertNull(Sale::where('email', 'dana@guests.org')->value('promoter_link_id'), 'and nothing was remembered');
+
+        $this->withHeaders(['Sec-Fetch-Dest' => 'document', 'Sec-Fetch-Mode' => 'navigate'])
+            ->get(route('role.view_guest', ['subdomain' => $role->subdomain]).'?via=sam')->assertOk();
+        $this->assertSame(1, $link->fresh()->clicks, 'a visit is');
+    }
+
+    public function test_a_draft_or_cancelled_event_is_never_offered_as_a_target_and_archived_links_leave_room(): void
+    {
+        [$role, $event] = $this->setUpSchedule();
+        $draft = $this->createEvent($role, ['name' => 'Hidden draft night', 'is_draft' => true, 'tickets_enabled' => true, 'creator_role_id' => $role->id]);
+        $cancelled = $this->createEvent($role, ['name' => 'Called off night', 'is_cancelled' => true, 'tickets_enabled' => true, 'creator_role_id' => $role->id]);
+        $owner = $role->users()->first();
+
+        $html = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'promoters']))->assertOk()->getContent();
+        $this->assertStringContainsString(e($event->name), $html);
+        $this->assertStringNotContainsString('Hidden draft night', $html);
+        $this->assertStringNotContainsString('Called off night', $html);
+
+        // Full of live links: refused. Archive one, and there is room again.
+        foreach (range(2, PromoterLinks::MAX_LINKS) as $n) {
+            PromoterLink::create(['role_id' => $role->id, 'name' => 'P'.$n, 'code' => 'p'.$n]);
+        }
+        $this->post(route('role.promoters.store', ['subdomain' => $role->subdomain]), ['name' => 'One more'])->assertSessionHas('error');
+        PromoterLink::where('code', 'p2')->update(['archived_at' => now()]);
+        $this->post(route('role.promoters.store', ['subdomain' => $role->subdomain]), ['name' => 'One more'])->assertSessionHasNoErrors();
+        $this->assertTrue(PromoterLink::where('name', 'One more')->exists());
+
+        // Full again: bringing the archived one back would be one too many.
+        $p2 = PromoterLink::where('code', 'p2')->firstOrFail();
+        $this->post(route('role.promoters.restore', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($p2->id)]))->assertSessionHas('error');
+        $this->assertTrue($p2->fresh()->isArchived());
+    }
 }

@@ -210,7 +210,7 @@
             Troubleshooting
         </h2>
         <h3 class="doc-subheading">No button appears</h3>
-        <p>All of the pass type id, the team id and a certificate that opens with its password must be set; one missing, an expired or mismatched certificate and key, or a missing <code class="doc-inline-code">zip</code> or <code class="doc-inline-code">openssl</code> extension keeps the feature off without an error. Check the values, then see <a href="#setup-certificate" class="doc-link">A .p12 that will not open</a>. The ticket must also be eligible (see <a href="#overview" class="doc-link">Overview</a>).</p>
+        <p>All of the pass type id, the team id and a certificate that opens with its password must be set; one missing, an expired or mismatched certificate and key, or a missing <code class="doc-inline-code">zip</code> or <code class="doc-inline-code">openssl</code> extension keeps the feature off: nothing is shown to buyers, and the app's log (<code class="doc-inline-code">storage/logs/laravel.log</code>) says which one, in a warning that starts <code class="doc-inline-code">Apple Wallet:</code> and is written at most once an hour. Check the values, then see <a href="#setup-certificate" class="doc-link">A .p12 that will not open</a>. The ticket must also be eligible (see <a href="#overview" class="doc-link">Overview</a>).</p>
 
         <h3 class="doc-subheading">The iPhone says the pass cannot be added</h3>
         <p>The pass type id or team id does not match the certificate, or the certificate was made for another Pass Type ID. Wallet checks that the signature, the pass type id and the team id all belong together.</p>

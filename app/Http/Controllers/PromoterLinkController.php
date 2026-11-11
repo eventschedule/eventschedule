@@ -69,7 +69,9 @@ class PromoterLinkController extends Controller
             return $this->tab($role)->with('error', __('messages.not_authorized'));
         }
 
-        if (PromoterLink::where('role_id', $role->id)->count() >= PromoterLinks::MAX_LINKS) {
+        // Live links: an archived one cannot be deleted (its sales point at it), so counting it
+        // would close the schedule for good once it had sold through two hundred promoters.
+        if (PromoterLink::where('role_id', $role->id)->whereNull('archived_at')->count() >= PromoterLinks::MAX_LINKS) {
             return $this->tab($role)->with('error', __('messages.promoter_links_limit', ['count' => PromoterLinks::MAX_LINKS]));
         }
 
@@ -157,6 +159,11 @@ class PromoterLinkController extends Controller
 
         if (! $role->isPro()) {
             return $this->tab($role)->with('error', __('messages.not_authorized'));
+        }
+
+        // The cap counts live links, so bringing one back is adding one.
+        if (PromoterLink::where('role_id', $role->id)->whereNull('archived_at')->count() >= PromoterLinks::MAX_LINKS) {
+            return $this->tab($role)->with('error', __('messages.promoter_links_limit', ['count' => PromoterLinks::MAX_LINKS]));
         }
 
         $link = $this->link($role, $hash);

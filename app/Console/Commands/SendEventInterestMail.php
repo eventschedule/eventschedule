@@ -352,7 +352,8 @@ class SendEventInterestMail extends Command
             $this->ticketHolders[$key] = array_flip(SendTicketReminders::remindable(Sale::query(), unremindedOnly: false)
                 ->where('sales.event_id', $interest->event_id)
                 ->when($interest->event_date, fn ($q) => $q->where('sales.event_date', $interest->event_date))
-                ->where('sales.created_at', '<', $moment)
+                // created_at is on the app's clock, as SendTicketReminders compares it.
+                ->where('sales.created_at', '<', $moment->copy()->setTimezone(config('app.timezone')))
                 ->with('installmentPlan')
                 ->get()
                 ->reject(fn (Sale $sale) => $sale->isInstallmentDelinquent())

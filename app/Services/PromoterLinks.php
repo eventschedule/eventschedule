@@ -89,6 +89,16 @@ class PromoterLinks
             return;
         }
 
+        // Only a page the visitor went to. Any page on the platform shares this session, and a
+        // description may carry an image: <img src="...?via=me"> on a page a promoter can edit
+        // would otherwise set every reader's last link to theirs (and count them all as clicks).
+        // A browser says what a request is for; one that says nothing is let through, as before.
+        $dest = strtolower((string) $request->header('Sec-Fetch-Dest'));
+        $mode = strtolower((string) $request->header('Sec-Fetch-Mode'));
+        if (($dest !== '' && ! in_array($dest, ['document', 'iframe'], true)) || ($mode !== '' && $mode !== 'navigate')) {
+            return;
+        }
+
         $link = PromoterLink::where('role_id', $role->id)->where('code', $code)->whereNull('archived_at')->first();
 
         if (! $link) {

@@ -8156,4 +8156,5 @@ return [
     'promoter_edit_for' => 'تعديل :name',
     'promoter_archive_for' => 'أرشفة :name',
     'promoter_restore_for' => 'استعادة :name',
+    'donation_unreadable' => 'أدخل المبلغ بالأرقام، مثل 10.',
 ];

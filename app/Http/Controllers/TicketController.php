@@ -2065,12 +2065,15 @@ class TicketController extends Controller
             // checkout() waived the gateway's minimum for a donation beside a priced ticket, from
             // list prices. A promo code can still bring the tickets to nothing, and then the
             // donation alone is the charge: it must reach the minimum, or the gateway refuses the
-            // order after the seats are held. With a gift card the draw below keeps that rule.
-            if ($donation > 0 && ! $giftCard) {
+            // order after the seats are held. A gift card that pays the whole of it leaves nothing
+            // to charge, which is fine; one that pays only part cannot help, since the draw below
+            // can only leave the minimum or nothing, and an order under the minimum has neither.
+            if ($donation > 0) {
                 $ticketsNet = max(0, $subtotalAfterVolume - $discountTotal);
                 $minCharge = (float) (payment_gateways()->get($event->payment_method)
                     ?->amountLimits($event->ticket_currency_code ?: 'USD')[0] ?? 0);
-                if ($ticketsNet + $donation < $minCharge) {
+                $coveredByCard = $giftCard && (float) $giftCard->remaining_amount >= $ticketsNet + $donation;
+                if ($ticketsNet + $donation < $minCharge && ! $coveredByCard) {
                     throw new BusinessException(__('messages.donation_out_of_range', [
                         'min' => \App\Utils\MoneyUtils::format($minCharge - $ticketsNet, $event->ticket_currency_code),
                         'max' => \App\Utils\MoneyUtils::format($event->donationLimits()[1], $event->ticket_currency_code),

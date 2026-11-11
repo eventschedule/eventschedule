@@ -617,10 +617,10 @@ class Event extends Model
                         });
 
                         $model->sales->each(function ($sale) use ($newDate) {
-                            // A reminder sent for the old day said the wrong day, so the holder is
-                            // reminded again for the new one (app:send-ticket-reminders). The time
-                            // alone moving within the day changes nothing here.
-                            if ($sale->event_date !== $newDate && $sale->reminder_sent_at) {
+                            // A reminder already sent named the old day or time, so the holder is
+                            // reminded again with the new one (app:send-ticket-reminders): a show
+                            // moved from 8 PM to 10 AM must not leave "tomorrow at 8:00 PM" standing.
+                            if ($sale->reminder_sent_at) {
                                 $sale->reminder_sent_at = null;
                             }
                             $sale->event_date = $newDate;
@@ -3256,8 +3256,18 @@ class Event extends Model
      */
     public static function parseMoneyText(mixed $text, int $decimals): ?float
     {
-        $value = preg_replace("/[\\s\x{00a0}']/u", '', trim((string) $text));
-        if ($value === '' || ! preg_match('/^\d[\d.,]*\d$|^\d$|^[.,]\d+$/', $value)) {
+        // Text before and after the number is dropped, never text inside it, and a separator that
+        // belongs to a word ("kr. 50") is not a decimal point; "5,-" is five. As on the checkout.
+        $value = preg_replace('/[.,]-$/', '', trim((string) $text));
+        if (str_contains($value, '-')) {
+            return null;
+        }
+        preg_match('/^[^0-9]*/u', $value, $lead);
+        $lead = $lead[0] ?? '';
+        $keep = preg_match('/[.,]$/', $lead) && ! preg_match('/\p{L}[.,]$/u', $lead) ? substr($lead, -1) : '';
+        $value = $keep.substr($value, strlen($lead));
+        $value = preg_replace("/[\\s\x{00a0}']/u", '', preg_replace('/[^0-9]+$/u', '', $value));
+        if ($value === '' || preg_match('/[^0-9.,]/', $value) || ! preg_match('/^\d[\d.,]*\d$|^\d$|^[.,]\d+$/', $value)) {
             return null;
         }
 
@@ -3274,6 +3284,12 @@ class Event extends Model
         }
 
         return is_numeric($value) ? round((float) $value, $decimals) : null;
+    }
+
+    /** @return array<string, array<int, int|float>> every currency's default amounts, for the event form */
+    public static function allDefaultDonationAmounts(): array
+    {
+        return self::DONATION_DEFAULTS;
     }
 
     public static function defaultDonationAmounts(?string $currency): array

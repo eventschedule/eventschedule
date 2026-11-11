@@ -8158,4 +8158,5 @@ return [
     'promoter_edit_for' => ':name bewerken',
     'promoter_archive_for' => ':name archiveren',
     'promoter_restore_for' => ':name herstellen',
+    'donation_unreadable' => 'Vul een bedrag in als getal, bijvoorbeeld 10.',
 ];

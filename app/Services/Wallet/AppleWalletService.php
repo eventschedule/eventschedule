@@ -37,11 +37,25 @@ class AppleWalletService
 
     public static function isConfigured(): bool
     {
-        return self::passTypeId() !== ''
-            && self::teamId() !== ''
-            && class_exists(\ZipArchive::class)
-            && function_exists('openssl_pkcs7_sign')
-            && self::credentials() !== null;
+        // Silent until the operator has started setting it up; from then on, what is missing is
+        // said in the log (warn()), never on a page.
+        if (self::passTypeId() === '' || self::teamId() === '') {
+            return false;
+        }
+
+        if (! class_exists(\ZipArchive::class)) {
+            self::warn('the zip extension is not available');
+
+            return false;
+        }
+
+        if (! function_exists('openssl_pkcs7_sign')) {
+            self::warn('the openssl extension is not available');
+
+            return false;
+        }
+
+        return self::credentials() !== null;
     }
 
     /** Whether this sale may be offered as an Apple Wallet pass (the rules are WalletPasses::eligible(), shared with Google). */
@@ -308,7 +322,17 @@ class AppleWalletService
 
     private static function openCredentials(string $source, string $password, string $wwdrSource): ?array
     {
-        if ($source === '' || ! function_exists('openssl_pkcs12_read')) {
+        // Reached only once the pass type id and team id are set, so an empty certificate here is
+        // a setup that is half done, and says so like every other mistake below.
+        if ($source === '') {
+            self::warn('APPLE_WALLET_CERTIFICATE is not set');
+
+            return null;
+        }
+
+        if (! function_exists('openssl_pkcs12_read')) {
+            self::warn('the openssl extension is not available');
+
             return null;
         }
 
