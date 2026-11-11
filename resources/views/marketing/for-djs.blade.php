@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for DJs | Set Times & Residencies</x-slot>
-    <x-slot name="description">Put your DJ set times, residencies and guest spots on one link. Reach fans direct, no promoter middleman, and sell tickets with zero platform fees.</x-slot>
+    <x-slot name="title">Free Event Schedule for DJs | Gigs, Set Times & Residencies</x-slot>
+    <x-slot name="description">One link for every DJ gig: residencies that repeat themselves, set times, guest lists and ticket links, plus a 15-minute weekly routine that keeps it current.</x-slot>
     <x-slot name="breadcrumbTitle">For DJs</x-slot>
 
     <x-slot name="headMeta">
@@ -12,7 +12,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for DJs"
-        description="Put your DJ set times, residencies and guest spots on one link. Reach fans direct, no promoter middleman, and sell tickets with zero platform fees."
+        description="One link for every DJ gig: residencies that repeat themselves, set times, guest lists and ticket links, plus a 15-minute weekly routine that keeps it current."
         audience="DJs"
         keywords="DJ schedule, DJ set times, DJ residency schedule, DJ booking platform, DJ event calendar, DJ gig management, club DJ calendar, DJ link in bio, free DJ scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
@@ -39,7 +39,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Pack the dancefloor",
-                "text": "Fans sign up for email, hear automatically when you're spinning, and show up ready to dance."
+                "text": "Fans sign up for email, hear automatically about the dates you add, and show up ready to dance."
             }
         ]
     }
@@ -1040,6 +1040,39 @@
         .dj-claim span { flex: none; color: #b3bfbc; user-select: none; }
         .dj-out-note { margin-top: 1.25rem; color: #b3bfbc; font-size: 0.95rem; }
 
+        /* ---------------------------------------------------------------
+           05-07 The field guide: plain plates for the reading, and one
+           black display for the week. Built only from the tokens above,
+           so both modes follow. Contrast on --dj-plate-hi: ink-2 9.5
+           light / 8.7 dark, led-ink 6.3 light / 6.9 dark; ink-2 on
+           --dj-plate-2 7.6 / 10.3; on the glass, #b3bfbc 10.3 and
+           #ff7a1a 7.5.
+           --------------------------------------------------------------- */
+        .dj-cards { display: grid; gap: 1.1rem; }
+        @media (min-width: 720px) { .dj-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1040px) { .dj-cards.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; } }
+        .dj-card {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1.5rem 1.4rem;
+            border-radius: 1.1rem;
+            background-color: var(--dj-plate-hi);
+            box-shadow: 0 0 0 1px var(--dj-edge-lo), inset 0 1px 0 var(--dj-edge-hi), 0 1.4rem 2rem -1.4rem rgba(0, 0, 0, 0.45);
+        }
+        .dj-card-tag { font-family: var(--dj-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dj-led-ink); }
+        .dj-card h3 { margin-top: 0.35rem; font-family: var(--dj-display); font-weight: 700; font-size: 1.6rem; line-height: 1.08; }
+        .dj-card p { margin-top: 0.6rem; color: var(--dj-ink-2); font-size: 1rem; }
+        .dj-card .dj-card-foot { margin-top: auto; padding-top: 1rem; }
+        #dj .dj-card a, #dj .dj-note a { color: var(--dj-ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--dj-led); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
+        .dj-note { margin-top: 1.4rem; padding: 1.25rem 1.5rem; border-radius: 1.1rem; background-color: var(--dj-plate-2); box-shadow: inset 0 1px 2px var(--dj-edge-lo), 0 1px 0 var(--dj-edge-hi); color: var(--dj-ink-2); font-size: 1rem; }
+        .dj-note b { color: var(--dj-ink); }
+        .dj-week { padding: 0.6rem clamp(1rem, 3vw, 1.75rem); }
+        .dj-week-row { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 0.25rem 1rem; padding-block: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .dj-week-row:first-child { border-top: 0; }
+        .dj-week-row > b { padding-top: 0.3rem; font-family: var(--dj-mono); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; color: #ff7a1a; }
+        .dj-week-row h3 { font-family: var(--dj-display); font-weight: 700; font-size: 1.35rem; line-height: 1.15; color: #e9f1ec; }
+        .dj-week-row p { margin-top: 0.3rem; color: #b3bfbc; font-size: 1rem; }
+
         @media (prefers-reduced-motion: reduce) {
             .dj-vu i, .dj-bar, .dj-blink, .dj-jog-eye i, .dj-flow i, .dj-wire i { animation: none; }
             .dj-flow i, .dj-wire i { opacity: 1; }
@@ -1346,8 +1379,8 @@
                                     <div class="dj-vu" style="--t: 1.8s;"><i style="--d: -0.6s;"></i><i style="--d: -1.5s;"></i></div>
                                 </div>
                                 <div class="dj-ch-main">
-                                    <h3 data-reveal>Flyers that make themselves</h3>
-                                    <p data-reveal>Auto-generated set-time graphics, sized for stories, RA pages, and the group chat.</p>
+                                    <h3 data-reveal>Your next sets in one image</h3>
+                                    <p data-reveal>One image of your next sets, made from their flyers, in Story, Square or Portrait shape, with a caption to copy beside it for the post or the group chat.</p>
                                     <div class="dj-ch-gap"></div>
                                     <div class="dj-screen dj-oled dj-flyer-ui" aria-hidden="true">
                                         <div class="dj-flyer">
@@ -1358,7 +1391,7 @@
                                         </div>
                                         <div class="dj-flyer-sizes dj-read">
                                             <span><span class="dj-led"></span>Stories</span>
-                                            <span><span class="dj-led" style="--c: #3ddc84;"></span>RA pages</span>
+                                            <span><span class="dj-led" style="--c: #3ddc84;"></span>Posts</span>
                                             <span><span class="dj-led" style="--c: #ffb020;"></span>Group chat</span>
                                         </div>
                                     </div>
@@ -1377,7 +1410,7 @@
                                 </div>
                                 <div class="dj-ch-main">
                                     <h3 data-reveal>Your door, your money</h3>
-                                    <p data-reveal>Advance tickets straight from your schedule. QR check-in at the door. The platform fee is a round number: zero.</p>
+                                    <p data-reveal>Advance tickets straight from your schedule on Pro, and QR check-in at the door on every plan. The platform fee is a round number: zero.</p>
                                     <div class="dj-ch-gap"></div>
                                     <div class="dj-screen dj-oled dj-fee" aria-hidden="true">
                                         <div class="dj-read">Platform fee</div>
@@ -1485,11 +1518,189 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 05. Pads: every type of DJ                                   -->
+        <!-- 05. Track info: what every gig listing needs                 -->
+        <!-- ============================================================ -->
+        @php
+            $djListing = [
+                ['Where', 'Venue and city', 'Name the club and the city, not only the night. "Saturday at Warehouse" means nothing to a fan in another country. Give the venue its address and the event page shows the map.'],
+                ['When you are on', 'Your set time, not just doors', 'Doors at 10 tells nobody you are on at 2. On your own night, start the event at doors and add an Agenda with each set and its time, which the event page lists in order. On someone else\'s night, ask the promoter to add it: theirs is the same event your page shows.'],
+                ['How to get in', 'A ticket link or a guest list', 'Choose one of the three options on the event\'s Tickets tab: Tickets elsewhere with a link to the club\'s own ticket page, free registration for a guest list, or tickets you sell yourself on Pro. A listing with no way in leaves fans to message you, and most will not.'],
+                ['Who else', 'The rest of the lineup', 'Add your b2b partner and the other DJs as participants. Anyone with a schedule is linked from the event page, and once they accept, the night shows on their page too.'],
+                ['The picture', 'The flyer', 'Upload the club\'s flyer to the event. It is the image people already saw in the club\'s posts, and only events with a flyer are drawn in your events graphic.'],
+                ['The small print', 'The door policy', 'Age limit, last entry, cash or card on the door. One line in the description saves somebody a trip across town to be turned away.'],
+            ];
+        @endphp
+        <section class="dj-mod" id="gig-listing" style="scroll-margin-top: 4.5rem;">
+            <div class="dj-wrap">
+                <p class="dj-silk" aria-hidden="true"><b>05</b> Track info <span class="dj-silk-r">6 fields &middot; all filled</span></p>
+                <div class="dj-head">
+                    <h2 class="dj-h2" data-reveal>
+                        A gig page fans <span class="dj-lit">actually use</span>
+                    </h2>
+                    <p class="dj-sub" data-reveal style="--reveal-delay: 0.08s;">
+                        A link in your bio is only as good as the listing behind it. Someone who taps it at midnight wants five answers in three seconds: where, when you are on, how to get in, who else is playing and what it costs.
+                    </p>
+                </div>
+
+                <div class="dj-cards is-3" data-reveal-group="70">
+                    @foreach ($djListing as [$djLsTag, $djLsName, $djLsBody])
+                        <article class="dj-card" data-reveal>
+                            <span class="dj-card-tag">{{ $djLsTag }}</span>
+                            <h3>{{ $djLsName }}</h3>
+                            <p>{{ $djLsBody }}</p>
+                        </article>
+                    @endforeach
+                </div>
+
+                <p class="dj-note" data-reveal>
+                    <b>Running a guest list?</b> Use free registration with a limit, free on every plan. Each name gets a confirmation email with a QR code, the door scans it with any phone, and on a weekly night the limit counts each night on its own, so every Friday has its own 50 places. Selling tickets with a price is Pro, with no platform fee on top of your payment provider's. See <x-link href="{{ marketing_url('/features/registration') }}">free registration</x-link>.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 06. Loop: residencies and one-offs                            -->
+        <!-- ============================================================ -->
+        @php
+            $djLoops = [
+                ['Weekly', 'The residency', 'Every Friday at the same club is one recurring event: Weekly, Friday ticked, end set to Never. Your page always shows the next dates, and a fan subscribed to your calendar feed gets each Friday for the next 90 days.'],
+                ['Every other week', 'Fortnightly, or the first Friday', 'Every N Weeks covers a fortnightly slot. Monthly on the same day of the week covers "first Friday of the month". A pattern one setting cannot say, such as the first and third Friday, is two recurring events, one starting on each.'],
+                ['Gaps', 'A night off, a night extra', 'Away on tour for two Fridays? Add them under Exclude Dates and they drop off your page, rather than showing as cancelled. A bonus bank holiday Sunday goes under Include Dates.'],
+                ['Seasons', 'A summer run, then done', 'A residency for the season ends On Date, and a run of eight ends After Events. Guest spots and festival slots are single events, and sit between the residency dates in date order on the same page.'],
+            ];
+        @endphp
+        <section class="dj-mod" id="residencies" style="scroll-margin-top: 4.5rem;">
+            <div class="dj-wrap">
+                <p class="dj-silk" aria-hidden="true"><b>06</b> Loop <span class="dj-silk-r">Residencies &middot; one-offs</span></p>
+                <div class="dj-head">
+                    <h2 class="dj-h2" data-reveal>
+                        Residencies on loop, <span class="dj-lit">one-offs</span> in between
+                    </h2>
+                    <p class="dj-sub" data-reveal style="--reveal-delay: 0.08s;">
+                        A residency is a regular slot at one club, so it should be entered once and never again. A guest spot is a single date. One page holds both, in the order you play them.
+                    </p>
+                </div>
+
+                <div class="dj-cards" data-reveal-group="70">
+                    @foreach ($djLoops as [$djLpTag, $djLpName, $djLpBody])
+                        <article class="dj-card" data-reveal>
+                            <span class="dj-card-tag">{{ $djLpTag }}</span>
+                            <h3>{{ $djLpName }}</h3>
+                            <p>{{ $djLpBody }}</p>
+                        </article>
+                    @endforeach
+                </div>
+
+                <p class="dj-note" data-reveal>
+                    <b>Who enters the night?</b> If the club adds the residency to its own schedule and names you on it, accept the request once and every date of the series is on your page, with any change the club makes. Enter it yourself only when the night is yours. Every pattern, with the awkward ones worked out, is in the <x-link href="{{ marketing_url('/features/recurring-events') }}#guide">recurring events guide</x-link>.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 07. Routing: getting clubs and promoters to list you         -->
+        <!-- ============================================================ -->
+        @php
+            $djRouting = [
+                ['Be easy to find', 'Give promoters the email address your schedule is under. When they add you to a lineup and type it, your schedule is offered to them as a match to select, so the night lands in your Requests instead of on a second page with your name on it.'],
+                ['Answer the same day', 'A night a club adds you to waits under Requests until you accept it, and only then shows on your link, unless the club had already listed you before you claimed your page. Accepting is one press, and from then on a changed set time on their event is a changed set time on yours.'],
+                ['Claim what is already there', 'If a promoter named you before you had a schedule, a page with your dates already exists. Claim it with the address it carries, and the promoters who added those dates keep listing you.'],
+                ['Let bookers ask properly', 'Switch on Accept requests and your page takes bookings through a form, so a promoter sends a date, a venue and a message instead of a DM that gets buried. Put your set lengths and tech needs in Request Terms, shown at the top of the form. Questions of your own on the form are Pro.'],
+                ['Get on the city guides', 'Local listings run on curator schedules. Follow the guides in your city, then tick them under Default curator schedules, in your schedule\'s Settings under New events. Every new date you add is sent to them to review. Only guides that take requests are offered. A guide can also follow your schedule as an event source and pick up every set by itself.'],
+                ['Share the event, not a screenshot', 'In the group chat, send the event\'s own link rather than a screenshot of the flyer. It carries the time, the map, Add to Calendar and the way in, and it is still right if the set time moves.'],
+            ];
+        @endphp
+        <section class="dj-mod" id="get-listed" style="scroll-margin-top: 4.5rem;">
+            <div class="dj-wrap">
+                <p class="dj-silk" aria-hidden="true"><b>07</b> Routing <span class="dj-silk-r">Clubs &middot; promoters &middot; guides</span></p>
+                <div class="dj-head">
+                    <h2 class="dj-h2" data-reveal>
+                        Get clubs and promoters to <span class="dj-lit">list you</span>
+                    </h2>
+                    <p class="dj-sub" data-reveal style="--reveal-delay: 0.08s;">
+                        The best gig page is one you barely type into, because the people booking you put the dates there. That takes a little setting up on your side.
+                    </p>
+                </div>
+
+                <div class="dj-cards is-3" data-reveal-group="70">
+                    @foreach ($djRouting as $djRtIndex => [$djRtName, $djRtBody])
+                        <article class="dj-card" data-reveal>
+                            <span class="dj-card-tag">Route {{ $djRtIndex + 1 }}</span>
+                            <h3>{{ $djRtName }}</h3>
+                            <p>{{ $djRtBody }}</p>
+                        </article>
+                    @endforeach
+                </div>
+
+                <p class="dj-note" data-reveal>
+                    How booking requests look from your side, and what a promoter fills in, is on the page for <x-link href="{{ marketing_url('/features/booking-requests') }}">booking requests</x-link>.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 08. Clock: keeping it current, and the week                  -->
+        <!-- ============================================================ -->
+        @php
+            $djFeeds = [
+                ['From your calendar', 'Gigs already in Google Calendar', 'Keep one calendar just for gigs, connect it under Integrations and choose From Google Calendar. New entries wait as drafts for you to publish, or switch on Publish new events automatically. Private entries and declined invitations stay off your page. Outlook and CalDAV work the same way, free on every plan.'],
+                ['From a flyer or an email', 'The booking, read for you', 'Open Actions, Import Events and drop in the flyer the club sent, or paste the booking email. The name, date, time and venue are read out for you to check before anything is saved. Free, up to 50 reads a day.'],
+                ['From a club\'s website', 'Their listings page', 'Paste the address of a club\'s events page. A page that carries structured event data is read directly, and others are read by AI. Facebook and Instagram cannot be read from a link, so use a screenshot of those.'],
+            ];
+            $djWeek = [
+                ['MON', 'Clear the queue', 'Accept the nights clubs have added you to, import any new bookings from flyers or emails, and upload a flyer to every new date.'],
+                ['TUE', 'Post the week', 'Open Actions, Events graphic, pick the Story shape and download the image of your next sets, then copy the caption beside it. Post both, with your link at the top.'],
+                ['THU', 'Push the weekend', 'Share the event link for your biggest set of the weekend in the group chat and your story. If you run a guest list, say when it closes.'],
+                ['SUN', 'Fix what moved', 'Set time changed or a night pulled? Edit it once. Your page and any embed show it at once, and subscribed calendars catch up on their own, which for Google Calendar can take several hours.'],
+                ['1ST', 'The monthly letter', 'A newsletter set to repeat on the 1st, with its events block on the rest of the month, lists up to 25 of the month\'s sets, the nights clubs added you to included.'],
+            ];
+        @endphp
+        <section class="dj-mod" id="routine" style="scroll-margin-top: 4.5rem;">
+            <div class="dj-wrap">
+                <p class="dj-silk" aria-hidden="true"><b>08</b> Clock <span class="dj-silk-r">15 minutes &middot; once a week</span></p>
+                <div class="dj-head">
+                    <h2 class="dj-h2" data-reveal>
+                        Keep it current in <span class="dj-lit">15 minutes</span> a week
+                    </h2>
+                    <p class="dj-sub" data-reveal style="--reveal-delay: 0.08s;">
+                        A gig page with last month's dates on it is worse than none. Let the bookings come in on their own, then keep one short slot in your week for the rest.
+                    </p>
+                </div>
+
+                <div class="dj-cards is-3" data-reveal-group="70">
+                    @foreach ($djFeeds as [$djFdTag, $djFdName, $djFdBody])
+                        <article class="dj-card" data-reveal>
+                            <span class="dj-card-tag">{{ $djFdTag }}</span>
+                            <h3>{{ $djFdName }}</h3>
+                            <p>{{ $djFdBody }}</p>
+                        </article>
+                    @endforeach
+                </div>
+
+                <div class="dj-screen dj-week" style="margin-top: 1.75rem;" data-reveal="panel">
+                    @foreach ($djWeek as [$djWkDay, $djWkName, $djWkBody])
+                        <div class="dj-week-row">
+                            <b dir="ltr">{{ $djWkDay }}</b>
+                            <div>
+                                <h3>{{ $djWkName }}</h3>
+                                <p>{{ $djWkBody }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <p class="dj-note" data-reveal>
+                    <b>Two kinds of email, counted differently.</b> Fans who sign up get an automatic email when you add new dates, at most one every 72 hours, and it does not count against anything; nights a club added you to are not in it, which is why the monthly letter matters. A newsletter counts each recipient as one email: 10 a month on Free, 100 on Pro, 1,000 on Enterprise, or unlimited on any plan once your schedule sends through its own email settings. A monthly letter to 300 fans is 300 emails, past Pro's 100, so it needs Enterprise or your own email settings; and on eventschedule.com a send to more than 50 people also needs those settings or a verified phone number.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 09. Pads: every type of DJ                                   -->
         <!-- ============================================================ -->
         <section class="dj-mod" id="pads" style="scroll-margin-top: 4.5rem;">
             <div class="dj-wrap">
-                <p class="dj-silk" aria-hidden="true"><b>05</b> Pads <span class="dj-silk-r">Bank A &middot; 6 pads</span></p>
+                <p class="dj-silk" aria-hidden="true"><b>09</b> Pads <span class="dj-silk-r">Bank A &middot; 6 pads</span></p>
                 <div class="dj-pads-head">
                     <div>
                         <h2 class="dj-h2" data-reveal>
@@ -1532,11 +1743,11 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 06. Signal chain: how it works                               -->
+        <!-- 10. Signal chain: how it works                               -->
         <!-- ============================================================ -->
         <section class="dj-mod" id="chain" style="scroll-margin-top: 4.5rem;">
             <div class="dj-wrap">
-                <p class="dj-silk" aria-hidden="true"><b>06</b> Signal chain <span class="dj-silk-r">In the booth</span></p>
+                <p class="dj-silk" aria-hidden="true"><b>10</b> Signal chain <span class="dj-silk-r">In the booth</span></p>
                 <div class="dj-head">
                     <h2 class="dj-h2" data-reveal>
                         Your DJ schedule, live in <span class="dj-lit">three steps</span>
@@ -1561,7 +1772,7 @@
                     <div class="dj-unit" data-reveal style="--reveal-delay: 0.28s;">
                         <div class="dj-unit-top" aria-hidden="true"><span class="dj-digits">03</span><p class="dj-silk">Master</p></div>
                         <h3>Pack the dancefloor</h3>
-                        <p>Fans sign up for email, hear automatically when you're spinning, and show up ready to dance.</p>
+                        <p>Fans sign up for email, hear automatically about the dates you add, and show up ready to dance.</p>
                         <div class="dj-unit-meter" aria-hidden="true"><div class="dj-bar" style="--lv: 100%;"></div></div>
                     </div>
                 </div>
@@ -1569,11 +1780,11 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 07. Sends: key features                                      -->
+        <!-- 11. Sends: key features                                      -->
         <!-- ============================================================ -->
         <section class="dj-mod">
             <div class="dj-wrap">
-                <p class="dj-silk" aria-hidden="true"><b>07</b> Sends <span class="dj-silk-r">4 outputs</span></p>
+                <p class="dj-silk" aria-hidden="true"><b>11</b> Sends <span class="dj-silk-r">4 outputs</span></p>
                 <div class="dj-head">
                     <h2 class="dj-h2" data-reveal>Key <span class="dj-lit">features</span></h2>
                 </div>
@@ -1613,11 +1824,11 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- 08. Inputs: related pages                                    -->
+        <!-- 12. Inputs: related pages                                    -->
         <!-- ============================================================ -->
         <section class="dj-mod">
             <div class="dj-wrap">
-                <p class="dj-silk" aria-hidden="true"><b>08</b> Inputs <span class="dj-silk-r">4 lines</span></p>
+                <p class="dj-silk" aria-hidden="true"><b>12</b> Inputs <span class="dj-silk-r">4 lines</span></p>
                 <div class="dj-ins-head">
                     <h2 class="dj-h2" data-reveal>Related <span class="dj-lit">pages</span></h2>
                     <a href="{{ marketing_url('/use-cases') }}" class="dj-more" data-reveal>
@@ -1639,11 +1850,11 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 09. Manual: FAQ                                              -->
+        <!-- 13. Manual: FAQ                                              -->
         <!-- ============================================================ -->
         <section class="dj-mod" id="faq" style="scroll-margin-top: 4.5rem;">
             <div class="dj-wrap">
-                <p class="dj-silk" aria-hidden="true"><b>09</b> Manual <span class="dj-silk-r">Operating instructions</span></p>
+                <p class="dj-silk" aria-hidden="true"><b>13</b> Manual <span class="dj-silk-r">Operating instructions</span></p>
                 <div class="dj-manual-grid">
                     <div class="dj-manual-head">
                         <h2 class="dj-h2" data-reveal>
@@ -1663,10 +1874,14 @@
                         @php
                             $faqs = [
                                 ['q' => 'Can I track both residencies and one-off bookings?', 'a' => 'Yes. Set up recurring events for your weekly or monthly residencies and they auto-repeat on your schedule. Add guest spots and festival bookings as one-off events. Everything shows up in one clean calendar that fans can follow.'],
+                                ['q' => 'How should a DJ share upcoming gigs?', 'a' => 'Put every date on one page and use that page\'s link everywhere: your Instagram and TikTok bio, your RA profile, SoundCloud and Mixcloud, and the signature on the emails you send bookers. Each listing should say the venue and city, your set time, how to get in and who else is playing. Fans who want more can subscribe to the calendar feed or sign up for email, so a new date reaches them without them checking back.'],
+                                ['q' => 'What is the difference between a residency and a guest spot?', 'a' => 'A residency is a regular slot at one club, weekly, fortnightly or monthly, usually on the same night. A guest spot is a one-off booking. On Event Schedule a residency is one recurring event that lists every date by itself, with nights off removed under Exclude Dates, and a guest spot is a single event. Both show on the same page in date order.'],
+                                ['q' => 'Should I list my set time or the door time?', 'a' => 'Both, because fans need the door time to get in and the set time to know when to arrive. Start the event at doors and add your set, with its time, in the event\'s Agenda, which the event page shows in order. Adding agenda parts by hand is free on every plan.'],
+                                ['q' => 'How do I run a guest list for my sets?', 'a' => 'Use free registration with a limit, which is free on every plan. Each name gets a confirmation email with a QR code, the door scans it with any phone, and on a weekly night the limit counts for each night on its own. If the club runs the list or sells the tickets, choose Tickets elsewhere and link to their page instead.'],
                                 ['q' => 'Does it handle late-night sets that cross midnight?', 'a' => 'Yes. Event Schedule handles overnight events correctly. A set that starts at 11 PM Saturday and ends at 4 AM Sunday displays properly on the Saturday listing, so fans know when to show up.'],
                                 ['q' => 'What happens when a club adds me to their lineup?', 'a' => 'It arrives as a request on your schedule. Accept it and the set shows on your link too, with no double entry, and because both schedules share one event, a changed set time shows on both. The event page lists the whole lineup, whether or not every DJ on it has signed up.'],
                                 ['q' => 'A promoter listed me before I joined. Is that page mine?', 'a' => 'It can be. Naming a DJ who is not on Event Schedule creates a page for them, so the name can appear on the lineup. The page says who created it and that you have not claimed it yet, credits each date to the club or promoter that added it, and stays out of search engines. Press Claim this page, sign in with the email address it carries, and it becomes your schedule, with those promoters still listing you. If it is not you, press This is not me.'],
-                                ['q' => 'Can I sell advance tickets to my sets?', 'a' => 'Yes. Connect your own Stripe or PayPal account, or take cash at the door, and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door, and you keep 100% of the sale minus your payment provider\'s fee. A Stripe, PayPal or Razorpay sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. Not on sale yet? Switch on the "Notify me" card and fans can leave just an email address on the event page to hear when tickets go on sale.'],
+                                ['q' => 'Can I sell advance tickets to my sets?', 'a' => 'Yes, on the Pro plan. Connect your own Stripe or PayPal account, or take cash at the door, and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door, and you keep 100% of the sale minus your payment provider\'s fee. A Stripe, PayPal or Razorpay sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. Not on sale yet? Switch on the "Notify me" card and fans can leave just an email address on the event page to hear when tickets go on sale.'],
                                 ['q' => 'Can fans add my set times to their own calendar?', 'a' => 'Yes. Your page offers a live calendar feed that fans can subscribe to in Google Calendar, Apple Calendar or Outlook, with no email address needed. Unlike a one-off download, it updates itself when a set time moves. Each event page also has its own Add to Calendar button.'],
                                 ['q' => 'Can I keep private gigs and secret parties off my public schedule?', 'a' => 'Yes. Draft events are free and stay hidden until you publish them. On the Enterprise plan you can also mark events internal for your team only, or unlisted with an optional password, so a wedding, corporate booking, or secret location party is reachable only by direct link.'],
                                 ['q' => 'Can I run separate club nights or brands on one schedule?', 'a' => 'Yes. Sub-schedules are free and let you group events by club night or brand, so your weekly techno night and your open format bookings stay organized under one account. Your link still shows everything in one place, and you can embed the calendar on any website.'],
@@ -1689,11 +1904,11 @@
         <x-seo.faq-schema :items="$faqs" />
 
         <!-- ============================================================ -->
-        <!-- 10. Master out: your name on the main display                -->
+        <!-- 14. Master out: your name on the main display                -->
         <!-- ============================================================ -->
         <section id="claim" class="dj-mod" style="scroll-margin-top: 4rem;">
             <div class="dj-wrap">
-                <p class="dj-silk" aria-hidden="true"><b>10</b> Master out <span class="dj-silk-r"><span class="dj-led dj-blink" style="--c: #ff3b30;"></span> Live</span></p>
+                <p class="dj-silk" aria-hidden="true"><b>14</b> Master out <span class="dj-silk-r"><span class="dj-led dj-blink" style="--c: #ff3b30;"></span> Live</span></p>
 
                 <div class="dj-screen dj-out-screen" id="dj-out" data-reveal="panel">
                     <div class="dj-vu" aria-hidden="true" style="--t: 1.5s;"><i></i><i style="--d: -0.5s;"></i></div>

@@ -322,12 +322,64 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 3. Options in the URL                                        -->
+        <!-- 3. Where the code goes in WordPress                          -->
+        <!-- ============================================================ -->
+        @php
+            $wpPlaces = [
+                ['Block editor', 'Use the Custom HTML block, not the Embed block. The Embed block only accepts addresses from services WordPress knows, such as YouTube, or that advertise oEmbed, which a schedule page does not, so a schedule address pasted there comes back as an error or a bare link. The Custom HTML block takes the iframe code as written, and its Preview tab shows the calendar before you publish.'],
+                ['Classic editor', 'Paste on the Text tab, never the Visual tab: the Visual tab treats code as words to display, so the page ends up showing the code itself. If somebody later edits the page on the Visual tab, check that the calendar is still there afterwards.'],
+                ['Sidebars and footers', 'Since WordPress 5.8, widget areas are edited with blocks, so the Custom HTML block works there too; a site still on classic widgets has the Custom HTML widget. Add layout=list and a height of about 500 to 600, because a sidebar is far narrower than the 768 pixels the month grid needs.'],
+                ['Block themes', 'On a block theme you can place the calendar in a template rather than a page, from Appearance, Editor, so it appears under every page of one kind. Most sites are better served by one Events page and a menu link to it, which is easier for the next person to find and change.'],
+                ['Page builders', 'Elementor\'s HTML widget, Divi\'s Code module and Beaver Builder\'s HTML module all take the code as it is. Set the element to the full width of its column, because a builder\'s default box is often narrower than it looks in the editor.'],
+                ['A menu link or a button', 'Not every page needs a frame. A menu item called Events, or a Buttons block on the homepage, pointing at your schedule\'s own page opens the full calendar with its search, filters and a page for each event. It suits a narrow theme, and it works on every WordPress plan.'],
+            ];
+        @endphp
+        <section id="placement" class="es-wp-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-wp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Where the code goes</p>
+                    <h2 class="es-balance es-wp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Block editor, classic editor, <span class="es-wp-accent">widgets and builders.</span>
+                    </h2>
+                    <p class="es-wp-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        WordPress has several places that accept HTML, and one tempting place that does not. Which to use depends on the editor your site runs and where on the page the calendar belongs.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                    @foreach ($wpPlaces as [$wplName, $wplBody])
+                        <div class="es-wp-panel flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-wp-ink text-base font-bold">{{ $wplName }}</h3>
+                            <p class="es-wp-muted mt-2 text-sm leading-relaxed">{{ $wplBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="es-wp-panel mt-8 p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-wp-ink text-base font-bold">A better tag for a calendar lower down the page</h3>
+                    <p class="es-wp-muted mt-2 text-sm leading-relaxed">
+                        The code from the Embed Schedule dialog works as it is. For a list of upcoming events halfway down your homepage, two standard HTML attributes help, and WordPress leaves both in place when you paste them.
+                    </p>
+                    <pre class="es-wp-code mt-4 p-4" dir="ltr"><span class="k">&lt;iframe</span> src=<span class="s">"{{ $wpExampleUrl }}?embed=true&amp;layout=list"</span>
+  title=<span class="s">"Upcoming events"</span> width=<span class="s">"100%"</span> height=<span class="s">"600"</span>
+  loading=<span class="s">"lazy"</span> style=<span class="s">"border: none;"</span><span class="k">&gt;&lt;/iframe&gt;</span></pre>
+                    <ul class="es-wp-muted mt-4 list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                        <li><code dir="ltr">title</code> is worth adding by hand. It names the frame for people using a screen reader, who otherwise hear only that there is a frame.</li>
+                        <li><code dir="ltr">loading="lazy"</code> asks the browser to wait until the visitor scrolls near the frame. WordPress 5.7 and later already adds it to a frame with a width and height in the page content, except near the top of the page; add it yourself in a page builder or template, where WordPress does not.</li>
+                        <li><code dir="ltr">layout=list</code> and a height of 600 suit a homepage column. On the Events page itself, keep the dialog's 800 or go to 1000 for a busy month.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4. Options in the URL                                        -->
         <!-- ============================================================ -->
         <section id="options" class="es-wp-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                     <p class="es-wp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Fitting your theme</p>
                     <h2 class="es-balance es-wp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Tune it with <span class="es-wp-accent">the address, not a settings page.</span>
@@ -364,12 +416,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. Registration and tickets                                  -->
+        <!-- 5. Registration and tickets                                  -->
         <!-- ============================================================ -->
         <section id="tickets" class="es-wp-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                     <p class="es-wp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Sign-ups on the page</p>
                     <h2 class="es-balance es-wp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Let people register <span class="es-wp-accent">without leaving your site.</span>
@@ -405,12 +457,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. Embed or plugin                                           -->
+        <!-- 6. Embed or plugin                                           -->
         <!-- ============================================================ -->
         <section id="why" class="es-wp-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
                     <p class="es-wp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Embed or plugin</p>
                     <h2 class="es-balance es-wp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Why keep the calendar <span class="es-wp-accent">outside WordPress?</span>
@@ -457,12 +509,119 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Troubleshooting                                           -->
+        <!-- 7. Before you choose: trade-offs and a checklist             -->
+        <!-- ============================================================ -->
+        @php
+            $wpTrade = [
+                ['Where the events live', 'In your WordPress database, as posts or in the plugin\'s own tables.', 'On Event Schedule, shown on your page through the frame.'],
+                ['Updates', 'Yours to run: the plugin, its add-ons and WordPress itself, kept in step, ideally tried on a copy of the site first.', 'None on your site. The calendar is updated where it runs.'],
+                ['Security', 'More code on your server, and most security advisories for WordPress sites concern plugins, so each one is another thing to patch promptly.', 'Nothing added to your server. A frame from another site cannot reach into your pages or your admin.'],
+                ['Load on your hosting', 'PHP and database work on your server whenever the calendar is shown, and some plugins load their scripts on every page.', 'None on your server. The visitor\'s browser fetches the frame from Event Schedule as one extra page.'],
+                ['Look', 'Your theme\'s styles and templates, which is the main reason to choose one.', 'The colours, background and font set on your schedule. A frame cannot read your theme\'s stylesheet; custom CSS inside it is Pro.'],
+                ['WordPress search', 'Events turn up in your site\'s own search box.', 'Events are not in WordPress\'s search, though each has its own public page that search engines can index.'],
+                ['Tickets', 'Often a second plugin. The free Event Tickets plugin that pairs with The Events Calendar takes a 2% application fee on each sale.', 'Free registration on every plan. Priced tickets on Pro, with no platform fee.'],
+                ['Leaving', 'The events stay in that database; getting them out depends on the plugin\'s export.', 'Paste the same code into any new site. The iCal and RSS feeds and a backup export take the events anywhere.'],
+            ];
+            $wpChecks = [
+                ['Does it repeat the way your events do?', 'A weekly class is easy. The second Tuesday of the month, every other Thursday, and a series that skips the school holidays are where calendars differ. Test your own patterns, not the demo\'s.'],
+                ['What does the month look like on a phone?', 'A seven-column grid is unreadable at phone width. Look for a calendar that turns into a list or agenda on a small screen, and check it on a real phone.'],
+                ['Can visitors take events with them?', 'Add to Calendar on each event, and a feed people can subscribe to, so a moved date reaches their phone without them coming back to your site.'],
+                ['Who else needs to add events?', 'If members or other organizations submit dates, you want a form with an approval step, not a WordPress login for each of them.'],
+                ['What does a ticket cost you?', 'Read the fee per ticket as well as the monthly price. A percentage on every sale can cost more than a subscription once you sell a few hundred tickets.'],
+                ['Is it still looked after?', 'Every plugin\'s page on WordPress.org shows when it was last updated and the WordPress version it was tested up to. A year without an update is a warning.'],
+                ['Does each event get its own page?', 'An event needs its own address, carrying structured event data, for search engines to show its date in results and for you to share it.'],
+                ['Can you get everything out?', 'An iCal feed, an export or a full backup means the choice is never final. Find out before you have five hundred events in it.'],
+            ];
+        @endphp
+        <section id="decide" class="es-wp-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <p class="es-wp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before you choose</p>
+                    <h2 class="es-balance es-wp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Plugin or hosted calendar: <span class="es-wp-accent">the trade-off, row by row.</span>
+                    </h2>
+                    <p class="es-wp-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Both are reasonable ways to put events on a WordPress site. They put the work in different places, so the right one depends on who looks after your site and what the calendar has to do.
+                    </p>
+                </div>
+
+                <div class="es-wp-panel p-6 sm:p-8" data-reveal="panel">
+                    <div class="hidden gap-x-6 pb-3 md:grid md:grid-cols-5" aria-hidden="true">
+                        <span></span>
+                        <span class="es-wp-tag md:col-span-2">An events plugin</span>
+                        <span class="es-wp-tag md:col-span-2">An embedded hosted calendar</span>
+                    </div>
+                    @foreach ($wpTrade as [$wtName, $wtPlugin, $wtEmbed])
+                        <div class="es-wp-rule grid gap-2 gap-x-6 py-4 md:grid-cols-5">
+                            <h3 class="es-wp-ink text-sm font-bold">{{ $wtName }}</h3>
+                            <p class="es-wp-muted text-sm leading-relaxed md:col-span-2"><span class="es-wp-ink font-semibold md:hidden">Plugin: </span>{{ $wtPlugin }}</p>
+                            <p class="es-wp-muted text-sm leading-relaxed md:col-span-2"><span class="es-wp-ink font-semibold md:hidden">Embedded: </span>{{ $wtEmbed }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-wp-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-wp-ink text-base font-bold">Pick a plugin when</h3>
+                        <ul class="es-wp-muted mt-3 list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                            <li>every listing must be styled by your theme's own templates;</li>
+                            <li>events have to be WordPress posts, for your site search or for other plugins that read them;</li>
+                            <li>someone already updates and backs up the site every month, and one more plugin is no extra burden.</li>
+                        </ul>
+                    </div>
+                    <div class="es-wp-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-wp-ink text-base font-bold">Pick an embedded calendar when</h3>
+                        <ul class="es-wp-muted mt-3 list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                            <li>nobody is paid to look after the site, and an update that breaks the events page would go unnoticed;</li>
+                            <li>people outside the WordPress admin add events, or submit them for you to approve;</li>
+                            <li>you take registrations or sell tickets and want them checked in at the door from the same place;</li>
+                            <li>the same events also go in a newsletter, a link in your bio or another organization's website.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="es-wp-ink mt-16 mb-6 text-center text-2xl font-black tracking-tight" data-reveal>Eight questions to ask any WordPress event calendar</h3>
+                <ol class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="80">
+                    @foreach ($wpChecks as $wcIndex => [$wcName, $wcBody])
+                        <li class="es-wp-panel flex gap-4 p-6" data-reveal="panel">
+                            <span class="es-wp-step" aria-hidden="true">{{ $wcIndex + 1 }}</span>
+                            <div class="min-w-0">
+                                <h4 class="es-wp-ink text-base font-bold">{{ $wcName }}</h4>
+                                <p class="es-wp-muted mt-2 text-sm leading-relaxed">{{ $wcBody }}</p>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
+
+                <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-wp-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-wp-ink text-base font-bold">How Event Schedule answers them</h3>
+                        <p class="es-wp-muted mt-2 text-sm leading-relaxed">
+                            Events repeat daily, weekly on chosen days, every 2 to 52 weeks, monthly by date or by weekday such as the second Tuesday, and yearly, with single dates skipped or added. Below about 768 pixels the embed shows a day-by-day agenda. Every event has Add to Calendar, and the schedule a live iCal feed. Submissions come in through a request form with an approval queue, free. Registration is free; priced tickets are Pro, with no platform fee on top of your payment provider's. Each event has its own page with structured event data, and you can export a backup of the schedule whenever you like.
+                        </p>
+                    </div>
+                    <div class="es-wp-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-wp-ink text-base font-bold">Moving from a plugin you already have</h3>
+                        <p class="es-wp-muted mt-2 text-sm leading-relaxed">
+                            In Event Schedule, open Actions, Import Events and paste the address of your plugin's iCal export, if it has one, or of your events page. A calendar feed, or a page carrying the structured event data many plugins add for search engines, is read directly for the next 12 months, up to 100 events a read, with past events left out; any other page is read by AI. Check the list, add the events, swap the plugin's block or shortcode for the embed, and deactivate the plugin once the new page looks right.
+                        </p>
+                        <a href="{{ marketing_url('/docs/ai-import') }}#link-import" class="es-wp-accent mt-auto inline-flex items-center pt-5 text-sm font-semibold hover:underline">
+                            Importing from a link
+                            <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. Troubleshooting                                           -->
         <!-- ============================================================ -->
         <section id="troubleshooting" class="es-wp-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <div class="es-wp-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                     <p class="es-wp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">If it does not show</p>
                     <h2 class="es-balance es-wp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Four things <span class="es-wp-accent">worth checking.</span>
@@ -491,12 +650,16 @@
         @include('marketing.partials.pricing-nudge')
 
         <!-- ============================================================ -->
-        <!-- 7. FAQ                                                       -->
+        <!-- 9. FAQ                                                       -->
         <!-- ============================================================ -->
         @php
             $wordpressFaqs = [
                 ['q' => 'Is there an Event Schedule WordPress plugin?', 'a' => 'No, and you do not need one. The calendar goes onto a WordPress page with the embed code from Event Schedule, pasted into a Custom HTML block. Because nothing is installed on your site, there is nothing to update or keep compatible.'],
                 ['q' => 'How do I add an event calendar to a WordPress page?', 'a' => 'In Event Schedule, open the Actions menu, choose Embed Schedule and copy the Iframe Code. In WordPress, edit the page, add a Custom HTML block, paste the code and publish. In the classic editor, paste it on the Text tab.', 'link' => [marketing_url('/docs/sharing').'#embed', 'Embedding in the guide']],
+                ['q' => 'Is a plugin or an embedded calendar better for WordPress?', 'a' => 'It depends on who looks after the site. A plugin stores events as WordPress content and uses your theme\'s templates, but it is more code on your server to update and keep secure. An embedded hosted calendar adds nothing to your server and never needs updating on your side, but it keeps its own look and its events are not in WordPress\'s site search. If nobody is paid to maintain the site, or people outside your admin add events, the embed is usually the safer choice.'],
+                ['q' => 'Does an embedded calendar slow down my WordPress site?', 'a' => 'It adds no work to your WordPress server: no plugin code runs and no database queries are made for the events. The visitor\'s browser loads the frame from Event Schedule as one extra page. WordPress 5.7 and later already adds loading="lazy" to a frame with a width and height in the page content, except near the top of the page, so the browser fetches it only when the visitor scrolls near it; in a page builder or template, add the attribute yourself.'],
+                ['q' => 'Is an iframe calendar bad for SEO?', 'a' => 'Search engines may not count what is inside a frame as part of your page, so write the introduction to your events page as normal text on the WordPress page itself. The embed address is marked noindex so it never competes with your page, and each event still has its own public page with structured event data that search engines can find.'],
+                ['q' => 'Can I move my events from a WordPress calendar plugin?', 'a' => 'Yes. Open Actions, Import Events and paste your plugin\'s iCal export address, or the address of your events page. A calendar feed, or a page with structured event data, is read directly for the next 12 months, up to 100 events a read, and anything else on the page is read by AI. Then replace the plugin\'s block or shortcode with the embed and deactivate the plugin.', 'link' => [marketing_url('/docs/ai-import').'#link-import', 'Importing from a link in the guide']],
                 ['q' => 'Is it free?', 'a' => 'Yes. Embedding the calendar is free on every plan, and so is embedding a registration form for a free event. On a Free schedule the copied code includes a small "Powered by Event Schedule" line under the frame. Selling priced tickets and the ticket widget are on the Pro plan.'],
                 ['q' => 'Will the calendar update on my site automatically?', 'a' => 'Yes. The frame loads your schedule live every time the page is viewed, so an event you add, move or cancel is right on your WordPress page at once. You never paste the code a second time.'],
                 ['q' => 'Why did my iframe disappear after I saved the page?', 'a' => 'WordPress removes iframe code for users who lack the unfiltered HTML permission, which on a single site means anyone below Editor, and on a multisite network anyone who is not a Super Admin. Have an Administrator paste it. On WordPress.com, iframe code needs a paid plan with hosting features active.'],
@@ -532,7 +695,7 @@
         <x-seo.faq-schema :items="$wordpressFaqs" />
 
         <!-- ============================================================ -->
-        <!-- 8. Claim                                                     -->
+        <!-- 10. Claim                                                    -->
         <!-- ============================================================ -->
         <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
             <div class="mx-auto max-w-6xl">

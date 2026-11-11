@@ -16,6 +16,11 @@
          - Federation is for installs that are NOT eventschedule.com, off until the operator
            enables it, opt-in per schedule.
          - The auto import from URLs is selfhost-only; this page does not claim it.
+         - The new-event digest covers only events the schedule created itself (sourced and
+           listed events are left out, docs/creating-schedules#notifications-to-followers); a
+           repeating newsletter whose events block is a date range lists the calendar page's own
+           list (EventRepo::upcomingForGuest), up to 25 events.
+         - A cancelled event is hidden from the public curator calendar (RoleController::viewGuest).
          Differentiation: /for-curators ("local events guide") is written for one person's scene
          guide. This page is for an institution running the calendar of record for a place, so it
          leads on intake from many organizers, moderation, and publishing on a site it already
@@ -366,12 +371,64 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. Organising and publishing                                 -->
+        <!-- 4. The first six weeks: launch and getting organizers in     -->
+        <!-- ============================================================ -->
+        @php
+            $ccLaunch = [
+                ['Week 1', 'List the twenty who run most of it', 'Write down the organizers behind most of what happens: the library, the leisure centre, the churches, the school parents\' groups, the market, the sports clubs, the pubs with live music and the council itself. In most places a short list of regulars accounts for most of the dates, and each one you win keeps feeding the calendar for years.'],
+                ['Weeks 1 and 2', 'Fill it before anyone sees it', 'Aim for something on most days of the next six weeks before you tell a soul. Regular sessions do the heavy lifting: a weekly storytime, a fortnightly quiz and a repair cafe on the first Saturday of the month are one recurring event each, and together they put something on every week. Paste the rest in from posters and websites with the importer.'],
+                ['Weeks 2 to 4', 'Ask each organizer once, by name', 'A general "send us your events" appeal on social media rarely brings in more than a few. A short message to a named person does better, because it can say their events are already listed and show them how to keep them right. Offer two ways in: the submission form, or their own free schedule listed as an event source.'],
+                ['Weeks 4 to 6', 'Launch it where people already look', 'Embed the calendar on the homepage of the site that hosts it, not three menus deep. Download the QR code from the Followers tab, which opens the calendar with its email sign-up ready, and put it on the noticeboard, the library desk and the parish magazine, with the submission link beside it.'],
+            ];
+        @endphp
+        <section id="launch" class="es-cc-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-cc-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The first six weeks</p>
+                    <h2 class="es-balance es-cc-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        An empty calendar <span class="es-cc-accent">teaches people not to come back.</span>
+                    </h2>
+                    <p class="es-cc-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Readers decide in a visit or two whether a calendar is worth checking, and a launch week with a dozen listings on it answers no. Fill it first, announce it second, and make posting easier for organizers than not posting.
+                    </p>
+                </div>
+
+                <ol class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="80">
+                    @foreach ($ccLaunch as [$clWhen, $clName, $clBody])
+                        <li class="es-cc-panel flex flex-col p-6" data-reveal="panel">
+                            <p class="es-cc-tag mb-3">{{ $clWhen }}</p>
+                            <h3 class="es-cc-ink text-base font-bold">{{ $clName }}</h3>
+                            <p class="es-cc-muted mt-2 text-sm leading-relaxed">{{ $clBody }}</p>
+                        </li>
+                    @endforeach
+                </ol>
+
+                <div class="es-cc-panel mt-8 p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-cc-ink text-base font-bold">A message that gets an organizer posting</h3>
+                    <p class="es-cc-muted mt-2 text-sm leading-relaxed">
+                        Short, personal, and about their events rather than your project. Change the names and send it from your own address, one organizer at a time.
+                    </p>
+                    <div class="es-cc-board mt-5 p-5 text-sm leading-relaxed" style="box-shadow: none;">
+                        <p>Hi Sam,</p>
+                        <p class="mt-3">We have started a shared what's-on calendar for Millbrook, and the bowls club's Tuesday and Saturday sessions are already on it: [calendar link]. Could you check we have them right?</p>
+                        <p class="mt-3">To add new dates, use this form, which can read the details off your poster: [submission link]. Or, if you would rather keep your own calendar, make a free schedule for the club and we will list everything you add there automatically.</p>
+                        <p class="mt-3">Either way, residents see your events beside everything else in town, on the council website too.</p>
+                    </div>
+                    <p class="es-cc-muted mt-5 text-sm leading-relaxed">
+                        Ask for a correction, not a favour: people answer "is this right?" more readily than "please send us things". Whoever replies has looked at the calendar, which is the first step to using it.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. Organising and publishing                                 -->
         <!-- ============================================================ -->
         <section id="publish" class="es-cc-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                     <p class="es-cc-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Getting the events out</p>
                     <h2 class="es-balance es-cc-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Put it where people <span class="es-cc-accent">already look.</span>
@@ -397,7 +454,7 @@
                     <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
                         <h3 class="es-cc-ink text-base font-bold">In people's inboxes</h3>
                         <p class="es-cc-muted mt-2 text-sm leading-relaxed">
-                            Readers sign up with an email address from the panel on your calendar. Confirmed subscribers get a digest of the new events you publish, at most one every 72 hours and outside your newsletter allowance. Write a weekly <x-link href="{{ marketing_url('/features/newsletters') }}">newsletter</x-link> of your own on top, 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise with each recipient counting as one, or unlimited with your own email settings.
+                            Readers sign up with an email address from the panel on your calendar. Confirmed subscribers get a digest of the new events the calendar adds itself, at most one every 72 hours and outside your newsletter allowance; events that arrive from organizers' own schedules are not in it. For the whole week, set a <x-link href="{{ marketing_url('/features/newsletters') }}">newsletter</x-link> to repeat every week with its events block on the next 7 days. It lists up to 25 of the week's events from everything your calendar shows, sourced events included, within 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise with each recipient counting as one, or unlimited with your own email settings.
                         </p>
                     </div>
                     <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
@@ -418,12 +475,116 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. Who runs one                                              -->
+        <!-- 6. Running it week to week: policy, routine, sections        -->
+        <!-- ============================================================ -->
+        <section id="routine" class="es-cc-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-cc-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Running it week to week</p>
+                    <h2 class="es-balance es-cc-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Write the rules down. <span class="es-cc-accent">Keep the week short.</span>
+                    </h2>
+                    <p class="es-cc-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        The community calendars that last are run on a written listing policy and a short, fixed routine, so a decision does not depend on who is editing that Monday, and the work fits in a lunch break.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-cc-ink text-base font-bold">What to list</h3>
+                        <ul class="es-cc-muted mt-3 list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                            <li>Open to the public, or to a whole stated audience, such as every parent at a school.</li>
+                            <li>Inside the area the calendar covers, or close enough that residents go.</li>
+                            <li>A set date, start time and place, or a link for an online event.</li>
+                            <li>Run by someone you can reach if a detail is wrong.</li>
+                            <li>Free or paid, as long as the event is the point and not the sale.</li>
+                        </ul>
+                    </div>
+                    <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-cc-ink text-base font-bold">What to leave off</h3>
+                        <ul class="es-cc-muted mt-3 list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                            <li>Private parties, members-only meetings and weddings.</li>
+                            <li>Sales, offers and opening hours dressed up as events.</li>
+                            <li>Job adverts, and appeals for money with no event attached.</li>
+                            <li>Anything you would not want printed under your organization's name.</li>
+                        </ul>
+                        <p class="es-cc-muted mt-auto pt-4 text-sm leading-relaxed">
+                            Decide now how you treat political meetings, services of worship and paid classes, because each will turn up in the first month. Put the short version in Request Terms, which submitters read before they type.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="es-cc-panel mt-8 p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-cc-ink text-base font-bold">The twenty-minute week</h3>
+                    <ol class="es-cc-muted mt-3 list-decimal space-y-2 ps-5 text-sm leading-relaxed">
+                        <li><span class="es-cc-ink font-semibold">Clear the Requests tab.</span> Accept what fits the policy and decline what does not. With the new event requests email on, in Settings under Notifications, each request reaches your inbox within minutes, or in the daily noon summary, so nothing has to sit until Monday.</li>
+                        <li><span class="es-cc-ink font-semibold">Read the next seven days as a reader would.</span> A listing with no start time, no place or a title like "Event" gets a note to its organizer today, or comes off your calendar until it is fixed.</li>
+                        <li><span class="es-cc-ink font-semibold">Look for doubles.</span> The pub and the quizmaster both sent the Thursday quiz. Keep the one from whoever runs it and remove the other from your schedule.</li>
+                        <li><span class="es-cc-ink font-semibold">Check who has gone quiet.</span> A regular with nothing listed for a month has usually stopped updating, not stopped running. One message brings them back.</li>
+                        <li><span class="es-cc-ink font-semibold">Let the week send itself.</span> A newsletter set to repeat every week, with its events block on the next 7 days, goes out with that week's events and skips a week that has none. Count it before you start: four or five sends to 200 readers is 800 to 1,000 emails a month, past Pro's 100 and inside Enterprise's 1,000, and unlimited on any plan once the schedule sends through your own email settings. On eventschedule.com a send to more than 50 people also needs those settings or a verified phone number.</li>
+                    </ol>
+                </div>
+
+                <div class="es-cc-panel mt-4 p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-cc-ink text-base font-bold">Sub-schedules or categories?</h3>
+                    <p class="es-cc-muted mt-2 text-sm leading-relaxed">
+                        Both, for different jobs. Sub-schedules are the few big divisions you would give a page of their own: areas of town, or audiences such as families and sport. Each has its own address and its own embed, and an event sits in one sub-schedule on your calendar, so keep them to a handful that do not overlap. Categories describe the type of event, for the reader's filter: twelve come ready to use, you can rename them or add your own up to 32, and they are listed alphabetically. A good test for both: if a reader would never filter by it, it should not be one.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7. What kills a community calendar                          -->
+        <!-- ============================================================ -->
+        @php
+            $ccPitfalls = [
+                ['Listings that outlive the event', 'A fair that was called off stays up, somebody stands in an empty field, and they stop trusting the calendar.', 'Let organizers own their dates. When the library cancels an event on its own schedule, it leaves your public calendar too, because you list their event, not a copy of it.'],
+                ['A launch with nothing on it', 'Ten listings on the day it goes live, and the first readers never come back.', 'Fill six weeks before you announce, with recurring events doing most of the work.'],
+                ['One editor, one inbox', 'Everything waits for one person, who goes on holiday in August.', 'Put the organizers you trust on your approved list, so what they send from their own schedules skips the queue. On Enterprise, add a second admin.'],
+                ['Spam and sales pitches', 'One listing for a get-rich seminar and readers start scrolling past everything.', 'Keep Require Account and Require Approval on, as a curator schedule starts, and write Request Terms that say what you decline.'],
+                ['A calendar nobody can find', 'It sits three clicks from the homepage, and most of its visits are the editor\'s.', 'Embed it where people already read, offer the email sign-up and the live calendar feed, and post the week ahead as a graphic.'],
+                ['Too many boxes', 'Twenty sub-schedules, half of them empty, and a filter nobody touches.', 'A handful of sub-schedules that do not overlap and categories for the type of event. Fold any that stay empty for a season into another.'],
+            ];
+        @endphp
+        <section id="pitfalls" class="es-cc-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <p class="es-cc-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What kills a community calendar</p>
+                    <h2 class="es-balance es-cc-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Six ways they die, <span class="es-cc-accent">and the fix for each.</span>
+                    </h2>
+                    <p class="es-cc-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Community calendars rarely fail because of the software. They fail because they go stale, fill with noise or sit where nobody looks.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                    @foreach ($ccPitfalls as [$cpName, $cpWhat, $cpFix])
+                        <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-cc-ink text-base font-bold">{{ $cpName }}</h3>
+                            <p class="es-cc-muted mt-2 text-sm leading-relaxed">{{ $cpWhat }}</p>
+                            <div class="mt-auto pt-4">
+                                <div class="es-cc-rule pt-4">
+                                    <p class="es-cc-tag mb-2">The fix</p>
+                                    <p class="es-cc-ink text-sm leading-relaxed">{{ $cpFix }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. Who runs one                                              -->
         <!-- ============================================================ -->
         <section id="who" class="es-cc-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                     <p class="es-cc-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who keeps one</p>
                     <h2 class="es-balance es-cc-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         One calendar, <span class="es-cc-accent">four kinds of keeper.</span>
@@ -457,12 +618,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Plans and ownership                                       -->
+        <!-- 9. Plans and ownership                                       -->
         <!-- ============================================================ -->
         <section id="plans" class="es-cc-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <div class="es-cc-mark mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                     <p class="es-cc-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What it costs</p>
                     <h2 class="es-balance es-cc-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Free for the calendar. <span class="es-cc-accent">Pay for the team.</span>
@@ -502,16 +663,20 @@
         @include('marketing.partials.pricing-nudge')
 
         <!-- ============================================================ -->
-        <!-- 7. FAQ                                                       -->
+        <!-- 10. FAQ                                                      -->
         <!-- ============================================================ -->
         @php
             $communityFaqs = [
                 ['q' => 'Is a community event calendar on Event Schedule free?', 'a' => 'Yes. The calendar, public submissions, the approval queue, event sources, sub-schedules, embedding it on your website, the live calendar feed and email sign-up with an automatic digest are all free forever. Pro removes our branding and raises the newsletter allowance; Enterprise adds more team members and a custom domain.'],
+                ['q' => 'What should a community event calendar include?', 'a' => 'Every listing needs a title that says what it is, a date and start time, a place or an online link, who runs it, and the price or the word free. Around the listings, the calendar needs a way for organizers to submit, a written policy on what you list, filters by area or type of event, and ways to follow it without visiting: an email sign-up and a calendar feed people can subscribe to.'],
+                ['q' => 'How do I get local organizers to submit events?', 'a' => 'List their events yourself first, then ask each one personally whether you have them right and how they would like to keep them current. Make it easier than not posting: a form that reads the details off a poster, or their own free schedule listed as an event source, so they never submit anything at all. A general appeal on social media rarely brings in more than a few.'],
+                ['q' => 'How do I keep a community calendar up to date?', 'a' => 'Give the dates to the people who know them. An organizer with their own schedule, listed as an event source, updates your calendar every time they update theirs, and an event they cancel leaves your public calendar too. For everything else, clear the request queue once a week and read the next seven days as a reader would, chasing any listing with no time or place.', 'link' => [marketing_url('/docs/creating-schedules').'#event-sources', 'Event sources in the guide']],
+                ['q' => 'Who should be allowed to post on a community calendar?', 'a' => 'Anyone should be able to send an event, and someone should approve it before it appears. Ask submitters to sign in so every listing has a name behind it, keep the approval queue on, publish terms that say what you list, and let organizers with a good record skip the queue through your approved list.'],
                 ['q' => 'How do local organizers add their events?', 'a' => 'Through your public request link. On the AI Import form they paste the announcement or upload a photo of the flyer and check the details it reads out. On the Booking Form they fill in the fields you ask for. Organizers who keep their own schedule on Event Schedule can also be listed as event sources, so their events appear on yours without them submitting anything.', 'link' => [marketing_url('/docs/creating-schedules').'#engagement-requests', 'Request settings in the guide']],
                 ['q' => 'Can I approve events before they appear?', 'a' => 'Yes, and it is on by default. Submitted events wait on the Requests tab until you accept or decline them. Schedules you add to your approved list skip the queue while Require Account is on, as it is by default, and event sources you picked yourself are listed straight away.'],
                 ['q' => 'Do people need an account to submit an event?', 'a' => 'On a curator schedule Require Account starts on, so every request has a name behind it, and a first-time submitter creates their account on the same page as the event. You can turn it off to take requests from guests instead.'],
                 ['q' => 'Can I put the calendar on our existing website?', 'a' => 'Yes, on every plan. Choose Embed Schedule from the Actions menu, pick a month calendar or a list, and paste the iframe code into your page. The embedded calendar updates on its own whenever an event is added or approved.', 'link' => [marketing_url('/docs/sharing').'#embed', 'Embedding in the guide']],
-                ['q' => 'Can residents get the events without visiting the site?', 'a' => 'Yes. They can subscribe to the whole calendar as a live feed in Google Calendar, Apple Calendar or Outlook, or leave an email address in the sign-up panel. Confirmed subscribers get a digest of newly published events, at most one every 72 hours.'],
+                ['q' => 'Can residents get the events without visiting the site?', 'a' => 'Yes. They can subscribe to the whole calendar as a live feed in Google Calendar, Apple Calendar or Outlook, or leave an email address in the sign-up panel. Confirmed subscribers get a digest of the events the calendar adds itself, at most one every 72 hours. Events pulled in from organizers\' own schedules are left out of that digest, so to send the whole week, set a newsletter to repeat weekly with its events block on the next 7 days.'],
                 ['q' => 'Can I split the calendar by neighbourhood or type of event?', 'a' => 'Yes, with sub-schedules. Each one has its own link and can be embedded on its own page, and visitors can filter the full calendar by them.'],
                 ['q' => 'What if the same event is submitted twice?', 'a' => 'When you import an event that is already on Event Schedule, you are offered the existing one, so a single click lists it on your calendar instead of creating a copy that would drift out of date.'],
                 ['q' => 'Can several people at the council or paper share the work?', 'a' => 'A free schedule has one team member. On Enterprise you can add more: admins who run the calendar day to day and viewers with read-only access. A selfhosted install includes it at no cost.'],
@@ -543,7 +708,7 @@
         <x-seo.faq-schema :items="$communityFaqs" />
 
         <!-- ============================================================ -->
-        <!-- 8. Claim                                                     -->
+        <!-- 11. Claim                                                    -->
         <!-- ============================================================ -->
         <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
             <div class="mx-auto max-w-6xl">
