@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Open Source Event Calendar - Licence and Selfhosting</x-slot>
-    <x-slot name="description">Event Schedule is open source under the Attribution Assurance License. Selfhost the whole thing on your own server, or drive it through the REST API.</x-slot>
+    <x-slot name="description">Event Schedule is open source under the Attribution Assurance License: what it lets you do, how to selfhost it, and how it compares with Pretix and Mobilizon.</x-slot>
     <x-slot name="breadcrumbTitle">Open Source</x-slot>
 
     <x-slot name="structuredData">
@@ -819,6 +819,28 @@
         .os-clone code { display: block; max-width: 100%; padding: 0.55rem 0.9rem; border: 1px solid rgba(125, 165, 255, 0.3); border-radius: 0.7rem; background: #0b1124; font-size: 0.82rem; white-space: pre; overflow-x: auto; color: #dfe6fb; }
         #hp .hp-finale .os-copy { min-height: 2.4rem; background: #101831; border-color: rgba(125, 165, 255, 0.4); color: #dfe6fb; }
 
+        {{-- ---- The licence, case by case: two columns of ruled rows under the sheet ---- --}}
+        .os-cases { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: clamp(2rem, 4vw, 3.5rem); margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+        @media (min-width: 900px) { .os-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .os-cases li { padding-block: 1.15rem; border-top: 1px solid var(--hp-line-2); }
+        #hp .os-cases h4 { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; font-size: 1.15rem; font-variation-settings: 'wght' 760; letter-spacing: -0.02em; }
+        .os-cases p { margin-top: 0.4rem; font-size: 1rem; line-height: 1.55; color: var(--hp-ink-2); }
+
+        {{-- ---- Other open source calendars: ours across the top, four beside each other ---- --}}
+        .os-cmp { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: clamp(2rem, 4vw, 3.25rem); }
+        @media (min-width: 720px) { .os-cmp { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1200px) { .os-cmp { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .os-cmp > .is-ours { grid-column: 1 / -1; border-color: var(--hp-blue); }
+        .os-cmp dl { display: grid; gap: 0.75rem; margin-top: 1rem; }
+        @media (min-width: 900px) { .os-cmp > .is-ours dl { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 2rem; } }
+        .os-cmp dt { font-family: var(--hp-mono); font-size: 0.68rem; font-weight: 700; font-variation-settings: normal; letter-spacing: 0.1em; text-transform: uppercase; color: var(--hp-ink-3); }
+        .os-cmp dd { margin-top: 0.15rem; font-size: 0.95rem; line-height: 1.5; color: var(--hp-ink); }
+        .os-cmp-pick { margin-top: auto; padding-top: 1.1rem; }
+        .os-cmp-pick p { padding-top: 0.9rem; border-top: 1px solid var(--hp-line-2); font-size: 0.95rem; line-height: 1.5; color: var(--hp-ink-2); }
+        .os-cmp-pick strong { color: var(--hp-ink); }
+        .os-cmp-pick .hp-more { margin-top: 0.75rem; }
+        .os-cmp-foot { max-width: 52rem; margin-top: 1.5rem; font-size: 0.92rem; line-height: 1.55; color: var(--hp-ink-3); }
+
         {{-- Motion off: everything of this page's stands still. Not the shared arrival
            (es-fade-up), which ends visible only by running: stopped part way it would leave the
            headline's path unseen. --}}
@@ -1048,7 +1070,7 @@
         ];
 
         $requirements = ['PHP 8.2 or newer', 'MySQL 5.7+ or MariaDB 10.3+', 'Apache or Nginx', 'HTTPS', 'One cron entry'];
-        $dockerLines = ['git clone https://github.com/eventschedule/dockerfiles', 'cd dockerfiles', 'docker compose up --build -d'];
+        $dockerLines = ['git clone https://github.com/eventschedule/dockerfiles', 'cd dockerfiles', 'docker compose run --rm app php artisan key:generate --show', 'docker compose up --build -d'];
 
         // The files the page quotes, drifting under the hero. Each goes to where it is quoted.
         $lineup = [
@@ -1091,7 +1113,7 @@
             ],
             [
                 'q' => 'How do I install it on my own server?',
-                'a' => 'Three ways. Softaculous does a one-click install on a cPanel host, the eventschedule/dockerfiles repository has images and a Compose file, or you install by hand: PHP 8.2 or newer, MySQL or MariaDB, Apache or Nginx with rewrites, HTTPS, and one cron entry running the scheduler every minute. The installation guide walks through all of it.',
+                'a' => 'Three ways. Softaculous does a one-click install on a cPanel host, the eventschedule/dockerfiles repository has a Compose file that builds the app and runs it in four containers, or you install by hand: PHP 8.2 or newer, MySQL or MariaDB, Apache or Nginx with rewrites, HTTPS, and one cron entry running the scheduler every minute. The installation guide walks through all of it.',
             ],
             [
                 'q' => 'Can I take my data out again?',
@@ -1099,7 +1121,19 @@
             ],
             [
                 'q' => 'Do you accept contributions?',
-                'a' => 'Issues and pull requests are open on GitHub. Read the code first: it is a fairly ordinary Laravel 12 application with Vue on the front end, and the parts most people want to change - views, translations, integrations - are where you would expect to find them.',
+                'a' => 'Issues and pull requests are open on GitHub: open an issue to report a bug or suggest a feature, or send a pull request. Read the code first: it is a fairly ordinary Laravel 12 application with Vue on the front end, and the parts most people want to change - views, translations, integrations - are where you would expect to find them. A translation fix needs no pull request at all: an admin of a selfhosted install can correct the wording in the translation manager and share it from there.',
+            ],
+            [
+                'q' => 'How are releases made, and how do I stay up to date?',
+                'a' => 'Each release is a numbered version tag on GitHub, with release notes and a ready-to-run eventschedule.zip: Composer dependencies installed and front-end assets built, so the server needs neither Composer nor Node. A selfhosted install asks GitHub for the latest release once a day and offers it on the App Update screen, or you run php artisan app:update. A Docker install builds from the main branch unless you pin APP_REF to a release tag.',
+            ],
+            [
+                'q' => 'Can I use Event Schedule in a commercial product?',
+                'a' => 'Yes. The Attribution Assurance License allows use, modification and redistribution, and nothing in it limits commercial use. What it asks in return is attribution: the licence text travels with redistributed source, a packaged program shows the author name, "Event Schedule" and the project URL when it launches, and the name may not be used to promote a derived product without written permission. On a selfhosted install, including one run as a paid service, a small credit stays on public schedule pages.',
+            ],
+            [
+                'q' => 'Which open source event calendar should I use?',
+                'a' => 'It depends on what the events need. Event Schedule suits ticketing and a public calendar on ordinary PHP hosting or hosted with no server. Pretix is built around ticket sales, with an offline-capable scanner and a point of sale, and wants PostgreSQL and Redis. Hi.Events is ticketing with a per-ticket fee on its Cloud and a paid licence to remove its credit. Mobilizon is federated community events with no ticketing. The Events Calendar is a WordPress plugin, for a site that already runs WordPress.',
             ],
         ];
     @endphp
@@ -1432,6 +1466,36 @@
                     </p>
                 </div>
             </div>
+
+            {{-- The questions people bring to an open source licence, each answered from a clause of
+                 LICENSE, or for the credit, from the selfhost guide's own reading of it. --}}
+            @php
+                $licenceCases = [
+                    ['Run it for my own venue, club or company?', 'yes', 'Yes. Using it needs no permission and no fee. Public schedule pages carry a small Event Schedule credit, which the project asks you to leave in place.'],
+                    ['Change the code and keep the changes to myself?', 'yes', 'Yes. The grant covers use "with or without modification", and no clause asks you to publish what you changed or to send it back.'],
+                    ['Charge customers for a service built on it?', 'yes', 'Yes. Nothing in the licence limits commercial use. The same install runs as a multi-tenant service with your own prices, and the credit stays on every customer\'s public pages there too.'],
+                    ['Publish my own fork of the source?', 'cond', 'Yes, as long as the fork prominently displays the licence text (condition 1). That holds for the whole code or any part of it, changed or not.'],
+                    ['Ship it inside a packaged product or appliance?', 'cond', 'Yes, with two things attached (condition 2): the licence text in the product\'s documentation, and the author\'s name, "Event Schedule" and the project URL shown each time the program launches.'],
+                    ['Use the Event Schedule name to promote my fork?', 'no', 'Not without written permission. Condition 3 says neither the author\'s name nor any trademark may be used to endorse or promote a product derived from the code unless that permission was given first.'],
+                    ['Take the credit off the public pages?', 'no', 'Not on a selfhosted install: the credit is how the project reads its attribution condition, and no setting there removes it. Embedded calendar views do not carry it.'],
+                    ['Hold the authors responsible if something breaks?', 'no', 'No. The software comes "as is", with no warranty and no liability for damages, lost data or lost profits. Condition 4 also leaves you answerable for the rules of whoever runs the equipment you use, the licences of other software you combine with it, and local law, export and encryption rules included.'],
+                ];
+                $caseTags = ['yes' => ['Yes', 'is-yours'], 'cond' => ['Yes, with the notice', 'is-pro'], 'no' => ['No', 'is-ent']];
+            @endphp
+            <div id="license-cases">
+                <h3 class="hp-h3 os-sub-h" data-reveal>Can I&hellip;? <span class="hp-ink-grad">The licence, case by case.</span></h3>
+                <p class="os-sub-lead" data-reveal>
+                    The questions people ask before they build on open source code, each answered from the clause above that decides it.
+                </p>
+                <ul class="os-cases" data-reveal-group="70">
+                    @foreach ($licenceCases as [$caseQ, $caseKind, $caseA])
+                        <li data-reveal>
+                            <h4>{{ $caseQ }} <span class="os-pill {{ $caseTags[$caseKind][1] }}">{{ $caseTags[$caseKind][0] }}</span></h4>
+                            <p>{{ $caseA }}</p>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
         </div>
     </section>
 
@@ -1582,7 +1646,7 @@
                 <div class="os-way is-second" data-reveal>
                     <div class="os-way-top"><span>02</span><span class="os-pill">Compose</span></div>
                     <h3>Docker</h3>
-                    <p>Images and a Compose file live in their own repository, so the application repo stays free of deployment plumbing. The first build takes a few minutes while dependencies install and assets compile. On Alpine images the web user is the numeric UID 82, not www-data.</p>
+                    <p>Images and a Compose file live in their own repository, so the application repo stays free of deployment plumbing. The first build takes a few minutes while dependencies install and assets compile. Paste the key the third line prints into APP_KEY in .env before the first start, or a rebuild signs everybody out. On Alpine images the web user is the numeric UID 82, not www-data.</p>
                     <div class="os-cmd" dir="ltr">
                         <button type="button" class="os-copy" data-copy="{{ implode("\n", $dockerLines) }}" hidden>Copy</button>
                         @foreach ($dockerLines as $dockerLine)
@@ -1639,6 +1703,124 @@
                     </li>
                 </ul>
             </div>
+        </div>
+    </section>
+
+    {{-- ============================================================
+         7. Other open source event calendars
+         ============================================================ --}}
+    @php
+        // Every line about another project is taken from its comparison page
+        // (MarketingController: comparePretix, compareHiEvents, compareMobilizon,
+        // compareTheEventsCalendar), so this card and that page say the same thing.
+        $ourCard = [
+            'name' => 'Event Schedule',
+            'rows' => [
+                ['Licence', 'Attribution Assurance License'],
+                ['Selfhost on', 'PHP 8.2 or newer with MySQL or MariaDB: ordinary PHP hosting, a VPS or Docker'],
+                ['Tickets', 'Paid tickets, free registration, check-in and refunds; every feature on a selfhosted install'],
+                ['Calendar sync', 'Two-way with Google Calendar and Outlook, plus CalDAV'],
+                ['Hosted option', 'eventschedule.com, free to publish, priced tickets on Pro'],
+                ['Credit on a selfhost', 'A small credit on public pages, which no setting removes'],
+            ],
+        ];
+        $otherCards = [
+            [
+                'name' => 'Pretix',
+                'path' => '/pretix-alternative',
+                'rows' => [
+                    ['Licence', 'AGPLv3'],
+                    ['Selfhost on', 'PostgreSQL and Redis, with Docker as the documented route'],
+                    ['Tickets', 'Its focus: conferences, festivals and exhibitions, with a seating plan editor'],
+                    ['Calendar sync', 'None'],
+                    ['Hosted option', 'A paid hosted service with per-ticket pricing'],
+                ],
+                'pick' => 'the door needs a scanner that works offline, or a till at the counter.',
+            ],
+            [
+                'name' => 'Hi.Events',
+                'path' => '/hi-events-alternative',
+                'rows' => [
+                    ['Licence', 'AGPL-3.0 with additional terms'],
+                    ['Selfhost on', 'An all-in-one Docker image, PostgreSQL and Redis'],
+                    ['Tickets', 'Waitlists, browser check-in lists, add-ons, affiliate tracking, reserved seating'],
+                    ['Hosted option', 'Cloud with no monthly fee and a per-ticket fee'],
+                    ['Credit on a selfhost', 'A "Powered by Hi.Events" link, removed by a paid licence'],
+                ],
+                'pick' => 'you sell a few paid tickets a year and would rather pay per ticket than per month.',
+            ],
+            [
+                'name' => 'Mobilizon',
+                'path' => '/mobilizon-alternative',
+                'rows' => [
+                    ['Licence', 'AGPLv3'],
+                    ['Selfhost on', 'Elixir and PostgreSQL, or join an existing instance'],
+                    ['Tickets', 'None: participation and place limits only'],
+                    ['Calendar sync', 'ICS and RSS feeds, one way'],
+                    ['Hosted option', 'Instances run by others, federated over ActivityPub'],
+                ],
+                'pick' => 'your community lives on the fediverse and nobody pays to come.',
+            ],
+            [
+                'name' => 'The Events Calendar',
+                'path' => '/the-events-calendar-alternative',
+                'rows' => [
+                    ['Licence', 'GPLv2 or later'],
+                    ['Selfhost on', 'A plugin inside your own WordPress site'],
+                    ['Tickets', 'Through the Event Tickets plugin'],
+                    ['Calendar sync', 'Calendar export and one-way imports'],
+                    ['Hosted option', 'None: you run the WordPress site'],
+                ],
+                'pick' => 'your website is WordPress and events should wear its theme.',
+            ],
+        ];
+    @endphp
+    <section id="compared" class="hp-sec os-sec">
+        <div class="hp-wrap">
+            <div class="hp-head">
+                <span class="hp-kicker" data-reveal>06 / Others like it</span>
+                <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    Open source event calendars, <span class="hp-ink-grad">side by side.</span>
+                </h2>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.14s;">
+                    Event Schedule is one of several projects you can read and run yourself. They differ most in three places: what the licence asks of you, what the server needs, and whether they sell tickets at all. Here is each on those lines, with the one reason to pick it over us.
+                </p>
+            </div>
+
+            <div class="os-cmp" data-reveal-group="80">
+                <article class="os-way is-ours" data-reveal>
+                    <div class="os-way-top"><span class="os-pill is-pro">This page</span></div>
+                    <h3>{{ $ourCard['name'] }}</h3>
+                    <dl>
+                        @foreach ($ourCard['rows'] as [$cmpLabel, $cmpValue])
+                            <div><dt>{{ $cmpLabel }}</dt><dd>{{ $cmpValue }}</dd></div>
+                        @endforeach
+                    </dl>
+                    <div class="os-cmp-pick">
+                        <p><strong>Pick it when</strong> you want ticketing and a public calendar in one app that runs on the PHP hosting most people already have, or hosted with no server at all.</p>
+                    </div>
+                </article>
+                @foreach ($otherCards as $cmpCard)
+                    <article class="os-way" data-reveal>
+                        <h3>{{ $cmpCard['name'] }}</h3>
+                        <dl>
+                            @foreach ($cmpCard['rows'] as [$cmpLabel, $cmpValue])
+                                <div><dt>{{ $cmpLabel }}</dt><dd>{{ $cmpValue }}</dd></div>
+                            @endforeach
+                        </dl>
+                        <div class="os-cmp-pick">
+                            <p><strong>Pick it when</strong> {{ $cmpCard['pick'] }}</p>
+                            <a href="{{ marketing_url($cmpCard['path']) }}" class="hp-more">
+                                {{ $cmpCard['name'] }} compared
+                                <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+            <p class="os-cmp-foot" data-reveal>
+                Each line is a summary of the full comparison behind its link, where both projects are set out feature by feature. The other projects change too: check their own documentation before you commit to a server.
+            </p>
         </div>
     </section>
 

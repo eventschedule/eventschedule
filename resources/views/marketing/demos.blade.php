@@ -742,6 +742,23 @@
             .ex-blank:hover .ex-clip { transform: none; }
             .ex-bar.is-on .ex-bar-in { animation: none !important; }
         }
+
+        {{-- ---------- what to copy ---------- --}}
+        {{-- Plain cards of the kit, three to a row on a laptop, with the look across the foot so
+             the grid is whole at every width; each card's guide link sits on its bottom edge. --}}
+        .ex-copy-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: clamp(2rem, 4vw, 3.25rem); }
+        @media (min-width: 720px) { .ex-copy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1100px) { .ex-copy-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .ex-copy-grid > .is-wide { grid-column: 1 / -1; }
+        .ex-copy { display: flex; flex-direction: column; padding: clamp(1.25rem, 2.4vw, 1.75rem); }
+        .ex-copy-like { font-family: var(--hp-mono); font-size: 0.7rem; font-weight: 700; font-variation-settings: normal; letter-spacing: 0.08em; line-height: 1.5; text-transform: uppercase; color: var(--hp-ink-3); }
+        #hp .ex-copy h3 { margin-top: 0.6rem; font-size: 1.35rem; font-variation-settings: 'wght' 780; letter-spacing: -0.025em; line-height: 1.2; }
+        .ex-copy > p:not(.ex-copy-like) { margin-top: 0.55rem; font-size: 1rem; line-height: 1.55; color: var(--hp-ink-2); }
+        .ex-copy ul { display: grid; gap: 0.55rem; margin-top: 1rem; margin-bottom: 1.25rem; font-size: 0.95rem; line-height: 1.5; color: var(--hp-ink-2); }
+        @media (min-width: 900px) { .ex-copy ul.is-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; } }
+        .ex-copy li { display: flex; gap: 0.65rem; }
+        .ex-copy li::before { content: ""; flex: none; width: 0.3rem; height: 0.3rem; margin-top: 0.62em; border-radius: 999px; background: var(--hp-blue); }
+        .ex-copy .hp-more { margin-top: auto; align-self: flex-start; }
     </style>
 
     @php
@@ -956,6 +973,18 @@
             [
                 'q' => 'Can I see how one of these looks on a bigger screen?',
                 'a' => 'Open any of them on a laptop. These are the same public pages an audience gets, and the guest layout is responsive, so one schedule reflows to whatever screen it is opened on rather than being maintained twice.',
+            ],
+            [
+                'q' => 'Can I start my schedule from one of these examples?',
+                'a' => 'Not as a copy: a demo\'s settings, pictures and events stay its own, and a new schedule starts blank. Create a schedule of the same type, then borrow the shape the section above describes for the example closest to yours: how the events repeat, how they are split into sub-schedules and how people sign up. Inside your own schedule, Clone Event copies an event you already made, and saving events as reusable templates is a Pro feature.',
+            ],
+            [
+                'q' => 'Which schedule type should I choose: Talent, Venue or Curator?',
+                'a' => 'Pick by what the schedule is about, because the type cannot be changed afterwards. Talent is for a performer: a musician, a DJ or a speaker. Venue is for a place, such as a bar, a club, a theater or an event space, and adds the address. Curator is for someone who lists other people\'s events, such as a promoter, a blogger or a community guide, and adds Event Sources, which pull in what chosen talent and venue schedules publish. In the model town, Springfield Events is a Curator schedule and Moe\'s Tavern is a Venue.',
+            ],
+            [
+                'q' => 'Should my schedule show a calendar or a list?',
+                'a' => 'Calendar lays events on a month grid and suits a place with something on most nights, where the shape of the month matters. List shows each event as a full-width card in date order and suits events that each deserve space, or ones spread thinly across the year. A new schedule starts on List, the setting is Default Layout in the Style section, visitors can switch between the two on your page, and on a phone the calendar becomes a compact month with that month\'s events listed under it.',
             ],
             [
                 'q' => 'Can I put a calendar like this on my own website?',
@@ -1333,7 +1362,129 @@
     </section>
 
     {{-- ============================================================
-         4. Questions, the related strip, the claim
+         4. What to copy: the examples, read as settings to borrow
+         ============================================================ --}}
+    @php
+        // Phrased as "if yours is like this one": the hand-made examples live only on the hosted
+        // install, so nothing here says which settings any one of them uses. The setting names
+        // are the user guide's; the Springfield facts are DemoService's seeds.
+        $copyCards = [
+            [
+                'like' => ['Meditation Classes', 'Hiking Club', 'Karate Club'],
+                'title' => 'A class that repeats',
+                'lead' => 'Make each class one recurring event, not fifty separate ones, so a change of room or teacher is typed once.',
+                'points' => [
+                    'Choose Recurring beside Date & Time, then Daily or Weekly with the days it runs.',
+                    'Put a holiday under Exclude Dates instead of deleting the series: guests see nothing on that day.',
+                    'Turn on free registration with a capacity, which counts places per date.',
+                    'A morning and an evening class on the same day are two events: a series keeps one start time.',
+                ],
+                'link' => ['Recurring events in the guide', '/docs/creating-events#recurring'],
+            ],
+            [
+                'like' => ['Weekend Yoga Retreat', 'County Fairgrounds'],
+                'title' => 'A weekend, or a season',
+                'lead' => 'Decide first whether people come for the whole thing or pick parts of it.',
+                'points' => [
+                    'One booking for the whole weekend: one event with the Multi-day event switch on.',
+                    'Parts people choose between: each part its own event, so each has its own places and its own page.',
+                    'A season of different events: sub-schedules such as Fairs and Markets, so visitors filter to theirs.',
+                    'A multi-day event cannot also repeat, so a retreat held every spring is cloned each year with Clone Event.',
+                ],
+                'link' => ['Creating events in the guide', '/docs/creating-events#details'],
+            ],
+            [
+                'like' => ['Village Idiot', 'Sufficient Grounds', 'Battle of the Bands'],
+                'title' => 'A lineup that changes every week',
+                'lead' => 'The act is what people come for, so put the act on the event and give each night its own page.',
+                'points' => [
+                    'One event per night, because the lineup belongs to the event: Clone Event copies last week\'s and you change the act.',
+                    'Name each act under Participants. One that is not on Event Schedule gets a page of its own saying you listed them.',
+                    'With something on most nights, set the Default Layout to Calendar so the month reads at a glance.',
+                    'Sub-schedules such as Live Music and Open Mic let regulars filter to their night.',
+                ],
+                'link' => ['Participants in the guide', '/docs/creating-events#participants'],
+            ],
+            [
+                'like' => ['Nate\'s Woodworking Shop', 'Painting'],
+                'title' => 'A workshop with a few seats',
+                'lead' => 'Small groups fill up and people ask about the next one, so the page has to say how many places are left.',
+                'points' => [
+                    'Free registration with a capacity shows the places left, free on every plan.',
+                    'Charging for a seat is a ticket with a price, which is Pro, with no platform fee taken.',
+                    'For a date not on sale yet, switch on the "Notify me" card so people leave an email address.',
+                    'When a date sells out, the ticket waitlist (Pro) emails the next person in line when a place frees up, with a 24-hour head start.',
+                ],
+                'link' => ['Tickets in the guide', '/docs/tickets'],
+            ],
+            [
+                'like' => ['Pages Book Nook Shop', 'Community Youth Group'],
+                'title' => 'One place, many kinds of event',
+                'lead' => 'Readings, clubs and signings on one calendar turn into noise unless visitors can narrow it down.',
+                'points' => [
+                    'A sub-schedule per kind of event, each with a color and an address of its own you can share on its own.',
+                    'File each event under one of them; a sub-schedule sorts, it never hides.',
+                    'The sign-up panel on your page lets regulars leave an email address and hear about the new events you add.',
+                ],
+                'link' => ['Sub-schedules in the guide', '/docs/creating-schedules#customize-subschedules'],
+            ],
+            [
+                'like' => ['Springfield Events', 'Moe\'s Tavern', 'The Aztec Theater'],
+                'title' => 'A town guide over other people\'s venues',
+                'lead' => 'The model town is built the way a city guide is: one curator schedule listing what the venue schedules publish.',
+                'points' => [
+                    'Springfield Events is a Curator schedule, filed into Bars & Nightlife, Entertainment, Community, and Arts & Culture.',
+                    'Each venue is a Venue schedule with its own sub-schedules: Live Music, DJ Nights, Comedy, Open Mic and Special Events.',
+                    'A curator\'s Event Sources pull in everything a talent or venue schedule publishes, free on every plan.',
+                    'The Aztec Theater has a seating plan, which is allocated seating on a venue schedule: Enterprise.',
+                ],
+                'link' => ['Event sources in the guide', '/docs/creating-schedules#event-sources'],
+            ],
+        ];
+    @endphp
+    <section id="copy" class="hp-sec">
+        <div class="hp-wrap">
+            <div class="hp-head">
+                <span class="hp-kicker" data-reveal>Make it yours</span>
+                <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">What to copy <span class="hp-ink-grad">from each example.</span></h2>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
+                    Find the example closest to what you run, then borrow its shape: how the events are split, how they repeat and how people sign up. The look comes last, and it is the easiest part to change.
+                </p>
+            </div>
+
+            <div class="ex-copy-grid" data-reveal-group="80">
+                @foreach ($copyCards as $copyCard)
+                    <article class="hp-card ex-copy" data-reveal>
+                        <p class="ex-copy-like">If yours is like {{ implode(', ', array_slice($copyCard['like'], 0, -1)) }}{{ count($copyCard['like']) > 1 ? ' or ' : '' }}{{ last($copyCard['like']) }}</p>
+                        <h3>{{ $copyCard['title'] }}</h3>
+                        <p>{{ $copyCard['lead'] }}</p>
+                        <ul>
+                            @foreach ($copyCard['points'] as $copyPoint)
+                                <li>{{ $copyPoint }}</li>
+                            @endforeach
+                        </ul>
+                        <a href="{{ marketing_url($copyCard['link'][1]) }}" class="hp-more">{{ $copyCard['link'][0] }} {!! $arrow !!}</a>
+                    </article>
+                @endforeach
+
+                <article class="hp-card ex-copy is-wide" data-reveal>
+                    <p class="ex-copy-like">Whichever one you pick</p>
+                    <h3>Copying the look takes four settings</h3>
+                    <p>A new schedule does not start with any of these looks. Each is a field in the Style section of your schedule, and the preview shows it before you save.</p>
+                    <ul class="is-cols">
+                        <li>Header Image: upload your own wide picture, or pick one of the 31 preset headers.</li>
+                        <li>Background: Aurora, Gradient, Solid or Image. The Springfield schedules each use a two-color gradient.</li>
+                        <li>Accent Color: one color for buttons and highlights, with the text on it chosen to stay readable.</li>
+                        <li>Font Family: over 230 Google Fonts for your schedule's name, such as Bangers on Springfield Events and Alfa Slab One on Moe's Tavern.</li>
+                    </ul>
+                    <a href="{{ marketing_url('/docs/schedule-styling') }}" class="hp-more">Schedule styling in the guide {!! $arrow !!}</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    {{-- ============================================================
+         5. Questions, the related strip, the claim
          ============================================================ --}}
     <x-seo.faq-schema :items="$faqs" />
 

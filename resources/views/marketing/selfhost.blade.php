@@ -79,12 +79,14 @@
                 'lines' => [
                     ['cmd', 'git clone https://github.com/eventschedule/dockerfiles'],
                     ['cmd', 'cd dockerfiles'],
+                    ['cmd', 'docker compose run --rm app php artisan key:generate --show'],
+                    ['note', '# paste the key it prints into APP_KEY in .env'],
                     ['cmd', 'docker compose up --build -d'],
                     ['note', '# then open http://localhost:8080'],
                 ],
                 'exit' => 'Stack running',
                 'cta' => ['View the Docker setup', 'https://github.com/eventschedule/dockerfiles', true],
-                'copy' => "git clone https://github.com/eventschedule/dockerfiles\ncd dockerfiles\ndocker compose up --build -d",
+                'copy' => "git clone https://github.com/eventschedule/dockerfiles\ncd dockerfiles\ndocker compose run --rm app php artisan key:generate --show\ndocker compose up --build -d",
             ],
             [
                 'key' => 'manual',
@@ -1308,6 +1310,24 @@
         /* A class that sets display outranks the attribute, so say it once for the page. */
         #hp [hidden] { display: none !important; }
 
+        /* ---- Where it runs, and keeping it running --------------------
+           Plain cards of the page's own kind (.sh-card), three to a row on a
+           laptop. A line that answers "who is this for" sits at the foot of
+           each card, so the three feet line up. Neutral, not amber: these are
+           choices, and amber is spent on the six things that are yours. */
+        .sh-three { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; margin-top: clamp(2rem, 4vw, 3.25rem); }
+        @media (min-width: 1024px) { .sh-three { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .sh-three > .is-wide { grid-column: 1 / -1; }
+        .sh-card .hp-tag { align-self: flex-start; }
+        .sh-card .sh-dots { margin-top: 1.1rem; }
+        .sh-k { font-family: var(--hp-mono); font-size: 0.86em; font-variation-settings: normal; overflow-wrap: anywhere; color: var(--hp-ink); }
+        .sh-fit { margin-top: auto; }
+        .sh-fit > p { margin-top: 1.4rem; padding-top: 1.1rem; border-top: 1px solid var(--hp-line-2); font-size: 0.93rem; line-height: 1.5; color: var(--hp-ink-2); }
+        .sh-fit strong { color: var(--hp-ink); }
+        .sh-fit .hp-more { margin-top: 0.9rem; }
+        .sh-wide-note { max-width: 46rem; margin: 1.5rem auto 0; font-size: 0.95rem; line-height: 1.55; text-align: center; color: var(--hp-ink-2); text-wrap: balance; }
+        @media (min-width: 900px) { .sh-checks { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; } }
+
         @media (prefers-reduced-motion: reduce) {
             #hp .sh-chip,
             .sh-chip::before,
@@ -1387,7 +1407,7 @@
                 <div class="sh-stage-head" data-reveal>
                     <div class="sh-prompt" aria-hidden="true"><span>~/eventschedule</span> $ install</div>
                     <h2 class="hp-h2">Watch it <span class="text-gradient-selfhost">come up</span></h2>
-                    <p class="hp-lead">A shared cPanel host, a Docker stack or a plain zip on your own box. All three land on the same setup wizard. These are the real commands, the wizard's own fields and a real admin screen, with only the waiting cut out.</p>
+                    <p class="hp-lead">A shared cPanel host, a Docker stack or a plain zip on your own box. The zip finishes in the setup wizard; Docker skips it, because Compose sets up the database. These are the real commands, the wizard's own fields and a real admin screen, with only the waiting cut out.</p>
                 </div>
 
                 <div class="sh-methods" role="tablist" aria-label="Installation method">
@@ -1652,6 +1672,85 @@
                     </ul>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Where it runs: shared host, VPS or Docker                    -->
+    <!-- ============================================================ -->
+    @php
+        // Every line below is from the installation and Docker guides
+        // (marketing/docs/selfhost/installation, marketing/docs/selfhost/docker).
+        $hostingOptions = [
+            [
+                'title' => 'A shared host with cPanel',
+                'tag' => 'Least to look after',
+                'lead' => 'The hosting account you may already pay for, with PHP and MySQL included. The release zip ships with its dependencies installed and its assets built, so the server needs no Composer and no Node.',
+                'points' => [
+                    'Install with Softaculous in one click, or upload the zip and set the document root to its <code class="sh-k">public</code> directory.',
+                    'Add the every-minute job under Cron Jobs. A host that will not run one that often can be driven over HTTP instead: set <code class="sh-k">APP_CRON_SECRET</code> and have an outside cron service request <code class="sh-k">/translate_data?secret=...</code> once a minute.',
+                    'Check the host\'s limits. The release asks PHP for 5 MB image uploads and 90 seconds a request in <code class="sh-k">public/.user.ini</code>; under Apache with mod_php that file is ignored and php.ini decides.',
+                ],
+                'fit' => 'One venue, club or festival that wants its own calendar at its own address, and nobody whose job is a server.',
+                'link' => ['Open it in Softaculous', 'https://www.softaculous.com/apps/calendars/Event_Schedule', true],
+            ],
+            [
+                'title' => 'Your own VPS',
+                'tag' => 'Most control',
+                'lead' => 'A small Linux server where you install PHP, MySQL or MariaDB and Apache or Nginx yourself, then follow the Manual tab above. Every setting is in reach, and so is every chore.',
+                'points' => [
+                    'One crontab line runs the scheduler. The queue ships as <code class="sh-k">sync</code>, so mail and webhooks go out inside the request and there is no worker to babysit.',
+                    'The web-server user needs to write to <code class="sh-k">storage</code>, <code class="sh-k">bootstrap</code>, <code class="sh-k">public</code> and the <code class="sh-k">.env</code> file, and nothing else. Locked down like that, the Update button cannot replace the app\'s files, so you update with <code class="sh-k">sudo php artisan app:update</code> and hand storage back afterwards.',
+                    'Put a certificate on the domain before you open the wizard. Session cookies are secure-only, so over plain HTTP the wizard\'s Sign Up answers Page Expired and a login never sticks.',
+                ],
+                'fit' => 'Someone who already looks after a Linux server, or wants the install beside other sites on one.',
+                'link' => ['Read the installation guide', route('marketing.docs.selfhost.installation'), false],
+            ],
+            [
+                'title' => 'Docker Compose',
+                'tag' => 'Nothing on the host but Docker',
+                'lead' => 'The dockerfiles repository builds the app and starts four containers: PHP-FPM, Nginx on port 8080, MariaDB 11 and a scheduler that stands in for the cron entry. There is no setup wizard: you go straight to creating your account.',
+                'points' => [
+                    'Needs Docker Engine 24 or newer with the Compose v2 plugin, and a reverse proxy for HTTPS in front of port 8080 (Caddy, Nginx Proxy Manager, Traefik or SWAG).',
+                    'Fix <code class="sh-k">APP_KEY</code> in .env before the first start. The image makes a new key on every build, which signs everybody out and leaves saved credentials unreadable.',
+                    'Updating is a rebuild: <code class="sh-k">git pull</code>, <code class="sh-k">docker compose build --no-cache</code>, <code class="sh-k">docker compose up -d</code>. Not the Update button, whose changes the next container throws away. Set <code class="sh-k">APP_REF</code> to a release tag to stay on a release.',
+                ],
+                'fit' => 'Anyone who already runs other services in containers and wants this one to look the same.',
+                'link' => ['Read the Docker guide', route('marketing.docs.selfhost.docker'), false],
+            ],
+        ];
+    @endphp
+    <section id="hosting" class="hp-sec">
+        <div class="hp-wrap">
+            <div class="hp-head" data-reveal>
+                <div class="sh-prompt" aria-hidden="true"><span>~/eventschedule</span> $ where</div>
+                <h2 class="hp-h2">Where should a selfhosted event calendar <span class="text-gradient-selfhost">run?</span></h2>
+                <p class="hp-lead">Three kinds of server run it well. Pick the one you already know how to look after: the cheapest box is no bargain if nobody notices its cron job stopped.</p>
+            </div>
+
+            <div class="sh-three" data-reveal-group="110">
+                @foreach ($hostingOptions as $option)
+                    <article class="sh-card" data-reveal="panel">
+                        <span class="hp-tag">{{ $option['tag'] }}</span>
+                        <h3 class="hp-h3">{{ $option['title'] }}</h3>
+                        <p>{{ $option['lead'] }}</p>
+                        <ul class="sh-dots">
+                            @foreach ($option['points'] as $point)
+                                <li><span>{!! $point !!}</span></li>
+                            @endforeach
+                        </ul>
+                        <div class="sh-fit">
+                            <p><strong>Suits:</strong> {{ $option['fit'] }}</p>
+                            <a href="{{ $option['link'][1] }}" @if ($option['link'][2]) target="_blank" rel="noopener noreferrer" @endif class="hp-more sh-more">
+                                {{ $option['link'][0] }}
+                                <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $option['link'][2] ? $outPath : $arrowPath }}" /></svg>
+                            </a>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <p class="sh-wide-note" data-reveal>Whichever you pick, the database is MySQL 5.7 or newer, or MariaDB 10.3 or newer. It is the only database the app runs on, so a host that offers only PostgreSQL or SQLite will not do.</p>
         </div>
     </section>
 
@@ -2157,6 +2256,98 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- Keeping it running: updates, backups, security              -->
+    <!-- ============================================================ -->
+    @php
+        // From the installation guide's Updating, Troubleshooting and HTTPS sections, the
+        // Docker guide's Backups, the Backup & Restore section of the account settings guide,
+        // and AppUpdateService (the PHP check runs before any file is replaced).
+        $upkeep = [
+            [
+                'tag' => 'Updates',
+                'title' => 'What the Update button checks',
+                'lead' => 'Once a day the scheduler asks GitHub for the latest release, and Settings > App Update shows it beside your installed version. Update downloads it, replaces the app\'s files, runs any new migrations and clears the cached config, routes and views.',
+                'points' => [
+                    'It reads which PHP the new release needs, and stops before changing a single file if the web server\'s PHP, or the command-line PHP your cron job runs on, is older. Upgrade both, then update again.',
+                    'It also stops untouched when the web-server user cannot write every file of the app. Run <code class="sh-k">sudo php artisan app:update</code> on the server then. The command has no time limit, so it is also the way past an update that outruns PHP\'s max_execution_time.',
+                    'Everything under <code class="sh-k">storage/app</code>, uploads and custom translations included, survives. The <code class="sh-k">vendor</code> directory is replaced, so a package you added with Composer is gone.',
+                ],
+            ],
+            [
+                'tag' => 'Backups',
+                'title' => 'Three things, kept off the server',
+                'lead' => 'Nothing backs up a selfhosted install for you. Copy all three before every update and on a timer of your own, and keep them somewhere other than the server they came from.',
+                'points' => [
+                    'The database, with <code class="sh-k">mysqldump</code> (or <code class="sh-k">mariadb-dump</code> inside the Docker stack).',
+                    'The <code class="sh-k">storage</code> directory, where uploaded flyers, logos and photos live.',
+                    'The <code class="sh-k">.env</code> file. It holds <code class="sh-k">APP_KEY</code>, and a database restored without its key cannot read the payment and mail credentials saved in it.',
+                    'Per schedule, Settings > Backup & Restore exports a .zip, images optional, and imports it as a new schedule. It is the tool for moving one schedule; for a whole install, use the database dump.',
+                ],
+            ],
+            [
+                'tag' => 'Security',
+                'title' => 'Settings worth checking on day one',
+                'lead' => 'Most of these are one line in .env or the web server\'s config. Each closes a gap that a default or a hurried install leaves open.',
+                'points' => [
+                    'Run a current PHP patch release. The installation guide lists the versions that fix the PHP2Shell flaws.',
+                    'Point the document root at <code class="sh-k">public</code>, not the install folder. Set one level too high, the app also answers on <code class="sh-k">/public/</code> and tickets carry two different QR addresses.',
+                    'Behind a proxy or Cloudflare, set <code class="sh-k">TRUSTED_PROXIES</code>. Without it the app sees plain HTTP, which can loop redirects, and logs the proxy\'s address as every visitor\'s.',
+                    'Leave sign-up closed. After the first account it sends people to the login page; <code class="sh-k">ALLOW_REGISTRATION=true</code> lets anyone who registers create schedules on your server.',
+                    'Add both Cloudflare Turnstile keys to put a challenge in front of sign-in, checkout, bookings and guest submissions. With one key missing, the challenge is skipped without a warning.',
+                ],
+            ],
+        ];
+        $healthChecks = [
+            'Run <code class="sh-k">php artisan schedule:run</code> by hand. It lists what it ran, and any error it prints is one cron would have hit in silence.',
+            'Open the admin panel\'s Queue screen and look for the Scheduler card\'s last tick, a minute or two old.',
+            'Buy or register for a test event with your own address. <code class="sh-k">MAIL_MAILER</code> ships as <code class="sh-k">log</code>, so a missing confirmation usually means mail was never set up.',
+            'Open the test event\'s public page and check its images load. If they do not, the <code class="sh-k">public/storage</code> link is missing: fix the ownership and run <code class="sh-k">php artisan storage:link</code>.',
+        ];
+    @endphp
+    <section id="upkeep" class="hp-sec">
+        <div class="hp-wrap">
+            <div class="hp-head" data-reveal>
+                <div class="sh-prompt" aria-hidden="true"><span>~/eventschedule</span> $ uptime</div>
+                <h2 class="hp-h2">Running it in year two, <span class="text-gradient-selfhost">not just day one</span></h2>
+                <p class="hp-lead">The install takes an afternoon. Whether people still trust the calendar a year later comes down to updates, backups and a handful of settings. Here is what each one involves on this app.</p>
+            </div>
+
+            <div class="sh-three" data-reveal-group="110">
+                @foreach ($upkeep as $part)
+                    <article class="sh-card" data-reveal="panel">
+                        <span class="hp-tag">{{ $part['tag'] }}</span>
+                        <h3 class="hp-h3">{{ $part['title'] }}</h3>
+                        <p>{{ $part['lead'] }}</p>
+                        <ul class="sh-dots">
+                            @foreach ($part['points'] as $point)
+                                <li><span>{!! $point !!}</span></li>
+                            @endforeach
+                        </ul>
+                    </article>
+                @endforeach
+
+                <article class="sh-card is-wide" data-reveal="panel">
+                    <span class="hp-tag">After an install or an update</span>
+                    <h3 class="hp-h3">Four checks that prove it is healthy</h3>
+                    <p>An install missing its cron entry or its mail settings looks fine in a browser. These four take five minutes and catch both.</p>
+                    <ol class="sh-dots sh-checks">
+                        @foreach ($healthChecks as $check)
+                            <li><span>{!! $check !!}</span></li>
+                        @endforeach
+                    </ol>
+                    <div class="sh-fit">
+                        <p>Creating the first account means accepting the selfhosting terms: the software comes as is, the data and your customers are yours to look after, and Event Schedule cannot reach into your server to recover anything.</p>
+                        <a href="{{ route('marketing.self_hosting_terms') }}" class="hp-more sh-more">
+                            Read the selfhosting terms
+                            <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $arrowPath }}" /></svg>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- Should you: hosted beside selfhosted                        -->
     <!-- ============================================================ -->
     @php
@@ -2399,13 +2590,18 @@
         $selfhostFaqs = [
             ['q' => 'Is Event Schedule really free to selfhost?', 'a' => 'Yes. Event Schedule is open source under the Attribution Assurance License. There is no licence fee, no per-event charge and no platform fee on ticket sales. Your only costs are the server and the processing fees your payment provider charges.'],
             ['q' => 'Do I get the paid features when I selfhost?', 'a' => 'A selfhosted install is treated as Enterprise throughout the code, so ticketing, team members, the API, AI generation and everything else are included at no cost. Two features, auto import from URLs and one-click app updates, exist only on selfhosted installs. Per-schedule custom domains are the one thing that does not carry over, because they belong to hosted mode and your install already runs on a domain you chose.'],
-            ['q' => 'What do I need on the server?', 'a' => 'PHP 8.2 or newer with the usual extensions, MySQL 5.7+ or MariaDB 10.3+, Apache or Nginx with rewrites enabled, and an SSL certificate. Most shared hosts already meet this.'],
+            ['q' => 'What do I need on the server?', 'a' => 'PHP 8.2 or newer on a current patch release, with the BCMath, Ctype, Fileinfo, Intl, JSON, Mbstring, OpenSSL, PDO (MySQL), MySQLi, Tokenizer, XML, cURL, GD and Zip extensions. MySQL 5.7+ or MariaDB 10.3+, Apache or Nginx with rewrites and the document root on the public directory, an SSL certificate, and a way to run one command every minute. Most shared hosts already meet this. Composer and Node are not needed, because the release zip ships with its dependencies installed.'],
+            ['q' => 'Can I use PostgreSQL or SQLite instead of MySQL?', 'a' => 'No. MySQL 5.7 or newer, or MariaDB 10.3 or newer, is the only database Event Schedule runs on. The setup wizard asks only for a MySQL connection, and the Docker stack brings its own MariaDB 11.'],
+            ['q' => 'Can I run Event Schedule with Docker?', 'a' => 'Yes. The eventschedule/dockerfiles repository runs it with Docker Compose in four containers: the app on PHP-FPM, Nginx on port 8080, MariaDB 11 and a scheduler that replaces the cron entry. You need Docker Engine 24 or newer with Compose v2, and a reverse proxy such as Caddy or Traefik for HTTPS. Set a fixed APP_KEY in .env before the first start, and update by rebuilding the image rather than with the in-app Update button.'],
+            ['q' => 'How do I back up a selfhosted install?', 'a' => 'Back up three things: the database (mysqldump, or mariadb-dump in the Docker stack), the storage directory with the uploaded images, and the .env file, whose APP_KEY is needed to read the credentials saved in the database. Nothing does this for you, so put it on a timer and keep the copies off the server. To move a single schedule, Settings > Backup & Restore exports it as a .zip and imports it as a new schedule on any install.'],
+            ['q' => 'What are the selfhosting terms?', 'a' => 'Two things govern a selfhosted install. The code is under the Attribution Assurance License, which asks that the original attribution stays in place. The selfhosting terms, which you accept when you create the first account, cover your relationship with Event Schedule: you take the software as is, you own your data and are responsible for it, and you support your own customers. Event Schedule cannot access, change or remove data on your server.'],
             ['q' => 'Can I install it on shared hosting?', 'a' => 'Yes. If your host offers Softaculous, Event Schedule installs in one click with the database and configuration set up for you. Otherwise upload the release zip and point your document root at the public directory.'],
-            ['q' => 'How do updates work?', 'a' => 'When a new version is released, a notice appears in your admin panel. One click applies the update in seconds, database migrations included. No terminal access is required.'],
-            ['q' => 'Do I have to set up a cron job?', 'a' => 'Yes, one line: "* * * * * php /path/to/eventschedule/artisan schedule:run". It drives reminder emails, calendar sync and the release of expired ticket reservations. Without it those stop running.'],
+            ['q' => 'How do updates work?', 'a' => 'Once a day the scheduler asks GitHub for the latest release, and Settings > App Update shows it beside your installed version. One click downloads it, replaces the files and runs the database migrations, with no terminal needed. Before it changes anything it checks that your PHP is new enough for that release and that the web-server user can write every file of the app; if either fails, nothing is touched and the screen says why, and php artisan app:update on the server does the same job. A Docker install updates by rebuilding its image instead. Take a backup first.'],
+            ['q' => 'Do I have to set up a cron job?', 'a' => 'Yes, one line: "* * * * * php /path/to/eventschedule/artisan schedule:run". It drives reminder emails, scheduled newsletters, calendar sync and the release of expired ticket reservations. Without it those stop running, while the site itself looks perfectly healthy.'],
+            ['q' => 'Can I run it without a crontab?', 'a' => 'Yes. Set APP_CRON_SECRET in .env to a long random string, then have your control panel or any outside cron service request https://your-domain.com/translate_data?secret=YOUR_SECRET once a minute. It runs the same schedule as the cron entry. Use one or the other, never both, because each is a complete copy of the schedule. The Docker stack needs neither: its scheduler container does the job.'],
             ['q' => 'Which payment methods work on a selfhosted install?', 'a' => 'Stripe, PayPal, Payfast (for rand), Razorpay (for Indian rupees), Invoice Ninja, a payment link and cash, with no platform fee on any of them. Stripe runs on the platform keys in your .env, which is the only Stripe rail a selfhost has. PayPal and Razorpay can each be one account for the whole install, set with PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET or RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET, or each schedule owner can connect their own in Settings > Payment Methods. Neither has to call your server for an ordinary sale, so only their optional webhooks need a public address. A Stripe, PayPal or Razorpay sale can be refunded from the Sales page, in full or in part, and the money goes back through the provider.'],
-            ['q' => 'Which features need my own accounts or keys?', 'a' => 'Anything that talks to another service needs your own account with it, and that part does nothing until you add the credentials: an SMTP service for email, Stripe or PayPal for payments, a Google or Microsoft app for calendar sync, a Gemini or OpenAI key for the AI features, a Google Wallet issuer account for the Add to Google Wallet button on tickets, and a OneSignal app for push notifications.'],
-            ['q' => 'Does a selfhosted install send anything back to Event Schedule?', 'a' => 'Not unless an admin switches something on. There is no telemetry and no phone-home. Two optional features do send data to eventschedule.com, and both start off. Federation shares only your public events into the eventschedule.com listings, with every listing linking back to your own site, and a schedule is only listed once someone who manages it says yes. Translation sharing sends wording you corrected in the translation manager, when an admin presses Share or, with automatic sharing on, as it is saved.'],
+            ['q' => 'Which features need my own accounts or keys?', 'a' => 'Anything that talks to another service needs your own account with it, and that part does nothing until you add the credentials: an SMTP service or Amazon SES for email (or the server\'s own sendmail), Stripe, PayPal, Payfast or Razorpay for payments, a Google or Microsoft app for calendar sync, a Gemini or OpenAI key for the AI features, a Google Wallet issuer account and an Apple Developer Program membership for the wallet buttons on tickets, Google keys for maps and YouTube search, Twilio for phone verification and events created from WhatsApp, a OneSignal app for push notifications, Cloudflare Turnstile keys for the challenge on public forms, a Facebook app for Sign in with Facebook, an OpenStreetMap-style address search (MAP_GEOCODER_URL) for the venue map, and a Meta ad account for Boost. Everything else, CalDAV sync included, needs no keys of yours in .env.'],
+            ['q' => 'Does a selfhosted install send anything back to Event Schedule?', 'a' => 'Not unless an admin switches something on. There is no usage reporting and no phone-home. Two optional features do send data to eventschedule.com, and both start off. Federation shares only your public events into the eventschedule.com listings, with every listing linking back to your own site, and a schedule is only listed once someone who manages it says yes. Translation sharing sends wording you corrected in the translation manager, when an admin presses Share or, with automatic sharing on, as it is saved. Crash reports are a third opt-in: the Report errors to the developers box in the setup wizard, unticked unless you tick it (REPORT_ERRORS in .env), sends errors to Event Schedule\'s error tracker. The daily update check asks GitHub, not us, for the newest version number.'],
             ['q' => 'Can I run it as a white-label SaaS for my own customers?', 'a' => 'Yes. Set IS_HOSTED=true and the same install runs multi-tenant, with a subdomain per customer, Stripe subscription billing and your own prices on the Pro and Enterprise tiers. You set the prices and keep the revenue. One thing to know before you price it: the licence credit stays on the public pages of every customer you charge. It is a small chip in the corner, it sits on your free tier too, and it is the whole of what the software costs you.'],
             ['q' => 'Can I move from the hosted version to selfhosted?', 'a' => 'Yes. Backup and restore is built in, so you can export your schedule data, with images if you want them, and import it into your own install.'],
         ];
