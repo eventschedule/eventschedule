@@ -470,7 +470,7 @@
             },
             {
                 "question": "My list has 5,000 people. Should I switch?",
-                "answer": "Not for the newsletters, unless you connect your own mail server. The largest hosted allowance is 1,000 recipients a month, so one newsletter to 5,000 people cannot go out on it. With your own SMTP provider entered in the schedule's Email Settings the cap is lifted, and deliverability becomes yours to look after. If that does not appeal, keep Mailchimp for campaigns and use the schedule for event pages, sign-ups and tickets."
+                "answer": "Not for the newsletters, unless you connect your own mail server. The largest hosted allowance is 1,000 newsletter emails a month, each recipient counting as one, so one newsletter to 5,000 people cannot go out on it. With your own SMTP provider entered in the schedule's Email Settings the cap is lifted, and deliverability becomes yours to look after. If that does not appeal, keep Mailchimp for campaigns and use the schedule for event pages, sign-ups and tickets."
             },
             {
                 "question": "Can I keep using Mailchimp alongside Event Schedule?",
@@ -1372,7 +1372,7 @@
             {
                 "feature": "Newsletter to guests and followers",
                 "competitor": false,
-                "es": "Free, 10 recipients a month"
+                "es": "Free, 10 emails a month"
             }
         ],
         "tool_strengths": [
@@ -1993,7 +1993,7 @@
             },
             {
                 "title": "A list that hears about the next one",
-                "description": "Visitors can follow your schedule or leave an email address. Confirmed subscribers get an automatic digest when you publish new events, so next month does not begin with collecting addresses. Newsletters you write to that list count recipients per month: 10 on Free, 100 on Pro, 1,000 on Enterprise.",
+                "description": "Visitors can follow your schedule or leave an email address. Confirmed subscribers get an automatic digest when you publish new events, so next month does not begin with collecting addresses. Newsletters you write to that list draw on a monthly allowance of emails, each recipient counting as one: 10 on Free, 100 on Pro, 1,000 on Enterprise.",
                 "icon": "mail",
                 "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
                 "border": "border-cyan-200 dark:border-cyan-500/20",
