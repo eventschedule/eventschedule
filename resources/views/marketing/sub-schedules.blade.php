@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Sub-Schedules | Sort One Event Calendar Into Sections</x-slot>
-    <x-slot name="description">Sort one event calendar into sections like Live Music or Workshops, each with a colour, its own link and a place in the filter. Free, with no limit.</x-slot>
+    <x-slot name="description">Sub-schedules sort one event calendar into sections like Live Music or Workshops, each with a colour and a link. When to use them, categories or a new schedule.</x-slot>
     <x-slot name="breadcrumbTitle">Sub-Schedules</x-slot>
 
     <x-slot name="structuredData">
@@ -499,6 +499,13 @@
             outline-color: #7dd3fc !important;
         }
 
+        /* --- The comparison: four sorting tools side by side. Five columns do
+               not fit a phone, so the table keeps its width and the card scrolls
+               sideways instead of crushing every cell to one word a line. --- */
+        .es-sort-compare { min-width: 46rem; }
+        .es-sort-compare th[scope="row"] { width: 9.5rem; }
+        .es-sort-compare td { font-size: 0.85rem; line-height: 1.45; }
+
         @media (prefers-reduced-motion: reduce) {
             .es-sort-div, .es-sort-seg {
                 transition: none !important;
@@ -551,6 +558,22 @@
                 'a' => 'It is a named section inside one schedule. Create sub-schedules like "Live Music", "Comedy" and "Workshops", file each event under one of them, and your schedule gains a filter, a colour dot per event, and a direct URL for each section. Everything still lives on the same link.',
             ],
             [
+                'q' => 'What is the difference between a sub-schedule and a category?',
+                'a' => 'A sub-schedule is a section of your schedule: it has an address of its own (your-schedule.eventschedule.com/live-music), its own option in the filter, a newsletter segment of its ticket buyers, and each schedule that shows an event files it separately. A category is a label on the event itself, picked from a list of up to 32 that starts with 12 defaults. The search box on your schedule matches category names, and a category is linked only as a filtered view with a number in the address. Both can colour the dot beside an event, and when both do, the category wins. Use sub-schedules for the sections people go to, and categories for what kind of event it is.',
+            ],
+            [
+                'q' => 'Should I use sub-schedules or separate schedules?',
+                'a' => 'Use a sub-schedule when the strand shares your audience and only needs its own section, colour and link. Make a separate schedule when it needs something only a schedule has: its own followers, its own calendar feed, its own name and design, its own team or its own plan. A second venue across town, or a resident company with a following of its own, is a schedule. A curator schedule can then pull in both with event sources, so one combined calendar still exists. On eventschedule.com an account can own up to 50 schedules.',
+            ],
+            [
+                'q' => 'How many sub-schedules should a calendar have?',
+                'a' => 'There is no cap, but three to seven is the range where a visitor reads the whole dropdown at a glance. The filter only appears from two sub-schedules, and a section that holds one or two events a season reads 0 in most months of the calendar view, which looks like a closed section. Fold a thin strand into its neighbour, or leave those events unfiled: they still show under Show All.',
+            ],
+            [
+                'q' => 'Does renaming a sub-schedule change its link?',
+                'a' => 'No. Renaming keeps the address it already had. Only editing the slug itself, with Edit under the address, changes it, and then the old address no longer opens that section. So settle the slug before it goes on a poster, a QR code or a newsletter.',
+            ],
+            [
                 'q' => 'Can a sub-schedule hide events from the public?',
                 'a' => 'No, and this is worth being exact about. A sub-schedule stores a name, an English name, a URL slug and a colour, and nothing else. There is no visibility setting on it, so filing an event under one never takes it off your public schedule. If you want an event hidden, set its visibility instead. Draft keeps it members-only until you publish it and is free on every plan; Internal and Unlisted go further and are on the Enterprise plan.',
             ],
@@ -560,7 +583,7 @@
             ],
             [
                 'q' => 'How do visitors filter?',
-                'a' => 'A "Schedule" dropdown appears in the filter panel on your public calendar, listing every sub-schedule with a count beside it, plus a "Show all" option. The count is for the view the visitor is on: the month showing in the calendar, or the whole upcoming run in list view. It only appears once you have more than one sub-schedule, since a single divider is not a choice.',
+                'a' => 'A "Schedule" dropdown appears in the filter panel on your public calendar, listing every sub-schedule with a count beside it, plus a "Show All" option. The count is for the view the visitor is on: the month showing in the calendar, or the whole upcoming run in list view. It only appears once you have more than one sub-schedule, since a single divider is not a choice.',
             ],
             [
                 'q' => 'Can I link straight to one sub-schedule?',
@@ -584,6 +607,65 @@
             ],
         ];
 
+        // Four ways to sort, compared. Sourced: categories (docs creating-schedules
+        // #customize-categories: 12 defaults, 32 rows, colour wins the dot), custom fields
+        // (#customize-custom-fields: Pro, 10 per schedule, Show as filter, ?custom_N=),
+        // ?category=id (docs sharing #embed-parameters), the search box matching category
+        // but not sub-schedule (calendar.blade.php buildSearchHaystack), the 50-schedule cap
+        // (FEATURES.md), the sub-schedule segment (NewsletterSegment::resolveGroup) and the
+        // pass coverage (docs subscriptions).
+        $compareRows = [
+            ['What it is', 'A section of your schedule', 'A label on the event', 'One more fact you define, such as a room', 'A separate calendar at its own link'],
+            ['Per event', 'One on each schedule the event is on, filed by that schedule', 'One, the same wherever the event is listed', 'One value, or several with a Multi-select field', 'An event is made on one schedule; a curator schedule can list it too'],
+            ['Its own link', 'A clean path: /live-music', 'A filtered view: ?category= and a number', 'A filtered view: ?custom_1=room+a', 'Its own address'],
+            ['Colour dot', 'Yes, unless a category colour wins', 'Yes, and it wins', 'No', 'Its own colours and design'],
+            ['Filter and search', 'Schedule filter from two sub-schedules, plus one-tap buttons above the events', 'Category filter (one-tap buttons when there are no sub-schedules), and the search box finds it', 'A filter (on by default for dropdowns), and the search box finds it', 'Not needed: it is a page of its own'],
+            ['Followers and calendar feed', 'Shared with the whole schedule', 'Shared with the whole schedule', 'Shared with the whole schedule', 'Its own'],
+            ['Mail and passes', 'A newsletter segment of its ticket buyers, and a pass that covers it (Pro)', 'Neither', 'Neither', 'Its own followers, newsletters and passes'],
+            ['How many, what plan', 'No limit, free', 'Up to 32, free', 'Up to 10 per schedule, Pro', 'Up to 50 owned per account on eventschedule.com, each schedule on its own plan'],
+        ];
+
+        // Pick-when cards, one per tool in the table above.
+        $pickWhen = [
+            ['Sub-schedule', 'Free', 'Visitors choose between the strands before anything else, you want a link per strand to print, embed or mail, or you will write to one strand\'s buyers or sell a pass for it. On your public page, two or more sub-schedules also become a row of buttons above the events, one tap each.'],
+            ['Category', 'Free', 'You want to say what kind of event it is in a word the search box can find: Concerts, Education, Food & Drink. A category belongs to the event, so it reads the same on every schedule that lists it, and it is the natural second axis beside your sub-schedules.'],
+            ['Custom field', 'Pro', 'There is a third fact people narrow by that is neither the strand nor the kind of event: the room, the age range, the language, the level. A Multi-select field lets one event carry several values, which a sub-schedule never can.'],
+            ['Second schedule', 'Free', 'The strand has its own audience. People should be able to follow it without the rest, subscribe to its calendar alone, see its own name and design, or have it run by another team. That is a schedule, not a section.'],
+        ];
+
+        // Six planning steps. Step 4 is sourced from RoleController (a sub-schedule's slug is
+        // posted back on every save, so a rename keeps it) and the guest route (a
+        // sub-schedule answers to its current slug only, with no record of old ones).
+        $planSteps = [
+            ['Choose one question', 'Dividers answer the first question a visitor asks: what kind of night, which room, what level. An event takes one divider on your schedule, so a list that mixes two questions, "Jazz" beside "Main Room", leaves every jazz night in the main room with no obvious home. Pick one, and put the other in categories or, on Pro, a custom field.'],
+            ['Cut three to seven tabs', 'Fewer than two and the filter does not appear at all. More than seven or eight and visitors scroll a menu instead of choosing. The filter lists every sub-schedule with a count for the view, so a strand that holds two events a season shows 0 most months and reads like a closed room.'],
+            ['Name it in your visitors\' words', 'The name is what the filter, the buttons above your events and the browser tab of the section\'s own page say ("Live Music | Riverside Arts"). "Family Matinees" beats "FAM-SAT". Keep it short enough to read at a glance on a phone.'],
+            ['Settle the slug before you print', 'Renaming a sub-schedule keeps its address. Editing the slug changes it, and the old address then stops opening that section, so a poster, a QR code or last month\'s newsletter points somewhere else. Decide the slug first, then print.'],
+            ['Give colour to one axis', 'There are fourteen colours. Colour either the sub-schedules or the categories, not both: when both carry one, the category wins the dot, and the key you published stops matching. Give strands that share nights colours far apart, and never let colour carry the meaning alone, since the name is what a colour-blind visitor reads.'],
+            ['File the coming events in one sitting', 'Each event is filed from the Sub-schedule field on its own form, and a recurring event is one event, so a whole series moves at once. Go through what is coming before you announce the sections, so the first visitor to press a tab finds it full. On a curator schedule, choosing a sub-schedule for an event source files everything from it.'],
+        ];
+
+        // Dividers by kind of organizer: one axis each, and where the second one goes.
+        $organizerExamples = [
+            ['Music venue', 'Main Room, Back Bar, Courtyard', 'Genre as a category'],
+            ['Arts or community centre', 'Live Music, Comedy, Workshops, Film Club, Family', 'Age range as a custom field (Pro)'],
+            ['Dance or yoga studio', 'Beginner, Improvers, Advanced, Drop-in', 'Style as a category'],
+            ['Festival or conference', 'One per stage or track', 'Days need nothing: the calendar already sorts by date'],
+            ['Library', 'Children, Teens, Adults', 'Topic as a category'],
+            ['Sports league', 'One per division or age bracket', 'Team names in the event name, since a match has two teams and one divider'],
+            ['Curator of a city\'s events', 'One per neighbourhood, filled by event sources', 'Kind of event: the category each event already carries'],
+        ];
+
+        // The mistakes band.
+        $mistakes = [
+            ['A "Members only" divider', 'A sub-schedule has no visibility setting, so everything behind it is still public. Hide an event with its own visibility: Draft is free, Internal and Unlisted are on Enterprise.'],
+            ['A divider per month or per day', 'The calendar already sorts by date. A festival\'s Friday is a date, not a section; its stages or tracks are the sections.'],
+            ['A divider per team', 'A match has two teams and an event takes one divider on your schedule, so one side always loses. Divide by division or age bracket and put both teams in the event name.'],
+            ['Promising a feed per strand', 'Your schedule has one calendar feed and it carries every public event. Send people the strand\'s link instead, and if a strand truly needs its own subscribers, make it a schedule.'],
+            ['Colour on both lists', 'A category colour wins over a sub-schedule colour, so the key on your poster no longer matches the dots on the page. Colour one list and leave the other plain.'],
+            ['An "Other" divider', 'The catch-all grows into the biggest tab and tells nobody anything. Leave odd events unfiled: they still show under Show All.'],
+        ];
+
         $dotSections = [
             ['top', 'The drawer'],
             ['record', 'What it stores'],
@@ -594,6 +676,9 @@
             ['pro', 'On the Pro plan'],
             ['rest', 'Everything else'],
             ['who', 'Who sorts'],
+            ['choose', 'Which tool'],
+            ['plan', 'Planning'],
+            ['mistakes', 'Mistakes'],
             ['faq', 'Questions'],
             ['claim', 'Slide it in'],
         ];
@@ -902,7 +987,7 @@
                     <h3 class="es-sort-ink mb-4 text-lg font-bold">What the visitor sees</h3>
                     <div class="es-sort-select" aria-hidden="true">
                         <div class="es-sort-opt es-sort-opt-head">
-                            <span class="es-sort-ink flex-1">Show all</span>
+                            <span class="es-sort-ink flex-1">Show All</span>
                         </div>
                         @foreach ($dividers as [$sName, $sSlug, $sColor, $sCount])
                             <div class="es-sort-opt">
@@ -1201,7 +1286,162 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. Three steps                                               -->
+    <!-- 10. Which tool: sub-schedule, category, custom field, schedule -->
+    <!-- ============================================================ -->
+    <section id="choose" class="scroll-mt-24 border-t py-20 es-sort-rule lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-sort-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <p class="es-sort-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before you cut tabs</p>
+                <h2 class="es-balance es-sort-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Sub-schedule, category, or <span class="es-sort-accent">a second schedule?</span>
+                </h2>
+                <p class="es-sort-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Four tools sort events here, and they overlap just enough to cause trouble. A sub-schedule is a place visitors go. A category says what kind of event it is. A custom field records one more fact. A second schedule is a different audience. This is how they differ, side by side.
+                </p>
+            </div>
+
+            <div class="es-sort-card p-6 sm:p-8" data-reveal="panel">
+                <div class="overflow-x-auto">
+                    <table class="es-sort-table es-sort-compare">
+                        <caption class="sr-only">Sub-schedules, categories, custom fields and separate schedules compared</caption>
+                        <thead>
+                            <tr class="es-sort-tag">
+                                <th scope="col"><span class="sr-only">Question</span></th>
+                                <th scope="col">Sub-schedule</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Custom field</th>
+                                <th scope="col">Second schedule</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($compareRows as [$cmpLabel, $cmpSub, $cmpCat, $cmpField, $cmpSchedule])
+                                <tr>
+                                    <th scope="row" class="es-sort-ink align-top text-sm font-bold">{{ $cmpLabel }}</th>
+                                    <td class="es-sort-ink align-top">{{ $cmpSub }}</td>
+                                    <td class="es-sort-muted align-top">{{ $cmpCat }}</td>
+                                    <td class="es-sort-muted align-top">{{ $cmpField }}</td>
+                                    <td class="es-sort-muted align-top">{{ $cmpSchedule }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="es-sort-muted mt-6 border-t pt-4 text-sm es-sort-rule">
+                    None of the four hides an event. That is the event's own visibility, whichever way you sort.
+                </p>
+            </div>
+
+            <div class="mt-6 grid gap-6 md:grid-cols-2" data-reveal-group="100">
+                @foreach ($pickWhen as [$pickName, $pickPlan, $pickBody])
+                    <div class="es-sort-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-sort-ink text-lg font-bold">Pick a {{ strtolower($pickName) }} when</h3>
+                            <span class="es-sort-plan @if ($pickPlan === 'Pro') es-sort-plan-pro @endif">{{ $pickPlan }}</span>
+                        </div>
+                        <p class="es-sort-muted text-sm leading-relaxed">{{ $pickBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-sort-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Running two schedules does not mean losing the combined calendar: a curator schedule can list the events of both with event sources, which are free, and file each source behind a divider of its own. Categories and custom fields are set up beside sub-schedules, in the
+                <a href="{{ route('marketing.docs.creating_schedules') }}#customize-categories" class="es-sort-link font-medium hover:underline">Customize section of the schedule guide</a>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 11. Planning the dividers                                     -->
+    <!-- ============================================================ -->
+    <section id="plan" class="scroll-mt-24 border-t py-20 es-sort-rule lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-sort-num mb-6" data-reveal aria-hidden="true"><span>11</span></div>
+                <p class="es-sort-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Field guide</p>
+                <h2 class="es-balance es-sort-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    How to cut dividers <span class="es-sort-accent">that hold.</span>
+                </h2>
+                <p class="es-sort-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Sections are cheap to make and costly to change once people have the links. Half an hour of planning before the first one saves a season of moving events around.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($planSteps as $planIndex => [$planTitle, $planBody])
+                    <div class="es-sort-card flex flex-col p-6" data-reveal="panel">
+                        <div class="es-sort-accent mb-3 font-mono text-2xl font-black">{{ str_pad($planIndex + 1, 2, '0', STR_PAD_LEFT) }}</div>
+                        <h3 class="es-sort-ink mb-2 text-lg font-bold">{{ $planTitle }}</h3>
+                        <p class="es-sort-muted text-sm leading-relaxed">{{ $planBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-sort-card mt-10 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-sort-ink mb-2 text-xl font-bold">Dividers by kind of organizer</h3>
+                <p class="es-sort-muted mb-6 text-sm">One question per list. The middle column is the sub-schedules; the last is where the second question goes.</p>
+                <table class="es-sort-table">
+                    <caption class="sr-only">Example sub-schedules for seven kinds of organizer, and where the second way of sorting goes</caption>
+                    <thead>
+                        <tr class="es-sort-tag">
+                            <th scope="col">Organizer</th>
+                            <th scope="col">Sub-schedules</th>
+                            <th scope="col" class="hidden sm:table-cell">The other axis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($organizerExamples as [$exWho, $exTabs, $exOther])
+                            <tr>
+                                <th scope="row" class="es-sort-ink align-top text-sm font-bold">{{ $exWho }}</th>
+                                <td class="align-top">
+                                    <span class="es-sort-mono es-sort-ink">{{ $exTabs }}</span>
+                                    <span class="es-sort-muted mt-1 block text-xs sm:hidden">{{ $exOther }}</span>
+                                </td>
+                                <td class="es-sort-muted hidden align-top text-sm sm:table-cell">{{ $exOther }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 12. Six mistakes (fixed-dark band)                            -->
+    <!-- ============================================================ -->
+    <section id="mistakes" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-sort-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 70% 30%, rgba(125, 211, 252, 0.12), rgba(125, 211, 252, 0) 60%); opacity: 0.5;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-sort-num mb-6" data-reveal aria-hidden="true"><span>12</span></div>
+                    <p class="es-sort-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What goes wrong</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Six dividers <span class="es-sort-lit">to leave out.</span>
+                    </h2>
+                    <p class="es-sort-band-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Each of these looks tidy on the day it is made and causes a problem within a month.
+                    </p>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                    @foreach ($mistakes as [$mistakeTitle, $mistakeBody])
+                        <div class="es-sort-card flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-sort-band-ink mb-2 text-lg font-bold">{{ $mistakeTitle }}</h3>
+                            <p class="es-sort-band-muted text-sm leading-relaxed">{{ $mistakeBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 13. Three steps                                               -->
     <!-- ============================================================ -->
     <section class="scroll-mt-24 border-t py-20 es-sort-rule lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -1341,7 +1581,7 @@
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-sort-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <div class="es-sort-num mb-6" data-reveal aria-hidden="true"><span>13</span></div>
                 <h2 class="es-balance es-sort-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

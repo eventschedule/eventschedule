@@ -602,8 +602,24 @@
                 'a' => 'Three lists, and a newsletter can reach only two of them. Subscribers gave your schedule an email address and confirmed it, or ticked the box at checkout: they get the automatic digest of new events, at most one every three days, and any newsletter you send them. Account followers pressed Follow while signed in, and hear from you only through a newsletter. The interest list belongs to one event, one date at a time: an address left under "Tell me when tickets go on sale" gets an email when tickets go on sale and a reminder shortly before it starts, plus any change or cancellation notice you send. It is not a subscription to your schedule, it never counts against your allowance, and no newsletter segment can reach it.',
             ],
             [
+                'q' => 'What should an event newsletter include?',
+                'a' => 'A subject that names the event or the month, a preview line that adds the second reason to open, one short paragraph about the thing you most want people to do, a button for it, and then the events themselves with dates, prices and links. In the builder that is a Heading, a Text block, a Button and an Events block, with your social links at the foot. Leave out the welcome paragraph and the list of everything you did last month: the reader opened it to find out what is on and how to go.',
+            ],
+            [
+                'q' => 'How often should I send an event newsletter?',
+                'a' => 'Once a month is the rhythm most event lists can keep, with an extra send only when something is worth it: tickets going on sale, a date close to selling out, an added date. Weekly suits a schedule whose programme changes every week. Whatever you pick, keep it regular, and remember that subscribers already get the automatic digest when you publish new public events, so a newsletter should add something the digest cannot.',
+            ],
+            [
+                'q' => 'Can a newsletter send itself every month?',
+                'a' => 'Yes, on every plan. In Review and send choose Schedule for later and then Repeat, every week or every month. Each copy works its events out when it goes, so pair it with a date range in the Events block, such as the rest of the month it is sent in, and write {month} in the subject to have each copy name its month. A send is skipped, and the owner told why, when there is nothing to list, nobody to send to or not enough allowance left. A repeat that could never fit your plan is refused when you set it up: a weekly one is checked as five sends a month.',
+            ],
+            [
+                'q' => 'Can I email only people who have not bought a ticket yet?',
+                'a' => 'No. Segments add people together and none of them takes buyers out, so a "last tickets" newsletter to everyone also reaches the people who already have one. Write a line for them ("Already booked? See you on Friday") rather than leaving them wondering whether their ticket counts. The reverse works: the Ticket Buyers segment, narrowed to one event, reaches the people who ordered for it, including orders that were never paid.',
+            ],
+            [
                 'q' => 'How many newsletters can I send?',
-                'a' => 'The limits count recipients rather than sends: a newsletter to 100 followers uses 100 of the monthly allowance. The free plan includes 10 newsletter emails per month per schedule, the Pro plan increases this to 100, and Enterprise to 1,000. A selfhosted install has no limit, and neither does a schedule that sends through its own SMTP server.',
+                'a' => 'The limits count recipients rather than sends: a newsletter to 100 followers uses 100 of the monthly allowance, and your team members, who receive every newsletter, count too. The free plan includes 10 newsletter emails per month per schedule, the Pro plan increases this to 100, and Enterprise to 1,000. A selfhosted install has no limit, and neither does a schedule that sends through its own SMTP server.',
             ],
             [
                 'q' => 'Is the newsletter builder a paid feature?',
@@ -611,7 +627,7 @@
             ],
             [
                 'q' => 'How does email deliverability work?',
-                'a' => 'Event Schedule handles email delivery infrastructure for you, and every message carries one-click unsubscribe headers, a bulk precedence header and a reply-to address pointing at your schedule. Any schedule can also configure its own SMTP server for maximum deliverability and branding control, which removes the monthly recipient limit.',
+                'a' => 'Event Schedule handles email delivery infrastructure for you, and every message carries one-click unsubscribe headers, a bulk precedence header and a reply-to address pointing at your schedule\'s contact email when it has one. Any schedule can also configure its own SMTP server, which sends from your own From Name and From Address and removes the monthly recipient limit. If you do, set up SPF, DKIM and DMARC records for the sending domain, use an address on a domain you own rather than a free mailbox, and mail only people who asked to hear from you.',
             ],
             [
                 'q' => 'Can I see who opened it?',
@@ -623,6 +639,71 @@
             ],
         ];
 
+        // Subject lines: weak, better, and why. The third row is sourced from
+        // NewsletterEmail::envelope(): without the schedule's own email settings the
+        // From name is the platform's (mail.from.name); the schedule is the Reply-To.
+        $subjectRows = [
+            ['November newsletter', 'Ember & Ash on Friday, and four more nights', 'It names the thing inside, not the envelope it came in.'],
+            ['Don\'t miss out!!!', 'Last 30 tickets for Saturday\'s matinee', 'A number and a day are a reason to open it now. Capitals and exclamation marks are a reason to filter it.'],
+            ['Exciting news!', 'Riverside Arts: the 2027 season is on sale', 'Unless your own email settings set the From Name, the sender line is not your schedule\'s name, so the subject has to say who it is from.'],
+            ['What\'s on', 'What\'s on in {month}', 'In a repeating newsletter, each copy names the month its events are in.'],
+        ];
+
+        // A monthly programme, top to bottom: the default block set, re-ordered.
+        $anatomy = [
+            ['Profile image', 'As the first block it becomes the masthead: your logo and your schedule\'s name.'],
+            ['Heading', 'What\'s on in {month}. It copies the subject until you type in it.'],
+            ['Text', 'Two sentences on the one night you most want filled. No welcome paragraph.'],
+            ['Button', 'Book Ember & Ash. One button, for that one thing.'],
+            ['Events', 'The rest of the month it is sent in, as cards: dates, prices or Sold Out, and links.'],
+            ['Social links', 'Already filled in from your schedule.'],
+        ];
+
+        // Six sends most event lists need. Segment behaviour from NewsletterSegment
+        // (no segment subtracts; Ticket Buyers and Waitlist narrow to one event; the
+        // sub-schedule segment is that strand's buyers) and docs newsletters #recipients
+        // (everyone = followers + email subscribers; buyers are not in it).
+        $sendPlan = [
+            ['The monthly programme', 'Everyone: your followers and email subscribers', 'Set it to repeat on the 1st, with the Events block on the rest of the month it is sent in and {month} in the subject.'],
+            ['Tickets on sale', 'Everyone, plus Ticket Buyers to reach past bookers who never signed up', 'Subscribers also get the automatic digest of new events, so say what the digest cannot: who, why this one, what sells first.'],
+            ['Last call', 'Everyone, or the Sub-schedule segment for one strand\'s buyers', 'No segment leaves out people who already bought, so give them a line of their own.'],
+            ['A date added', 'Waitlist, narrowed to that event', 'The people who could not get in are the likeliest to book the new date. Send it the day the date goes up.'],
+            ['Thank you, and the next one', 'Ticket Buyers, narrowed to that event', 'It includes cancelled, refunded and abandoned orders, so word it for anyone who booked or nearly did.'],
+            ['Press and partners', 'A manual list', 'Keep it apart from your audience, so a press note never lands in a fan\'s inbox.'],
+        ];
+
+        // What a month of sending costs, in recipients. The weekly rows count five
+        // sends because that is how a weekly repeat is checked
+        // (NewsletterController::repeatTooBig). Limits from Role::newsletterLimit().
+        $planFits = function (int $perMonth): string {
+            foreach ([['Free', 10], ['Pro', 100], ['Enterprise', 1000]] as [$fitName, $fitLimit]) {
+                if ($perMonth <= $fitLimit) {
+                    return $fitName;
+                }
+            }
+            return 'Own email settings';
+        };
+        $budgetRows = [
+            ['A new schedule', 9, 'Monthly', 1],
+            ['A weekly class', 20, 'Weekly repeat', 5],
+            ['A small venue', 45, 'Monthly, plus one extra newsletter', 2],
+            ['The same venue, a year on', 60, 'Monthly, plus one extra newsletter', 2],
+            ['An arts centre', 300, 'Monthly', 1],
+            ['A busy club night', 400, 'Weekly repeat', 5],
+        ];
+
+        // Deliverability, in the order it matters. Own email settings and the DNS
+        // records: docs creating-schedules #integrations-email. Confirmed sign-ups:
+        // docs newsletters #email-subscribers. Failed and Unsubscribed: #analytics.
+        $deliverTips = [
+            ['Send from a domain you own', 'Your own email settings send from a From Name and From Address you choose. Put that address on a domain you own, not a free mailbox, and add the SPF, DKIM and DMARC records your mail provider gives you. Those three records are what tell an inbox the mail really is yours.'],
+            ['Mail only people who asked', 'The sign-up form mails a confirmation link and nobody is sent anything until it is clicked, which keeps typed-in strangers off your list. An old spreadsheet is the risky part: import only people who agreed to hear from you, because complaints from people who did not are what land the next send in spam.'],
+            ['Read Failed and Unsubscribed', 'Every send\'s statistics count the messages the mail server could not deliver and the people who left through that newsletter\'s link. Delete failed addresses from your manual lists. An unsubscribe rate that climbs is the list telling you that you send too often or off topic.'],
+            ['Send yourself a test, every time', 'A test goes to you and does not come off the allowance. Look at the three things that most often differ from the preview: the images, the links and dark mode.'],
+            ['Words, not one big picture', 'A newsletter that is a single image arrives blank wherever images are blocked, and an open is counted by an image, so those readers never show as opened. Keep the facts in text and give every image its alt text.'],
+            ['Keep a rhythm', 'A list that hears from you every month remembers who you are. One that hears from you twice a year has forgotten signing up, and some of them will press Report spam instead of Unsubscribe.'],
+        ];
+
         $dotSections = [
             ['top', 'The send'],
             ['rails', 'Two rails'],
@@ -631,6 +712,9 @@
             ['letter', 'The letter'],
             ['receipt', 'The returns'],
             ['run', 'How a send runs'],
+            ['write', 'Writing it'],
+            ['plan', 'Who and how often'],
+            ['inbox', 'Reaching the inbox'],
             ['faq', 'Questions'],
             ['claim', 'Get started'],
         ];
@@ -891,7 +975,7 @@
                         <div class="es-send-wrap">
                             <table class="es-send-table">
                                 <caption class="es-send-muted mb-4 text-sm">
-                                    Recipients each month, per schedule. Nothing else in the newsletter
+                                    Newsletter emails each month, one per recipient, per schedule. Nothing else in the newsletter
                                     builder is gated by plan.
                                 </caption>
                                 <thead>
@@ -980,7 +1064,7 @@
                             @foreach ([
                                 ['Email subscribers', 'Everyone who confirmed an address on your sign-up form or ticked the box at checkout.', null],
                                 ['All followers', 'People who pressed Follow with an account. Subscribers are their own segment, so nobody lands in both.', null],
-                                ['Ticket buyers', 'Narrow to one event, or to a range of order dates.', null],
+                                ['Ticket buyers', 'Everyone who started an order or registered, or narrow it to one event. Cancelled, refunded and unfinished orders are included.', null],
                                 ['A manual list', 'Typed in, pasted in bulk, or uploaded as a CSV of up to ten thousand rows.', null],
                                 ['Sub-schedule buyers', 'People who bought into one strand of your schedule.', null],
                                 ['Waitlist', 'People waiting on a full registration or a sold-out ticket. The ticket waitlist itself is a Pro feature.', null],
@@ -999,7 +1083,7 @@
 
                         <p class="es-send-muted es-send-rule-t mt-5 pt-4 text-xs">
                             Save a segment once and pick it from a list next time. Imported addresses
-                            join your followers, so they are yours to reach again.
+                            go into a manual segment, not into your followers, so pick that segment to reach them again.
                         </p>
 
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1247,6 +1331,265 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 7b. Writing it (07)                                          -->
+    <!-- ============================================================ -->
+    <section id="write" class="es-send-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-send-die mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-send-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Writing it</p>
+                <h2 class="es-balance es-send-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    An event newsletter <span class="es-send-grad">people open</span>.
+                </h2>
+                <p class="es-send-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The reader wants two things: what is on, and how to go. Everything in a good event
+                    newsletter serves one of them, starting with the line they see before they open it.
+                </p>
+            </div>
+
+            <div class="grid items-start gap-6 lg:grid-cols-5">
+                {{-- min-w-0, as in section 02: the table inside must not size the track. --}}
+                <div class="min-w-0 lg:col-span-3">
+                    <div class="es-send-card p-6 sm:p-7" data-reveal="panel">
+                        <h3 class="es-send-ink mb-1 text-lg font-bold">The subject line does the selling</h3>
+                        <p class="es-send-muted mb-5 text-sm">
+                            A phone shows the start of it and little more, so the important words go first. The
+                            preview text is the second line an inbox shows; leave it empty and it is the opening
+                            of your first text block, so either write it or make that opening worth reading.
+                        </p>
+                        <div class="es-send-wrap">
+                            <table class="es-send-table">
+                                <caption class="sr-only">Weak event newsletter subject lines, better versions, and why</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Instead of</th>
+                                        <th scope="col">Write</th>
+                                        <th scope="col">Why</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($subjectRows as [$subWeak, $subStrong, $subWhy])
+                                        <tr>
+                                            <td class="whitespace-nowrap">{{ $subWeak }}</td>
+                                            <th scope="row" class="es-send-accent">{{ $subStrong }}</th>
+                                            <td>{{ $subWhy }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="es-send-muted es-send-rule-t mt-4 pt-4 text-xs">
+                            {month} works in the subject, the preview text, a heading, a text block and a button,
+                            in any newsletter. To find out which subject your own list prefers, an A/B test sends
+                            two to a sample first, though on a list of a few dozen the difference is mostly noise.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
+                        <div class="es-tilt-inner es-send-sheet">
+                            <p class="es-send-muted es-send-micro mb-3 font-bold uppercase tracking-[0.18em]">A monthly programme, top to bottom</p>
+                            <div class="space-y-2">
+                                @foreach ($anatomy as [$aName, $aWhat])
+                                    <div class="es-send-sub px-3.5 py-2.5">
+                                        <p class="es-send-accent es-send-micro font-bold uppercase tracking-[0.14em]">{{ $aName }}</p>
+                                        <p class="es-send-ink mt-0.5 text-sm">{{ $aWhat }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="es-send-muted mt-4 text-xs">A new newsletter starts with all of these but the Button, plus a second text block; the profile image, header banner and social links are there when your schedule has them.</p>
+                            <div class="es-glare" aria-hidden="true"></div>
+                            <div class="es-ring-glow" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-3" data-reveal-group="100">
+                <div class="es-send-card flex h-full flex-col p-6" data-reveal>
+                    <h3 class="es-send-ink mb-2 text-lg font-bold">Lead with one thing</h3>
+                    <p class="es-send-muted text-sm">
+                        Open on the night you most need to fill, the one with a deadline or the one people
+                        will talk about. A newsletter that opens with "Hello and welcome to our November
+                        update" spends the only line everybody reads on nothing.
+                    </p>
+                </div>
+                <div class="es-send-card flex h-full flex-col p-6" data-reveal>
+                    <h3 class="es-send-ink mb-2 text-lg font-bold">Let the Events block list the rest</h3>
+                    <p class="es-send-muted text-sm">
+                        Do not type dates and prices into text: the Events block reads them from your schedule,
+                        shows Sold Out when a date is gone, and leaves out drafts, unlisted events and anything
+                        already over. Pick a window (the next 7 days, the next 30, the rest of the month, the
+                        whole of next month) and it is worked out when the newsletter goes, not when you wrote it.
+                    </p>
+                </div>
+                <div class="es-send-card flex h-full flex-col p-6" data-reveal>
+                    <h3 class="es-send-ink mb-2 text-lg font-bold">One button, for one action</h3>
+                    <p class="es-send-muted text-sm">
+                        Three buttons asking for three things get fewer clicks than one asking for one. Give the
+                        Button block to the thing you led with; every event in the list already links to its own
+                        page, and the top ten links on the statistics page will show you what people chose.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7c. Who and how often (08)                                   -->
+    <!-- ============================================================ -->
+    <section id="plan" class="es-send-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-send-die mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-send-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who and how often</p>
+                <h2 class="es-balance es-send-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Six sends, <span class="es-send-grad">and who gets each</span>.
+                </h2>
+                <p class="es-send-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most event lists need the same handful of newsletters a season. Each goes to a different
+                    set of people, and choosing the right one is most of what makes a list stay subscribed.
+                </p>
+            </div>
+
+            <div class="es-send-card p-6 sm:p-7" data-reveal="panel">
+                <div class="es-send-wrap">
+                    <table class="es-send-table">
+                        <caption class="es-send-muted mb-4 text-sm">
+                            With no segment ticked, a newsletter goes to everyone: your followers and email
+                            subscribers together. Ticket buyers who never signed up are not part of it.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">The send</th>
+                                <th scope="col">Send it to</th>
+                                <th scope="col">Worth knowing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($sendPlan as [$spSend, $spTo, $spNote])
+                                <tr>
+                                    <th scope="row">{{ $spSend }}</th>
+                                    <td>{{ $spTo }}</td>
+                                    <td>{{ $spNote }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-4 grid gap-4 lg:grid-cols-5">
+                <div class="es-send-card flex flex-col p-6 sm:p-7 lg:col-span-2" data-reveal="panel">
+                    <h3 class="es-send-ink mb-3 text-lg font-bold">A rhythm you can keep</h3>
+                    <p class="es-send-muted mb-3 text-sm">
+                        Once a month is the cadence most event lists hold for years: a programme on the
+                        1st, and an extra send only when there is news, such as tickets on sale, a date close
+                        to selling out or a date added. Weekly suits a schedule whose programme changes every
+                        week, like a club night or a run of classes.
+                    </p>
+                    <p class="es-send-muted text-sm">
+                        A newsletter can repeat itself every week or every month, on your schedule's clock.
+                        Each copy is worked out when it goes, and a copy with no events to list, nobody to
+                        send to or no allowance left is skipped, with an email to the owner saying why.
+                    </p>
+                    <a href="{{ route('marketing.docs.newsletters') }}#repeating" class="es-send-accent mt-auto inline-flex items-center pt-5 text-sm font-semibold hover:underline">
+                        Repeating newsletters in the guide
+                        <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="es-send-card min-w-0 p-6 sm:p-7 lg:col-span-3" data-reveal="panel">
+                    <h3 class="es-send-ink mb-1 text-lg font-bold">What a month of sending needs</h3>
+                    <p class="es-send-muted mb-4 text-sm">
+                        People on the list, team members included, times sends in the month. A weekly repeat is
+                        checked as five sends, because a month can hold five weeks, and one that could never fit
+                        is refused when you set it up.
+                    </p>
+                    <div class="es-send-wrap">
+                        <table class="es-send-table">
+                            <caption class="sr-only">Newsletter emails a month, one per recipient, for six sending patterns, and the plan each fits</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Who</th>
+                                    <th scope="col">List</th>
+                                    <th scope="col">Sends</th>
+                                    <th scope="col">Emails a month</th>
+                                    <th scope="col">Fits</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($budgetRows as [$bWho, $bList, $bRhythm, $bTimes])
+                                    <tr>
+                                        <th scope="row">{{ $bWho }}</th>
+                                        <td class="es-send-num">{{ number_format($bList) }}</td>
+                                        <td>{{ $bRhythm }}</td>
+                                        <td class="es-send-num whitespace-nowrap">{{ number_format($bList * $bTimes) }}</td>
+                                        <td class="es-send-ink font-semibold">{{ $planFits($bList * $bTimes) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="es-send-muted es-send-rule-t mt-4 pt-4 text-xs">
+                        Monthly allowances of 10, 100 and 1,000 newsletter emails on Free, Pro and Enterprise, each recipient counting as one. A
+                        schedule with its own email settings, and a selfhosted install, has no cap. On
+                        eventschedule.com a send to more than 50 people also needs a verified phone number
+                        or those email settings.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7d. Reaching the inbox (09)                                  -->
+    <!-- ============================================================ -->
+    <section id="inbox" class="es-send-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-send-die mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <p class="es-send-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Reaching the inbox</p>
+                <h2 class="es-balance es-send-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Delivered is not <span class="es-send-grad">the same as read</span>.
+                </h2>
+                <p class="es-send-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Inboxes sort mail by who sent it, whether the sender is who they say they are, and how
+                    earlier mail from them was received. Six habits decide most of that.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($deliverTips as $tipIndex => [$tipTitle, $tipBody])
+                    <div class="es-send-card flex h-full flex-col p-6" data-reveal>
+                        <p class="es-send-accent es-send-num mb-3 text-sm font-bold">{{ str_pad($tipIndex + 1, 2, '0', STR_PAD_LEFT) }}</p>
+                        <h3 class="es-send-ink mb-2 text-lg font-bold">{{ $tipTitle }}</h3>
+                        <p class="es-send-muted text-sm">{{ $tipBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-send-tint mt-6 p-6 sm:p-7" data-reveal>
+                <p class="es-send-ink text-sm font-bold">Read the open rate as a floor</p>
+                <p class="es-send-muted mt-2 text-sm">
+                    Opens are counted by a tracking image, so anyone whose mail app blocks images reads your
+                    newsletter and is counted as unopened. Compare one send with the last rather than with a
+                    number you read elsewhere, and trust clicks more: a click is somebody who wanted to go.
+                </p>
+                <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="es-send-accent mt-4 inline-flex items-center text-sm font-semibold hover:underline">
+                    Setting up your own email settings
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 8. Key features                                              -->
     <!-- ============================================================ -->
     <section class="es-send-rule-t py-20">
@@ -1365,7 +1708,7 @@
     <section id="faq" class="es-send-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-send-die mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-send-die mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <p class="es-send-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-send-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked <span class="es-send-grad">at the counter</span>.
