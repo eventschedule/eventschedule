@@ -228,6 +228,8 @@
         .vc-tier::before { content: ""; width: 0.42rem; aspect-ratio: 1; border-radius: 50%; background: var(--vc-c2); }
         .vc-tier-ent { background: var(--vc-ink); border-color: var(--vc-ink); color: var(--vc-bg); }
         .vc-tier-ent::before { background: #fde047; }
+        .vc-tier-pro { background: var(--vc-ink); border-color: var(--vc-ink); color: var(--vc-bg); }
+        .vc-tier-pro::before { background: #fb923c; }
         .vc-titled { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
         .vc-h3 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
 
@@ -1346,6 +1348,22 @@
                 'a' => 'There are none, and it is better to say so before you move a programme across. Event Schedule has one running order per event. Parallel sessions are separate events on the same date, and a sub-schedule can keep a strand together and color it, which is organizing and color-coding rather than access control. There is no room inventory and nothing is hidden by a sub-schedule.',
             ],
             [
+                'q' => 'What should a virtual conference agenda include?',
+                'a' => 'For every session: a title that says what it is, the speaker\'s name, a start and an end time, and a one or two sentence description for anything longer than a short talk. For the day: its date, the time zone printed beside every time, the breaks named as breaks, and how people join. Publish it as a page rather than a PDF, so it reads on a phone and can be corrected when a speaker swaps slots. In Event Schedule each session is a part of the day\'s agenda with its own name, times and description, and the time zone comes from the schedule.',
+            ],
+            [
+                'q' => 'How long should a virtual conference day be?',
+                'a' => 'Three to five hours of live programme works for most online audiences, with a 10 to 15 minute break every 60 to 90 minutes and five minutes between speakers for the changeover. Talks of 20 to 30 minutes and keynotes of 30 to 45 hold attention better on a screen than the hour-long slots of a venue. If the content needs more time, add a day rather than stretch one: three half days are easier to fit around a working week than one long day.',
+            ],
+            [
+                'q' => 'How do I schedule a virtual conference across time zones?',
+                'a' => 'Find the two regions most of your attendees are in and pick the four hours they share. 13:00 to 17:00 UTC suits the Americas and Europe, 08:00 to 12:00 UTC suits Europe and Asia-Pacific, and 22:00 to 02:00 UTC suits the Americas and Asia-Pacific. Reach the region you left out by repeating the keynote as a second event in its window, rotating the window from day to day, or sending the recording. Set your schedule\'s timezone before you add events: the event page prints its abbreviation beside the time, and the calendar invite places the day at each attendee\'s own local hour.',
+            ],
+            [
+                'q' => 'How do attendees get the link to join?',
+                'a' => 'They register or buy a ticket. The public event page shows only the domain of the join link, such as zoom.us, never the link itself. Everyone who registers gets a ticket page with the full link on it, and the reminder email sent before the start, 3 hours or 1, 2 or 3 days ahead as you choose, carries the link as well. If the link changes after people have registered, saving the event asks whether to email them about it; on eventschedule.com that email goes to registered attendees once your schedule has its own email settings.',
+            ],
+            [
                 'q' => 'Is the agenda free?',
                 'a' => 'Yes. Adding parts, naming them, giving them start and end times, writing a description for each one, moving them into order and publishing the running order are all free forever, along with the join link, calendar sync and the embeddable calendar. Agenda scanning, which reads a printed or emailed programme and fills the parts in for you, is on the Enterprise plan. Typing them costs nothing.',
             ],
@@ -1363,8 +1381,32 @@
             ],
             [
                 'q' => 'How do attendees hear about the next edition?',
-                'a' => 'Two ways. Somebody who left an email address on your page and confirmed it is sent a digest on its own when you post the sessions, batched rather than one message per talk. Somebody who pressed Follow from their own account is reached only by a newsletter you write, which is what you want when the programme is set and there is something to say about it: 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted one per recipient. Followers also show up with their name and email on your followers tab, so the audience is yours rather than a platform\'s.',
+                'a' => 'Two ways. Somebody who left an email address on your page and confirmed it is sent a digest on its own when you publish new conference days, batched rather than one message per event and never more than one every three days. Somebody who pressed Follow from their own account is reached only by a newsletter you write, which is what you want when the programme is set and there is something to say about it: 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted one per recipient. Followers also show up with their name and email on your followers tab, so the audience is yours rather than a platform\'s.',
             ],
+        ];
+
+        // The worked half day in the agenda guide: 205 minutes of programme and 35 of breaks.
+        $vcSample = [
+            ['13:00', 'Welcome, and how today works', 10, false],
+            ['13:10', 'Opening keynote', 35, false],
+            ['13:45', 'Break', 10, true],
+            ['13:55', 'Talk: what we measured', 25, false],
+            ['14:20', 'Talk: what we changed', 25, false],
+            ['14:45', 'Break', 15, true],
+            ['15:00', 'Panel, four speakers', 40, false],
+            ['15:40', 'Break', 10, true],
+            ['15:50', 'Workshop: hands on', 45, false],
+            ['16:35', 'Lightning talks', 15, false],
+            ['16:50', 'Close, and what comes next', 10, false],
+        ];
+
+        // Three four-hour windows on Tue 3 Mar 2026. Offsets that day: Los Angeles UTC-8,
+        // New York UTC-5, São Paulo UTC-3, London UTC+0, Berlin UTC+1, Bengaluru UTC+5:30,
+        // Singapore UTC+8, Tokyo UTC+9, Sydney UTC+11 (daylight time until 5 April).
+        $vcWindows = [
+            ['Americas and Europe', '13:00 to 17:00 UTC', 'The window for a North American and European crowd. The west coast starts early and Asia-Pacific is asleep.', [['New York', '08:00 to 12:00'], ['São Paulo', '10:00 to 14:00'], ['London', '13:00 to 17:00'], ['Berlin', '14:00 to 18:00'], ['Bengaluru', '18:30 to 22:30'], ['Los Angeles', '05:00 to 09:00']]],
+            ['Europe and Asia-Pacific', '08:00 to 12:00 UTC', 'Morning in Europe, afternoon and evening across Asia and Australia. The Americas are the ones left out.', [['London', '08:00 to 12:00'], ['Berlin', '09:00 to 13:00'], ['Bengaluru', '13:30 to 17:30'], ['Singapore', '16:00 to 20:00'], ['Sydney', '19:00 to 23:00'], ['New York', '03:00 to 07:00']]],
+            ['Americas and Asia-Pacific', '22:00 to 02:00 UTC', 'An American afternoon is the next morning in Tokyo and Sydney, so the Pacific shares one window and Europe sits this one out.', [['Los Angeles', '14:00 to 18:00'], ['New York', '17:00 to 21:00'], ['São Paulo', '19:00 to 23:00'], ['Tokyo', '07:00 to 11:00, Wed'], ['Sydney', '09:00 to 13:00, Wed'], ['London', '22:00 to 02:00']]],
         ];
 
         $dotSections = [
@@ -1372,7 +1414,10 @@
             ['unit', 'One event'],
             ['run', 'Setting it'],
             ['programme', 'The programme'],
+            ['guide', 'Building it'],
+            ['zones', 'Time zones'],
             ['session', 'In session'],
+            ['whole', 'Tracks and links'],
             ['tickets', 'The takings'],
             ['after', 'Afterwards'],
             ['who', 'Perfect for'],
@@ -1876,14 +1921,159 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 04 In session: seven parts, one link (a band that stays dark) -->
+        <!-- 04 Building the agenda: a field guide that holds in any tool -->
+        <!-- ============================================================ -->
+        <section id="guide" class="vc-sec" style="scroll-margin-top: 4rem;">
+            <div class="vc-wrap">
+                <header class="vc-head">
+                    <div>
+                        <p class="vc-kick" data-reveal><b>04</b><i></i>How to build a virtual conference agenda</p>
+                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            Shorter days, <span class="vc-holo-text">more breaks.</span>
+                        </h2>
+                    </div>
+                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
+                        An online programme is not a venue programme moved to a screen. Nobody has a corridor to stretch their legs in, every speaker changeover happens live, and half your audience is at a desk with their own work open beside the stream. These are the rules of thumb that shape a day people stay for.
+                    </p>
+                </header>
+
+                <div class="vc-set">
+                    <!-- A worked half day, with its arithmetic -->
+                    <article class="vc-panel vc-marks" data-reveal="panel">
+                        <h3 class="vc-h3">A four-hour day that works</h3>
+                        <p class="vc-note" style="margin-top: 0.6rem;">13:00 to 17:00 UTC, one track, eleven parts.</p>
+                        <ol class="vc-read">
+                            @foreach ($vcSample as [$sampleTime, $sampleName, $sampleMins, $sampleIsGap])
+                                <li class="@if ($sampleIsGap) is-gap @endif">
+                                    <time>{{ $sampleTime }}</time>
+                                    <span>{{ $sampleName }}</span>
+                                    <small>{{ $sampleMins }}m</small>
+                                </li>
+                            @endforeach
+                        </ol>
+                        <p class="vc-note">The arithmetic: 240 minutes, of which 205 are programme and 35 are breaks. The longest run without a pause is 70 minutes, at the end, where the workshop is followed by short talks that ask little of a tired room. Each talk is booked 5 minutes short of its slot, which is the changeover.</p>
+                    </article>
+
+                    <div class="vc-three" data-reveal-group="100">
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #22d3ee;" aria-hidden="true">1</span>
+                            <h3 class="vc-h3">Three to five hours of live programme a day</h3>
+                            <p>A full eight-hour conference day online loses people by mid-afternoon. If the content needs more hours, add a day rather than stretch one. Three half days across a week also gives speakers in awkward time zones one slot that suits them.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #4ade80;" aria-hidden="true">2</span>
+                            <h3 class="vc-h3">Lengths that suit a screen</h3>
+                            <p>Keynotes of 30 to 45 minutes, talks of 20 to 30, panels of 40 to 45 with four voices at most, and workshops of 45 to 90 with a break inside the longer ones. Put the end time on every part as well as the start, so somebody can plan an afternoon around the one session they came for.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #fde047;" aria-hidden="true">3</span>
+                            <h3 class="vc-h3">A break every 60 to 90 minutes</h3>
+                            <p>Ten to fifteen minutes each, and name them on the agenda so people trust that they exist. Attendees who know a break is at 14:45 stay through the talk before it instead of leaving early to make coffee.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #fb923c;" aria-hidden="true">4</span>
+                            <h3 class="vc-h3">Changeovers belong in the timing</h3>
+                            <p>The next speaker has to join, share a screen and say "can you see this?". Build five minutes into each slot, or give the changeover its own short part. Without it, one overrun in the morning pushes every session after it late.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #22d3ee;" aria-hidden="true">5</span>
+                            <h3 class="vc-h3">The headline goes where the most people overlap</h3>
+                            <p>Put your best-known speaker in the hour that most registrants share across their time zones, not first thing in your own morning. The next section shows how to find that hour.</p>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="vc-panel vc-marks" style="margin-top: clamp(2.5rem, 5vw, 4rem);" data-reveal="panel">
+                    <h3 class="vc-h3">Five mistakes that cost a virtual conference its audience</h3>
+                    <div class="vc-rail">
+                        <p class="vc-phase">The mistake<span>and what to do instead</span></p>
+                        <ul>
+                            <li><b>The agenda is only a PDF.</b> It cannot be read comfortably on a phone, search engines barely see it, and the moment a speaker swaps slots the copy in everyone's inbox is wrong. Publish the agenda as a page and send people the link.</li>
+                            <li><b>Times with no zone.</b> "Starts at 9" means nothing to a global audience. Every published time needs its zone beside it, and a calendar file that puts the session at each attendee's own hour.</li>
+                            <li><b>Too many tracks for the crowd.</b> Three parallel tracks split an audience of 150 into rooms of about 50, and a quiet room makes a speaker look unpopular. Run one track until the audience is large enough that each room still feels busy.</li>
+                            <li><b>Moving a session without saying so.</b> In Event Schedule, changing the day's date or start time (on a one-off event) or its join link asks on save whether to email the people registered; on eventschedule.com that email reaches them once the schedule sends through its own email settings. Moving one session inside the day does not ask, so tell people yourself when a headline slot moves.</li>
+                            <li><b>No rehearsal slot.</b> Book every speaker for a short technical check a day or two before, on the same platform and link type they will use live. Most live failures are a microphone, a screen share permission or a browser that blocks the camera.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 05 Time zones: three windows on one date                     -->
+        <!-- ============================================================ -->
+        <section id="zones" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
+            <div class="vc-wrap">
+                <header class="vc-head">
+                    <div>
+                        <p class="vc-kick" data-reveal><b>05</b><i></i>Scheduling across time zones</p>
+                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            No hour suits everyone. <span class="vc-holo-text">Pick two regions.</span>
+                        </h2>
+                    </div>
+                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
+                        Look at where your registrants or last year's attendees are, choose the two regions with the most people, and find the four hours they share. Here are the three windows that come up most, worked out for Tue 3 Mar 2026.
+                    </p>
+                </header>
+
+                <div class="vc-cells" data-reveal>
+                    @foreach ($vcWindows as [$windowName, $windowUtc, $windowFor, $windowCities])
+                        <article>
+                            <h3 class="vc-h3">{{ $windowName }}</h3>
+                            <p class="vc-note" style="margin-top: 0.4rem;">{{ $windowUtc }}</p>
+                            <p>{{ $windowFor }}</p>
+                            <dl class="vc-fields">
+                                @foreach ($windowCities as [$cityName, $cityHours])
+                                    <div>
+                                        <dt>{{ $cityName }}</dt>
+                                        <dd>{{ $cityHours }}</dd>
+                                    </div>
+                                @endforeach
+                            </dl>
+                        </article>
+                    @endforeach
+                </div>
+
+                <div class="vc-duo" style="margin-top: clamp(2.5rem, 5vw, 4rem);" data-reveal-group="110">
+                    <article class="vc-panel vc-marks" data-reveal="panel">
+                        <h3 class="vc-h3">Three ways to reach the region you left out</h3>
+                        <div class="vc-rail">
+                            <ul>
+                                <li><b>Repeat the keynote.</b> Run it a second time in the other window as its own event, with its own join link and its own registration count, so the two audiences never compete for one cap.</li>
+                                <li><b>Rotate the window by day.</b> Day one in the Americas and Europe window, day two in Europe and Asia-Pacific. Each region gets one comfortable day and nobody gets three bad ones.</li>
+                                <li><b>Send the recording.</b> For everyone who registered and could not be awake, the recording the next morning is the conference. Plan who sends it and when before the day, not after.</li>
+                            </ul>
+                        </div>
+                        <p class="vc-note">Watch the clocks in March and late October. In 2026 the United States moves its clocks on 8 March and Europe on 29 March, so for three weeks New York is four hours behind London instead of five. In autumn Europe moves back first, on 25 October, and the United States on 1 November, so for one week the gap is four hours again. Sydney's clocks move on 5 April and 4 October.</p>
+                    </article>
+
+                    <article class="vc-panel vc-marks" data-reveal="panel">
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">What Event Schedule does with the zone</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <div class="vc-rail">
+                            <ul>
+                                <li>Set the schedule's timezone first, in Edit Schedule under Details, Language and time. Every event time is entered and shown in that zone, and the agenda's part times are the clock times you typed, read in it too.</li>
+                                <li>The event page prints the start with the zone's abbreviation next to it, so "13:00 UTC" never reads as somebody's local 1 PM.</li>
+                                <li>The calendar invite in the confirmation email, and the .ics download, carry the exact moment, so each attendee's calendar shows the day at their own local hour.</li>
+                                <li>The reminder email goes out 3 hours, or 1, 2 or 3 days, before the start. A day-based reminder lands at the same moment for everyone, which is the middle of the night somewhere, so for a global audience the 3 hour option is the one that arrives close to the start for all of them.</li>
+                            </ul>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 06 In session: seven parts, one link (a band that stays dark) -->
         <!-- ============================================================ -->
         <section id="session" class="vc-sec vc-band" style="scroll-margin-top: 4rem;">
             <div class="vc-band-glow" aria-hidden="true"></div>
             <div class="vc-wrap" style="position: relative;">
                 <header class="vc-head">
                     <div>
-                        <p class="vc-kick" data-reveal><b>04</b><i></i>In session</p>
+                        <p class="vc-kick" data-reveal><b>06</b><i></i>In session</p>
                         <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
                             One link. <span class="vc-holo-text">Wherever you stream.</span>
                         </h2>
@@ -1945,14 +2135,82 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 05 The takings: registration and ticket types. Deliberately
+        <!-- 07 The whole conference: tracks, speakers, sponsors, links   -->
+        <!-- ============================================================ -->
+        <section id="whole" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
+            <div class="vc-wrap">
+                <header class="vc-head">
+                    <div>
+                        <p class="vc-kick" data-reveal><b>07</b><i></i>Tracks, speakers, sponsors, recordings</p>
+                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            Where each piece of <span class="vc-holo-text">the conference lives.</span>
+                        </h2>
+                    </div>
+                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
+                        Moving a programme across goes faster once you know which thing belongs on the day, which on the session, and which on the schedule as a whole. Six decisions, each with the answer.
+                    </p>
+                </header>
+
+                <div class="vc-cells" style="margin-top: 0;" data-reveal>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">Parallel tracks</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <p>A track is one event per day: "Day 1, Main stage" and "Day 1, Workshops" on the same date, each with its own running order, join link and registration limit. File every track's events under a sub-schedule of their own. Each sub-schedule gets a color and an address of its own, such as /workshops, which you can hand to the people who only care about that track, and visitors can filter the calendar by it.</p>
+                    </article>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">Speakers</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <p>Name them on the event's Participants tab. Each appears on the event page, linked to their own schedule if they have one, and somebody new gets a page they can claim. Participants belong to the event, not to one part of it, so on a one-event day every speaker is listed together: write the name into the part as well ("Keynote: Ana Ruiz") so each slot says who is on.</p>
+                    </article>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">Sponsors</h3>
+                            <span class="vc-tier vc-tier-pro">Pro</span>
+                        </div>
+                        <p>Sponsors set on the schedule appear as a band of logos on its pages, each with an optional name, website and a Gold, Silver or Bronze tier. One event can show the same sponsors, none, or its own list, which is how a workshop track carries the company that paid for it. A newsletter has a Sponsors block too, for the thank-you email.</p>
+                    </article>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">Who gets the join link</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <p>The public event page never prints the link, only its domain, such as zoom.us. The full link is on the ticket page of everyone who registers or buys, and in the reminder email before the start. So give even a free conference free registration: it is the step that hands people the way in, and it tells you how many to expect.</p>
+                    </article>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">An all-days ticket</h3>
+                            <span class="vc-tier vc-tier-pro">Pro</span>
+                        </div>
+                        <p>Each day sells or registers on its own, because each has its own link. With priced tickets, the cart lets a buyer add several days or tracks and pay once, and every event in the order keeps its own ticket page with its own link on it. A multi-event pass is built for a door, not a stream: its page carries the link of the event it is sold on and names the other days without theirs.</p>
+                    </article>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">Recordings</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <p>Event Schedule does not host video. Upload the recording to YouTube, Vimeo or your own site, then send the link in a newsletter to the Ticket Buyers segment narrowed to that day; a Video block shows the YouTube thumbnail and links out. That segment includes orders later cancelled or refunded. For a public recording, add the link to the session's description so the agenda becomes the archive.</p>
+                    </article>
+                </div>
+
+                <p class="vc-strand-note" data-reveal>
+                    The newsletter allowance counts every recipient: 10 a month on Free, 100 on Pro and 1,000 on Enterprise, or unlimited once the schedule sends through its own email settings. On eventschedule.com a send to more than 50 people also needs a verified phone number or those email settings, so set them up before the day if you plan to mail the recording to a full house. More in the guides to <x-link href="{{ marketing_url('/docs/creating-events') }}#participants">participants</x-link>, <x-link href="{{ marketing_url('/docs/creating-events') }}#sponsors">event sponsors</x-link> and <x-link href="{{ marketing_url('/docs/newsletters') }}#recipients">newsletter recipients</x-link>.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 08 The takings: registration and ticket types. Deliberately
              NOT called "at the door": there is no door on a virtual
              conference.                                                   -->
         <!-- ============================================================ -->
         <section id="tickets" class="vc-sec" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap vc-take">
                 <div>
-                    <p class="vc-kick" data-reveal><b>05</b><i></i>The takings</p>
+                    <p class="vc-kick" data-reveal><b>08</b><i></i>The takings</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Name your prices. <span class="vc-holo-text">Keep the money.</span>
                     </h2>
@@ -1970,7 +2228,7 @@
                         <ul>
                             <li>Zero platform fees at every plan level. Attendees pay through your own Stripe or PayPal account, or you take payment through Invoice Ninja, a payment link or cash, and the processor's own fee is the only cut anybody takes.</li>
                             <li>Individual tickets give everyone in a company's group booking their own confirmation email and their own QR code, instead of one person holding twelve.</li>
-                            <li>Custom questions on the ticket, another Pro one, collect what the conference actually needs: a job title for the badge, an accessibility requirement, which workshop somebody picked.</li>
+                            <li>Questions collect what the conference actually needs: a job title, an accessibility requirement, which workshop somebody picked. A question attached to a ticket type is free; event-wide questions on the checkout form, and an answer from every guest on a group booking, are Pro.</li>
                             <li>Quantities are counted for each date on its own, and on Pro a waitlist catches the people who arrive after a day has sold out.</li>
                         </ul>
                         <p class="vc-phase" aria-hidden="true">T plus 1 day<span>afterwards</span></p>
@@ -2012,12 +2270,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 06 Afterwards                                                -->
+        <!-- 09 Afterwards                                                -->
         <!-- ============================================================ -->
         <section id="after" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap">
                 <header class="vc-head vc-head-solo">
-                    <p class="vc-kick" data-reveal><b>06</b><i></i>Afterwards</p>
+                    <p class="vc-kick" data-reveal><b>09</b><i></i>Afterwards</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         When the stream stops.
                     </h2>
@@ -2033,7 +2291,7 @@
                     <article>
                         <div class="vc-after-no"><span class="vc-tier">Free</span></div>
                         <h3 class="vc-h3">Write to the people who came</h3>
-                        <p>A confirmed email subscriber hears about the sessions you add without you doing anything. The newsletter is the one you write when next year's programme is set: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted one per recipient.</p>
+                        <p>A confirmed email subscriber hears about the new conference days you publish without you doing anything. The newsletter is the one you write when next year's programme is set, sent to your followers or to the Ticket Buyers of this year's days: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted one per recipient.</p>
                     </article>
                     <article>
                         <div class="vc-after-no"><span class="vc-tier">Free</span></div>
@@ -2062,13 +2320,13 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 07 Perfect for: six badges on one rail                       -->
+        <!-- 10 Perfect for: six badges on one rail                       -->
         <!-- ============================================================ -->
         <section id="who" class="vc-sec" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap">
                 <header class="vc-head">
                     <div>
-                        <p class="vc-kick" data-reveal><b>07</b><i></i>Perfect for</p>
+                        <p class="vc-kick" data-reveal><b>10</b><i></i>Perfect for</p>
                         <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
                             Every kind of <span class="vc-holo-text">virtual conference</span>
                         </h2>
@@ -2114,12 +2372,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 08 Three steps                                               -->
+        <!-- 11 Three steps                                               -->
         <!-- ============================================================ -->
         <section class="vc-sec vc-alt">
             <div class="vc-wrap">
                 <header class="vc-head vc-head-solo">
-                    <p class="vc-kick" data-reveal><b>08</b><i></i>Three steps</p>
+                    <p class="vc-kick" data-reveal><b>11</b><i></i>Three steps</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         From blank to published.
                     </h2>
@@ -2142,12 +2400,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 09 Key features                                              -->
+        <!-- 12 Key features                                              -->
         <!-- ============================================================ -->
         <section class="vc-sec">
             <div class="vc-wrap vc-kf">
                 <div>
-                    <p class="vc-kick" data-reveal><b>09</b><i></i>Key features</p>
+                    <p class="vc-kick" data-reveal><b>12</b><i></i>Key features</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s; font-size: clamp(2.1rem, 4.2vw, 3.4rem);">What a conference actually leans on</h2>
                     <p class="vc-kf-more" data-reveal style="--reveal-delay: 0.15s;">
                         <a href="{{ marketing_url('/features') }}" class="vc-more">
@@ -2191,7 +2449,7 @@
             <div class="vc-wrap">
                 <div class="vc-also-head">
                     <div>
-                        <p class="vc-kick" data-reveal><b>10</b><i></i>Also online</p>
+                        <p class="vc-kick" data-reveal><b>13</b><i></i>Also online</p>
                         <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s; font-size: clamp(2.1rem, 4.2vw, 3.4rem);">Related pages</h2>
                     </div>
                     <a href="{{ marketing_url('/use-cases') }}" class="vc-more" data-reveal>
@@ -2214,14 +2472,14 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 11 Questions                                                 -->
+        <!-- 14 Questions                                                 -->
         <!-- ============================================================ -->
         <x-seo.faq-schema :items="$faqs" />
 
         <section id="faq" class="vc-sec" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap vc-faq">
                 <div class="vc-faq-head">
-                    <p class="vc-kick" data-reveal><b>11</b><i></i>Questions</p>
+                    <p class="vc-kick" data-reveal><b>14</b><i></i>Questions</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Frequently asked questions
                     </h2>
@@ -2245,13 +2503,13 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 12 Close: your name on the badge                             -->
+        <!-- 15 Close: your name on the badge                             -->
         <!-- ============================================================ -->
         <section id="claim" class="vc-sec vc-band" style="scroll-margin-top: 4rem;">
             <div class="vc-band-glow" aria-hidden="true"></div>
             <div class="vc-wrap vc-close" style="position: relative;">
                 <div>
-                    <p class="vc-kick" data-reveal><b>12</b><i></i>Close</p>
+                    <p class="vc-kick" data-reveal><b>15</b><i></i>Close</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         One event. <span class="vc-holo-text">The whole day inside it.</span>
                     </h2>

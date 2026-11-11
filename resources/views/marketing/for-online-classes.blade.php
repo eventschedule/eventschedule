@@ -34,7 +34,7 @@
                 "@type": "HowToStep",
                 "position": 2,
                 "name": "Skip the weeks you are off",
-                "text": "Add date exceptions for the holiday weeks, and paste your class link on the course so students join from the schedule."
+                "text": "Add date exceptions for the holiday weeks, and paste your class link on the course. Everyone who signs up finds it on their ticket page, and in the reminder (not sent to season pass holders)."
             },
             {
                 "@type": "HowToStep",
@@ -681,6 +681,8 @@
         .oc-note h3 { font-size: 1.08rem; font-weight: 700; color: var(--oc-ink); }
         .oc-note p { margin-top: 0.4rem; font-size: 0.95rem; color: var(--oc-ink-2); }
         .oc-smallprint { margin-top: 1.25rem; font-size: 0.9rem; color: var(--oc-ink-2); }
+        /* The heading of a worked example that is a guide rather than a picture. */
+        .oc-cap-h { font-family: var(--oc-display); font-size: clamp(1.3rem, 2.4vw, 1.6rem); font-weight: 400; line-height: 1.2; color: var(--oc-ink); }
 
         /* Lesson 1.1 is the featured one: teal in both modes, with its own inks. */
         #oc .oc-lesson-feature {
@@ -1211,6 +1213,15 @@
             ['12', 'Dec 8', 14, 1],
         ];
 
+        // Rules of thumb for a seat cap, by what the teacher has to see and hear.
+        $ocCaps = [
+            ['Conversation and language practice', '6 to 10', 'Everyone should speak several times a session. Past ten, the quiet students say nothing all evening.'],
+            ['Coaching circle or critique', '8 to 12', 'You look at each person\'s work on screen, and each review takes minutes.'],
+            ['Hands-on: coding, cooking, drawing', '10 to 16', 'You need to see screens or cameras to catch a mistake before it is three steps deep.'],
+            ['Movement: yoga, fitness, dance', '15 to 25', 'About as many camera tiles as you can watch for form at once.'],
+            ['Lecture with questions in the chat', 'No cap', 'Nobody needs your eyes on them. Cap only if your video plan limits the room.'],
+        ];
+
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for teaching online classes?',
@@ -1227,6 +1238,22 @@
             [
                 'q' => 'Can I cap how many students join each session?',
                 'a' => 'Yes, on the free plan. Set a seat cap on the course and it is counted per session date, so week three filling up does not close week four. When a session is full the register shows no seats left for that date and the sign-up button on that date becomes a waitlist instead. When somebody cancels, the first person waiting for that date is emailed and has twenty-four hours to take the seat before it passes to the next in line. The registration waitlist is free; the same waitlist on a sold-out paid date is a Pro feature.',
+            ],
+            [
+                'q' => 'How do students get the link to an online class?',
+                'a' => 'By signing up for a session. Your public schedule shows each class with its time and only the domain of the meeting link, such as zoom.us. A student who registers or buys a seat gets a confirmation email with a calendar invite and a button to their ticket page, and that page shows the full link. The reminder email before the session carries the link again; reminders are on by default, 1 day before, and can be moved to 3 hours or to 2 or 3 days. Someone who holds a season pass for the term finds the link on their pass page, but is not sent the reminder.',
+            ],
+            [
+                'q' => 'Should I sell an online course as a whole term or class by class?',
+                'a' => 'Sell the whole term when the lessons build on each other and you want the same students every week: a season pass on the course covers every date in one purchase, on the Pro plan. Sell class by class when each session stands alone, such as fitness, a conversation hour or a weekly clinic: each registration or ticket is for one date and comes with that date\'s link and reminder. A visit card across several classes suits regulars at a studio, but its page carries only the link of the event it was sold on and names the other classes without theirs, so for classes held only online you would send those links to card holders yourself.',
+            ],
+            [
+                'q' => 'How many students should an online class have?',
+                'a' => 'As many as you can see and hear properly. As rough guides: 6 to 10 for conversation or language practice, 8 to 12 for coaching or critique, 10 to 16 for hands-on classes such as coding, cooking or drawing, 15 to 25 for yoga or fitness where you watch form on camera, and no cap for a lecture with questions in the chat. Keep the cap under any participant limit on your video plan. In Event Schedule the cap is counted per session date, and a full date turns its sign-up button into a free waitlist.',
+            ],
+            [
+                'q' => 'Can students book one-to-one time with me between classes?',
+                'a' => 'Yes. Set office hours up as an appointment type with the weekly hours you are free and Online as the location, with your meeting link. Students pick a slot on your booking page, shown in their own timezone, and the link reaches them with the booking confirmation. One free appointment type is included on the free plan; more types, a price on a session and rules such as buffers and minimum notice are Pro. On eventschedule.com booking emails are sent through your schedule\'s own email settings, so set those up first.',
             ],
             [
                 'q' => 'Can I sell a card that covers the whole term?',
@@ -1270,8 +1297,8 @@
         $ocLabel = array_column($dotSections, 1, 0);
         $ocModules = [
             ['The term', [['term', $ocLabel['term'], '4 min'], ['setup', $ocLabel['setup'], '4 min']]],
-            ['The class', [['register', $ocLabel['register'], '5 min'], ['card', $ocLabel['card'], '5 min'], ['link', $ocLabel['link'], '3 min']]],
-            ['Around it', [['rest', $ocLabel['rest'], '6 min'], ['who', $ocLabel['who'], '2 min'], ['steps', 'Three steps', '1 min'], ['reading', 'Reading list', '1 min']]],
+            ['The class', [['register', $ocLabel['register'], '7 min'], ['card', $ocLabel['card'], '7 min'], ['link', $ocLabel['link'], '6 min']]],
+            ['Around it', [['rest', $ocLabel['rest'], '8 min'], ['who', $ocLabel['who'], '2 min'], ['steps', 'Three steps', '1 min'], ['reading', 'Reading list', '1 min']]],
             ['Finals', [['tuition', 'Tuition', '2 min'], ['electives', 'Electives', '1 min'], ['faq', $ocLabel['faq'], 'Quiz']]],
         ];
         $ocL = [];
@@ -1346,7 +1373,7 @@
                         <ul class="oc-facts es-fade-up es-d-4" aria-hidden="true">
                             <li>12 lessons</li>
                             <li>4 modules</li>
-                            <li>About 35 minutes</li>
+                            <li>About 45 minutes</li>
                             <li>1 certificate</li>
                         </ul>
                     </div>
@@ -1627,6 +1654,37 @@
                             </div>
                         </div>
 
+                        <!-- How big an online class should be: rules of thumb, by the kind of teaching. -->
+                        <div class="oc-worked" data-reveal="panel">
+                            <p class="oc-worked-tag" aria-hidden="true">Choosing the cap</p>
+                            <h3 class="oc-cap-h">How many students fit in an online class?</h3>
+                            <p class="oc-worked-cap" style="margin-top: 0.5rem;">
+                                The number is decided by what you need to see and hear from each student, not by the size of the call. Rules of thumb from the way online classes are usually run:
+                            </p>
+                            <table class="oc-reg" style="margin-top: 1rem;">
+                                <caption class="sr-only">Suggested seat caps for kinds of online class, with the reason for each</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Kind of class</th>
+                                        <th scope="col" class="oc-reg-end">Seats</th>
+                                        <th scope="col">Why that many</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($ocCaps as [$capKind, $capSeats, $capWhy])
+                                        <tr>
+                                            <th scope="row">{{ $capKind }}</th>
+                                            <td class="oc-reg-end"><b>{{ $capSeats }}</b></td>
+                                            <td>{{ $capWhy }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <p class="oc-worked-cap">
+                                Two more limits to check before you publish. Your video plan may cap how many people can join one meeting, so keep the seat cap under it. And on a free class some people register and never arrive, so once you know your usual turnout you can set the cap a seat or two above the number you can actually teach.
+                            </p>
+                        </div>
+
                         {!! $ocFoot('register') !!}
                     </section>
 
@@ -1721,6 +1779,47 @@
                             </div>
                         </div>
 
+                        <!-- Which way to sell an online course, and what each one does to the class link. -->
+                        <div class="oc-worked" data-reveal="panel">
+                            <p class="oc-worked-tag" aria-hidden="true">Course, drop-in or card</p>
+                            <h3 class="oc-cap-h">Which way should students sign up?</h3>
+                            <p class="oc-worked-cap" style="margin-top: 0.5rem;">
+                                Online, the choice decides one more thing than price: how each student gets the class link. Pick by how your students attend.
+                            </p>
+                            <div class="oc-trio" style="margin-top: 1.1rem;">
+                                <div class="oc-mini">
+                                    <div class="oc-mini-head">
+                                        <h3>Enrol for the whole term</h3>
+                                        <span class="oc-tag oc-tag-paid">Pro</span>
+                                    </div>
+                                    <p>Pick this when the same students come every week and the lessons build on each other. Sell a season pass on the course itself: one purchase covers every date of the term, and because the pass belongs to the course, the holder's ticket page carries the class link.</p>
+                                    <div class="oc-mini-foot">
+                                        <p>Season pass holders are not sent the reminder email, so give them the class time and link in a welcome newsletter.</p>
+                                    </div>
+                                </div>
+                                <div class="oc-mini">
+                                    <div class="oc-mini-head">
+                                        <h3>Drop in, week by week</h3>
+                                        <span class="oc-tag">Free</span>
+                                    </div>
+                                    <p>Pick this when each session stands on its own: a fitness class, a conversation hour, a weekly clinic. Each sign-up is for one date, its ticket page shows that date's link, and the reminder arrives before that session. Free registration costs nothing on any plan; a drop-in seat with a price is Pro.</p>
+                                    <div class="oc-mini-foot">
+                                        <p>The cost: a regular signs up once per session, twelve times in a twelve-week term.</p>
+                                    </div>
+                                </div>
+                                <div class="oc-mini">
+                                    <div class="oc-mini-head">
+                                        <h3>A card across classes</h3>
+                                        <span class="oc-tag oc-tag-paid">Pro</span>
+                                    </div>
+                                    <p>Pick this when regulars move between several classes. A visit card or membership covering a sub-schedule follows them from class to class. Check one thing first: the card's page shows the link of the event it is sold on and lists the other classes it covers by name only, because a card is built to be scanned at a door.</p>
+                                    <div class="oc-mini-foot">
+                                        <p>For classes held only on a video call, send card holders the links yourself, in a newsletter to the buyers of the event the card is sold on.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {!! $ocFoot('card') !!}
                     </section>
 
@@ -1779,6 +1878,42 @@
                             </div>
                         </div>
 
+                        <!-- The link's journey from the course to a student's screen. -->
+                        <div class="oc-worked" data-reveal="panel">
+                            <p class="oc-worked-tag" aria-hidden="true">From sign-up to the call</p>
+                            <h3 class="oc-cap-h">How a student gets into class</h3>
+                            <ul class="oc-checks" style="margin-top: 1rem;">
+                                <li>Your public schedule shows the class with its time and the link's domain, such as zoom.us, never the link itself, so a stranger browsing the page cannot walk into the room.</li>
+                                <li>The student registers or buys a seat for a date. The confirmation email carries a calendar invite for that session and a button to their ticket page.</li>
+                                <li>The ticket page shows the full class link. It is the page to bookmark, and with free registration it is also where a student cancels and frees the seat.</li>
+                                <li>Before the session, the reminder email arrives with the date, the time and the link again. Reminders are on for every schedule unless you switch them off.</li>
+                                <li>If you change the class link, saving the course asks whether to email everyone holding a seat on an upcoming session. Say yes, or half the class waits in the old room. On eventschedule.com that email reaches registered students once your schedule sends through its own email settings, so set those up before you rely on it.</li>
+                            </ul>
+                        </div>
+
+                        <div class="oc-duo">
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>A reminder timed for a class</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>The reminder goes out 3 hours, or 1, 2 or 3 days, before each session, and one setting covers every event your schedule owns. It starts at 1 day. For a weekly evening class, 3 hours is often the better choice: the link lands the same afternoon, when students are deciding whether to log on, and a drop-in student booked for three dates is reminded before each of the three.</p>
+                                <div class="oc-mini-foot">
+                                    <p>Set it under Edit Schedule, Tickets, Reminders. <x-link href="{{ marketing_url('/docs/creating-schedules') }}#ticket-reminders">Read about reminders</x-link></p>
+                                </div>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>Students in other time zones</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>A class is set in your schedule's timezone and the course page prints that zone's abbreviation beside the time. The calendar invite carries the exact moment, so a student abroad sees the session at their own hour. Watch the weeks the clocks change: a class that stays at 6:00 PM for you moves an hour for any student whose country changes its clocks on another date, or not at all.</p>
+                                <div class="oc-mini-foot">
+                                    <p>Send a short note to the class in those weeks, and name the time in the zones where most of your students live, in the course description.</p>
+                                </div>
+                            </div>
+                        </div>
+
                         {!! $ocFoot('link') !!}
                     </section>
 
@@ -1823,6 +1958,30 @@
                             <p>
                                 Worth being precise about which list is which. Somebody who left an email address and confirmed it hears when you publish new classes, as one digest rather than a message per class. Somebody who pressed Follow from their own account is on the other list, and that one is reached only by a newsletter you write. There is no automation builder here either way: no branching sequence, no drip.
                             </p>
+                        </div>
+
+                        <!-- Between the classes: one-to-one time, and what students thought. -->
+                        <div class="oc-duo">
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>Office hours students book themselves</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>Make office hours an appointment type: a 15 or 20 minute slot, the hours you are free each week, and Online as the location with your meeting link, which reaches the student with their booking confirmation rather than on a public page. Students pick a time on your booking page, shown in their own timezone with yours beside it. Both of you are emailed, the student gets a calendar invite, and the booking lands in your own calendar too if you sync one.</p>
+                                <div class="oc-mini-foot">
+                                    <p>One free appointment type on the free plan. Pro adds more types, a price on a session, buffers, minimum notice and approval. On eventschedule.com booking emails need your own email settings. <x-link href="{{ marketing_url('/docs/appointments') }}#location">Set up appointments</x-link></p>
+                                </div>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>Feedback after each session</h3>
+                                    <span class="oc-tag oc-tag-paid">Pro</span>
+                                </div>
+                                <p>Post-event feedback is off until you switch it on, under Edit Schedule, Engagement, Feedback. Once on, everyone who registered or bought a single seat is emailed between 1 and 48 hours after that session ends, as you choose, and rates it from one to five stars with an optional comment; a drop-in student is asked after each session they booked. Season pass holders are not asked. To hear early in a term, while there is still time to change the pace, switch feedback on for the course for the first few weeks and off again.</p>
+                                <div class="oc-mini-foot">
+                                    <p>One course can differ from the schedule's setting. On eventschedule.com the requests are sent from your own email settings. <x-link href="{{ marketing_url('/docs/tickets') }}#feedback">Read about feedback</x-link></p>
+                                </div>
+                            </div>
                         </div>
 
                         {!! $ocFoot('rest') !!}
@@ -1885,7 +2044,7 @@
                         </h2>
 
                         <ol class="oc-steps" data-reveal-group="120">
-                            @foreach ([['01', 'Write the term', 'Create the course as a recurring event, pick the night it meets, and end the recurrence after a set number of sessions or on a closing date.'], ['02', 'Skip the weeks you are off', 'Add date exceptions for the holiday weeks, and paste your class link on the course so students join from the schedule.'], ['03', 'Open the register', 'Set a seat cap counted per date, then take free registrations, or sell single seats and class cards with nothing taken off the top.']] as [$stepNum, $stepTitle, $stepBody])
+                            @foreach ([['01', 'Write the term', 'Create the course as a recurring event, pick the night it meets, and end the recurrence after a set number of sessions or on a closing date.'], ['02', 'Skip the weeks you are off', 'Add date exceptions for the holiday weeks, and paste your class link on the course. Everyone who signs up finds it on their ticket page, and in the reminder (not sent to season pass holders).'], ['03', 'Open the register', 'Set a seat cap counted per date, then take free registrations, or sell single seats and class cards with nothing taken off the top.']] as [$stepNum, $stepTitle, $stepBody])
                                 <li class="oc-step" data-reveal>
                                     <span class="oc-step-no" aria-hidden="true">{{ $stepNum }}</span>
                                     <h3>{{ $stepTitle }}</h3>

@@ -603,6 +603,12 @@
         .wb-card h3, .wb-card h4 { font-size: 1.14rem; font-weight: 700; line-height: 1.25; }
         .wb-card p { color: var(--wb-ink-2); font-size: 1rem; }
         .wb-foot { margin-top: 1rem; color: var(--wb-ink-3); font-size: 0.95rem; }
+        /* The mail log's second line, and the page checklist: a tally light per item. */
+        .wb-run-note { display: block; margin-top: 0.35rem; font-weight: 400; font-size: 0.92rem; line-height: 1.5; color: #aab1bc; }
+        .wb-check { display: grid; gap: 0.7rem; margin-top: 1rem; }
+        .wb-check li { position: relative; padding-inline-start: 1.4rem; color: var(--wb-ink-2); font-size: 1rem; }
+        .wb-check li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.55em; width: 0.55rem; aspect-ratio: 1; border-radius: 50%; background: var(--wb-ok); }
+        .wb-check b { color: var(--wb-ink); }
 
         /* ---------------------------------------------------------------
            The series: a prompter and a playout timeline
@@ -999,6 +1005,22 @@
                 'a' => 'Yes, on the free plan. Set the days of the week it runs, add date exceptions for the weeks you are skipping, and give the recurrence an end: either a closing date or a number of sessions, so a series that is meant to be twelve weeks long stops after twelve. Registration capacity is counted per session date, so next week starts empty even though it is the same event.',
             ],
             [
+                'q' => 'What is the best day and time to hold a webinar?',
+                'a' => 'For an audience at work, Tuesday to Thursday, late morning or just after lunch in the time zone where most of your registrants are. Avoid Monday mornings and Friday afternoons. A consumer or hobby audience is often freer on a weekday evening or a weekend morning. Plan an hour on the calendar with about 45 minutes of content and the rest for questions. If your audience spans two regions that share no working hours, run the webinar twice at two times as two separate events, each with its own link and registration count.',
+            ],
+            [
+                'q' => 'How many reminder emails should I send before a webinar?',
+                'a' => 'Two or three messages in total is usually enough: the confirmation when someone signs up, one the day before and one on the day. More starts to read as noise. Event Schedule sends the confirmation, with a calendar invite and a link to the registration page that holds the join link, and one reminder per registration at the time you choose: 3 hours, or 1, 2 or 3 days, before the start. To add a second touch, schedule a newsletter to the Ticket Buyers segment narrowed to that webinar.',
+            ],
+            [
+                'q' => 'How do I send the webinar recording to people who registered?',
+                'a' => 'Upload the recording to YouTube, Vimeo or your own site, since Event Schedule does not host video. Then create a newsletter, choose the Ticket Buyers segment and narrow it to that webinar, and add a Video block, which shows the YouTube thumbnail and links to the video. The segment includes everyone who registered, those who did not attend as well. Each recipient counts against the monthly newsletter allowance of 10 on Free, 100 on Pro and 1,000 on Enterprise, or no limit with your own email settings.',
+            ],
+            [
+                'q' => 'How can I collect questions before a webinar?',
+                'a' => 'Ask for them when people sign up, then open the session with the most common ones. In Event Schedule, custom questions on the free registration form are a Pro feature, while a question attached to a ticket type is free on every plan, so a webinar sold as a single ticket type priced at zero can carry one; its button then reads Get Tickets, and a waitlist on a sold-out ticket type is Pro, while the free registration waitlist is free. Each answer is stored with the registration and shown when you open it on the Sales page. During the session, use your meeting platform\'s own chat or Q&A.',
+            ],
+            [
                 'q' => 'Do people who registered find out if I move the session?',
                 'a' => 'Yes, once you say so. Change the join link or the venue and Event Schedule stops on the way to saving and asks whether to email everyone who registered, with a short note you can write into it; cancelling a session emails them as part of cancelling, with the same kind of note, and on eventschedule.com registrants get both when your schedule sends through its own email settings. On a one-off session moving the date or the time asks too, though on a recurring series the prompt covers the link and the venue rather than the weekly time. Free registrations are on the list either way, and so is anyone who left only an email address on the event page to hear about it, whose copy never carries the join link. Followers are different, and there are two of them. Somebody signed in who pressed Follow is on a list only a newsletter you write reaches; pressing Follow on its own sends nothing to an account follower automatically when you add a session. Somebody who left an email address on your page and confirmed it is on the other list, and a new session does reach them on its own, as a digest rather than a message per webinar.',
             ],
@@ -1012,8 +1034,21 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting webinars?',
-                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, with no monthly ceiling, and so is scanning a ticket in at the door. Charging for a seat is Pro at '.plan_price($proMonthly).' a month, which also adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
+                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, with no monthly ceiling, and so is scanning a ticket in at the door. Charging for a seat is Pro at '.plan_price($proMonthly).' a month, which also adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, confirmations and reminders go out either way, while change and cancellation notices reach registrants through your own SMTP details, which you add once in the integrations tab on any plan.',
             ],
+        ];
+
+        // Every email around one webinar, in order. The reminder is the ticket reminder
+        // (Edit schedule > Tickets > Reminders, default 1 day); the 48-hour one is the Notify me
+        // list's (usage.event_interest_reminder_hours); feedback is Pro and off by default.
+        $wbMail = [
+            ['Sign-up', 'Confirmation, from Event Schedule', 'A calendar invite for the session and a button to their registration page. Your registration notes ride along.', 'Page'],
+            ['-48 h', 'Notify me list, if you switched it on', 'People who left only an email address hear the session is close. It points at the public page.', 'No'],
+            ['-24 h', 'Your note, scheduled', 'A newsletter set with Schedule for later: what to have open, and a button to the session.', 'Optional'],
+            ['-3 h', 'The reminder, from Event Schedule', 'One per registration, 3 hours or 1, 2 or 3 days before, as you set it. It repeats the time and carries the link itself.', 'Yes'],
+            ['Change', 'Change notice, if you send one', 'Saving a new link asks whether to email registrants. On eventschedule.com they get it once your schedule has its own email settings.', 'Page'],
+            ['+1 to 48 h', 'Feedback request, on Pro', 'Off until you switch it on; on eventschedule.com it needs your own email settings. One to five stars and a comment, once per registration.', 'No'],
+            ['+1 day', 'The recording, from you', 'A newsletter to everyone who registered, with the recording link in a Video block.', 'Video'],
         ];
 
         $dotSections = [
@@ -1021,8 +1056,10 @@
             ['path', 'The signal path'],
             ['platform', 'The patch bay'],
             ['rundown', 'The rundown'],
+            ['plan', 'Planning'],
             ['series', 'The series'],
             ['register', 'Registration'],
+            ['showup', 'Show-up'],
             ['rest', 'Everything else'],
             ['who', 'Perfect for'],
             ['faq', 'Questions'],
@@ -1384,13 +1421,76 @@
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 5. The series: recurrence with a hard out                    -->
-        <!-- ============================================================ -->
-        <section id="series" class="wb-sec wb-alt" style="scroll-margin-top: 4rem;">
+        {{-- 5. Planning: the slot and the page, before the slides --}}
+        <section id="plan" class="wb-sec wb-alt" style="scroll-margin-top: 4rem;">
             <div class="wb-wrap">
                 <div class="wb-l3" data-reveal="l3">
                     <span class="wb-l3-tc wb-mono" aria-hidden="true">05:00:00:00</span>
+                    <h2 class="wb-l3-name">Pick the slot <em class="wb-hi">before the slides.</em></h2>
+                    <p class="wb-l3-title wb-mono">Planning a webinar</p>
+                </div>
+                <p class="wb-sub" data-reveal style="margin-bottom: 2.25rem;">
+                    Most of a webinar's turnout is settled before anyone opens a slide deck: the day and hour it runs, how long it says it will take, and whether the page tells a stranger in ten seconds why they should come.
+                </p>
+
+                <div class="wb-two">
+                    <div class="wb-tb" data-reveal-group="90">
+                        <div class="wb-tb-row" data-reveal>
+                            <span class="wb-key wb-key-cyan" aria-hidden="true">Day</span>
+                            <div class="wb-tb-head">
+                                <h3>Tuesday to Thursday, for people at work</h3>
+                            </div>
+                            <p>Monday morning goes on clearing the inbox and Friday afternoon is already the weekend. A hobby or consumer audience is the exception: a weekday evening or a weekend morning, when they are not at a desk, often suits them better.</p>
+                        </div>
+                        <div class="wb-tb-row" data-reveal>
+                            <span class="wb-key wb-key-green" aria-hidden="true">Hour</span>
+                            <div class="wb-tb-head">
+                                <h3>Their working day, not yours</h3>
+                            </div>
+                            <p>Late morning or just after lunch in the region most of your registrants are in. When two regions matter, run it twice: two events at two hours, each with its own link and its own count, and let people pick the one they can make.</p>
+                        </div>
+                        <div class="wb-tb-row" data-reveal>
+                            <span class="wb-key wb-key-amber" aria-hidden="true">Length</span>
+                            <div class="wb-tb-head">
+                                <h3>An hour on the calendar, 45 minutes of talk</h3>
+                            </div>
+                            <p>Leave a quarter of the slot for questions. Say the length on the page and keep to it: a webinar that runs ten minutes over teaches its audience to leave early next time.</p>
+                        </div>
+                        <div class="wb-tb-row" data-reveal>
+                            <span class="wb-key wb-key-red" aria-hidden="true">Lead</span>
+                            <div class="wb-tb-head">
+                                <h3>Two to three weeks of runway</h3>
+                            </div>
+                            <p>Open registration two or three weeks ahead for a public webinar and about a week ahead for an internal one. Keep promoting in the final days: plenty of people only sign up once the date is close enough to plan around.</p>
+                        </div>
+                    </div>
+
+                    <div class="wb-card" data-reveal="panel">
+                        <div class="wb-card-head">
+                            <h3>What the registration page has to say</h3>
+                        </div>
+                        <p>Read your page as somebody who has never heard of you. It needs all seven of these before you share the link.</p>
+                        <ul class="wb-check">
+                            <li><b>A title that names the result,</b> such as "Close the month in three days", rather than the format, such as "Finance webinar 4".</li>
+                            <li><b>The date, the start time and the zone.</b> The event page prints the zone's abbreviation next to the time, so set your schedule's timezone first.</li>
+                            <li><b>How long it runs, and what happens when.</b> The agenda's parts publish with their times, as in the rundown above.</li>
+                            <li><b>Who is presenting.</b> Add them as participants and each one is shown on the page, linked to their own schedule if they have one.</li>
+                            <li><b>What people leave with:</b> the slides, a template, a recording, and whether the recording is promised to everyone who registers.</li>
+                            <li><b>A short form.</b> Free registration asks for a name and an email. Every question you add is one more reason to close the tab, so ask only what you will use.</li>
+                            <li><b>What happens next.</b> Say that the confirmation email links to a registration page with the join link, and that the reminder before the start carries the link itself, so nobody hunts the public page for it.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. The series: recurrence with a hard out                    -->
+        <!-- ============================================================ -->
+        <section id="series" class="wb-sec" style="scroll-margin-top: 4rem;">
+            <div class="wb-wrap">
+                <div class="wb-l3" data-reveal="l3">
+                    <span class="wb-l3-tc wb-mono" aria-hidden="true">06:00:00:00</span>
                     <h2 class="wb-l3-name">Twelve Thursdays, and then it <em class="wb-hi">stops.</em></h2>
                     <p class="wb-l3-title wb-mono">The series</p>
                 </div>
@@ -1474,12 +1574,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Registration: the house counter and the talkback panel    -->
+        <!-- 7. Registration: the house counter and the talkback panel    -->
         <!-- ============================================================ -->
-        <section id="register" class="wb-sec" style="scroll-margin-top: 4rem;">
+        <section id="register" class="wb-sec wb-alt" style="scroll-margin-top: 4rem;">
             <div class="wb-wrap">
                 <div class="wb-l3" data-reveal="l3">
-                    <span class="wb-l3-tc wb-mono" aria-hidden="true">06:00:00:00</span>
+                    <span class="wb-l3-tc wb-mono" aria-hidden="true">07:00:00:00</span>
                     <h2 class="wb-l3-name">Counted per session, <em class="wb-hi">not per series.</em></h2>
                     <p class="wb-l3-title wb-mono">Registration</p>
                 </div>
@@ -1545,13 +1645,87 @@
             </div>
         </section>
 
+        {{-- 8. Show-up: every message from sign-up to the follow-up --}}
+        <section id="showup" class="wb-sec" style="scroll-margin-top: 4rem;">
+            <div class="wb-wrap">
+                <div class="wb-l3" data-reveal="l3">
+                    <span class="wb-l3-tc wb-mono" aria-hidden="true">08:00:00:00</span>
+                    <h2 class="wb-l3-name">Registered is not <em class="wb-hi">in the room.</em></h2>
+                    <p class="wb-l3-title wb-mono">From sign-up to show-up</p>
+                </div>
+                <p class="wb-sub" data-reveal style="margin-bottom: 2.25rem;">
+                    A free webinar always has people who sign up and never arrive. You cannot close that gap, only narrow it, and the way to narrow it is to put the link in front of people at the moment they are free to click it. Here is every message around one webinar, in order, and who sends it.
+                </p>
+
+                <div class="wb-run wb-glass" data-reveal>
+                    <div class="wb-run-head">
+                        <div>
+                            <h3>Product Deep Dive, the mail log</h3>
+                            <p class="wb-mono">One session &middot; seven messages &middot; four of them automatic</p>
+                        </div>
+                    </div>
+                    <table>
+                        <caption class="sr-only">Every email around one webinar: when it goes out, who sends it, what it says, and whether it carries the join link</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="wb-mono">When</th>
+                                <th scope="col" class="wb-mono">What goes out</th>
+                                <th scope="col" class="wb-mono">Join link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($wbMail as [$mailWhen, $mailWhat, $mailNote, $mailLink])
+                                <tr>
+                                    <td class="wb-run-in">{{ $mailWhen }}</td>
+                                    <th scope="row">
+                                        <span class="wb-run-seg">{{ $mailWhat }}</span>
+                                        <span class="wb-run-note">{{ $mailNote }}</span>
+                                    </th>
+                                    <td class="wb-run-dur">{{ $mailLink }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="wb-foot" data-reveal>The reminder is set once for the schedule, under Edit Schedule, Tickets, Reminders, and is on unless you switch it off. Feedback is set under Engagement. <x-link href="{{ marketing_url('/docs/creating-schedules') }}#ticket-reminders">How reminders work</x-link></p>
+
+                <div class="wb-cards" data-reveal-group="100">
+                    <div class="wb-card" data-reveal>
+                        <div class="wb-card-head">
+                            <h3>Spend the one reminder well</h3>
+                            <span class="wb-tier">Free</span>
+                        </div>
+                        <p>Event Schedule sends one reminder per registration. A day before puts tomorrow's session in mind; three hours before catches people on the day, when they decide whether to join. For a public webinar, choose 3 hours and schedule your own note for the day before. For an internal session already sitting in everyone's calendar, 1 day is plenty.</p>
+                    </div>
+                    <div class="wb-card" data-reveal>
+                        <div class="wb-card-head">
+                            <h3>Collect questions before you go live</h3>
+                            <span class="wb-tier">Free</span>
+                        </div>
+                        <p>Ask "What would you like answered?" when people sign up, and open with the three most common questions. Questions on the free registration form are Pro, but a question attached to a ticket type works on every plan: switch the webinar to Sell tickets with one ticket type priced at zero, and add the question under it. The button then reads Get Tickets instead of Register, and a waitlist on a sold-out ticket type is Pro, where the free registration waitlist is free. During the session, the platform's own chat or Q&amp;A takes the rest.</p>
+                    </div>
+                    <div class="wb-card" data-reveal>
+                        <div class="wb-card-head">
+                            <h3>Send the recording the next day</h3>
+                            <span class="wb-tier">Free</span>
+                        </div>
+                        <p>Event Schedule does not host video, so upload the recording to YouTube, Vimeo or your own site. Then write a newsletter to the Ticket Buyers segment narrowed to this webinar: it reaches everyone who registered, the people who missed it included. A Video block shows the YouTube thumbnail and links out.</p>
+                    </div>
+                </div>
+
+                <p class="wb-note" data-reveal>
+                    Two limits to plan around. The newsletter allowance counts each recipient (10 a month on Free, 100 on Pro, 1,000 on Enterprise, or unlimited once the schedule sends through its own email settings), and on eventschedule.com a send to more than 50 people also needs a verified phone number or those settings. And a weekly series is one event, so its Ticket Buyers segment holds everyone who registered for any of its dates: say which session the recording is from in the subject line.
+                </p>
+            </div>
+        </section>
+
         <!-- ============================================================ -->
-        <!-- 7. Everything else: a multiview beside its shot list         -->
+        <!-- 9. Everything else: a multiview beside its shot list         -->
         <!-- ============================================================ -->
         <section id="rest" class="wb-sec wb-alt" style="scroll-margin-top: 4rem;">
             <div class="wb-wrap">
                 <div class="wb-l3" data-reveal="l3">
-                    <span class="wb-l3-tc wb-mono" aria-hidden="true">07:00:00:00</span>
+                    <span class="wb-l3-tc wb-mono" aria-hidden="true">09:00:00:00</span>
                     <h2 class="wb-l3-name">The rest of the webinar rack</h2>
                     <p class="wb-l3-title wb-mono">Everything else</p>
                 </div>
@@ -1574,7 +1748,7 @@
                                 <h3>Email the people who already turn up</h3>
                                 <span class="wb-tier">Free</span>
                             </div>
-                            <p>People follow your schedule, which puts them on a list you can write to: the next series announced, the recording posted, the thing you promised to send. A list can also be cut down to just the people who registered for one particular session, which is usually the list you actually wanted. Open and click rates afterwards tell you whether it landed.</p>
+                            <p>People follow your schedule, which puts them on a list you can write to: the next series announced, the recording posted, the thing you promised to send. A list can also be cut down to just the people who registered for one particular webinar, which is usually the list you actually wanted; for a weekly series, that means everyone who registered for any of its dates. Open and click rates afterwards tell you whether it landed.</p>
                             <p>The number worth knowing first: 10 emails a month on Free, 100 on Pro, 1,000 on Enterprise, counted per recipient rather than per send. A newsletter never sends itself. What does go out on its own is a digest of the new sessions you publish, to the people who confirmed an email sign-up on your page, at most one every 72 hours and outside that allowance; pressing Follow alone signs nobody up for it.</p>
                         </div>
                         <!-- 2 -->
@@ -1631,12 +1805,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 8. Perfect for: six cameras, each with its caption up        -->
+        <!-- 10. Perfect for: six cameras, each with its caption up        -->
         <!-- ============================================================ -->
         <section id="who" class="wb-sec" style="scroll-margin-top: 4rem;">
             <div class="wb-wrap">
                 <div class="wb-l3" data-reveal="l3">
-                    <span class="wb-l3-tc wb-mono" aria-hidden="true">08:00:00:00</span>
+                    <span class="wb-l3-tc wb-mono" aria-hidden="true">10:00:00:00</span>
                     <h2 class="wb-l3-name">Perfect for all types of <em class="wb-hi">webinars</em></h2>
                     <p class="wb-l3-title wb-mono" aria-hidden="true">Six cameras</p>
                 </div>
@@ -1667,12 +1841,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 9. Three steps: the countdown                                -->
+        <!-- 11. Three steps: the countdown                                -->
         <!-- ============================================================ -->
         <section class="wb-sec wb-alt">
             <div class="wb-wrap">
                 <div class="wb-l3" data-reveal="l3">
-                    <span class="wb-l3-tc wb-mono" aria-hidden="true">09:00:00:00</span>
+                    <span class="wb-l3-tc wb-mono" aria-hidden="true">11:00:00:00</span>
                     <h2 class="wb-l3-name">Three steps to a webinar people show up to</h2>
                     <p class="wb-l3-title wb-mono">Countdown</p>
                 </div>
@@ -1697,7 +1871,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 10. Key features: the shot box                               -->
+        <!-- 12. Key features: the shot box                               -->
         <!-- ============================================================ -->
         <section class="wb-sec">
             <div class="wb-wrap wb-feat">
@@ -1730,7 +1904,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- 11. Related pages: the other studios                         -->
+        <!-- 13. Related pages: the other studios                         -->
         <!-- ============================================================ -->
         <section class="wb-sec">
             <div class="wb-wrap">
@@ -1756,7 +1930,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 12. FAQ                                                      -->
+        <!-- 14. FAQ                                                      -->
         <!-- ============================================================ -->
         <x-seo.faq-schema :items="$faqs" />
 
@@ -1764,7 +1938,7 @@
             <div class="wb-wrap wb-faq">
                 <div class="wb-faq-head">
                     <div class="wb-l3" data-reveal="l3" style="margin-bottom: 1.25rem;">
-                        <span class="wb-l3-tc wb-mono" aria-hidden="true">10:00:00:00</span>
+                        <span class="wb-l3-tc wb-mono" aria-hidden="true">12:00:00:00</span>
                         <h2 class="wb-l3-name" style="font-size: clamp(1.8rem, 3.6vw, 2.7rem);">Frequently asked questions</h2>
                         <p class="wb-l3-title wb-mono" aria-hidden="true">Talkback</p>
                     </div>
@@ -1788,7 +1962,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 13. Finale: the tally comes on                               -->
+        <!-- 15. Finale: the tally comes on                               -->
         <!-- ============================================================ -->
         <div class="wb-bars" aria-hidden="true"></div>
 
