@@ -21,7 +21,7 @@
 
 return [
     '/' => '2026-11-08',
-    '/about' => '2026-10-15',
+    '/about' => '2026-11-11',
     '/accelevents-alternative' => '2026-11-11',
     '/accessibility' => '2026-10-08',
     '/addevent-alternative' => '2026-11-11',
@@ -84,7 +84,7 @@ return [
     '/eventzilla-alternative' => '2026-11-11',
     '/examples' => '2026-10-09',
     '/facebook-events-alternative' => '2026-11-11',
-    '/faq' => '2026-10-15',
+    '/faq' => '2026-11-11',
     '/features' => '2026-11-10',
     '/features/ai' => '2026-11-11',
     '/features/allocated-seating' => '2026-11-11',
@@ -185,7 +185,7 @@ return [
     '/pricing' => '2026-11-11',
     '/privacy' => '2026-11-11',
     '/qr-code-generator-replacement' => '2026-11-11',
-    '/replace' => '2026-10-15',
+    '/replace' => '2026-11-11',
     '/saas' => '2026-10-20',
     '/sched-alternative' => '2026-11-11',
     '/search' => '2026-10-08',

@@ -616,7 +616,19 @@
             ],
             [
                 'q' => 'What does Event Schedule not replace?',
-                'a' => 'There is no automation or drip-campaign builder, so a nurture sequence stays where it is. There is no blank design canvas: graphics are generated from the event record in fixed layouts. It is not a general website builder, and there is no task board or kanban. Seat maps exist, but only on Enterprise: on the other plans ticket types are priced by the number and buyers are not choosing a specific seat.',
+                'a' => 'There is no automation or drip-campaign builder, so a nurture sequence stays where it is. There is no blank design canvas: graphics are generated from the event record in fixed layouts. It is not a general website builder, and there is no task board or kanban. It does not host or stream video (an online event carries a link to Zoom, Meet or Teams), it has no volunteer rota or shifts, it sends nothing to your attendees by SMS, and it does not calculate tax or keep your books. Seat maps exist, but only on Enterprise: on the other plans ticket types are priced by the number and buyers are not choosing a specific seat.',
+            ],
+            [
+                'q' => 'What should an all-in-one event platform actually replace?',
+                'a' => 'Every tool that holds a copy of the event. If a tool stores the date, the place, the price or the list of who is coming, it goes wrong the moment the event moves, and somebody has to remember to fix it: the flyer, the link in bio, the sign-up form, the attendee spreadsheet, the door list, the mailout of upcoming dates. Those are the ones worth folding into one record. A tool whose job would exist with no event in it, such as your accounts, a shop or an email automation, should stay, and be connected instead.',
+            ],
+            [
+                'q' => 'Does Event Schedule calculate sales tax or VAT on tickets?',
+                'a' => 'No. A ticket price is what the buyer pays, and no tax is added on top or collected for you, so set prices that already include any tax you owe. For your records, the Sales page lists every sale and refund, the sales CSV export on Pro gives your accountant the rows, and the Invoice Ninja integration on Pro can bill a sale as an invoice. Ask a tax professional what applies to your events.',
+            ],
+            [
+                'q' => 'Can I send text messages to my attendees?',
+                'a' => 'No. Tickets, the reminder before each event, change and cancellation notices and newsletters all go by email, and nothing is sent to buyers or followers by SMS or WhatsApp. On Enterprise you can create events by sending a WhatsApp message to the platform, but that is a way in for you, not a channel out to your audience. If texting is how your audience hears from you, keep that service.',
             ],
             [
                 'q' => 'Do I have to move everything at once?',
@@ -919,11 +931,37 @@
                 <div class="es-belt-tab mb-6" data-reveal aria-hidden="true"><span>05</span></div>
                 <p class="es-belt-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Where the belt stops</p>
                 <h2 class="es-balance es-belt-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Four things that <span class="es-belt-accent">stay on the bench.</span>
+                    Eight things that <span class="es-belt-accent">stay on the bench.</span>
                 </h2>
                 <p class="es-belt-muted es-belt-lead mt-5" data-reveal style="--reveal-delay: 0.15s;">
                     A consolidation page that claims everything is not worth reading. These are the jobs Event Schedule does not replace, where you should keep the specialist.
                 </p>
+            </div>
+
+            {{-- The buyer's test: what an all-in-one event platform should and should not replace. --}}
+            <div class="es-belt-card mb-6 p-7" data-reveal="panel">
+                <h3 class="es-belt-ink mb-2 text-xl font-bold">The test: does the tool hold a copy of the event?</h3>
+                <p class="es-belt-muted es-belt-small mb-6">An all-in-one event platform earns its place by removing copies, not by owning every login you have. Put each tool you pay for through one question: does it store the date, the place, the price or the list of who is coming, and would it be wrong the day the event moves? If it would, fold it in. If its job would still exist with no event in it, keep the specialist and connect it.</p>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div>
+                        <p class="es-belt-tag mb-3">Fold it in when the tool</p>
+                        <ul class="es-belt-muted es-belt-small space-y-2">
+                            <li>holds a date that someone retypes when it moves: the flyer, the bio link, the events page of your website</li>
+                            <li>keeps a list of who is coming apart from the list of who paid: a sign-up form, a spreadsheet of names</li>
+                            <li>has to know a ticket was sold: a door code, a head count, a "tell me when tickets are out" form (switch on the Mailing list)</li>
+                            <li>exists to send people to the event: the mailout of upcoming dates, the link in bio</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="es-belt-tag mb-3">Keep the specialist when the tool</p>
+                        <ul class="es-belt-muted es-belt-small space-y-2">
+                            <li>does its job with no event in it: the books, payroll, a shop, a blog</li>
+                            <li>builds something from nothing: a poster on a blank page, a nurture sequence, a ten-page website</li>
+                            <li>owns a channel this one does not use: text messages, live video</li>
+                            <li>organises people who are neither your team nor your audience: a volunteer rota, a supplier board</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <div class="grid gap-6 md:grid-cols-2" data-reveal-group="90">
@@ -942,6 +980,22 @@
                 <div class="es-belt-card p-7" data-reveal="panel">
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">Task boards and free-form databases</h3>
                     <p class="es-belt-muted es-belt-small">Planning here is event-shaped: sub-schedules, an agenda of parts inside an event, templates for the ones you repeat, and a Requests tab for what the public sends in. There is no kanban and no arbitrary table, so a production board with cards for the van hire stays on its board.</p>
+                </div>
+                <div class="es-belt-card p-7" data-reveal="panel">
+                    <h3 class="es-belt-ink mb-2 text-lg font-bold">Video hosting and streaming</h3>
+                    <p class="es-belt-muted es-belt-small">An online event here is a link. Tick Online, paste the Zoom, Meet or Teams address, and the public page shows only its domain while the full link goes on each ticket and into the reminder email. Videos on a schedule or an event are YouTube links. Nothing is streamed or stored here, so the stream stays on the video platform and the schedule decides who receives the link.</p>
+                </div>
+                <div class="es-belt-card p-7" data-reveal="panel">
+                    <h3 class="es-belt-ink mb-2 text-lg font-bold">Volunteer rotas and shifts</h3>
+                    <p class="es-belt-muted es-belt-small">There are no shifts to fill and no sign-up sheet for helpers. A team is an Enterprise feature, up to five people on eventschedule.com, and on a talent schedule its Availability tab lets each member mark the days they are not free, which is a note to the team rather than a rota. A crew of twenty volunteers keeps its rota tool; a zero-price ticket type can still get them scanned in at the door.</p>
+                </div>
+                <div class="es-belt-card p-7" data-reveal="panel">
+                    <h3 class="es-belt-ink mb-2 text-lg font-bold">Text messages</h3>
+                    <p class="es-belt-muted es-belt-small">Everything sent to an attendee is email: the ticket, the reminder before the event, a change or cancellation notice, the newsletter. Nothing goes to buyers or followers by SMS or WhatsApp. If your audience lives on text, keep the SMS service; on Pro, webhooks can hand each new sale to whatever sends your texts.</p>
+                </div>
+                <div class="es-belt-card p-7" data-reveal="panel">
+                    <h3 class="es-belt-ink mb-2 text-lg font-bold">Accounting and sales tax</h3>
+                    <p class="es-belt-muted es-belt-small">Sales tax and VAT are not calculated or collected, so set ticket prices that already include them. The Sales page keeps every sale and refund, the sales CSV export on Pro hands your accountant the rows, and Invoice Ninja on Pro can bill a sale as an invoice in your own company. Bookkeeping, tax returns and payroll stay in your accounting software.</p>
                 </div>
             </div>
 
@@ -975,7 +1029,7 @@
                         <li>The schedule page and unlimited events</li>
                         <li>Two-way Google, Outlook and CalDAV sync</li>
                         <li>Free RSVP with a capacity per date, and no monthly ceiling</li>
-                        <li>Refunds from the Sales page, and no platform fee on any plan</li>
+                        <li>No platform fee on ticket sales, on any plan</li>
                         <li>Scanning tickets at the door, and a QR code for the schedule page</li>
                         <li>One appointment type on a public booking page</li>
                         <li>Event graphics generated from the event</li>
@@ -995,10 +1049,10 @@
                     </div>
                     <h3 class="es-belt-ink mb-3 text-lg font-bold">Put a price on it</h3>
                     <ul class="es-belt-muted es-belt-small space-y-2">
-                        <li>Selling tickets that carry a price, and the live check-in dashboard</li>
+                        <li>Selling tickets that carry a price, refunds from the Sales page, and the live check-in dashboard</li>
                         <li>Passes, subscriptions and individual tickets</li>
                         <li>As many appointment types as you need</li>
-                        <li>Your own questions at checkout, promo codes, the ticket waitlist</li>
+                        <li>Questions asked per order or per guest, promo codes, the ticket waitlist</li>
                         <li>Polls, post-event feedback, sales CSV export</li>
                         <li>REST API, webhooks, custom CSS, ticket widget embed</li>
                         <li>One hundred newsletter emails a month</li>
@@ -1014,7 +1068,7 @@
                     <h3 class="es-belt-ink mb-3 text-lg font-bold">Your domain, your team</h3>
                     <ul class="es-belt-muted es-belt-small space-y-2">
                         <li>Your own domain on the schedule</li>
-                        <li>Up to five team members</li>
+                        <li>A team of up to five people, you included</li>
                         <li>Internal and unlisted event visibility</li>
                         <li>AI agenda scanning into event parts</li>
                         <li>One thousand newsletter emails a month</li>
@@ -1056,9 +1110,9 @@
                 <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner es-belt-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
-                            <span class="es-belt-tier es-belt-tier-free mb-3 inline-flex">Free</span>
+                            <span class="es-belt-tier es-belt-tier-pro mb-3 inline-flex">Pro</span>
                             <h3 class="es-belt-ink mb-2 text-xl font-bold">Zero platform fees on ticket sales</h3>
-                            <p class="es-belt-muted es-belt-small">Money moves through your own <a href="{{ route('marketing.stripe') }}" class="es-belt-link font-medium underline hover:no-underline">Stripe</a> or <a href="{{ route('marketing.paypal') }}" class="es-belt-link font-medium underline hover:no-underline">PayPal</a> account and Event Schedule takes none of it, on every plan including the free one. The only cut is the processor's own fee, the same cut it would take anywhere else, and a refund goes back the same way from the Sales page. This is usually the line that pays for the whole switch.</p>
+                            <p class="es-belt-muted es-belt-small">Money moves through your own <a href="{{ route('marketing.stripe') }}" class="es-belt-link font-medium underline hover:no-underline">Stripe</a> or <a href="{{ route('marketing.paypal') }}" class="es-belt-link font-medium underline hover:no-underline">PayPal</a> account and Event Schedule takes none of it, on every plan. Putting a price on a ticket is the Pro step; after that the only cut is the processor's own fee, the same cut it would take anywhere else, and a refund goes back the same way from the Sales page. This is usually the line that pays for the whole switch.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

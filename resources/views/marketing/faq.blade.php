@@ -577,6 +577,11 @@
         // itself does (GoogleWalletService::isConfigured()), so an install without an issuer
         // account never promises a button no buyer can find.
         $walletLive = \App\Services\Wallet\GoogleWalletService::isConfigured();
+        // Apple Wallet is gated the same way (AppleWalletService::isConfigured()).
+        $walletNames = array_values(array_filter([
+            $walletLive ? 'Google Wallet' : null,
+            \App\Services\Wallet\AppleWalletService::isConfigured() ? 'Apple Wallet' : null,
+        ]));
 
         // Prices come from the marketing.* view composer, the same values /pricing renders,
         // so the rate card cannot quietly disagree with it.
@@ -596,8 +601,8 @@
                     ],
                     [
                         'q' => 'Do I need technical skills to use it?',
-                        'a' => 'No. You create a schedule, add events, and share the link. If the details are already written down somewhere, paste the text or drop in a flyer image and AI parsing fills the fields for you to check before you save. That is on the free plan, up to 10 parses a day.',
-                        'links' => [['How the AI import works', marketing_url('/features/ai')]],
+                        'a' => 'No. You create a schedule, add events, and share the link. If the details are already written down somewhere, paste the text, drop in a flyer image, or paste a link to an events page or a calendar, and the import page turns it into events for you to check before you add them. That is on the free plan: a calendar link is read directly and costs nothing, and text, images and pages the AI has to read count against an allowance of 50 a day.',
+                        'links' => [['How the AI import works', marketing_url('/features/ai')], ['Importing events', marketing_url('/docs/ai-import')]],
                     ],
                     [
                         'q' => 'Is Event Schedule really free?',
@@ -619,12 +624,12 @@
                 'items' => [
                     [
                         'q' => "What's the difference between Free and Pro?",
-                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, event graphics, and 10 newsletter emails a month, each recipient counting as one. Free also gives you unlimited registration, ticket types priced at zero, QR scanning at the door and one bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and is what lets you charge for a ticket, through Stripe, PayPal or any other payment method, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, gift cards, add-ons, installment payments, unlimited appointment types, the ticket waitlist, custom fields, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
+                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, event graphics, ticket reminders, and 10 newsletter emails a month, each recipient counting as one. Free also gives you unlimited registration, ticket types priced at zero, questions on a ticket type, QR scanning at the door and one free bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and is what lets you charge for a ticket, through Stripe, PayPal or any other payment method, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, donations at checkout, gift cards, add-ons, installment payments, promoter links, unlimited and paid appointment types, the ticket waitlist, custom fields, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
                         'links' => [['Compare the plans', marketing_url('/pricing')]],
                     ],
                     [
                         'q' => 'What does Enterprise add?',
-                        'a' => 'Enterprise is ' . plan_price($entMonthly) . ' a month and adds reserved seating for venue schedules (a seating plan drawn once and reused on every date), a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, up to five team members with availability tracking, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy, agenda scanning, and 1,000 newsletter emails a month. Priority support comes with it.',
+                        'a' => 'Enterprise is ' . plan_price($entMonthly) . ' a month and adds reserved seating for venue schedules (a seating plan drawn once and reused on every date), a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, a team of up to five people with availability tracking, feeds that re-read another calendar or events page about once an hour and add what is new, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy and for flyers, agenda scanning, and 1,000 newsletter emails a month. Priority support comes with it.',
                         'links' => [['Pricing', marketing_url('/pricing')], ['Reserved seating', marketing_url('/features/allocated-seating')]],
                     ],
                     [
@@ -634,7 +639,7 @@
                     ],
                     [
                         'q' => 'What happens when my free trial ends?',
-                        'a' => 'The ' . $trialDays . '-day trial applies to a paid plan, not to the product. When it ends, the card on file is charged for Pro at ' . plan_price($proMonthly) . ' a month or ' . plan_price($proYearly) . ' a year, or Enterprise at ' . plan_price($entMonthly) . ' a month or ' . plan_price($entYearly) . ' a year. Cancel during the trial and nothing is charged. Cancel later and the schedule drops back to the free plan with every event and every record intact. You lose the paid features, not the calendar.',
+                        'a' => 'The ' . $trialDays . '-day trial applies to a paid plan, not to the product. When it ends, the card on file is charged for Pro at ' . plan_price($proMonthly) . ' a month or ' . plan_price($proYearly) . ' a year, or Enterprise at ' . plan_price($entMonthly) . ' a month or ' . plan_price($entYearly) . ' a year. Cancel during the trial and nothing is charged. The trial is one per account, so a second schedule you upgrade is charged from the start, and the checkout page says so before you enter a card. Cancel later and the schedule drops back to the free plan with every event and every record intact. You lose the paid features, not the calendar.',
                     ],
                     [
                         'q' => 'Can I cancel anytime?',
@@ -642,7 +647,7 @@
                     ],
                     [
                         'q' => 'Can I add my team?',
-                        'a' => 'Free and Pro include one team member, which is you. Multiple team members are an Enterprise feature, capped at five, and Enterprise adds an availability tab for tracking who is around on which day. An admin runs the schedule day to day, ticket sales and the door included; a viewer is read-only and sees no sales, but can scan tickets at the door. Being blunt about it, do not sign up for the free plan expecting to invite your whole staff.',
+                        'a' => 'Free and Pro include one team member, which is you. A team is an Enterprise feature: up to five people on a schedule on eventschedule.com, you included, and no cap on a selfhosted install. Enterprise also adds an availability tab for tracking who is around on which day. An admin runs the schedule day to day, ticket sales and the door included; a viewer is read-only and sees no sales, but can scan tickets at the door. Being blunt about it, do not sign up for the free plan expecting to invite your whole staff.',
                         'links' => [['Team members', marketing_url('/docs/managing-schedules#team')]],
                     ],
                 ],
@@ -681,8 +686,8 @@
                     ],
                     [
                         'q' => 'How do QR check-ins work?',
-                        'a' => 'Each ticket email carries a QR code'.($walletLive ? ', and buyers can also save the ticket to Google Wallet from the ticket page or that email (on a selfhosted install, once Google Wallet is set up); the pass carries the same code' : '').'. Open the scan screen on any phone or tablet, point it at the code, and the ticket is verified and marked as used. A second scan of the same code is caught rather than argued about at the door. Scanning is on every plan, and it needs no dedicated hardware.',
-                        'links' => [['Check-in', marketing_url('/features/check-in')], ...($walletLive ? [['Wallet passes', marketing_url('/docs/tickets#wallet-passes')]] : [])],
+                        'a' => 'Each ticket email carries a QR code'.($walletNames ? ', and buyers can also save the ticket to '.implode(' or ', $walletNames).' from the ticket page or that email; the pass carries the same code' : '').'. Open the scan screen on any phone or tablet, point it at the code, and the ticket is verified and marked as used. A second scan of the same code is caught rather than argued about at the door. Scanning is on every plan, and it needs no dedicated hardware.',
+                        'links' => [['Check-in', marketing_url('/features/check-in')], ...($walletNames ? [['Wallet passes', marketing_url('/docs/tickets#wallet-passes')]] : [])],
                     ],
                     [
                         'q' => 'Can I track check-ins in real time?',
@@ -691,8 +696,21 @@
                     ],
                     [
                         'q' => 'Can I collect additional information from ticket buyers?',
-                        'a' => 'Yes, with custom fields on Pro. A field can be a short text answer, a longer one, a dropdown, a multi-select, a date or a yes/no switch, and you attach it either to the order or to each individual ticket. Access needs, a meal choice, a shirt size, a school contact: ask at the point of purchase and the answer arrives with the sale.',
-                        'links' => [['Custom fields', marketing_url('/features/custom-fields')]],
+                        'a' => 'Yes, at three levels, and the first is free. A question you add to a ticket type is asked once per order that includes that type, on every plan. Questions asked once for the whole order are custom fields, a Pro feature, up to 10 per event. And to have every guest on an order answer for themselves, a meal choice or a name for a badge, switch on Individual tickets and Collect ticket fields per guest, which needs Pro on any event that sells tickets. A field can be text, multi-line text, yes/no, a date, a dropdown or a multi-select. Access needs, a shirt size, a school contact: ask at the point of purchase and the answer is stored with the sale.',
+                        'links' => [['Custom fields', marketing_url('/features/custom-fields')], ['Checkout fields', marketing_url('/docs/tickets#checkout-fields')]],
+                    ],
+                    [
+                        // TicketController (duplicate_guest_emails, twice): one address per guest.
+                        // EventRepo::saveEvent() scrubs individual_tickets below Pro when tickets are on.
+                        'q' => 'Can each guest on one order get their own ticket?',
+                        'a' => 'Yes, with Individual tickets. Checkout then takes each guest\'s details, and each guest gets their own confirmation email and QR code instead of one for the whole order, so guests can arrive separately. Each guest needs a different email address: an order that repeats one is refused. On a free registration it is free on every plan; on an event that sells tickets, even at a price of zero, it needs Pro. Without it, a free registration is one place, and one email address registers once per date.',
+                        'links' => [['Checkout options', marketing_url('/docs/tickets#checkout')]],
+                    ],
+                    [
+                        // TicketReminder, app:send-ticket-reminders; guide: creating-schedules#ticket-reminders.
+                        'q' => 'Do ticket holders get a reminder before the event?',
+                        'a' => 'Yes, on every plan, with nothing to set up. Before each event, everyone with a ticket or a registration gets one email with the day and time, the place, their QR code, a button to their ticket, and the join link if the event is online. It is on for every schedule and goes out 1 day before unless you choose 3 hours, 2 days or 3 days, in the schedule\'s timezone. A reminder of a day or more that would land in the night, between 10 PM and 8 AM, goes at 8 PM the evening before instead. You can change the timing, switch it off or preview the email in the schedule\'s Tickets settings. Imported attendees, season pass holders and a cancelled event get none.',
+                        'links' => [['Reminders', marketing_url('/docs/creating-schedules#ticket-reminders')]],
                     ],
                     [
                         'q' => 'Can I offer free tickets alongside paid ones?',
@@ -705,7 +723,7 @@
                     ],
                     [
                         'q' => 'What happens when tickets sell out?',
-                        'a' => 'A waitlist button appears in place of the sold-out ticket and people join with a name and an email. If stock comes back from a cancellation or a refund, the next person in line is emailed and has a 24-hour window to buy before the offer passes to the person behind them. The ticket waitlist is on Pro; the waitlist on a free registration is on every plan.',
+                        'a' => 'A waitlist button appears in place of the sold-out ticket and people join with a name and an email. When a place comes back (a sale cancelled, fully refunded or left unpaid), one person at a time is emailed, starting with the first in line, and gets a 24-hour head start before the next is told. The place is not held for them: the date is simply back on sale, first come, first served, so a quick reply wins it. The ticket waitlist is on Pro; the waitlist on a free registration is on every plan.',
                         'links' => [['Waitlist', marketing_url('/features/waitlist')]],
                     ],
                     [
@@ -733,7 +751,7 @@
                     ],
                     [
                         'q' => 'Can my audience add events to their personal calendars?',
-                        'a' => 'Yes. Every event page carries add-to-calendar buttons for Google, Apple and Outlook, and the Apple one is the .ics download, so anything that reads a calendar file is covered by the same button. On a recurring event each date gets its own set rather than one link for the whole series. The same menu also offers to subscribe to every event on your schedule: a live feed their calendar app keeps re-reading, so a moved date updates itself, where a downloaded .ics file is a one-off snapshot. It costs them no email address, and it is a different thing from the two-way sync you set up for your own calendar.',
+                        'a' => 'Yes. Every event page carries add-to-calendar buttons for Google, Apple and Outlook, and the Apple one is the .ics download, so anything that reads a calendar file is covered by the same button. On a recurring event each date gets its own set rather than one link for the whole series. Those copy one event across once and never update. To keep people current, each schedule has one live iCal feed that their calendar app keeps re-reading, so a moved date updates itself: it lists your upcoming events and expands a recurring one into dated entries for the next 90 days. The Add to Calendar menu offers it on events that are not selling tickets or taking registrations, and the sign-up panel offers it to signed-out visitors. It costs them no email address, and it is a different thing from the two-way sync you set up for your own calendar.',
                         'links' => [['Calendar feeds', marketing_url('/docs/sharing#calendar-feeds')]],
                     ],
                     [
@@ -746,6 +764,18 @@
                         'a' => 'A schedule is the calendar itself, the thing with a name and an address, like The Blue Note or DJ Sarah. Sub-schedules are strands within it that sort and colour-code what is on, such as a series or a strand of programming, so somebody can look at one strand instead of the whole year. Events are the individual dates. One thing worth knowing: a sub-schedule organises, it does not hide. Hiding something is a visibility setting on the event.',
                         'links' => [['Sub-schedules', marketing_url('/features/sub-schedules')]],
                     ],
+                    [
+                        // docs/ai-import (link, text, image, Google Calendar, Eventbrite Pro); EventFeed::allowedFor() Enterprise.
+                        'q' => 'Can I bring in events I already list somewhere else?',
+                        'a' => 'Yes. Import Events, in the schedule\'s Actions menu, takes a link to an events page or a calendar, pasted text, or a flyer image, and returns the events for you to tick and add. A calendar link, or a page that publishes its events as data, is read directly and uses none of the AI allowance. The schedule\'s owner can also connect Google Calendar with read-only access and copy one calendar\'s next 12 months. All of that is free. Import from Eventbrite copies your Eventbrite events with their ticket types and venues, and needs Pro. Each of those is a one-time copy: for a calendar or an events page that keeps changing, an Enterprise feed re-reads it about once an hour and brings in what is new.',
+                        'links' => [['Importing events', marketing_url('/docs/ai-import')], ['Feeds', marketing_url('/docs/creating-schedules#integrations-feeds')]],
+                    ],
+                    [
+                        // Role::appointmentTypeLimit() (1 on Free), AppointmentType::canTakePayment(), AppointmentTypeController::fill().
+                        'q' => 'Can people book a time with me, like a lesson or a consultation?',
+                        'a' => 'Yes, and one appointment type is on the free plan: you set weekly hours, guests pick a time on your public booking page, and the confirmation, reminder and cancellation emails go out for you once email is set up (see below). On Free that type has no price. Pro adds more types, a price on a booking (paid in cash or through a connected payment method other than Invoice Ninja, with no platform fee), and the advanced rules: date overrides, buffers before and after, minimum notice, how far ahead people can book, and an approval step. On eventschedule.com appointment emails need your schedule\'s own email settings, and the Appointments tab tells you when they are missing.',
+                        'links' => [['Appointments', marketing_url('/features/appointments')], ['Appointment guide', marketing_url('/docs/appointments')]],
+                    ],
                 ],
             ],
             [
@@ -756,7 +786,7 @@
                 'items' => [
                     [
                         'q' => 'Can I send newsletters to my followers?',
-                        'a' => 'Yes, and on the free plan, not Pro. You compose in a block builder starting from a template, pull in your event listings, and send to followers, ticket buyers, a sub-schedule\'s audience or a list you import. Opens and clicks are reported afterwards. What changes with the plan is volume: 10 emails a month on Free, 100 on Pro, 1,000 on Enterprise, counted per recipient, so one letter to 40 followers uses 40 of the allowance. Uploading your own images into a newsletter is the one part that needs Pro.',
+                        'a' => 'Yes, and on the free plan, not Pro. You compose in a block builder starting from a template, pull in your event listings, and send to followers, ticket buyers, a sub-schedule\'s audience or a list you import. Opens and clicks are reported afterwards. What changes with the plan is volume: 10 emails a month on Free, 100 on Pro, 1,000 on Enterprise, counted per recipient, so one letter to 40 followers uses 40 of the allowance. A schedule that sends through its own email settings has no monthly limit. On eventschedule.com a newsletter to more than 50 recipients needs those email settings or a verified phone number on your account. Uploading image files into a newsletter needs Pro; on Free an image block can point at a picture hosted elsewhere.',
                         'links' => [['Newsletters', marketing_url('/docs/newsletters')]],
                     ],
                     [
@@ -770,7 +800,7 @@
                         // usage.audience_announcement_min_hours, and does NOT draw on the newsletter
                         // allowance. Account followers are a different list and get newsletters only.
                         'q' => 'Do my followers get an email automatically when I add an event?',
-                        'a' => 'Some of them do, and the difference matters. Anyone who gave your schedule an email address and confirmed it is emailed a digest when you publish new public events, batched so a season announced in one sitting is one message rather than twenty, and never more often than once every three days. It does not count against your newsletter allowance. Somebody who followed you while signed in to their own account is on a separate list, and that one only ever hears from a newsletter you write yourself. You can switch the automatic digest off per schedule under Settings, Notifications.',
+                        'a' => 'Some of them do, and the difference matters. Anyone who gave your schedule an email address and confirmed it is emailed a digest when you publish new public events your schedule created itself (an event another schedule lists on yours is not announced), batched so a season announced in one sitting is one message of up to 25 events rather than twenty messages, and never more often than once every three days. It does not count against your newsletter allowance. On eventschedule.com, once more than 50 people have confirmed, the digest needs your own email settings or a verified phone number on the owner\'s account. Somebody who followed you while signed in to their own account is on a separate list, and that one only ever hears from a newsletter you write yourself. You can switch the automatic digest off per schedule under Settings, Notifications.',
                         'links' => [['Followers', marketing_url('/docs/managing-schedules#followers')]],
                     ],
                     [
@@ -786,6 +816,13 @@
                         'q' => 'Can others submit events to my schedule?',
                         'a' => 'Yes. Turn on event requests and your schedule gets a public submission form. On venue and curator schedules you can also require approval, so nothing appears until you have looked at it. Submissions land in a pending queue and you are emailed when one arrives, and if you decline one, the person who sent it is told.',
                         'links' => [['Event requests', marketing_url('/docs/creating-schedules#engagement-requests')]],
+                    ],
+                    [
+                        // Role $attributes + migration 2026_07_25: all three on for a new schedule.
+                        // Guide: creating-schedules#engagement-fan-content.
+                        'q' => 'Can my audience post photos and comments on my events?',
+                        'a' => 'Yes, and it is already on: a new schedule takes comments, photos and YouTube video links on its events, each kind with its own switch under Engagement, Fan content in the schedule\'s settings. Nothing a visitor sends appears in public until you approve it. People submit with just a name and an email address unless you turn on Require an account, and the submitter\'s email is only ever shown to you. A free schedule holds up to 25 fan photos in total; Pro removes the cap and adds a download of every photo on an event in one go.',
+                        'links' => [['Fan photos and videos', marketing_url('/features/fan-videos')], ['Fan content settings', marketing_url('/docs/creating-schedules#engagement-fan-content')]],
                     ],
                 ],
             ],
@@ -804,6 +841,12 @@
                         'q' => 'Can I hide an event until I am ready?',
                         'a' => 'Yes. Draft is on the free plan: the event exists for you and is published nowhere, not on the page, the feeds, the graphics, a newsletter or the calendar sync. Enterprise adds two more options: Internal, which stays members-only for good, and Unlisted, which is off the schedule but reachable by direct link, with an optional password.',
                         'links' => [['Internal and unlisted events', marketing_url('/docs/creating-events#privacy')]],
+                    ],
+                    [
+                        // docs/creating-events#venue: the page shows the link's domain or "Online", never the link.
+                        'q' => 'Will the public see the link to my online event?',
+                        'a' => 'No. Tick Online on an event and paste its Zoom, Meet or Teams link: the public event page never shows the link itself, only its domain, such as zoom.us, or just the word Online. The link goes on the ticket of everyone who registers or buys one, and into their reminder email, so give an online event free registration or tickets if guests need to receive it.',
+                        'links' => [['Online events', marketing_url('/features/online-events')], ['Event location', marketing_url('/docs/creating-events#venue')]],
                     ],
                     [
                         'q' => 'Is payment processing secure?',
@@ -857,8 +900,8 @@
                 'items' => [
                     [
                         'q' => 'Can I track who views my schedule?',
-                        'a' => 'You get counts, not people, and being exact about it: the built-in dashboard reports page views over time, a desktop, mobile and tablet split, which countries those views came from, which domains referred them, and which UTM campaign tags they arrived with. It is on the free plan. What it does not report is any kind of person, not even a unique-visitor number, and it does not load a third-party tracker in order to get one.',
-                        'links' => [['Analytics', marketing_url('/docs/analytics')]],
+                        'a' => 'You get counts, not names, and being exact about it: the Web Analytics tab reports page views over time, a desktop, mobile and tablet split, which countries those views came from, which sites referred them, the UTM campaign tags they arrived with, clicks on your social links, and broken links people opened. On eventschedule.com a Realtime tab beside it shows the last half hour as it happens: page views from everyone and, as a separate figure, visitors whose own cookie choice allows it, each listed by country, device and page with no name or email. Both are on the free plan, and neither loads a third-party tracker in order to get its numbers.',
+                        'links' => [['Analytics', marketing_url('/docs/analytics')], ['Realtime', marketing_url('/docs/analytics#realtime')]],
                     ],
                     [
                         'q' => 'Does Event Schedule integrate with Google Analytics?',
@@ -867,8 +910,8 @@
                     ],
                     [
                         'q' => 'Can I import events from a flyer or image?',
-                        'a' => 'Yes. Paste text or drop in an image and AI parsing pulls out the name, date, time, venue and description and fills the event form, where you check it before saving. It is on the free plan at 10 parses a day, 50 on Pro and 100 on Enterprise. It fills a form in; it does not publish anything by itself.',
-                        'links' => [['Creating events', marketing_url('/docs/creating-events')], ['AI features', marketing_url('/features/ai')]],
+                        'a' => 'Yes. On the import page, paste text or drop in a flyer, and AI reads out the name, date, time, venue, description and price. One event comes back as a card you can edit, several as a list you tick. Nothing goes on your schedule until you add it, and what you add is published. Free and Pro allow 50 AI reads a day per schedule, Enterprise 100, and a selfhosted install has no limit.',
+                        'links' => [['Importing events', marketing_url('/docs/ai-import')], ['AI features', marketing_url('/features/ai')]],
                     ],
                 ],
             ],
@@ -885,7 +928,7 @@
                     ],
                     [
                         'q' => 'Can I selfhost Event Schedule?',
-                        'a' => 'Yes. Run it on your own server and it resolves to the Enterprise feature set at no cost, with the data on your own hardware. A selfhosted install even has a couple of things the hosted one does not, such as importing events from a URL or a city search, and one-click updates.',
+                        'a' => 'Yes. Run it on your own server and it resolves to the Enterprise feature set at no cost, with the data on your own hardware. A selfhosted install even has a couple of things the hosted one does not: a daily automatic import from a list of web addresses, and one-click updates.',
                         'links' => [['Selfhosting guide', marketing_url('/selfhost')], ['GitHub', $github, true]],
                     ],
                     [

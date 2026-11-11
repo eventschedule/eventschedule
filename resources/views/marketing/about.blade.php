@@ -40,7 +40,7 @@
            table of checkable facts.
 
            THE GATHERING LETTERS ARE THE NAVIGATION. Sections carry the
-           binder's mark B to K, and the dot nav repeats the same boxed
+           binder's mark B to J, and the dot nav repeats the same boxed
            letters (.es-colo-navmark) so the sequence is the wayfinding.
            The first gathering and the back matter are deliberately
            UNSIGNED, which is the real convention: a title leaf does not
@@ -607,7 +607,7 @@
             ],
             [
                 'The free plan is one team member.',
-                'Multiple team members, capped at five, are an Enterprise feature. Selfhost and you have them, because a selfhosted install is Enterprise.',
+                'Multiple team members are an Enterprise feature, capped at five people on eventschedule.com, you included. Selfhost and you have them with no cap, because a selfhosted install is Enterprise.',
             ],
             [
                 '"Unlimited events" has a daily ceiling on the hosted site.',
@@ -626,11 +626,11 @@
             ],
             [
                 'q' => 'Can I run it on my own server?',
-                'a' => 'Yes. Selfhost it and the database sits on hardware you control. A selfhosted install resolves to the Enterprise tier, so selling tickets at a price, the API, custom CSS, multiple team members and every other paid-tier feature is included, and two things exist only on a selfhosted install: one-click app updates and importing events from URLs or by city.',
+                'a' => 'Yes. Selfhost it and the database sits on hardware you control. A selfhosted install resolves to the Enterprise tier, so selling tickets at a price, the API, custom CSS, multiple team members and every other paid-tier feature is included. The one exception is a custom domain per schedule, which a selfhosted install has no need of because the whole install already sits on a domain you chose. Two things exist only on a selfhosted install: one-click app updates and a daily automatic import from a list of web addresses.',
             ],
             [
                 'q' => 'Do you take a cut of ticket sales?',
-                'a' => 'No. Event Schedule charges zero platform fees. You connect your own Stripe or PayPal account and the money settles into it directly, so past the processor\'s own charge nothing is taken. Payfast, Razorpay, an external payment link, cash at the door and Invoice Ninja are the other routes, and none of them is plan gated either. A refund comes out of the same account: from the Sales page a Stripe, PayPal or Razorpay sale goes back in full or in part through the provider, on every plan.',
+                'a' => 'No. Event Schedule charges zero platform fees, on every plan. Putting a price on a ticket is the Pro step on eventschedule.com (a selfhosted install has it already): you connect your own Stripe or PayPal account and the money settles into it directly, so past the processor\'s own charge nothing is taken. Payfast, Razorpay, an external payment link, cash at the door and Invoice Ninja are the other routes. A refund comes out of the same account: from the Sales page a Stripe, PayPal or Razorpay sale goes back in full or in part through the provider.',
             ],
             [
                 'q' => 'Who is behind it?',
@@ -644,6 +644,22 @@
                         : 'any advertising partners the privacy policy names; the policy lists every one. Analytics and marketing cookies are opt-in: nothing optional is stored or loaded until you allow it in the cookie banner, and declining keeps it that way.')
                     .' When somebody follows your schedule or buys a ticket, you see their name and email so you can reach them. Selfhost and none of it leaves your server.',
             ],
+            [
+                'q' => 'What does "open source event management platform" mean for Event Schedule?',
+                'a' => 'That the whole application, the same code that runs eventschedule.com, is public on GitHub under the Attribution Assurance License. You can read it, change it, run it on your own server with every paid feature but per-schedule custom domains switched on, and take your schedules out with the backup export on any plan. It does not mean everything on the hosted service costs nothing: there the free plan is permanent, and charging for a ticket is what Pro is for.',
+            ],
+            [
+                'q' => 'Can I modify Event Schedule, or use it for a business?',
+                'a' => 'Yes. The license permits use, modification and redistribution, as source code or as a built program, and it does not limit you to non-commercial use. Its conditions are about attribution: keep the license text with any copy you pass on, show the author\'s name, "Event Schedule" and the project address in a built version, and do not use the author\'s name to promote what you build without permission. An install can even run as a service for other organizers, with its own plans and billing, and on such a platform the Event Schedule credit stays on every schedule, whatever plan it is on.',
+            ],
+            [
+                'q' => 'Who maintains it, and how does a selfhosted install get updates?',
+                'a' => 'The team behind Invoice Ninja, in the public repository, which has carried every change since its first commit in July 2024. Releases are published on GitHub. A selfhosted install checks once a day for a new release number, and an instance admin updates it in one step from Settings, App Update, or by running php artisan app:update on the server, which installs the release, runs any new migrations and clears the caches. Take a backup of the database, the storage folder and the .env file first.',
+            ],
+            [
+                'q' => 'Does a selfhosted install report back to anyone?',
+                'a' => 'No usage reports and no license check. Left as installed, it makes two plain downloads on its own: GitHub once a day for the latest release number, and DB-IP once a month for the free country-level database behind the analytics country breakdown. Crash reports reach the developers only if you tick the box in the setup wizard, and every other service, from your mail server to Stripe or an AI provider, is contacted only once you add its credentials.',
+            ],
         ];
 
         // The dot nav carries the same gathering letters the sections are marked
@@ -655,10 +671,11 @@
             ['imprint', 'The imprint', 'C'],
             ['mission', 'Why it was set', 'D'],
             ['impressions', 'Two impressions', 'E'],
-            ['rules', 'Standing rules', 'F'],
-            ['errata', 'Errata', 'G'],
-            ['makers', 'The makers', 'H'],
-            ['faq', 'Questions', 'I'],
+            ['terms', 'The terms in practice', 'F'],
+            ['rules', 'Standing rules', 'G'],
+            ['errata', 'Errata', 'H'],
+            ['makers', 'The makers', 'I'],
+            ['faq', 'Questions', 'J'],
             ['claim', 'The last leaf', null],
         ];
     @endphp
@@ -941,12 +958,72 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- F. Standing rules: what we hold to                            -->
+    <!-- F. The terms in practice: open source, read by a buyer        -->
+    <!-- ============================================================ -->
+    {{-- Every claim here is checkable in the repository: LICENSE, README.md (requirements,
+         install routes, "What a fresh install connects to"), docs/selfhost/installation#updating
+         and docs/account-settings#backup. --}}
+    <section id="terms" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12" data-reveal>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">F</span> The terms in practice</p>
+                <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
+                    Open source, read the way <span class="es-colo-second">a buyer reads it.</span>
+                </h2>
+                <div class="es-colo-rule es-colo-draw" aria-hidden="true"></div>
+                <p class="es-colo-muted mt-5 text-lg">
+                    &ldquo;Open source event management platform&rdquo; is easy to print and easy to stretch. For an organizer choosing one, it comes down to four questions. Here is each answer, with the file or page that settles it.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2" data-reveal-group="110">
+                <div class="es-colo-leaf flex flex-col p-7" data-reveal="panel">
+                    <p class="es-colo-tag mb-3">The license</p>
+                    <h3 class="es-colo-title es-colo-ink mb-3 text-xl">What you may do, and what you owe</h3>
+                    <p class="es-colo-muted text-sm leading-relaxed">The Attribution Assurance License is OSI-approved and adapted from BSD. You may use, change and redistribute the code, as source or as a built program, and nothing in it limits you to non-commercial use. What it asks in return is attribution: the license text travels with any copy you pass on, a built version shows the author's name, Event Schedule and the project address, and nobody may use the author's name to promote a product made from it without permission. That is why a selfhosted install keeps a small Event Schedule credit on its guest pages.</p>
+                    <a href="https://github.com/eventschedule/eventschedule/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="es-colo-link mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold">
+                        Read the LICENSE file
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                </div>
+                <div class="es-colo-leaf flex flex-col p-7" data-reveal="panel">
+                    <p class="es-colo-tag mb-3">Where it runs</p>
+                    <h3 class="es-colo-title es-colo-ink mb-3 text-xl">Hosted or on your server, the same code</h3>
+                    <p class="es-colo-muted text-sm leading-relaxed">On eventschedule.com there is nothing to install: the free plan has no expiry, and keeping the servers up is our job. On your own server you need PHP 8.2 or newer, MySQL 5.7+ or MariaDB 10.3+, Apache or Nginx, HTTPS and one cron entry. Docker, Softaculous, or a release zip with a setup wizard in the browser gets you there, and every paid feature is on. The one thing a selfhosted install does without is a separate domain per schedule, because the whole install already sits on a domain you chose.</p>
+                    <a href="{{ route('marketing.docs.selfhost.installation') }}" class="es-colo-link mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold">
+                        Read the installation guide
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+                </div>
+                <div class="es-colo-leaf flex flex-col p-7" data-reveal="panel">
+                    <p class="es-colo-tag mb-3">Your data</p>
+                    <h3 class="es-colo-title es-colo-ink mb-3 text-xl">How you take it with you</h3>
+                    <p class="es-colo-muted text-sm leading-relaxed">Backup and restore is on every plan. It exports each schedule you can edit, with its events, tickets and sales, and the images if you ask, as one file that another install imports as new schedules, so nothing there is overwritten. The iCal and RSS feeds are public on every plan, and Pro adds the sales CSV export and a REST API with an OpenAPI description. On a selfhosted install the database itself is yours, and moving the whole install is a database dump plus the storage folder and the .env file.</p>
+                    <a href="{{ route('marketing.docs.account_settings') }}#backup" class="es-colo-link mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold">
+                        How backup and restore works
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+                </div>
+                <div class="es-colo-leaf flex flex-col p-7" data-reveal="panel">
+                    <p class="es-colo-tag mb-3">Maintenance</p>
+                    <h3 class="es-colo-title es-colo-ink mb-3 text-xl">Who keeps it going</h3>
+                    <p class="es-colo-muted text-sm leading-relaxed">The team behind Invoice Ninja, in public. Releases are published on GitHub, and a selfhosted install checks once a day for a new one and updates in one step from the admin panel, migrations included. It sends no usage reports and makes no license check. Bugs and ideas go in as GitHub issues, pull requests are welcome, and a translation fix made in an install's own translation manager can be shared back upstream.</p>
+                    <a href="https://github.com/eventschedule/eventschedule/issues" target="_blank" rel="noopener noreferrer" class="es-colo-link mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold">
+                        Open the issue tracker
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- G. Standing rules: what we hold to                            -->
     <!-- ============================================================ -->
     <section id="rules" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">F</span> Standing rules</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">G</span> Standing rules</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     What we believe in, <span class="es-colo-second">pinned to the press.</span>
                 </h2>
@@ -993,12 +1070,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- G. The errata slip                                            -->
+    <!-- H. The errata slip                                            -->
     <!-- ============================================================ -->
     <section id="errata" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mb-10" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">G</span> Errata</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">H</span> Errata</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     The slip that says <span class="es-colo-second">what is not here.</span>
                 </h2>
@@ -1032,12 +1109,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- H. The makers                                                 -->
+    <!-- I. The makers                                                 -->
     <!-- ============================================================ -->
     <section id="makers" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mb-10" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">H</span> The makers</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">I</span> The makers</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     Built by the team behind <span class="es-colo-second">Invoice Ninja.</span>
                 </h2>
@@ -1079,14 +1156,14 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- I. Questions                                                 -->
+    <!-- J. Questions                                                 -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-10" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">I</span> Questions</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">J</span> Questions</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     What people ask <span class="es-colo-second">before they trust it.</span>
                 </h2>
@@ -1115,7 +1192,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- J. Related pages                                              -->
+    <!-- K. Related pages                                              -->
     <!-- ============================================================ -->
     <section class="py-16">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -1140,7 +1217,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- K. The last leaf                                              -->
+    <!-- L. The last leaf                                              -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
