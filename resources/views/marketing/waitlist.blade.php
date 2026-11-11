@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Ticket Waitlist for Sold-Out Events | One Offer at a Time</x-slot>
-    <x-slot name="description">When a date sells out, guests join a waitlist. A returned seat goes to one person at a time, with 24 hours to buy, so it is never promised to two people.</x-slot>
+    <x-slot name="description">When a date sells out, guests join a waitlist. Each returned seat is offered to one person at a time, a day each. How to set one up and read the queue.</x-slot>
     <x-slot name="breadcrumbTitle">Waitlist</x-slot>
 
     <x-slot name="structuredData">
@@ -197,7 +197,7 @@
                             Sold out is not <span class="es-queue-accent">the end of it.</span>
                         </h1>
                         <p class="es-queue-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                            Seats come back. A card is declined, an order is refunded, a pass holder cancels the night before. When one does, it goes to one person on your waitlist - not to all of them - and they get a day to take it.
+                            Seats come back. A card is declined, an order is refunded, a pass holder cancels the night before. When one does, the next person on your waitlist is emailed, not all of them, and has a day's head start before the offer passes on.
                         </p>
                         <div class="mt-8 flex flex-wrap gap-3" data-reveal style="--reveal-delay: 0.15s;">
                             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#166534] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#12522a]">
@@ -242,7 +242,7 @@
 
                         <div class="es-queue-board-rule mt-6 pt-4">
                             <p class="es-queue-board-muted text-xs leading-relaxed">
-                                One offer is live at a time. If it is not taken inside 24 hours it passes to position two, and the seat was never promised to anyone else in the meantime.
+                                One offer is live at a time. If it is not taken inside 24 hours it passes to position two. Nobody else on the list is emailed in the meantime.
                             </p>
                         </div>
                     </div>
@@ -297,7 +297,7 @@
                         One person, <span class="es-queue-accent">one seat, one day.</span>
                     </h2>
                     <p class="es-queue-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        The alternative - emailing everybody and letting them race - is how a sold-out night gets oversold and how thirty-nine people are told about a seat that has already gone.
+                        The alternative - emailing everybody and letting them race - is how thirty-nine people are told about a seat that has already gone.
                     </p>
                 </div>
 
@@ -305,11 +305,11 @@
                     <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
                         <h3 class="es-queue-ink text-base font-bold">Only the next in line hears</h3>
                         <p class="es-queue-muted mt-2 text-sm leading-relaxed">
-                            When a place frees up, one email goes out, to one person, carrying a link that will let them buy it. Nobody else is told the seat exists yet.
+                            When a place frees up, one email goes out, to one person, carrying a link that will let them buy it. Nobody else on the list is emailed about it yet.
                         </p>
                     </div>
                     <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
-                        <h3 class="es-queue-ink text-base font-bold">The offer holds for 24 hours</h3>
+                        <h3 class="es-queue-ink text-base font-bold">Each offer runs for 24 hours</h3>
                         <p class="es-queue-muted mt-2 text-sm leading-relaxed">
                             Long enough for somebody at work to see it and decide, short enough that the seat is not still sitting there on the night. When the window closes without a purchase, the offer moves on by itself.
                         </p>
@@ -325,7 +325,7 @@
                 <div class="es-queue-panel mt-8 p-6" data-reveal="panel">
                     <h3 class="es-queue-ink text-base font-bold">You can see the whole queue</h3>
                     <p class="es-queue-muted mt-2 text-sm leading-relaxed">
-                        A Waitlist tab appears on the Sales page as soon as there is one entry, listing each person's name and email with the event, the date and where they are in the line. It is the demand that did not fit, in writing - which is worth reading before you decide whether to add a second night.
+                        A Waitlist tab appears on the Sales page as soon as there is one entry, listing each person's name and email with the event, the date, their status and when they joined, which is their place in the line. It is the demand that did not fit, in writing - which is worth reading before you decide whether to add a second night.
                     </p>
                 </div>
                 <div class="mt-10 text-center">
@@ -335,6 +335,163 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4. Before the date sells out                                 -->
+        <!-- ============================================================ -->
+        <section id="setup" class="es-queue-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-queue-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-queue-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How to set up a ticket waitlist</p>
+                    <h2 class="es-balance es-queue-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Six things to settle <span class="es-queue-accent">before you sell out.</span>
+                    </h2>
+                    <p class="es-queue-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        A waitlist only works if the date can really fill up, the seats that come back really come back, and the people in the queue know what they signed up for. Each of those is a setting or a sentence you decide now, not on the night.
+                    </p>
+                </div>
+
+                @php
+                    $queueSetup = [
+                        ['Give every ticket type a limit', 'The Join Waitlist button appears only when the date has no seat left: every ticket type used up, or the shared total reached if your types draw on one number. Leave a single type unlimited and the date can never sell out, so nobody can ever join.', [marketing_url('/docs/tickets').'#combined-total', 'Shared totals in the guide']],
+                        ['Keep sales open until the night', 'A full date whose ticket sales have ended shows as ended, not as a waitlist, because a seat that came back could not be sold anyway. If you close sales a day early, the queue closes with them. Close sales only when you truly stop taking people.', null],
+                        ['Release unpaid orders on a timer', 'An order nobody pays still holds its seats. Turn on Expire unpaid tickets in the Sales rules row and enter a number of hours: a few for card payments, longer when buyers pay an invoice. Every order that lapses puts its seats back and wakes the queue.', [marketing_url('/docs/tickets').'#sales-rules', 'Sales rules in the guide']],
+                        ['Cancel the orders you know are empty', 'When a buyer writes to say they cannot come, cancel the order or refund it in full. That frees the seat and the next person in line is emailed. A partial refund leaves the ticket valid, so it frees nothing.', [marketing_url('/docs/tickets').'#refunds', 'Refunds in the guide']],
+                        ['Say what joining means', 'Put one line in the event description: joining is not a ticket, people are told in the order they joined, and a returned seat is first come, first served once they are told. A guest who knew that does not write to you angry.', null],
+                        ['Check the plan for the kind of event', 'A full free registration date offers the waitlist on every plan, Free included. A sold-out ticketed date needs Pro. On a selfhosted install both are included at no cost.', [marketing_url('/pricing'), 'Compare plans']],
+                    ];
+                @endphp
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                    @foreach ($queueSetup as $qsIndex => [$qsName, $qsBody, $qsLink])
+                        <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
+                            <p class="es-queue-tag mb-3">Step {{ $qsIndex + 1 }}</p>
+                            <h3 class="es-queue-ink text-base font-bold">{{ $qsName }}</h3>
+                            <p class="es-queue-muted mt-2 text-sm leading-relaxed">{{ $qsBody }}</p>
+                            @if ($qsLink)
+                                <a href="{{ $qsLink[0] }}" class="es-queue-accent mt-auto pt-4 text-sm font-semibold hover:underline">{{ $qsLink[1] }}</a>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="es-queue-board mt-8 p-6 sm:p-8" data-reveal="panel">
+                    <p class="es-queue-board-muted text-xs font-semibold uppercase tracking-widest">A line to copy into a sold-out event's description</p>
+                    <p class="es-queue-board-ink mt-4 text-base leading-relaxed">
+                        "Sold out? Join the waitlist with your name and email. If a seat comes back, we email the next person in line, in the order people joined. The seat is then first come, first served, so buy as soon as you see the email. After about a day, the next person is told."
+                    </p>
+                    <p class="es-queue-board-muted es-queue-board-rule mt-6 pt-4 text-xs leading-relaxed">
+                        Why that wording: the email a guest gets when it is their turn says a place may now be free and asks them to act quickly. It does not reserve the seat, and your description should not promise that it does.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. The clock and late returns                                -->
+        <!-- ============================================================ -->
+        <section id="clock" class="es-queue-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-queue-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-queue-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How long a waitlist offer lasts</p>
+                    <h2 class="es-balance es-queue-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        A day per person, <span class="es-queue-accent">so late seats travel less far.</span>
+                    </h2>
+                    <p class="es-queue-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Each offer runs for 24 hours before it passes on (the check runs every hour, so it can be a little over). That is fair to the person at the front, and it has a cost you can count: the closer to the night a seat comes back, the fewer people in the queue it can reach if nobody answers.
+                    </p>
+                </div>
+
+                @php
+                    // Worst case, nobody answers: offers go out at the return and then about every
+                    // 24 to 25 hours until doors. 7 days = 168h -> 7 offers; 72h -> 3; 36h -> 2; 6h -> 1.
+                    $queueClock = [
+                        ['7', 'A week before', 'Seven people can be offered it in turn before doors, even if the first six let it go.'],
+                        ['3', 'Three days before', 'Three people at most. A long queue for a Saturday show barely moves in the last half of the week.'],
+                        ['2', 'The night before', 'Thirty-six hours out, the second offer goes out with about half a day to spare.'],
+                        ['1', 'The afternoon of the show', 'One person is told. If they miss the email, the seat sits on the event page for whoever finds it.'],
+                    ];
+                @endphp
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="80">
+                    @foreach ($queueClock as [$qcNum, $qcWhen, $qcBody])
+                        <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
+                            <p class="es-queue-accent text-4xl font-black tabular-nums">{{ $qcNum }}</p>
+                            <h3 class="es-queue-ink mt-2 text-base font-bold">{{ $qcWhen }}</h3>
+                            <p class="es-queue-muted mt-2 text-sm leading-relaxed">{{ $qcBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="es-queue-muted mx-auto mt-6 max-w-3xl text-center text-sm">
+                    Figures are the most people an unanswered seat can be offered to, one after another, before the doors open.
+                </p>
+
+                <div class="mt-8 grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-queue-ink text-base font-bold">An offer is a head start, not a hold</h3>
+                        <p class="es-queue-muted mt-2 text-sm leading-relaxed">
+                            The moment a seat comes back, the date is on sale again, so somebody who happens to open the event page can buy it before the person who was emailed. Checkout counts stock, so the seat is never sold twice. If a passer-by takes it, the queue simply waits: when the emailed person's day runs out, the next in line is told only if the date still has room.
+                        </p>
+                    </div>
+                    <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-queue-ink text-base font-bold">In the last day, people beat the queue</h3>
+                        <p class="es-queue-muted mt-2 text-sm leading-relaxed">
+                            Because the final offers have so little time to travel, the last seats of a sold-out night tend to go to whoever is watching the page. If you would rather they went to the queue, ask buyers to cancel early: a cancellation a week out reaches up to seven people, one on the day reaches one.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. Reading the queue                                         -->
+        <!-- ============================================================ -->
+        <section id="demand" class="es-queue-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-queue-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-queue-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What a waitlist tells you</p>
+                    <h2 class="es-balance es-queue-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        A long queue is a reason <span class="es-queue-accent">to add a night.</span>
+                    </h2>
+                    <p class="es-queue-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Most of the people on a waitlist will never be offered a seat, because only a handful come back. The list is more useful as a measure: it counts the demand you turned away, by date, with an email address for each person.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                    <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-queue-ink text-base font-bold">An entry is a person, not a seat</h3>
+                        <p class="es-queue-muted mt-2 text-sm leading-relaxed">
+                            Joining asks for a name and an email, never a number of tickets, and one address can be on a date's list once. Somebody who joins usually wants seats for the people they would have come with. If your typical order is two tickets, read forty entries as up to about eighty seats.
+                        </p>
+                    </div>
+                    <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-queue-ink text-base font-bold">Size the extra night below the list</h3>
+                        <p class="es-queue-muted mt-2 text-sm leading-relaxed">
+                            Joining costs nothing and plans change, so not everyone will buy when the new date opens. A second night is safer sized at a fraction of what the queue suggests, in a smaller room or with fewer tickets released, and grown if it sells.
+                        </p>
+                    </div>
+                    <div class="es-queue-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-queue-ink text-base font-bold">Tell the queue first</h3>
+                        <p class="es-queue-muted mt-2 text-sm leading-relaxed">
+                            Newsletters have a Waitlist segment, on every plan, that can be narrowed to one event. Send the new date to it before you announce it anywhere else. On the hosted plans, unless you send through your own email settings, each person counts as one email against the monthly newsletter allowance.
+                        </p>
+                        <a href="{{ marketing_url('/docs/newsletters') }}#managing-segments" class="es-queue-accent mt-auto pt-4 text-sm font-semibold hover:underline">Segments in the guide</a>
+                    </div>
+                </div>
+
+                <div class="es-queue-panel mt-8 p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-queue-ink text-base font-bold">Keeping the list clean</h3>
+                    <ul class="es-queue-muted mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed">
+                        <li>When somebody on a ticketed date's list pays for a ticket to that date with the same email address, their entry is marked Purchased by itself, so the queue does not offer them a second seat.</li>
+                        <li>A person who asks to be taken off can be removed with Remove at the end of their row, after a confirmation.</li>
+                        <li>A recurring event keeps one queue per date. Adding a new date starts an empty queue for it, which is another reason to write to the old one.</li>
+                        <li>Thirty days after a date, its waitlist entries are deleted as personal data. Write to those people before then if you want them for the next run, or point them at <x-link href="{{ marketing_url('/features/recurring-events') }}">the dates you add</x-link> while the list still exists.</li>
+                    </ul>
                 </div>
             </div>
         </section>
@@ -349,10 +506,14 @@
                 ['q' => 'Do I have to switch the waitlist on?', 'a' => 'No. Once a date has sold out, the Join Waitlist button takes the place of the buy button on that event page by itself. Guests give a name and an email, and that is the whole sign-up.'],
                 ['q' => 'How is this different from "Tell me when tickets go on sale"?', 'a' => 'That is the interest list, and it does a different job. The waitlist is for a date that has sold out: it queues people for a seat that comes back and offers it to one of them at a time, free on registration events and Pro on ticketed ones. The interest list is for an event whose tickets are not on sale yet, or for someone who only wants to hear if it changes. It takes an email address and nothing else, then sends one email when tickets go on sale, one if the event is cancelled and a reminder before it starts, plus any notice you choose to send if the date or venue changes. It is free on every plan, off until you switch on the "Notify me" card, and it never offers anyone a seat.', 'link' => [marketing_url('/docs/tickets').'#interest-list', 'How the interest list works']],
                 ['q' => 'Is it per event or per date?', 'a' => 'Per date. A recurring night that is full on Friday and half empty on Saturday offers the waitlist on Friday only, because Friday is the thing that sold out.'],
-                ['q' => 'What stops two people buying the same returned seat?', 'a' => 'Only one person is ever notified at a time. The next in line is told only after the current offer is either taken or expires, which is the whole reason the feature works this way rather than emailing everyone at once.'],
-                ['q' => 'How long does someone have?', 'a' => 'Twenty-four hours from the email. If they have not bought by then the offer passes to the next person automatically - there is nothing for you to chase or re-send.'],
+                ['q' => 'What stops two people buying the same returned seat?', 'a' => 'Checkout counts stock, so a seat can only ever be sold once. The waitlist adds the courtesy: one person is emailed when a place comes back, and the next in line is told only after that offer has run out and the date still has room, rather than everyone being emailed at once and most of them finding the seat gone.'],
+                ['q' => 'How long does someone have?', 'a' => 'Twenty-four hours from the email before the offer passes to the next person, automatically, with nothing for you to chase or re-send. The seat is not locked to them in that time: the date is back on sale, so somebody visiting the event page could buy it first. That is why the email asks them to act quickly.'],
                 ['q' => 'Does a refunded ticket wake the list?', 'a' => 'A full refund does. A cancelled sale, a fully refunded sale and an unpaid order that expires all put the place back and offer it on, and so does a pass holder cancelling a date they had booked in advance. A partial refund leaves the ticket valid, so the seat is still taken and nobody is offered it.'],
                 ['q' => 'Can I see who is waiting?', 'a' => 'Yes, on the Waitlist tab of the Sales page, which appears as soon as there is one entry. It shows each person with their event, date and status, so you know how much demand you turned away.'],
+                ['q' => 'Does joining a waitlist reserve a ticket?', 'a' => 'No. Joining puts a name and an email address in the queue for one date, and nothing is charged or held. When a place comes back, the next person is emailed a link to the event page and buys there like anyone else, at the price the ticket has then.'],
+                ['q' => 'Can someone ask for more than one ticket from the waitlist?', 'a' => 'The waitlist does not ask how many. When it is their turn they open the event page and can buy as many as are free, within the limits you set on the event. If one cancelled order returned four seats and they want two, the other two stay on sale on the event page.'],
+                ['q' => 'Should I keep a waitlist or add another date?', 'a' => 'Both, usually. The waitlist sells the few seats that come back, which on a typical sold-out night is a handful. When the queue for one date is many times longer than that, the demand is there for a second date: add it, write to the Waitlist segment first, and size it below the length of the list, because not everyone who joined will buy.', 'link' => [marketing_url('/features/recurring-events'), 'Adding dates to a series']],
+                ['q' => 'What happens to the waitlist after the event?', 'a' => 'Thirty days after the date, its waitlist entries are deleted, because they are personal data collected for one night. Until then the people still waiting can be seen with Include past events on the Waitlist tab, and written to with a newsletter, so contact them before the thirty days run out if you want them for the next run.'],
                 ['q' => 'Which plan do I need?', 'a' => 'On a free registration event the waitlist works on every plan, including Free. On a ticketed event it is on the Pro plan, and on every selfhosted install at no cost.'],
             ];
         @endphp

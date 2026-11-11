@@ -348,6 +348,168 @@
             </div>
         </section>
 
+        <!-- ============================================================ -->
+        <!-- 5. The playbook                                              -->
+        <!-- ============================================================ -->
+        <section id="playbook" class="es-line-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-line-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">A ticket promo code playbook</p>
+                    <h2 class="es-balance es-line-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Six kinds of code, <span class="es-line-accent">and how to set each one.</span>
+                    </h2>
+                    <p class="es-line-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Most organizers run the same handful of offers. Each one has a job, and the settings follow from the job. The field names below are the ones in the event's Tickets tab.
+                    </p>
+                </div>
+
+                @php
+                    $codePlays = [
+                        ['Early bird', 'Rewards the people who commit first, and tells you early how a show is selling while there is still time to act on it.', ['Discount Type: Percentage', 'Discount Value: 15 to 20', 'Expires At: the moment you announce', 'Max Uses: blank, or a cap in orders'], 'Want everyone to see the lower price without typing a code? Make it a ticket type with its own sales end date instead. Sales windows work on every plan.'],
+                        ['Group booking', 'Not a code at all. A volume discount on the ticket type applies itself once an order reaches the minimum quantity you set, so nobody has to ask and a single buyer cannot use it.', ['Volume discount on the ticket type', 'Minimum quantity: 4, say', 'Type: Percentage or Fixed amount', 'Works on every plan'], 'A promo code still stacks on top: the volume discount comes off first and the code is worked out on what is left.'],
+                        ['Partner or affiliate', 'One code per partner, so every order on the Sales page says which partner brought it: a choir, a bookshop, a club that shares your audience.', ['One code each: CHOIR10, BOOKSHOP10', 'Discount Type: Percentage', 'Expires At: the end of the campaign', 'Max Uses: blank'], 'Paying the partner a commission instead of giving buyers money off? A promoter link (Pro) counts their clicks, tickets and revenue with no discount at all.'],
+                        ['Comps and guest list', 'Press, the band\'s guests, a radio giveaway of ten pairs. A full discount on one ticket type, capped at the number of orders you are giving away.', ['Discount Value: 100 (Percentage)', 'Applies To: one ticket type', 'Max Uses: the number of comp orders', 'Expires At: the day before the show'], 'An order that comes to zero is confirmed with no payment step (except through an Invoice Ninja payment link). For guests you can name, importing them on the Sales page (Pro) skips the code, so there is nothing to forward.'],
+                        ['Last-minute', 'For the seats still empty in the last few days. Short, narrow and sent privately, so the people who paid full price weeks ago do not learn to wait next time.', ['Expires At: 48 hours after sending', 'Applies To: only the type with seats left', 'Shared as the link that fills it in', 'Sent to followers, not posted'], 'Send it in a newsletter with the code\'s own link, so a reader taps once and the code is already filled in when they choose their tickets.'],
+                        ['Thank-you for regulars', 'For the people who came last time. It turns a past buyer into a returning one, and the code tells you how many came back.', ['One code for your mailing list', 'Discount Type: Percentage or Fixed amount', 'Expires At: two weeks after sending', 'Max Uses: blank'], 'Ticket presets can carry promo codes, so a code you give regulars at every show is in place on each new event without retyping it.'],
+                    ];
+                @endphp
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                    @foreach ($codePlays as [$cpName, $cpWhy, $cpSettings, $cpNote])
+                        <div class="es-line-panel flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-line-ink text-base font-bold">{{ $cpName }}</h3>
+                            <p class="es-line-muted mt-2 text-sm leading-relaxed">{{ $cpWhy }}</p>
+                            <ul class="es-line-rule es-line-ink mt-4 space-y-1 pt-3 text-xs font-semibold">
+                                @foreach ($cpSettings as $cpSetting)
+                                    <li>{{ $cpSetting }}</li>
+                                @endforeach
+                            </ul>
+                            <p class="es-line-muted mt-auto pt-4 text-xs leading-relaxed">{{ $cpNote }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="es-line-panel mt-8 p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-line-ink text-base font-bold">Where add-ons fit</h3>
+                    <p class="es-line-muted mt-2 text-sm leading-relaxed">
+                        Because a code never comes off an add-on, you can be generous on the door price and keep your margin on the things you paid for: the meal, the parking, the shirt. It also means a comp code is free entry, not a free everything. A guest who adds parking to a 100% code pays for the parking, and checkout asks for that amount alone. The same is true of a donation at checkout: no code ever reduces it.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. Limits that stop a code leaking                           -->
+        <!-- ============================================================ -->
+        <section id="limits" class="es-line-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-line-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Promo code limits and deadlines</p>
+                    <h2 class="es-balance es-line-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Codes get shared. <span class="es-line-accent">Set them up for it.</span>
+                    </h2>
+                    <p class="es-line-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        A code sent to forty people reaches four hundred the moment one of them posts it. You cannot stop that, so set every code so that the worst case is a cost you already agreed to.
+                    </p>
+                </div>
+
+                @php
+                    $codeLimits = [
+                        ['Max Uses counts orders, not tickets', 'Each order that uses a code counts once, however many tickets it holds. A comp code with Max Uses at 10 is ten orders, which can be far more than ten seats. Add a Max per order limit on the ticket type as well, or point the code at a ticket type whose own Quantity is the ceiling you mean.'],
+                        ['A fixed amount comes off the order once', 'A fixed code takes its amount off the order\'s eligible tickets, once. Ten off an order of four tickets is ten off, not forty. If you mean so much off each ticket, use a percentage, or a volume discount on the ticket type.'],
+                        ['Give every code an end', 'Without Expires At, a code works until its uses run out or you switch it off, and a code posted on a deals site does not go away by itself. Set a moment, not just a day, and say it in the message that sends the code.'],
+                        ['Each event keeps its own count', 'A code belongs to the event it is on. Add the same code to five events with Max Uses at 50 and it can be used up to 250 times across them. Set the cap for each event as if it were the only one.'],
+                        ['One code per order', 'A buyer enters one promo code for an event, so two codes never stack. A code does combine with a volume discount and with a gift card, and the order of those three is fixed, so the same money is never discounted twice.'],
+                        ['Capitals do not make a code private', 'Codes are matched whatever the capitals, and FREE, VIP or 100OFF are the first things people try. Use a word only your audience would know, up to 50 characters, and keep a 100% code on a short leash with a low Max Uses.'],
+                    ];
+                @endphp
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                    @foreach ($codeLimits as $clIndex => [$clName, $clBody])
+                        <div class="es-line-panel flex flex-col p-6" data-reveal="panel">
+                            <p class="es-line-tag mb-3">Rule {{ $clIndex + 1 }}</p>
+                            <h3 class="es-line-ink text-base font-bold">{{ $clName }}</h3>
+                            <p class="es-line-muted mt-2 text-sm leading-relaxed">{{ $clBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="es-line-muted mx-auto mt-8 max-w-3xl text-center text-sm">
+                    Max per order and volume discounts are set on each ticket type: <x-link href="{{ marketing_url('/docs/tickets') }}#max-per-order">Max per order</x-link> and <x-link href="{{ marketing_url('/docs/tickets') }}#volume-discount">volume discounts</x-link> in the guide.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7. Measuring which code worked                               -->
+        <!-- ============================================================ -->
+        <section id="measure" class="es-line-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-line-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Did the discount pay for itself?</p>
+                    <h2 class="es-balance es-line-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Count what a code brought <span class="es-line-accent">against what it gave away.</span>
+                    </h2>
+                    <p class="es-line-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Every discounted ticket is money off a ticket somebody might have bought anyway. A code earned its keep only if it brought buyers who would not have come, or brought them early enough to change what you did next.
+                    </p>
+                </div>
+
+                <div class="grid items-start gap-8 lg:grid-cols-2">
+                    <div class="space-y-4" data-reveal-group="90">
+                        <div class="es-line-panel p-6" data-reveal="panel">
+                            <h3 class="es-line-ink text-base font-bold">Where the numbers are</h3>
+                            <p class="es-line-muted mt-2 text-sm leading-relaxed">
+                                Times Used sits beside each code's Active switch, counted in orders. On the Sales page every order that used a code carries it, with what it took off. The sales export (Pro) has Promo Code, Discount and Promoter columns, so a spreadsheet can total each code's orders and its cost.
+                            </p>
+                        </div>
+                        <div class="es-line-panel p-6" data-reveal="panel">
+                            <h3 class="es-line-ink text-base font-bold">One code per channel</h3>
+                            <p class="es-line-muted mt-2 text-sm leading-relaxed">
+                                The same 15% as NEWS15 in the newsletter, POSTER15 on the posters and RADIO15 on air tells you which channel sold tickets, which no single code can. Keep the discount the same across them, or you are measuring the size of the discount instead of the channel.
+                            </p>
+                        </div>
+                        <div class="es-line-panel p-6" data-reveal="panel">
+                            <h3 class="es-line-ink text-base font-bold">Look at when the orders came</h3>
+                            <p class="es-line-muted mt-2 text-sm leading-relaxed">
+                                If most early-bird orders land in the last two days before the deadline, the deadline did the work and a smaller discount would likely have done the same. If they arrive evenly from the first day, the price was the draw.
+                            </p>
+                        </div>
+                    </div>
+
+                    @php
+                        // Break-even: at discount d, revenue per ticket falls to (1 - d), so the same
+                        // takings need 1 / (1 - d) times the buyers. 10% -> 11%, 20% -> 25%,
+                        // 25% -> 33%, 30% -> 43%, 50% -> 100% more.
+                        $breakEven = [
+                            ['10% off', '11% more'],
+                            ['20% off', '25% more'],
+                            ['25% off', '33% more'],
+                            ['30% off', '43% more'],
+                            ['50% off', '100% more'],
+                        ];
+                    @endphp
+                    <div class="es-line-receipt p-6 sm:p-8" data-reveal="panel">
+                        <div class="flex items-baseline justify-between gap-4">
+                            <p class="es-line-receipt-muted text-xs font-semibold uppercase tracking-widest">Discount</p>
+                            <p class="es-line-receipt-muted text-xs font-semibold uppercase tracking-widest">Buyers needed to break even</p>
+                        </div>
+                        <div class="mt-5 space-y-3">
+                            @foreach ($breakEven as [$beOff, $beMore])
+                                <div class="flex items-baseline justify-between gap-4">
+                                    <span class="es-line-figure es-line-receipt-accent text-sm font-semibold">{{ $beOff }}</span>
+                                    <span class="es-line-figure es-line-receipt-ink text-sm font-semibold">{{ $beMore }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="es-line-receipt-rule es-line-receipt-muted mt-6 pt-4 text-xs leading-relaxed">
+                            To take the same money at 20% off, you need a quarter more buyers than you would have had at full price. Half price needs twice as many. Worth it when the room would otherwise be empty, rarely when it would have sold anyway.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         @include('marketing.partials.pricing-nudge')
 
         <!-- ============================================================ -->
@@ -363,6 +525,10 @@
                 ['q' => 'Can I stop a code without losing the history?', 'a' => 'Yes. Switch it inactive rather than deleting it. The orders that used it keep their record, the usage count is still there, and you can switch it back on next season.'],
                 ['q' => 'Can a buyer use a promo code and a gift card together?', 'a' => 'Yes, on the same order. They do different jobs: the code changes the price, and the gift card spends a balance somebody already paid you for.'],
                 ['q' => 'Is there anything different about Invoice Ninja?', 'a' => 'In payment-link mode, yes: one promo code per event, applying to all ticket types. If you need several codes or per-ticket targeting on Invoice Ninja, use invoice mode instead.'],
+                ['q' => 'Does Max Uses count tickets or orders?', 'a' => 'Orders. Each order that uses the code counts once, whether it holds one ticket or six. To limit the number of discounted tickets as well, set Max per order on the ticket type, or point the code at a ticket type whose own quantity is the limit you want.'],
+                ['q' => 'Is a fixed-amount code taken off each ticket or the whole order?', 'a' => 'The whole order, once. A fixed code takes its amount off the tickets it applies to, together, and never more than their total. For a discount that grows with the number of tickets, use a percentage code, or a volume discount on the ticket type.'],
+                ['q' => 'Can I schedule a promo code to start later?', 'a' => 'A code has an end (Expires At) but no start. Add it with its Active switch off, save the event, and switch it on when the offer opens. Until then the code is refused at checkout like any code that does not exist.'],
+                ['q' => 'How do I give out free comp tickets?', 'a' => 'Two ways. A 100% code pointed at one ticket type, with Max Uses set to the number of comp orders: an order that comes to zero is confirmed straight away, with no payment step (except through an Invoice Ninja payment link), and any add-on the guest picks is still charged. Or, for guests you can name, import them from the Sales page (Pro) with Send Email on, which issues their tickets without a code anyone could forward.'],
                 ['q' => 'Which plan do I need?', 'a' => 'Promo codes and add-ons are both on the Pro plan, and on every selfhosted install at no cost. Anything with a price on it needs Pro anyway, so a discount code always arrives with the rest of the ticketing suite, and no plan takes a platform fee: only your payment processor\'s fee comes off a paid ticket.'],
             ];
         @endphp

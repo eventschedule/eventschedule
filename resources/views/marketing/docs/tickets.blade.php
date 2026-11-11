@@ -1520,11 +1520,11 @@
             <li>When all tickets sell out for an event date, a <strong class="text-gray-900 dark:text-white">Join Waitlist</strong> button appears on the event page</li>
             <li>Guests enter their name and email</li>
             <li>When a spot opens up (a sale is cancelled, fully refunded or expires unpaid, a pass holder cancels a booked date, or your box office releases a seat), the next person in line is notified by email. A partial refund frees no spot</li>
-            <li>They receive a link that is valid for 24 hours</li>
+            <li>The email links to the event page and gives them a 24-hour head start before the next person is told. The seat is not held for them: the date is back on sale, first come, first served</li>
             <li>If they don't purchase in time, the next person in line is notified</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Only one person is notified at a time, to prevent overselling. The next is notified only after the current person's 24-hour window expires or they complete their purchase.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Only one person is notified at a time, so a returned seat is not announced to everyone at once. The next is notified only after the current person's 24-hour window expires, and only if the date still has room.</p>
 
         <h3 class="doc-subheading">Managing the Waitlist</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> and choose the <strong class="text-gray-900 dark:text-white">Waitlist</strong> tab. The tab is there while at least one person is waiting or has been notified, and carries their count.</p>

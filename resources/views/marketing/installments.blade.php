@@ -144,6 +144,10 @@
             flex: none;
         }
         .es-inst-leg-paid { background-color: #bfdbfe; border-color: #bfdbfe; }
+        /* The same mark on a page panel (the missed-payment timeline), where the
+           statement's pale border would vanish on white. */
+        .es-inst-panel .es-inst-leg { border-color: rgba(30, 58, 138, 0.45); }
+        .dark .es-inst-panel .es-inst-leg { border-color: rgba(191, 219, 254, 0.45); }
 
         .es-inst-band { background-color: #0d1017; }
         .es-inst-band-tag {
@@ -347,6 +351,197 @@
             </div>
         </section>
 
+        <!-- ============================================================ -->
+        <!-- 4. When a payment plan makes sense                           -->
+        <!-- ============================================================ -->
+        <section id="when" class="es-inst-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-inst-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-inst-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Should you offer installment payments?</p>
+                    <h2 class="es-balance es-inst-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        A payment plan fits a big price <span class="es-inst-accent">sold a long way out.</span>
+                    </h2>
+                    <p class="es-inst-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Monthly payments help a buyer who wants to come and cannot pay it all this month. They cost you cash up front and a little chasing. That trade is worth making in some cases and not in others.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-inst-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-inst-ink text-base font-bold">Offer it when</h3>
+                        <ul class="es-inst-muted mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed">
+                            <li>The ticket is a large share of what your audience can spend in a month: a residential course, a retreat, a festival weekend with a camping pass, a training that runs for weeks.</li>
+                            <li>You go on sale months before the event, so there are months to spread the payments over.</li>
+                            <li>You can wait for the money. The plan pays you month by month, so a venue deposit due now still comes out of what you already hold.</li>
+                            <li>Your buyers are people, not companies. A business paying for staff usually wants one invoice, not four card payments.</li>
+                        </ul>
+                    </div>
+                    <div class="es-inst-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-inst-ink text-base font-bold">Leave it off when</h3>
+                        <ul class="es-inst-muted mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed">
+                            <li>The ticket is cheap. Splitting it saves the buyer little, and each part must still clear Stripe's minimum charge.</li>
+                            <li>Most tickets sell in the last few weeks. A plan has to finish before your runway, so late buyers would never be offered it.</li>
+                            <li>You take payment through PayPal, Payfast, Razorpay, Invoice Ninja, a payment link or cash. Installments need Stripe, which can charge a saved card later.</li>
+                            <li>Selling out is certain anyway. A plan helps people who would otherwise wait or not come; a show that sells out in a day does not need it.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. Setting the schedule                                      -->
+        <!-- ============================================================ -->
+        <section id="schedule" class="es-inst-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-inst-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-inst-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How to set up a payment plan</p>
+                    <h2 class="es-balance es-inst-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Count backwards <span class="es-inst-accent">from the doors.</span>
+                    </h2>
+                    <p class="es-inst-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Payments are a month apart, starting on the day of purchase, and the last one must land before your runway. So every number of payments has a last day it can be offered. After that day the buyer simply sees pay in full; the plan does not shrink to fit.
+                    </p>
+                </div>
+
+                @php
+                    // A retreat on 1 October with a 14-day runway: the last payment must be due by
+                    // 17 September. Payments are monthly from the purchase date, so N payments fit
+                    // an order placed by 17 September minus (N - 1) months.
+                    $instCutoffs = [
+                        ['2 payments', 'by 17 August'],
+                        ['3 payments', 'by 17 July'],
+                        ['4 payments', 'by 17 June'],
+                        ['6 payments', 'by 17 April'],
+                        ['12 payments', 'by 17 October the year before'],
+                    ];
+                @endphp
+                <div class="grid items-start gap-8 lg:grid-cols-2">
+                    <div class="es-inst-statement p-6 sm:p-8" data-reveal="panel">
+                        <p class="es-inst-statement-muted text-xs font-semibold uppercase tracking-widest">Retreat on 1 October &middot; runway 14 days</p>
+                        <p class="es-inst-statement-ink mt-2 text-sm">Last payment due by 17 September. Offered on orders placed:</p>
+                        <div class="mt-5 space-y-3">
+                            @foreach ($instCutoffs as [$icCount, $icBy])
+                                <div class="flex items-baseline justify-between gap-4">
+                                    <span class="es-inst-statement-ink text-sm font-semibold">{{ $icCount }}</span>
+                                    <span class="es-inst-figure es-inst-statement-accent text-sm font-semibold">{{ $icBy }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="es-inst-statement-rule es-inst-statement-muted mt-6 pt-4 text-xs leading-relaxed">
+                            Announce this retreat in March and choose twelve payments, and nobody is ever offered the plan. Choose four, and everyone who books before mid-June can spread it.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4" data-reveal-group="90">
+                        <div class="es-inst-panel p-6" data-reveal="panel">
+                            <h3 class="es-inst-ink text-base font-bold">Pick the count for when most people buy</h3>
+                            <p class="es-inst-muted mt-2 text-sm leading-relaxed">
+                                Not for your earliest buyer. If most of your bookings come in the three months before an event, a count that fits three months is the one that gets used. The options are 2, 3, 4, 5, 6, 8, 10 or 12 payments, and the buyer chooses only between that plan and paying in full.
+                            </p>
+                        </div>
+                        <div class="es-inst-panel p-6" data-reveal="panel">
+                            <h3 class="es-inst-ink text-base font-bold">The first payment is the deposit</h3>
+                            <p class="es-inst-muted mt-2 text-sm leading-relaxed">
+                                There is no separate deposit amount: the first payment is one equal share, taken at checkout. With four payments it is a quarter of the order, with two it is half. Want more up front? Choose fewer payments.
+                            </p>
+                        </div>
+                        <div class="es-inst-panel p-6" data-reveal="panel">
+                            <h3 class="es-inst-ink text-base font-bold">Fourteen days of runway, not seven</h3>
+                            <p class="es-inst-muted mt-2 text-sm leading-relaxed">
+                                A declined card is retried one, four and nine days after the first attempt. At the seven-day minimum, the last retry of a declined final payment can fall after the doors open. At fourteen, every retry is done at least five days before the event.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                @php
+                    // The final payment of the plan above, declined. Retries follow
+                    // SaleInstallment::RETRY_DAYS (1, 3, 5): the 18th, 21st and 26th.
+                    $instTimeline = [
+                        ['15 Sep', 'Reminder', 'The buyer is emailed two days ahead, with the card and the amount.'],
+                        ['17 Sep', 'Declined', 'The buyer is told, and told plainly that the ticket still works. You get an email too.'],
+                        ['18 and 21 Sep', 'Retries', 'The card is tried again, and each attempt that fails emails the buyer, who can change the card on their plan page.'],
+                        ['24 Sep', 'Final notice', 'A week before the event, everyone with a balance gets a last notice, and you get the list.'],
+                        ['26 Sep', 'Last retry', 'If this one fails, the ticket goes on hold until they pay or give a new card.'],
+                        ['1 Oct', 'At the door', 'Scanning shows an amber Overdue balance screen with the name and what is owed. Admit anyway is your call.'],
+                    ];
+                @endphp
+                <div class="es-inst-panel mt-8 p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-inst-ink text-base font-bold">What happens when the last payment fails, day by day</h3>
+                    <ol class="mt-5 space-y-4">
+                        @foreach ($instTimeline as [$itWhen, $itWhat, $itBody])
+                            <li class="flex items-start gap-3">
+                                <span class="es-inst-leg mt-1.5" aria-hidden="true"></span>
+                                <span class="min-w-0">
+                                    <span class="es-inst-ink block text-sm font-semibold"><span class="es-inst-figure">{{ $itWhen }}</span> &middot; {{ $itWhat }}</span>
+                                    <span class="es-inst-muted block text-sm leading-relaxed">{{ $itBody }}</span>
+                                </span>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="es-inst-muted es-inst-rule mt-6 pt-4 text-sm leading-relaxed">
+                        If the buyer's bank asks them to approve a payment, they get an email asking them to confirm it instead, and it does not count as a decline. Full details are in <x-link href="{{ marketing_url('/docs/tickets') }}#installments-missed">the guide's section on missed payments</x-link>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. Wording the offer                                         -->
+        <!-- ============================================================ -->
+        <section id="wording" class="es-inst-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-inst-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-inst-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How to word a payment plan offer</p>
+                    <h2 class="es-balance es-inst-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Say the total, the count <span class="es-inst-accent">and the last day.</span>
+                    </h2>
+                    <p class="es-inst-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Checkout shows every date and amount before the buyer agrees. Your event description is where they decide whether to get that far, so put the plan there in plain words.
+                    </p>
+                </div>
+
+                <div class="grid items-start gap-8 lg:grid-cols-2">
+                    <div class="es-inst-statement p-6 sm:p-8" data-reveal="panel">
+                        <p class="es-inst-statement-muted text-xs font-semibold uppercase tracking-widest">Lines to adapt for an event description</p>
+                        <ul class="mt-5 space-y-4">
+                            <li class="es-inst-statement-ink text-sm leading-relaxed">"Pay in full, or in four monthly payments with no interest and no fee. The first is taken today and your place is confirmed straight away."</li>
+                            <li class="es-inst-statement-ink text-sm leading-relaxed">"Monthly payments are open on bookings made by 17 June. After that, the full price is due at booking."</li>
+                            <li class="es-inst-statement-ink text-sm leading-relaxed">"If you need to cancel, [your policy]. Payments not yet taken are always cancelled with the booking."</li>
+                        </ul>
+                        <p class="es-inst-statement-rule es-inst-statement-muted mt-6 pt-4 text-xs leading-relaxed">
+                            The date in the second line comes from the table above: your event date, less your runway, less one month for each payment after the first.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4" data-reveal-group="90">
+                        <div class="es-inst-panel p-6" data-reveal="panel">
+                            <h3 class="es-inst-ink text-base font-bold">Lead with the total</h3>
+                            <p class="es-inst-muted mt-2 text-sm leading-relaxed">
+                                "From a quarter a month" without the full price reads like a trick. Give the price, then the plan. A buyer who knows both trusts the monthly figure.
+                            </p>
+                        </div>
+                        <div class="es-inst-panel p-6" data-reveal="panel">
+                            <h3 class="es-inst-ink text-base font-bold">Avoid the words of a loan</h3>
+                            <p class="es-inst-muted mt-2 text-sm leading-relaxed">
+                                Nobody lends anything here: you charge your own buyer's card on agreed dates through your own Stripe account. Words like credit or finance suggest a lender and a credit check that are not there.
+                            </p>
+                        </div>
+                        <div class="es-inst-panel p-6" data-reveal="panel">
+                            <h3 class="es-inst-ink text-base font-bold">Decide your drop-out policy first</h3>
+                            <p class="es-inst-muted mt-2 text-sm leading-relaxed">
+                                Two actions on a sale's menu on the Sales page match the two usual policies. Refund Ticket returns every payment collected so far, as a plan is refunded only in full. Cancel Ticket stops the payments still to come and frees the place, without refunding what was paid. Either way, write the rule down before the first booking.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         @include('marketing.partials.pricing-nudge')
 
         <!-- ============================================================ -->
@@ -361,6 +556,10 @@
                 ['q' => 'Why is the option missing on some orders?', 'a' => 'Because the plan could not actually be carried out. Each individual payment has to clear Stripe\'s minimum charge, so a small order split several ways is not offered it - and a promo code or a gift card can take an order under that line, or under the minimum you set. It is also not offered on a basket spanning several events or one containing a pass.'],
                 ['q' => 'Can a buyer clear the balance early?', 'a' => 'Yes. Their payment-plan page, linked from every reminder, lets them pay a single installment early, clear the whole balance, or change the card the rest will be charged to.'],
                 ['q' => 'How does a refund work on a plan?', 'a' => 'Leg by leg, and in full only, from the Sales page. Every payment that was actually taken goes back through Stripe, each through the account it was charged to - installment plans are the one case that records which account that was, so a seller who has since reconnected Stripe is not refunding from the wrong place. The payments not yet taken are cancelled rather than refunded, so the card is never charged again, and the seats go back on sale.'],
+                ['q' => 'Can I take a deposit now and the balance later?', 'a' => 'Not as a separate amount. The first payment is the deposit: one equal share of the order, taken at checkout, so with four payments it is a quarter and with two it is half. For a larger first payment, choose fewer payments.'],
+                ['q' => 'Why did the payment plan stop being offered as the event got closer?', 'a' => 'Because the plan would no longer finish in time. Payments are a month apart from the day of purchase, and the last one has to be due before the runway you set. Once a new order could not fit every payment before that line, checkout offers paying in full only. The plan is never shortened to fit, so pick a number of payments that suits when most of your buyers book.'],
+                ['q' => 'Can buyers choose how many payments to make?', 'a' => 'No. You choose the number once, on the event: 2, 3, 4, 5, 6, 8, 10 or 12. The buyer chooses between that plan and paying in full, which is selected by default. After that they can pay ahead or clear the balance from their plan page whenever they like.'],
+                ['q' => 'Is this the same as buy now, pay later?', 'a' => 'No. With a buy now, pay later service a lender pays you and collects from the buyer. Here there is no lender: you charge your own buyer\'s saved card through your Stripe account on dates they agreed to, you receive each payment as it is collected, and an unpaid balance is yours to chase. There is no credit check, and no interest or fee for the buyer.'],
                 ['q' => 'Which plan do I need?', 'a' => 'Installments are on the Pro plan, and on every selfhosted install at no cost. Selling a ticket that carries a price is Pro too, so the two arrive together, and there is no platform fee on any tier.'],
             ];
         @endphp
