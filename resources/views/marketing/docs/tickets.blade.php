@@ -383,7 +383,7 @@
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">A ticket type sells by the number, not by the seat: the buyer takes three, not seats 12, 13 and 14. To sell the seats themselves, see <a href="#allocated-seating" class="doc-link">Allocated Seating</a>. There is no pay-what-you-wish pricing either: every ticket type has one fixed price, and a blank price means free.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A ticket type sells by the number, not by the seat: the buyer takes three, not seats 12, 13 and 14. To sell the seats themselves, see <a href="#allocated-seating" class="doc-link">Allocated Seating</a>. Every ticket type has one fixed price, and a blank price means free. For pay what you want, give a free ticket type and switch on <a href="#donations" class="doc-link">donations</a> (Pro).</p>
 
         <h4 id="ticket-settings" class="text-base font-semibold text-gray-900 dark:text-white mb-4">Ticket settings</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A ticket type carries more than its Price, Quantity and Type: a line of links under those fields adds one more setting each. In the form's order:</p>

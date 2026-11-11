@@ -779,6 +779,8 @@
             align-items: flex-end;
         }
         .bw-back-btl p { padding: 0.8rem 1.5rem 1.75rem; }
+        /* Six labels sit three by two, so the last row is never left with a gap. */
+        @media (min-width: 1040px) { .bw-backs-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; } }
         .bw-why-note { justify-content: center; margin-top: clamp(2.25rem, 4vw, 3.25rem); text-align: center; }
 
         /* ---------------------------------------------------------------
@@ -1247,11 +1249,11 @@
             ],
             [
                 'q' => 'Can bands and food trucks book themselves in?',
-                'a' => 'Turn on booking requests and they can ask for a date through your page rather than a direct message you lose. Every request waits for you to accept it, and you are emailed when new ones are pending. Once you accept, adding them to the event as a participant offers the date to their own schedule, where it appears when they accept it (or straight away if they have approved you), so you are not both keeping the same listing up to date.',
+                'a' => 'Turn on booking requests and they can ask for a date through your page rather than a direct message you lose. With Require Approval on, the default, every request waits for you to accept it, and you are emailed when new ones are pending. Once you accept, adding them to the event as a participant offers the date to their own schedule, where it appears when they accept it (or straight away if they have approved you), so you are not both keeping the same listing up to date.',
             ],
             [
                 'q' => 'Can we email people about a release?',
-                'a' => 'Two ways. Somebody who leaves an email address on your page and confirms it gets a short digest automatically when you put new dates up, at most one every few days, and it costs nothing from the allowance. A release you want to write properly about is a newsletter you send yourself, and that is what the allowance counts: 10 emails a month free, 100 on Pro, counted per recipient rather than per send, so a single newsletter to a hundred followers uses a hundred of them.',
+                'a' => 'Two ways. Somebody who leaves an email address on your page and confirms it gets a short digest automatically when you publish new events your own schedule created, at most one every few days, and it costs nothing from the allowance. A date a band made on its own schedule and added you to is not in it. A release you want to write properly about is a newsletter you send yourself, and that is what the allowance counts: 10 emails a month free, 100 on Pro, counted per recipient rather than per send, so a single newsletter to a hundred followers uses a hundred of them.',
             ],
             [
                 'q' => 'Can people ask to hear when tour tickets go on sale?',
@@ -1261,13 +1263,32 @@
                 'q' => 'How do people pay for a tour, and can I refund one?',
                 'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash on the day, or Payfast if you sell in rand or Razorpay if you sell in Indian rupees, chosen per event. Event Schedule takes no platform fee on any of them. If a tour does not run, refund it from the Sales page: a Stripe, PayPal or Razorpay sale goes back through the provider, in full or in part, and a partial refund leaves the ticket valid. Every other method is marked as refunded instead, which records it without moving money, so you return that one yourself.',
             ],
+            [
+                'q' => 'What events do breweries and wineries usually run?',
+                'a' => 'Weekly nights carry the calendar: trivia, live music, run clubs, yoga, games and a food truck in the yard. The big dates are seasonal: release days, pairing dinners, an anniversary party, summer concerts, harvest and crush tours, Oktoberfest, wine club pick-up parties and a holiday market. Most are free to attend and earn their keep at the bar. Charge for the ones limited by glasses, seats or staff, such as tours, tastings and dinners, and run those in seatings.',
+            ],
+            [
+                'q' => 'How do I put my brewery\'s event calendar on my website?',
+                'a' => 'Copy the embed code from your schedule and paste it into your site\'s events page as an iframe. It loads from your schedule on every visit, so changes show without pasting it again. Add layout=list for a narrow column, since the month grid needs about 768 pixels of width, schedule= with a sub-schedule\'s slug to show only one strand such as music, and dark=true or dark=false to match your site. Embedding is free on every plan.',
+            ],
+            [
+                'q' => 'How do we show a 21+ or no-children policy on an event?',
+                'a' => 'There is no age setting, and Event Schedule does not check ages, so say it where guests read it: in the event\'s short description, which shows on the calendar and the event page, and in Ticket notes (Registration notes on a free event), which go into the confirmation email and onto the ticket. Then check ID at the door before you scan. A designated-driver or non-drinking ticket type at a lower price makes the policy easy to follow for the people who are not tasting.',
+            ],
+            [
+                'q' => 'Should private event bookings go through our calendar?',
+                'a' => 'The calendar should know the room is taken, but the enquiry is better kept off the request form. The Booking Form (Accept requests) suits bands and food trucks: it takes an event name, a date and time, a description and the sender\'s name and email, with an optional phone number and your Request Terms, and with Require Approval on (the default) each one waits on your Requests tab until you accept or decline it. A request is an event on your schedule from the moment it is sent, though, so take private party enquiries by phone or email, and once one is agreed add it yourself as a Draft, which only you and your team see. Requests are free; your own extra questions on the form need Pro.',
+            ],
         ];
         $dotSections = [
             ['top', 'The week'],
             ['why', 'Why it is free'],
             ['rhythm', 'The rhythm'],
+            ['year', 'A year on the board'],
             ['ticket', 'When you sell one'],
+            ['tastings', 'Seatings'],
             ['guests', 'Other people'],
+            ['private', 'Bookings and website'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -1463,7 +1484,7 @@
                             ['One night, one event', 'Choose the day and the time. Move the quiz to eight and every future Wednesday moves with it.'],
                             ['Take the shut weeks out', 'A date exception drops the week you are closed for the holidays without disturbing the pattern.'],
                             ['Strands, not one long list', 'Music on one sub-schedule, tours on another. Each one has a link you can send on its own.'],
-                            ['On the regulars\' phones', 'Every night\'s Add to Calendar menu offers the whole taproom calendar as a live feed. Subscribe once, and new nights and moved ones turn up without anyone checking the page.'],
+                            ['On the regulars\' phones', 'On a night with nothing to buy or register for, the Add to Calendar menu offers the whole taproom calendar as a live feed. Subscribe once, and new nights and moved ones turn up without anyone checking the page.'],
                         ] as [$t, $d])
                             <li>
                                 <span><b>{{ $t }}</b> <span>- {{ $d }}</span></span>
@@ -1507,6 +1528,54 @@
                         <span>Label proof &middot; 02</span>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3A. A year on the board (02A)                                -->
+        <!-- ============================================================ -->
+        <section id="year" class="bw-sec bw-sec-kraft2" style="scroll-margin-top: 4.5rem;">
+            <div class="bw-wrap">
+                <div class="bw-head-c">
+                    <p class="bw-kick" data-reveal><span class="bw-cap bw-cap-sm bw-cap-copper" aria-hidden="true">2A</span>A year on the board</p>
+                    <h2 class="bw-h2 bw-h2-both" data-reveal style="--reveal-delay: 0.08s;">
+                        Twelve months of reasons <span>to come back</span>.
+                    </h2>
+                    <p class="bw-lede" data-reveal style="--reveal-delay: 0.16s;">
+                        The weekly nights fill the quiet days. The calendar's big dates are seasonal, and most of them are booked or announced six to eight weeks ahead. Here is a year for a taproom and a tasting room together, with how each one is set up.
+                    </p>
+                </div>
+
+                <div class="bw-backs" data-reveal-group="70">
+                    @foreach ([
+                        ['Jan', 'Dry month, open doors', 'Keep the quiz and the games night running and add a no-and-low tasting. A free event with a Registration Limit tells you how many glasses to pour.'],
+                        ['Feb', 'Pairing night', 'Stout and chocolate, or wine and cheese for two. Seats are the constraint, so it is a ticket with a price and a fixed quantity (Pro).'],
+                        ['Mar', 'The first big party', 'An anniversary, a spring release or a saint\'s day. One-off event, free entry, the band named under Participants so the date can show on their page too.'],
+                        ['Apr', 'Release day', 'Timed entry beats a queue round the block: free ticket types, one per half-hour arrival window, each with its own quantity.'],
+                        ['May', 'The yard opens', 'Sunday afternoon music as one recurring event, weekly from the first Sunday in May with an end date in September.'],
+                        ['Jun', 'Food truck season', 'Each visit is its own date, made from the truck\'s request, so the calendar names the van that is actually in the yard that night.'],
+                        ['Jul', 'Long evenings', 'Outdoor cinema or yoga in the vines. Free, limited by chairs or mats, counted per date on a recurring event.'],
+                        ['Aug', 'Vineyard concert', 'A priced night with a designated-driver ticket beside the standard one, so the person not drinking pays less and gets a different wristband.'],
+                        ['Sep', 'Harvest and crush', 'Harvest tours and a grape stomp in seatings of a dozen. Months assume a northern-hemisphere season; south of the equator, shift them by six.'],
+                        ['Oct', 'Oktoberfest', 'The biggest weekend of a brewery\'s year. Free entry keeps it busy; a priced ticket for the long-table dinner keeps it planned.'],
+                        ['Nov', 'Barrel release, wine club pick-up', 'An evening for members, and a release tasting the Notify me card, once you switch it on, can take names for before tickets open.'],
+                        ['Dec', 'Markets and the shut weeks', 'A Christmas market as a one-off, the closed days taken out of every series, and gift cards for next year\'s tours (Pro, and on eventschedule.com they also need the schedule\'s own email settings).'],
+                    ] as $bwIdx => [$m, $t, $d])
+                        <div class="bw-back-wrap" data-reveal style="--r: {{ [-1.2, 0.9, -0.6, 1.3, -1, 0.7, -1.4, 1.1, -0.8, 1.2, -0.5, 1][$bwIdx] }}deg;">
+                            <article @class(['bw-back', 'bw-back-can' => $bwIdx % 2 === 0, 'bw-back-btl' => $bwIdx % 2 === 1])>
+                                <h3>{{ $m }} &middot; {{ $t }}</h3>
+                                <p>{{ $d }}</p>
+                            </article>
+                        </div>
+                    @endforeach
+                </div>
+
+                <p class="bw-note bw-why-note" data-reveal>
+                    <span class="bw-tag">Free plan</span>
+                    <span>
+                        Everything here is free except where a price, gift cards or a paid ticket is named. Put the year's big dates up as Drafts in January, so they hold their place on your calendar, and publish each when it is ready to announce.
+                    </span>
+                </p>
             </div>
         </section>
 
@@ -1576,6 +1645,73 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 4A. Tastings, seatings and the 21+ line (03A)                -->
+        <!-- ============================================================ -->
+        <section id="tastings" class="bw-sec bw-sec-paper" style="scroll-margin-top: 4.5rem;">
+            <div class="bw-wrap bw-duo">
+                <div class="bw-duo-copy">
+                    <p class="bw-kick" data-reveal><span class="bw-cap bw-cap-sm bw-cap-wine" aria-hidden="true">3A</span>Tastings with limited places</p>
+                    <h2 class="bw-h2 bw-h2-vin" data-reveal style="--reveal-delay: 0.08s;">
+                        Seatings, drivers and <span>the 21+ line</span>.
+                    </h2>
+                    <p class="bw-lede" data-reveal style="--reveal-delay: 0.16s;">
+                        A tasting is limited by glasses, staff and the length of the bar, so it runs in seatings. Four decisions shape it, and each is easier made in the editor than at the door.
+                    </p>
+                    <div class="bw-points" data-reveal-group="100">
+                        @foreach ([
+                            ['Seatings: one event or three?', 'Close together, on a day people treat as one visit, make one event with a ticket type per seating, each with its own quantity: one page, and the buyer picks a time at checkout. Hours apart, or sold to different people, make each seating its own event, so each has its own time on the calendar, its own check-in list and a reminder timed to it. Reminders go out before the event\'s start, so on the single event the 5:00 seating hears at the 1:00 seating\'s time.'],
+                            ['A ticket for the driver', 'A cheaper designated-driver type, with no pours, beside the standard one. The scan shows which type the order holds, so the door hands that guest a different wristband. The same idea works for a non-drinking partner at a pairing dinner.'],
+                            ['Say the age rule where it is read', 'There is no age setting, and nothing here checks anyone\'s age. Write &ldquo;21+, photo ID at the door&rdquo; (or your children and dogs policy) in the short description and in Ticket notes, which go into the confirmation email and onto the ticket. Then check ID before you scan.'],
+                            ['Release day without the queue', 'Instead of a crowd at opening, issue free tickets in half-hour arrival windows, a ticket type each with its own quantity. Switch on the Notify me card first, so people can leave an address and hear the moment the windows open.'],
+                        ] as $bwIdx => [$t, $d])
+                            <div class="bw-point" data-reveal>
+                                <span class="bw-cap bw-cap-sm bw-cap-wine" aria-hidden="true">{{ ['A', 'B', 'C', 'D'][$bwIdx] }}</span>
+                                <p class="bw-point-t">{{ $t }}</p>
+                                <p class="bw-point-d">{!! e($d, false) !!}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="bw-note" data-reveal>
+                        <span class="bw-tag bw-tag-paid">Pro plan</span>
+                        <span>A price on a seating is Pro. Free tickets, arrival windows, quantities and the Notify me card are on every plan.</span>
+                    </p>
+                </div>
+
+                <div class="bw-proof" data-reveal="right">
+                    <div class="bw-proof-label">
+                        <div class="bw-proof-art" aria-hidden="true"><b>Sat<br>flight</b><span>Tasting room</span></div>
+                        <div class="bw-proof-panel">
+                            <div class="bw-proof-head">
+                                <h3>One afternoon, three seatings</h3>
+                                <span>42 places</span>
+                            </div>
+                            @foreach ([
+                                ['1:00 seating', '14 places'],
+                                ['3:00 seating', '14 places'],
+                                ['5:00 seating', '14 places'],
+                                ['Designated driver', '6, no pours'],
+                            ] as [$sName, $sQty])
+                                <div class="bw-proof-row">
+                                    <b>{{ $sName }}</b>
+                                    <i aria-hidden="true"></i>
+                                    <span>{{ $sQty }}</span>
+                                </div>
+                            @endforeach
+                            <p class="bw-proof-sub">The sum</p>
+                            <p>
+                                Fourteen stools at the bar, an hour and a half a flight, thirty minutes to reset: three seatings fit between one and seven. 3 &times; 14 = 42 places at the bar, and six cheaper driver tickets that do not take a stool.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bw-proof-bar" aria-hidden="true">
+                        <i style="--c: #5e1a28;"></i><i style="--c: #a8843a;"></i><i style="--c: #f7efdf;"></i><i style="--c: #1d1712;"></i>
+                        <span>Label proof &middot; 3A</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 5. Other people (04)                                         -->
         <!-- ============================================================ -->
         <section id="guests" class="bw-sec bw-sec-kraft2" style="scroll-margin-top: 4.5rem;">
@@ -1621,7 +1757,7 @@
                     <div class="bw-points" data-reveal-group="100">
                         @foreach ([
                             ['They ask through the page', 'Turn on booking requests and the asks arrive attached to the date they are for, instead of a message you scroll past.'],
-                            ['Nothing posts without you', 'Every request waits for you to accept it, so the public calendar only shows what you agreed to.'],
+                            ['Nothing posts without you', 'With Require Approval on, every request waits for you to accept it before it goes on your public calendar.'],
                             ['One entry, two calendars', 'Add them to the event as a participant and the date is offered to their own schedule, for them to accept. A duo who is not on Event Schedule yet gets a page with your dates on it, credited to you, and can claim it with the email address you added.'],
                         ] as $bwIdx => [$t, $d])
                             <div class="bw-point" data-reveal>
@@ -1636,6 +1772,48 @@
                         <span>Requests and participants cost nothing, and neither does a schedule for the van.</span>
                     </p>
                 </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5A. Private hire, food trucks, your website (04A)            -->
+        <!-- ============================================================ -->
+        <section id="private" class="bw-sec bw-sec-paper" style="scroll-margin-top: 4.5rem;">
+            <div class="bw-wrap">
+                <div class="bw-head-c">
+                    <p class="bw-kick" data-reveal><span class="bw-cap bw-cap-sm bw-cap-copper" aria-hidden="true">4A</span>Bookings and your website</p>
+                    <h2 class="bw-h2 bw-h2-hop" data-reveal style="--reveal-delay: 0.08s;">
+                        Private parties, the van rota, <span>and the page people already visit</span>.
+                    </h2>
+                    <p class="bw-lede" data-reveal style="--reveal-delay: 0.16s;">
+                        Three jobs that usually live in an inbox, a group chat and a web page nobody updates. Each one has a place on the same calendar, or a reason to stay off it.
+                    </p>
+                </div>
+
+                <div class="bw-backs bw-backs-3" data-reveal-group="90">
+                    @foreach ([
+                        ['Requests from performers', 'Turn on Accept requests and choose the Booking Form: an event name, a date and time and a description, with the sender\'s name and email. Tick Date & Time as required, switch on Ask for phone number, and put your set length, fee terms and load-in time in Request Terms. On Pro, add your own questions, such as genre and a link to a recording.'],
+                        ['Private hire stays off the form', 'A request is an event on your schedule from the moment it is sent, so take party enquiries by phone or email instead. Once the party is agreed, add it yourself as a Draft on the Listing tab: the room shows as taken to you and your team and to nobody else. Want the public to know you are shut that night? Put up a one-off event that says so.'],
+                        ['The food truck rota', 'Each truck asks for its own dates through the same form, so every visit is its own event, named after the van that will really be in the yard. A truck with a schedule of its own can be added as a participant, and the visit shows on its page as well as yours.'],
+                        ['On your website', 'Paste the embed code into the events page of your site and the calendar loads live, so a night you move this afternoon is right there already. Add layout=list for a narrow column (the month grid needs about 768 pixels), schedule= and a sub-schedule\'s slug to show only the music, and dark=true for a dark site.'],
+                        ['On the tables', 'The QR code on your Followers tab opens your page with the sign-up form ready. Print it on table tents and beer mats: people who leave an address there and confirm it get a short email when you publish new events your schedule made, though not dates a band made on its own schedule and added you to.'],
+                        ['In the regulars\' calendars', 'On a night with nothing to buy or register for, the Add to Calendar menu also offers your whole calendar as a feed, and so does the sign-up panel. Someone who subscribes once sees new nights and moved ones in their phone\'s calendar, with nothing more to do on either side.'],
+                    ] as $bwIdx => [$t, $d])
+                        <div class="bw-back-wrap" data-reveal style="--r: {{ [1.1, -0.9, 1.4, -1.2, 0.8, -1.3][$bwIdx] }}deg;">
+                            <article @class(['bw-back', 'bw-back-can' => $bwIdx % 2 === 0, 'bw-back-btl' => $bwIdx % 2 === 1])>
+                                <h3>{{ $t }}</h3>
+                                <p>{{ $d }}</p>
+                            </article>
+                        </div>
+                    @endforeach
+                </div>
+
+                <p class="bw-note bw-why-note" data-reveal>
+                    <span class="bw-tag">Free plan</span>
+                    <span>
+                        Requests, Request Terms, Drafts, the embed, the QR code and the feed are on every plan. Your own questions on the form are Pro. <x-link href="{{ marketing_url('/docs/sharing#embed-parameters') }}">Every embed option</x-link>
+                    </span>
+                </p>
             </div>
         </section>
 

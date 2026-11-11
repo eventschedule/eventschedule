@@ -39,7 +39,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Scan them in",
-                "text": "Every ticket carries a QR code. Scan it on the door, free on every plan, and on Pro the live check-in dashboard shows who is inside against the capacity you set."
+                "text": "Every ticket carries a QR code. Scan it on the door, free on every plan, and on Pro the live check-in dashboard counts arrivals against the tickets sold."
             }
         ]
     }
@@ -840,6 +840,16 @@
         .nc-clip-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 0.9rem; margin-bottom: 1.1rem; border-bottom: 3px solid var(--nc-rule); color: var(--nc-ink-3); }
         .nc-clip h3 { font-size: clamp(1.1rem, 1.6vw, 1.35rem); text-wrap: balance; }
         .nc-clip p { margin-top: 0.9rem; color: var(--nc-ink-2); }
+        /* A sum worked on the back of a flyer: label, figure, and the working under it. */
+        .nc-math { margin-top: 1.2rem; border-top: 3px solid var(--nc-rule); }
+        @media (min-width: 860px) { .nc-math { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2.5rem; } }
+        .nc-math-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 0.25rem 1rem; padding-block: 0.8rem 0.75rem; border-bottom: 1px solid var(--nc-soft); }
+        .nc-math-row span { font-weight: 600; color: var(--nc-ink); }
+        .nc-math-row b { font-family: var(--nc-mono); font-weight: 700; font-size: 1.15rem; color: var(--nc-ink); }
+        .nc-math-row small { grid-column: 1 / -1; font-size: 0.92rem; color: var(--nc-ink-3); }
+        /* A sheet laid on a block keeps the ink of paper, not the block's light type. */
+        #nc .nc-block .nc-sheet { color: var(--nc-ink); }
+        #nc .nc-block .nc-sheet .nc-board-top { color: var(--nc-ink-3); }
         .nc-clip p + p { padding-top: 0.9rem; border-top: 1px dashed var(--nc-soft); font-size: 0.95rem; color: var(--nc-ink-3); }
 
         /* ---------------------------------------------------------------
@@ -1138,7 +1148,7 @@
             ],
             [
                 'q' => 'What happens when a night sells out?',
-                'a' => 'Turn on the waitlist for that event and people can join it once tickets are gone. If a ticket is released, the waitlist is notified automatically instead of you working through replies. The waitlist is a Pro feature.',
+                'a' => 'Turn on the waitlist for that event and people can join it once tickets are gone. If a ticket is released, the waitlist is notified automatically instead of you working through replies. On a ticketed night the waitlist is Pro; on a free registration night that is full it is free.',
             ],
             [
                 'q' => 'Can people ask to hear when tickets go on sale?',
@@ -1148,6 +1158,22 @@
                 'q' => 'Can I refund a ticket if a night is cancelled?',
                 'a' => 'Yes, from the Sales page, on Pro. A Stripe, PayPal or Razorpay sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A full refund puts those tickets back on sale, and a partial one leaves the ticket valid. A sale taken another way, like cash on the door or a payment link, is marked as refunded and you hand the money back yourself.',
             ],
+            [
+                'q' => 'How does a nightclub guest list work?',
+                'a' => 'A guest list is a free place on a named list, usually with a time to arrive by, kept for the promoter\'s crowd, friends of the DJs and regulars. Because it costs nothing to join, fewer people show than sign up, so clubs give out more names than the bodies they want: divide the bodies by the share of the list that turned up on recent nights. Here, a night that is all list is Free registration with a limit; a list beside paid tiers is a ticket type priced at zero with a per-order limit of 2 for a plus-one. Both work on every plan and come with a QR code to scan at the door.',
+            ],
+            [
+                'q' => 'Should a club sell tickets in advance or at the door?',
+                'a' => 'Both, for most nights. Advance tickets tell you the number before the night and reliably bring people in, so use them for headliners, holidays and anything that sells out. Door sales catch the walk-ups and the regulars who never book. Decide the split before you publish: take what you owe guests and keep for the door off the licensed capacity, and only promise the rest online. Charging for advance tickets here is Pro; a door price you take in person needs nothing from us.',
+            ],
+            [
+                'q' => 'How do I show DJ set times on the event page?',
+                'a' => 'Add one part per set on the event\'s Agenda tab, each with a start and an end time, in running order; it shows on the public event page and works on every plan. While times are still moving, publish the lineup with Show times switched off, and switch it on once they are fixed. Name the DJs on the Participants tab too, so each one links to their own page.',
+            ],
+            [
+                'q' => 'Can I mark a club night as 18+ or 21+?',
+                'a' => 'There is no separate age setting, and Event Schedule does not check ages. Say it where people read it: in the night\'s name or short description, which shows on the calendar and the event page, and in Ticket notes (Registration notes on a free night), which go into the confirmation email and onto the ticket. Then check ID at the door before you scan, so anyone refused is not counted as an arrival.',
+            ],
         ];
 
         $dotSections = [
@@ -1155,8 +1181,11 @@
             ['decides', 'What it decides'],
             ['entry', 'The list'],
             ['scan', 'The door itself'],
+            ['mix', 'The entry mix'],
+            ['night', 'Door night'],
             ['playing', "Who's playing"],
             ['rest', 'The rest of it'],
+            ['lineup', 'The calendar'],
             ['weekend', 'The weekend'],
             ['who', 'Perfect for'],
             ['steps', 'Three steps'],
@@ -1355,10 +1384,10 @@
                     <article class="nc-item nc-entry-b" data-reveal style="--reveal-delay: 0.08s;">
                         <div class="nc-item-head">
                             <h3 class="nc-d">Cover that changes on the clock</h3>
-                            <span class="nc-tier">Free</span>
+                            <span class="nc-tier nc-tier-pro">Pro</span>
                         </div>
                         <p>
-                            Give a night more than one ticket type and put a sales window on each. The cheap tier stops selling at 11pm, the full-price tier takes over, and nobody has to remember to change anything at the door.
+                            Give a night more than one ticket type and put a sales window on each. The cheap tier stops selling at 11pm, the full-price tier takes over, and nobody has to remember to change anything at the door. Sales windows work on every plan; a price on the ticket is Pro.
                         </p>
                         <div class="nc-sheet nc-board">
                             <div class="nc-board-top" aria-hidden="true"><span class="nc-m">On the door</span><span class="nc-board-clock">23:04</span></div>
@@ -1377,10 +1406,10 @@
                     <article class="nc-item nc-entry-c" data-reveal style="--reveal-delay: 0.16s;">
                         <div class="nc-item-head">
                             <h3 class="nc-d">Tables and group rates</h3>
-                            <span class="nc-tier">Free</span>
+                            <span class="nc-tier nc-tier-pro">Pro</span>
                         </div>
                         <p>
-                            A table is a ticket type with a price and a quantity, and a group rate can kick in automatically once someone buys several at once. Anything that comes with the table can be an add-on that attaches to the booking, which is the one part of this that needs Pro.
+                            A table is a ticket type with a price and a quantity, and a group rate can kick in automatically once someone buys several at once. Anything that comes with the table can be an add-on that attaches to the booking. Group rates themselves work on every plan; a table with a price, and its add-ons, are Pro.
                         </p>
                         <div class="nc-six" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><span class="nc-m">The sixth one in</span></div>
                     </article>
@@ -1397,11 +1426,11 @@
                     <div class="nc-head">
                         <p class="nc-strip" data-reveal>The door itself</p>
                         <h2 class="nc-d nc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            Know who is inside, <span class="nc-hl">not who bought.</span>
+                            Know who arrived, <span class="nc-hl">not just who bought.</span>
                         </h2>
                     </div>
                     <p data-reveal style="--reveal-delay: 0.16s;">
-                        Every ticket carries a QR code, and scanning it on the way in is free on every plan. On Pro the check-in dashboard counts against the capacity you set, so the number on the clicker is the number in the room.
+                        Every ticket carries a QR code, and scanning it on the way in is free on every plan. On Pro the check-in dashboard counts every arrival against the tickets sold, by ticket type, as each code is scanned.
                     </p>
                     <ul class="nc-ticks" data-reveal style="--reveal-delay: 0.22s;">
                         <li>
@@ -1454,6 +1483,154 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 4A. Guest list, advance or door: the entry mix               -->
+        <!-- ============================================================ -->
+        <section id="mix" class="nc-sec nc-paper" style="scroll-margin-top: 4rem;">
+            <div class="nc-wrap">
+                <div class="nc-head">
+                    <p class="nc-strip" data-reveal style="--r: -1.2deg;">The entry mix</p>
+                    <h2 class="nc-d nc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Guest list, advance or door? <span class="nc-hl">Usually all three.</span>
+                    </h2>
+                    <p class="nc-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Each way in fills a different part of the night. The skill is in how much of the room you give each one, and that is a sum you can do on Monday.
+                    </p>
+                </div>
+
+                <div class="nc-clips" data-reveal-group="90">
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: -0.7deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">Way in 01</span><span class="nc-tier">Free</span></div>
+                        <h3 class="nc-d">The guest list</h3>
+                        <p>
+                            Pick it when the room needs to look full by midnight, a promoter brings a crowd, or the money is made at the bar. A list costs nothing to join, so it is also the easiest thing to drop: plan on fewer bodies than names.
+                        </p>
+                        <p>
+                            A night that is all list is Free registration with a Registration Limit, and anyone who cannot come cancels from the link in their email, which frees the place. A list beside paid tiers is a ticket type priced at zero, which works on every plan. Use + Add Limit to cap it at 2 per order and each name can bring one guest; one scan lets the whole order in.
+                        </p>
+                    </article>
+
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: 0.6deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">Way in 02</span><span class="nc-tier nc-tier-pro">Pro</span></div>
+                        <h3 class="nc-d">Advance tickets</h3>
+                        <p>
+                            Pick it for a headline name, a holiday night or anything that will sell out, and for any night where you need to know the number before you book extra bar staff. Paid tickets are the reliable part of a night, because people who have paid are the ones who turn up.
+                        </p>
+                        <p>
+                            Make the cheap tier small rather than short. Sixty early tickets that sell out on Tuesday say more than a price that changes at a time nobody remembers. A tier that sells out stays on the page marked Sold out, and Show unavailable tickets keeps a tier whose sales window has closed on view too. When the last tier goes, the waitlist takes names.
+                        </p>
+                    </article>
+
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: -0.4deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">Way in 03</span><span class="nc-tier">Free</span></div>
+                        <h3 class="nc-d">On the door</h3>
+                        <p>
+                            Pick it for the regular nights, the walk-ups from the bar next door and the crowd that never books anything. Leave part of the capacity off the page entirely and take money at the door the way the bar already does.
+                        </p>
+                        <p>
+                            Reserving online and paying on arrival is the Cash payment method, on a priced ticket, so Pro. A cash order stays unpaid until somebody marks it paid on the Sales page, and the scanner refuses an unpaid order, so mark it paid at the till before you scan. Expire unpaid tickets releases an unpaid order a set number of hours after it was placed, so on a pay-at-the-door night set it longer than the time between booking and the night, or leave it off.
+                        </p>
+                    </article>
+                </div>
+
+                <article class="nc-sheet nc-clip" data-reveal style="--r: 0deg;">
+                    <div class="nc-clip-top"><span class="nc-m">Worked through</span><span class="nc-m" aria-hidden="true">Sat &middot; 300 capacity</span></div>
+                    <h3 class="nc-d">Splitting a 300-person room</h3>
+                    <div class="nc-math">
+                        @foreach ([
+                            ['Licensed capacity', '300', 'The number the fire officer cares about. Everything below comes out of it.'],
+                            ['Owed before you sell anything', '- 20', 'DJs\' guests, the promoter\'s people, the regulars you always let in.'],
+                            ['Kept for the door', '- 60', 'Walk-ups. Never on the page, so a full page never turns away the bar crowd.'],
+                            ['Online, in bodies', '220', 'What the page is allowed to promise.'],
+                            ['Guest list, expected', '80', 'If last month\'s lists showed up at 60%, 80 bodies is 80 / 0.6 = 133 names. Set the zero-priced type\'s quantity to 133, not 80.'],
+                            ['Early advance', '60', 'A small first tier that sells out and says so.'],
+                            ['Advance', '80', 'Everything after the early tier.'],
+                            ['Adds up to', '220', '80 + 60 + 80, the online figure above. Nothing promised twice.'],
+                        ] as [$mathLabel, $mathFigure, $mathNote])
+                            <div class="nc-math-row">
+                                <span>{{ $mathLabel }}</span>
+                                <b>{{ $mathFigure }}</b>
+                                <small>{{ $mathNote }}</small>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p>
+                        Measure your own show rate rather than borrowing one: scan the list for four weeks and divide the people who came by the names you took. If more of the list turns up than usual, the door's 60 is the cushion, which is the other reason to keep it.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4B. Door night: age, ID and the real count                   -->
+        <!-- ============================================================ -->
+        <section id="night" class="nc-sec nc-paper nc-alt" style="scroll-margin-top: 4rem;">
+            <div class="nc-wrap">
+                <div class="nc-head">
+                    <p class="nc-strip" data-reveal style="--r: 1.1deg;">Door night</p>
+                    <h2 class="nc-d nc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Age, ID and <span class="nc-hl">the number inside.</span>
+                    </h2>
+                    <p class="nc-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Six things that go wrong at a club door and nowhere else, and what to set up before Friday so they do not.
+                    </p>
+                </div>
+
+                <div class="nc-clips" data-reveal-group="80">
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: -0.6deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 01</span><span class="nc-tier">Free</span></div>
+                        <h3 class="nc-d">Say the age policy where it is read</h3>
+                        <p>
+                            There is no age setting, and nothing checks anyone's age for you. Put &ldquo;21+ with photo ID&rdquo; in the night's name or short description, so it shows on the calendar and the event page, and in Ticket notes (Registration notes on a free night), which go into the confirmation email and onto the ticket. The person turned away at the rope has then been told three times.
+                        </p>
+                    </article>
+
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: 0.5deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 02</span><span class="nc-tier">Free</span></div>
+                        <h3 class="nc-d">ID first, then the scan</h3>
+                        <p>
+                            A scan admits the order and counts it. If the ID check comes after it, everyone refused at the rope is already in your numbers. Run the line in one order: ID, scan, then the stamp or wristband.
+                        </p>
+                    </article>
+
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: -0.3deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 03</span><span class="nc-tier">Free</span></div>
+                        <h3 class="nc-d">The count is arrivals, not people inside</h3>
+                        <p>
+                            Each ticket admits once, and a second scan answers Already checked in with the time of the first. Nobody scans out, so the figure only goes up. For the licensed number, keep a clicker on the exit, and use the stamp for re-entry rather than a second scan.
+                        </p>
+                    </article>
+
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: 0.7deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 04</span><span class="nc-tier nc-tier-pro">Pro</span></div>
+                        <h3 class="nc-d">Walk-ups are not in the dashboard</h3>
+                        <p>
+                            The check-in dashboard counts ticket holders scanned against tickets sold, by ticket type. Cash taken at the door for people with no ticket never reaches it, so the door's own tally is part of the number too. Add the two before you tell anyone the room is full.
+                        </p>
+                    </article>
+
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: -0.5deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 05</span><span class="nc-tier">Free</span></div>
+                        <h3 class="nc-d">The list after the cut-off</h3>
+                        <p>
+                            &ldquo;Guest list until midnight&rdquo; is about arrival, and a ticket does not know the time. Name the type &ldquo;Guest list, in by midnight&rdquo;: the scan shows what the order holds, so the door sees a list ticket at 00:40 and decides whether to charge the difference.
+                        </p>
+                    </article>
+
+                    <article class="nc-sheet nc-clip" data-reveal style="--r: 0.4deg;">
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 06</span><span class="nc-tier">Free</span></div>
+                        <h3 class="nc-d">How many phones on the door</h3>
+                        <p>
+                            Lanes = guests &times; share arriving in the busiest half hour &times; seconds per guest &divide; 1,800 (the seconds in half an hour). A 300 room where 70% arrive in the half hour before the headliner, at 20 seconds a guest with an ID check: 300 &times; 0.7 &times; 20 &divide; 1,800 = 2.3, so three lanes, plus a spare phone.
+                        </p>
+                        <p>
+                            The ID check is what makes a club door slow, not the scan. <x-link href="{{ marketing_url('/features/check-in') }}">More on running the door</x-link>
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 5. Who's playing                                             -->
         <!-- ============================================================ -->
         <section id="playing" class="nc-sec nc-block" style="scroll-margin-top: 4rem;">
@@ -1472,7 +1649,7 @@
                                 <h3 class="nc-d">Accept requests</h3>
                                 <span class="nc-tier">Free</span>
                             </div>
-                            <p>Switch it on and artists can submit a night from your public page. Everything waits on your Requests tab until you accept or decline it, so nothing reaches your calendar by surprise.</p>
+                            <p>Switch it on and artists can submit a night from your public page. Everything waits on your Requests tab until you accept or decline it, so nothing goes on your public calendar until you say yes.</p>
                         </div>
                         <div class="nc-play-item" data-reveal>
                             <div class="nc-item-head">
@@ -1567,7 +1744,7 @@
 
                     <!-- 5 -->
                     <article class="nc-sheet nc-clip" data-reveal style="--r: -0.6deg;">
-                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 05</span><span class="nc-tier nc-tier-pro">Pro</span></div>
+                        <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 05</span><span class="nc-tier">Free</span></div>
                         <h3 class="nc-d">The post, without opening a design tool</h3>
                         <p>
                             Generate a graphic from a night in a story, square, portrait or landscape crop, and post it. It is built from that event, so the date and the room are already right.
@@ -1586,6 +1763,80 @@
                             Embed the calendar on your own site so tonight is wherever people already look you up, and every night syncs two ways with Google, Outlook and CalDAV.
                         </p>
                     </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6A. The calendar: residencies, guest nights, set times       -->
+        <!-- ============================================================ -->
+        <section id="lineup" class="nc-sec nc-block" style="scroll-margin-top: 4rem;">
+            <div class="nc-laser nc-laser-left" aria-hidden="true"></div>
+            <div class="nc-wrap">
+                <div class="nc-head">
+                    <p class="nc-strip" data-reveal style="--r: -1.4deg;">The calendar</p>
+                    <h2 class="nc-d nc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Weekly nights, one-off specials, <span class="nc-hl">and who is on when.</span>
+                    </h2>
+                    <p class="nc-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A club calendar is mostly the same three nights every week, broken up by the dates that sell the year. Build the repeating part once and spend the time on the specials.
+                    </p>
+                </div>
+
+                <div class="nc-play">
+                    <div class="nc-play-list" data-reveal-group="100">
+                        <div class="nc-play-item" data-reveal>
+                            <div class="nc-item-head">
+                                <h3 class="nc-d">A residency is one event</h3>
+                                <span class="nc-tier">Free</span>
+                            </div>
+                            <p>Friday's house night repeats weekly on Friday with no end date. Ticket stock and a Registration Limit count per date, so a 300 cap means 300 every Friday, not 300 across the year. A Friday the room is hired out is an excluded date and simply leaves the calendar.</p>
+                        </div>
+                        <div class="nc-play-item" data-reveal>
+                            <div class="nc-item-head">
+                                <h3 class="nc-d">A guest night is its own date</h3>
+                                <span class="nc-tier">Free</span>
+                            </div>
+                            <p>The residency's lineup and prices are the same every week, so a guest headliner does not belong inside it. Exclude that Friday from the series and add a one-off event on the same date, with the guest named, a page of its own and its own prices. Regulars still find something on Friday; it is just the bigger night.</p>
+                        </div>
+                        <div class="nc-play-item" data-reveal>
+                            <div class="nc-item-head">
+                                <h3 class="nc-d">Set times on the event page</h3>
+                                <span class="nc-tier">Free</span>
+                            </div>
+                            <p>The Agenda tab takes one part a set, each with a start and end time, in running order. Announce the lineup with the Show times switch off while times are still moving, and turn it on once they are fixed. Turning it off and saving clears times already typed in, so add them on the day you mean to show them.</p>
+                        </div>
+                        <div class="nc-play-item" data-reveal>
+                            <div class="nc-item-head">
+                                <h3 class="nc-d">Name every DJ</h3>
+                                <span class="nc-tier">Free</span>
+                            </div>
+                            <p>Add the DJs on the Participants tab. One with a schedule of their own is linked from your event, and one without gets a page that lists your date and can be claimed with the email address you enter. Once a DJ claims it, your club goes onto their approved list, so the next dates you book them on appear without a request.</p>
+                        </div>
+                        <div class="nc-play-item" data-reveal>
+                            <div class="nc-item-head">
+                                <h3 class="nc-d">Announce the weekend in one go</h3>
+                                <span class="nc-tier">Free</span>
+                            </div>
+                            <p>Publish Thursday, Friday and Saturday in the same sitting. Your email subscribers get one message listing the batch of nights your schedule created, at most once every three days by default, rather than three in a row. Then make one graphic of the three nights, as a square post or a story, and switch on the Notify me card for a headliner whose tickets are not on sale yet.</p>
+                        </div>
+                    </div>
+
+                    <div aria-hidden="true" data-reveal="right">
+                        <div class="nc-sheet nc-board">
+                            <div class="nc-board-top"><span class="nc-m">Saturday &middot; set times</span><span class="nc-board-clock">22:00</span></div>
+                            <ul>
+                                @foreach ([['Doors and warm-up', '22:00', 'Resident', false], ['Kaya Sol', '00:00', 'Guest', false], ['NULL/VOID', '01:30', 'Guest', false], ['Close', '03:00', 'Resident', false]] as [$setName, $setTime, $setRole, $setDone])
+                                    <li class="{{ $setDone ? 'is-closed' : '' }}">
+                                        <span class="nc-board-name">{{ $setName }}</span>
+                                        <span class="nc-board-price">{{ $setTime }}</span>
+                                        <span class="nc-m nc-board-state">{{ $setRole }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <p class="nc-reqs-foot">One part a set, in running order, on the night's own page.</p>
+                    </div>
                 </div>
             </div>
         </section>

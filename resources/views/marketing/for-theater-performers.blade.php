@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Actor Schedules | A Credits List That Updates Itself</x-slot>
-    <x-slot name="description">Set your schedule to List and it becomes your credits: every production dated, past work kept, and new bookings arriving from the companies that cast you.</x-slot>
+    <x-slot name="description">An actor schedule that keeps itself: every production dated, auditions kept private, a whole run set up once, and new dates sent by the companies that cast you.</x-slot>
     <x-slot name="breadcrumbTitle">For Theater Performers</x-slot>
 
     <x-slot name="headMeta">
@@ -632,6 +632,10 @@
         .tp-box-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 3ch 4ch; gap: 1.5ch; align-items: baseline; padding-block: 0.5rem; border-bottom: 1px dotted var(--tp-rule); font-size: 0.875em; }
         .tp-box-row span:first-child { font-weight: 700; }
         .tp-box-row span:nth-child(2) { font-size: 0.86em; color: var(--tp-ink-3); }
+        /* A form's fields, one per line, as the promo code card writes them. */
+        .tp-kv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1.5ch; align-items: baseline; padding-block: 0.5rem; border-bottom: 1px dotted var(--tp-rule); font-size: 0.875em; }
+        .tp-kv span:first-child { color: var(--tp-ink-3); }
+        .tp-kv span:last-child { font-weight: 700; text-align: end; }
         .tp-box-row span:nth-child(3),
         .tp-box-row span:nth-child(4) { text-align: end; }
         #tp .tp-insert .tp-box-fine { font-size: 0.8em; }
@@ -954,6 +958,22 @@
                 'q' => 'Can I sell tickets to my own show?',
                 'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a seat carry a price. Named ticket types with their own prices, quantities and sales windows, payment through Stripe, PayPal, Invoice Ninja, Payfast (in rand), Razorpay (in Indian rupees), a payment link or cash, and the live check-in dashboard, promo codes, add-ons and per-attendee tickets come with it. Scanning the QR code at the door is free on any plan, and a free preview or a scratch night takes registrations without one. Event Schedule charges no platform fee on either plan.',
             ],
+            [
+                'q' => 'How do actors keep track of their schedule?',
+                'a' => 'Most working actors keep two lists and never mix them: a private calendar holding everything (auditions, callbacks, rehearsals, fittings, holds and the day job) and a public list of where people can see them perform. Only the second one gets shared. On Event Schedule the public schedule is that list. Auditions and rehearsals can sit on it as Drafts, which only you and your team see, or stay in the personal calendar it syncs with, where an entry marked private is never pulled in and anything else arrives as a draft for you to publish or keep hidden.',
+            ],
+            [
+                'q' => 'Should an actor list past productions online?',
+                'a' => 'Yes. Agents and casting directors read past credits to judge your range and the level you work at, and audiences use them to decide whether to come. Give each one its date, its company and its venue. With the List layout, past productions stay on your schedule under a Past Events heading rather than dropping off, and one setting hides them if you would rather show only what is coming.',
+            ],
+            [
+                'q' => 'Should an understudy put the whole run on their schedule?',
+                'a' => 'No. Someone who sees your name on a date buys a ticket to see you, and a run you are only covering promises performances you may never give. List the performances you are scheduled to play, add a date the moment you are told you are going on, and share that event\'s own link. An alternate who plays set nights every week can make those nights one recurring event and exclude any night they swap out.',
+            ],
+            [
+                'q' => 'How do I get comps or a discount code for friends and family?',
+                'a' => 'Ask the company: comps and cast codes come from whoever sells the tickets. If they sell on Event Schedule, a promo code (Pro) can be a percentage or a fixed amount off, limited to a number of uses, a date and chosen ticket types, and it comes with a link that applies it at checkout. A use is one order, so to give exactly two free seats make the code a fixed amount worth two full-price tickets. If the theatre sells elsewhere and is happy for a code to be public, list the production with Tickets elsewhere and fill in the Price, and the Coupon Code and Discount fields show beside it on your event page, free on any plan.',
+            ],
         ];
 
         $dotSections = [
@@ -962,6 +982,9 @@
             ['cast', 'Getting cast'],
             ['produce', 'Producing'],
             ['follow', 'Your audience'],
+            ['week', 'Public or private'],
+            ['run', 'Runs and covers'],
+            ['comps', 'Comps and codes'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -1307,7 +1330,7 @@
                         <i class="tp-clip" aria-hidden="true"></i>
                         <div class="tp-box-top">
                             <h3>Solo show, Fringe</h3>
-                            <span class="tp-tag">Free</span>
+                            <span class="tp-tag">Pro</span>
                         </div>
                         <p>One recurring event, twelve nights, closing on the last.</p>
 
@@ -1421,6 +1444,271 @@
                         <p class="tp-prog-name">Maya Okonkwo <i>(Lady Macbeth)</i></p>
                         <p>Bridge Theatre: Kristine Linde in A Doll's House. Elsewhere: Nina in The Seagull (Studio Four), Marianne in Constellations (Fringe Collective), Viola in Twelfth Night (Parkside Players).</p>
                         <p class="tp-prog-url">Current credits: maya.eventschedule.com</p>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Scene 4A. What goes public (double blue pages)               -->
+        <!-- ============================================================ -->
+        <section id="week" class="tp-scene" style="scroll-margin-top: 5rem;">
+            <div class="tp-wrap tp-desk">
+                <article class="tp-leaf tp-rev-blue" data-reveal>
+                    <header class="tp-slug">
+                        <div class="tp-slug-in">
+                            <p class="tp-kicker">Public or private</p>
+                            <p class="tp-slug-rev" aria-hidden="true">Double blue revised</p>
+                            <p class="tp-pg" aria-hidden="true"></p>
+                        </div>
+                    </header>
+
+                    <p class="tp-sline" aria-hidden="true"><b>4A</b><span>Int. actor's flat - Sunday night</span><b>4A</b></p>
+                    <h2 class="tp-h2">
+                        What goes on the page, and <span class="tp-hl">what never does</span>.
+                    </h2>
+
+                    <p class="tp-action">
+                        An actor's week is mostly things nobody else should see: a 10:40 audition, a
+                        fitting, a callback, the day job. The people who open your page want one answer,
+                        which is where they can see you next. Sort every entry before it goes in and the
+                        page stays worth opening.
+                    </p>
+
+                    @foreach ([
+                        ['Performances', 'public', 'Every night you are on, with the venue and a way to book. This is what the page is for, and it is the line a casting director scans first.'],
+                        ['Previews and press night', 'public', 'Previews are dates in the run like any other. Give press night an entry of its own only when it has its own title or its own price.'],
+                        ['Readings and showcases', 'public, if anyone can come', 'A public reading or a showcase that sells seats belongs on the page. An invitation-only industry showing does not. Teaching and workshops go on a sub-schedule of their own, so the credits stay a list of credits.'],
+                        ['Auditions and callbacks', 'Draft', 'Never public. Casting is confidential, and a callback on your page can tell another actor what you are up for. Saved as a Draft, it stays on your schedule for you and your team and off the public page.'],
+                        ['Self-tape deadlines', 'Draft', 'A deadline is a reminder to you, not an event anyone attends. A Draft keeps it beside everything else without it showing up anywhere public.'],
+                        ['Rehearsals, fittings, tech', 'Draft, or not at all', 'Useful to you, meaningless to an audience. Keep them as Drafts, or leave them in the personal calendar your schedule syncs with.'],
+                        ['Holds and the day job', 'never', 'A hold is a date you promised to keep free for a booking that is not confirmed. On a public page it reads as a show that does not exist. The day job is nobody\'s business.'],
+                    ] as $exIndex => [$t, $p, $d])
+                        <div @class(['tp-ex', 'tp-chg' => $exIndex === 3])>
+                            <h3 class="tp-cue">{{ $t }}</h3>
+                            <p class="tp-paren">{{ $p }}</p>
+                            <p class="tp-dia">{{ $d }}</p>
+                            @if ($exIndex === 3)
+                                <span class="tp-pencil" aria-hidden="true">tell <u>no one</u></span>
+                            @endif
+                        </div>
+                    @endforeach
+
+                    <p class="tp-note">
+                        <span class="tp-tag">Free</span>
+                        <span>Drafts and sub-schedules are on every plan. If your schedule reads from Google Calendar or Outlook, mark audition entries private there: an entry your calendar marks private is never pulled in, and the rest arrive as drafts until you publish them, unless you switch on Publish new events automatically. <x-link href="{{ marketing_url('/docs/creating-schedules#calendar-privacy') }}">What stays off your page</x-link></span>
+                    </p>
+
+                    <p class="tp-cont" aria-hidden="true">(CONTINUED)</p>
+                    <i class="tp-ear" aria-hidden="true"></i>
+                </article>
+
+                <aside class="tp-aside" data-reveal="right">
+                    <div class="tp-insert" style="--r: 1.4deg;">
+                        <i class="tp-clip" aria-hidden="true"></i>
+                        <div class="tp-insert-pg" aria-hidden="true"><span>Insert</span><span>4B.</span></div>
+                        <h3>When an agent shares the diary</h3>
+                        <p>
+                            On the Enterprise plan your agent or manager can join the schedule as a team member
+                            and see the Drafts beside the public dates. Its Availability tab, on Talent schedules
+                            only, lets you cross off the days you are not free, so whoever answers the offers knows
+                            not to say yes to the night of a family wedding. It is a note to your team: never shown
+                            publicly, and it does not stop anyone adding you to an event that day.
+                            <x-link href="{{ marketing_url('/features/availability') }}">How availability works</x-link>
+                        </p>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Scene 4C. A run, and the nights you cover (double yellow)    -->
+        <!-- ============================================================ -->
+        <section id="run" class="tp-scene" style="scroll-margin-top: 5rem;">
+            <div class="tp-wrap tp-desk tp-desk-flip">
+                <article class="tp-leaf tp-rev-yellow" data-reveal>
+                    <header class="tp-slug">
+                        <div class="tp-slug-in">
+                            <p class="tp-kicker">Runs and covers</p>
+                            <p class="tp-slug-rev" aria-hidden="true">Double yellow revised</p>
+                            <p class="tp-pg" aria-hidden="true"></p>
+                        </div>
+                    </header>
+
+                    <p class="tp-sline" aria-hidden="true"><b>4C</b><span>Int. company office - first day of rehearsal</span><b>4C</b></p>
+                    <h2 class="tp-h2">
+                        Thirty-two performances, <span class="tp-hl">two entries</span>.
+                    </h2>
+
+                    <p class="tp-action">
+                        A run is the hardest thing to keep right by hand: eight shows a week, two start
+                        times, a dark Sunday, a night lost to a private hire and a matinee added when
+                        week three sells out. Built as a pattern, it is two events you set once.
+                    </p>
+
+                    @foreach ([
+                        ['Split it by start time', 'A recurring event has one start time, so evenings and matinees are two series. Evenings repeat weekly, Monday to Saturday at 7:30pm. Matinees repeat weekly on Thursday and Saturday at 2:30pm. Tick the days, then choose how each one ends.'],
+                        ['End it on closing night', 'Set Recurring End to On Date with the closing performance, or to After Events with the number of performances if the run is counted that way. The series stops drawing dates after it.'],
+                        ['Take one out, put one in', 'The private hire is an excluded date and simply disappears from the page. The extra Sunday matinee is an included date, kept even though the weekly pattern would never have drawn it.'],
+                        ['Or accept the company\'s', 'If the company runs its season on Event Schedule, build none of this. Accept their production when the request arrives and your page carries their dates and their changes.'],
+                        ['When the theatre sells the tickets', 'Choose Tickets elsewhere on the event\'s Tickets tab and paste the theatre\'s booking page as the Registration URL. Your event page gets a View Event button that opens it, on every plan.'],
+                    ] as $exIndex => [$t, $d])
+                        <div @class(['tp-ex', 'tp-chg' => $exIndex === 2])>
+                            <h3 class="tp-cue">{{ $t }}</h3>
+                            <p class="tp-dia">{{ $d }}</p>
+                        </div>
+                    @endforeach
+
+                    <p class="tp-trans" aria-hidden="true">Cut to: the understudy.</p>
+
+                    <h3 class="tp-h2">If you are <span class="tp-hl">the cover</span>.</h3>
+
+                    <p class="tp-action">
+                        Covers, understudies and swings have the opposite problem. Someone who sees your
+                        name beside a date buys a ticket to see you, so the run you cover is the one thing
+                        your page must not promise.
+                    </p>
+
+                    @foreach ([
+                        ['List only the nights you play', 'Many companies give an understudy set performances, often a weekday matinee. Each is a one-off event on your page with the theatre\'s booking link under Tickets elsewhere. The rest of the run stays off it. If the company adds you to the whole run, decline it and list your own nights instead: accepting a series puts every date on your page.'],
+                        ['Going on at short notice', 'Told at the half that you are on tonight? Add the date there and then, and send its own link to the people who would come. The email your subscribers get about new events is spaced at least three days apart by default and may not go out in time, so a same-night message is one you send yourself.'],
+                        ['Alternates and set nights', 'An alternate who plays the same nights every week has a run of their own: one recurring event on those weekdays, with any night swapped out excluded.'],
+                    ] as $exIndex => [$t, $d])
+                        <div @class(['tp-ex', 'tp-chg' => $exIndex === 1])>
+                            <h3 class="tp-cue">{{ $t }}</h3>
+                            <p class="tp-dia">{{ $d }}</p>
+                            @if ($exIndex === 1)
+                                <span class="tp-pencil" style="left: auto; right: -1.5rem;" aria-hidden="true">breathe</span>
+                            @endif
+                        </div>
+                    @endforeach
+
+                    <p class="tp-note">
+                        <span class="tp-tag">Note</span>
+                        <span>Your email subscribers hear about a new date automatically when it is an event you created on your own schedule. A production a company adds you to shows on your page once you accept it, but it is not part of that email; tell people about it in a newsletter. <x-link href="{{ marketing_url('/features/recurring-events') }}">More repeat patterns</x-link></span>
+                    </p>
+
+                    <p class="tp-cont" aria-hidden="true">(CONTINUED)</p>
+                </article>
+
+                <aside class="tp-aside" data-reveal="left">
+                    <div class="tp-insert" style="--r: -1.5deg;">
+                        <i class="tp-clip" aria-hidden="true"></i>
+                        <div class="tp-box-top">
+                            <h3>A four-week run</h3>
+                            <span class="tp-tag">Free</span>
+                        </div>
+                        <p>Two recurring events. Every figure below is a date on the page.</p>
+
+                        <div class="tp-box-rows">
+                            <div class="tp-box-row">
+                                <span>Series</span>
+                                <span>When</span>
+                                <span>Wk</span>
+                                <span>All</span>
+                            </div>
+                            @foreach ([
+                                ['Evenings', 'Mon to Sat, 7:30pm', '6', '24'],
+                                ['Matinees', 'Thu and Sat, 2:30pm', '2', '8'],
+                                ['Private hire', 'Excluded', '', '-1'],
+                                ['Extra matinee', 'Included', '', '+1'],
+                                ['On the page', 'Closing night ends both', '', '32'],
+                            ] as [$rName, $rWhen, $rWeek, $rAll])
+                                <div class="tp-box-row">
+                                    <span>{{ $rName }}</span>
+                                    <span>{{ $rWhen }}</span>
+                                    <span>{{ $rWeek }}</span>
+                                    <span>{{ $rAll }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <p class="tp-box-fine">
+                            Each date gets its own page and, when you sell the seats yourself, its own ticket count.
+                        </p>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Scene 4D. Comps and codes (double green pages)               -->
+        <!-- ============================================================ -->
+        <section id="comps" class="tp-scene" style="scroll-margin-top: 5rem;">
+            <div class="tp-wrap tp-desk">
+                <article class="tp-leaf tp-rev-green" data-reveal>
+                    <header class="tp-slug">
+                        <div class="tp-slug-in">
+                            <p class="tp-kicker">Comps and codes</p>
+                            <p class="tp-slug-rev" aria-hidden="true">Double green revised</p>
+                            <p class="tp-pg" aria-hidden="true"></p>
+                        </div>
+                    </header>
+
+                    <p class="tp-sline" aria-hidden="true"><b>4D</b><span>Int. box office - before the half</span><b>4D</b></p>
+                    <h2 class="tp-h2">
+                        &ldquo;Can you get me in?&rdquo; <span class="tp-hl">Three answers</span>.
+                    </h2>
+
+                    <p class="tp-action">
+                        Every cast member is asked it in tech week, by a parent, a flatmate and someone
+                        from drama school. Comps and cast codes come from whoever sells the tickets, so
+                        the answer depends on who that is.
+                    </p>
+
+                    @foreach ([
+                        ['The company sells on Event Schedule', 'their Pro plan', 'Ask for a code of your own. A promo code takes a percentage or a fixed amount off, stops after a set number of uses, can expire on a date and can apply to chosen ticket types only. Each one has a link that applies it at checkout, so your aunt never has to type it.'],
+                        ['Two comps, not ten', 'the trap', 'A use is one order, not one seat, so a single-use code at 100% off covers every seat in that order. To give exactly two, make the code a fixed amount worth two full-price tickets: it can never take off more than that, and a third seat is paid at the usual price. An order a code brings to zero confirms with no payment step (unless the event uses an Invoice Ninja payment link) and still comes with its QR ticket.'],
+                        ['Who brought who', 'Pro', 'On a fringe show where everyone is asked to sell, the producer can give each cast member a promoter link. The Promoters tab counts the visits, tickets and revenue each link brought in, free registrations included.'],
+                        ['The theatre sells elsewhere', 'Free', 'List the production with Tickets elsewhere and fill in the Price, and the Coupon Code and Discount fields show the code and what it is worth beside it. Do that only with a code the theatre is happy to see in public. A friends-and-family code goes to friends and family in a message.'],
+                    ] as $exIndex => [$t, $p, $d])
+                        <div @class(['tp-ex', 'tp-chg' => $exIndex === 1])>
+                            <h3 class="tp-cue">{{ $t }}</h3>
+                            <p class="tp-paren">{{ $p }}</p>
+                            <p class="tp-dia">{{ $d }}</p>
+                            @if ($exIndex === 1)
+                                <span class="tp-pencil" aria-hidden="true">one <u>order</u>!</span>
+                            @endif
+                        </div>
+                    @endforeach
+
+                    <p class="tp-note">
+                        <span class="tp-tag">Pro</span>
+                        <span>Promo codes and promoter links need the selling schedule on Pro, and so does any ticket with a price. On a show you produce yourself, that schedule is yours. <x-link href="{{ marketing_url('/features/promo-codes') }}">How promo codes work</x-link></span>
+                    </p>
+
+                    <p class="tp-cont" aria-hidden="true">(CONTINUED)</p>
+                    <i class="tp-ear" aria-hidden="true"></i>
+                </article>
+
+                <aside class="tp-aside" data-reveal="right">
+                    <div class="tp-insert" style="--r: 2.2deg;">
+                        <i class="tp-clip" aria-hidden="true"></i>
+                        <div class="tp-box-top">
+                            <h3>Promo code</h3>
+                            <span class="tp-tag">Pro</span>
+                        </div>
+                        <p>A pair for opening week, for one cast member's family.</p>
+
+                        <div class="tp-box-rows">
+                            @foreach ([
+                                ['Promo Code', 'CAST-MAYA'],
+                                ['Discount Type', 'Fixed amount'],
+                                ['Discount Value', '2 full-price seats'],
+                                ['Max Uses', '1'],
+                                ['Expires At', 'End of week one'],
+                                ['Applies To', 'Specific Tickets: Full price'],
+                            ] as [$kName, $kValue])
+                                <div class="tp-kv">
+                                    <span>{{ $kName }}</span>
+                                    <span>{{ $kValue }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <p class="tp-box-fine">
+                            One order, two seats free. A third seat in the same order is paid. Add-ons are never discounted.
+                        </p>
                     </div>
                 </aside>
             </div>
