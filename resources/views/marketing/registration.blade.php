@@ -36,14 +36,14 @@
             {
                 "@type": "HowToStep",
                 "position": 1,
-                "name": "Open the Tickets section",
-                "text": "Edit the event and scroll to the Tickets section of the event editor."
+                "name": "Open the Tickets tab",
+                "text": "Edit the event and open the Tickets tab of the event form."
             },
             {
                 "@type": "HowToStep",
                 "position": 2,
-                "name": "Choose Registration",
-                "text": "Select the Registration mode. There is no payment method to connect and nothing to price."
+                "name": "Press Free registration",
+                "text": "Press the Free registration tile. There is no payment method to connect and nothing to price."
             },
             {
                 "@type": "HowToStep",
@@ -290,7 +290,7 @@
                         ['A Register button on the event page', 'Switch an event to Registration and its page swaps the buy button for Register. The form asks for a name and an email, and a phone number too if you ask for one, either as optional or required. Nothing else stands between a guest and a place.'],
                         ['A confirmation with a QR code', 'The moment someone registers, they get an email and a ticket page of their own with a QR code on it. Add registration notes to the event, such as directions, parking or what to bring, and they appear in that email and on the ticket.'],
                         ['A name in your Sales list', 'Every registration lands in the Sales list beside any paid sales you have, with the name, the email and the date it is for. The same email cannot register twice for the same date, so the list is not padded with duplicates.'],
-                        ['A scan at the door', 'Open the Sales page on a phone, press Scan Ticket and point the camera at the code. Each registration admits once and a second scan warns you. Scanning is free on every plan, and any team member can do it, viewers included.'],
+                        ['A scan at the door', 'Open the Sales page on a phone, press Scan Ticket and point the camera at the code to check it is a live registration for this event and date. A scan confirms the code but does not record an arrival, so keep your own count at the door if you need one. Scanning is free on every plan, and any team member can do it, viewers included.'],
                     ];
                 @endphp
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="80">
@@ -351,12 +351,87 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. Parties, questions, the embed                             -->
+        <!-- 4. No-shows and the limit to set                             -->
+        <!-- ============================================================ -->
+        @php
+            // The limit to set is chairs / expected show-up rate, rounded DOWN so the room is never
+            // planned past its size: 60 / 0.7 = 85.7 -> 85. "If all come" is limit - chairs.
+            $showUpRows = [
+                ['80%', 75, 15],
+                ['70%', 85, 25],
+                ['60%', 100, 40],
+                ['50%', 120, 60],
+            ];
+        @endphp
+        <section id="no-shows" class="es-reg-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-reg-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-reg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">No-shows and overbooking</p>
+                    <h2 class="es-balance es-reg-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Sixty chairs. <span class="es-reg-accent">How many sign-ups?</span>
+                    </h2>
+                    <p class="es-reg-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        On a free event the list and the room are two different numbers. People register for free things the way they save an article for later: sincerely, and at no cost if the evening fills up with something else. Set the limit for the number you expect to walk in, not the number of names.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-5" data-reveal-group="90">
+                    <div class="es-reg-panel flex flex-col p-6 lg:col-span-2" data-reveal="panel">
+                        <p class="es-reg-tag mb-3">The rule of thumb</p>
+                        <p class="es-reg-ink text-3xl font-black tabular-nums">chairs &divide; show-up rate</p>
+                        <p class="es-reg-muted mt-2 text-sm leading-relaxed">
+                            rounded down, is the Registration Limit to set. For 60 chairs and an audience where 7 in 10 who sign up arrive, that is 60 &divide; 0.7 = 85.
+                        </p>
+                        <div class="es-reg-rule mt-5 pt-5">
+                            <p class="es-reg-ink text-sm font-semibold">Where the rate comes from</p>
+                            <p class="es-reg-muted mt-2 text-sm leading-relaxed">
+                                Organizers of free talks, meetups and open days commonly find that somewhere between a third and half of sign-ups do not come. Treat that as general experience, not a law: a small workshop people asked to join loses fewer, and a big free lecture announced a month ahead loses more.
+                            </p>
+                        </div>
+                        <div class="es-reg-rule mt-auto pt-5">
+                            <p class="es-reg-ink text-sm font-semibold">Measure your own</p>
+                            <p class="es-reg-muted mt-2 text-sm leading-relaxed">
+                                Count heads against the list for your next few events: a clicker at the door, or the Sales list ticked off as people arrive. Divide the people who came by the people registered. Three events in, you have your audience's rate instead of a guess.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="es-reg-panel flex flex-col overflow-x-auto p-6 lg:col-span-3" data-reveal="panel">
+                        <table class="w-full text-left text-sm">
+                            <caption class="es-reg-muted mb-4 text-left text-sm">A room of 60, worked with the rule of thumb. The last column is the night it goes wrong.</caption>
+                            <thead>
+                                <tr class="es-reg-ink">
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Share who come</th>
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Registration Limit</th>
+                                    <th scope="col" class="pb-3 font-semibold">Standing if everyone comes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($showUpRows as [$showRate, $showLimit, $showOver])
+                                    <tr class="es-reg-rule">
+                                        <td class="es-reg-ink py-3 pe-3 font-semibold tabular-nums">{{ $showRate }}</td>
+                                        <td class="es-reg-accent py-3 pe-3 font-bold tabular-nums">{{ $showLimit }}</td>
+                                        <td class="es-reg-muted py-3 tabular-nums">{{ $showOver }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <p class="es-reg-muted mt-auto pt-5 text-sm leading-relaxed">
+                            Overbook only as far as the room can survive a good night. If all 120 arrive at a 60-seat talk, half of them stand in the corridor, and they will remember that longer than the talk. Start near 80%, count who actually came after each event, and widen the gap only when your own numbers say so. Two things close it without overbooking at all: the reminder, whose Can't make it? link gets places handed back before the night, and the waitlist, which passes each of those places to somebody who still wants it.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. Parties, questions, the embed                             -->
         <!-- ============================================================ -->
         <section id="options" class="es-reg-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-reg-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <div class="es-reg-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                     <p class="es-reg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The details</p>
                     <h2 class="es-balance es-reg-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Groups, questions, <span class="es-reg-accent">and your own website.</span>
@@ -405,12 +480,112 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. Registration or tickets                                   -->
+        <!-- 6. What to ask on the form                                   -->
+        <!-- ============================================================ -->
+        <section id="what-to-ask" class="es-reg-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-reg-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-reg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Designing the form</p>
+                    <h2 class="es-balance es-reg-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Every question <span class="es-reg-accent">costs a few sign-ups.</span>
+                    </h2>
+                    <p class="es-reg-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        A free event asks for nothing but attention, and a long form spends it. Ask what you will act on before the event or at the door. Everything else is data you have to store, protect and one day delete.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="90">
+                    <div class="es-reg-panel flex flex-col p-6" data-reveal="panel">
+                        <p class="es-reg-tag mb-3">Always</p>
+                        <h3 class="es-reg-ink text-base font-bold">A name and an email</h3>
+                        <p class="es-reg-muted mt-2 text-sm leading-relaxed">
+                            The form requires both, and for most free events they are enough: the email carries the confirmation and the reminder, and the name is what you type into the filter on your Sales list when someone at the door cannot find their code. The email is also what stops one person taking two places on the same date.
+                        </p>
+                    </div>
+                    <div class="es-reg-panel flex flex-col p-6" data-reveal="panel">
+                        <p class="es-reg-tag mb-3">Only when you will use it</p>
+                        <ul class="es-reg-muted list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                            <li><span class="es-reg-ink font-semibold">A phone number</span>, when the plan could change on the day: an outdoor event, a coach that leaves at 8. Make it optional unless you would really ring everyone.</li>
+                            <li><span class="es-reg-ink font-semibold">Dietary needs</span>, only if you are feeding people, and as a dropdown you can count.</li>
+                            <li><span class="es-reg-ink font-semibold">Access needs</span>, as an open question, so the ramp or the front-row seat is arranged before the day and not at the door.</li>
+                            <li><span class="es-reg-ink font-semibold">Which session</span>, when one sign-up leads to several rooms.</li>
+                        </ul>
+                        <p class="es-reg-muted mt-auto pt-4 text-xs">The phone question is free. Your own questions are <x-link href="{{ marketing_url('/features/custom-fields') }}">custom fields</x-link>, on Pro.</p>
+                    </div>
+                    <div class="es-reg-panel flex flex-col p-6" data-reveal="panel">
+                        <p class="es-reg-tag mb-3">Leave off</p>
+                        <ul class="es-reg-muted list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                            <li>A postal address, a date of birth, a job title: not unless the event is for one profession and somebody checks it.</li>
+                            <li>"How did you hear about us?" when nobody will read the answers. Your schedule's analytics already show where visitors came from.</li>
+                            <li>A marketing box that starts ticked. The form's own Email me updates box starts unticked, and the list it builds is one people chose.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-reg-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-reg-ink text-base font-bold">Directions go in the notes, not the form</h3>
+                        <p class="es-reg-muted mt-2 text-sm leading-relaxed">
+                            Parking, the side door, what to bring, the dress code: write it in Registration notes, in the Registration form row of the Tickets tab. It goes into the confirmation email and onto the guest's ticket page, where they look for it on the way, not while they are deciding whether to sign up.
+                        </p>
+                    </div>
+                    <div class="es-reg-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-reg-ink text-base font-bold">If people come in pairs, say so on the form</h3>
+                        <p class="es-reg-muted mt-2 text-sm leading-relaxed">
+                            With one place per sign-up, a couple either registers twice from two addresses or registers once and arrives as two, and the second person is a chair you never counted. If your audience brings partners, children or friends, turn on Individual tickets in the Registration form row, so one guest registers the whole party, with a name and a different email address for each person, and every chair is on the list.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7. Week by week                                              -->
+        <!-- ============================================================ -->
+        @php
+            $regTimeline = [
+                ['When you publish: register yourself', 'Sign up with your own address before you share the link. You get the confirmation, the QR code and your notes exactly as a guest will, and you can cancel from the ticket page afterwards to give the place back.'],
+                ['While it fills: read the waitlist', 'A list that fills in two days and keeps a queue is telling you something: a bigger room, or a second date. On a recurring event every date has its own limit and its own waitlist, so a second session adds places without crowding the first.'],
+                ['Before the event: let the reminder work', 'Registered guests get one reminder email, on by default on every plan, a day before unless you pick 3 hours, 2 days or 3 days in the Reminders row of your schedule\'s Tickets section. It carries the QR code and a Can\'t make it? link to the guest\'s ticket page, where they can cancel and free the place for the waitlist.'],
+                ['On the night: scan, and let walk-ins register', 'Registration stays open until the end of the event\'s day, so while places remain a walk-in can sign up on their own phone and show their confirmation like everyone else. A printed QR code of the event page\'s address by the door does it, and keeps the list you count against complete.'],
+                ['The morning after: write down one number', 'Divide the heads you counted by the registrations on the list. That is your show-up rate, and the number to divide the chairs by next time. Note when the queue formed too, so you know when to open the doors.'],
+            ];
+        @endphp
+        <section id="timeline" class="es-reg-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-reg-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <p class="es-reg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">From announcement to the morning after</p>
+                    <h2 class="es-balance es-reg-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Running the list, <span class="es-reg-accent">step by step.</span>
+                    </h2>
+                    <p class="es-reg-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Opening registration takes a minute. What decides whether the room is right on the night is the five moments after it.
+                    </p>
+                </div>
+
+                <ol class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="70">
+                    @foreach ($regTimeline as $i => [$tlTitle, $tlBody])
+                        <li class="es-reg-panel flex gap-4 p-6 {{ $loop->last ? 'md:col-span-2' : '' }}" data-reveal="panel">
+                            <span class="es-reg-accent shrink-0 text-lg font-black tabular-nums" aria-hidden="true">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div>
+                                <h3 class="es-reg-ink text-base font-bold">{{ $tlTitle }}</h3>
+                                <p class="es-reg-muted mt-1.5 text-sm leading-relaxed">{{ $tlBody }}</p>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. Registration or tickets                                   -->
         <!-- ============================================================ -->
         <section id="or-tickets" class="es-reg-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-reg-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <div class="es-reg-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                     <p class="es-reg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Registration or tickets</p>
                     <h2 class="es-balance es-reg-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Which one does <span class="es-reg-accent">this event need?</span>
@@ -448,7 +623,7 @@
                 <div class="es-reg-panel mt-8 p-6" data-reveal="panel">
                     <h3 class="es-reg-ink text-base font-bold">What stays free, and what Pro adds</h3>
                     <p class="es-reg-muted mt-2 text-sm leading-relaxed">
-                        Free on every plan: registration with no cap on how many you take, the Registration Limit, the waitlist on a full registration date, per-guest registration, the embeddable form, confirmation emails with QR codes, self-cancellation and scanning at the door. Pro adds your own <x-link href="{{ marketing_url('/features/custom-fields') }}">registration questions</x-link>, the live <x-link href="{{ marketing_url('/features/check-in') }}">check-in dashboard</x-link>, the sales CSV export and webhooks for each registration. A selfhosted install includes all of it.
+                        Free on every plan: registration with no cap on how many you take, the Registration Limit, the waitlist on a full registration date, per-guest registration, the embeddable form, confirmation emails with QR codes, self-cancellation and scanning at the door. Pro adds your own <x-link href="{{ marketing_url('/features/custom-fields') }}">registration questions</x-link>, the sales CSV export and webhooks for each registration. The live <x-link href="{{ marketing_url('/features/check-in') }}">check-in dashboard</x-link> counts tickets, not registrations. A selfhosted install includes all of it.
                     </p>
                 </div>
 
@@ -479,6 +654,10 @@
                 ['q' => 'Does a recurring event share one limit across every date?', 'a' => 'No. The Registration Limit is per date. A weekly class with a limit of 12 takes 12 registrations on each date, and each date fills, and waitlists, on its own.'],
                 ['q' => 'Can I ask my own questions on the registration form?', 'a' => 'Yes, on the Pro plan. Custom fields add your own questions to the form, and the answers show beside each registration. The phone number question is free on every plan.'],
                 ['q' => 'Can I put the registration form on my own website?', 'a' => 'Yes, on every plan. Take the event page address, add ?rsvp=true&embed=true, and use it as the src of an iframe. The form works inside the frame. On Pro, the event editor has an Embed Registration link that writes the code for you.', 'link' => [marketing_url('/docs/tickets').'#embed-widget', 'How the embed works']],
+                ['q' => 'How many people who register for a free event actually come?', 'a' => 'It depends on the audience, but organizers of free talks, meetups and open days commonly find that a third to half of sign-ups do not arrive. Small sessions people asked to join lose fewer; big events announced weeks ahead lose more. Measure your own: count heads against your Sales list for a few events and divide the people who came by the people registered.'],
+                ['q' => 'Should I overbook a free event?', 'a' => 'A little, once you know your show-up rate. Divide the chairs by the share of sign-ups you expect to arrive and round down: 60 chairs at a 70% show-up rate is a Registration Limit of 85. Start cautiously, near 80%, because if everyone does come the extra people stand. Reminders and the waitlist recover many no-shows without any overbooking.'],
+                ['q' => 'Do registered guests get a reminder before the event?', 'a' => 'Yes. Registered guests get one reminder email before the event, on every plan, switched on by default and sent a day before unless you choose 3 hours, 2 days or 3 days. It carries their QR code and a Can\'t make it? link to their ticket page, where they can cancel and free the place. You change it in the Reminders row of the schedule\'s Tickets section.', 'link' => [marketing_url('/docs/creating-schedules').'#ticket-reminders', 'How reminders work']],
+                ['q' => 'Can someone register at the door on the day?', 'a' => 'Yes, while places remain. Registration stays open until the end of the event\'s day in the schedule\'s timezone, so a walk-in can register on their own phone from the event page, get their QR code by email.'],
                 ['q' => 'How is this different from selling tickets?', 'a' => 'Registration has no payment step and one kind of place. Tickets let you set several ticket types with prices, promo codes and add-ons, and take payment through Stripe, PayPal and other methods; a priced ticket needs the Pro plan. Both scan the same way at the door.'],
             ];
         @endphp

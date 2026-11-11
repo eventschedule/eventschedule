@@ -320,12 +320,164 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 3. Coverage                                                  -->
+        <!-- 3. Pricing a pack against the drop-in                        -->
+        <!-- ============================================================ -->
+        @php
+            // Worked from a drop-in of 20 (no currency: it is the reader's own). Per class = pack
+            // price / visits. The membership's break-even is 150 / 20 = 7.5, so the 8th class is
+            // the first one it saves money on. The cost floor: 60 room + 80 teacher = 140 a class.
+            $packRows = [
+                ['Drop-in', '20', '20', 'None'],
+                ['5-class pack', '90', '18', '10%'],
+                ['10-class pack', '170', '17', '15%'],
+                ['20-class pack', '300', '15', '25%'],
+                ['Membership, 30 days', '150', '12.50 at 12 classes', 'Pays off from the 8th class'],
+            ];
+        @endphp
+        <section id="pricing" class="es-punch-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-punch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Pricing class packs and memberships</p>
+                    <h2 class="es-balance es-punch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Start from the drop-in. <span class="es-punch-accent">Discount by commitment.</span>
+                    </h2>
+                    <p class="es-punch-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        A pack is a promise to come back, paid in advance. The discount is what you give for that promise, so it should grow with the size of the promise and never fall below what a class costs you to run.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 lg:grid-cols-5" data-reveal-group="90">
+                    <div class="es-punch-panel flex flex-col overflow-x-auto p-6 lg:col-span-3" data-reveal="panel">
+                        <table class="w-full text-left text-sm">
+                            <caption class="es-punch-muted mb-4 text-left text-sm">A worked ladder from a drop-in price of 20, in whatever currency you sell in. The steps are a common shape, not a rule.</caption>
+                            <thead>
+                                <tr class="es-punch-ink">
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">What they buy</th>
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Price</th>
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Per class</th>
+                                    <th scope="col" class="pb-3 font-semibold">Off the drop-in</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($packRows as [$packName, $packPrice, $packPer, $packOff])
+                                    <tr class="es-punch-rule">
+                                        <td class="es-punch-ink py-3 pe-3 font-semibold">{{ $packName }}</td>
+                                        <td class="es-punch-muted py-3 pe-3 tabular-nums">{{ $packPrice }}</td>
+                                        <td class="es-punch-accent py-3 pe-3 font-bold tabular-nums">{{ $packPer }}</td>
+                                        <td class="es-punch-muted py-3">{{ $packOff }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <p class="es-punch-muted mt-auto pt-5 text-sm leading-relaxed">
+                            Per class is the pack price divided by its visits: 170 &divide; 10 = 17. The membership is priced at seven and a half drop-ins, 150 &divide; 20 = 7.5, so it costs more than paying as you go until the eighth class and less from then on. Against the 20-class pack at 15 a class it only wins from the 11th class in its 30 days, so it is the right buy for someone who comes three or more times a week, which is the customer a membership is for.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col gap-4 lg:col-span-2">
+                        <div class="es-punch-panel flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-punch-ink text-base font-bold">Check the floor first</h3>
+                            <p class="es-punch-muted mt-2 text-sm leading-relaxed">
+                                Add up what one class costs you: say 60 for the room and 80 for the teacher, 140 in all. At the deepest pack price, 15 a head, it takes 10 people to cover it; at the drop-in, 7. If your room holds 12 and a typical class has 9, nine pack holders at 15 bring in 135, under the 140 the class costs. Count the membership too: a member who comes 12 times pays 12.50 a class, so a class of members needs 12 people to cover the 140. Make the pack smaller or the discount shallower before you print it.
+                            </p>
+                        </div>
+                        <div class="es-punch-panel flex flex-1 flex-col p-6" data-reveal="panel">
+                            <h3 class="es-punch-ink text-base font-bold">Do not price on unused visits</h3>
+                            <p class="es-punch-muted mt-2 text-sm leading-relaxed">
+                                Some passes expire with classes left on them, and it is tempting to count that in. Don't. A holder who loses three classes to an expiry date rarely buys a second pack, and the expiry rules in the next section are there to keep people coming, not to keep their money.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="es-punch-panel mt-8 p-6" data-reveal="panel">
+                    <h3 class="es-punch-ink text-base font-bold">Pack or membership: which to sell</h3>
+                    <p class="es-punch-muted mt-2 text-sm leading-relaxed">
+                        Sell a pack, which is a Visit pass here, to people who come when they can: once a week, some weeks not at all. Sell a membership, which has no visit limit until it expires, to people who come three or more times a week and want to stop thinking about it. A common way to set the two: put the membership where a three-times-a-week regular saves against your biggest pack, and the 10-class pack where a once-a-week regular saves against the drop-in. A festival pass, one visit to each covered event, suits a weekend of workshops where each session is its own event. For a six-week course that repeats on the same night, sell a Season pass on the recurring event: it covers every date, once each.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4. Expiry                                                    -->
+        <!-- ============================================================ -->
+        @php
+            // Days a once-a-week regular needs (visits x 7), and a window at least a third longer,
+            // rounded up to a number people remember: 35 -> 60, 70 -> 120, 140 -> 200.
+            $expiryRows = [
+                ['5-class pack', '35 days', '60 days'],
+                ['10-class pack', '70 days', '120 days'],
+                ['20-class pack', '140 days', '200 days'],
+                ['Monthly membership', 'Not counted', '30 days'],
+                ['Annual membership', 'Not counted', '365 days'],
+            ];
+        @endphp
+        <section id="expiry" class="es-punch-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-punch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Expiry rules</p>
+                    <h2 class="es-balance es-punch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Long enough to use. <span class="es-punch-accent">Short enough to mean it.</span>
+                    </h2>
+                    <p class="es-punch-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        An expiry date does two jobs. It keeps a pack from sitting in a drawer for two years at last year's price, and it gives a holder a reason to come this week. It should never be the reason somebody loses classes they paid for.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 lg:grid-cols-5" data-reveal-group="90">
+                    <div class="es-punch-panel flex flex-col overflow-x-auto p-6 lg:col-span-3" data-reveal="panel">
+                        <table class="w-full text-left text-sm">
+                            <caption class="es-punch-muted mb-4 text-left text-sm">Give at least a third more time than a once-a-week regular needs, then round up to a number people remember.</caption>
+                            <thead>
+                                <tr class="es-punch-ink">
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Pass</th>
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Used up at once a week</th>
+                                    <th scope="col" class="pb-3 font-semibold">Valid for (days)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($expiryRows as [$expName, $expNeed, $expSet])
+                                    <tr class="es-punch-rule">
+                                        <td class="es-punch-ink py-3 pe-3 font-semibold">{{ $expName }}</td>
+                                        <td class="es-punch-muted py-3 pe-3 tabular-nums">{{ $expNeed }}</td>
+                                        <td class="es-punch-accent py-3 font-bold tabular-nums">{{ $expSet }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <p class="es-punch-muted mt-auto pt-5 text-sm leading-relaxed">
+                            Leave Valid for (days) blank and the pass never expires, which is fair for a small pack bought by a friend of the studio and risky for a 20-class pack sold at a deep discount. Wherever you sell, check whether local consumer rules set a minimum life for prepaid passes before you choose a short one.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col gap-4 lg:col-span-2">
+                        <div class="es-punch-panel flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-punch-ink text-base font-bold">The clock starts at purchase</h3>
+                            <p class="es-punch-muted mt-2 text-sm leading-relaxed">
+                                Valid for (days) counts from the moment the pass is bought, not from a calendar month or the first class. A 30-day membership bought on 15 March runs out on 14 April. If you sell "monthly" memberships, say "30 days from purchase" in the ticket's description so nobody expects the 1st.
+                            </p>
+                        </div>
+                        <div class="es-punch-panel flex flex-1 flex-col p-6" data-reveal="panel">
+                            <h3 class="es-punch-ink text-base font-bold">Changing the window later</h3>
+                            <p class="es-punch-muted mt-2 text-sm leading-relaxed">
+                                Each pass is given its expiry date when it is bought. Change Valid for (days) and the passes you sell from then on get the new window; the ones already sold keep the date they were sold with, which is what their holders were promised.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. Coverage                                                  -->
         <!-- ============================================================ -->
         <section id="coverage" class="es-punch-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                     <p class="es-punch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Coverage</p>
                     <h2 class="es-balance es-punch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Decide <span class="es-punch-accent">where it works.</span>
@@ -361,12 +513,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. Advance booking and the cancellation policy               -->
+        <!-- 6. Advance booking and the cancellation policy               -->
         <!-- ============================================================ -->
         <section id="booking" class="es-punch-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
                     <p class="es-punch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Advance booking</p>
                     <h2 class="es-balance es-punch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Turn up, <span class="es-punch-accent">or book the date.</span>
@@ -411,12 +563,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. At the door, and the ledger behind it                     -->
+        <!-- 7. At the door, and the ledger behind it                     -->
         <!-- ============================================================ -->
         <section id="door" class="es-punch-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                     <p class="es-punch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">At the door</p>
                     <h2 class="es-balance es-punch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         One scan <span class="es-punch-accent">punches the card.</span>
@@ -472,14 +624,62 @@
             </div>
         </section>
 
+        <!-- ============================================================ -->
+        <!-- 8. Before you sell one                                       -->
+        <!-- ============================================================ -->
+        @php
+            $passDecisions = [
+                ['Which classes does it cover?', 'If every class costs the same, cover All events in this schedule and new classes join by themselves. If a workshop or a specialist class costs more, put the standard classes in a sub-schedule and cover that, so the pass cannot be spent on the expensive night.'],
+                ['How many visits, and for how long?', 'Pick the pack sizes from the drop-in price and the expiry from how often your regulars come, as above. Two or three options are plenty; five pack sizes is a decision nobody at the till wants to make.'],
+                ['Can the holder bring someone?', 'Admissions per event lets a pass admit two or more people at each event without spending extra visits. A "bring a friend" membership is a cheap way to find the next member, but every extra person takes a place from the capacity.'],
+                ['Turn up, or book ahead?', 'If classes rarely fill, leave holders to scan in at the door. If they do, switch on advance booking, cap Max advance seats per date so drop-ins still get in, and choose a cancellation deadline: 12 hours, with no credit after it, is a reasonable middle ground for a class with a waiting list.'],
+                ['Where is it sold?', 'Make one event the pass shop and point coverage at your real classes. On a one-off shop event the pass stays on sale after its date, so use + Add Sales Dates when you want an offer to end. To keep the shop off your calendar, set it to Unlisted, which is on the Enterprise plan.'],
+                ['What is the refund policy?', 'Write it in the ticket description before anyone buys. A partial refund for unused classes keeps the pass working; a full refund ends it and drops its visit log from the Subscriptions tab, so export first if you need the history.'],
+            ];
+        @endphp
+        <section id="before-you-sell" class="es-punch-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-punch-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <p class="es-punch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before you sell one</p>
+                    <h2 class="es-balance es-punch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Six decisions, <span class="es-punch-accent">made once.</span>
+                    </h2>
+                    <p class="es-punch-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        A pass lives for months, so a rule you get wrong on day one is wrong for every holder until it runs out. These are the questions a studio, a dance school or a series organizer should answer before the first one is sold.
+                    </p>
+                </div>
+
+                <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                    @foreach ($passDecisions as $i => [$pdTitle, $pdBody])
+                        <li class="es-punch-panel flex gap-4 p-6" data-reveal="panel">
+                            <span class="es-punch-accent shrink-0 text-lg font-black tabular-nums" aria-hidden="true">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div>
+                                <h3 class="es-punch-ink text-base font-bold">{{ $pdTitle }}</h3>
+                                <p class="es-punch-muted mt-1.5 text-sm leading-relaxed">{{ $pdBody }}</p>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
+
+                <p class="es-punch-muted mt-8 text-center text-sm">
+                    Every setting is walked through in the <x-link href="{{ marketing_url('/docs/subscriptions') }}">passes and subscriptions guide</x-link>.
+                </p>
+            </div>
+        </section>
+
         @include('marketing.partials.pricing-nudge')
 
         <!-- ============================================================ -->
-        <!-- 6. FAQ                                                       -->
+        <!-- 9. FAQ                                                       -->
         <!-- ============================================================ -->
         @php
             $passFaqs = [
                 ['q' => 'Is a pass an auto-renewing subscription?', 'a' => 'No. The buyer pays once and Event Schedule never bills them again. A pass here is a multi-use ticket, not a card kept on file, so when it runs out of visits or reaches its expiry the holder simply buys another. The word subscription is also used for your own Pro or Enterprise plan, which is a different thing entirely and is managed on the Plan tab.'],
+                ['q' => 'How should I price a 10-class pack?', 'a' => 'Start from your drop-in price and give a discount that grows with the size of the pack. With a drop-in of 20, a 5-class pack at 10% off is 90 (18 a class), a 10-class pack at 15% off is 170 (17 a class) and a 20-class pack at 25% off is 300 (15 a class). Then check the floor: divide what one class costs you to run by the deepest per-class price, and make sure a typical class has at least that many people in it.'],
+                ['q' => 'Should a class pack expire?', 'a' => 'Usually, yes, but generously. A sensible window is at least a third longer than a once-a-week regular needs: 60 days for a 5-class pack, 120 for a 10-class pack, 200 for a 20-class pack. Here the window is Valid for (days), counted from the moment of purchase; leave it blank and the pass never expires. Check whether local consumer rules set a minimum life for prepaid passes where you sell.'],
+                ['q' => 'What is the difference between a class pack and a membership?', 'a' => 'A class pack, a Visit pass here, is a fixed number of visits, each one event-day, used whenever the holder likes until it expires. A membership is unlimited visits to the covered events until it expires, with no visit limit to run down. Packs suit people who come when they can; memberships suit people who come three or more times a week.'],
+                ['q' => 'Can I sell drop-ins and class packs at the same time?', 'a' => 'Yes. Each class keeps its ordinary ticket for drop-ins, and the pass is sold as a ticket type of its own, usually on one event set aside as the pass shop. A pass cannot share an order with single-date tickets, so a buyer pays for each separately. If holders book ahead, their bookings and the drop-in tickets draw on the same capacity, so a class is never oversold.'],
                 ['q' => 'How many QR codes does a holder get?', 'a' => 'One. A pass is a single redeemable unit - one code with one visit counter - which is why the maximum per order is fixed at one and you never have to set that yourself.'.($walletLive ? ' Saved to Google Wallet it is still one pass, not one per date; on a selfhosted install that button appears once the operator has set up Google Wallet.' : '').' Buying passes as gifts means a separate order for each, and a pass cannot share an order with ordinary single-date tickets.'],
                 ['q' => 'Does a guest use up one of the visits?', 'a' => 'No. Admissions per event is the number of people who may enter at each event, the holder included, and it is counted separately from the visits. A ten-visit pass that admits two is still ten visits, each of which lets two people in. Extra people do count against the event capacity, so an extra admission is only granted while the date still has a free seat.'],
                 ['q' => 'What happens if my schedule drops back to the free plan?', 'a' => 'Passes you already sold keep every setting and the scanner still checks holders in, because taking a sold pass away from the person holding it would be indefensible. What stops is booking dates in advance. The plan is checked when the pass is used, not only when it was sold.'],
@@ -516,7 +716,7 @@
         <x-seo.faq-schema :items="$passFaqs" />
 
         <!-- ============================================================ -->
-        <!-- 7. Claim                                                     -->
+        <!-- 10. Claim                                                    -->
         <!-- ============================================================ -->
         <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
             <div class="mx-auto max-w-6xl">

@@ -256,12 +256,68 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 2. One plan, every date                                      -->
+        <!-- 2. Reserved seating or general admission                     -->
+        <!-- ============================================================ -->
+        <section id="reserved-or-ga" class="es-house-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                    <p class="es-house-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Reserved seating or general admission</p>
+                    <h2 class="es-balance es-house-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Not every room <span class="es-house-accent">needs seat numbers.</span>
+                    </h2>
+                    <p class="es-house-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Allocated seating, which is called reserved seating in many places, means each ticket names a seat. General admission means it names a room, and the first through the door choose. Neither is better. They suit different nights, and picking the wrong one shows in the queue and on the floor.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-house-card flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-house-ink mb-2 text-lg font-bold">Allocate the seats when</h3>
+                        <ul class="es-house-muted list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                            <li>The room has fixed seats and the view from them differs: a theatre, a concert hall, a lecture theatre with a balcony</li>
+                            <li>The show runs long and people sit for all of it, so where they sit is most of what they paid for</li>
+                            <li>You want to charge more for the front stalls than the back of the circle</li>
+                            <li>The audience includes people who cannot queue for an hour to get a good seat: older guests, families, wheelchair users and the people with them</li>
+                            <li>Groups book together and expect to sit together</li>
+                        </ul>
+                    </div>
+                    <div class="es-house-card flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-house-ink mb-2 text-lg font-bold">Keep general admission when</h3>
+                        <ul class="es-house-muted list-disc space-y-2 ps-5 text-sm leading-relaxed">
+                            <li>Most of the audience stands, or moves around: a gig, a club night, a market</li>
+                            <li>Every seat is roughly as good as the next, so a number adds nothing but work</li>
+                            <li>Chairs are set out on the day and the count changes with the room's set-up</li>
+                            <li>You have nobody to show people to their seats, and a full room of numbered chairs needs someone</li>
+                            <li>A lot of tickets sell at the door, where picking seats slows the line</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-8 grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-house-card flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-house-ink mb-2 text-base font-bold">The middle way: both in one room</h3>
+                        <p class="es-house-muted text-sm leading-relaxed">A plan can hold seated sections and standing ones together. Numbered rows at the front for the people who want to sit, a standing floor behind them sold by the number, each its own price band. It suits a music venue that puts on seated shows some nights and standing ones on others.</p>
+                    </div>
+                    <div class="es-house-card flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-house-ink mb-2 text-base font-bold">Zones without a map</h3>
+                        <p class="es-house-muted text-sm leading-relaxed">If you only need a price for each area, and not a seat for each person, you do not need a seat map at all. Two ordinary ticket types, Stalls and Balcony, each with its own quantity, sell a zoned room on Pro. Reach for allocated seating when the seat itself is what people are choosing.</p>
+                        <a href="{{ route('marketing.ticketing') }}" class="es-house-accent mt-auto inline-flex items-center pt-4 text-sm font-semibold hover:underline">
+                            How ticket types work
+                            <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3. One plan, every date                                      -->
         <!-- ============================================================ -->
         <section id="reuse" class="es-house-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
                     <p class="es-house-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">One plan</p>
                     <h2 class="es-balance es-house-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         A plan is a room, <span class="es-house-accent">not a night.</span>
@@ -289,12 +345,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 3. The designer                                              -->
+        <!-- 4. The designer                                              -->
         <!-- ============================================================ -->
         <section id="designer" class="es-house-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                     <p class="es-house-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The designer</p>
                     <h2 class="es-balance es-house-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Rows, tables, tiers, <span class="es-house-accent">and the gangway.</span>
@@ -341,12 +397,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. What the buyer does                                       -->
+        <!-- 5. What the buyer does                                       -->
         <!-- ============================================================ -->
         <section id="buyer" class="es-house-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                     <p class="es-house-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The buyer</p>
                     <h2 class="es-balance es-house-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Pick your seats, <span class="es-house-accent">or let us pick them.</span>
@@ -379,12 +435,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. The box office                                            -->
+        <!-- 6. The box office                                            -->
         <!-- ============================================================ -->
         <section id="boxoffice" class="es-house-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
                     <p class="es-house-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The box office</p>
                     <h2 class="es-balance es-house-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         The same map, <span class="es-house-accent">with the names on.</span>
@@ -491,7 +547,147 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Plan band                                                 -->
+        <!-- 7. Building a seat map, step by step                         -->
+        <!-- ============================================================ -->
+        @php
+            $buildSteps = [
+                ['Start from the numbers painted on the seats', 'Choose a starting layout (Theatre with balcony, Cabaret tables, Straight rows, or Seated and standing) or a blank canvas, then number it the way the room already is: left to right, right to left, or odds one side and evens the other. Most houses skip I and O, which read as 1 and 0 on a printed ticket. The label you set is what the buyer reads on their ticket and the usher reads off the sheet.'],
+                ['One level per floor, one section per price', 'Stalls, circle and balcony are levels. Inside a level, a section is the unit you price, so split where the price changes, not where the carpet does. Each section carries one price band.'],
+                ['Mark the gangways', 'Aisle after seat takes a list such as 6, 14. The seats on either side stop being neighbours, so Find best seats never puts a couple on opposite sides of an aisle.'],
+                ['Give accessible seating its own section', 'Wheelchair spaces sell only from a section with Accessibility only switched on, and the Companion seat beside each can be booked only together with it, or once it has gone. Mark seats behind a pillar as Restricted view; if they should cost less, give them a section and a band of their own, because a band belongs to a section.'],
+                ['Draw the stage and the doors', 'Put the stage marker where the stage is, and add labels for the bar and the entrances. A buyer reads the whole map from the stage, and nothing on a label can ever be sold.'],
+                ['Clear the issues panel, then save', 'It lists every section that cannot sell yet: no name, no seats, no price band, a standing area with no capacity, wheelchair spaces outside an Accessibility only section, a seat number used twice.'],
+                ['Attach it and price each band', 'Open the event from the venue schedule that owns the plan; on its Tickets tab choose Sell tickets, pick the Seating plan, and give each ticket type a Price band. An amber notice names any band no ticket prices, and those seats are never offered.'],
+                ['Hold back, then buy as a stranger would', 'Open the box office and hold the house seats, the sound desk and camera positions before the first sale, night by night. Then open the event page and press Find best seats for two: that is what most buyers will be offered.'],
+            ];
+        @endphp
+        <section id="build" class="es-house-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <p class="es-house-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How to build a seat map</p>
+                    <h2 class="es-balance es-house-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        From an empty sheet <span class="es-house-accent">to the first sale.</span>
+                    </h2>
+                    <p class="es-house-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        You draw a plan once, and then it serves every show you put in that room. Working in the order below saves the most rework.
+                    </p>
+                </div>
+
+                <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                    @foreach ($buildSteps as $i => [$bsTitle, $bsBody])
+                        <li class="es-house-card flex gap-4 p-6" data-reveal="panel">
+                            <span class="es-house-accent shrink-0 text-lg font-black tabular-nums" aria-hidden="true">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div>
+                                <h3 class="es-house-ink text-base font-bold">{{ $bsTitle }}</h3>
+                                <p class="es-house-muted mt-1.5 text-sm leading-relaxed">{{ $bsBody }}</p>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
+
+                <div class="es-house-card mt-8 p-6" data-reveal="panel">
+                    <h3 class="es-house-ink mb-2 text-base font-bold">Finish the plan before anyone opens a date</h3>
+                    <p class="es-house-muted text-sm leading-relaxed">A date does not read the plan live. The first time it is opened, by a buyer, your box office or the one-date designer, it takes its own copy, and later edits to the plan no longer reach it. Change a date that has its copy with Modify this date only, or use Revert this date, which works only before a seat on that date is sold. The <x-link href="{{ marketing_url('/docs/allocated-seating') }}">seating guide</x-link> walks through every setting.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. Pricing by section, and the mistakes                      -->
+        <!-- ============================================================ -->
+        @php
+            // A 216-seat house in three bands of 72. Totals: 72 x 35 = 2,520; 72 x 28 = 2,016;
+            // 72 x 22 = 1,584; together 6,120. A flat 28 across all 216 is 6,048.
+            $bandRows = [
+                ['Front stalls, rows A to F', 72, '35', '2,520'],
+                ['Rear stalls, rows G to L', 72, '28', '2,016'],
+                ['Circle', 72, '22', '1,584'],
+            ];
+            $seatMistakes = [
+                ['Renaming a price band after it is on sale', 'A ticket type finds its band by name. Rename the band in the plan and the ticket stops selling seats, while its old quantity stays on screen looking like stock. Re-pick the band on each event that uses the plan.'],
+                ['A wheelchair space in an ordinary section', 'It cannot be sold to anyone, because wheelchair spaces sell only from an Accessibility only section. The issues panel flags it; fix it before the night somebody needs it.'],
+                ['Pressing Generate rows twice', 'Generate rows adds to a section, it never replaces, so a second press doubles the seats. Undo, or Ctrl+Z, takes it back.'],
+                ['A band no ticket prices', 'Seats in a section whose band matches no ticket type are never offered. That is the usual reason a new plan shows fewer seats than the room has.'],
+                ['Whole table only on a cabaret night', 'Once part of such a table has gone, the rest is offered to nobody. Use Single seats or whole table where couples and pairs book, and keep Whole table only for a dinner sold by the table.'],
+                ['The single-seat rule in a room that sells singles', 'It refuses a choice that would leave one seat alone in a row, which protects a theatre and frustrates a bar. Turn it off, or tune Smallest run to protect and Stop applying at, in the plan\'s Selling rules.'],
+                ['Editing the plan to fix a night already on sale', 'That night has its own copy. Make the change with Modify this date only, or the plan changes and the night you meant does not.'],
+                ['Choosing Invoice Ninja payment links', 'They cannot be used with allocated seating, and the refusal comes at checkout, not when you attach the plan. Pick another payment method for a seated event.'],
+            ];
+        @endphp
+        <section id="pricing-and-mistakes" class="es-house-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-house-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <p class="es-house-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Pricing by section</p>
+                    <h2 class="es-balance es-house-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Price what people see, <span class="es-house-accent">not where they sit.</span>
+                    </h2>
+                    <p class="es-house-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        A buyer is paying for the view and the distance from the stage. When every seat costs the same, the front sells in a day and the back is what you are still trying to shift on the night.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 lg:grid-cols-5" data-reveal-group="90">
+                    <div class="es-house-card flex flex-col overflow-x-auto p-6 lg:col-span-3" data-reveal="panel">
+                        <table class="w-full text-left text-sm">
+                            <caption class="es-house-muted mb-4 text-left text-sm">A 216-seat house in three bands, in whatever currency you sell in. An example, not a price list.</caption>
+                            <thead>
+                                <tr class="es-house-ink">
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Price band</th>
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Seats</th>
+                                    <th scope="col" class="pb-3 pe-3 font-semibold">Price</th>
+                                    <th scope="col" class="pb-3 font-semibold">Sold out</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($bandRows as [$bandName, $bandSeats, $bandPrice, $bandTotal])
+                                    <tr class="es-house-rule">
+                                        <td class="es-house-ink py-3 pe-3 font-semibold">{{ $bandName }}</td>
+                                        <td class="es-house-muted py-3 pe-3 tabular-nums">{{ $bandSeats }}</td>
+                                        <td class="es-house-muted py-3 pe-3 tabular-nums">{{ $bandPrice }}</td>
+                                        <td class="es-house-accent py-3 font-bold tabular-nums">{{ $bandTotal }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="es-house-rule">
+                                    <td class="es-house-ink py-3 pe-3 font-bold">The house</td>
+                                    <td class="es-house-ink py-3 pe-3 font-bold tabular-nums">216</td>
+                                    <td class="es-house-muted py-3 pe-3">&nbsp;</td>
+                                    <td class="es-house-accent py-3 font-bold tabular-nums">6,120</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="es-house-muted mt-auto pt-5 text-sm leading-relaxed">
+                            The same room at a flat 28 takes 6,048 when full, so banding is not mainly about the sold-out night. It is about the night that does not sell out: a buyer who would not pay 28 for the circle will pay 22, and a seat in the front stalls stops being a bargain that is gone in a day.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col gap-4 lg:col-span-2">
+                        <div class="es-house-card flex flex-col p-6" data-reveal="panel">
+                            <h3 class="es-house-ink mb-2 text-base font-bold">One ticket type per band</h3>
+                            <p class="es-house-muted text-sm leading-relaxed">Each band is sold by a ticket type that names it: Front stalls at 35 and Circle at 22 are two ticket types pointing at two bands of one plan. The seats in a band are its stock, so the band runs out on its own while the others stay open.</p>
+                        </div>
+                        <div class="es-house-card flex flex-1 flex-col p-6" data-reveal="panel">
+                            <h3 class="es-house-ink mb-2 text-base font-bold">Three or four bands is plenty</h3>
+                            <p class="es-house-muted text-sm leading-relaxed">Every band is a decision for the buyer and a line in your report. Start with the price steps a regular would recognise, front, middle and back or upstairs, and split further only when one band keeps selling out first.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="es-house-ink mt-16 mb-6 text-center text-2xl font-black tracking-tight" data-reveal>Eight mistakes that cost seats</h3>
+                <div class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                    @foreach ($seatMistakes as [$smTitle, $smBody])
+                        <div class="es-house-card flex flex-col p-6" data-reveal="panel">
+                            <h4 class="es-house-ink mb-2 text-base font-bold">{{ $smTitle }}</h4>
+                            <p class="es-house-muted text-sm leading-relaxed">{{ $smBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 9. Plan band                                                 -->
         <!-- ============================================================ -->
         <section id="plan" class="es-house-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
@@ -517,10 +713,14 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 7. FAQ                                                       -->
+        <!-- 10. FAQ                                                      -->
         <!-- ============================================================ -->
         @php
             $seatingFaqs = [
+                ['q' => 'What is the difference between allocated seating and reserved seating?', 'a' => 'None: they are two names for the same thing, a ticket that names a particular seat. Allocated seating is the more common term in some countries and reserved seating in others. The opposite is general admission, where a ticket names the room and guests take whatever seat or space is free when they arrive.'],
+                ['q' => 'Is reserved seating better than general admission?', 'a' => 'For some events. Reserved seating suits fixed-seat rooms where the view differs from seat to seat, long seated shows, audiences who cannot queue early for a good spot, and venues that want to charge more for the best seats. General admission suits standing events, rooms where every seat is about as good as the next, chairs set out on the day and nights with a lot of door sales. One plan can also mix seated sections at the front with a standing area sold by the number.'],
+                ['q' => 'How should I price seats by section?', 'a' => 'Give each section a price band and sell each band through its own ticket type. Price for what the seat sees: front, middle and back, or downstairs and upstairs, is enough for most rooms. Each band sells out on its own, so watch which one goes first and split or raise it next time. Seats with a restricted view belong in a section and band of their own if they should cost less.'],
+                ['q' => 'Can buyers choose seats without using the map?', 'a' => 'Yes. They can enter how many seats they want and press Find best seats, which picks the best available together, starting from the earliest section and row and as close to the centre of the row as it can. There is also a List view that completes a purchase without the map, and the map itself can be used with the keyboard.'],
                 ['q' => 'Can one plan cover every date of a run?', 'a' => 'Yes, and that is the point of it. A plan is a drawing of the room, so a recurring event uses the same one for every performance. Each date keeps its own bookings, and a single date can be changed on its own without touching the others.'],
                 ['q' => 'Can I mix seated and standing?', 'a' => 'Yes. A seated section carries individual seats the buyer chooses; a standing section carries a capacity and sells by the number, like an ordinary ticket type. Rows at the front and a standing floor at the back is one plan with two price bands.'],
                 ['q' => 'How do wheelchair spaces work?', 'a' => 'Mark a section accessibility only and the wheelchair spaces in it are never handed out as the next available seat. The companion seat beside a space is held back too, and becomes bookable together with the space, so a wheelchair user and their companion are not seated three rows apart.'],
@@ -535,8 +735,8 @@
                 ['q' => 'Does it work with tables?', 'a' => 'Yes. Give a section round or rectangular tables and say how many sit at each. A table can sell as single seats, as a whole table only, or either way, which is the difference between a cabaret night and a fundraising dinner.'],
                 // The Seating tab is rendered on venue schedules only, which is the single
                 // most surprising thing about this feature if you run a talent schedule.
-                ['q' => 'Which kind of schedule can build a plan?', 'a' => 'A venue schedule. Plans describe a room, so the Seating tab appears on the schedule that has the room and not on a talent or curator one. That does not shut anyone else out of a seated night: a talent or curator schedule listing a seated event still sells from the map and still gets the box office console for it. If you promote in a room you do not own, the venue draws the plan once and every show in it uses the same drawing.'],
-                ['q' => 'What happens to a seated event if my plan lapses?', 'a' => 'The show carries on. A plan already attached to an event stays attached and keeps selling seats, and the box office keeps working on it, because pulling a seating chart out from under a run that is on sale would be indefensible. What Enterprise gates is attaching a new plan to another event.'],
+                ['q' => 'Which kind of schedule can build a plan?', 'a' => 'A venue schedule. Plans describe a room, so the Seating plans tab appears on the schedule that has the room and not on a talent or curator one. That does not shut anyone else out of a seated night: when a talent or curator schedule lists a seated event, its visitors pick seats from the same map. The box office console is run from the venue\'s schedule, so if you promote in a room you do not own, the venue draws the plan once, every show in it uses the same drawing, and the venue\'s team holds back, books and moves seats.'],
+                ['q' => 'What happens to a seated event if my plan lapses?', 'a' => 'The show carries on selling. A plan already attached to an event stays attached and keeps selling seats for as long as the schedule can sell those tickets (a ticket with a price needs Pro), because pulling a seating chart out from under a run that is on sale would be indefensible, and your plans are kept. What stops is managing them: the designer and the box office console are Enterprise, and so is attaching a plan to another event. You would be selling seats you can no longer hold back, move or release, so come back to Enterprise before the next performance.'],
                 ['q' => 'Which plan do I need?', 'a' => 'Allocated seating is on the Enterprise plan, and on every selfhosted install at no cost. The rest of ticketing - types, check-in, promo codes, waitlists, the sales export - is available below it.'],
             ];
         @endphp
@@ -562,7 +762,7 @@
         <x-seo.faq-schema :items="$seatingFaqs" />
 
         <!-- ============================================================ -->
-        <!-- 8. Claim                                                     -->
+        <!-- 11. Claim                                                    -->
         <!-- ============================================================ -->
         <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
             <div class="mx-auto max-w-6xl">
