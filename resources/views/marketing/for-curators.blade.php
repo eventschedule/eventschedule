@@ -429,9 +429,12 @@
             ['toolkit', "The curator's toolkit", '2'],
             ['mailbag', 'From the mailbag', '3'],
             ['classifieds', 'Classifieds', '4'],
-            ['press', 'How the page gets made', '5'],
-            ['questions', 'Questions', '6'],
-            ['claim', 'Claim your guide', '7'],
+            ['wire', 'The wire', '5'],
+            ['house-rules', 'House rules', '6'],
+            ['circulation', 'Circulation', '7'],
+            ['press', 'How the page gets made', '8'],
+            ['questions', 'Questions', '9'],
+            ['claim', 'Claim your guide', '10'],
         ];
 
         // The listings column. The right-hand column of a real listings page is
@@ -458,6 +461,10 @@
             ['q' => 'Can I control which events appear on my schedule?', 'a' => 'Yes. Submitted events wait in your inbox until you accept or decline them, so nothing reaches the public page without your say-so. A signed-in submitter hears by email which way you decided. If you trust a schedule, add it to your approved list and its events publish straight through, as long as you ask submitters for an account, which a curator schedule does by default. The event sources you picked yourself skip the queue too.'],
             ['q' => 'What happens when an event is already on Event Schedule?', 'a' => 'You are offered the existing one. Paste in something the site already knows about and the importer flags the match, so a single click lists that event on your guide instead of creating a second copy, and the listing keeps pointing back at the schedule that owns it. Draft and private events are never offered, so nothing unpublished can end up on your page.'],
             ['q' => 'What happens when I list an act or venue that is not on Event Schedule?', 'a' => 'They get a page of their own the moment you save the event. It says who created it and that they have not claimed it, credits each date to the schedule that added it, and stays out of search engines until it is claimed. On eventschedule.com you can tick a box to email them an invitation. When they claim it by signing in with the email address you entered, your guide goes on their approved list, so the events you list them on keep appearing without waiting for their approval.'],
+            ['q' => 'How do I start a local events guide?', 'a' => 'Decide the patch and the kind of events first, and write that down as an inclusion policy of a few lines. Then create a curator schedule, add the venues and acts you cover as event sources, switch on requests with the policy as your Request Terms, and set up four to eight sub-schedules as sections. Fill the first month by pasting in what you can find, share one link wherever your readers already gather, and choose a weekly day for the email. Expect the first weeks to be mostly your own pasting; submissions grow as readers and organisers learn the guide exists.'],
+            ['q' => 'How do I get venues to send me their events?', 'a' => 'Make it less work for them than not sending. A venue already on Event Schedule can be added as an event source, so you never ask it for anything; it can also follow your guide and pick it under Default curator schedules, which it is offered while you take requests, and each new event it saves arrives as a request for you to review, unless you have switched Require Approval off or added that schedule to Approved Schedules. A venue that is not on Event Schedule can use your request form, by pasting its announcement or uploading the flyer. Ask in person, leave the link, and when a venue has sent good listings for a while add it to Approved Schedules so what it sends from its own schedule skips your queue.'],
+            ['q' => 'Should I charge venues to be listed on my events guide?', 'a' => 'Most guides that last do not. Readers trust a guide because it lists what is worth going to, and a guide that lists whoever paid stops being a guide. Charge for attention that is clearly labelled instead: a sponsor of the weekly email or of the whole guide. On Pro, sponsor logos with tiers appear on your guide\'s page and in a newsletter\'s Sponsors block, and the announcement bar can carry a sponsor\'s message.'],
+            ['q' => 'How do I keep a local events calendar up to date without doing it all by hand?', 'a' => 'Let the people running the events keep it current. Events from the schedules you follow as sources appear within minutes of being published and change when the source changes them. A recurring night is one event with its skipped dates, not a listing a week. On Enterprise, and on any selfhosted install, Feeds reads a venue\'s calendar, RSS feed or event page about once an hour. What is left, the noticeboards and the group chats, is a ten-minute weekly sweep pasted onto the import page.'],
             ['q' => 'How do people discover my curated schedule?', 'a' => 'Share your schedule link on social media, embed the calendar on your blog or website, and let search engines index the page. Readers can subscribe to the whole guide as a live calendar from the sign-up panel on your page, so a moved date updates itself. Readers who follow the guide are giving you permission to email them, so a newsletter with the highlights of the week is yours to send whenever you like.'],
         ];
     @endphp
@@ -962,7 +969,245 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. The press run (fixed dark in both modes)                  -->
+        <!-- 5. The wire: where the listings come from                    -->
+        <!-- ============================================================ -->
+        @php
+            // Each row is a way events reach a guide, with the plan it needs,
+            // checked against docs/FEATURES.md (Curator event sources, Event
+            // requests, Import from a link, AI event parsing, Feeds).
+            $curWire = [
+                ['Venue and act schedules you follow', 'Free', 'The best source there is, because the people running the event keep it right. Add up to 100 talent and venue schedules under Event Sources and what they publish appears on your guide within minutes. Their drafts, internal and unlisted events stay theirs.'],
+                ['Schedules that name your guide', 'Free', 'A talent or venue schedule that follows your guide can pick it under Default curator schedules while your guide takes requests. Each new event it saves then arrives as a request for you to review, unless you have switched Require Approval off or added that schedule to Approved Schedules.'],
+                ['Submissions from organisers and readers', 'Free', 'Switch on Accept requests. People paste their announcement or upload a flyer on the AI Import form, or on the plain Booking Form if you choose that instead, and it waits in your queue.'],
+                ['Calendars and pages you copy from', 'Free', 'Paste a venue\'s .ics link, a public Google Calendar or a page that carries event data on the import page. Up to 100 events come back as a list to tick, and an import can be undone for 24 hours.'],
+                ['Posters, flyers and group-chat posts', 'Free', 'Photograph the poster or paste the message and the details are read out for you: 50 reads a day on Free and Pro, 100 on Enterprise.'],
+                ['Sites that will never join', 'Enterprise', 'Feeds reads up to 10 calendars, RSS, Atom or JSON feeds or event pages about once an hour, and publishes what is new or holds it as a draft for you. Included on every selfhosted install.'],
+            ];
+        @endphp
+        <section id="wire" class="es-cur-ground-2 scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+            <div class="mx-auto max-w-5xl">
+
+                <div data-reveal>
+                    <div class="es-cur-rule"></div>
+                    <div class="flex items-baseline justify-between gap-4 py-2">
+                        <span class="es-cur-kicker" style="color: var(--esc-spot);">The wire</span>
+                        <span class="es-cur-folio es-cur-nums" aria-hidden="true">Page 5</span>
+                    </div>
+                    <div class="es-cur-rule"></div>
+                    <h2 class="es-cur-head-2 es-balance mt-7 max-w-3xl">
+                        Where a local events guide&rsquo;s listings <span class="text-gradient-guide">actually come from</span>
+                    </h2>
+                    <p class="es-cur-serif mt-4 max-w-3xl text-lg leading-relaxed" style="color: var(--esc-muted);">
+                        The guides that last are not the ones with the most listings in their first week. They are the ones that still have every Friday covered in month six, because the listings arrive without the editor chasing anybody. Here are the six ways in.
+                    </p>
+                </div>
+
+                <div class="mt-9" data-reveal>
+                    <div class="flex items-baseline justify-between gap-4 pb-2">
+                        <span class="es-cur-kicker" style="color: var(--esc-spot);">Sources, by the work they take</span>
+                        <span class="es-cur-kicker es-cur-faint">Plan</span>
+                    </div>
+                </div>
+                <div data-reveal-group="60">
+                    @foreach ($curWire as $wi => [$wName, $wTier, $wBlurb])
+                        <div class="es-cur-listing" data-reveal>
+                            <div class="es-cur-row">
+                                <span class="es-cur-serif text-lg font-bold"><span class="es-cur-nums" style="color: var(--esc-spot);">{{ $wi + 1 }}.</span> {{ $wName }}</span>
+                                <span class="es-cur-dots" aria-hidden="true"></span>
+                                <span class="es-cur-when"><span class="es-cur-tag">{{ $wTier }}</span></span>
+                            </div>
+                            <p class="es-cur-agate es-cur-muted mt-1.5">{{ $wBlurb }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="es-cur-box mt-10 p-6 lg:p-8" data-reveal>
+                    <p class="es-cur-kicker" style="color: var(--esc-spot);">Pick your mix</p>
+                    <div class="mt-5 grid gap-6 md:grid-cols-3">
+                        <div>
+                            <h3 class="es-cur-serif text-lg font-bold">A music or nightlife guide</h3>
+                            <p class="es-cur-agate es-cur-muted mt-1.5">Lean on sources. Rooms and acts already keep calendars, so follow them and spend your time on the picks. When you list a venue that is not on Event Schedule, a page is made in its name that it can claim, and once it does and starts publishing, add it as an event source.</p>
+                        </div>
+                        <div>
+                            <h3 class="es-cur-serif text-lg font-bold">A neighbourhood or family guide</h3>
+                            <p class="es-cur-agate es-cur-muted mt-1.5">Lean on submissions. The library, the school fair and the community garden will never run a calendar, but they will fill in a form once a term if you ask in person and leave the link.</p>
+                        </div>
+                        <div>
+                            <h3 class="es-cur-serif text-lg font-bold">A whole-city guide</h3>
+                            <p class="es-cur-agate es-cur-muted mt-1.5">All six, plus a weekly sweep of the places that will never come to you. Over time, aim for sources to carry most of the listings and the sweep to fill the gaps.</p>
+                        </div>
+                    </div>
+                    <div class="es-cur-rule-hair mt-7"></div>
+                    <p class="es-cur-agate es-cur-muted mt-4">
+                        In the guide: <x-link href="{{ marketing_url('/docs/creating-schedules#event-sources') }}" class="es-cur-link" style="color: var(--esc-spot);">event sources</x-link> &middot; <x-link href="{{ marketing_url('/docs/creating-schedules#engagement-requests') }}" class="es-cur-link" style="color: var(--esc-spot);">taking requests</x-link> &middot; <x-link href="{{ marketing_url('/docs/ai-import#link-import') }}" class="es-cur-link" style="color: var(--esc-spot);">importing from a link</x-link> &middot; <x-link href="{{ marketing_url('/docs/managing-schedules#feeds') }}" class="es-cur-link" style="color: var(--esc-spot);">feeds</x-link>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. House rules: editorial standards and sections             -->
+        <!-- ============================================================ -->
+        <section id="house-rules" class="es-cur-ground scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+            <div class="mx-auto max-w-5xl">
+
+                <div data-reveal>
+                    <div class="es-cur-rule"></div>
+                    <div class="flex items-baseline justify-between gap-4 py-2">
+                        <span class="es-cur-kicker" style="color: var(--esc-spot);">House rules</span>
+                        <span class="es-cur-folio es-cur-nums" aria-hidden="true">Page 6</span>
+                    </div>
+                    <div class="es-cur-rule"></div>
+                    <h2 class="es-cur-head-2 es-balance mt-7 max-w-3xl">
+                        The editorial standards of a guide <span class="text-gradient-guide">people trust</span>
+                    </h2>
+                    <p class="es-cur-serif mt-4 max-w-3xl text-lg leading-relaxed" style="color: var(--esc-muted);">
+                        Readers trust a guide for two reasons: everything on it is real, and they can find what they came for at a glance. Both are decisions an editor makes once, in writing, rather than again every Tuesday.
+                    </p>
+                </div>
+
+                <div class="mt-10 grid gap-5 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-cur-box-heavy flex flex-col p-6 lg:p-8" data-reveal>
+                        <p class="es-cur-kicker" style="color: var(--esc-spot);">Write it down</p>
+                        <h3 class="es-cur-serif mt-2 text-2xl font-bold">An inclusion policy in four lines</h3>
+                        <ol class="mt-4 space-y-3">
+                            @foreach ([
+                                ['Where', 'Name the edges of your patch: "inside the ring road", or "the county and the two towns either side".'],
+                                ['What', 'Public events anybody can go to. Not private parties, not sales pitches dressed up as workshops.'],
+                                ['How soon', 'Ask for events at least five days out, so you have time to check them.'],
+                                ['What you promise', 'That you list events, not that you vouch for them. Say so once and you will not need to say it again.'],
+                            ] as [$ruleName, $ruleBody])
+                                <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">{{ $ruleName }}.</span> {{ $ruleBody }}</li>
+                            @endforeach
+                        </ol>
+                        <p class="es-cur-agate es-cur-muted mt-auto pt-5">Put it in Request Terms. Every submitter sees them at the top of the form, before typing a word, so the policy does the declining for you.</p>
+                    </div>
+
+                    <div class="es-cur-box-heavy flex flex-col p-6 lg:p-8" data-reveal>
+                        <p class="es-cur-kicker" style="color: var(--esc-spot);">Before it goes to print</p>
+                        <h3 class="es-cur-serif mt-2 text-2xl font-bold">Five checks on every submission</h3>
+                        <ol class="mt-4 space-y-3">
+                            @foreach ([
+                                ['The source', 'Match the date and time to the organiser\'s own page or poster, never a screenshot of a repost.'],
+                                ['The room', 'One place, one name. When submitters spell a venue three ways, merge the duplicates nobody has claimed so its events sit on one page.'],
+                                ['The door', 'Price and age stated, even when the answer is "free" or "all ages".'],
+                                ['The run', 'A weekly quiz is one recurring event with its skipped dates, not fifty-two listings.'],
+                                ['The owner', 'An event you list is the organiser\'s to edit. When one is wrong and not yours to fix, take it off your guide and tell them.'],
+                            ] as [$checkName, $checkBody])
+                                <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">{{ $checkName }}.</span> {{ $checkBody }}</li>
+                            @endforeach
+                        </ol>
+                        <p class="es-cur-agate es-cur-muted mt-auto pt-5">Trusted schedules can skip the queue: add them under Approved Schedules and what they send from their own schedule publishes straight through.</p>
+                    </div>
+                </div>
+
+                <div class="es-cur-box mt-5 p-6 lg:p-8" data-reveal>
+                    <p class="es-cur-kicker" style="color: var(--esc-spot);">Sections and categories, decided</p>
+                    <div class="mt-5 grid gap-8 md:grid-cols-2">
+                        <div>
+                            <h3 class="es-cur-serif text-lg font-bold">Sub-schedules are your sections</h3>
+                            <p class="es-cur-agate es-cur-muted mt-1.5">Use one for a strand a reader would follow or share on its own: Live music, Kids and family, Outdoors. Each has its own link and is a filter on your calendar, and a whole source can be filed under one. Keep to between four and eight, so a reader sees all of them at once.</p>
+                        </div>
+                        <div>
+                            <h3 class="es-cur-serif text-lg font-bold">Categories say what kind of event it is</h3>
+                            <p class="es-cur-agate es-cur-muted mt-1.5">Concert, Workshop, Market. Edit the list to match your city and keep the names plain. Readers can also search your guide and filter it by venue, by free entry and by online events, so none of those needs a section of its own.</p>
+                        </div>
+                    </div>
+                    <div class="es-cur-rule-hair mt-7"></div>
+                    <p class="es-cur-agate es-cur-muted mt-4">
+                        In the guide: <x-link href="{{ marketing_url('/docs/creating-schedules#customize-subschedules') }}" class="es-cur-link" style="color: var(--esc-spot);">sub-schedules</x-link> &middot; <x-link href="{{ marketing_url('/docs/creating-schedules#customize-categories') }}" class="es-cur-link" style="color: var(--esc-spot);">categories</x-link> &middot; <x-link href="{{ marketing_url('/docs/creating-schedules#merge') }}" class="es-cur-link" style="color: var(--esc-spot);">merging duplicate venues</x-link>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7. Circulation: freshness, readers and money                 -->
+        <!-- ============================================================ -->
+        @php
+            $curWeek = [
+                ['Clear the queue', 'Mon', 'Accept or decline each listing. A submitter picks the section on the form, and a whole source is filed by its sub-schedule setting. Each source shows how many of its events are on your guide; a number that stops moving for a month means a source has gone quiet.'],
+                ['The sweep', 'Tue', 'Ten minutes on the places that will never come to you: noticeboards, the council\'s page, the group chats. Paste what you find on the import page.'],
+                ['The picks', 'Wed', 'Choose the five you would go to yourself and write one line on each. This is the part readers cannot get anywhere else.'],
+                ['The weekend email', 'Thu', 'Write it with an Events block set to the next 7 days and add your picks at the top. With your own mail server connected, or on a selfhosted install, it can repeat every week by itself and is rebuilt each time it sends.'],
+                ['The post', 'Fri', 'Make the Events graphic, free on every plan: up to 20 upcoming events that have a flyer, in square, portrait, story or wide shapes.'],
+            ];
+        @endphp
+        <section id="circulation" class="es-cur-ground-2 scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+            <div class="mx-auto max-w-5xl">
+
+                <div data-reveal>
+                    <div class="es-cur-rule"></div>
+                    <div class="flex items-baseline justify-between gap-4 py-2">
+                        <span class="es-cur-kicker" style="color: var(--esc-spot);">Circulation</span>
+                        <span class="es-cur-folio es-cur-nums" aria-hidden="true">Page 7</span>
+                    </div>
+                    <div class="es-cur-rule"></div>
+                    <h2 class="es-cur-head-2 es-balance mt-7 max-w-3xl">
+                        A guide is a habit. <span class="text-gradient-guide">Make it a weekly one.</span>
+                    </h2>
+                    <p class="es-cur-serif mt-4 max-w-3xl text-lg leading-relaxed" style="color: var(--esc-muted);">
+                        Readers come back to a guide on a rhythm: the Thursday email, the Friday post, the Saturday morning look. Pick the days, keep them, and an hour a week holds the whole thing together.
+                    </p>
+                </div>
+
+                <div class="mt-9" data-reveal>
+                    <div class="flex items-baseline justify-between gap-4 pb-2">
+                        <span class="es-cur-kicker" style="color: var(--esc-spot);">The desk diary</span>
+                        <span class="es-cur-kicker es-cur-faint">Day</span>
+                    </div>
+                </div>
+                <div data-reveal-group="60">
+                    @foreach ($curWeek as [$dName, $dDay, $dBody])
+                        <div class="es-cur-listing" data-reveal>
+                            <div class="es-cur-row">
+                                <span class="es-cur-serif text-lg font-bold">{{ $dName }}</span>
+                                <span class="es-cur-dots" aria-hidden="true"></span>
+                                <span class="es-cur-when es-cur-agate es-cur-nums es-cur-muted">{{ $dDay }}</span>
+                            </div>
+                            <p class="es-cur-agate es-cur-muted mt-1.5">{{ $dBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="es-cur-box-heavy mt-10 p-6 lg:p-8" data-reveal>
+                    <p class="es-cur-kicker" style="color: var(--esc-spot);">Do the arithmetic first</p>
+                    <h3 class="es-cur-serif mt-2 text-2xl font-bold">400 readers, four Thursdays: 1,600 emails a month</h3>
+                    <p class="es-cur-agate es-cur-muted mt-3">
+                        The newsletter allowance counts each recipient as one email: 10 a month on Free, 100 on Pro and 1,000 on Enterprise. A weekly email to 400 readers is past Free and Pro with its first send, and past Enterprise by the third Thursday, and a repeating newsletter that could not fit a month of five Thursdays is refused when you set it up. Connect your own mail server in the Email Settings row of Integrations, on any plan, and the cap is lifted for that schedule because the mail leaves through your provider; a selfhosted install has no cap at all.
+                        One more thing a curator should know: readers who sign up on your page get an automatic digest when your guide adds events of its own, without touching the allowance, but it never covers events you list from sources or other schedules. On a guide, that is most of them, so the weekly email is yours to send.
+                    </p>
+                    <p class="es-cur-agate es-cur-muted mt-3">
+                        In the guide: <x-link href="{{ marketing_url('/docs/newsletters#allowance') }}" class="es-cur-link" style="color: var(--esc-spot);">the allowance</x-link> &middot; <x-link href="{{ marketing_url('/docs/newsletters#repeating') }}" class="es-cur-link" style="color: var(--esc-spot);">repeating newsletters</x-link>
+                    </p>
+                </div>
+
+                <div class="mt-5 grid gap-5 md:grid-cols-2" data-reveal-group="90">
+                    <div class="es-cur-box flex flex-col p-6 lg:p-8" data-reveal>
+                        <p class="es-cur-kicker" style="color: var(--esc-spot);">Building the readership</p>
+                        <ul class="mt-4 space-y-3">
+                            <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">Ask venues for a corner of the noticeboard.</span> Print the QR code from your Followers tab; it opens your guide with the sign-up form ready.</li>
+                            <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">Live where your readers already are.</span> Embed the calendar on the site you have, or embed just the sign-up form on a partner&rsquo;s site.</li>
+                            <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">Let them subscribe in their calendar.</span> The iCal feed costs a reader no email address, and a moved date updates itself.</li>
+                            <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">Post one link, every week, in the same place.</span> The group chat gets the guide, not twenty separate posts.</li>
+                        </ul>
+                    </div>
+
+                    <div class="es-cur-box flex flex-col p-6 lg:p-8" data-reveal>
+                        <p class="es-cur-kicker" style="color: var(--esc-spot);">Paying for it, honestly</p>
+                        <ul class="mt-4 space-y-3">
+                            <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">Sell a sponsor, not a listing.</span> On Pro, sponsor logos with Gold, Silver and Bronze tiers sit in a band on your guide&rsquo;s page, and a newsletter&rsquo;s Sponsors block carries them into the weekly email.</li>
+                            <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">Rent the top line.</span> The announcement bar, also Pro, puts one message at the top of your guide&rsquo;s page, and on its event pages too if you choose, for a sponsor or for your own news.</li>
+                            <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">Run your own night.</span> A guide that hosts a monthly showcase sells its tickets from its own page with no platform fee; a ticket with a price needs Pro.</li>
+                            <li class="es-cur-agate es-cur-muted"><span class="es-cur-serif font-bold" style="color: var(--esc-ink);">Skip pay-to-list.</span> Promoter links credit sales on a schedule&rsquo;s own events, never on events it only lists, so other people&rsquo;s tickets earn a guide nothing. Charging venues to appear would cost it the trust it runs on.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. The press run (fixed dark in both modes)                  -->
         <!-- ============================================================ -->
         <section id="press" class="es-cur-ground scroll-mt-24 px-2 py-10 sm:px-4 lg:py-16">
             <div class="es-cur-press es-band-dark noise relative overflow-hidden px-5 py-14 sm:px-8 lg:px-12 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -972,7 +1217,7 @@
                         <div class="es-cur-press-rule"></div>
                         <div class="flex items-baseline justify-between gap-4 py-2">
                             <span class="es-cur-kicker" style="color: #fbbf24;">Late edition</span>
-                            <span class="es-cur-folio es-cur-nums" style="color: #b0a79a;" aria-hidden="true">Page 5</span>
+                            <span class="es-cur-folio es-cur-nums" style="color: #b0a79a;" aria-hidden="true">Page 8</span>
                         </div>
                         <div class="es-cur-press-rule"></div>
                         <h2 class="es-cur-head-2 es-cur-press-ink es-balance mt-7">
@@ -999,7 +1244,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- 6. Ask the editor                                            -->
+        <!-- 9. Ask the editor                                            -->
         <!-- ============================================================ -->
         <x-seo.faq-schema :items="$curFaqs" />
         <section id="questions" class="es-cur-ground scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
@@ -1009,7 +1254,7 @@
                     <div class="es-cur-rule"></div>
                     <div class="flex items-baseline justify-between gap-4 py-2">
                         <span class="es-cur-kicker" style="color: var(--esc-spot);">Ask the editor</span>
-                        <span class="es-cur-folio es-cur-nums" aria-hidden="true">Page 6</span>
+                        <span class="es-cur-folio es-cur-nums" aria-hidden="true">Page 9</span>
                     </div>
                     <div class="es-cur-rule"></div>
                     <h2 class="es-cur-head-2 es-balance mt-7">
@@ -1040,7 +1285,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- 7. The coupon                                                -->
+        <!-- 10. The coupon                                               -->
         <!-- ============================================================ -->
         <section id="claim" class="es-cur-ground scroll-mt-24 px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-28">
             <div class="mx-auto max-w-3xl">

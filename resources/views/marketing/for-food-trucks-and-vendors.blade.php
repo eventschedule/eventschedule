@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Food Truck Schedules | One Link That Always Has Today's Stop</x-slot>
-    <x-slot name="description">Your address changes every week. Put the route on one link that never goes stale, and let customers subscribe to it in their own calendar. Free forever.</x-slot>
+    <x-slot name="description">Post your food truck schedule on one link that always shows today's stop: regular pitches set up once, rained-off days fixed in a minute, catering requests. Free.</x-slot>
     <x-slot name="breadcrumbTitle">For Food Trucks and Vendors</x-slot>
 
     <x-slot name="headMeta">
@@ -34,7 +34,9 @@
            the side of the truck: an awning, a serving hatch, and in the
            hatch the one thing a customer wants to know, today's stop,
            with the rest of the week small beneath it. After that: order
-           tickets on the rail, the week as a route of stops, a paper
+           tickets on the rail, the week as a route of stops, a field
+           guide on the timetable's own cards set straight (the stop,
+           the change of plan, the markets), a paper
            tray on a checkered liner, a painted mustard sign, a street
            of stalls, two menu boards and the back of the truck with a
            number plate to fill in.
@@ -833,7 +835,7 @@
         #ft .ft-week-body:has(.ft-pitch[data-line="c"]:hover) .ft-stop[data-line="c"] .ft-stop-dot { scale: 1.45; background: var(--line); }
 
         /* ---------------------------------------------------------------
-           03 The window: a paper tray on the checkered liner
+           05 The window: a paper tray on the checkered liner
            --------------------------------------------------------------- */
         .ft-liner {
             position: relative;
@@ -956,7 +958,7 @@
         }
 
         /* ---------------------------------------------------------------
-           04 Catering: the painted mustard sign
+           06 Catering: the painted mustard sign
            --------------------------------------------------------------- */
         .ft-mustard {
             position: relative;
@@ -999,7 +1001,7 @@
         }
 
         /* ---------------------------------------------------------------
-           05 Who it is for: a street of stalls
+           08 Who it is for: a street of stalls
            --------------------------------------------------------------- */
         .ft-stalls { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.4rem 1.8rem; margin-top: clamp(2.8rem, 5vw, 4rem); }
         @media (min-width: 680px) { .ft-stalls { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -1180,7 +1182,7 @@
         .ft-next strong { display: block; margin-top: 0.25rem; font-family: var(--ft-display); font-weight: 400; font-size: clamp(1.25rem, 2.4vw, 1.7rem); line-height: 1.1; }
 
         /* ---------------------------------------------------------------
-           07 Questions: asked at the hatch
+           10 Questions: asked at the hatch
            --------------------------------------------------------------- */
         .ft-qa { width: min(100%, 52rem); margin: clamp(2.4rem, 5vw, 3.6rem) auto 0; display: grid; gap: 1.1rem; counter-reset: ft-q; }
         .ft-qa details {
@@ -1358,6 +1360,78 @@
             .ft-stop.is-today .ft-stop-dot { animation: none; }
             .ft-btn, .ft-hang, .ft-ticket, .ft-stall, .ft-next a, .ft-qr-sticker, .ft-stop-dot, .ft-qa summary i, .ft-menu a { transition: none; }
         }
+        /* ---------------------------------------------------------------
+           The field guide (03, 04, 07): the timetable's card set straight,
+           in the theme tokens, so it reads in daylight and at the night
+           market. A change-of-plan row pairs what happened with the edit.
+           --------------------------------------------------------------- */
+        .ft-guide-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.2rem; margin-top: clamp(2.5rem, 5vw, 3.6rem); }
+        @media (min-width: 900px) { .ft-guide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.4rem; } }
+        .ft-card {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1.4rem 1.6rem;
+            border: 3px solid var(--ft-edge);
+            border-radius: 1.3rem;
+            background: var(--ft-card);
+            box-shadow: 0 0.45rem 0 var(--ft-edge);
+        }
+        .ft-card h3 { font-size: 1.65rem; line-height: 1.08; }
+        .ft-card-lead { margin-top: 0.45rem; color: var(--ft-ink-2); }
+        .ft-card .ft-notes { margin-top: 1.4rem; }
+        .ft-card-foot { margin-top: auto; padding-top: 1.3rem; font-size: 0.95rem; color: var(--ft-ink-2); }
+        .ft-steps { display: grid; gap: 1.1rem; margin-top: 1.4rem; counter-reset: ft-step; }
+        .ft-steps li { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: 0.85rem; counter-increment: ft-step; }
+        .ft-steps li::before {
+            content: counter(ft-step);
+            display: grid;
+            place-items: center;
+            width: 2.1rem;
+            height: 2.1rem;
+            border-radius: 50%;
+            border: 3px solid var(--ft-k);
+            background: var(--ft-m);
+            color: var(--ft-k);
+            font-family: var(--ft-display);
+            font-size: 1.05rem;
+        }
+        .ft-steps li:nth-child(even)::before { background: var(--ft-t); }
+        .ft-plan { margin-top: clamp(2.5rem, 5vw, 3.6rem); overflow: hidden; border: 3px solid var(--ft-edge); border-radius: 1.3rem; background: var(--ft-card); box-shadow: 0 0.45rem 0 var(--ft-edge); }
+        .ft-plan-head { display: none; }
+        .ft-plan-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.35rem; padding: 1.05rem 1.3rem; border-top: 2px solid var(--ft-line); }
+        .ft-plan-row:first-of-type { border-top: 0; }
+        .ft-plan-what { font-weight: 700; line-height: 1.3; }
+        .ft-plan-do { color: var(--ft-ink-2); }
+        @media (min-width: 860px) {
+            .ft-plan-head {
+                display: grid;
+                grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+                gap: 1.6rem;
+                padding: 0.9rem 1.3rem 0.8rem;
+                background: var(--ft-m);
+                color: var(--ft-k);
+                font-family: var(--ft-mono);
+                font-size: 0.78rem;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+            .ft-plan-row { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr); gap: 1.6rem; }
+            .ft-plan-row:first-of-type { border-top: 2px solid var(--ft-line); }
+        }
+        .ft-terms { margin-top: 1.2rem; padding: 1rem 1.1rem; border: 2px dashed var(--ft-line); border-radius: 0.9rem; }
+        .ft-terms p:first-child { font-family: var(--ft-mono); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ft-ink-3); }
+        .ft-terms p:last-child { margin-top: 0.35rem; color: var(--ft-ink); }
+        #ft .ft-card a.ft-inline,
+        #ft .ft-plan-note a.ft-inline {
+            color: var(--ft-ink);
+            font-weight: 700;
+            text-decoration: underline;
+            text-decoration-color: var(--ft-red);
+            text-decoration-thickness: 2px;
+            text-underline-offset: 0.2em;
+        }
+        .ft-plan-note { max-width: 46rem; margin: 1.6rem auto 0; text-align: center; font-size: 0.95rem; color: var(--ft-ink-2); }
     </style>
 
     @php
@@ -1402,6 +1476,18 @@
                 'a' => 'Add a date exception for that date and the stop is simply not on the schedule that week. The rest of the recurring pattern carries on untouched, so you are not rebuilding the week around one cancellation.',
             ],
             [
+                'q' => 'What should a food truck schedule include?',
+                'a' => 'For every stop: the day, the exact spot (an address plus a landmark such as the north gate of the park), the hours you serve rather than the hours you are parked, how people can pay, and a line about the food. A host such as a brewery or a market belongs in the venue, so its name and address come with the stop. Keep the whole thing on one link that stays the same all year, set the regular pitches up once as recurring events, and change only the days that change.',
+            ],
+            [
+                'q' => 'What should a food truck do when the weather cancels a stop?',
+                'a' => 'Make the call at a set time, early enough to reach people before they leave, and change the schedule before you post anywhere else. For a regular pitch, exclude that one date on the recurring event: the rest of the series carries on. For a one-off stop, cancel the event, and anyone who opens it sees that it has been cancelled. Give the reason and say where you will be next, and on Pro you can put that message in the announcement bar at the top of your page.',
+            ],
+            [
+                'q' => 'How do I get my food truck listed at markets and festivals?',
+                'a' => 'Ask the organizer how they publish their line-up. If the market runs its own schedule on Event Schedule, it can name you on its market day, and the date comes to you as a request you accept (unless that schedule had already listed you before you claimed your page), so it is on your page and theirs without being typed twice. You can also follow the market\'s schedule and, while it takes requests, tick it under Also list on when you add the stop. Either way, send them your schedule link so they can see where else you trade.',
+            ],
+            [
                 'q' => 'Can people book me for catering and private events?',
                 'a' => 'Yes. Turn on booking requests and people can ask to book you, with their own date and details attached. Every request waits for you to accept it, and you get an email when a new one lands, so an enquiry does not sit unread in a comment thread.',
             ],
@@ -1410,8 +1496,11 @@
             ['top', "Today's stop"],
             ['today', 'The link'],
             ['week', 'The week'],
+            ['stop', 'The stop'],
+            ['weather', 'Change of plan'],
             ['sticker', 'The window'],
             ['catering', 'Catering'],
+            ['markets', 'Markets'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -1653,7 +1742,144 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. The sticker in the window (03): a tray on the liner       -->
+        <!-- 4. The stop (03): what a listing says, and the Sunday routine -->
+        <!-- ============================================================ -->
+        <section id="stop" class="ft-section" style="scroll-margin-top: 4.5rem;">
+            <div class="ft-wrap">
+                <div class="ft-head-center">
+                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 03</span>The stop</p>
+                    <h2 class="ft-d ft-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Write a stop people <span class="ft-swipe">can walk to</span>.
+                    </h2>
+                    <p class="ft-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        "Riverside Market, 12 to 8" is enough for a regular. Somebody new, standing in
+                        the car park, needs to know which corner, whether you take cards, and whether
+                        8 means 8 or sold out at 6.
+                    </p>
+                </div>
+
+                <div class="ft-guide-grid" data-reveal-group="110">
+                    <article class="ft-card" data-reveal="panel">
+                        <h3 class="ft-d">Six things every stop says</h3>
+                        <p class="ft-card-lead">Put them in once on a regular pitch and every date of it carries them.</p>
+                        <ul class="ft-notes">
+                            @foreach ([
+                                ['The exact spot', 'The address, plus what you are parked beside: north gate, by the fountain. The stop\'s venue puts the address and a map on its page.'],
+                                ['Serving hours', 'When the hatch opens and closes, not when you arrive to set up. If you stop when the food runs out, add "or until sold out".'],
+                                ['How to pay', 'Card only, cash only, or both. It is the question asked most often at the window.'],
+                                ['What is cooking', 'A line on the menu, the special, or a link to the full menu, with a photo of the food as the stop\'s image.'],
+                                ['Who you are with', 'At a brewery or a market, choose the host as the venue, so their name and address do the work for you.'],
+                                ['Whether it is public', 'A wedding or an office lunch is not a stop. Save it as a Draft and only your schedule\'s members see it.'],
+                            ] as [$t, $d])
+                                <li>
+                                    <span class="ft-pin" aria-hidden="true"></span>
+                                    <span><span class="ft-note-t">{{ $t }}</span> <span class="ft-note-d">- {{ $d }}</span></span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </article>
+
+                    <article class="ft-card" data-reveal="panel">
+                        <h3 class="ft-d">The Sunday routine, twenty minutes</h3>
+                        <p class="ft-card-lead">Run the same five steps before every week and the link is right before anybody asks.</p>
+                        <ol class="ft-steps">
+                            @foreach ([
+                                ['Read next week day by day', 'A pitch you know you will miss gets its date excluded now, not at 11 that morning.'],
+                                ['Add the one-offs', 'The festival weekend, the brewery takeover, the new market you said yes to on Thursday.'],
+                                ['Give each stop a photo', 'The Events graphic only draws stops that have their own image; the rest go into its caption text.'],
+                                ['Make the graphic, post it Monday', 'Choose the Story shape, 1080 by 1920. A regular pitch appears once, under its next date, so it reads as where to find you next.'],
+                                ['Let the digest go out', 'Subscribers who confirmed get one email covering your new stops, at most one every three days. A regular pitch is one event, announced once when you made it, so the digest carries the new one-offs.'],
+                            ] as [$t, $d])
+                                <li>
+                                    <div>
+                                        <p class="ft-note-t">{{ $t }}</p>
+                                        <p class="ft-note-d">{{ $d }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ol>
+                        <p class="ft-card-foot">The graphic is free on every plan. See <x-link href="{{ marketing_url('/docs/event-graphics#shape') }}" class="ft-inline">shapes and sizes</x-link> in the guide</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. Change of plan (04): weather, breakdowns, a moved pitch    -->
+        <!-- ============================================================ -->
+        <section id="weather" class="ft-section ft-alt" style="scroll-margin-top: 4.5rem;">
+            <div class="ft-wrap">
+                <div class="ft-head-center">
+                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 04</span>Change of plan</p>
+                    <h2 class="ft-d ft-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Rain, wind, <span class="ft-swipe">a flat tyre</span>.
+                    </h2>
+                    <p class="ft-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A truck calls off more days than a restaurant ever will. The schedule cannot stop
+                        the rain, but the right edit takes a minute and leaves the rest of the week alone.
+                    </p>
+                </div>
+
+                <div class="ft-plan" data-reveal="panel">
+                    <div class="ft-plan-head" aria-hidden="true">
+                        <span>What changed</span>
+                        <span>What to do on the schedule</span>
+                    </div>
+                    @foreach ([
+                        ['One day of a regular pitch is off', 'Exclude that date on the recurring event. The stop is gone for that day and the series carries on. Guests see nothing there rather than a cancelled entry, so say why somewhere they will look.'],
+                        ['A different spot or different hours, for one day', 'Exclude the date at the usual pitch and add a one-off stop with the new place and hours. A regular pitch keeps one start time, so a one-day change is its own event.'],
+                        ['A one-off stop is called off', 'Cancel it from the event\'s Actions menu. Anyone who opens it sees a notice that it has been cancelled, and if the sky clears you can restore it.'],
+                        ['A pitch ends for the season', 'Set the recurring event\'s end to On Date. Every week after it disappears, and the summer stays on record.'],
+                        ['The truck is off the road for a week', 'Exclude each date, and on Pro put one line at the top of your page with the announcement bar, on every stop\'s page too if you switch that on.'],
+                    ] as [$what, $do])
+                        <div class="ft-plan-row">
+                            <p class="ft-plan-what">{{ $what }}</p>
+                            <p class="ft-plan-do">{{ $do }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="ft-plan-note" data-reveal>
+                    A calendar that subscribed to your feed drops an excluded date and picks up a new stop on its own. More on <x-link href="{{ marketing_url('/docs/creating-events#recurring') }}" class="ft-inline">excluded dates and end dates</x-link> in the guide
+                </p>
+
+                <div class="ft-guide-grid" data-reveal-group="110">
+                    <article class="ft-card" data-reveal="panel">
+                        <h3 class="ft-d">Make the weather call the same way every time</h3>
+                        <ul class="ft-notes">
+                            @foreach ([
+                                ['Set a call time', 'Decide by 9:00 for a lunch service and by 14:00 for an evening market, then post at that time. A call made at the hatch reaches nobody who is already on their way.'],
+                                ['Know your limits before the forecast does', 'The wind your awning or gazebo can take, the heat your generator and your crew can work in, the rain your pitch drains. Write them down and most calls make themselves.'],
+                                ['Ask each host for their rule', 'Markets and breweries often have a weather policy, and a pitch fee that stands either way. Know it before the first wet Saturday.'],
+                            ] as [$t, $d])
+                                <li>
+                                    <span class="ft-pin" aria-hidden="true"></span>
+                                    <span><span class="ft-note-t">{{ $t }}</span> <span class="ft-note-d">- {{ $d }}</span></span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </article>
+
+                    <article class="ft-card" data-reveal="panel">
+                        <h3 class="ft-d">Say it in one place first</h3>
+                        <ul class="ft-notes">
+                            @foreach ([
+                                ['The link before the story', 'Change the schedule, then point every post at it. The customer who checks at 11:45 should read the same answer as the one who saw your story at 9.'],
+                                ['Give the reason and the next stop', '"Too windy at the pier today, back on Friday at Riverside Market" keeps a customer. "Closed today" sends them to the next truck.'],
+                                ['Do not delete the regular pitch', 'Removing the whole recurring event to clear one bad day takes every future date with it. Exclude the day instead.'],
+                            ] as [$t, $d])
+                                <li>
+                                    <span class="ft-pin" aria-hidden="true"></span>
+                                    <span><span class="ft-note-t">{{ $t }}</span> <span class="ft-note-d">- {{ $d }}</span></span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. The sticker in the window (05): a tray on the liner       -->
         <!-- ============================================================ -->
         <section id="sticker" class="ft-liner" style="scroll-margin-top: 4.5rem;">
             <div class="ft-wrap ft-liner-in">
@@ -1685,7 +1911,7 @@
                     </div>
 
                     <div>
-                        <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 03</span>The window</p>
+                        <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 05</span>The window</p>
                         <h2 class="ft-d ft-h2" data-reveal style="--reveal-delay: 0.08s;">
                             They already <span class="ft-swipe">came to you once</span>.
                         </h2>
@@ -1722,12 +1948,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. Catering (04): the painted mustard sign                   -->
+        <!-- 7. Catering (06): the painted mustard sign                   -->
         <!-- ============================================================ -->
         <section id="catering" class="ft-mustard" style="scroll-margin-top: 4.5rem;">
             <div class="ft-wrap">
                 <div class="ft-head-center">
-                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 04</span>Catering</p>
+                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 06</span>Catering</p>
                     <h2 class="ft-d ft-h2" data-reveal style="--reveal-delay: 0.08s;">
                         The bookings that <span class="ft-swipe">pay for January</span>.
                     </h2>
@@ -1761,12 +1987,75 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Who it is for (05): a street of stalls                    -->
+        <!-- 8. Booked by others (07): markets, festivals, catering asks  -->
+        <!-- ============================================================ -->
+        <section id="markets" class="ft-section ft-alt" style="scroll-margin-top: 4.5rem;">
+            <div class="ft-wrap">
+                <div class="ft-head-center">
+                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 07</span>Markets and bookings</p>
+                    <h2 class="ft-d ft-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        When somebody else <span class="ft-swipe">puts you on the bill</span>.
+                    </h2>
+                    <p class="ft-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Markets, festivals and breweries publish their own line-ups. Get onto theirs
+                        without typing the date twice, and turn catering enquiries into ones you can
+                        quote from.
+                    </p>
+                </div>
+
+                <div class="ft-guide-grid" data-reveal-group="110">
+                    <article class="ft-card" data-reveal="panel">
+                        <h3 class="ft-d">Getting onto a market&rsquo;s page</h3>
+                        <ol class="ft-steps">
+                            @foreach ([
+                                ['They add you to their market day', 'When the market runs its schedule on Event Schedule and names you on its event, the date waits on your Requests tab, unless that schedule had already listed you before you claimed your page. Accept it and it is on your route with their venue attached.'],
+                                ['Not on Event Schedule yet?', 'Being named makes a page in your truck\'s name, marked as not yet claimed. Sign in with the email address they entered and it becomes your schedule, their dates included.'],
+                                ['Or you list yourself on theirs', 'Follow the market\'s schedule. While it takes requests, it is offered under Also list on in your stop\'s Listing tab; tick it and the stop goes onto their page, after their approval if they review what they list.'],
+                                ['A street food guide can carry the lot', 'A curator schedule can follow yours as an event source and show every stop you publish, with nothing for you to do.'],
+                            ] as [$t, $d])
+                                <li>
+                                    <div>
+                                        <p class="ft-note-t">{{ $t }}</p>
+                                        <p class="ft-note-d">{{ $d }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ol>
+                        <p class="ft-card-foot">In the guide: <x-link href="{{ marketing_url('/docs/creating-events#schedules') }}" class="ft-inline">Also list on</x-link> and <x-link href="{{ marketing_url('/docs/creating-events#claim') }}" class="ft-inline">pages created for others</x-link></p>
+                    </article>
+
+                    <article class="ft-card" data-reveal="panel">
+                        <h3 class="ft-d">Catering enquiries you can quote from</h3>
+                        <ul class="ft-notes">
+                            @foreach ([
+                                ['Make the date and place required', 'Tick Date &amp; Time and Location among the Booking Form\'s required fields, so no enquiry arrives without them.'],
+                                ['Ask for a number', 'Turn on Ask for phone number, and Required under it. Event planners would rather talk it through.'],
+                                ['Switch off online events', 'Offer online events is on by default. A truck has no online version, so turn it off.'],
+                                ['Ask the site questions on Pro', 'Custom fields put guest count, budget, dietary needs and power on site on the form. The answers come with the request and in the email that announces it.'],
+                            ] as [$t, $d])
+                                <li>
+                                    <span class="ft-pin" aria-hidden="true"></span>
+                                    <span><span class="ft-note-t">{!! $t !!}</span> <span class="ft-note-d">- {!! $d !!}</span></span>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <div class="ft-terms">
+                            <p>Sample request terms</p>
+                            <p>Private hire from 50 guests. We need a level, 7 m pitch with vehicle access, and power on site or room for our generator. A minimum spend applies and a deposit holds the date. For weddings, please ask at least six weeks ahead.</p>
+                        </div>
+                        <p class="ft-card-foot">Request Terms are free and shown at the top of the form, before anything is typed. See <x-link href="{{ marketing_url('/docs/creating-schedules#engagement-requests') }}" class="ft-inline">request settings</x-link> in the guide</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 9. Who it is for (08): a street of stalls                    -->
         <!-- ============================================================ -->
         <section id="who" class="ft-section" style="scroll-margin-top: 4.5rem;">
             <div class="ft-wrap">
                 <div class="ft-head-center">
-                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 05</span>Who it is for</p>
+                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 08</span>Who it is for</p>
                     <h2 class="ft-d ft-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Anything with <span class="ft-swipe">wheels and a hatch</span>.
                     </h2>
@@ -1806,12 +2095,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 7. How it works (06) and key features: the painted boards    -->
+        <!-- 10. How it works (09) and key features: the painted boards   -->
         <!-- ============================================================ -->
         <section id="how" class="ft-section ft-alt" style="scroll-margin-top: 4.5rem; padding-top: clamp(6rem, 10vw, 9rem);">
             <div class="ft-wrap">
                 <div class="ft-board" data-reveal="panel">
-                    <p class="ft-kicker"><span class="ft-no" aria-hidden="true">No. 06</span>How it works</p>
+                    <p class="ft-kicker"><span class="ft-no" aria-hidden="true">No. 09</span>How it works</p>
                     <h2 class="ft-d ft-h2">
                         A Sunday evening, <span class="ft-swipe">once</span>.
                     </h2>
@@ -1868,7 +2157,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- 8. Related pages: the next stops down the road               -->
+        <!-- 11. Related pages: the next stops down the road              -->
         <!-- ============================================================ -->
         <section class="ft-section ft-alt">
             <div class="ft-wrap">
@@ -1900,12 +2189,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 9. FAQ (07): asked at the hatch                              -->
+        <!-- 12. FAQ (10): asked at the hatch                             -->
         <!-- ============================================================ -->
         <section id="faq" class="ft-section" style="scroll-margin-top: 4.5rem;">
             <div class="ft-wrap">
                 <div class="ft-head-center">
-                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 07</span>Questions</p>
+                    <p class="ft-kicker" data-reveal><span class="ft-no" aria-hidden="true">No. 10</span>Questions</p>
                     <h2 class="ft-d ft-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Asked <span class="ft-swipe">at the hatch</span>.
                     </h2>
@@ -1928,7 +2217,7 @@
         <x-seo.faq-schema :items="$faqs" />
 
         <!-- ============================================================ -->
-        <!-- 10. Finale: the back of the truck                            -->
+        <!-- 13. Finale: the back of the truck                            -->
         <!-- ============================================================ -->
         <section id="claim" class="ft-finale" style="scroll-margin-top: 4.5rem;">
             <div class="ft-wrap">

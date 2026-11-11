@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Performers & Artists | Gig Calendar</x-slot>
-    <x-slot name="description">Free event schedule for performers and artists. Share your shows, sell tickets with zero platform fees, and claim the page a venue made in your name.</x-slot>
+    <x-slot name="description">A free gig calendar for every performer: one link for every show, booking requests, calendar sync, free registration, paid tickets on Pro with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Talent</x-slot>
 
     @php
@@ -36,6 +36,10 @@
             ['q' => 'A venue or curator made a page for me. How do I claim it?', 'a' => 'When a schedule lists you on an event before you are on Event Schedule, a page is created in your name so their lineup can show you. It says who created it and that you have not claimed it yet, credits each date to the schedule that added it, and stays out of search engines until it is claimed. To take it over, press Claim this page and sign in with the email address on it, the one that schedule entered for you. It becomes your schedule, and the schedules already listing you keep listing you without asking again. If the page is not about you, press This is not me: when you hold the address on it the page comes down at once, and otherwise your report is recorded for review.'],
             ['q' => 'I already have a Linktree. Why would I need this?', 'a' => 'A link page shows buttons. A schedule shows dates. Your Event Schedule page lists your actual upcoming shows with venues, times and ticket links, updates itself as you add dates, and lets fans follow you so you can email them when a new show lands. You can keep your link page and point it here, or replace it entirely.'],
             ['q' => 'Can I put my dates on my own website and social profiles?', 'a' => 'Yes. Embed your schedule on any website with a single iframe, or share your schedule URL on social profiles, EPKs and booking platforms. There are also iCal and RSS feeds, so your dates can flow into other calendars and sites automatically. Everything updates the moment you add a show.'],
+            ['q' => 'What is a gig calendar?', 'a' => 'A gig calendar is a public list of your upcoming performances: the date, the time you go on, the venue and town, who else is on the bill and how to get in. Fans use it to find your next show, bookers use it to see whether you are working and where, and festivals use it to check you are active. It works best as one link that you keep current and put everywhere, rather than dates copied by hand into a website, a bio and a press kit.'],
+            ['q' => 'Should I put private gigs on my public calendar?', 'a' => 'No. Weddings, corporate events and house parties are bookings, not shows, and the client rarely wants the address public. Keep them for your own planning instead: an event saved as a Draft is seen only by your schedule\'s members, on every plan. On Enterprise, Internal keeps an event members-only for good, and Unlisted gives it a link that is not shown on your page, with an optional password.'],
+            ['q' => 'Can a venue add me to their event without asking me?', 'a' => 'They can name you on their event, but once you run your own schedule the date does not appear on it until you accept, unless that schedule had already listed you before you claimed your page. It waits on your Requests tab, and if you decline it never reaches your page. Before you have a schedule, naming you creates a page in your name that says it has not been claimed, credits each date to the schedule that added it and stays out of search engines. Claim it with the email address they entered, or press This is not me.'],
+            ['q' => 'Can I sync my gig calendar with Google Calendar?', 'a' => 'Yes, free on every plan, and Outlook and CalDAV calendars work the same way. Choose a calendar and a direction: send your gigs to it, read events in from it, or both. Events read in wait as drafts until you publish them, unless you switch on publishing them automatically, and entries your calendar marks private, invitations you declined and out-of-office blocks are never read in. One thing to know: a recurring event goes to the calendar as a single entry on its first date, so fans who want every night of a residency should subscribe to your iCal feed instead.'],
             ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Your dates are public the moment you add them, on your schedule page and in your iCal and RSS feeds, and a fan can subscribe to your calendar from the sign-up panel on your page so a moved date updates itself. Switch on the "Notify me" card and, on a show that is not on sale yet, a fan can leave an email address to hear when tickets go on sale. A fan who signs up on your page and confirms their address gets a digest automatically when you announce new shows, at most one every few days, and it does not draw on your newsletter allowance. Beyond that you write the newsletter yourself: 10 newsletter emails a month on the free plan and 100 on Pro, counted per recipient. Any plan can also generate a shareable graphic of your upcoming shows, and Pro lets you boost events with Meta Ads.'],
         ];
     @endphp
@@ -43,7 +47,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Performers & Artists"
-        description="Free event scheduling for performers and artists of every kind. Share your shows, sell tickets through Stripe or PayPal, sync with Google Calendar, let venues add you to their schedule, and claim the page a venue or curator made in your name. Zero platform fees."
+        description="Free event scheduling for performers and artists of every kind. Share your shows, take free registrations, sell paid tickets through Stripe or PayPal on Pro, sync with Google Calendar, let venues add you to their schedule, and claim the page a venue or curator made in your name. Zero platform fees."
         audience="Performers & Artists"
         keywords="performer schedule, share tour dates, artist event calendar, performer booking, gig management, free event scheduling" />
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -403,9 +407,249 @@
     </x-marketing.feature-banner>
 
     <!-- ============================================================ -->
+    <!-- 3f. Field guide: what goes on a gig calendar                 -->
+    <!-- ============================================================ -->
+    @php
+        $gigShow = [
+            ['The time you go on, not only the doors', 'Doors at 19:00 tells a fan nothing if you are the third act. Put your set time in the event, or the start time and a line saying where you are on the bill.'],
+            ['The venue, picked rather than typed', 'Choose the venue from your saved venues instead of writing it into the title. A venue saved with its address puts that address and a map on the event page, and you never type it again for the next show there.'],
+            ['Everyone else on the bill', 'Add the other acts as participants. Each name appears on the event page and links to that act\'s own schedule, which is how their fans find you.'],
+            ['How to get in', 'A price and a ticket link, "free entry", or "sign up to come". When tickets are sold somewhere else, the Tickets elsewhere option puts a button on your event that opens that page, on every plan.'],
+            ['What a fan must know before travelling', 'Age limit, cash only, seated or standing, sold out. One line in the description saves a wasted trip and an angry message.'],
+            ['Where an online show happens', 'A stream or a video call is an event like any other. Turn on Online in the event\'s Location section and add the link, so a fan in another city knows they can watch.'],
+        ];
+        $gigHide = [
+            ['Your fee, rider and contract', 'They belong in the thread with the booker. A public page is read by other venues and other acts.'],
+            ['Holds and pencilled dates', 'List a show when the venue or promoter announces it, never before. Announcing ahead of them breaks trust, and on some deals it breaks a radius clause.'],
+            ['Private bookings', 'Weddings, corporate nights and house parties are work, not shows. Save one as a Draft and only your schedule\'s members see it, so it still counts in your own planning.'],
+            ['Load-in times and home addresses', 'Fans need the doors time and the venue. Nobody else needs to know when your van is parked outside.'],
+        ];
+    @endphp
+    <section id="guide" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
+                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]" aria-hidden="true"></span>
+                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Gig calendar field guide</span>
+                </div>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    What a gig calendar is for, <span class="text-gradient-talent">and what goes on it</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.16s;">
+                    A gig calendar answers one question for three kinds of reader. A fan wants to know where to see you next. A booker wants to know whether you are working and where you draw. A festival or a journalist wants to know whether you are active at all. One public link, kept current, answers all three without you writing back to anyone.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2" data-reveal-group="90">
+                <div class="flex flex-col rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                    <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Put on every date</h3>
+                    <p class="mb-5 text-sm text-gray-500 dark:text-gray-400">Six things a listing needs before anyone acts on it.</p>
+                    <ul class="space-y-4">
+                        @foreach ($gigShow as [$showTitle, $showBody])
+                            <li class="flex gap-3">
+                                <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $showTitle }}</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $showBody }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="flex flex-col rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                    <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Keep off the public page</h3>
+                    <p class="mb-5 text-sm text-gray-500 dark:text-gray-400">A gig calendar is public by design. Four things should never be on it.</p>
+                    <ul class="space-y-4">
+                        @foreach ($gigHide as [$hideTitle, $hideBody])
+                            <li class="flex gap-3">
+                                <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $hideTitle }}</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $hideBody }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="mt-auto border-t border-gray-200 pt-5 text-sm leading-relaxed text-gray-600 dark:border-white/10 dark:text-gray-400">
+                        Draft is free on every plan. On Enterprise, Internal keeps an event members-only for good, and Unlisted gives it a link that is not shown on your page, with an optional password, for a private show you want a few people to find. The guide's <x-link href="{{ marketing_url('/docs/creating-events#draft') }}" class="text-blue-700 dark:text-blue-300">visibility settings</x-link> explain each choice.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-4 rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                <h3 class="mb-5 text-xl font-bold text-gray-900 dark:text-white">Three ways a date reaches your page</h3>
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div>
+                        <p class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">You add it</p>
+                        <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">Type it in, or paste the venue's announcement, a flyer or a link to their event page on the import page and the details are read out for you. That reading is free, up to 50 a day, which is more than a busy month of gigs.</p>
+                    </div>
+                    <div>
+                        <p class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">A booker adds you</p>
+                        <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">A venue or promoter names you on their event. The date waits on your Requests tab until you accept it, unless that schedule had already listed you before you claimed your page, then shows on both schedules with nothing retyped.</p>
+                    </div>
+                    <div>
+                        <p class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-300">Your calendar sends it</p>
+                        <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">Connect Google Calendar, Outlook or CalDAV, free. Events read in from your calendar wait as drafts until you publish them, unless you choose to publish them automatically, and entries marked private, declined invitations and out-of-office blocks are never read in.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3g. Getting booked through your page                         -->
+    <!-- ============================================================ -->
+    @php
+        $bookedSteps = [
+            ['They name you on their event', 'On the event\'s Participants tab they type your name and email address, and anyone on Event Schedule with that address is offered to them as a match. Give bookers the address you use here.'],
+            ['A request lands on your Requests tab', 'The Requests tab appears only while something is waiting, with the count on it, and each card says which event and which schedule is asking.'],
+            ['You accept, and it is on both pages', 'The date shows on your schedule with the venue attached, and on theirs with your name linked. Decline and it never reaches your page.'],
+            ['Not here yet? A page waits for you', 'The listing makes a page in your name, marked as not yet claimed and kept out of search engines. Sign in with the email address they entered and it becomes your schedule, with their dates still on it.'],
+        ];
+    @endphp
+    <section id="bookings" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
+                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]" aria-hidden="true"></span>
+                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Getting booked</span>
+                </div>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    Let the page do <span class="text-gradient-talent">half the booking</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.16s;">
+                    Bookings still start with a message, but a good page makes the message shorter. A booker who can see where you played last month and which nights you are already taken asks a better question, and asks it sooner.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2" data-reveal-group="90">
+                <div class="flex flex-col rounded-3xl border border-gray-200 bg-gray-50 p-7 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                    <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">When a venue or promoter adds you</h3>
+                    <p class="mb-5 text-sm text-gray-500 dark:text-gray-400">The free half of booking: you never type their date in again.</p>
+                    <ol class="space-y-4">
+                        @foreach ($bookedSteps as $i => [$stepTitle, $stepBody])
+                            <li class="flex gap-4">
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-xs font-black text-white" aria-hidden="true">{{ $i + 1 }}</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $stepTitle }}</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $stepBody }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="mt-auto pt-5 text-sm text-gray-600 dark:text-gray-400">
+                        More in the guide: <x-link href="{{ marketing_url('/docs/managing-schedules#requests') }}" class="text-blue-700 dark:text-blue-300">the Requests tab</x-link> &middot; <x-link href="{{ marketing_url('/docs/creating-events#claim') }}" class="text-blue-700 dark:text-blue-300">pages created for others</x-link>
+                    </p>
+                </div>
+
+                <div class="flex flex-col rounded-3xl border border-gray-200 bg-gray-50 p-7 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                    <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Taking booking requests on your page</h3>
+                    <p class="mb-5 text-sm text-gray-500 dark:text-gray-400">For the promoter, the wedding planner or the school that has no schedule of its own.</p>
+                    <ul class="space-y-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                        <li><span class="font-semibold text-gray-900 dark:text-white">Switch it on.</span> Edit Schedule, Engagement, Requests, then Accept requests. A talent schedule always uses the Booking Form, nobody needs an account to send one, and every request comes with the sender's name and email.</li>
+                        <li><span class="font-semibold text-gray-900 dark:text-white">Require what you need to answer.</span> Tick Event Name, Date &amp; Time, Description or Location so a request cannot arrive without them. Turn on Ask for phone number if you would rather call back, and turn off Offer online events if you only play in person.</li>
+                        <li><span class="font-semibold text-gray-900 dark:text-white">Write your terms where they are read first.</span> Request Terms appear at the top of the form, before anything is typed. Free on every plan.</li>
+                        <li><span class="font-semibold text-gray-900 dark:text-white">Ask your own questions on Pro.</span> Custom fields put expected audience, set length or budget on the form, and the answers come with the request.</li>
+                    </ul>
+                    <div class="mt-5 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-400/25 dark:bg-blue-500/10">
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">Sample request terms</p>
+                        <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">Sets run 45 to 90 minutes. Please ask at least four weeks ahead. Beyond 100 km we ask for travel and a room. The venue provides PA and a sound engineer; we bring our own instruments. A deposit confirms the date.</p>
+                    </div>
+                    <p class="mt-auto pt-5 text-sm text-gray-600 dark:text-gray-400">
+                        How the form behaves: <x-link href="{{ marketing_url('/docs/creating-schedules#engagement-requests') }}" class="text-blue-700 dark:text-blue-300">Requests settings in the guide</x-link>
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-4 rounded-3xl border border-amber-200 bg-amber-50 p-7 dark:border-amber-700/60 dark:bg-amber-500/10" data-reveal="panel">
+                <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Four habits that cost performers bookings</h3>
+                <ul class="grid grid-cols-1 gap-x-8 gap-y-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300 md:grid-cols-2">
+                    <li><span class="font-semibold text-gray-900 dark:text-white">The newest date is last spring.</span> A calendar that stops reads like an act that stopped. If you are writing or recording, say so in your description and keep the page.</li>
+                    <li><span class="font-semibold text-gray-900 dark:text-white">The ticket link lives only in your bio.</span> A fan who lands on the date has to go back and hunt. Put the link on the event itself.</li>
+                    <li><span class="font-semibold text-gray-900 dark:text-white">Requests left waiting.</span> Accept the dates venues added you to and decline the rest, so the tab only ever holds decisions you still have to make.</li>
+                    <li><span class="font-semibold text-gray-900 dark:text-white">Two names for one act.</span> Use the same spelling and the same email address everywhere you are booked, so every listing finds the one page.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3h. Keep it current, put it everywhere                       -->
+    <!-- ============================================================ -->
+    @php
+        $gigRoutine = [
+            ['Clear the Requests tab', 'Accept the dates you have been added to and answer the booking requests. It is the one step nobody else can do for you.'],
+            ['Add what you booked yourself', 'Paste the announcement or flyer on the import page, or publish what your calendar sync brought in as drafts.'],
+            ['Make a residency one event', 'Every Thursday, every other Friday or the first Saturday of the month is one recurring event. Add the nights you are away as excluded dates rather than deleting anything.'],
+            ['Check the next three dates', 'Right set time, right venue, a ticket link or a price. These are the ones people act on this week.'],
+            ['Post it', 'Make an Events graphic of what is coming, free on every plan, and post it the same afternoon.'],
+        ];
+        $gigShare = [
+            ['Your bio', 'Your schedule address does not change when your dates do, so it can sit in a bio for years and always show what is next.'],
+            ['Your own website', 'Embed the calendar with one iframe from Actions, then Embed Schedule. It loads live, so the site never shows an old date.'],
+            ['Your fans\' calendars', 'The iCal feed lists each night of a residency separately, 90 days ahead, and a calendar that subscribes picks up a moved date on its own.'],
+            ['The merch table', 'Print the QR code from your Followers tab on a card or a poster. It opens your page with the sign-up form ready.'],
+            ['Your press kit and signature', 'Bookers and festivals check dates before they reply. A link in an EPK or an email signature answers them first.'],
+            ['A second project', 'Play in two acts, or solo and with a band? A sub-schedule for each gives each its own link, under one schedule.'],
+        ];
+    @endphp
+    <section id="routine" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
+                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]" aria-hidden="true"></span>
+                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Keep it current</span>
+                </div>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    Ten minutes a week <span class="text-gradient-talent">keeps it true</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.16s;">
+                    The best gig calendar is not the prettiest one. It is the one that was right last night. Pick a day, Monday works for most acts, and run the same five steps.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-5" data-reveal-group="90">
+                <div class="flex flex-col rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:col-span-2" data-reveal="panel">
+                    <h3 class="mb-5 text-xl font-bold text-gray-900 dark:text-white">The weekly routine</h3>
+                    <ol class="space-y-4">
+                        @foreach ($gigRoutine as $i => [$routineTitle, $routineBody])
+                            <li class="flex gap-4">
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 text-xs font-black text-white" aria-hidden="true">{{ $i + 1 }}</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $routineTitle }}</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $routineBody }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="mt-auto pt-5 text-sm text-gray-600 dark:text-gray-400">
+                        A recurring event goes to a connected Google, Outlook or CalDAV calendar as one entry on its first date, so send fans the feed, not your own calendar. More on <x-link href="{{ marketing_url('/features/recurring-events') }}" class="text-blue-700 dark:text-blue-300">recurring events</x-link> and how they reach calendars.
+                    </p>
+                </div>
+
+                <div class="lg:col-span-3" data-reveal="panel">
+                    <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Where to put the link</h3>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        @foreach ($gigShare as [$shareTitle, $shareBody])
+                            <div class="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/[0.04]">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $shareTitle }}</p>
+                                <p class="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $shareBody }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                        Step by step in the guide: <x-link href="{{ marketing_url('/docs/sharing#embed') }}" class="text-blue-700 dark:text-blue-300">embedding</x-link> &middot; <x-link href="{{ marketing_url('/docs/sharing#calendar-feeds') }}" class="text-blue-700 dark:text-blue-300">calendar feeds</x-link> &middot; <x-link href="{{ marketing_url('/docs/sharing#qr-code') }}" class="text-blue-700 dark:text-blue-300">the QR code</x-link> &middot; <x-link href="{{ marketing_url('/docs/event-graphics') }}" class="text-blue-700 dark:text-blue-300">event graphics</x-link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 4. What you keep (dark band)                                 -->
     <!-- ============================================================ -->
-    <section id="keep" class="relative scroll-mt-24 bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
+    <section id="keep" class="relative scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 25%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
@@ -678,6 +922,9 @@
             ['top', 'Top'],
             $hasRail ? ['live', 'Live now'] : null,
             ['gigs', 'How it works'],
+            ['guide', 'Field guide'],
+            ['bookings', 'Getting booked'],
+            ['routine', 'Keep it current'],
             ['keep', 'Fees'],
             ['plans', 'Plans'],
             ['stages', 'Your stage'],
