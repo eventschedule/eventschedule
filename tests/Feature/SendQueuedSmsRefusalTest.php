@@ -10,8 +10,8 @@ use Tests\TestCase;
 /**
  * Twilio answering 400 with code 21408 ("Permission to send an SMS has not been enabled for the
  * region") is final for that number. The job threw on it, so the worker tried three times and
- * reported each attempt to Sentry. A 4xx refusal now ends the job; a 429, a 5xx or a timeout
- * still throws and is retried.
+ * reported each attempt to Sentry. A refusal about the recipient now ends the job; a 429, a 5xx,
+ * a timeout or a setup Twilio rejects (a bad token, a wrong SID) still throws and is retried.
  */
 class SendQueuedSmsRefusalTest extends TestCase
 {
@@ -57,6 +57,23 @@ class SendQueuedSmsRefusalTest extends TestCase
     public function test_a_rate_limit_still_throws_so_it_is_retried(): void
     {
         $this->twilioAnswers(429, ['code' => 20429, 'status' => 429]);
+
+        $this->expectException(\RuntimeException::class);
+
+        (new SendQueuedSms('+15551234567', 'hello'))->handle();
+    }
+
+    /** A rotated token is wrong for every message on the install: it must not end as one number's refusal. */
+    public function test_a_broken_twilio_setup_still_throws(): void
+    {
+        $badToken = ['code' => 20003, 'message' => 'Authenticate', 'status' => 401];
+        Http::fake(['api.twilio.com/*' => Http::sequence()
+            ->push($badToken, 401)
+            ->push(['code' => 21606, 'message' => 'The From phone number is not a valid, SMS-capable inbound phone number', 'status' => 400], 400)
+            ->push($badToken, 401)]);
+
+        $this->assertSame(SmsService::FAILED, SmsService::send('+15551234567', 'hello'), 'a rotated token');
+        $this->assertSame(SmsService::FAILED, SmsService::send('+15551234567', 'hello'), 'a From number that cannot send');
 
         $this->expectException(\RuntimeException::class);
 

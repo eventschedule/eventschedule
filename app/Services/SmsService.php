@@ -18,14 +18,25 @@ class SmsService
     public const SENT = 'sent';
 
     /**
-     * Twilio turned this message down for good: a 4xx other than 429 (21408 a region the account
-     * may not send to, 21211 a number that is not one, 21610 a recipient who replied STOP).
-     * Sending it again gets the same answer.
+     * Twilio turned this message down for good because of its RECIPIENT (REFUSING_CODES). Sending it
+     * again gets the same answer.
      */
     public const REFUSED = 'refused';
 
-    /** It may go through later: a 429, a 5xx, a timeout, or SMS is not configured. */
+    /**
+     * Anything else: a 429, a 5xx, a timeout, SMS not configured, and every other 4xx. A 401 (a
+     * rotated token), a 404 (a wrong account SID) or a From number that cannot send is wrong for
+     * EVERY message on the install, so it must throw and reach Sentry, never end quietly as one
+     * number's refusal.
+     */
     public const FAILED = 'failed';
+
+    /**
+     * Twilio's codes that are about the number a message is for: 21211 not a valid number, 21265 a
+     * short code, 21408 a region the account may not send to, 21610 a recipient who replied STOP,
+     * 21612 a number Twilio cannot reach, 21614 not a mobile number.
+     */
+    private const REFUSING_CODES = [21211, 21265, 21408, 21610, 21612, 21614];
 
     public static function sendSms(string $to, string $message): bool
     {
@@ -60,7 +71,8 @@ class SmsService
                 return self::SENT;
             }
 
-            $refused = $response->clientError() && $response->status() !== 429;
+            $refused = $response->status() === 400
+                && in_array((int) $response->json('code'), self::REFUSING_CODES, true);
 
             Log::log($refused ? 'warning' : 'error', $refused ? 'Twilio SMS refused' : 'Twilio SMS failed', [
                 'to' => self::maskPhone($to),

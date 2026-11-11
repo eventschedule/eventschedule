@@ -461,6 +461,35 @@ class TicketReminderTest extends TestCase
         $this->assertNull($stale->fresh()->reminder_sent_at);
     }
 
+    /**
+     * A daily series made a one-off on another day, in one save: its sales keep the nights they were
+     * bought for. The saving hook used to move every one of them onto the new day, and the reminder
+     * then told every past night's buyer that the event was tomorrow.
+     */
+    public function test_a_series_made_a_one_off_on_a_new_day_does_not_remind_past_buyers(): void
+    {
+        $event = $this->createRecurringEvent($this->role, [
+            'creator_role_id' => $this->role->id,
+            'starts_at' => now()->subWeeks(3)->setTime(20, 0)->format('Y-m-d H:i:s'),
+        ]);
+        $past = $this->sale($event, ['event_date' => now()->subWeeks(2)->format('Y-m-d')]);
+        $lastWeek = $this->sale($event, ['event_date' => now()->subWeek()->format('Y-m-d')]);
+
+        // One save: no longer recurring, and on tomorrow evening.
+        $event->days_of_week = null;
+        $event->recurring_frequency = null;
+        $event->starts_at = now()->addDay()->setTime(8, 0)->format('Y-m-d H:i:s');
+        $event->save();
+
+        $this->assertSame(now()->subWeeks(2)->format('Y-m-d'), $past->fresh()->event_date, 'kept the night it was bought for');
+        $this->assertSame(now()->subWeek()->format('Y-m-d'), $lastWeek->fresh()->event_date);
+
+        Carbon::setTestNow(now()->addHours(4));
+        $this->sendReminders();
+
+        $this->assertSame([], $this->remindedEmails(), 'nobody who went on a past night is told "tomorrow"');
+    }
+
     public function test_moving_an_event_to_another_time_the_same_day_reminds_again(): void
     {
         $event = $this->eventStartingIn(20);

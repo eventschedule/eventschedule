@@ -577,7 +577,13 @@ class Event extends Model
                     : null;
             }
 
-            if ($model->isDirty('starts_at') && ! $model->days_of_week) {
+            // A one-off that STAYS a one-off. A series made a one-off in the same save (the form and
+            // the API null days_of_week) is left alone: its sales were bought for many dates, and
+            // moving every one of them onto the new day folded every past night's buyers into it,
+            // and app:send-ticket-reminders then told them all that "it is tomorrow". Its sales keep
+            // the dates they were bought for, which the reminders and the ticket page already
+            // expect (Event::matchesDate() turns a date the event no longer has away).
+            if ($model->isDirty('starts_at') && ! $model->days_of_week && ! $model->getOriginal('days_of_week')) {
                 $model->load(['tickets', 'addons', 'sales']);
 
                 // The occurrence moved, so re-key everything that hangs off its date. That key is
@@ -3310,7 +3316,7 @@ class Event extends Model
     public function donationLimits(float $ticketsTotal = 0.0): array
     {
         $currency = $this->ticket_currency_code ?: 'USD';
-        $smallest = 1 / max(1, \App\Utils\MoneyUtils::getSmallestUnitMultiplier($currency));
+        $smallest = 1 / max(1, MoneyUtils::getSmallestUnitMultiplier($currency));
         $gatewayMinimum = $ticketsTotal > 0 ? 0.0 : (float) (payment_gateways()->get($this->payment_method)?->amountLimits($currency)[0] ?? 0);
         $ownLargest = max(array_merge([0], array_map('floatval', (array) ($this->donation_amounts ?? []))));
 
