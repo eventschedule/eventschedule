@@ -5214,6 +5214,7 @@ class MarketingController extends Controller
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (RSVP and $0 tickets)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Yes', false],
                     ],
                     'Integrations' => [
                         ['Newsletters', 'Yes (Free)', 'SMS blasts', false],
@@ -5310,7 +5311,6 @@ class MarketingController extends Controller
                 ],
                 'limits' => [
                     ['tag' => 'No SMS', 'title' => 'Email reaches the crowd, not texts', 'text' => 'Posh can text past attendees, and Event Schedule sends no SMS to guests at all. Your reach here is email: newsletters, the automatic digest of new nights, and the "Notify me" list on each event.'],
-                    ['tag' => 'No promoter links', 'title' => 'Commissions are tracked elsewhere', 'text' => 'There is no promoter program here: no unique link per promoter and no commission ledger. Promo codes on Pro are the nearest tool, with a code for each promoter and a usage limit if you want one.'],
                     ['tag' => 'Door staff are Enterprise', 'title' => 'One login on Free and Pro', 'text' => 'Posh gives door staff a login of their own. Here a viewer, who scans tickets without seeing sales, is a team member, and team members come with Enterprise, at most five on the hosted service.'],
                 ],
                 'faq' => [
@@ -5915,6 +5915,7 @@ class MarketingController extends Controller
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (free tickets)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter or affiliate links', 'Yes (Pro)', 'Yes (affiliates)', false],
                     ],
                     'Customization' => [
                         ['Remove branding', 'Yes (Pro)', 'Selfhost licence, from 499 EUR/yr', false],
@@ -6026,7 +6027,6 @@ class MarketingController extends Controller
                 ],
                 'limits' => [
                     ['tag' => 'A monthly price', 'title' => 'A quiet month still costs Pro', 'text' => 'Hi.Events Cloud charges nothing until a ticket sells, while a priced ticket here needs Pro at '.plan_price($this->planPrice()).'/mo whatever you sell. An organizer who sells only a few paid tickets a year may pay less per ticket there; registering for a free event is free with both.'],
-                    ['tag' => 'No affiliates', 'title' => 'No affiliate tracking', 'text' => 'Hi.Events tracks affiliates who sell tickets on your behalf, and Event Schedule has nothing like it. The closest tool is a promo code on Pro, one per partner if you want, each with its own usage limit.'],
                     ['tag' => 'Credit stays on selfhost', 'title' => 'No licence takes our credit off', 'text' => 'Hi.Events sells a licence, from 499 EUR a year, that removes its link from a selfhosted install. Our license requires an attribution credit on every selfhosted install and nothing removes it there, though on the hosted service Pro takes the Event Schedule branding off.'],
                 ],
                 'faq' => [
@@ -8666,6 +8666,7 @@ class MarketingController extends Controller
             ['page' => 'Managing Schedules', 'section' => 'Followers', 'description' => 'Manage your audience, follow links and the Account badge.', 'url' => $r['managing_schedules'].'#followers', 'category' => 'User Guide', 'keywords' => 'subscribers audience follow account badge remove'],
             ['page' => 'Managing Schedules', 'section' => 'Team', 'description' => 'Invite team members as admins or viewers: who sees sales and refunds, who runs check-in, and who can scan tickets at the door.', 'url' => $r['managing_schedules'].'#team', 'category' => 'User Guide', 'keywords' => 'members permissions collaborate admin viewer access level staff door scanner sales refunds'],
             ['page' => 'Managing Schedules', 'section' => 'Transferring Ownership', 'description' => 'Hand a schedule and everything on it to another account, with the new owner accepting by email.', 'url' => $r['managing_schedules'].'#transfer-ownership', 'category' => 'User Guide', 'keywords' => 'transfer ownership hand over change owner give away new owner sell venue'],
+            ['page' => 'Managing Schedules', 'section' => 'Promoters', 'description' => 'Give each person who sells for you their own link, and see the clicks, tickets, revenue and commission each one brought in.', 'url' => $r['managing_schedules'].'#promoters', 'category' => 'User Guide', 'keywords' => 'promoter promoters affiliate referral tracking link via street team commission ambassador sales attribution'],
             ['page' => 'Managing Schedules', 'section' => 'Plan', 'description' => 'View and manage your subscription plan.', 'url' => $r['managing_schedules'].'#plan', 'category' => 'User Guide', 'keywords' => 'subscription billing upgrade'],
             ['page' => 'Managing Schedules', 'section' => 'Ads on Free Schedules', 'description' => 'Why some sites show ads on free schedules, where they never appear, and how to switch them off.', 'url' => $r['managing_schedules'].'#plan-ads', 'category' => 'User Guide', 'keywords' => 'ads adsense advertising free plan remove ads ad-free upgrade pro'],
             ['page' => 'Managing Schedules', 'section' => 'Audit Log', 'description' => 'Track who changed what on your schedule, with filters and per-entry details.', 'url' => $r['managing_schedules'].'#audit-log', 'category' => 'User Guide', 'keywords' => 'audit log activity history changes tracking who'],

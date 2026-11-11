@@ -12,7 +12,7 @@ class CaptureUtmParameters
     /**
      * The cross-session attribution cookies, and how long they live once consented to.
      */
-    private const ATTRIBUTION_COOKIES = ['utm_params', 'utm_referrer_url', 'utm_landing_page'];
+    private const ATTRIBUTION_COOKIES = ['utm_params', 'utm_referrer_url', 'utm_landing_page', \App\Services\PromoterLinks::COOKIE];
 
     private const COOKIE_MINUTES = 60 * 24 * 30;
 

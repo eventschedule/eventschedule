@@ -346,6 +346,9 @@
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date ?? $event->saleEventDateFromStartsAt() }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
+        @if ($promoterVia = \App\Services\PromoterLinks::codeForForm(request(), $event))
+        <input type="hidden" name="via" value="{{ $promoterVia }}">
+        @endif
         <x-honeypot />
         @if (request()->embed)
         <input type="hidden" name="embed" value="true">

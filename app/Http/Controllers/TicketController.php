@@ -914,7 +914,7 @@ class TicketController extends Controller
 
         $filter = strtolower(request()->filter ?? '');
         $includePast = request()->query('include_past') == 1;
-        $sales = $this->salesQuery($filter, primaryOnly: false, includePast: $includePast)->orderBy('created_at', 'DESC')->get();
+        $sales = $this->salesQuery($filter, primaryOnly: false, includePast: $includePast)->with('promoterLink')->orderBy('created_at', 'DESC')->get();
 
         // First pass: collect unique custom field names
         $customFieldNames = [];
@@ -972,7 +972,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Donation', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Order ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires', 'Seats'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Donation', 'Promoter', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Order ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires', 'Seats'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -1006,6 +1006,7 @@ class TicketController extends Controller
                     CsvUtils::sanitizeCell($sale->giftCard ? $sale->giftCard->formattedCode() : ''),
                     $sale->gift_card_amount ? number_format($sale->gift_card_amount, 2, '.', '') : '',
                     $sale->donation_amount ? number_format($sale->donation_amount, 2, '.', '') : '',
+                    CsvUtils::sanitizeCell($sale->promoterLink?->name ?? ''),
                     CsvUtils::sanitizeCell($sale->transaction_reference),
                     CsvUtils::sanitizeCell($sale->payment_method),
                     $sale->status,
@@ -1783,6 +1784,9 @@ class TicketController extends Controller
             $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);
         }
 
+        // The promoter whose link brought the buyer, for the event's own schedule only.
+        $sale->promoter_link_id = \App\Services\PromoterLinks::linkFor($request, $event)?->id;
+
         if (! $sale->event_date) {
             $sale->event_date = $event->saleEventDateFromStartsAt();
         }
@@ -2182,6 +2186,7 @@ class TicketController extends Controller
                     $guestSale->payment_amount = max(0, $seatPrices[$g] - $seatVolumeShares[$g] - $seatPromoShares[$g] - $seatGiftShares[$g]);
                     $guestSale->status = $sale->status ?? 'unpaid';
                     $guestSale->group_id = $sale->id;
+                    $guestSale->promoter_link_id = $sale->promoter_link_id;
                     if ($promoCodeId) {
                         $guestSale->promo_code_id = $promoCodeId;
                     }
@@ -2518,6 +2523,8 @@ class TicketController extends Controller
                     $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);
                 }
 
+                $sale->promoter_link_id = \App\Services\PromoterLinks::linkFor($request, $event)?->id;
+
                 if (! $sale->event_date) {
                     $sale->event_date = $event->saleEventDateFromStartsAt();
                 }
@@ -2565,6 +2572,7 @@ class TicketController extends Controller
                         $guestSale->payment_amount = 0;
                         $guestSale->status = 'paid';
                         $guestSale->group_id = $sale->id;
+                        $guestSale->promoter_link_id = $sale->promoter_link_id;
 
                         // Copy event-level custom values from primary sale
                         for ($cv = 1; $cv <= 10; $cv++) {

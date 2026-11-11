@@ -250,6 +250,7 @@ class HelpUtils
         '{subdomain}/team/add-member' => '/docs/managing-schedules#team',
         '{subdomain}/team/transfer' => '/docs/managing-schedules#transfer-ownership',
         'schedule-transfer/*' => '/docs/managing-schedules#transfer-ownership',
+        '{subdomain}/promoters' => '/docs/managing-schedules#promoters',
         '{subdomain}/plan' => '/docs/managing-schedules#plan',
         '{subdomain}/audit-log' => '/docs/managing-schedules#audit-log',
         '{subdomain}/videos' => '/docs/managing-schedules#videos',

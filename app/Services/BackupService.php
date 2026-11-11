@@ -340,6 +340,7 @@ class BackupService
             'newsletter_unsubscribes' => $unsubscribesData,
             'role_subscribers' => $subscribersData,
             'gift_cards' => $this->exportGiftCards($role),
+            'promoter_links' => $this->exportPromoterLinks($role),
             'appointment_types' => $this->exportAppointmentTypes($role),
             // Templates, exported with the schedule that owns them. The per-occurrence snapshots
             // travel with their event, because that is what they belong to.
@@ -590,6 +591,21 @@ class BackupService
         })->toArray();
     }
 
+    /** The schedule's promoter links: the sales that cite one carry `_promoter_link_ref_id`. */
+    private function exportPromoterLinks(Role $role): array
+    {
+        return \App\Models\PromoterLink::where('role_id', $role->id)->get()->map(fn ($link) => [
+            '_ref_id' => $link->id,
+            'name' => $link->name,
+            'code' => $link->code,
+            'commission_percent' => $link->commission_percent,
+            'clicks' => $link->clicks,
+            'first_click_at' => $link->first_click_at?->toDateTimeString(),
+            'archived_at' => $link->archived_at?->toDateTimeString(),
+            'created_at' => $link->created_at?->toDateTimeString(),
+        ])->all();
+    }
+
     private function exportGiftCards(Role $role): array
     {
         return GiftCard::where('role_id', $role->id)->get()->map(function ($card) {
@@ -758,6 +774,7 @@ class BackupService
                 '_ref_id' => $sale->id,
                 '_promo_code_ref_id' => $sale->promo_code_id,
                 '_gift_card_ref_id' => $sale->gift_card_id,
+                '_promoter_link_ref_id' => $sale->promoter_link_id,
                 '_group_ref_id' => $sale->group_id,
                 '_order_ref_id' => $sale->order_id,
                 '_newsletter_ref_id' => $sale->newsletter_id,
@@ -1285,6 +1302,7 @@ class BackupService
             'tickets' => [],
             'promo_codes' => [],
             'gift_cards' => [],
+            'promoter_links' => [],
             'appointment_types' => [],
             'sales' => [],
             'parts' => [],
@@ -1324,6 +1342,33 @@ class BackupService
                     $plan = $this->importSeatingPlan($planData, $role, $idMap);
                     if (isset($planData['_ref_id'])) {
                         $idMap['seating_plans'][$planData['_ref_id']] = $plan->id;
+                    }
+                } catch (\Exception $e) {
+                    report($e);
+                }
+            }
+
+            // Promoter links before events, too: sales reference them by promoter_link_id. A code
+            // that does not fit is left out rather than failing the restore.
+            foreach ($scheduleData['promoter_links'] ?? [] as $linkData) {
+                try {
+                    $code = \App\Services\PromoterLinks::cleanCode($linkData['code'] ?? null);
+                    $name = trim((string) ($linkData['name'] ?? ''));
+                    if ($code === null || $name === '' || \App\Services\PromoterLinks::codeTaken($role, $code)) {
+                        continue;
+                    }
+                    $link = new \App\Models\PromoterLink([
+                        'role_id' => $role->id,
+                        'name' => mb_substr($name, 0, 100),
+                        'code' => $code,
+                        'commission_percent' => is_numeric($linkData['commission_percent'] ?? null) ? max(0, min(100, (float) $linkData['commission_percent'])) : null,
+                    ]);
+                    $link->clicks = max(0, (int) ($linkData['clicks'] ?? 0));
+                    $link->first_click_at = ! empty($linkData['first_click_at']) ? \Carbon\Carbon::parse($linkData['first_click_at']) : null;
+                    $link->archived_at = ! empty($linkData['archived_at']) ? \Carbon\Carbon::parse($linkData['archived_at']) : null;
+                    $link->save();
+                    if (isset($linkData['_ref_id'])) {
+                        $idMap['promoter_links'][$linkData['_ref_id']] = $link->id;
                     }
                 } catch (\Exception $e) {
                     report($e);
@@ -2595,6 +2640,11 @@ class BackupService
             $sale->gift_card_id = $idMap['gift_cards'][$giftCardRefId];
             $sale->gift_card_amount = $data['gift_card_amount'] ?? null;
         }
+        $promoterRefId = $data['_promoter_link_ref_id'] ?? null;
+        if ($promoterRefId && isset($idMap['promoter_links'][$promoterRefId])) {
+            $sale->promoter_link_id = $idMap['promoter_links'][$promoterRefId];
+        }
+
         // The donation is already inside payment_amount; this keeps it as its own figure.
         $sale->donation_amount = is_numeric($data['donation_amount'] ?? null) && (float) $data['donation_amount'] > 0 ? (float) $data['donation_amount'] : null;
 

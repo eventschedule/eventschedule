@@ -58,6 +58,7 @@ class PersonalDataExportService
         'newsletters' => 'Content the user wrote for a schedule, exported with its backup.',
         'owner_digests' => 'Bookkeeping of which weekly digest was sent.',
         'password_reset_tokens' => 'Credentials.',
+        'promoter_links' => 'A schedule\'s promoter links (the name the organizer gave each, its code and its click count): settings of the schedule, exported with its backup and deleted with it.',
         'roles' => 'Schedules; summarised under schedules, the full content is in the schedule backup.',
         'sale_refunds' => 'Refund bookkeeping, summarised on each purchase.',
         'support_messages' => 'Exported inside support_conversations.',

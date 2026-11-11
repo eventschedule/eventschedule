@@ -1113,6 +1113,9 @@
                                                      (EventController), and a venue or performer schedule an organizer lists on
                                                      their own event (EventRepo), so it is offered in their lists next time. --}}
                                                 <p>
+                                                    If you reach a schedule through one of its promoter links (an address ending in <span class="es-fine-chip">?via=</span> and a code), and then buy a ticket or register for one of that schedule's own events, the schedule owner sees which promoter link your purchase came through, beside the purchase they see in any case. The link is remembered for your visit, and for 30 days if you allow marketing cookies.
+                                                </p>
+                                                <p>
                                                     Signing up for a schedule's email updates works the same way: the schedule owner sees the address you enter, and confirming the link we send also sets up an account for you that follows the schedule. Submitting an event to a curator's schedule makes you a follower too, as the submission form says, and so does listing another schedule's venue or performer on an event you create, so it appears in your lists. Buying a ticket, RSVPing, or posting a comment, photo or video does not make you a follower.
                                                 </p>
                                                 {{-- The owner's Realtime tab. Same predicate as the live-view paragraph under
@@ -1276,6 +1279,7 @@
                                                                 google_analytics_enabled() ? ['Analytics', '_ga, _ga_<measurement-id>', 'Google Analytics: tells visits and visitors apart. Up to 2 years, and deleted when you withdraw.'] : null,
                                                                 ['Analytics', 'es_hero, es_hero_clicked', 'Session storage: which homepage headline you saw and whether you then clicked sign up. Until the tab closes.'],
                                                                 ['Marketing', 'utm_params, utm_referrer_url, utm_landing_page', 'Which link, campaign or site brought you here, credited if you later create an account or buy a ticket. 30 days.'],
+                                                                ['Marketing', 'es_via', 'The promoter link that brought you to a schedule, credited to that promoter if you buy a ticket for one of its events. 30 days.'],
                                                                 ['Marketing', 'es_attribution', 'The same, written by your browser for the step from our marketing pages to sign-up: the page you landed on, the site that sent you, campaign and referral tags, and the homepage headline you saw. Until the browser closes; at most 2 KB.'],
                                                                 ['Marketing', '_fbp, _fbc', 'The Meta Pixel, on the pages of Boosted events. Up to 90 days, and deleted when you withdraw.'],
                                                                 ['Marketing', '__gads, __gpi, __eoi', 'Google AdSense, on free schedules where ads are switched on. Up to 13 months, and deleted when you withdraw.'],

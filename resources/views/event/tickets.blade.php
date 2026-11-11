@@ -1360,6 +1360,10 @@
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
+        {{-- The promoter link this visit came through (PromoterLinks): an embedded checkout may keep no session. --}}
+        @if ($promoterVia = \App\Services\PromoterLinks::codeForForm(request(), $event))
+        <input type="hidden" name="via" value="{{ $promoterVia }}">
+        @endif
         {{-- vmodel: the waitlist panel below sits inside this form and posts by fetch,
              so joinWaitlist() reads the same field rather than rendering a second one. --}}
         <x-honeypot vmodel="website" />

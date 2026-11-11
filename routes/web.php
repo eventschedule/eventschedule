@@ -30,6 +30,7 @@ use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventbriteController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventFeedController;
+use App\Http\Controllers\PromoterLinkController;
 use App\Http\Controllers\EventInterestController;
 use App\Http\Controllers\EventTemplateController;
 use App\Http\Controllers\FeedbackController;
@@ -953,6 +954,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/team/transfer', [RoleController::class, 'storeTransfer'])->name('role.transfer.store')->middleware('throttle:5,1');
     Route::post('/{subdomain}/team/transfer/cancel', [RoleController::class, 'cancelTransfer'])->name('role.transfer.cancel');
     Route::post('/{subdomain}/team/transfer/resend', [RoleController::class, 'resendTransfer'])->name('role.transfer.resend')->middleware('throttle:5,1');
+    // Promoter links: their list is a tab of the schedule (role.view_admin, tab "promoters");
+    // these answer its forms. For the owner and the admins, checked in the controller.
+    Route::post('/{subdomain}/promoters', [PromoterLinkController::class, 'store'])->name('role.promoters.store')->where('subdomain', '(?!admin(?=/|$))[^/]+');
+    Route::put('/{subdomain}/promoters/{hash}', [PromoterLinkController::class, 'update'])->name('role.promoters.update')->where('subdomain', '(?!admin(?=/|$))[^/]+');
+    Route::post('/{subdomain}/promoters/{hash}/archive', [PromoterLinkController::class, 'archive'])->name('role.promoters.archive')->where('subdomain', '(?!admin(?=/|$))[^/]+');
+    Route::post('/{subdomain}/promoters/{hash}/restore', [PromoterLinkController::class, 'restore'])->name('role.promoters.restore')->where('subdomain', '(?!admin(?=/|$))[^/]+');
     // Feeds: the addresses a schedule keeps reading for events. Their list is a tab of the
     // schedule (role.view_admin, tab "feeds"); these are what changes one. For the owner and the
     // admins, checked in the controller. The check is throttled: it fetches somebody else's server.
@@ -1053,7 +1060,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     $adminTabSubdomain = config('app.is_nexus')
         ? '(?!docs(?=/|$)|features(?=/|$)|admin(?=/|$))[^/]+'
         : '(?!docs(?=/|$)|admin(?=/|$))[^/]+';
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|feeds|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|feeds|followers|team|promoters|plan|videos')->where('subdomain', $adminTabSubdomain);
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image')->middleware('throttle:60,1');
 

@@ -64,6 +64,7 @@ class PageQueryScalingTest extends TestCase
         'requests tab' => 29, // 26
         'followers tab' => 38, // 34
         'team tab' => 30, // 27
+        'promoters tab' => 35, // 32
         'plan tab' => 31, // 28
         'availability tab' => 31, // 28
         'appointments tab' => 36, // 32
@@ -163,7 +164,9 @@ class PageQueryScalingTest extends TestCase
             $event->roles()->attach($this->talent->id, ['is_accepted' => true]);
             $event->roles()->attach($this->curator->id, ['is_accepted' => true]);
             $ticket = $this->createTicket($event, ['price' => 10 + $i, 'quantity' => 100]);
-            $this->createSale($event, $this->venue, ['name' => 'Buyer '.$i, 'email' => "buyer{$i}@gmail.com", 'payment_amount' => 10 + $i], $ticket);
+            // A promoter link per round, credited with the round's sale (the Promoters tab).
+            $promoter = \App\Models\PromoterLink::create(['role_id' => $this->venue->id, 'name' => 'Promoter '.$i, 'code' => 'promoter-'.$i, 'commission_percent' => 10]);
+            $this->createSale($event, $this->venue, ['name' => 'Buyer '.$i, 'email' => "buyer{$i}@gmail.com", 'payment_amount' => 10 + $i, 'promoter_link_id' => $promoter->id], $ticket);
             $this->events[] = $event;
 
             $this->createRecurringEvent($this->venue, ['name' => 'Weekly '.$i, 'creator_role_id' => $this->venue->id, 'days_of_week' => '0000100']);
@@ -225,7 +228,7 @@ class PageQueryScalingTest extends TestCase
             'guest calendar events api', 'guest past events api', 'guest curator page',
             'guest rss feed', 'guest ical feed', 'guest schedule sitemap', 'guest request form', 'guest booking page',
             // The admin portal
-            'dashboard', 'following', 'schedule tab', 'requests tab', 'followers tab', 'team tab', 'plan tab',
+            'dashboard', 'following', 'schedule tab', 'requests tab', 'followers tab', 'team tab', 'promoters tab', 'plan tab',
             'availability tab', 'appointments tab', 'schedule settings', 'event form', 'sales', 'analytics',
             'realtime data', 'realtime summary', 'realtime activity', 'newsletters', 'boost', 'account settings',
             'check-in stats',
@@ -293,7 +296,7 @@ class PageQueryScalingTest extends TestCase
 
             'dashboard' => $this->actingAs($owner)->get(route('home')),
             'following' => $this->actingAs($owner)->get(route('following')),
-            'schedule tab', 'requests tab', 'followers tab', 'team tab', 'plan tab', 'availability tab', 'appointments tab' => $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $sub, 'tab' => explode(' ', $page)[0]])),
+            'schedule tab', 'requests tab', 'followers tab', 'team tab', 'promoters tab', 'plan tab', 'availability tab', 'appointments tab' => $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $sub, 'tab' => explode(' ', $page)[0]])),
             'schedule settings' => $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $sub])),
             'event form' => $this->actingAs($owner)->get(route('event.edit', ['subdomain' => $sub, 'hash' => UrlUtils::encodeId($event->id)])),
             'sales' => $this->actingAs($owner)->get(route('sales')),

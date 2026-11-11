@@ -33,6 +33,10 @@
             <x-doc-nav-link href="#team-leaving">When someone leaves</x-doc-nav-link>
             <x-doc-nav-link href="#transfer-ownership">Transferring Ownership</x-doc-nav-link>
         </x-doc-nav-group>
+        <x-doc-nav-group label="Promoters" href="#promoters">
+            <x-doc-nav-link href="#promoters-add">Adding a link</x-doc-nav-link>
+            <x-doc-nav-link href="#promoters-counts">What is counted</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-link href="#plan">Plan</x-doc-nav-link>
         <x-doc-nav-link href="#audit-log">Audit Log</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
@@ -837,6 +841,42 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             <strong class="text-gray-900 dark:text-white">Billing on eventschedule.com.</strong> The previous owner is never charged for the schedule again: their subscription is cancelled at the end of the billing period already paid for and their saved card is removed. The schedule keeps its plan until that period ends. Before then the new owner adds their own billing details to keep it, otherwise the schedule moves to the free plan. Selfhosted installs have no billing step at all.
         </p>
+    </section>
+
+    <!-- Promoters -->
+    <section id="promoters" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+            </svg>
+            Promoters <x-doc-badge plan="pro" />
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The <strong class="text-gray-900 dark:text-white">Promoters</strong> tab gives each person who sells tickets for you a link of their own: a street team, a DJ with a following, a partner organization. When somebody follows a promoter's link and then buys a ticket, or registers for a free event, the sale is credited to that promoter, and the tab shows how many people each link brought, the tickets they bought, the revenue, and the commission it earned. It is open to the schedule's owner and admins.
+        </p>
+
+        <h3 id="promoters-add" class="doc-subheading">Adding a link</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>The first time, the form is the page; after that, click <strong>Add link</strong> at the top. Enter the promoter's <strong>Name</strong>. The <strong>Code</strong> is what goes after <code>?via=</code> in the link; leave it empty and one is made from the name. Codes use letters, numbers, dashes and underscores, and each is used once on a schedule.</li>
+            <li>Optionally set a <strong>Commission (%)</strong>. The tab works out what each promoter has earned; paying it is up to you, outside Event Schedule.</li>
+            <li>Click <strong>Add link</strong>, then <strong>Copy link</strong> on its row and send it to the promoter.</li>
+        </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <strong class="text-gray-900 dark:text-white">Copied links lead to</strong>, above the list once the schedule has coming events with tickets or free registration, chooses where every copied link leads: the whole schedule, or one of those events. It changes the links, not the figures. The code is the same either way, so a promoter can use one link for the schedule and another for a single event. Once somebody has followed a link its code can no longer change, because it is already out in the world; the name and commission can. <strong>Archive</strong> stops a link counting new visits and sales, and keeps what it earned on the list.
+        </p>
+
+        <h3 id="promoters-counts" class="doc-subheading">What is counted</h3>
+        <ul class="doc-list mb-6">
+            <li><strong>Clicks</strong> are visits through the link, once per visit. Search engines and other crawlers are not counted.</li>
+            <li>A sale is credited to the last promoter link the buyer followed on this schedule. It is kept for the visit, and for 30 days when the visitor has allowed marketing cookies.</li>
+            <li>Only this schedule's own events count. An event the schedule only lists, made by another schedule, is not credited to its links.</li>
+            <li><strong>Tickets</strong> and <strong>Revenue</strong> come from paid sales: refunds are taken off, and <a href="{{ route('marketing.docs.tickets') }}#donations" class="doc-link">donations</a> are left out. Revenue in more than one currency is listed per currency. The <strong>Promoter</strong> column of the sales export names the link behind each sale.</li>
+        </ul>
+
+        <div class="doc-callout doc-callout-plan mb-6">
+            <div class="doc-callout-title">Promoter links need Pro <x-doc-badge plan="pro" /></div>
+            <p>On eventschedule.com promoter links are part of the Pro and Enterprise plans. If a schedule leaves Pro, its links stay listed with what they earned, but no new sale is credited until it is back on Pro. Selfhosted installs have them without a subscription.</p>
+        </div>
     </section>
 
     <!-- Plan -->

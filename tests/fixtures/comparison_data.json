@@ -7780,6 +7780,12 @@
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
                 ]
             ],
             "Integrations": [
@@ -7940,11 +7946,6 @@
                 "tag": "No SMS",
                 "title": "Email reaches the crowd, not texts",
                 "text": "Posh can text past attendees, and Event Schedule sends no SMS to guests at all. Your reach here is email: newsletters, the automatic digest of new nights, and the \"Notify me\" list on each event."
-            },
-            {
-                "tag": "No promoter links",
-                "title": "Commissions are tracked elsewhere",
-                "text": "There is no promoter program here: no unique link per promoter and no commission ledger. Promo codes on Pro are the nearest tool, with a code for each promoter and a usage limit if you want one."
             },
             {
                 "tag": "Door staff are Enterprise",
@@ -9151,6 +9152,12 @@
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Promoter or affiliate links",
+                    "Yes (Pro)",
+                    "Yes (affiliates)",
+                    false
                 ]
             ],
             "Customization": [
@@ -9354,11 +9361,6 @@
                 "tag": "A monthly price",
                 "title": "A quiet month still costs Pro",
                 "text": "Hi.Events Cloud charges nothing until a ticket sells, while a priced ticket here needs Pro at $5/mo whatever you sell. An organizer who sells only a few paid tickets a year may pay less per ticket there; registering for a free event is free with both."
-            },
-            {
-                "tag": "No affiliates",
-                "title": "No affiliate tracking",
-                "text": "Hi.Events tracks affiliates who sell tickets on your behalf, and Event Schedule has nothing like it. The closest tool is a promo code on Pro, one per partner if you want, each with its own usage limit."
             },
             {
                 "tag": "Credit stays on selfhost",

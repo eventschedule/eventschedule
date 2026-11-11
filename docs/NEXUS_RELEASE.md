@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-promoter-links-2026-11-11) | not yet | One migration (in the start command); nothing after |
 | [Unreleased](#unreleased-donations-at-checkout-2026-11-11) | not yet | One migration (in the start command); nothing after |
 | [Unreleased](#unreleased-apple-wallet-passes-2026-11-11) | not yet | Nothing until you choose to switch it on (env vars in the app spec) |
 | [Unreleased](#unreleased-ticket-reminders-2026-11-10) | not yet | One migration (in the start command); after: watch the first hourly run's mail volume and bounces |
@@ -100,6 +101,20 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: promoter links (2026-11-11)
+
+**What ships:** a Promoters tab on each schedule (Pro; owners and admins): a link per promoter,
+`?via=CODE` on any of the schedule's guest pages, with clicks, tickets, revenue and an optional
+commission per link. A sale is credited only for the schedule's own events, while it is Pro.
+Nothing is credited until an owner adds a link, so nothing changes for anyone at deploy. The
+privacy policy (clause 06 and the cookie table) names the new `es_via` cookie, set only with
+marketing consent.
+
+**Migration** (the start command runs it):
+- `2026_11_11_000002_create_promoter_links`: a new `promoter_links` table and a nullable,
+  indexed `sales.promoter_link_id` (no foreign key). Adding the index builds it online on
+  MySQL 8 (in place, concurrent reads and writes), so `sales` is not copied or locked.
 
 ## Unreleased: donations at checkout (2026-11-11)
 

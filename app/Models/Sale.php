@@ -253,6 +253,12 @@ class Sale extends Model
         return $this->belongsTo(Event::class);
     }
 
+    /** The promoter link the buyer arrived through (the schedule's Promoters tab), if any. */
+    public function promoterLink()
+    {
+        return $this->belongsTo(PromoterLink::class);
+    }
+
     public function refunds()
     {
         return $this->hasMany(SaleRefund::class);
@@ -790,6 +796,8 @@ class Sale extends Model
         // its own field rather than by widening payment_amount: the primary/guest contract above
         // is what stops a subscriber double-counting, and inflating a leg primary's total to the
         // order's would break it for anyone summing across an order.
+        // The promoter link the buyer arrived through, as the id the Promoters tab knows it by.
+        $data->promoter_link_id = $this->promoter_link_id ? UrlUtils::encodeId($this->promoter_link_id) : null;
         $data->order_id = $this->order_id ? UrlUtils::encodeId($this->order_id) : null;
         $data->is_order_primary = $this->isOrderPrimary();
 

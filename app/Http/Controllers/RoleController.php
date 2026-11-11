@@ -2230,6 +2230,9 @@ class RoleController extends Controller
             return $this->viewGuestUnclaimed($request, $role, $slug, $id, $date);
         }
 
+        // ?via=CODE: the promoter whose link brought this visitor (the schedule's Promoters tab).
+        \App\Services\PromoterLinks::capture($request, $role);
+
         // The embeddable signup form (issue #125). Answered here, before any event, calendar or
         // analytics work: it renders nothing but the subscribe panel, and like every embed it is
         // not a page view. Root only, so ?form= on an event URL keeps meaning nothing.
@@ -3962,7 +3965,28 @@ class RoleController extends Controller
             && auth()->user()->isEditor($subdomain)
             && \App\Utils\ImportOptions::scheduleIsEmpty($role);
 
+        // The Promoters tab: the schedule's links, what each brought in, and the events a link may
+        // point at (its own coming events with tickets or registration: a link to an event it only lists would earn
+        // nothing, Event::ticketingRole()). Built on that tab alone.
+        $promoters = null;
+        if ($tab === 'promoters') {
+            $promoterLinks = \App\Models\PromoterLink::where('role_id', $role->id)
+                ->orderByRaw('archived_at IS NOT NULL')->orderBy('name')->get();
+            $promoters = [
+                'links' => $promoterLinks,
+                'stats' => \App\Services\PromoterLinks::stats($role, $promoterLinks),
+                'events' => $role->ownEvents()
+                    ->with(['roles', 'creatorRole'])
+                    ->where(fn ($query) => $query->where('events.tickets_enabled', true)->orWhere('events.rsvp_enabled', true))
+                    ->where(fn ($query) => $query->where('events.starts_at', '>=', now()->subDay())->orWhereNotNull('events.days_of_week'))
+                    ->orderBy('events.starts_at')
+                    ->limit(50)
+                    ->get(),
+            ];
+        }
+
         return view('role/show-admin', compact(
+            'promoters',
             'subdomain',
             'role',
             'tab',

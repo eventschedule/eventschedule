@@ -132,6 +132,8 @@
             'feeds' => $isEditorHere && (($feedsCount ?? 0) > 0 || $tab == 'feeds') ? ['label' => __('messages.feeds_tab'), 'count' => $feedsWaiting ?? 0, 'waiting' => true] : null,
             'followers' => $isEditorHere && (config('app.hosted') || config('app.is_testing') || $subscribersCount) ? ['label' => __('messages.followers'), 'count' => count($followers) + $subscribersCount] : null,
             'team' => $isEditorHere ? ['label' => __('messages.team'), 'count' => count($members) > 1 ? count($members) : 0] : null,
+            // Pro. Kept for a schedule that has links from when it was, so what they earned stays readable.
+            'promoters' => $isEditorHere && ($role->isPro() || $tab == 'promoters' || \App\Models\PromoterLink::where('role_id', $role->id)->exists()) ? ['label' => __('messages.promoters')] : null,
             'plan' => $isEditorHere && config('app.hosted') ? ['label' => __('messages.plan')] : null,
         ]);
     @endphp
@@ -448,6 +450,8 @@
     @include('role.show-admin-followers')
     @elseif ($tab == 'team')
     @include('role.show-admin-team')
+    @elseif ($tab == 'promoters')
+    @include('role.show-admin-promoters')
     @elseif ($tab == 'videos')
     @include('role.show-admin-videos')
     @elseif ($tab == 'plan')
