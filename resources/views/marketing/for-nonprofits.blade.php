@@ -277,6 +277,22 @@
                 'a' => 'At an event\'s checkout, yes, and only there. On Pro a buyer can add a donation to their tickets, and a free ticket with donations switched on lets people pay what they want. Event Schedule does not process standalone donations, issue tax receipts or keep a donor database. What it does well is the event side of fundraising: the gala with a supporter ticket and a table of eight, the sponsored walk with capped places, and the page people keep coming back to for the next date. If your donations run through another tool, link to it from the event description.',
             ],
             [
+                'q' => 'How do you price tickets for a charity gala?',
+                'a' => 'Work back from the goal. Agree what the night must raise after costs, find the cost per head of the room (venue, food, drink) and add the fixed costs (sound, printing, insurance). A supporter ticket at about one and a half times the cost per head covers the evening with a little over, a table of eight gets a small saving per seat, and one cheap ticket with a small quantity keeps the room from being only donors. The rest of the goal comes from sponsors, donations added at checkout and what happens in the room, such as an auction. Divide the costs by everything that came in and you have the cost to raise each unit, the figure to compare year on year.',
+            ],
+            [
+                'q' => 'Can people pay what they want for a community event?',
+                'a' => 'Yes, on Pro. Give the event a free ticket type and switch on Ask for a donation at checkout: the ticket reads "Free · donations welcome", and each person pays what they choose, or nothing. You set up to three suggested amounts and decide whether people may type their own. Donations are taken through Stripe, PayPal, Payfast or Razorpay, and a donation with a free ticket must be at least the provider\'s smallest charge. A donation is added on the event\'s own checkout, so it cannot be combined with other events in one cart.',
+            ],
+            [
+                'q' => 'Does Event Schedule issue tax receipts for donations?',
+                'a' => 'No. A donation added at checkout appears as its own line in the buyer\'s total and in their confirmation email, which thanks them for it, and in the Donation column of the sales export on Pro. A formal receipt for a tax claim comes from your accounting or donor system, which can take its figures from that export. Also worth knowing: in many countries only the part of a gala ticket above the value of what the guest receives (the dinner, the show) counts as a gift, and the rules differ from place to place, so ask your accountant how to word the ticket.',
+            ],
+            [
+                'q' => 'Can volunteers sign up for a specific job on a shift?',
+                'a' => 'Yes, with ticket types priced at zero, which are free on every plan. Choose Sell tickets on the event and add one type per job, each with its own number of places and description, for example Sorting with 8 places and Driver with 3. Each type can ask its own questions. What Event Schedule does not do is the rest of volunteer management: it does not assign people to jobs they did not pick, log hours, or keep background checks and training records.',
+            ],
+            [
                 'q' => 'Where does the ticket money go?',
                 'a' => 'Straight to the organization. On Pro, a ticket is paid into your own Stripe or PayPal account, billed through your own Invoice Ninja company, taken by a payment link you control, or collected in cash at the door, chosen per event. Your payment provider charges its own processing fee, and Event Schedule adds nothing on top. If a guest cannot come, refund them from the Sales page: a Stripe, PayPal or Razorpay sale goes back through the provider in full or in part, and any other method is marked as refunded so your records stay straight.',
             ],
@@ -294,7 +310,7 @@
             ],
             [
                 'q' => 'Can we show our sponsors?',
-                'a' => 'Yes, on Pro. Sponsor and partner logos sit on the schedule page with tiers, so the headline sponsor of the gala is not the same size as the local bakery that gave the raffle prize. Sponsors also get what every visitor gets: an event page they can share with their own staff.',
+                'a' => 'Yes, on Pro. Sponsor and partner logos sit on the schedule page in Gold, Silver and Bronze tiers, so the headline sponsor of the gala is not the same size as the local bakery that gave the raffle prize. One event can also show sponsors of its own instead of the schedule\'s, which suits a gala with its own backers. Sponsors also get what every visitor gets: an event page they can share with their own staff.',
             ],
             [
                 'q' => 'Who owns our supporters\' data?',
@@ -305,7 +321,10 @@
         $dotSections = [
             ['top', 'Where it goes'],
             ['gala', 'The gala'],
+            ['price', 'Pricing the night'],
+            ['timeline', 'The run-up'],
             ['free', 'The free half'],
+            ['volunteers', 'Volunteers'],
             ['supporters', 'Supporters'],
             ['programs', 'Programs'],
             ['honest', 'What it is not'],
@@ -479,12 +498,194 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. The free half (02)                                        -->
+    <!-- 2b. Pricing the night from the goal (02)                     -->
+    <!-- ============================================================ -->
+    @php
+        // Worked example, illustrative amounts with no currency: the goal, the cost of
+        // the room and where the rest comes from. Rows add up to the goal exactly:
+        // 2,800 + 6,000 + 1,500 + 1,500 + 8,200 = 20,000, and gross 35,000 - costs 15,000.
+        $galaMath = [
+            ['Ticket sales', '120 supporters at 95, 64 table seats at 90, 16 students at 40', '17,800'],
+            ['Less the cost of the night', '60 a head for 200 guests, plus 3,000 for sound, printing and insurance', '-15,000'],
+            ['What the tickets leave', 'The tickets cover the room and a little more', '2,800'],
+            ['Sponsors', 'A headline sponsor and two smaller ones', '6,000'],
+            ['Donations added at checkout', 'Say 50 orders add 30', '1,500'],
+            ['Raffle strips, sold as an add-on', 'Say 150 strips at 10', '1,500'],
+            ['Auction and pledges on the night', 'What the room still has to find', '8,200'],
+        ];
+        $galaMistakes = [
+            ['A table sold as one ticket', 'The door and the caterer both count tickets, so a "Table of eight" type counts as one guest and one scan admits one person. Sell the table as eight of the main ticket with a volume discount at a minimum quantity of 8, and every seat is a ticket. On Pro, Individual tickets then gives each guest their own name and QR code.'],
+            ['The student price set at cost', 'A cheap ticket is there to change who is in the room, not to make money. Price it below cost on purpose, cap its quantity, and let the supporter ticket carry the margin.'],
+            ['Forgetting the provider\'s share', 'Stripe or PayPal takes its fee from every paid order, and a donation added at checkout is part of the order. Work out what each ticket leaves after that fee before you print the prices, not after the night.'],
+            ['A goal nobody wrote down', 'If the board agreed 20,000 net, every number on this page follows from it. Without one, the night is judged on how it felt, and next year starts from nothing.'],
+        ];
+    @endphp
+    <section id="price" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Pricing the night</p>
+                <h2 class="es-balance es-cause-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Start from the goal, <span class="es-cause-grad">not the ticket price</span>.
+                </h2>
+                <p class="es-cause-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most galas price the ticket by what last year charged, then hope. Work the other way:
+                    agree what the night must raise after costs, find out what the room costs per head,
+                    and you will see quickly that the tickets pay for the evening and the evening pays for
+                    the cause.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-5">
+                <div class="es-cause-card flex flex-col p-6 sm:p-7 lg:col-span-3" data-reveal="panel">
+                    <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-cause-ink text-lg font-bold">A dinner for 200 that must raise 20,000</h3>
+                        <span class="es-cause-muted es-cause-num text-xs">worked example</span>
+                    </div>
+                    <div class="space-y-2.5">
+                        @foreach ($galaMath as [$mLabel, $mNote, $mAmount])
+                            <div class="es-cause-sub flex items-baseline justify-between gap-4 p-3.5">
+                                <div class="min-w-0 flex-1">
+                                    <p class="es-cause-ink text-sm font-semibold">{{ $mLabel }}</p>
+                                    <p class="es-cause-muted mt-0.5 text-xs">{{ $mNote }}</p>
+                                </div>
+                                <span class="es-cause-num es-cause-ink shrink-0 text-sm font-bold">{{ $mAmount }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-cause-muted mt-auto border-t border-[rgba(19,32,31,0.1)] pt-4 text-sm dark:border-[rgba(232,239,238,0.12)]">
+                        Illustrative amounts, before your payment provider's fee. The money comes in at
+                        35,000 and the night costs 15,000, so it costs 0.43 to raise each 1. That ratio is
+                        the number to compare from one year to the next.
+                    </p>
+                </div>
+
+                <div class="es-cause-card flex flex-col p-6 sm:p-7 lg:col-span-2" data-reveal="panel">
+                    <h3 class="es-cause-ink text-lg font-bold">Setting the ladder</h3>
+                    <ul class="mt-4 space-y-3">
+                        @foreach ([
+                            'Start the supporter ticket at about one and a half times the cost per head. Here, 60 a head becomes 90 or a little more; this example uses 95.',
+                            'Give a business a reason to buy eight: a small saving per seat, and the table named in the programme.',
+                            'Keep one cheap ticket, with a small quantity, so the room is not only donors.',
+                            'Put what the ticket includes in its description: the dinner, the show, the bar. It is what a buyer weighs the price against.',
+                            'Ask for the rest separately. On Pro, a donation added at checkout sits on top of the ticket and no promo code ever discounts it.',
+                        ] as $point)
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="es-cause-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="es-cause-muted text-sm">{{ $point }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="mt-auto pt-5">
+                        <span class="es-cause-plan es-cause-plan-free">Free plan</span>
+                        <span class="es-cause-muted ml-1 text-xs">volume discounts, descriptions, sales dates</span>
+                    </p>
+                    <p class="mt-2">
+                        <span class="es-cause-plan es-cause-plan-pro">Pro plan</span>
+                        <span class="es-cause-muted ml-1 text-xs">prices, donations, add-ons, promo codes</span>
+                    </p>
+                </div>
+            </div>
+
+            <h3 class="es-cause-ink mb-5 mt-14 text-center text-xl font-bold" data-reveal>Four pricing mistakes that cost a gala money</h3>
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($galaMistakes as [$t, $d])
+                    <div class="es-cause-card es-cause-hover flex flex-col p-6" data-reveal>
+                        <h4 class="es-cause-ink text-base font-bold">{{ $t }}</h4>
+                        <p class="es-cause-muted mt-2 text-sm">{{ $d }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-cause-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                How the donation step looks to a buyer, and which payment providers take it, is in the
+                <x-link href="{{ marketing_url('/docs/tickets') }}#donations">tickets guide</x-link>.
+                Volume discounts are set on the ticket type, described under
+                <x-link href="{{ marketing_url('/docs/tickets') }}#volume-discount">volume discount</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2c. The run-up, twelve weeks to the morning after (03)       -->
+    <!-- ============================================================ -->
+    @php
+        $galaRunUp = [
+            ['12 weeks out', 'Book the room and agree the goal', 'Create the event as a Draft. Your team sees it and the public does not, so the details can change while the venue confirms. Draft is on every plan.'],
+            ['10 weeks', 'Announce the date before the tickets', 'Switch on the "Notify me" card on your schedule, and people who are not ready to buy can leave an address and hear when tickets go on sale.'],
+            ['8 weeks', 'Open tickets with an early price', 'Give the early-bird type a sales end date, so it closes on a fixed day by itself. Send last year\'s volunteers a promo code (Pro).'],
+            ['6 weeks', 'Put the sponsors on the page', 'Logos in Gold, Silver and Bronze tiers on the schedule page, and the gala can show sponsors of its own on its event page (Pro).'],
+            ['3 weeks', 'Collect what the caterer needs', 'A question on the ticket type asks each order for a meal choice or a dietary need, free on every plan. With Individual tickets on (Pro), every guest at a table gives their own name and gets their own QR code.'],
+            ['10 days', 'Give the caterer a number', 'The Sales list shows every order. Send one last-call newsletter to your followers and subscribers (or a manual segment of last year\'s guests), remembering that each recipient counts against the month\'s allowance.'],
+            ['The day before', 'Let the reminders go', 'A reminder email reaches every ticket holder before the event, on by default, from 3 hours to 3 days ahead as you set it. Charge the phones that will scan at the door.'],
+            ['The morning after', 'Thank people, then count', 'Once feedback is switched on, requests go out on their own, 1 to 48 hours after the end (Pro, sent from your own email settings on eventschedule.com). Then write the board report.'],
+        ];
+        $boardReport = [
+            ['How much did we raise?', 'The Revenue tab of Analytics, by date of purchase, and the sales export with its own Donation column (Pro). Your provider\'s payout report has the fees.'],
+            ['How many actually came?', 'The Check-Ins tab of Analytics, counted from tickets scanned at the door. Scanning is free on every plan.'],
+            ['Where did people hear about it?', 'Sources in Web Analytics sorts visits to the page into Direct, Search, Social, Email, Newsletter and the rest.'],
+            ['Did people enjoy it?', 'The star ratings and comments from post-event feedback (Pro).'],
+            ['What did it cost to raise?', 'Costs divided by money in. Worked out the same way every year, it tells the board more than the total does.'],
+        ];
+    @endphp
+    <section id="timeline" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The run-up</p>
+                <h2 class="es-balance es-cause-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Twelve weeks to the night, <span class="es-cause-grad">one morning after</span>.
+                </h2>
+                <p class="es-cause-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A fundraiser run by a small staff and a committee of volunteers goes wrong in the
+                    same places every year: tickets that open too late, a caterer given a guess, and a
+                    board report written from memory. This is the order that avoids all three.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                @foreach ($galaRunUp as [$when, $t, $d])
+                    <li class="es-cause-card flex gap-4 p-6" data-reveal="panel">
+                        <span class="es-cause-cap es-cause-accent w-20 shrink-0 pt-1">{{ $when }}</span>
+                        <div>
+                            <h3 class="es-cause-ink text-base font-bold">{{ $t }}</h3>
+                            <p class="es-cause-muted mt-1.5 text-sm">{{ $d }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-cause-card mt-10 p-6 sm:p-8" data-reveal="panel">
+                <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 class="es-cause-ink text-lg font-bold">Five questions the board will ask, and where each answer is</h3>
+                    <span class="es-cause-plan es-cause-plan-free">Analytics on every plan</span>
+                </div>
+                <div class="grid gap-3 md:grid-cols-2">
+                    @foreach ($boardReport as [$q, $a])
+                        <div class="es-cause-sub p-4">
+                            <p class="es-cause-ink text-sm font-semibold">{{ $q }}</p>
+                            <p class="es-cause-muted mt-1 text-sm">{{ $a }}</p>
+                        </div>
+                    @endforeach
+                    <div class="es-cause-sub p-4">
+                        <p class="es-cause-ink text-sm font-semibold">Read the guide</p>
+                        <p class="es-cause-muted mt-1 text-sm">
+                            What each figure counts, and what it leaves out, is set out in the
+                            <x-link href="{{ marketing_url('/docs/analytics') }}">analytics guide</x-link>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. The free half (04)                                        -->
     <!-- ============================================================ -->
     <section id="free" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                 <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The free half</p>
                 <h2 class="es-balance es-cause-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Most of your calendar <span class="es-cause-grad">costs nothing to attend</span>.
@@ -521,7 +722,90 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Supporters (03)                                           -->
+    <!-- 3b. Volunteers: what works here and what to keep elsewhere (05) -->
+    <!-- ============================================================ -->
+    @php
+        $volunteerWorks = [
+            ['One shift, one headcount', 'Free registration with a Registration Limit. The limit is per date, so a Saturday shift set as one recurring event keeps a separate count for every Saturday, and a full date offers a waiting list on every plan.'],
+            ['Several jobs on one shift', 'Choose Sell tickets and add a ticket type priced at zero for each job: Sorting with 8 places, Driver with 3, First aid with 1. Each has its own quantity and description, and up to 10 questions of its own, such as a T-shirt size or whether the driver has a licence. Zero-priced tickets are free on every plan.'],
+            ['Directions in the confirmation', 'Registration notes, or Ticket notes for zero-priced tickets, go into the confirmation email: where to park, which door, what to wear, who to ask for.'],
+            ['A reminder before the shift', 'Reminder emails reach registrations and free tickets as well as paid ones. They are on by default, and you choose 3 hours or 1, 2 or 3 days ahead under Tickets in the schedule\'s settings.'],
+            ['Cancelling frees the place', 'A volunteer who cannot come cancels from the ticket page linked in their email, and the place opens for somebody else. Nobody has to ring the office.'],
+            ['Knowing who turned up', 'Only a ticket records a check-in. When attendance matters, for a funder or an insurer, use zero-priced ticket types rather than free registration and scan them as people arrive.'],
+        ];
+        $volunteerElsewhere = [
+            'Placing people on a rota they did not choose themselves',
+            'Logging volunteer hours over a year',
+            'Background checks, waivers and training records',
+            'Swapping a shift from one volunteer to another',
+        ];
+    @endphp
+    <section id="volunteers" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Volunteers</p>
+                <h2 class="es-balance es-cause-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Sign-ups here. <span class="es-cause-grad">The rota stays with you</span>.
+                </h2>
+                <p class="es-cause-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Event Schedule is not volunteer management software, and it is better to know that
+                    before the first shift. What it does well is the part volunteers see: a public list of
+                    dates, a place they can claim, an email that tells them where to go, and a reminder
+                    the day before.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ($volunteerWorks as [$t, $d])
+                    <div class="es-cause-card es-cause-hover flex flex-col p-6" data-reveal>
+                        <h3 class="es-cause-ink text-lg font-bold">{{ $t }}</h3>
+                        <p class="es-cause-muted mt-2 text-sm">{{ $d }}</p>
+                        <p class="mt-auto pt-5"><span class="es-cause-plan es-cause-plan-free">Free plan</span></p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-10 grid gap-4 lg:grid-cols-2">
+                <div class="es-cause-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <p class="es-cause-cap es-cause-muted">Keep in your own volunteer tool</p>
+                    <ul class="mt-4 space-y-3">
+                        @foreach ($volunteerElsewhere as $point)
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="es-cause-muted mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                <span class="es-cause-ink text-sm">{{ $point }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="es-cause-muted mt-auto pt-5 text-sm">
+                        A spreadsheet is often enough for these. The registration list on the Sales page
+                        gives it the names to start from.
+                    </p>
+                </div>
+
+                <div class="es-cause-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <p class="es-cause-cap es-cause-accent">How many places to open</p>
+                    <p class="es-cause-muted mt-4 text-sm">
+                        Some people who sign up for an unpaid shift will not come, and nothing is lost to
+                        them by staying home. Count your own: compare the names on the list with the faces
+                        at the last three shifts. If 12 of every 15 turn up and the job needs 12, open 15
+                        places, not 12, and let the waiting list cover the rest.
+                    </p>
+                    <p class="es-cause-muted mt-3 text-sm">
+                        On a sold-out ticket type the waiting list is a Pro feature. On a full free
+                        registration it is free, which is one more reason to use registration for a shift
+                        with one job.
+                    </p>
+                    <p class="mt-auto pt-5 text-sm">
+                        <x-link href="{{ marketing_url('/features/registration') }}">How free registration works</x-link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. Supporters (06)                                           -->
     <!-- ============================================================ -->
     <section id="supporters" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -560,7 +844,7 @@
                 </div>
 
                 <div class="order-1 lg:order-2">
-                    <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                     <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Supporters</p>
                     <h2 class="es-balance es-cause-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         A list that is <span class="es-cause-grad">yours to keep</span>.
@@ -589,12 +873,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Programs, chapters and sponsors (04)                      -->
+    <!-- 5. Programs, chapters and sponsors (07)                      -->
     <!-- ============================================================ -->
     <section id="programs" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                 <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Programs</p>
                 <h2 class="es-balance es-cause-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     One organization, <span class="es-cause-grad">many front doors</span>.
@@ -637,7 +921,7 @@
                     <ul class="space-y-3">
                         @foreach ([
                             'Sponsor and partner logos on the schedule page, in tiers, so the headline sponsor gets the headline spot.',
-                            'Star ratings and comments collected from attendees after the event, for the report the funder asks for.',
+                            'Star ratings and comments collected from attendees after the event, for the report the funder asks for. On eventschedule.com the requests are sent from the schedule\'s own email settings.',
                             'A sales export with every ticket and every answer, for the finance volunteer.',
                             'More than one colleague managing the schedule is Enterprise, with admins who see sales and viewers who scan at the door.',
                         ] as $point)
@@ -654,13 +938,13 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. What it is not (05)                                       -->
+    <!-- 6. What it is not (08)                                       -->
     <!-- ============================================================ -->
     <section id="honest" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-14 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                     <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What it is not</p>
                     <h2 class="es-balance es-cause-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         An events tool, <span class="es-cause-grad">not a donor database</span>.
@@ -709,12 +993,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Who it is for (06)                                        -->
+    <!-- 7. Who it is for (09)                                        -->
     <!-- ============================================================ -->
     <section id="who" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                 <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
                 <h2 class="es-balance es-cause-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Any group that <span class="es-cause-grad">runs on goodwill</span>.
@@ -778,7 +1062,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. How it works (07, dark band)                              -->
+    <!-- 8. How it works (10, dark band)                              -->
     <!-- ============================================================ -->
     <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-cause-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -788,7 +1072,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                     <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Set up in an afternoon, <span class="es-cause-grad">run all year</span>.
@@ -896,12 +1180,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 11. FAQ (08)                                                 -->
+    <!-- 11. FAQ (11)                                                 -->
     <!-- ============================================================ -->
     <section id="faq" class="scroll-mt-24 border-t border-[rgba(19,32,31,0.1)] py-20 dark:border-[rgba(232,239,238,0.1)] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-cause-chip mb-6" data-reveal aria-hidden="true"><span>11</span></div>
                 <p class="es-cause-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-cause-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked at <span class="es-cause-grad">the board meeting</span>.

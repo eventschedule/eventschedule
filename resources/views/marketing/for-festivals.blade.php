@@ -307,6 +307,22 @@
                 'a' => 'Yes, as a pass. A weekend pass is sold once and redeemed across every event it covers, so Friday, Saturday and Sunday each scan the same QR code, and the pass keeps count of what has been used. A day ticket is simply a ticket type on one day\'s event. Passes, and putting a price on any ticket, are part of Pro at '.plan_price($proMonthly).' a month, with zero platform fees on what fans pay you.',
             ],
             [
+                'q' => 'How do I make a festival schedule with several stages?',
+                'a' => 'Make each stage a sub-schedule, then choose how fine to go. For a festival where people come for particular acts, make every set its own event on its stage, so each has a page and a calendar entry. Where sets are short or the order changes late, make one event per stage per day and list the sets inside it as agenda parts with start and end times. Either way, add one plain event for each festival day to carry the day tickets and the weekend pass, so the gate scans against the day and the sets carry no tickets of their own.',
+            ],
+            [
+                'q' => 'Should a festival sell day tickets, weekend passes or both?',
+                'a' => 'Usually both, with the weekend pass priced below three day tickets so the people most likely to come every day commit early. What matters is that they share one field. A weekend pass holds no place in a day\'s count before the day, so either set each day\'s tickets to the licence minus the passes you will sell, or, on Pro, switch on advance booking so pass holders book their days from the same count as the day tickets, and bookings can never oversell the day. A holder who comes without booking is still let in, so ask holders to book, or keep a margin below the licence.',
+            ],
+            [
+                'q' => 'How do we show set times for each stage?',
+                'a' => 'Give each set a start and end time. As separate events, the sets sit on their stage\'s sub-schedule, and the stage\'s own link shows only that stage. As agenda parts inside a stage-day event, each part has an optional start and end time and appears in running order on the event page. Typing them in is free; reading a running order off a photo of the printed lineup is Enterprise.',
+            ],
+            [
+                'q' => 'How do we update the festival schedule during the event?',
+                'a' => 'Edit the set, and the festival page, the stage links and the embed show the change at once. Fans who subscribed to the calendar feed get it when their calendar next reads the feed, which is cached for an hour and can take Google Calendar several hours, so a same-day change belongs on the announcement bar too, which is Pro and can appear on every event page. A set that is called off is cancelled from the Actions menu, and can be restored if it goes ahead after all.',
+            ],
+            [
                 'q' => 'Can each stage have its own link?',
                 'a' => 'Each stage is a sub-schedule, and every sub-schedule has its own link and colour. Share the main festival link and people see every stage together; share the tent\'s link and they see only the tent. Sub-schedules are on the free plan, with no limit on how many stages you add.',
             ],
@@ -339,11 +355,14 @@
         $dotSections = [
             ['top', 'The grid'],
             ['stages', 'Stages'],
+            ['layout', 'Laying it out'],
             ['acts', 'The lineup'],
             ['passes', 'Passes'],
+            ['capacity', 'Capacity'],
             ['gate', 'The gate'],
             ['applications', 'Applications'],
             ['fans', 'The crowd'],
+            ['live', 'Festival week'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -514,12 +533,95 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. The lineup (02)                                           -->
+    <!-- 2b. Laying it out: three shapes for a festival schedule (02) -->
+    <!-- ============================================================ -->
+    @php
+        // Counts for a three-day, three-stage weekend with ten sets a stage a day.
+        $festShapes = [
+            ['A set is an event', '90 events', 'Each set has its own page, its own entry in a fan\'s calendar and its act named on it, offered the date for their own page. Fans can share one set, and a moved set moves alone. Pick it when people come for particular acts. It is the most to type: Clone Event starts each set from the last.'],
+            ['A stage-day is an event', '9 events', 'One event for each stage on each day, with the sets inside it as agenda parts, each with a start and an end time, in running order. The acts are named as the event\'s participants. Pick it when sets are short or the running order changes late. A part has no page of its own and is not a separate calendar entry.'],
+            ['A day is an event', '3 events', 'Friday, Saturday and Sunday, each with the whole day\'s running order as agenda parts. Pick it for a one-stage festival or a day of talks, where the day is what people come to and the order is detail.'],
+        ];
+        $shapeMistakes = [
+            ['A day with no end time', 'Check-in for a date closes at its start plus its length, or two hours after the start when no length is set. Give each day event the hour the gates really close, or a noon opening stops scanning at two.'],
+            ['The weekend as one long ticket', 'An ordinary ticket admits once. Sold on a single Friday-to-Sunday event, it reads Already checked in on Saturday morning. Sell the weekend as a festival pass over the three day events: one QR code, one visit each day, and a second scan on the same day uses nothing.'],
+            ['A sub-schedule for each day', 'Dates already split the calendar by day. Sub-schedules are for the thing a fan filters by, the stage, and an event sits in one sub-schedule per schedule, so spending them on days leaves no way to show one stage on its own.'],
+        ];
+    @endphp
+    <section id="layout" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Laying it out</p>
+                <h2 class="es-balance es-fest-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Pick the shape <span class="es-fest-grad">before the first set</span>.
+                </h2>
+                <p class="es-fest-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A festival schedule can be published three ways, and the choice decides how fans browse
+                    it, how acts are credited and where the tickets live. Here is each one for a three-day
+                    weekend with three stages and ten sets a stage each day.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($festShapes as [$t, $count, $d])
+                    <div class="es-fest-card es-fest-hover flex flex-col p-6" data-reveal>
+                        <div class="flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-fest-ink text-lg font-bold">{{ $t }}</h3>
+                            <span class="es-fest-accent es-fest-num text-xs font-bold">{{ $count }}</span>
+                        </div>
+                        <p class="es-fest-muted mt-2 text-sm">{{ $d }}</p>
+                        <p class="mt-auto pt-5"><span class="es-fest-plan es-fest-plan-free">Free plan</span></p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-fest-card mt-4 grid gap-6 p-6 sm:p-7 md:grid-cols-2" data-reveal="panel">
+                <div>
+                    <h3 class="es-fest-ink text-lg font-bold">Whichever shape, the gate needs one event a day</h3>
+                    <p class="es-fest-muted mt-2 text-sm">
+                        Entry is sold and scanned on an event. With a day per event that is done already. With
+                        sets or stage-days, add a plain event for each festival day, say Friday entry, Saturday
+                        entry and Sunday entry, give each its day tickets, and point the weekend pass at those
+                        three. The sets carry no tickets, so nobody needs one per set.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="es-fest-ink text-lg font-bold">What it costs</h3>
+                    <p class="es-fest-muted mt-2 text-sm">
+                        Stages, events, agenda parts and free registration are on the free plan. A price on a
+                        day ticket, and the weekend pass, are Pro. Reading a running order off a photo of the
+                        printed lineup is Enterprise; typing it in is free.
+                    </p>
+                </div>
+            </div>
+
+            <h3 class="es-fest-ink mb-5 mt-14 text-center text-xl font-bold" data-reveal>Three layouts that go wrong at the gate</h3>
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ($shapeMistakes as [$t, $d])
+                    <div class="es-fest-card es-fest-hover flex flex-col p-6" data-reveal>
+                        <h4 class="es-fest-ink text-base font-bold">{{ $t }}</h4>
+                        <p class="es-fest-muted mt-2 text-sm">{{ $d }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-fest-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Agenda parts are explained in the
+                <x-link href="{{ marketing_url('/docs/creating-events') }}#agenda">events guide</x-link>,
+                and the pass types, a festival pass among them, in the
+                <x-link href="{{ marketing_url('/docs/subscriptions') }}#types">passes guide</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. The lineup (03)                                           -->
     <!-- ============================================================ -->
     <section id="acts" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                 <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The lineup</p>
                 <h2 class="es-balance es-fest-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Your acts announce <span class="es-fest-grad">you back</span>.
@@ -547,12 +649,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Passes and tickets (03)                                   -->
+    <!-- 4. Passes and tickets (04)                                   -->
     <!-- ============================================================ -->
     <section id="passes" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                 <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Passes and tickets</p>
                 <h2 class="es-balance es-fest-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Friday to Sunday on <span class="es-fest-grad">one QR code</span>.
@@ -574,7 +676,7 @@
                     <ul class="space-y-3">
                         @foreach ([
                             'Registration with a capacity, so the field does not overfill.',
-                            'A QR code for everyone who registers, scanned at the gate like a ticket.',
+                            'A QR code for everyone who registers, checked at the gate from the same scanner. To count arrivals, sell zero-priced tickets instead.',
                             'The count kept for each date on its own, closing when the places run out.',
                             'A waitlist on a full date, offering a returned place to the next person in line.',
                             'Several events in one checkout, so a fan picks up free tickets for three workshops at once.',
@@ -619,7 +721,118 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. The gate (04)                                             -->
+    <!-- 4b. Capacity: passes and day tickets on one field (05)       -->
+    <!-- ============================================================ -->
+    @php
+        // Worked example: a site licensed for 3,000 a day and 1,200 weekend passes.
+        // Day tickets to sell = 3,000 - 1,200 = 1,800 on each day.
+        $capacityRows = [
+            ['Friday', '3,000', '1,200', '1,800'],
+            ['Saturday', '3,000', '1,200', '1,800'],
+            ['Sunday', '3,000', '1,200', '1,800'],
+        ];
+    @endphp
+    <section id="capacity" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Capacity</p>
+                <h2 class="es-balance es-fest-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Passes and day tickets <span class="es-fest-grad">share one field</span>.
+                </h2>
+                <p class="es-fest-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The licence says how many people may be on site at once, not how many tickets you may
+                    sell. A weekend pass is a person on site every day, so every pass sold is a day ticket
+                    you cannot sell three times over. Decide how the two share the field before either goes
+                    on sale.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+                <div class="es-fest-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-fest-ink text-lg font-bold">The simple way: subtract the passes</h3>
+                        <span class="es-fest-muted es-fest-num text-xs">worked example</span>
+                    </div>
+                    <p class="es-fest-muted mb-5 text-sm">
+                        A pass holds no place in a day's count before the day, so a day ticket's quantity can
+                        sell in full on top of every pass. Cap the passes, and set each day's tickets to what
+                        is left.
+                    </p>
+                    <div class="space-y-2.5">
+                        <div class="flex items-baseline justify-between gap-3 px-3.5">
+                            <span class="es-fest-cap es-fest-muted w-20 shrink-0">Day</span>
+                            <span class="es-fest-cap es-fest-muted flex-1 text-right">Licence</span>
+                            <span class="es-fest-cap es-fest-muted flex-1 text-right">Passes</span>
+                            <span class="es-fest-cap es-fest-muted flex-1 text-right">Day tickets</span>
+                        </div>
+                        @foreach ($capacityRows as [$cDay, $cLicence, $cPasses, $cDayTickets])
+                            <div class="es-fest-sub flex items-baseline justify-between gap-3 p-3.5">
+                                <span class="es-fest-ink w-20 shrink-0 text-sm font-semibold">{{ $cDay }}</span>
+                                <span class="es-fest-muted es-fest-num flex-1 text-right text-sm">{{ $cLicence }}</span>
+                                <span class="es-fest-muted es-fest-num flex-1 text-right text-sm">{{ $cPasses }}</span>
+                                <span class="es-fest-accent es-fest-num flex-1 text-right text-sm font-bold">{{ $cDayTickets }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-fest-muted mt-auto pt-5 text-sm">
+                        The pass quantity is one pool for the whole run: 1,200 means 1,200 passes in all. This
+                        assumes every holder comes every day. One catch on the day itself: each pass scanned at
+                        the gate is counted against that day's tickets too, so a day that has not sold out in
+                        advance stops selling on the gate before the field is full. The next way counts the field more closely.
+                    </p>
+                </div>
+
+                <div class="es-fest-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-fest-ink text-lg font-bold">The exact way: holders book their days</h3>
+                        <span class="es-fest-plan es-fest-plan-pro">Pro plan</span>
+                    </div>
+                    <p class="es-fest-muted mb-5 text-sm">
+                        Switch on "Let holders book seats in advance" on the pass. Holders pick their days on
+                        their own pass page, and those bookings and the day tickets draw from the same count,
+                        so bookings can never oversell the day. A holder who comes without booking is still let
+                        in, so ask holders to book, or keep a margin below the licence.
+                    </p>
+                    <ul class="space-y-3">
+                        @foreach ([
+                            'Set the day tickets close to the licence, 3,000, and the bookings come out of it. Leave a margin for holders who will turn up without booking.',
+                            'Max advance seats per date keeps some of each day for people who buy on the gate.',
+                            'On a festival pass, booking a day spends that day\'s one visit.',
+                            'A cancellation deadline, from 12 hours to a week before, stops a booking being dropped the morning of the day. After it, a cancel can free the place and keep the visit spent.',
+                        ] as $point)
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="es-fest-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="es-fest-muted text-sm">{{ $point }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ([
+                    ['Two prices, one field', 'An early-bird and a standard day ticket are the same people on the same grass. Give both the same quantity and choose Combined Total, and they draw on one pool however the sales split.', 'Free plan', 'free'],
+                    ['When Saturday is full', 'On Pro, a waitlist opens on the sold-out day. A returned ticket goes to the first person on it by email, with 24 hours before the next person is told, and the place is not held: whoever buys first has it.', 'Pro plan', 'pro'],
+                    ['Before a day goes on sale', 'Switch on the "Notify me" card and fans leave an address on the day\'s event, and hear by email soon after its tickets go on sale on Event Schedule. Selling a priced day ticket is Pro.', 'Free switch, Pro to sell', 'pro'],
+                ] as [$t, $d, $plan, $kind])
+                    <div class="es-fest-card es-fest-hover flex flex-col p-6" data-reveal>
+                        <h3 class="es-fest-ink text-base font-bold">{{ $t }}</h3>
+                        <p class="es-fest-muted mt-2 text-sm">{{ $d }}</p>
+                        <p class="mt-auto pt-5"><span class="es-fest-plan es-fest-plan-{{ $kind }}">{{ $plan }}</span></p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-fest-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                How advance booking and its cancellation rules work, step by step, is in the
+                <x-link href="{{ marketing_url('/docs/subscriptions') }}#advance-booking">passes guide</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. The gate (06)                                             -->
     <!-- ============================================================ -->
     <section id="gate" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -658,7 +871,7 @@
                 </div>
 
                 <div class="order-1 lg:order-2">
-                    <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                     <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gate</p>
                     <h2 class="es-balance es-fest-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         No scanners to hire, <span class="es-fest-grad">no printout</span>.
@@ -671,7 +884,7 @@
 
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
-                            ['Every gate, the same codes', 'Tickets, passes and free registrations all scan the same way, so the family gate and the main gate need no separate lists.'],
+                            ['Every gate, the same codes', 'Tickets, passes and free registrations are all checked from the same scanner, so the family gate and the main gate need no separate lists. Only tickets and passes record an arrival; a free registration is checked and not counted.'],
                             ['Watch the field fill', 'On Pro, the check-in dashboard keeps a running count per ticket type, so you know the Sunday crowd is bigger than Saturday\'s before the bar does.'],
                             ['Sponsors where people look', 'On Pro, partner logos sit on the festival page in tiers, headline partner first.'],
                         ] as [$t, $d])
@@ -687,12 +900,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Applications (05)                                         -->
+    <!-- 6. Applications (07)                                         -->
     <!-- ============================================================ -->
     <section id="applications" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                 <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Applications</p>
                 <h2 class="es-balance es-fest-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Acts and traders apply <span class="es-fest-grad">on the page</span>.
@@ -749,12 +962,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. The crowd (06)                                            -->
+    <!-- 7. The crowd (08)                                            -->
     <!-- ============================================================ -->
     <section id="fans" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                 <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The crowd</p>
                 <h2 class="es-balance es-fest-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     From the first announcement <span class="es-fest-grad">to the last photo</span>.
@@ -771,7 +984,7 @@
                     ['Every new date, on its own', 'People who confirm their email on your page get a short digest when you add events, at most one every three days, and it does not touch your newsletter allowance.', 'Free plan'],
                     ['The lineup in their calendar', 'Fans subscribe to the festival\'s live calendar feed, so a set moved from 18:00 to 19:30 moves in their own phone too.', 'Free plan'],
                     ['The letters you write', 'A newsletter for the headliner reveal: 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted per person it reaches.', 'All plans'],
-                    ['Photos, videos, comments', 'The crowd posts what they saw on each event, held in a queue until you approve it. 25 photos on the free plan, no cap on Pro.', 'Free plan'],
+                    ['Photos, videos, comments', 'With fan content on (the default), the crowd posts what they saw on each event, held in a queue until you approve it. 25 photos on the free plan, no cap on Pro.', 'Free plan'],
                     ['A lift to the site', 'On Pro, fans can offer and ask for seats in a car to the festival, with the driver approving who comes.', 'Pro plan'],
                 ] as [$t, $d, $p])
                     <div class="es-fest-card es-fest-hover flex flex-col p-6" data-reveal>
@@ -785,12 +998,77 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Who it is for (07)                                        -->
+    <!-- 7b. Festival week: announce, publish access, keep it current (09) -->
+    <!-- ============================================================ -->
+    @php
+        $festWeek = [
+            ['Announcing the lineup', 'Free plan', 'free', [
+                'Enter the whole lineup as Drafts while contracts are signed. Your team sees it and the public does not.',
+                'Publish in waves at least three days apart. Confirmed subscribers get a digest of new events at most once every 72 hours, so the headliners on a Monday and the second wave on a Thursday arrive as two emails, not one.',
+                'Keep a wave to 25 sets or fewer: a digest lists the soonest 25 of the new events.',
+                'Sets added as agenda parts to an event already published are not news to the digest. Announce those with a newsletter.',
+            ]],
+            ['Publishing access information', 'Pro plan', 'pro', [
+                'Make a Multi-select custom field called Access, with the choices you really offer: step-free, BSL interpreted, seated area, relaxed. Tick On event page and Show as filter, and untick On request form.',
+                'Each set then shows its access row, and a fan can narrow the whole schedule to interpreted sets.',
+                'Put the access plan in the schedule\'s description before tickets go on sale: routes and surfaces, viewing platforms, accessible toilets, a quiet space, strobe and smoke warnings, the companion ticket policy, and how to reach the access team.',
+            ]],
+            ['Keeping it current on the day', 'Free and Pro', 'pro', [
+                'Move a set and its page, its stage link and the embed change at once. Subscribed calendars catch up on their own: the feed is cached for an hour, and Google Calendar can take several hours.',
+                'So a same-day change also goes on the announcement bar (Pro): up to 500 characters with links, on the festival page and, if you choose, on every event page.',
+                'A set that is called off is cancelled from the Actions menu. Its page says so, and it comes off the calendars your schedule syncs to. Restore it if the act turns up after all.',
+                'Agree who edits. Free and Pro have one team member; a production office with several people changing times needs Enterprise.',
+            ]],
+        ];
+    @endphp
+    <section id="live" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Festival week</p>
+                <h2 class="es-balance es-fest-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    A schedule is only right <span class="es-fest-grad">until the first delay</span>.
+                </h2>
+                <p class="es-fest-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The printed clash sheet is out of date by Saturday lunchtime. The festival page does not
+                    have to be. Three jobs decide whether fans trust it: how the lineup is announced, whether
+                    disabled fans can plan from it, and how fast a change on site reaches it.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-3">
+                @foreach ($festWeek as [$t, $plan, $kind, $points])
+                    <div class="es-fest-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <h3 class="es-fest-ink text-lg font-bold">{{ $t }}</h3>
+                        <ul class="mt-4 space-y-3">
+                            @foreach ($points as $point)
+                                <li class="flex items-start gap-3">
+                                    <svg aria-hidden="true" class="es-fest-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                    <span class="es-fest-muted text-sm">{{ $point }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p class="mt-auto pt-5"><span class="es-fest-plan es-fest-plan-{{ $kind }}">{{ $plan }}</span></p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-fest-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Custom fields are set up as described in the
+                <x-link href="{{ marketing_url('/docs/creating-schedules') }}#customize-custom-fields">schedule guide</x-link>.
+                For what a cancellation sends and to whom, see
+                <x-link href="{{ marketing_url('/docs/creating-events') }}#notify-attendees">notifying attendees</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. Who it is for (10)                                        -->
     <!-- ============================================================ -->
     <section id="who" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
                 <h2 class="es-balance es-fest-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Anything with <span class="es-fest-grad">more than one stage</span>.
@@ -854,7 +1132,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. How it works (08, dark band)                              -->
+    <!-- 9. How it works (11, dark band)                              -->
     <!-- ============================================================ -->
     <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-fest-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -864,7 +1142,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                    <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>11</span></div>
                     <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Built in a week, <span class="es-fest-grad">run for a weekend</span>.
@@ -972,12 +1250,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 12. FAQ (09)                                                 -->
+    <!-- 12. FAQ (12)                                                 -->
     <!-- ============================================================ -->
     <section id="faq" class="scroll-mt-24 border-t border-[rgba(27,21,16,0.1)] py-20 dark:border-[rgba(241,235,229,0.1)] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <div class="es-fest-chip mb-6" data-reveal aria-hidden="true"><span>12</span></div>
                 <p class="es-fest-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-fest-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked at <span class="es-fest-grad">the production meeting</span>.

@@ -267,11 +267,27 @@
             ],
             [
                 'q' => 'How do I move an existing group over?',
-                'a' => 'Create the group page, add your recurring meetup, and post the new link wherever your members already are. Members can follow the page, leave an email address to hear about new dates, or subscribe to the group calendar in their own calendar app. There is no way to import another platform\'s member list, and that is deliberate: everyone who joins has chosen to, so the list you build is one you can actually write to.',
+                'a' => 'Create the group page, add your recurring meetup, and bring any special one-off nights already announced across with Import from a link, which reads a calendar feed or an events page. Then post the new link wherever your members already are. Members can follow the page, leave an email address to hear about new dates, or subscribe to the group calendar in their own calendar app. Followers cannot be carried over from another platform, but if you hold members\' email addresses with their permission, you can import up to 10,000 at a time into a newsletter segment on every plan.',
             ],
             [
                 'q' => 'What happens when a meetup is full?',
-                'a' => 'Give the event a capacity and registration stops when the places are gone. Each date keeps its own count, so a full October night does not touch November. The RSVP waitlist is free: when someone cancels, the people waiting hear that a place has opened, so the room fills without you swapping names around by hand.',
+                'a' => 'Give the event a capacity and registration stops when the places are gone. Each date keeps its own count, so a full October night does not touch November. The RSVP waitlist is free: when someone cancels, the first person waiting is emailed and has 24 hours before the next person is told. The place is not held for them, so whoever registers first takes it, and the room fills without you swapping names around by hand.',
+            ],
+            [
+                'q' => 'How many RSVPs should I allow for a free meetup?',
+                'a' => 'More than you have chairs, once you know your turnout. Count heads at the same point of the night for three or four meetups and divide by the number who registered. If 74% of those who say yes turn up, a 40-chair room can take 40 divided by 0.74, about 54 registrations. Start a little below that, keep the waitlist on, and adjust after two nights. Measure a talk night and a social separately, because they rarely turn out alike.',
+            ],
+            [
+                'q' => 'How do I reduce no-shows at a free meetup?',
+                'a' => 'Make cancelling easier than not coming, and remind people. On Event Schedule a member cancels from the ticket page linked in their confirmation, which hands the place to the waitlist; a reminder email goes out before the night, on by default, between 3 hours and 3 days ahead as you choose; and the confirmation carries a calendar invite. Add a line to the registration notes asking people to cancel if they cannot come, so someone waiting gets the seat.',
+            ],
+            [
+                'q' => 'How far ahead should we post meetup dates?',
+                'a' => 'The regular nights can go up for the whole season at once: a recurring event puts every date on the page, in the calendar feed and in members\' calendars. Special nights, with a named speaker or a venue nobody knows, are worth posting three to four weeks ahead so people can plan around them. Because the digest to subscribers announces a recurring event once, give a special night its own event, or mention it in a newsletter.',
+            ],
+            [
+                'q' => 'What do we lose by leaving a big meetup platform?',
+                'a' => 'Mostly the people who browse a large platform for groups near them. Your existing members can follow you to a new link; strangers browsing a marketplace cannot. Plan to replace that stream with the embed on your own website, the link in your social profiles, local guides that list your public meetups on their calendars, and members who bring a friend. In return the group page, its dates and its subscribers belong to the group, with no organizer subscription to keep paying.',
             ],
             [
                 'q' => 'Can more than one organizer run the group?',
@@ -299,9 +315,12 @@
             ['top', 'The headcount'],
             ['rhythm', 'The rhythm'],
             ['door', 'The door'],
+            ['turnout', 'Turnout'],
             ['page', 'Your page'],
+            ['between', 'Between meetups'],
             ['people', 'The people up front'],
             ['extras', 'Beyond the RSVP'],
+            ['move', 'Moving a group'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -486,7 +505,7 @@
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
                 @foreach ([
                     ['A cap per date', 'Registration closes itself when the places are gone. Every date in the series has its own count, so the busy night and the quiet one never borrow from each other.'],
-                    ['A waitlist that fills the gap', 'When a full night gets a cancellation, the people waiting are told a place has opened, so it does not sit empty because nobody refreshed the page.'],
+                    ['A waitlist that fills the gap', 'When a full night gets a cancellation, the first person waiting is emailed that a place has opened, so it does not sit empty because nobody refreshed the page.'],
                     ['Each guest by name', 'Someone bringing two friends can register all three, and each gets a confirmation and a QR code of their own, so the headcount is people, not bookings.'],
                 ] as [$t, $d])
                     <div class="es-meet-card es-meet-hover flex flex-col p-6" data-reveal>
@@ -520,13 +539,115 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. The page is yours (03)                                    -->
+    <!-- 3b. Turnout: the no-show arithmetic (03)                     -->
+    <!-- ============================================================ -->
+    @php
+        // Worked example: four nights in a 40-chair room. 158 said yes, 117 came,
+        // so 74% turn up, and 40 / 0.74 = 54 places.
+        $turnoutNights = [
+            ['Night 1', 40, 29],
+            ['Night 2', 40, 31],
+            ['Night 3', 38, 27],
+            ['Night 4', 40, 30],
+        ];
+        $turnoutLevers = [
+            ['A reminder the day before', 'Reminder emails reach free registrations as well as tickets. They are on by default, and the schedule\'s settings choose 3 hours or 1, 2 or 3 days ahead. A day-ahead reminder that would land overnight is sent at 8pm the evening before instead.'],
+            ['A calendar entry from the start', 'The confirmation email carries a calendar invite, so the night sits in the member\'s own calendar from the moment they say yes.'],
+            ['Cancelling in one tap', 'A member can cancel from the ticket page linked in their confirmation, and the place goes straight back on offer. Most no-shows are people who would have cancelled if it took less effort.'],
+            ['Asking for it plainly', 'Registration notes go into every confirmation email. One line, "Can\'t make it? Cancel so someone on the waitlist gets your seat", does more than any reminder.'],
+        ];
+    @endphp
+    <section id="turnout" class="scroll-mt-24 border-t border-[rgba(27,23,21,0.1)] py-20 dark:border-[rgba(241,236,234,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">03</div>
+                <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Turnout</p>
+                <h2 class="es-balance es-meet-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Not everyone who says yes <span class="es-meet-grad">walks in</span>.
+                </h2>
+                <p class="es-meet-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A free RSVP costs nothing to break, so some never turn up. Cap a forty-chair room at
+                    forty and you will often count thirty heads while ten people sit on the waitlist at
+                    home. Measure your own turnout for a few nights, then set the cap from it.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-5">
+                <div class="es-meet-card flex flex-col p-6 sm:p-7 lg:col-span-3" data-reveal="panel">
+                    <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-meet-ink text-lg font-bold">Four nights in a forty-chair room</h3>
+                        <span class="es-meet-muted es-meet-num text-xs">worked example</span>
+                    </div>
+                    <div class="space-y-2.5">
+                        @foreach ($turnoutNights as [$nLabel, $nSaid, $nCame])
+                            <div class="es-meet-sub flex items-center gap-3 p-3">
+                                <span class="es-meet-ink es-meet-num w-16 shrink-0 text-xs font-semibold">{{ $nLabel }}</span>
+                                <div class="es-meet-meter min-w-0 flex-1" role="img" aria-label="{{ $nCame }} of {{ $nSaid }} came">
+                                    <div class="es-meet-fill" style="width: {{ round($nCame / $nSaid * 100) }}%;"></div>
+                                </div>
+                                <span class="es-meet-muted es-meet-num w-24 shrink-0 text-right text-xs">{{ $nCame }} of {{ $nSaid }} came</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-5 space-y-1.5 border-t border-[rgba(27,23,21,0.1)] pt-4 text-sm dark:border-[rgba(241,236,234,0.12)]">
+                        <p class="es-meet-muted"><span class="es-meet-ink font-semibold">Turnout:</span> 117 came out of 158 who said yes, which is 74%.</p>
+                        <p class="es-meet-muted"><span class="es-meet-ink font-semibold">The cap:</span> chairs divided by turnout, 40 &divide; 0.74 = 54 places.</p>
+                        <p class="es-meet-muted"><span class="es-meet-ink font-semibold">The margin:</span> start at 50, watch two nights, then move towards 54. Keep the waitlist on either way.</p>
+                    </div>
+                    <p class="es-meet-muted mt-auto pt-5 text-xs">
+                        Count heads at the same moment every night, say half an hour in, and compare with the
+                        names on the Sales page. A talk night and a social rarely turn out alike, so measure
+                        them separately.
+                    </p>
+                </div>
+
+                <div class="es-meet-card flex flex-col p-6 sm:p-7 lg:col-span-2" data-reveal="panel">
+                    <h3 class="es-meet-ink text-lg font-bold">How a returned place is passed on</h3>
+                    <ol class="mt-4 space-y-3">
+                        @foreach ([
+                            'Someone cancels, and the place is free again.',
+                            'The first person on that date\'s waitlist gets an email, with 24 hours before the next person is told.',
+                            'The place is not held for them. The date is simply back open, first come, first served.',
+                            'If they do nothing in 24 hours, the next person hears, as long as the date still has room.',
+                        ] as $i => $step)
+                            <li class="flex items-start gap-3">
+                                <span class="es-meet-accent es-meet-num w-5 shrink-0 text-sm font-bold">{{ $i + 1 }}</span>
+                                <span class="es-meet-muted text-sm">{{ $step }}</span>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="es-meet-muted mt-5 text-sm">
+                        So a cancellation on the afternoon of the meetup reaches one person on the list. If
+                        the night matters, mention in your group chat that places open up on the day.
+                    </p>
+                    <p class="mt-auto pt-5">
+                        <span class="es-meet-plan es-meet-plan-free">Free plan</span>
+                        <span class="es-meet-muted ml-1 text-xs">waitlist on a full free registration</span>
+                    </p>
+                </div>
+            </div>
+
+            <h3 class="es-meet-ink mb-5 mt-14 text-center text-xl font-bold" data-reveal>Four things that make people come, or cancel</h3>
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($turnoutLevers as [$t, $d])
+                    <div class="es-meet-card es-meet-hover flex flex-col p-6" data-reveal>
+                        <h4 class="es-meet-ink text-base font-bold">{{ $t }}</h4>
+                        <p class="es-meet-muted mt-2 text-sm">{{ $d }}</p>
+                        <p class="mt-auto pt-5"><span class="es-meet-plan es-meet-plan-free">Free plan</span></p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The page is yours (04)                                    -->
     <!-- ============================================================ -->
     <section id="page" class="scroll-mt-24 border-t border-[rgba(27,23,21,0.1)] py-20 dark:border-[rgba(241,236,234,0.1)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-14 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">03</div>
+                    <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">04</div>
                     <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Your page</p>
                     <h2 class="es-balance es-meet-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         The members are <span class="es-meet-grad">the group's</span>.
@@ -575,12 +696,59 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. The people up front (04)                                  -->
+    <!-- 4b. Between meetups: venues, announcing, keeping in touch (05) -->
+    <!-- ============================================================ -->
+    @php
+        $betweenCards = [
+            ['Hosts that take turns', 'A recurring event has one venue. If the group alternates on a fixed pattern, say the first Thursday at one office and the third at another, make it two recurring events, each with its own venue and its own cap. If the hosts change with no pattern, give each night its own event: Clone Event copies the last one, and you change the date and the place.', 'Free plan', 'free'],
+            ['A night that has to move', 'Change the venue on a published event and saving first asks whether to notify attendees, with room for a short note. The email moves the entry in their calendar. On eventschedule.com, people who registered are emailed only once the schedule has its own email settings. For one night of a series, skip that date in the series and give the night its own event with the new venue.', 'Free plan', 'free'],
+            ['The digest announces a series once', 'Confirmed subscribers get a digest of events you publish, at most one every 72 hours. A recurring meetup is one event, so it is announced in the next digest after you publish it, and its later dates are not news to the digest. When a regular night has a named speaker, give that night its own event and skip the date in the series, or write a newsletter.', 'Free plan', 'free'],
+            ['A monthly email that writes itself', 'Set a newsletter to repeat every month with an Events block that lists the rest of the month, and put {month} in the subject. Each copy counts every recipient: 120 members is 120 a month, more than the 100 on Pro, so connect the schedule\'s own email settings or use Enterprise\'s 1,000. A repeat that could never fit the monthly allowance is refused when you set it up.', 'Allowance by plan', 'free'],
+            ['Before you book a new host', 'Ask the things that end a night early: the real capacity rather than the chairs, when the building locks, the wifi password and the screen connector, step-free access, and whether food can come in. Put the answers in the event description, where every member can find them.', 'Free plan', 'free'],
+            ['The weeks in between', 'With fan content on (the default), members add photos from the night, approved by you first (25 per schedule on the free plan). On Pro, a poll on the next event lets members choose the topic, and post-event feedback asks how it went, sent from the schedule\'s own email settings on eventschedule.com.', 'Free and Pro', 'pro'],
+        ];
+    @endphp
+    <section id="between" class="scroll-mt-24 border-t border-[rgba(27,23,21,0.1)] py-20 dark:border-[rgba(241,236,234,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">05</div>
+                <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Between meetups</p>
+                <h2 class="es-balance es-meet-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The night is two hours. <span class="es-meet-grad">The group is the rest</span>.
+                </h2>
+                <p class="es-meet-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Groups rarely fade because one meetup went badly. They fade when the host changes and
+                    nobody is told, when a special night goes unannounced, or when a month passes with no
+                    word. Six habits that keep a group from going quiet.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                @foreach ($betweenCards as [$t, $d, $plan, $kind])
+                    <div class="es-meet-card es-meet-hover flex flex-col p-6" data-reveal>
+                        <h3 class="es-meet-ink text-lg font-bold">{{ $t }}</h3>
+                        <p class="es-meet-muted mt-2 text-sm">{{ $d }}</p>
+                        <p class="mt-auto pt-5"><span class="es-meet-plan es-meet-plan-{{ $kind }}">{{ $plan }}</span></p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-meet-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                How a repeating newsletter picks its events, and what counts against the allowance, is in the
+                <x-link href="{{ marketing_url('/docs/newsletters') }}#repeating">newsletter guide</x-link>.
+                On eventschedule.com, a send to more than 50 people needs the schedule's own email settings or a
+                verified phone number.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. The people up front (06)                                  -->
     <!-- ============================================================ -->
     <section id="people" class="scroll-mt-24 border-t border-[rgba(27,23,21,0.1)] py-20 dark:border-[rgba(241,236,234,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">04</div>
+                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">06</div>
                 <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The people up front</p>
                 <h2 class="es-balance es-meet-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Speakers, hosts and <span class="es-meet-grad">the rest of the crew</span>.
@@ -636,12 +804,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Beyond the RSVP (05)                                      -->
+    <!-- 6. Beyond the RSVP (07)                                      -->
     <!-- ============================================================ -->
     <section id="extras" class="scroll-mt-24 border-t border-[rgba(27,23,21,0.1)] py-20 dark:border-[rgba(241,236,234,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">05</div>
+                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">07</div>
                 <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Beyond the RSVP</p>
                 <h2 class="es-balance es-meet-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     What different groups <span class="es-meet-grad">reach for next</span>.
@@ -656,7 +824,7 @@
                 @foreach ([
                     ['Online and hybrid nights', 'Paste the Zoom, Meet or stream link into the event. Registrants get the full link on their ticket while the public page shows only the domain.', 'Free plan', 'free'],
                     ['A page in two languages', 'Choose one other language and event names and descriptions are translated into it, with a switch on the page. Made for language exchanges.', 'Free plan', 'free'],
-                    ['Photos from the night', 'Members add photos and comments with just a name and an email, held in a queue until you approve them. 25 photos on the free plan, no cap on Pro.', 'Free plan', 'free'],
+                    ['Photos from the night', 'With fan content on (the default), members add photos and comments with just a name and an email, held in a queue until you approve them. 25 photos on the free plan, no cap on Pro.', 'Free plan', 'free'],
                     ['Let members pick the topic', 'Put a poll on the next event to choose the talk, the trail or the game. Voting needs a signed-in account, so one person gets one vote.', 'Pro plan', 'pro'],
                     ['Rides to the trailhead', 'Carpool lets members offer and ask for seats to an event, with the driver approving each rider and contact details shared only once they do.', 'Pro plan', 'pro'],
                     ['The occasional paid night', 'A workshop with materials or the annual dinner: put a price on the ticket and the money lands in your own Stripe or PayPal account, with zero platform fees.', 'Pro plan', 'pro'],
@@ -672,12 +840,79 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Who it is for (06)                                        -->
+    <!-- 6b. Moving a group from another platform (08)                -->
+    <!-- ============================================================ -->
+    @php
+        $moveSteps = [
+            ['Build the page before you say anything', 'Create the schedule and add the regular night as a recurring event on the same day and at the same time, with the same cap, starting on your switch date. Members should land on something that already looks like their group.'],
+            ['Bring the special nights across', 'The regular night is already there, so bring only the one-off nights announced after the switch date. Paste the old group\'s events page or its calendar feed into Import from a link. A calendar feed, or a page that publishes its events as data, is read directly, and a repeating entry arrives as one repeating event when the schedule can express its rule. Dates that a recurring event of the same name already covers are left out. Untick anything you do not want; an import can be undone for 24 hours.'],
+            ['Pick a switch date', 'Dates before it finish where they started. Every date after it takes RSVPs on the new page only, so nobody is registered twice and no headcount is split between two lists.'],
+            ['Give members three ways to stay', 'They can follow the page, leave an email address, or subscribe to the group calendar in their own calendar app. Show the QR code from the Followers tab at the last few meetups on the old platform.'],
+            ['Bring a list you already hold', 'If you have members\' email addresses, and their permission to write to them, the Import Emails tab of Newsletters takes up to 10,000 at a time on every plan. They join a newsletter segment, not your followers, and each one counts against the monthly allowance when you write.'],
+            ['Leave a signpost behind', 'Point the old group page at the new link, and keep it up until its last date has passed. Members who missed every announcement will look there first.'],
+        ];
+    @endphp
+    <section id="move" class="scroll-mt-24 border-t border-[rgba(27,23,21,0.1)] py-20 dark:border-[rgba(241,236,234,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">08</div>
+                <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Moving a group</p>
+                <h2 class="es-balance es-meet-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Switch platforms <span class="es-meet-grad">without losing the room</span>.
+                </h2>
+                <p class="es-meet-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A group that moves badly loses the members who only ever looked at one page. A group
+                    that moves well runs its normal nights the whole time, and the only thing members
+                    notice is a new link. Six steps, in this order.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                @foreach ($moveSteps as $i => [$t, $d])
+                    <li class="es-meet-card flex gap-4 p-6" data-reveal="panel">
+                        <span class="es-meet-accent es-meet-num shrink-0 text-lg font-black" aria-hidden="true">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="es-meet-ink text-base font-bold">{{ $t }}</h3>
+                            <p class="es-meet-muted mt-1.5 text-sm">{{ $d }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-meet-card mt-8 grid gap-6 p-6 sm:p-7 md:grid-cols-2" data-reveal="panel">
+                <div>
+                    <h3 class="es-meet-ink text-lg font-bold">What moving costs, honestly</h3>
+                    <p class="es-meet-muted mt-2 text-sm">
+                        A large platform has people browsing it for groups near them. A page of your own
+                        does not arrive with that crowd. If most of your new members found you by browsing,
+                        expect fewer strangers at first, and plan to replace them.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="es-meet-ink text-lg font-bold">Where new members come from instead</h3>
+                    <p class="es-meet-muted mt-2 text-sm">
+                        The embed on your group's website, the link in every social profile, a local guide
+                        that runs a curator schedule and lists your public meetups on its own calendar, and
+                        members who bring a friend. The Sources list in Analytics shows which of these is
+                        working.
+                    </p>
+                </div>
+            </div>
+
+            <p class="es-meet-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                What a link import reads and leaves out is in the
+                <x-link href="{{ marketing_url('/docs/ai-import') }}#link-import">import guide</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Who it is for (09)                                        -->
     <!-- ============================================================ -->
     <section id="who" class="scroll-mt-24 border-t border-[rgba(27,23,21,0.1)] py-20 dark:border-[rgba(241,236,234,0.1)] lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">06</div>
+                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">09</div>
                 <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
                 <h2 class="es-balance es-meet-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Any group that <span class="es-meet-grad">keeps showing up</span>.
@@ -745,7 +980,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. How it works (07, dark band)                              -->
+    <!-- 8. How it works (10, dark band)                              -->
     <!-- ============================================================ -->
     <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-meet-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -755,7 +990,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">07</div>
+                    <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">10</div>
                     <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Ten minutes tonight, <span class="es-meet-grad">then just show up</span>.
@@ -863,12 +1098,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 11. FAQ (08)                                                 -->
+    <!-- 11. FAQ (11)                                                 -->
     <!-- ============================================================ -->
     <section id="faq" class="scroll-mt-24 border-t border-[rgba(27,23,21,0.1)] py-20 dark:border-[rgba(241,236,234,0.1)] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">08</div>
+                <div class="es-meet-chip mb-6" data-reveal aria-hidden="true">11</div>
                 <p class="es-meet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-meet-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked at <span class="es-meet-grad">the organizers' table</span>.
