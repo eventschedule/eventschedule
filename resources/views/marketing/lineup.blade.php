@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Event Lineup: Every Act, Venue and Sponsor Gets Its Credit</x-slot>
-    <x-slot name="description">Name the acts on an event and each appears on its page, linked to a page of their own they can claim. A venue logo wall is free, and sponsor logos come with Pro.</x-slot>
+    <x-slot name="title">Event Lineup: Running Order, Set Times and a Page per Act</x-slot>
+    <x-slot name="description">How to build an event lineup: running order, set times, changeovers and announcing in waves. Every act you name is credited and linked to a page of their own.</x-slot>
     <x-slot name="breadcrumbTitle">Event Lineup</x-slot>
 
     {{-- Claims on this page, checked against the code, the user guide and docs/FEATURES.md:
@@ -33,6 +33,18 @@
            upcoming, is listed; drafts, internal and unlisted events and anything the source has
            not accepted are left out; a source can be filed under a sub-schedule; each one shows
            how many of its events are on the calendar (docs/creating-schedules#event-sources).
+         - Running order and announcing (#running-order, #waves): the Agenda tab is free; a part has
+           an optional Start Time and End Time, a required name and a description; the form's order is
+           the page's (sort_order); a timed agenda draws as a timeline (event/show-guest #gp-agenda);
+           Show times off hides the time fields and SAVING with it off removes the times
+           (docs/creating-events#agenda). AI agenda import is Enterprise (#agenda-import). Editing the
+           agenda or the Participants tab triggers no notify prompt: that is only a one-time event's
+           date or time, or any event's venue or online link (docs/creating-events#notify-attendees).
+           Removing a participant detaches it (EventRepo roles()->sync()). Draft is members-only.
+           The new-event digest goes to confirmed subscribers on publish, can be turned off, and
+           never re-sends for a later edit (docs/managing-schedules, FEATURES "Automatic new-event
+           announcements"). The interest list behind the Notify me card is off until switched on,
+           free, and outside the newsletter allowance (docs/tickets#interest-list).
          No price is quoted here, so nothing needs plan_price(). --}}
 
     <x-slot name="structuredData">
@@ -40,7 +52,7 @@
         name="Event Schedule - Event Lineup"
         description="Name the acts and the venue on an event and each is credited on the event page and linked to a page of their own, which they can claim. A wall of venue logos across your schedule's header is free, and sponsor and partner logos come with Pro."
         audience="Performers, venues and event curators"
-        keywords="event lineup, event lineup page, performer pages, claim a page, venue logo wall, sponsor logos, event sponsors" />
+        keywords="event lineup, running order, set times, event lineup page, performer pages, claim a page, venue logo wall, sponsor logos, event sponsors" />
     </x-slot>
 
     @php
@@ -48,6 +60,10 @@
 
         $lineupFaqs = [
             ['q' => 'What is an event lineup?', 'a' => 'The people performing, speaking or hosting at an event, as opposed to the people attending it. On Event Schedule you name them on the event\'s Participants tab, and every one of them appears on the public event page, each linked to a page of their own.'],
+            ['q' => 'What is the difference between a lineup and a running order?', 'a' => 'The lineup is who is performing. The running order is when: each act\'s start and finish time, with the changeovers between them, worked out between doors and the curfew. Many events announce the lineup weeks ahead and the running order in the final week. On Event Schedule the lineup is the Participants tab and the running order is the Agenda tab, one part per set with a start and end time, both free on every plan.'],
+            ['q' => 'Where does the headliner go in a lineup?', 'a' => 'At a gig or a concert, last: they play when the room is fullest, and the support acts warm it up. At a club night the strongest slot is usually the busiest hour, which is often the middle of the night rather than the end. At a conference a well-known speaker usually opens the day, with another strong session at the end to keep people in the room. Whatever the format, name the headliner in the event\'s title, because that is what people see in a listing or a shared link.'],
+            ['q' => 'When should you announce set times?', 'a' => 'Usually in the last week before the event. Announcing them earlier invites people to come for one act and leave, and every change after that has to be announced again. Until then you can show the agenda in order without times: on Event Schedule, switch Show times off on the Agenda tab, then switch it back on and type the times when you publish them.'],
+            ['q' => 'How long should changeovers between acts be?', 'a' => 'As a rule of thumb, 15 to 20 minutes between full bands, longer when a headliner brings their own equipment or needs a line check, and 5 to 10 minutes between DJs who share the same setup. Ask each act how long they need when you book them, add the changeovers to the running order as gaps, and keep 10 minutes spare before the curfew.'],
             ['q' => 'Do the acts I list need an account?', 'a' => 'No. Naming somebody who is not on Event Schedule creates a page for them there and then, in the name you typed, with every date you list them on. They can claim it later by signing in with the email address or phone number you entered for them, and from then on it is an ordinary schedule they run themselves.'],
             ['q' => 'What does a page show before it is claimed?', 'a' => 'It opens by saying which schedule created it and that the act has not claimed it yet, so nobody mistakes it for a page they built. Under that it lists up to twenty upcoming public dates, each credited to the schedule that added it. It carries no contact details, no follow button and no tickets, and search engines are kept away from it until it is claimed.'],
             ['q' => 'What if the page is not theirs, or they do not want it?', 'a' => 'The page has a This is not me button beside Claim this page. Somebody who holds the email address or phone number on the page can take it down straight away. Anybody else is asked to sign in and their request is recorded for review, so the button cannot be aimed at a competitor.'],
@@ -288,7 +304,7 @@
             </div>
 
             <nav class="es-fade-up es-d-4 hp-toc" aria-label="On this page">
-                @foreach ([['bill', 'The lineup'], ['pages', 'Pages to claim'], ['sources', 'Sources'], ['wall', 'Logo wall'], ['sponsors', 'Sponsors']] as $tocIndex => [$tocId, $tocLabel])
+                @foreach ([['bill', 'The lineup'], ['running-order', 'Running order'], ['waves', 'Announcing it'], ['pages', 'Pages to claim'], ['sources', 'Sources'], ['wall', 'Logo wall'], ['sponsors', 'Sponsors']] as $tocIndex => [$tocId, $tocLabel])
                     <a href="#{{ $tocId }}"><b>{{ sprintf('%02d', $tocIndex + 1) }}</b>{{ $tocLabel }}</a>
                 @endforeach
             </nav>
@@ -360,6 +376,159 @@
                                 <span class="es-bill-shot-link flex-none text-xs font-semibold">View page</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2a. The running order: set times, and the night itself       -->
+    <!-- ============================================================ -->
+    @php
+        // A worked running order. Sets 30 + 40 + 65 = 135 minutes, changeovers 15 + 20 = 35,
+        // 8:00 PM to an 11:00 PM curfew is 180 minutes, so 10 are left as the buffer.
+        $runRows = [
+            ['7:30 PM', 'Doors', 'The time on the ticket and in calendars', false],
+            ['8:00 PM', 'The Slow Burners', '30 minutes, opener', true],
+            ['8:30 PM', 'Changeover', '15 minutes', false],
+            ['8:45 PM', 'Mara Okoro', '40 minutes, main support', true],
+            ['9:25 PM', 'Changeover', '20 minutes', false],
+            ['9:45 PM', 'The Paper Lanterns', '65 minutes, headliner, ends 10:50 PM', true],
+            ['11:00 PM', 'Curfew', '10 minutes of buffer before it', false],
+        ];
+        $runSteps = [
+            ['Start from the fixed edges', 'Write down doors, the curfew (when the sound has to stop) and anything else nobody can move: a late train, a room booked after you, a shared backline that leaves at midnight. The running order fills the space between them.'],
+            ['Place the headliner first', 'At a gig the headliner plays last, when the room is fullest. At a club night the busiest hour is often the middle of the night, not the end. At a conference a known speaker opens the day, and another strong one closes it so people stay. Pick their slot, then build the rest around it.'],
+            ['Size the sets by billing', 'A common shape is 30 minutes for an opener, 40 to 45 for main support and 60 to 90 for a headliner. Agree each length with the act when you book them, not on the night, and write it down.'],
+            ['Leave room for changeovers', 'Allow 15 to 20 minutes between full bands, more when the headliner brings their own gear, and 5 to 10 between DJs who share equipment. A changeover you did not plan for comes out of somebody\'s set.'],
+            ['Keep a buffer, and decide who gives it back', 'Nights run late. Hold 10 minutes before the curfew, and agree in advance that if time is lost it comes out of the support sets, never the headliner\'s.'],
+        ];
+        $nightFacts = [
+            ['One running order for everyone', 'Send the same times to every act, the sound engineer and the door. The agenda on the event page is the audience\'s copy of that sheet, so when one changes, change both.'],
+            ['When it runs late', 'Open the event on your phone, change the times on its Agenda tab and save, and the event page shows the new times from then on. Editing the agenda emails nobody, so a change people need to know about, such as the headliner going on later, also goes where your audience is looking.'],
+            ['When an act drops out', 'Remove them on the Participants tab and take their part off the agenda, and the date comes off their page too. Nothing is sent to ticket buyers for a lineup change, so if they were the reason people bought, tell buyers yourself.'],
+            ['Doors are not a set', 'Give the event the doors time as its start, because that is what lands on the ticket and in calendars, and let the agenda say when the first act is on. People arrive for doors and stay for the times on the page.'],
+        ];
+    @endphp
+    <section id="running-order" class="hp-sec">
+        <div class="hp-wrap">
+            <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+                <div class="min-w-0">
+                    <div class="hp-head">
+                        <span class="hp-kicker" data-reveal>Running order</span>
+                        <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">Who plays when, <span class="hp-ink-grad">worked back from the curfew.</span></h2>
+                        <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
+                            A lineup says who is on the bill. A running order says when each of them is on stage, and it is built from the times nobody can move. Five steps hold for a bar gig, a club night and a one-day conference alike.
+                        </p>
+                    </div>
+                    <ol class="mt-8 space-y-6" data-reveal-group="80">
+                        @foreach ($runSteps as $stepIndex => [$stepTitle, $stepBody])
+                            <li class="flex gap-4" data-reveal>
+                                <span class="es-bill-num flex h-9 w-9 flex-none items-center justify-center rounded-full text-sm font-bold" aria-hidden="true">{{ $stepIndex + 1 }}</span>
+                                <div>
+                                    <h3 class="text-base font-bold text-gray-900 dark:text-white">{{ $stepTitle }}</h3>
+                                    <p class="mt-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $stepBody }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+
+                <div class="es-bill-shot mx-auto w-full max-w-md p-5" data-reveal="panel" aria-label="Example running order for a three-act night">
+                    <p class="es-bill-shot-label mb-3">Running order &middot; Harvest Night</p>
+                    <div class="space-y-2">
+                        @foreach ($runRows as [$runTime, $runName, $runNote, $runIsSet])
+                            <div class="es-bill-row">
+                                <span class="w-16 flex-none text-xs font-bold">{{ $runTime }}</span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm {{ $runIsSet ? 'font-bold' : 'es-bill-shot-muted font-semibold' }}">{{ $runName }}</span>
+                                    <span class="es-bill-shot-muted block text-xs">{{ $runNote }}</span>
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-bill-shot-muted es-bill-shot-rule mt-4 pt-4 text-xs leading-relaxed">From the first note to the curfew is 180 minutes. The sets take 135 (30 + 40 + 65), the changeovers 35 (15 + 20), and 10 are left for the night running late.</p>
+                </div>
+            </div>
+
+            <div class="hp-card mt-12 p-6 sm:p-8" data-reveal="panel">
+                <div class="grid gap-8 md:grid-cols-2">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Putting it on the event page</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                            Name each act on the Participants tab, then open the Agenda tab and add one part per set, with its Start Time and End Time. Drag the parts into the running order, and the order on the form is the order on the page, shown as a timeline. Not ready to publish times yet? Switch Show times off and the agenda lists the sets in order without them. Saving with it off removes any times already typed, so keep the real ones on your own sheet until you announce them. Both tabs are free on every plan, and <x-link href="{{ marketing_url('/docs/creating-events') }}#agenda-import">reading a set list or a photo of a printed lineup</x-link> into the agenda with AI is Enterprise.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Billing the headliner</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                            The event's name is what shows in a listing, a calendar and a shared link, so put the headliner in it: "The Paper Lanterns with Mara Okoro" says more than "Harvest Night" to somebody scrolling past. On a festival or conference with a name of its own, keep the name and let the short description carry the top two or three acts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 hp-head">
+                <h3 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white" data-reveal>On the night</h3>
+            </div>
+            <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="70">
+                @foreach ($nightFacts as [$factTitle, $factBody])
+                    <div class="hp-card flex flex-col p-6" data-reveal="panel">
+                        <h4 class="text-base font-bold text-gray-900 dark:text-white">{{ $factTitle }}</h4>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $factBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2b. Announcing the lineup in waves                           -->
+    <!-- ============================================================ -->
+    @php
+        $waveCards = [
+            ['Wave one', 'The date, the room and the headliner', 'The headliner sells the early tickets, so lead with them, with tickets on sale the same day if you can. If sales open later, switch on the Notify me card first: people who find the page early can leave an email address and are told when tickets go on sale.'],
+            ['Wave two', 'The support acts, a few weeks on', 'Each act you add brings fans who had not heard of the headliner. Name them on the Participants tab and save, and the event page shows them at once. Give each act the link: the date goes on their own page as well (on a page they run, once they accept it, unless your schedule is on their approved list), and on eventschedule.com an act with no account yet can be sent an email that you added them.'],
+            ['Wave three', 'Set times, in the final week', 'Holding the times back until close to the night keeps people coming for the whole bill rather than one set, and leaves room for the changes that always come. When you are ready, switch Show times on in the agenda and type them in.'],
+        ];
+    @endphp
+    <section id="waves" class="hp-sec hp-alt">
+        <div class="hp-wrap">
+            <div class="hp-head is-center">
+                <span class="hp-kicker" data-reveal>Announcing it</span>
+                <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">Announce in waves, <span class="hp-ink-grad">not all at once.</span></h2>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
+                    One announcement is one moment of attention. Three give people a reason to look again, and each one reaches a different crowd of fans. A pattern many promoters use runs like this.
+                </p>
+            </div>
+
+            <div class="mt-12 grid grid-cols-1 gap-4 lg:grid-cols-3" data-reveal-group="70">
+                @foreach ($waveCards as $waveIndex => [$waveLabel, $waveTitle, $waveBody])
+                    <div class="hp-card flex flex-col p-6" data-reveal="panel">
+                        <div class="flex items-center gap-3">
+                            <span class="es-bill-num flex h-9 w-9 flex-none items-center justify-center rounded-full text-sm font-bold" aria-hidden="true">{{ $waveIndex + 1 }}</span>
+                            <span class="hp-tag">{{ $waveLabel }}</span>
+                        </div>
+                        <h3 class="mt-4 text-base font-bold text-gray-900 dark:text-white">{{ $waveTitle }}</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $waveBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="hp-card mt-8 p-6 sm:p-8" data-reveal="panel">
+                <div class="grid gap-8 md:grid-cols-2">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Build it before you announce it</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                            Set the event to Draft and only your schedule's members can see it, so the page, the tickets and the first names can be ready and checked days ahead. Switch it to Public on announcement day. Booked acts you are not announcing yet stay off the Participants tab until their wave, because everything on it is public the moment the event is.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Who hears about each wave</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                            Publishing a public event sends your confirmed email subscribers the automatic digest of new events, unless you have turned it off. Adding names to it later sends them nothing new, so waves two and three go out as a <x-link href="{{ marketing_url('/features/newsletters') }}">newsletter</x-link> (its allowance is counted in emails a month and grows with the plan) and on your own channels. The <x-link href="{{ marketing_url('/docs/tickets') }}#interest-list">interest list</x-link> behind the Notify me card is free on every plan and does not count against that allowance.
+                        </p>
                     </div>
                 </div>
             </div>

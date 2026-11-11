@@ -522,7 +522,7 @@
             ['Submit Event', 'Suggest a class'],
         ];
 
-        // Three houses, three vocabularies. Each pair is a real renameable key.
+        // Six houses, six vocabularies. Each pair is a real renameable key.
         $houses = [
             [
                 'who' => 'A yoga studio',
@@ -539,6 +539,42 @@
                 'note' => 'A service is not an event, and the hall is not a venue.',
                 'pairs' => [['Events', 'Services'], ['Venue', 'Hall'], ['Keep me posted', 'Get the bulletin']],
             ],
+            [
+                'who' => 'A comedy club',
+                'note' => 'Friday has an early show and a late show, and the late one has no cover.',
+                'pairs' => [['Events', 'Shows'], ['Buy Tickets', 'Book seats'], ['Free entry', 'No cover']],
+            ],
+            [
+                'who' => 'A public library',
+                'note' => 'Story time and the coding club are programs, and the categories are ages.',
+                'pairs' => [['Events', 'Programs'], ['Register', 'Save my spot'], ['Category', 'Age group']],
+            ],
+            [
+                'who' => 'A gallery or museum',
+                'note' => 'Most of what it lists runs for weeks, and the door says admission.',
+                'pairs' => [['Events', 'Exhibitions'], ['Buy Tickets', 'Buy admission'], ['Free entry', 'Free admission']],
+            ],
+        ];
+
+        // The families: one idea printed by several labels, so renaming one alone leaves the
+        // others in the shipped word. The "stays" column names strings that are NOT in
+        // Role::getCustomizableLabels(): search_events, no_events_found (calendar.blade.php) and
+        // join_waitlist (event/show-guest.blade.php, shown in place of Register when full).
+        $families = [
+            ['Events', 'Filter Events, Past Events, Show Past Events, No scheduled events, Submit Event', 'The search box (Search events...) and No events found after a search'],
+            ['Register, Get Tickets, Buy Tickets', 'All three. Register is the button for free registration, Get Tickets shows when every ticket is free and Buy Tickets when a ticket has a price, so one schedule shows all three over time', 'Join Waitlist, shown in their place when registration is full or tickets sell out with a waitlist, and the wording of the checkout page and the emails'],
+            ['Category, Venue, Schedule', 'Filter Events, Show All, Clear Filters, Done: the rest of the filter panel. Schedule here names the sub-schedule filter, not your page', 'The names of your categories, venues and sub-schedules, which are yours already'],
+            ['Show more, Show less', 'Each other: together they open and close the description in your schedule\'s header', 'The Show less that closes a venue description opened by Read more on an event page, and the Show more and Show less under a performer\'s description there'],
+            ['Gallery, Photo Gallery', 'Not each other, because they are two things: Gallery titles your own photos, and Photo Gallery titles the page of photos your guests add. Add Photo, Add Video and Add Comment rename those buttons on the event rows of your calendar; on the event page itself they keep the shipped wording', 'The photos and captions themselves'],
+        ];
+
+        $wordRules = [
+            ['Use the word on your door', 'Rename to the word your audience already says, and types into a search box when they look for you. If the sign outside reads Classes, the page should too.'],
+            ['Keep buttons short and active', 'A button is read on a phone, at a glance. A verb and an object in two or three words ("Book a mat", "Reserve seats") beats a sentence. The field takes 200 characters; a button does not want them.'],
+            ['Never promise what the page does not do', 'Register opens a free registration form, so "Pay now" would mislead. "No cover" only works where entry really is free. The label changes the word, not what pressing it does.'],
+            ['Rename the whole family', 'One idea is printed by several labels. Rename Events to Classes and Filter Events, Past Events and No scheduled events still say events until you rename them too. The table above lists each family.'],
+            ['Check the second language', 'On a schedule that offers a translation, read the second form of every override. A machine translation of a trade name or a joke is often wrong, and on a schedule not written in English you can write it yourself.'],
+            ['Read it as a stranger', 'Open the page signed out, on a phone, and the embed on your own site. A word only regulars know ("the jam", "late room") reads as a puzzle to a first visitor. If it needs explaining, keep the shipped word.'],
         ];
 
         // The duplex. One row per element of the same public schedule page:
@@ -631,6 +667,22 @@
 
         $faqs = [
             [
+                'q' => 'Why would an organizer rename the words on their pages?',
+                'a' => 'Because the shipped words are general and your audience is not. A yoga studio runs classes, a church holds services, a library runs programs and a comedy club has shows, and a page that calls them all events reads like somebody else\'s software. The right word also matches what people type when they look for you, and a button that says what really happens ("Book a mat", "Reserve seats") is clearer than a generic one. Renaming changes only the words: the layout, the links and what each button does stay the same.',
+            ],
+            [
+                'q' => 'Can I change "Tickets" to "Admission"?',
+                'a' => 'Yes, through the two ticket buttons. There is no label that is the word Tickets on its own: an event shows Get Tickets when every ticket is free and Buy Tickets when one has a price, so rename both, for example to "Get admission" and "Buy admission". Register, the button for free registration, is a third label. The checkout page and the emails a buyer receives keep their own wording.',
+            ],
+            [
+                'q' => 'Can I rename "Venue" to "Location"?',
+                'a' => 'Yes. Venue is the name of the venue filter on your calendar and of the chip that shows when a visitor uses it, so "Location", "Room" or "Hall" all work there. The names and addresses of the venues themselves were never shipped wording: they are what you typed, and you change them on the venue.',
+            ],
+            [
+                'q' => 'How many labels can one schedule override?',
+                'a' => 'Up to 30 of the ' . $sheetCount . ' at a time. Each override is a replacement of up to 200 characters, plus an optional second form for the language the schedule translates into. Remove one and the shipped word comes back when you save.',
+            ],
+            [
                 'q' => 'What are custom labels?',
                 'a' => 'Custom labels let you rename the built-in words on your public schedule. There are ' . $sheetCount . ' of them, and each one is a string Event Schedule prints for you rather than something you typed: "Events", "Venue", "Follow", "Free entry", "Back to Schedule" and so on. Override "Events" with "Classes" and every place that label prints reads "Classes" instead.',
             ],
@@ -652,7 +704,7 @@
             ],
             [
                 'q' => 'Can I invent a label that does not exist yet?',
-                'a' => 'No. You rename one of the ' . $sheetCount . ' labels the pages already print; you cannot add a thirty-eighth. The replacement itself is yours to write, up to 200 characters, and a single save accepts up to 30 overrides at once.',
+                'a' => 'No. You rename one of the ' . $sheetCount . ' labels the pages already print; you cannot add a thirty-eighth. The replacement itself is yours to write, up to 200 characters, and one schedule can carry up to 30 overrides at a time.',
             ],
             [
                 'q' => 'Where do the renamed words show up?',
@@ -671,6 +723,7 @@
             ['sheet', 'All ' . $sheetCount . ' labels'],
             ['languages', 'Two languages'],
             ['stop', 'Where it stops'],
+            ['choosing', 'Choosing the words'],
             ['rest', 'Everything else'],
             ['steps', 'Three steps'],
             ['faq', 'Questions'],
@@ -958,7 +1011,7 @@
             </div>
 
             <p class="es-ren-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                The list is fixed at {{ $sheetCount }}. You cannot add a new label, and a single save accepts up to 30 overrides at once.
+                The list is fixed at {{ $sheetCount }}. You cannot add a new label, and one schedule can carry up to 30 overrides at a time.
             </p>
         </div>
     </section>
@@ -1078,12 +1131,67 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 6a. Choosing the words: the families and six rules            -->
+    <!-- ============================================================ -->
+    <section id="choosing" class="scroll-mt-24 py-20 es-ren-rule border-t lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-ren-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-ren-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Choosing the words</p>
+                <h2 class="es-balance es-ren-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Rename the family, <span class="es-ren-accent">not just the word.</span>
+                </h2>
+                <p class="es-ren-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    An easy slip is renaming Events and stopping there. One idea is printed by several labels, and a page that says Classes in the heading and events in the filter reads as half finished. Here is what goes together, and what keeps the shipped wording whatever you do.
+                </p>
+            </div>
+
+            <div class="es-ren-card p-5 sm:p-8" data-reveal="panel">
+                <div class="es-ren-sheet-wrap" role="region" aria-label="Labels that belong together" tabindex="0">
+                    <table class="es-ren-sheet">
+                        <caption class="es-ren-muted mb-4 text-left text-sm">
+                            Labels that print the same idea. Rename the first column and check the second; the third is what these renames do not reach.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">If you rename</th>
+                                <th scope="col">Also look at</th>
+                                <th scope="col">Stays as shipped</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($families as [$familyRename, $familyAlso, $familyStays])
+                                <tr>
+                                    <th scope="row" class="es-ren-sheet-ships">{{ $familyRename }}</th>
+                                    <td class="es-ren-sheet-idea">{{ $familyAlso }}</td>
+                                    <td class="es-ren-sheet-idea">{{ $familyStays }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h3 class="es-ren-ink mt-14 mb-6 text-center text-2xl font-black tracking-tight" data-reveal>Six rules for a good rename</h3>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($wordRules as $ruleIndex => [$ruleTitle, $ruleBody])
+                    <div class="es-ren-card flex flex-col p-7" data-reveal="panel">
+                        <div class="es-ren-accent mb-3 font-mono text-sm font-black">{{ sprintf('%02d', $ruleIndex + 1) }}</div>
+                        <h4 class="es-ren-ink mb-2 text-lg font-bold">{{ $ruleTitle }}</h4>
+                        <p class="es-ren-muted text-sm leading-relaxed">{{ $ruleBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 7. Everything else: bento                                    -->
     <!-- ============================================================ -->
     <section id="rest" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-ren-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-ren-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                 <p class="es-ren-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Everything else</p>
                 <h2 class="es-balance es-ren-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     The rest of making it yours.
@@ -1201,7 +1309,7 @@
     <section id="steps" class="scroll-mt-24 es-ren-rule border-t py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-ren-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-ren-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                 <h2 class="es-balance es-ren-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
                     Three steps
                 </h2>
@@ -1296,7 +1404,7 @@
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-ren-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <div class="es-ren-corner mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <h2 class="es-balance es-ren-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Sell Gift Cards for Your Events | A Balance, Not a Coupon</x-slot>
-    <x-slot name="description">Sell balance-tracked gift cards your customers buy for someone else and redeem toward tickets for any event on your schedule. Set your own denominations.</x-slot>
+    <x-slot name="title">Sell Gift Cards for Events: Amounts, Expiry and Redemption</x-slot>
+    <x-slot name="description">How to sell gift cards for your events: choosing amounts, expiry rules, how redemption works and the holiday rush. Balance-tracked cards on the Pro plan.</x-slot>
     <x-slot name="breadcrumbTitle">Gift Cards</x-slot>
 
     <x-slot name="structuredData">
@@ -623,9 +623,9 @@
             ['Gift card KM4T-9PQX-H2RB', '-$60', true],
         ];
 
-        // Every state a card can be in, as the Gift cards tab shows it.
+        // Every state a card can be in, as the Gift Cards tab shows it.
         $states = [
-            ['Pending payment', 'Bought, not paid for yet. A cash card sits here until you mark it paid.'],
+            ['Pending Payment', 'Bought, not paid for yet. A cash card sits here until you mark it paid.'],
             ['Active', 'Paid for, in date, with balance left. This is the only state that can be spent.'],
             ['Used up', 'The balance reached zero, so there is nothing left to spend. The card stays open, because a cancelled order puts its money back on.'],
             ['Expired', 'Past its validity date. Set no validity period and a card never lands here.'],
@@ -654,7 +654,7 @@
         ];
 
         $actions = [
-            ['Mark paid', 'Activate a cash card once the money is in your hand. That is the moment the recipient is emailed the code.'],
+            ['Mark Paid', 'Activate a cash card once the money is in your hand. That is the moment the recipient is emailed the code.'],
             ['Resend email', 'Send the card to the recipient again when it is lost in a mailbox somewhere.'],
             ['Cancel', 'Stop a card being redeemed, whether it was ever paid for or not. Once cancelled it cannot be spent again.'],
             // Status only (GiftCardController::handleAction). Ticket sales now refund through Stripe,
@@ -663,6 +663,22 @@
         ];
 
         $faqs = [
+            [
+                'q' => 'How do I sell gift cards for my events?',
+                'a' => 'Open your schedule\'s Edit page, go to the Tickets tab and open its Gift cards row. Turn on Enable gift cards, add the amounts you want to sell, choose the currency, set how many days a card is valid for (or leave it empty for no expiry), pick how buyers pay, and save. On eventschedule.com the schedule also needs its own email settings, because the card is delivered by email. Once it is live, a Gift Cards button appears on your schedule page and a link under the tickets on your event pages, and the row gives you a purchase link to share. Selling gift cards is on the Pro plan.',
+            ],
+            [
+                'q' => 'What amounts should event gift cards come in?',
+                'a' => 'Work from your ticket prices. Three to five amounts usually cover it: one around the price of a single ticket, one for two tickets, one for a pair at your dearest show, and a larger one for a season or a workplace present. Leave a little headroom above a ticket price so a price rise does not leave the card short. You can save up to twelve amounts, and buyers choose from your list rather than typing their own.',
+            ],
+            [
+                'q' => 'Should event gift cards have an expiry date?',
+                'a' => 'Many organizers choose none, because a card that never expires never leads to an awkward conversation, and the outstanding balance simply stays on the books until it is spent. If you do set one, make it generous, show it before purchase and print it on the card, which Event Schedule does for you. Laws on gift card expiry differ between countries and regions, and some limit it, so check what applies where you sell before choosing a period.',
+            ],
+            [
+                'q' => 'Can a gift card be delivered on a chosen date, like a birthday?',
+                'a' => 'Not on a schedule: the card is emailed to the recipient as soon as the payment is confirmed (for a cash card, when you mark it paid). A buyer who wants it opened on the day can tick Send to myself, which makes them the recipient, and then hand the code over in person or write it inside a card.',
+            ],
             [
                 'q' => 'What can a gift card be spent on?',
                 'a' => 'A gift card can be redeemed toward tickets for any event on the schedule that sold it, including events you add later. It works when the event is priced in the same currency as the card.',
@@ -701,6 +717,8 @@
             ['register', 'The register'],
             ['checkout', 'At checkout'],
             ['setup', 'What you set'],
+            ['amounts', 'Amounts and rules'],
+            ['season', 'The gift season'],
             ['faq', 'Questions'],
             ['claim', 'Get started'],
         ];
@@ -929,7 +947,7 @@
                 <div class="es-gift-panel es-gift-hover p-6" data-reveal>
                     <h3 class="es-gift-ink mb-2 text-base font-bold">Open a card, see its whole story</h3>
                     <p class="es-gift-muted text-sm">
-                        The Gift cards tab on your Sales page lists every card you have sold. Open one
+                        The Gift Cards tab on your Sales page lists every card you have sold. Open one
                         and you get the buyer, the recipient, the message they wrote, and every order
                         the card was spent on.
                     </p>
@@ -1126,6 +1144,139 @@
         </div>
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 5a. Choosing amounts and rules (05)                          -->
+    <!-- ============================================================ -->
+    @php
+        // A worked set of amounts for one example venue, tickets $15 to $40. These are the
+        // organizer's own prices in an example, not ours, so no plan_price() is involved.
+        $amountPlan = [
+            ['$25', 'One standard ticket, with a little left on the code', 'The easy present for a colleague or a friend, and the leftover brings them back for a second night.'],
+            ['$50', 'Two standard tickets', 'A night out for the recipient and whoever they choose to bring.'],
+            ['$90', 'A pair for your dearest show', 'Covers two seats at the top price with room to spare, so nobody has to explain why the present does not quite stretch.'],
+            ['$150', 'Several nights across a season', 'For the regular in someone\'s life, and for a workplace buying one present for a team.'],
+        ];
+        $ruleCards = [
+            ['Expiry: decide, then say it everywhere', 'Valid for takes a number of days, from 1 to 3,650, counted from the moment the payment is confirmed. Leave it empty and cards never expire. If you set one, it is shown on the purchase page before anyone pays and printed on the card email and the card page, so nobody is surprised. Laws on whether a gift card may expire, and how soon, differ from place to place, so check the rules where you sell before you choose a period.'],
+            ['Say what it pays for', 'A card pays at your ticket checkout, for events on the schedule that sold it, priced in the card\'s currency. It does not pay for an appointment booking, and it is not money behind your bar. Put that in a sentence wherever you sell it, because the person who opens it was not there when it was bought.'],
+            ['Keep the list short', 'Three to five amounts is plenty. Twelve is the most the form takes, and a long row of buttons slows a buyer down more than it helps. The list is saved lowest first and the purchase page starts on the first amount, so the smallest card is the one already picked.'],
+            ['Remember the money is not spent yet', 'A sold card is money in your account for tickets you still owe. The Gift Cards tab on your Sales page totals the outstanding balance on active cards, one figure per currency. Many businesses record a sold card as owed until it is redeemed: ask your accountant how to treat it where you are.'],
+        ];
+    @endphp
+    <section id="amounts" class="es-gift-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-gift-stub mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-gift-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Amounts and rules</p>
+                <h2 class="es-balance es-gift-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Pick amounts from <span class="es-gift-grad">what your tickets cost</span>.
+                </h2>
+                <p class="es-gift-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The best denominations are the ones a buyer can picture as a night out. Start from
+                    your ticket prices, not from round numbers, and give each amount a reason to be on
+                    the list. Here is one set, worked for a venue whose tickets run from $15 to $40.
+                </p>
+            </div>
+
+            <div class="es-gift-panel mx-auto max-w-3xl overflow-hidden p-5 sm:p-7" data-reveal="panel">
+                <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 class="es-gift-ink text-lg font-bold">Four amounts, four reasons</h3>
+                    <span class="es-gift-num es-gift-muted text-xs">Tickets $15 to $40</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="es-gift-table text-sm">
+                        <caption class="sr-only">An example set of gift card amounts for a venue with tickets from $15 to $40: what each amount buys and why it is on the list.</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="es-gift-figure">Amount</th>
+                                <th scope="col">What it buys</th>
+                                <th scope="col">Why it is on the list</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($amountPlan as [$planAmount, $planBuys, $planWhy])
+                                <tr>
+                                    <th scope="row" class="es-gift-figure es-gift-accent whitespace-nowrap font-bold">{{ $planAmount }}</th>
+                                    <td class="es-gift-ink font-semibold">{{ $planBuys }}</td>
+                                    <td class="es-gift-muted">{{ $planWhy }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="es-gift-muted es-gift-rule-t mt-5 pt-4 text-xs">
+                    Leave a few dollars of headroom over a ticket price rather than matching it to the
+                    cent: prices go up, and a card that falls a dollar short feels smaller than it is.
+                    The customer pays any difference at checkout, so a card never has to cover a whole
+                    order to be useful.
+                </p>
+            </div>
+
+            <div class="mx-auto mt-6 grid max-w-5xl gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($ruleCards as [$t, $d])
+                    <div class="es-gift-panel es-gift-hover flex flex-col p-6" data-reveal>
+                        <h3 class="es-gift-ink mb-2 text-base font-bold">{{ $t }}</h3>
+                        <p class="es-gift-muted text-sm">{{ $d }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5b. The gift season (06)                                     -->
+    <!-- ============================================================ -->
+    @php
+        $seasonSteps = [
+            ['Early November', 'Set it up and buy one yourself', 'Switch gift cards on, save your amounts, and on eventschedule.com fill in the schedule\'s email settings, which the purchase page waits for. Then buy your smallest card and send it to a second address of your own, so you have seen the purchase page, both emails and the card page exactly as a customer will.'],
+            ['Late November', 'Say it out loud', 'Once selling is live, a Gift Cards button sits in your schedule\'s header and a short line under the ticket selector on your event pages. Copy the purchase link from the Gift cards row and put it in your next newsletter, your bio and a post about the shows you have coming up.'],
+            ['December', 'Keep it in front of people', 'Pin the link, mention it at the end of every event post, and on Pro run a line in the announcement bar across the top of your pages. Tell people at the door, too: the people at tonight\'s show already like what you put on, and some of them have a friend to buy for.'],
+            ['The last few days', 'Sell to the late shoppers', 'A card paid by card through Stripe is emailed as soon as the payment is confirmed, which makes it one of the few presents that can still be bought on the day. There is no delivery date to pick, so a buyer who wants it opened on the morning chooses Send to myself and writes the code inside a card.'],
+            ['January', 'Give them something to spend it on', 'Cards bought in December are spent in the new year, so have the next season\'s events listed before the holidays end. Watch the outstanding balance on the Gift Cards tab: it tells you how much of January\'s door is already paid for.'],
+        ];
+    @endphp
+    <section id="season" class="es-gift-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-gift-stub mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-gift-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gift season</p>
+                <h2 class="es-balance es-gift-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Ready by November, <span class="es-gift-grad">spent by spring</span>.
+                </h2>
+                <p class="es-gift-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Gift buying peaks in the weeks before the end-of-year holidays. A venue, studio
+                    or theatre that is ready before that rush catches all of it; one that switches
+                    cards on in mid December catches the tail. A plan in five steps:
+                </p>
+            </div>
+
+            <ol class="mx-auto max-w-3xl space-y-4" data-reveal-group="90">
+                @foreach ($seasonSteps as $seasonIndex => [$when, $t, $d])
+                    <li class="es-gift-panel es-gift-hover flex flex-col gap-3 p-6 sm:flex-row sm:gap-6" data-reveal>
+                        <div class="w-40 shrink-0">
+                            <p class="es-gift-num es-gift-accent text-xs font-bold">0{{ $seasonIndex + 1 }}</p>
+                            <p class="es-gift-ink mt-1 text-sm font-bold">{{ $when }}</p>
+                        </div>
+                        <div>
+                            <h3 class="es-gift-ink mb-2 text-base font-bold">{{ $t }}</h3>
+                            <p class="es-gift-muted text-sm">{{ $d }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-gift-tint mx-auto mt-8 max-w-3xl p-6" data-reveal>
+                <h3 class="es-gift-ink mb-2 text-base font-bold">Paid in cash? The code waits for you</h3>
+                <p class="es-gift-muted text-sm">
+                    A cash card is created as Pending Payment and nothing is emailed until you press
+                    Mark Paid on the Gift Cards tab. If you sell cards over the counter in December,
+                    mark each one as the money changes hands, or the recipient's email sits waiting
+                    while the present is already wrapped.
+                </p>
+            </div>
+        </div>
+    </section>
+
     {{-- The shared plan band. Every one of these pages states its tiers inline
          with Free/Pro chips, but none of them offered a way to see what the
          tiers cost, or even a link to /pricing - a reader who got this far had
@@ -1180,7 +1331,7 @@
     <section id="faq" class="es-gift-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-gift-stub mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <div class="es-gift-stub mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                 <p class="es-gift-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-gift-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked before <span class="es-gift-grad">the first one sells</span>.
