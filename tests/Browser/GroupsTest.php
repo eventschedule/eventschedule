@@ -65,27 +65,43 @@ class GroupsTest extends DuskTestCase
     }
 
     /**
-     * Create sub-schedules for the talent role
+     * Open the schedule form on its Sub-schedules row, and wait until that row's pane is on screen.
+     *
+     * The row is a toggle (partials/form-kit-script), so pressing it blindly closed it whenever it
+     * was already open, or did nothing when it landed before the kit was wired; the pane then
+     * stayed hidden, and waitFor(), which needs a VISIBLE element, timed out on a field that was
+     * there (CI, 2026-11-11). FormKit.openRow() opens it whatever its state, and is asked again
+     * until the pane shows.
      */
-    protected function createGroups(Browser $browser): void
+    protected function openSubschedules(Browser $browser): void
     {
         $browser->visit('/talent/edit')
-            ->waitFor('#edit-form', 15)
-            ->pause(500);
+            ->waitFor('#edit-form', 15);
 
         // Use JavaScript to switch to sub-schedules section (more reliable than clicking the nav link)
         $browser->script("document.querySelector('a[data-section=\"section-subschedules\"]').click()");
 
-        $browser->waitUntil("document.getElementById('section-subschedules') && document.getElementById('section-subschedules').style.display === 'block'", 5);
+        $browser->waitUntil("document.getElementById('section-subschedules') && document.getElementById('section-subschedules').style.display === 'block'", 15);
 
-        // Click the sub-schedules tab within the Customize section
-        $browser->click('button.customize-tab[data-tab="subschedules"]')
-            ->pause(500);
+        $browser->waitUntil("(function () {
+            var pane = document.getElementById('customize-tab-subschedules');
+            if (! pane || ! window.FormKit || ! window.FormKit.openRow) { return false; }
+            if (pane.hidden) { window.FormKit.openRow('customize', 'subschedules'); }
+            return ! pane.hidden && pane.offsetParent !== null;
+        })()", 15);
+    }
+
+    /**
+     * Create sub-schedules for the talent role
+     */
+    protected function createGroups(Browser $browser): void
+    {
+        $this->openSubschedules($browser);
 
         // Add first sub-schedule
         $browser->script('addGroupField();');
 
-        $browser->waitFor('input[name*="groups"][name*="name"]', 5)
+        $browser->waitFor('input[name*="groups"][name*="name"]', 15)
             ->type('input[name*="groups"][name*="name"]', 'Main Shows');
 
         // JS fallback for headless Chrome flakiness
@@ -106,21 +122,11 @@ class GroupsTest extends DuskTestCase
         $browser->waitForLocation('/talent/schedule', 45);
 
         // Add second sub-schedule
-        $browser->visit('/talent/edit')
-            ->waitFor('#edit-form', 15)
-            ->pause(500);
-
-        $browser->script("document.querySelector('a[data-section=\"section-subschedules\"]').click()");
-
-        $browser->waitUntil("document.getElementById('section-subschedules') && document.getElementById('section-subschedules').style.display === 'block'", 5);
-
-        // Click the sub-schedules tab within the Customize section
-        $browser->click('button.customize-tab[data-tab="subschedules"]')
-            ->pause(500);
+        $this->openSubschedules($browser);
 
         $browser->script('addGroupField();');
 
-        $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
+        $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 15)
             ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops');
 
         // JS fallback for headless Chrome flakiness
