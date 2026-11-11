@@ -68,7 +68,7 @@
             ],
             [
                 'q' => 'Eventbrite vs Ticket Tailor: which costs less?',
-                'a' => 'Ticket Tailor, at every ticket price we can work out. It charges a flat fee per ticket ('.$ttBand.' in the last US band we recorded, which we could not re-check, so confirm it on tickettailor.com) and your own Stripe, PayPal or Square account charges its processing. On a '.$usdWhole(25).' ticket that comes to about '.$usd($allIn($tt, 25)).', against '.$usd($allIn($eb, 25)).' on Eventbrite, and the gap grows with the price. What Eventbrite gives back for the difference is its marketplace and a checkout you do not have to set up.',
+                'a' => 'Ticket Tailor, at every ticket price we can work out. It charges a flat fee per ticket ('.$ttBand.' in the US, $0.85 pay as you go and less with prepaid credits) and your own Stripe, PayPal or Square account charges its processing. On a '.$usdWhole(25).' ticket that comes to about '.$usd($allIn($tt, 25)).', against '.$usd($allIn($eb, 25)).' on Eventbrite, and the gap grows with the price. What Eventbrite gives back for the difference is its marketplace and a checkout you do not have to set up.',
             ],
             [
                 'q' => 'Does Luma or another event platform work better for paid ticketed events?',
@@ -653,7 +653,7 @@
                         @if ($m['id'] === 'luma-vs-eventbrite')
                             Luma Plus's monthly charge is not in the per-ticket figure.
                         @else
-                            Ticket Tailor is shown at the middle of {{ $ttBand }} per ticket, the last US band we recorded; it could not be re-checked, so confirm it on tickettailor.com.
+                            Ticket Tailor is shown at the middle of {{ $ttBand }} per ticket: $0.85 pay as you go, less with prepaid credits.
                         @endif
                         The <x-link href="{{ marketing_url('/ticket-fee-calculator') }}">ticket fee calculator</x-link> works out a whole event from the same rates.
                     </p>

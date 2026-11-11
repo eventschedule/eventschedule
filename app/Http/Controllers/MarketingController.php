@@ -1958,8 +1958,8 @@ class MarketingController extends Controller
         return [
             'Pricing & Fees' => [
                 ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only', 'Yes (forever)'],
-                ['Paid plan price', 'From '.plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
-                ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket', 'N/A (no ticketing)'],
+                ['Paid plan price', 'From '.plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on tickets)', '$59/mo', 'No subscription ($0.30-$0.85/ticket)', 'Free'],
+                ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.30-$0.85/ticket', 'N/A (no ticketing)'],
                 ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay', 'Built-in (2.9% per order, on top)', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', 'No'],
             ],
             'Events & Ticketing' => [
@@ -1967,29 +1967,32 @@ class MarketingController extends Controller
                 ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['QR check-ins', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Ticket waitlist', 'Yes (Pro)', 'Yes', 'Yes', 'Yes (email sign-ups)', 'No'],
-                ['Check-in dashboard', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
-                ['Sale notifications', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
+                ['Check-in dashboard', 'Yes (Pro)', 'Yes', 'No', 'Yes', 'No'],
+                ['Sale notifications', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Sales data export', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Free event RSVP', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Recurring events', 'Yes (Free)', 'Yes', 'Via cloning', 'Yes', 'Yes'],
                 ['Event polls', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                 ['Promo/discount codes', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
-                ['Post-event feedback', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
+                ['Post-event feedback', 'Yes (Pro)', 'Yes', 'Yes', 'No', 'No'],
                 ['Embed ticket widget', 'Yes (Pro)', 'Yes', 'No', 'Yes', 'No'],
                 ['Individual tickets', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
-                // Competitor cells checked against each one's own help pages, 2026-09-10.
+                // Competitor cells checked against each one's own help pages, 2026-09-10, and the whole table again on 2026-11-11.
                 ['Refunds, full or partial', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Reserved seating', 'Yes (Enterprise)', 'Yes', 'No', 'Yes', 'No'],
+                ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes', 'Yes', 'Scheduled broadcasts', 'N/A'],
+                ['Donations / pay what you want', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
+                ['Promoter links with commission', 'Yes (Pro)', 'Tracking only', 'Tracking only', 'Tracking only', 'No'],
             ],
             'Integrations' => [
-                ['Calendar sync, both ways', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No', 'N/A'],
+                ['Calendar sync, both ways', 'Yes (Free)', 'No native 2-way sync', 'One-way iCal feed', 'No', 'N/A'],
                 ['CalDAV sync', 'Yes (Free)', 'No', 'No', 'No', 'No'],
                 ['Newsletters', 'Yes (Free)', 'Yes', 'Yes', 'No', 'No'],
                 ['Embed calendar on website', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'Yes (limited styling)'],
             ],
             'Customization' => [
-                ['Custom domains', 'Yes (Enterprise)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
+                ['Custom domains', 'Yes (Enterprise)', 'No', 'No (custom luma.com URL)', 'Yes ($8/mo add-on)', 'No'],
                 ['Remove branding', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
                 ['Custom fields', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
@@ -2004,7 +2007,7 @@ class MarketingController extends Controller
                 ['Private/password-protected events', 'Yes (Enterprise)', 'Yes (password)', 'Unlisted only', 'Yes (access code)', 'No'],
                 ['Availability management', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                 ['WhatsApp event creation', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
-                ['Email scheduling', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
+                ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                 ['Carpool matching', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                 ['Sponsor/partner logos', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
             ],
@@ -2112,6 +2115,20 @@ class MarketingController extends Controller
     }
 
     /**
+     * ", and buyers can also add it to Apple Wallet or Google Wallet", naming only the wallets this
+     * install has configured (both are off until the operator sets them up), or nothing at all.
+     */
+    private function walletClause(): string
+    {
+        $wallets = array_keys(array_filter([
+            'Apple Wallet' => \App\Services\Wallet\AppleWalletService::isConfigured(),
+            'Google Wallet' => \App\Services\Wallet\GoogleWalletService::isConfigured(),
+        ]));
+
+        return $wallets ? ', and buyers can also add it to '.implode(' or ', $wallets) : '';
+    }
+
+    /**
      * Get comparison data for individual competitor pages
      */
     private function getComparisonData(string $competitor): array
@@ -2134,7 +2151,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to publish events', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on tickets)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on tickets); Eventbrite Pro email marketing from $15/mo', true],
                         ['Platform fees', '0%', '3.7% + $1.79/ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built-in (2.9% per order, on top)', false],
                     ],
@@ -2151,14 +2168,17 @@ class MarketingController extends Controller
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
                         ['Event polls', 'Yes (Pro)', 'No', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
-                        ['Post-event feedback', 'Yes (Pro)', 'No', true],
+                        ['Post-event feedback', 'Yes (Pro)', 'Yes (star ratings, public paid events in US, Canada and UK)', false],
                         ['Individual tickets', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (48 hours before)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Tracking links, no commission', true],
                     ],
                     'Integrations' => [
                         ['Eventbrite auto-import', 'Yes (Pro)', 'N/A', true],
                         ['Calendar sync, both ways', 'Yes (Free)', 'No native 2-way sync', true],
                         ['CalDAV sync', 'Yes (Free)', 'No', true],
-                        ['Newsletters', 'Yes (Free)', 'Yes', false],
+                        ['Newsletters', 'Yes (Free)', 'Yes (250 a day free, more on Eventbrite Pro)', false],
                     ],
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'No', true],
@@ -2168,7 +2188,7 @@ class MarketingController extends Controller
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
-                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'No', true],
+                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'AI writes the description, summary and cover image', true],
                         ['Event graphics gen', 'Yes (Free)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
@@ -2179,7 +2199,7 @@ class MarketingController extends Controller
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -2321,10 +2341,10 @@ class MarketingController extends Controller
                 'tagline' => 'An open source alternative to Luma with zero platform fees, on the free plan too.',
                 'description' => 'Luma\'s free plan takes 5% of paid tickets on top of Stripe, and Luma Plus is $59/mo billed annually. Event Schedule takes 0% on every plan, with Pro at '.plan_price($this->planPrice()).'/mo.',
                 'keywords' => 'luma alternative, luma pricing, luma fees, luma plus pricing, is luma free, luma vs eventbrite, lu.ma alternative',
-                'about' => 'Luma (lu.ma) is a modern event platform popular with tech communities and creators. It offers sleek event pages, built-in video streaming, and community features.',
+                'about' => 'Luma (luma.com) is a modern event platform popular with tech communities and creators. It offers sleek event pages, Zoom and Google Meet integration for online events, and community features.',
                 'competitor_strengths' => [
                     'Polished, modern event page design with strong visual focus',
-                    'Built-in video streaming for virtual events',
+                    'Zoom and Google Meet integration that creates the meeting and tracks attendance',
                     'Popular in tech and startup communities with strong network effects',
                 ],
                 'sections' => [
@@ -2340,23 +2360,26 @@ class MarketingController extends Controller
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
                         ['Check-in dashboard', 'Yes (Pro)', 'No', true],
-                        ['Sale notifications', 'Yes (Pro)', 'No', true],
+                        ['Sale notifications', 'Yes (Pro)', 'Yes (registration alerts by email and push)', false],
                         ['Sales data export', 'Yes (Pro)', 'Yes', false],
-                        ['Recurring events', 'Yes (Free)', 'Clone only, no repeating series', true],
+                        ['Recurring events', 'Yes (Free)', 'Clone with a repeat pattern (up to 20 copies), no linked series', true],
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
                         ['Event polls', 'Yes (Pro)', 'No', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes (coupons)', false],
-                        ['Post-event feedback', 'Yes (Pro)', 'No', true],
+                        ['Post-event feedback', 'Yes (Pro)', 'Yes (Free)', false],
                         ['Individual tickets', 'Yes (Pro)', 'No', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (email, SMS and push)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes (Free)', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Referral tracking, no commission', true],
                     ],
                     'Integrations' => [
-                        ['Calendar sync, both ways', 'Yes (Free)', 'Yes', false],
+                        ['Calendar sync, both ways', 'Yes (Free)', 'No (one-way iCal feed)', true],
                         ['CalDAV sync', 'Yes (Free)', 'No', true],
                         ['Newsletters', 'Yes (Free)', 'Yes', false],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Enterprise)', 'Yes (Plus)', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'No (custom luma.com URL on Plus)', true],
                         ['Remove branding', 'Yes (Pro)', 'Yes (Plus)', true],
                         ['Custom fields', 'Yes (Pro)', 'Yes', false],
                         ['Custom CSS', 'Yes (Pro)', 'No', true],
@@ -2374,7 +2397,7 @@ class MarketingController extends Controller
                         ['Team collaboration', 'Yes (Enterprise)', '3 admins (free), 5 (Plus)', true],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes (Plus)', true],
@@ -2483,7 +2506,7 @@ class MarketingController extends Controller
                     ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Paid tickets settle into your own account with no platform fee on top, where Luma\'s free plan takes 5%. Selling a ticket with a price is on Pro.', 'doc' => 'tickets#payment'],
                 ],
                 'limits' => [
-                    ['tag' => 'No built-in streaming', 'title' => 'Bring your own video room', 'text' => 'Luma can host the stream for a virtual event itself, and Event Schedule cannot. An online event here carries the link to the meeting or stream you run somewhere else, and a schedule synced with Outlook can add a Teams meeting link to it.'],
+                    ['tag' => 'No Zoom integration', 'title' => 'Bring your own video room', 'text' => 'Luma creates the Zoom or Google Meet meeting for a virtual event and records who attended, and Event Schedule does not. An online event here carries the link to the meeting or stream you run somewhere else, and a schedule synced with Outlook can add a Teams meeting link to it.'],
                     ['tag' => 'No tech-scene network', 'title' => 'Luma\'s crowd stays on Luma', 'text' => 'Part of Luma\'s pull is the tech and startup community already using it, which a new schedule here does not inherit. People find you through the follow link and its QR code, the live calendar feed, and the "Notify me" card on each event.'],
                     ['tag' => 'Co-hosts are Enterprise', 'title' => 'Three free admins there, one here', 'text' => 'Luma lets three admins run a calendar on its free plan and five on Plus. On Event Schedule\'s Free and Pro plans one person runs a schedule, and admins or viewers beside the owner come with Enterprise, up to five on the hosted service.'],
                 ],
@@ -2493,7 +2516,7 @@ class MarketingController extends Controller
                     ['question' => 'Luma or Eventbrite: which charges less per ticket?', 'answer' => 'On a $20 ticket, Luma\'s free plan takes $1.00 (5%) and Eventbrite takes $2.53 (3.7% + $1.79), before payment processing on either. Luma Plus takes nothing per ticket for $59 a month. Event Schedule takes nothing per ticket on any plan; the only deduction is your payment processor\'s own.'],
                     ['question' => 'Is it easy to switch from Luma to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Your audience can sign up by email for an occasional digest of the new events you create, or subscribe to the schedule\'s live calendar feed, which needs no email address.'],
                     ['question' => 'How does Event Schedule pricing compare to Luma?', 'answer' => 'Luma Plus is $59/mo billed annually, and Luma\'s free plan takes a 5% platform fee on paid events. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, unlimited free registration and newsletters, with no platform fee on anything you sell.'],
-                    ['question' => 'Does Event Schedule support virtual events like Luma?', 'answer' => 'Yes. Event Schedule supports online events with video links, descriptions, and ticketing. While Luma has built-in video streaming, Event Schedule integrates with any video platform you already use.'],
+                    ['question' => 'Does Event Schedule support virtual events like Luma?', 'answer' => 'Yes. Event Schedule supports online events with video links, descriptions, and ticketing. Luma creates Zoom and Google Meet meetings for you, while Event Schedule takes the link from any video platform you already use, and the Outlook sync can create a Teams meeting.'],
                     ['question' => 'Can people be told when tickets go on sale?', 'answer' => 'Yes, free on every plan. Switch on the "Notify me" card and, on an event page, visitors leave an email address, with no account, and get one email when tickets go on sale, a reminder shortly before the event, and a notice if you cancel it; a change notice reaches them too when you choose to send one. Each date of a recurring event keeps its own list, and every email has a one-click unsubscribe. The event editor shows you how many people are waiting.'],
                 ],
             ],
@@ -2514,8 +2537,8 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free events only', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $0.28/ticket', true],
-                        ['Platform fees', '0%', '$0.28 to $0.60/ticket', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'No subscription ($0.30 to $0.85 a ticket)', true],
+                        ['Platform fees', '0%', '$0.30 to $0.85/ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/PayPal/Square', false],
                     ],
                     'Events & Ticketing' => [
@@ -2523,8 +2546,8 @@ class MarketingController extends Controller
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes (email sign-ups)', false],
-                        ['Check-in dashboard', 'Yes (Pro)', 'No', true],
-                        ['Sale notifications', 'Yes (Pro)', 'No', true],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
+                        ['Sale notifications', 'Yes (Pro)', 'Yes', false],
                         ['Sales data export', 'Yes (Pro)', 'Yes', false],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
                         ['Online events', 'Yes (Free)', 'Yes', false],
@@ -2533,6 +2556,9 @@ class MarketingController extends Controller
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
                         ['Individual tickets', 'Yes (Pro)', 'No', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Scheduled broadcasts you set up (SMS paid)', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Tracking links, commission paid by hand', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No', true],
@@ -2540,14 +2566,14 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'No', true],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Enterprise)', 'Yes (paid)', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes ($8/mo add-on)', false],
                         ['Remove branding', 'Yes (Pro)', 'Yes (paid)', true],
                         ['Custom fields', 'Yes (Pro)', 'Yes', false],
                         ['Custom CSS', 'Yes (Pro)', 'No', true],
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
-                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'No', true],
+                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'No built-in AI (an MCP connector for outside AI tools)', true],
                         ['Event graphics gen', 'Yes (Free)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
@@ -2558,7 +2584,7 @@ class MarketingController extends Controller
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -2570,7 +2596,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'Flat-Rate Pricing',
-                        'description' => 'Pay '.plan_price($this->planPrice()).'/mo flat instead of $0.28 to $0.60 per ticket. The more tickets you sell, the more you save.',
+                        'description' => 'Pay '.plan_price($this->planPrice()).'/mo flat instead of $0.30 to $0.85 per ticket. The more tickets you sell, the more you save.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -2665,9 +2691,9 @@ class MarketingController extends Controller
                 'tagline' => 'A purpose-built event platform vs a general scheduling tool.',
                 'description' => 'Compare Event Schedule with Google Calendar: public event pages, ticket sales, a live feed your audience can subscribe to, and two-way sync with Google.',
                 'keywords' => 'google calendar alternative, google calendar for events, event calendar platform, public event calendar, google calendar vs event platform',
-                'about' => 'Google Calendar is a popular personal scheduling tool used by billions worldwide. It excels at managing appointments, meetings, and personal reminders with deep Google ecosystem integration. The good news? You don\'t have to choose - Event Schedule syncs with Google Calendar, so you can use both together.',
+                'about' => 'Google Calendar is a popular personal scheduling tool used by hundreds of millions of people. It excels at managing appointments, meetings, and personal reminders with deep Google ecosystem integration. The good news? You don\'t have to choose - Event Schedule syncs with Google Calendar, so you can use both together.',
                 'competitor_strengths' => [
-                    'Free and ubiquitous with billions of existing users',
+                    'Free and ubiquitous, with a huge existing user base',
                     'Deep Google ecosystem integration (Gmail, Meet, Drive)',
                     'Excellent mobile apps with push notifications',
                 ],
@@ -2686,7 +2712,7 @@ class MarketingController extends Controller
                     'Ticketing & Payments' => [
                         ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'No', true],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'No', true],
-                        ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'No', true],
+                        ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Paid appointment bookings through your Stripe (premium plans)', true],
                         ['QR check-ins', 'Yes (Free)', 'No', true],
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
                         ['Check-in dashboard', 'Yes (Pro)', 'No', true],
@@ -2694,25 +2720,25 @@ class MarketingController extends Controller
                         ['Sales data export', 'Yes (Pro)', 'No', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'No', true],
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
-                        ['Free event RSVP', 'Yes (Free)', 'No', true],
-                        ['Platform fees', '0%', 'N/A', true],
+                        ['Free event RSVP', 'Yes (Free)', 'Invite link (up to 200 guests)', true],
+                        ['Platform fees', '0%', '0% (Stripe fees on paid bookings)', false],
                     ],
                     'Event Features' => [
-                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'No', true],
+                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'Gemini creates events from a prompt', true],
                         ['Event graphics gen', 'Yes (Free)', 'No', true],
-                        ['Rich descriptions (Markdown)', 'Yes (Free)', 'Plain text only', true],
-                        ['Custom fields', 'Yes (Pro)', 'No', true],
+                        ['Rich descriptions (Markdown)', 'Yes (Free)', 'Basic rich text, no Markdown', true],
+                        ['Custom fields', 'Yes (Pro)', 'Booking-form questions (appointments)', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
                         ['Event polls', 'Yes (Pro)', 'No', true],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
-                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
-                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Private visibility, no password', false],
+                        ['Availability management', 'Yes (Enterprise)', 'Personal working hours and booking pages', true],
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Sharing & Promotion' => [
-                        ['Shareable event pages', 'Yes (Free)', 'No', true],
+                        ['Shareable event pages', 'Yes (Free)', 'Basic public event link', true],
                         ['Link preview images', 'Yes (Free)', 'No', true],
                         ['Newsletter integration', 'Yes (Free)', 'No', true],
                         ['Embeddable calendars', 'Yes (customizable)', 'Yes (limited styling)', true],
@@ -2726,7 +2752,7 @@ class MarketingController extends Controller
                     'Platform' => [
                         ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Custom CSS', 'Yes (Pro)', 'No', true],
-                        ['Webhooks', 'Yes (Pro)', 'No', true],
+                        ['Webhooks', 'Yes (Pro)', 'Change notifications through the API', false],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
                         ['Calendar sync, both ways', 'Yes (Free)', 'N/A', true],
@@ -2753,7 +2779,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'AI Event Parsing',
-                        'description' => 'Paste event details in any format and our AI extracts dates, times, and descriptions automatically. Google Calendar requires tedious manual entry.',
+                        'description' => 'Paste event details in any format and our AI extracts dates, times, and descriptions automatically. Google Calendar does not read a flyer or a pasted listing into a public event page.',
                         'icon' => 'ai',
                         'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
                         'border' => 'border-sky-200 dark:border-sky-500/20',
@@ -2837,42 +2863,44 @@ class MarketingController extends Controller
                 ],
                 'sections' => [
                     'Pricing & Fees' => [
-                        ['Free plan', 'Yes (forever)', 'Yes (limited)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $16.79/mo (organizer)', true],
-                        ['Platform fees', '0%', '0% (but subscription required)', true],
+                        ['Free plan', 'Yes (forever)', 'Starter (first-time organizers: 2 events a month, 10 attendees each)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $29.99/mo or $174.99/yr (organizer)', true],
+                        ['Platform fees', '0%', 'Service fee on each paid ticket, paid by the attendee', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built-in (for paid events)', false],
                     ],
                     'Events & Ticketing' => [
                         ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes (paid events)', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
-                        ['QR check-ins', 'Yes (Free)', 'No', true],
-                        ['Ticket waitlist', 'Yes (Pro)', 'No', true],
-                        ['Check-in dashboard', 'Yes (Pro)', 'No', true],
+                        ['QR check-ins', 'Yes (Free)', 'Yes (in the Meetup app)', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Free events only', true],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Attendee list with check-in status', false],
                         ['Sale notifications', 'Yes (Pro)', 'No', true],
-                        ['Sales data export', 'Yes (Pro)', 'No', true],
+                        ['Sales data export', 'Yes (Pro)', 'Yes', false],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
                         ['Event polls', 'Yes (Pro)', 'No', true],
-                        ['Promo/discount codes', 'Yes (Pro)', 'No', true],
-                        ['Post-event feedback', 'Yes (Pro)', 'No', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'Yes (star ratings and reviews)', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (email and push)', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'No', true],
                     ],
                     'Integrations' => [
-                        ['Calendar sync, both ways', 'Yes (Free)', 'Add to calendar only', true],
+                        ['Calendar sync, both ways', 'Yes (Free)', 'Subscribe feed, one way', true],
                         ['CalDAV sync', 'Yes (Free)', 'No', true],
                         ['Newsletters', 'Yes (Free)', 'Group messaging only', true],
                     ],
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Remove branding', 'Yes (Pro)', 'No', true],
-                        ['Custom fields', 'Yes (Pro)', 'No', true],
+                        ['Custom fields', 'Yes (Pro)', 'RSVP questions', true],
                         ['Custom CSS', 'Yes (Pro)', 'No', true],
                     ],
                     'Unique Features' => [
                         ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'No', true],
                         ['Event graphics gen', 'Yes (Free)', 'No', true],
                         ['Embeddable calendar', 'Yes (Free)', 'No', true],
-                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'Comments and photos, no video', true],
                         ['Event boost (ads)', 'Yes (Pro)', 'No', true],
                         ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
                         ['Availability management', 'Yes (Enterprise)', 'No', true],
@@ -2880,10 +2908,10 @@ class MarketingController extends Controller
                         ['Team collaboration', 'Yes (Enterprise)', 'Co-organizers (paid)', true],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
-                        ['REST API', 'Yes (Pro)', 'Yes (limited)', true],
+                        ['REST API', 'Yes (Pro)', 'GraphQL, Meetup Pro only', true],
                         ['Webhooks', 'Yes (Pro)', 'No', true],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
@@ -2892,7 +2920,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'No Organizer Fee',
-                        'description' => 'Meetup charges organizers $16.79 to $24.50/mo just to host a group. Event Schedule is free forever with optional '.plan_price($this->planPrice()).'/mo Pro upgrade - saving you up to $200/year.',
+                        'description' => 'Past its Starter plan of two small events a month, Meetup charges organizers from $29.99/mo (or $174.99/yr) to run a group. Event Schedule is free forever, with an optional '.plan_price($this->planPrice()).'/mo Pro upgrade.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -2927,8 +2955,8 @@ class MarketingController extends Controller
                         'icon_color' => 'text-blue-600 dark:text-blue-400',
                     ],
                     [
-                        'title' => 'QR Check-Ins',
-                        'description' => 'Scan attendees in at the door with QR codes. Meetup has no built-in check-in system for tracking who actually showed up.',
+                        'title' => 'Check-In From Any Phone',
+                        'description' => 'Scan attendees in at the door from any phone browser, with nothing to install. Meetup checks members in through its own app.',
                         'icon' => 'ticket',
                         'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
                         'border' => 'border-amber-200 dark:border-amber-500/20',
@@ -2937,7 +2965,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Fan Engagement',
-                        'description' => 'Let your community share videos and comments on events. Build engagement that goes beyond RSVPs - something Meetup cannot offer.',
+                        'description' => 'Let your community share videos and comments on events. Build engagement that goes beyond RSVPs, with videos as well as photos.',
                         'icon' => 'image',
                         'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30',
                         'border' => 'border-cyan-200 dark:border-cyan-500/20',
@@ -2953,10 +2981,10 @@ class MarketingController extends Controller
                 'why_choose' => [
                     'summary' => 'Against Meetup it comes down to who holds the members and what hosting a group costs. Meetup charges the organizer a subscription; here running the group is free, and the people who sign up are on your own list.',
                     'points' => [
-                        'Running the group costs nothing on the free plan, against Meetup\'s organizer subscription from $16.79/mo',
+                        'Running the group costs nothing on the free plan, against Meetup\'s organizer subscription from $29.99/mo once a group outgrows Starter',
                         'Members who sign up by email are on your list, and the confirmed ones get a digest of each batch of new events automatically',
                         'A monthly meetup is one recurring event, on the 2nd Tuesday or any other pattern, on every plan',
-                        'Free registration with an optional limit per date, and a QR scan at the door, which Meetup does not have',
+                        'Free registration with an optional limit per date, and a QR scan at the door from any phone browser',
                         'The group\'s calendar embeds on your own website, so visitors never have to leave it to see what is next',
                         'Paid meetups on Pro, settled into a payment account in your name, with promo codes and a waitlist for sold-out tickets',
                     ],
@@ -2974,7 +3002,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Meetup to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your recurring or one-time events, then share its URL with your community. Members can sign up by email for a digest of the new events you create or subscribe to your live calendar feed, and newsletters keep the group engaged between meetups.'],
-                    ['question' => 'How does Event Schedule pricing compare to Meetup?', 'answer' => 'Meetup charges organizers a subscription starting at $16.79/mo for basic groups, with higher tiers for larger communities. Event Schedule has a free plan with unlimited events. The Pro plan is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
+                    ['question' => 'How does Event Schedule pricing compare to Meetup?', 'answer' => 'Meetup has a free Starter plan for first-time organizers (one group, two events a month, ten attendees each), then charges a subscription from $29.99/mo or $174.99/yr, and attendees pay a service fee on paid tickets. Event Schedule has a free plan with unlimited events. The Pro plan is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
                     ['question' => 'Can Event Schedule handle community events and recurring meetups?', 'answer' => 'Yes. Event Schedule supports recurring events, fan engagement features like videos and comments, newsletters with A/B testing, and embeddable calendar widgets. All designed for building and maintaining community.'],
                     ['question' => 'How will my members hear about new events?', 'answer' => 'People who sign up by email and confirm get an occasional digest of the new public events you create, at most one every 72 hours per schedule. Anyone can subscribe to your live calendar feed, which needs no email address and updates itself when a date moves. On a single event, the interest list emails people when tickets go on sale, reminds them before it starts and tells them if it is cancelled. Newsletters you write reach whoever you choose, within your plan\'s monthly recipient allowance.'],
                     ['question' => 'Can I bring my Meetup members with me?', 'answer' => 'If you hold their addresses with their consent, a CSV of up to 10,000 rows goes into your newsletter list on any plan. Otherwise post your schedule\'s sign-up link in a group message: people who confirm get the automatic digest of new events, and anyone can subscribe to the live calendar feed without giving an email address.'],
@@ -3006,22 +3034,25 @@ class MarketingController extends Controller
                         ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (app-based)', false],
-                        ['Ticket waitlist', 'Yes (Pro)', 'No', true],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Yes (face-value resale waitlist)', false],
                         ['Check-in dashboard', 'Yes (Pro)', 'No', true],
-                        ['Sale notifications', 'Yes (Pro)', 'No', true],
-                        ['Sales data export', 'Yes (Pro)', 'No', true],
+                        ['Sale notifications', 'Yes (Pro)', 'Scheduled sales reports', true],
+                        ['Sales data export', 'Yes (Pro)', 'Yes (reports and a read-only API)', false],
                         ['Recurring events', 'Yes (Free)', 'Limited', true],
                         ['Online events', 'Yes (Free)', 'Yes (livestream)', false],
-                        ['Free event RSVP', 'Yes (Free)', 'No', true],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes (free tickets and guest lists)', false],
                         ['Event polls', 'Yes (Pro)', 'No', true],
-                        ['Promo/discount codes', 'Yes (Pro)', 'No', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
                         ['Individual tickets', 'Yes (Pro)', 'No', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'On-sale alerts, no documented pre-show reminder', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Charity venues only', true],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Tracking links, no commission', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No', true],
                         ['CalDAV sync', 'Yes (Free)', 'No', true],
-                        ['Newsletters', 'Yes (Free)', 'Push notifications', true],
+                        ['Newsletters', 'Yes (Free)', 'No newsletter tool (DICE emails its own users)', true],
                     ],
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'No', true],
@@ -3041,7 +3072,7 @@ class MarketingController extends Controller
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Limited', true],
@@ -3053,7 +3084,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'Web-First Access',
-                        'description' => 'DICE requires fans to download their app to buy tickets. Event Schedule works in any browser - no app install required, no friction for your audience.',
+                        'description' => 'DICE fans can buy on the web, but they need its app to open the ticket and get in. Event Schedule tickets open in any browser - no app install required, no friction for your audience.',
                         'icon' => 'globe',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -3098,7 +3129,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Newsletters',
-                        'description' => 'Reach your audience directly with built-in newsletters. DICE limits you to push notifications that only work if fans have the app installed.',
+                        'description' => 'Reach your audience directly with built-in newsletters. DICE emails and notifies its own users, and gives you no newsletter tool of your own.',
                         'icon' => 'mail',
                         'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30',
                         'border' => 'border-cyan-200 dark:border-cyan-500/20',
@@ -3117,8 +3148,8 @@ class MarketingController extends Controller
                         'Fans buy and open their tickets in any browser, with nothing to install',
                         'Ticket money settles into your own Stripe or PayPal account on Pro',
                         'No service fee from us on top of your price, so the figure you set is the one fans see',
-                        'Free registration for guest-list nights and free-entry shows, which DICE does not offer',
-                        'Promo codes, and a waitlist that emails fans when a sold-out show frees up, on Pro',
+                        'Free registration for guest-list nights and free-entry shows, with no app needed to get in',
+                        'Promo codes and a waitlist for sold-out shows on Pro, and a reminder email to every ticket holder before the night, free',
                         'A weekly club night set up once, on chosen days, as one recurring event on every plan',
                     ],
                 ],
@@ -3135,9 +3166,9 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from DICE to Event Schedule?', 'answer' => 'Yes. Unlike DICE, Event Schedule works in any browser so your audience does not need to download an app. Create a free schedule, add your events, and share a direct link. Your fans can browse and buy tickets instantly.'],
-                    ['question' => 'How does Event Schedule pricing compare to DICE?', 'answer' => 'DICE absorbs its fees into ticket prices, meaning fans pay more than your listed price. Event Schedule charges zero platform fees and connects directly to your own Stripe or PayPal account, so you control exactly what attendees pay.'],
+                    ['question' => 'How does Event Schedule pricing compare to DICE?', 'answer' => 'DICE builds a booking fee into the advertised ticket price and shares it with the organiser, at a rate it does not publish. Event Schedule charges zero platform fees and connects directly to your own Stripe or PayPal account, so you control exactly what attendees pay.'],
                     ['question' => 'Does Event Schedule support music and nightlife events like DICE?', 'answer' => 'Yes. Event Schedule handles any event type including concerts, festivals, and nightlife. You get ticketing with QR check-ins, event graphics generation, and a shareable schedule page, without being locked into a single event genre.'],
-                    ['question' => 'Do my fans need an app to get their tickets?', 'answer' => 'No. The ticket opens in any browser, from the confirmation email or the ticket page, each with its QR code, and buyers can also add it to Google Wallet where Wallet is switched on. The free scanner reads that same code at the door.'],
+                    ['question' => 'Do my fans need an app to get their tickets?', 'answer' => 'No. The ticket opens in any browser, from the confirmation email or the ticket page, each with its QR code'.$this->walletClause().'. The free scanner reads that same code at the door.'],
                     ['question' => 'Can Event Schedule stop ticket touts?', 'answer' => 'Not the way DICE does, because there is no mobile-only ticket. Each ticket is a QR code that admits once, and a second scan warns the door. A per-order limit on each ticket type caps how many one buyer can take in a single order.'],
                     ['question' => 'Can one show have a guest list and paid tickets?', 'answer' => 'Yes. A ticket type priced at zero can sit beside paid ones, so a guest-list tier and a paid tier share one event, and the $0 tier works on every plan. The paid tier needs Pro. A night with no paid entry at all can use free registration instead.'],
                 ],
@@ -3148,9 +3179,9 @@ class MarketingController extends Controller
                 'slug' => 'brown-paper-tickets-alternative',
                 'meta_title' => 'Brown Paper Tickets Alternative, 0% Fees | Event Schedule',
                 'tagline' => 'A modern, actively developed alternative to Brown Paper Tickets.',
-                'description' => 'Brown Paper Tickets is being retired. Compare Event Schedule: zero platform fees, Stripe or PayPal payouts, and unlimited free registration.',
+                'description' => 'Brown Paper Tickets has closed to new events. Compare Event Schedule: zero platform fees, Stripe or PayPal payouts, and unlimited free registration.',
                 'keywords' => 'brown paper tickets alternative, brown paper tickets replacement, bpt alternative, event ticketing platform, brown paper tickets competitor',
-                'about' => 'Brown Paper Tickets was a ticketing platform known for its low fees and focus on independent events. Its website now says it is being retired and sends organizers to Events.com for their next event, so many are looking for a new home.',
+                'about' => 'Brown Paper Tickets was a ticketing platform known for its low fees and focus on independent events. It was acquired by Events.com, no longer takes new events and sends organizers to Events.com, so many are looking for a new home.',
                 'competitor_strengths' => [
                     'Historically low per-ticket fees for organizers',
                     'Long track record in the independent event space',
@@ -3160,7 +3191,7 @@ class MarketingController extends Controller
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to list', false],
                         ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Free (fees on tickets)', true],
-                        ['Platform fees', '0%', '$0.99 + 5% per ticket (buyer-paid)', true],
+                        ['Platform fees', '0%', '$1.49 + 6% per ticket (buyer-paid)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Built-in', false],
                     ],
                     'Events & Ticketing' => [
@@ -3170,14 +3201,17 @@ class MarketingController extends Controller
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
                         ['Check-in dashboard', 'Yes (Pro)', 'No', true],
                         ['Sale notifications', 'Yes (Pro)', 'No', true],
-                        ['Sales data export', 'Yes (Pro)', 'No', true],
+                        ['Sales data export', 'Yes (Pro)', 'Yes (spreadsheet reports)', false],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
                         ['Online events', 'Yes (Free)', 'Limited', true],
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
                         ['Event polls', 'Yes (Pro)', 'No', true],
-                        ['Promo/discount codes', 'Yes (Pro)', 'No', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Passwords and member discount codes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
                         ['Individual tickets', 'Yes (Pro)', 'No', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'No (updates sent by hand)', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'No', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No', true],
@@ -3197,12 +3231,12 @@ class MarketingController extends Controller
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
                         ['Event boost (ads)', 'Yes (Pro)', 'No', true],
-                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Password-protected prices only', true],
                         ['Availability management', 'Yes (Enterprise)', 'No', true],
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Limited', true],
@@ -3214,7 +3248,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'Reliable & Active',
-                        'description' => 'Brown Paper Tickets is being retired and migrated to Events.com. Event Schedule is actively developed with regular updates and dependable uptime.',
+                        'description' => 'Brown Paper Tickets no longer takes new events, and its past event data was not moved to Events.com. Event Schedule is actively developed with regular updates and dependable uptime.',
                         'icon' => 'globe',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -3273,20 +3307,20 @@ class MarketingController extends Controller
                     ['name' => 'DICE', 'route' => 'marketing.compare_dice'],
                 ],
                 'why_choose' => [
-                    'summary' => 'With Brown Paper Tickets being retired, the real question is where to settle next. Event Schedule is actively developed, adds no platform fee, and its code is open source, so the software cannot be taken away from you a second time.',
+                    'summary' => 'With Brown Paper Tickets closed to new events, the real question is where to settle next. Event Schedule is actively developed, adds no platform fee, and its code is open source, so the software cannot be taken away from you a second time.',
                     'points' => [
-                        'No $0.99 + 5% service fee on each ticket: Event Schedule adds no platform fee to what buyers pay',
+                        'No $1.49 + 6% service fee on each ticket: Event Schedule adds no platform fee to what buyers pay',
                         'Payouts on your processor\'s own timetable, straight into the Stripe or PayPal account you connect',
-                        'Promo codes, a ticket waitlist and a sales CSV export on Pro, none of which Brown Paper Tickets has',
+                        'Promo codes, a ticket waitlist and a reminder email to every ticket holder before the event, which Brown Paper Tickets never sent for you',
                         'A door scanner that runs on a phone on every plan, and a live check-in count on Pro',
-                        'Cash at the door still works: a buyer can choose to pay there, and you mark the order paid',
+                        'Cash at the door still works on Pro: set an event to cash, and you mark each order paid when the buyer pays at the door',
                         'Selfhosting under an open source license, which resolves to Enterprise, if you never want to be moved on again',
                     ],
                 ],
                 'switch_steps' => [
-                    ['title' => 'Copy your events while the pages are up', 'description' => 'Open each upcoming Brown Paper Tickets event page, copy its text and paste it into AI import, which fills in the event for you to check. Do it before those pages come down.', 'doc' => 'ai-import#text-import'],
+                    ['title' => 'Bring your events across with AI import', 'description' => 'Paste the text of an event, from an old listing, an email or a flyer, into AI import, which fills in the event for you to check.', 'doc' => 'ai-import#text-import'],
                     ['title' => 'Recreate the ticket types', 'description' => 'A name, price and quantity for each type, with dates sales open and close, so an early-bird price ends on its own.', 'doc' => 'tickets#ticket-types'],
-                    ['title' => 'Connect a payment account', 'description' => 'Brown Paper Tickets processed the cards itself. Here Stripe or PayPal does, into an account in your name, and cash at the door can stay as a second option.', 'doc' => 'account-settings#payments'],
+                    ['title' => 'Connect a payment account', 'description' => 'Brown Paper Tickets processed the cards itself. Here Stripe or PayPal does, into an account in your name, and an event can be set to cash at the door instead.', 'doc' => 'account-settings#payments'],
                     ['title' => 'Scan at the door', 'description' => 'The scanner runs in a phone\'s browser on every plan, and each ticket admits once.', 'doc' => 'tickets#check-in'],
                 ],
                 'limits' => [
@@ -3295,10 +3329,10 @@ class MarketingController extends Controller
                     ['tag' => 'Pro for selling', 'title' => 'The organizer pays, not the buyer', 'text' => 'Brown Paper Tickets put its fee on the buyer, so listing cost the organizer nothing. Selling priced tickets here is Pro at '.plan_price($this->planPrice()).'/mo, a flat charge that does not grow with the number sold, and free registration stays free.'],
                 ],
                 'faq' => [
-                    ['question' => 'Is it easy to switch from Brown Paper Tickets to Event Schedule?', 'answer' => 'Yes. Many organizers are moving away from Brown Paper Tickets as the platform is being retired and migrated to Events.com. Create a free schedule, add your events (AI import speeds this up), and share your new URL. You can be up and running in minutes.'],
-                    ['question' => 'How does Event Schedule pricing compare to Brown Paper Tickets?', 'answer' => 'Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. Free registration is unlimited, and selling paid tickets is on Pro. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo for unlimited ticketing, with payouts straight into your own Stripe or PayPal account.'],
-                    ['question' => 'Is Event Schedule actively maintained?', 'answer' => 'Yes. Brown Paper Tickets is being retired and migrated to Events.com. Event Schedule is built with a modern tech stack and receives regular updates. It is fully open source, so you can inspect the code, track development activity, and even selfhost it for complete control over your platform.'],
-                    ['question' => 'Can a buyer get tickets to several shows in one order?', 'answer' => 'Yes, on every plan. Tickets for several of your events go into one cart and are paid once, through Stripe or PayPal, with one order page listing every ticket.'],
+                    ['question' => 'Is it easy to switch from Brown Paper Tickets to Event Schedule?', 'answer' => 'Yes. Many organizers are moving away from Brown Paper Tickets now that the platform no longer takes new events. Create a free schedule, add your events (AI import speeds this up), and share your new URL. You can be up and running in minutes.'],
+                    ['question' => 'How does Event Schedule pricing compare to Brown Paper Tickets?', 'answer' => 'Brown Paper Tickets charged $1.49 + 6% per ticket in the US as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. Free registration is unlimited, and selling paid tickets is on Pro. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo for unlimited ticketing, with payouts straight into your own Stripe or PayPal account.'],
+                    ['question' => 'Is Event Schedule actively maintained?', 'answer' => 'Yes. Brown Paper Tickets no longer takes new events. Event Schedule is built with a modern tech stack and receives regular updates. It is fully open source, so you can inspect the code, track development activity, and even selfhost it for complete control over your platform.'],
+                    ['question' => 'Can a buyer get tickets to several shows in one order?', 'answer' => 'Yes. Tickets for several of your events go into one cart and are paid once, through Stripe or PayPal, with one order page listing every ticket. The cart itself is on every plan, and each paid ticket in it needs Pro.'],
                     ['question' => 'What happens to tickets I already sold on Brown Paper Tickets?', 'answer' => 'They stay with Brown Paper Tickets, or Events.com where it now sends organizers, because there is no importer for them. If those buyers are coming to a show you now run here and you have their details, the attendee import on Pro adds them from a CSV or by hand, up to 5,000 rows at a time.'],
                     ['question' => 'Can I keep my events if Event Schedule ever changes course?', 'answer' => 'The code is open source under the Attribution Assurance License, so the hosted service is not the only way to run it. You can download a backup of your schedule at any time, and the same software can be installed on your own server, where every feature is included.'],
                 ],
@@ -3311,7 +3345,7 @@ class MarketingController extends Controller
                 'tagline' => 'A simpler, more affordable alternative to Splash for event marketing.',
                 'description' => 'Compare Event Schedule with Splash: branded event pages, registration and ticketing with zero platform fees, and published pricing with no sales call.',
                 'keywords' => 'splash alternative, splash event marketing alternative, splash competitor, event management platform, splash replacement',
-                'about' => 'Splash is an enterprise event marketing platform focused on branded event experiences, registration, and attendee engagement. It targets mid-to-large organizations with custom event pages and marketing automation.',
+                'about' => 'Splash, part of Cvent since 2024, is an enterprise event marketing platform focused on branded event experiences, registration, and attendee engagement. It targets mid-to-large organizations with custom event pages and marketing automation.',
                 'competitor_strengths' => [
                     'Enterprise-grade event marketing and branding tools',
                     'Advanced attendee engagement and analytics',
@@ -3328,16 +3362,19 @@ class MarketingController extends Controller
                         ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
-                        ['Ticket waitlist', 'Yes (Pro)', 'No', true],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Yes (RSVP events, paid plans)', false],
                         ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
-                        ['Sale notifications', 'Yes (Pro)', 'No', true],
+                        ['Sale notifications', 'Yes (Pro)', 'Yes (RSVP notifications, Slack)', false],
                         ['Sales data export', 'Yes (Pro)', 'Yes', false],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
                         ['Event polls', 'Yes (Pro)', 'No', true],
-                        ['Promo/discount codes', 'Yes (Pro)', 'No', true],
-                        ['Post-event feedback', 'Yes (Pro)', 'No', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'Survey pages you send by hand', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (you build and schedule them)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes (donation tickets)', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Tracking links, no commission', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'Limited', true],
@@ -3348,7 +3385,7 @@ class MarketingController extends Controller
                         ['Custom domains', 'Yes (Enterprise)', 'Yes (enterprise)', false],
                         ['Remove branding', 'Yes (Pro)', 'Yes (enterprise)', false],
                         ['Custom fields', 'Yes (Pro)', 'Yes', false],
-                        ['Custom CSS', 'Yes (Pro)', 'No', true],
+                        ['Custom CSS', 'Yes (Pro)', 'Yes (paid plans)', false],
                         ['Embeddable calendar', 'Yes (Free)', 'Registration widget', true],
                     ],
                     'Unique Features' => [
@@ -3362,14 +3399,14 @@ class MarketingController extends Controller
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes (enterprise)', false],
-                        ['Webhooks', 'Yes (Pro)', 'No', true],
+                        ['Webhooks', 'Yes (Pro)', 'Yes (Simple Postback)', false],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
-                        ['Setup time', 'Minutes', 'Weeks (implementation)', true],
+                        ['Setup time', 'Minutes', 'Self-serve, or sales-led onboarding', true],
                     ],
                 ],
                 'key_advantages' => [
@@ -3384,7 +3421,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Instant Setup',
-                        'description' => 'Splash implementations can take weeks of onboarding. Event Schedule is ready in minutes - create your schedule, add events, and share with your audience right away.',
+                        'description' => 'Splash is sold through its sales team, with onboarding for larger rollouts. Event Schedule is ready in minutes - create your schedule, add events, and share with your audience right away.',
                         'icon' => 'calendar',
                         'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
                         'border' => 'border-sky-200 dark:border-sky-500/20',
@@ -3438,9 +3475,9 @@ class MarketingController extends Controller
                     'points' => [
                         'Published prices: a free plan, and Pro at '.plan_price($this->planPrice()).'/mo after a '.$this->trialDays().'-day trial, with no annual contract',
                         'Unlimited free registration on every plan, with questions asked once per order on Pro',
-                        'Custom CSS on Pro for whatever the theme settings do not cover, which Splash does not allow',
+                        'Custom CSS on Pro for whatever the theme settings do not cover, at a price that is published',
                         'A ticket waitlist, promo codes and post-event feedback emails on Pro',
-                        'The REST API on Pro, where Splash keeps it for enterprise, and webhooks, which Splash does not have',
+                        'The REST API and webhooks on Pro, where Splash keeps its API for enterprise',
                         'The open source code can be selfhosted, so attendee data can stay on your company\'s own servers',
                     ],
                 ],
@@ -3457,7 +3494,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Splash to Event Schedule?', 'answer' => 'Yes. Unlike Splash, there is no enterprise onboarding or sales process required. Just sign up, create a free schedule, add your events, and share your schedule URL. AI import can speed up event creation too.'],
-                    ['question' => 'How does Event Schedule pricing compare to Splash?', 'answer' => 'Splash uses custom enterprise pricing that requires contacting sales, with contracts typically running thousands of dollars per year. Event Schedule Pro is a transparent '.plan_price($this->planPrice()).'/mo with zero platform fees and no annual commitment.'],
+                    ['question' => 'How does Event Schedule pricing compare to Splash?', 'answer' => 'Splash uses custom enterprise pricing that requires contacting sales, on annual contracts. Event Schedule Pro is a transparent '.plan_price($this->planPrice()).'/mo with zero platform fees and no annual commitment.'],
                     ['question' => 'Can Event Schedule handle corporate events like Splash?', 'answer' => 'Yes. Event Schedule supports custom branding, embeddable widgets, custom CSS, and a REST API with webhooks on Pro for integration with your existing tools. Custom domains and multiple team members are on Enterprise.'],
                     ['question' => 'Can my team work on the same schedule?', 'answer' => 'Yes, on Enterprise, capped at five members on the hosted platform. An admin runs the schedule day to day and sees its ticket sales, waitlist and check-in dashboard; a viewer is read-only and sees no sales, but can scan tickets at the door. The free and Pro plans are one person per schedule.'],
                     ['question' => 'Can registrations go straight into our own systems?', 'answer' => 'Yes, through webhooks on Pro, which POST each new order (a free registration included), each published event change and each check-in to an address you choose. The REST API on the same plan reads and writes events and sales. There is no ready-made connector to a named CRM, so the receiving end is yours to build.'],
@@ -3481,15 +3518,15 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Small events only (under 50 attendees)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $50/mo', true],
-                        ['Platform fees', '0%', 'Ticketing add-on required', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $50/mo, billed annually', true],
+                        ['Platform fees', '0%', '1.9% + $0.99/ticket (0.99% on Ultra)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe (separate)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes (paid add-on)', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes (paid plans, fee per ticket)', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (Boost+)', false],
-                        ['Ticket waitlist', 'Yes (Pro)', 'No', true],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Session waitlists only (Boost plan and up)', true],
                         ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
                         ['Sale notifications', 'Yes (Pro)', 'No', true],
                         ['Sales data export', 'Yes (Pro)', 'Yes', false],
@@ -3499,6 +3536,7 @@ class MarketingController extends Controller
                         ['Event polls', 'Yes (Pro)', 'Feedback surveys only', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (Launch plan and up)', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'Export/subscribe only', true],
@@ -3513,17 +3551,17 @@ class MarketingController extends Controller
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
-                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'No', true],
+                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'AI writing tools (titles, descriptions, email)', true],
                         ['Event graphics gen', 'Yes (Free)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
-                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Yes (password wall, invite-only)', false],
                         ['Availability management', 'Yes (Enterprise)', 'No', true],
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
-                        ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Sponsor/partner logos', 'Yes (Pro)', 'Yes (Boost plan and up)', false],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -3601,7 +3639,7 @@ class MarketingController extends Controller
                         'Sessions as the parts of an event\'s agenda, open to comments, free on every plan',
                         'Ticketing built in on Pro rather than sold as an add-on, with no platform fee',
                         'Recurring events, which Sched does not support, for a meetup series that runs between conferences',
-                        'A ticket waitlist and sale notifications, both on Pro, where Sched has neither',
+                        'A waitlist for a sold-out ticket and sale notifications, both on Pro, where Sched waitlists sessions only',
                     ],
                 ],
                 'switch_steps' => [
@@ -3642,7 +3680,7 @@ class MarketingController extends Controller
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'No (quote-based)', true],
                         ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Custom quotes', true],
-                        ['Platform fees', '0%', '3% + $0.99/ticket', true],
+                        ['Platform fees', '0%', '3% + $0.99 per paid ticket, plus a quoted fee', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe (2.9% + $0.30)', false],
                     ],
                     'Events & Ticketing' => [
@@ -3659,11 +3697,13 @@ class MarketingController extends Controller
                         ['Event polls', 'Yes (Pro)', 'Yes', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Referral contest, no commission', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No (Zapier only)', true],
                         ['CalDAV sync', 'Yes (Free)', 'No', true],
-                        ['Newsletters', 'Yes (Free)', 'Announcements only', true],
+                        ['Newsletters', 'Yes (Free)', 'Email campaigns per event, and announcements', true],
                     ],
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'No', true],
@@ -3673,7 +3713,7 @@ class MarketingController extends Controller
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
-                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'No', true],
+                        ['AI suite (event parsing, flyer gen, style gen)', 'Parsing on Free, flyer and style on Enterprise', 'AI writing assistant only', true],
                         ['Event graphics gen', 'Yes (Free)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
@@ -3683,8 +3723,8 @@ class MarketingController extends Controller
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
-                        ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Sponsor/partner logos', 'Yes (Pro)', 'Yes (Sponsor Center, banners)', false],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Not public', true],
@@ -3762,7 +3802,7 @@ class MarketingController extends Controller
                         'Tracks as sub-schedules of one conference schedule, which visitors can filter by, on Free',
                         'An agenda on each event page with a start and end time per part, added by hand on every plan',
                         'A calendar of every session to embed on the conference website, where Whova offers an agenda widget',
-                        'Newsletters with A/B testing, plus a digest that mails subscribers each batch of new sessions, rather than announcements alone',
+                        'Newsletters with A/B testing to a list that outlives any one event, plus a digest that mails subscribers each batch of new sessions',
                     ],
                 ],
                 'switch_steps' => [
@@ -3778,7 +3818,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Whova to Event Schedule?', 'answer' => 'Yes. Unlike Whova, there is no sales process or demo required. Just sign up, create a free schedule, and start adding events. AI import can parse pasted event details to speed things up.'],
-                    ['question' => 'How does Event Schedule pricing compare to Whova?', 'answer' => 'Whova uses quote-based enterprise pricing that requires a sales call, with costs typically running thousands of dollars per event. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees on ticket sales.'],
+                    ['question' => 'How does Event Schedule pricing compare to Whova?', 'answer' => 'Whova uses quote-based enterprise pricing that requires a sales call, quoted per event. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees on ticket sales.'],
                     ['question' => 'Does Event Schedule offer attendee engagement features like Whova?', 'answer' => 'Yes. Fan videos and comments and newsletters with A/B testing are on every plan, and event polls and post-event feedback are on Pro, all without per-event pricing.'],
                     ['question' => 'Can I refund an attendee?', 'answer' => 'Yes, on Pro, alongside the paid ticketing that took the money. From the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part and the money goes back through the provider; a partial refund keeps the ticket valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead.'],
                     ['question' => 'Can I bring my Whova attendee list across?', 'answer' => 'Whova can export your sales data, and the email addresses in it can go into a schedule\'s newsletter list from a spreadsheet of up to 10,000 rows, on any plan. Holding them costs nothing; what is metered is each email sent, with a monthly allowance that grows with the plan and lifts entirely when the schedule uses its own mail server.'],
@@ -3801,7 +3841,7 @@ class MarketingController extends Controller
                 ],
                 'sections' => [
                     'Pricing & Fees' => [
-                        ['Free plan', 'Yes (forever)', 'No (paid plans only)', true],
+                        ['Free plan', 'Yes (forever)', 'Limited free plan ($1.50 + 3.5% a ticket)', true],
                         ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $7,500 (Professional)', true],
                         ['Platform fees', '0%', 'No transaction fees (paid plans)', false],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/Square/Payflow', false],
@@ -3821,6 +3861,9 @@ class MarketingController extends Controller
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'Yes (surveys)', false],
                         ['Individual tickets', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (you schedule up to 5)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Tracking links, no commission', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No (add-to-calendar only)', true],
@@ -3839,20 +3882,20 @@ class MarketingController extends Controller
                         ['Event graphics gen', 'Yes (Free)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
-                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Yes', false],
                         ['Availability management', 'Yes (Enterprise)', 'No', true],
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes (unlimited admins)', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
-                        ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Sponsor/partner logos', 'Yes (Pro)', 'Yes', false],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes (Enterprise only)', true],
                         ['Webhooks', 'Yes (Pro)', 'Yes (Enterprise only)', true],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
-                        ['Setup time', 'Minutes', 'Weeks (implementation)', true],
+                        ['Setup time', 'Minutes', 'Demo and account team on paid plans', true],
                     ],
                 ],
                 'key_advantages' => [
@@ -3867,7 +3910,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Instant Setup',
-                        'description' => 'Start in minutes vs weeks of enterprise onboarding. No implementation team needed.',
+                        'description' => 'Start in minutes, with no demo or implementation team in front of you.',
                         'icon' => 'calendar',
                         'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
                         'border' => 'border-sky-200 dark:border-sky-500/20',
@@ -3876,7 +3919,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'No Sales Process',
-                        'description' => 'Sign up and go. No demos, no contracts, no waiting for a sales rep to get back to you.',
+                        'description' => 'Sign up and go. Accelevents sells its larger plans through a demo; here every plan is a published price.',
                         'icon' => 'globe',
                         'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
                         'border' => 'border-teal-200 dark:border-teal-500/20',
@@ -3939,7 +3982,7 @@ class MarketingController extends Controller
                     ['tag' => 'Teams of five', 'title' => 'Not an unlimited admin roster', 'text' => 'Accelevents allows unlimited admins, while team members here are an Enterprise feature capped at five per schedule on the hosted service. A selfhosted install has no such cap.'],
                 ],
                 'faq' => [
-                    ['question' => 'Is it easy to switch from Accelevents to Event Schedule?', 'answer' => 'Yes. Unlike Accelevents, there is no enterprise onboarding or implementation process. Sign up, create a free schedule, and start adding events immediately. AI import can parse pasted event details to speed things up.'],
+                    ['question' => 'Is it easy to switch from Accelevents to Event Schedule?', 'answer' => 'Yes. There is no demo or implementation process in front of any plan. Sign up, create a free schedule, and start adding events immediately. AI import can parse pasted event details to speed things up.'],
                     ['question' => 'How does Event Schedule pricing compare to Accelevents?', 'answer' => 'Accelevents\' Professional plan starts from $7,500 and Business from $13,500, with no transaction fees on those plans. Event Schedule has a free plan with unlimited events and free registration; paid ticket sales come with Pro, a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees.'],
                     ['question' => 'Can Event Schedule handle virtual and hybrid events like Accelevents?', 'answer' => 'Yes. Event Schedule supports online events with video links and integrates with any streaming platform. Combined with ticketing, QR check-ins, and newsletters, it covers both virtual and in-person needs.'],
                     ['question' => 'Does Event Schedule do reserved seating and payment plans?', 'answer' => 'Yes. Allocated seating is on Enterprise: a venue schedule draws its room once and buyers pick seats from the map, with a box office view for holds and phone bookings. Installment payments are on Pro and run on Stripe: the buyer pays the first part at checkout, the ticket is valid at once, and the rest is charged monthly to the saved card.'],
@@ -3974,15 +4017,18 @@ class MarketingController extends Controller
                         ['QR check-ins', 'Yes (Free)', 'Yes (iOS/Android/web)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
                         ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
-                        ['Sale notifications', 'Yes (Pro)', 'No (webhooks only)', true],
+                        ['Sale notifications', 'Yes (Pro)', 'Yes', false],
                         ['Sales data export', 'Yes (Pro)', 'Yes', false],
-                        ['Recurring events', 'Yes (Free)', 'No', true],
+                        ['Recurring events', 'Yes (Free)', 'Series of separate events, no repeat pattern', true],
                         ['Online events', 'Yes (Free)', 'Yes (via meeting links)', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
                         ['Event polls', 'Yes (Pro)', 'No', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
-                        ['Individual tickets', 'Yes (Pro)', 'No', true],
+                        ['Individual tickets', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'No (messages you schedule)', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'UTM tracking, no commission', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No', true],
@@ -3990,7 +4036,7 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'Basic messaging only', true],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Enterprise)', 'No (discontinued)', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes', false],
                         ['Remove branding', 'Yes (Pro)', 'Yes (free)', false],
                         ['Custom fields', 'Yes (Pro)', 'Yes', false],
                         ['Custom CSS', 'Yes (Pro)', 'Yes (widget mode)', false],
@@ -4002,13 +4048,13 @@ class MarketingController extends Controller
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
                         ['Embeddable calendar', 'Yes (Free)', 'Checkout widget only', true],
-                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Yes (unlisted, secret or invitation only)', false],
                         ['Availability management', 'Yes (Enterprise)', 'No', true],
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes (4 roles)', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -4046,9 +4092,9 @@ class MarketingController extends Controller
                         'icon_color' => 'text-teal-600 dark:text-teal-400',
                     ],
                     [
-                        'title' => 'Custom Domains',
-                        'description' => 'Use your own domain for your event pages, on Enterprise. Tito discontinued custom domain support.',
-                        'icon' => 'globe',
+                        'title' => 'Automatic Reminders',
+                        'description' => 'Every ticket holder gets a reminder email before the event, on every plan, with no message to write. Tito sends reminders only when you schedule them.',
+                        'icon' => 'mail',
                         'gradient' => 'from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30',
                         'border' => 'border-blue-200 dark:border-blue-500/20',
                         'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
@@ -4082,7 +4128,7 @@ class MarketingController extends Controller
                     'summary' => 'Tito fits a tech conference that sells its tickets once a year and wants nothing else. A schedule that runs events all year, with a calendar and a mailing list beside the checkout, is where a flat monthly plan starts to beat 3% a ticket.',
                     'points' => [
                         'Pro at '.plan_price($this->planPrice()).'/mo costs less than Tito\'s 3% once a month\'s ticket sales pass '.plan_price($this->planPrice() / 0.03),
-                        'Recurring events with dates added or skipped, on Free, where Tito has no repeating series',
+                        'Recurring events with dates added or skipped, on Free, where a Tito series is a set of separate events',
                         'Payfast for South African rand and Razorpay for Indian rupees, beside Stripe and PayPal',
                         'Individual tickets on Pro, so each attendee in a group order gets a QR code of their own',
                         'A calendar of all your events to embed, where Tito embeds a checkout widget',
@@ -4136,12 +4182,13 @@ class MarketingController extends Controller
                         ['QR check-ins', 'Yes (Free)', 'No', true],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (limited)', true],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
-                        ['Online events', 'Yes (Free)', 'No', true],
+                        ['Online events', 'Yes (Free)', 'Yes (join links, Zoom and webinar integrations)', false],
                         ['Event polls', 'Yes (Pro)', 'No', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'No', true],
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
                         ['Add to calendar buttons', 'Yes (Free)', 'Yes (core feature)', false],
                         ['Subscription calendars', 'Yes (Free)', 'Yes (core feature)', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (every plan)', false],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'Import only (one-way)', true],
@@ -4165,7 +4212,7 @@ class MarketingController extends Controller
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes (Small Business+)', false],
@@ -4195,7 +4242,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => plan_price($this->planPrice()).'/mo vs $36/mo',
-                        'description' => 'AddEvent Small Business is $36/mo on monthly billing, less when paid yearly, and has no ticketing. Event Schedule sells tickets from the free plan.',
+                        'description' => 'AddEvent Small Business is $36/mo on monthly billing, less when paid yearly, and has no ticketing. Event Schedule takes free registrations on the free plan and sells paid tickets on Pro.',
                         'icon' => 'percent',
                         'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
                         'border' => 'border-teal-200 dark:border-teal-500/20',
@@ -4282,7 +4329,7 @@ class MarketingController extends Controller
                 ],
                 'sections' => [
                     'Pricing & Fees' => [
-                        ['Free plan', 'Yes (forever)', 'Selfhosted only (Community Edition)', true],
+                        ['Free plan', 'Yes (forever)', 'Hosted: 500 free tickets a year, then 0.50 EUR each; or selfhost', true],
                         ['Hosted pricing', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', '2.5%/ticket (cap 15 EUR)', true],
                         ['Platform fees', '0%', '2.5% per ticket', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/PayPal/Mollie', false],
@@ -4302,6 +4349,9 @@ class MarketingController extends Controller
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes (vouchers + discounts)', false],
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
                         ['Individual tickets', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (email rules you set up)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Tracking links, no commission', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No', true],
@@ -4320,14 +4370,14 @@ class MarketingController extends Controller
                         ['Event graphics gen', 'Yes (Free)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
-                        ['Embeddable calendar', 'Yes (Free)', 'Ticket widget only', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'Widget with a month, week or list of events', false],
                         ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
                         ['Availability management', 'Yes (Enterprise)', 'No', true],
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes (unlimited teams)', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -4384,7 +4434,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Simpler Setup',
-                        'description' => 'Simpler to selfhost than Pretix: just PHP and MySQL vs Docker, PostgreSQL, and Redis.',
+                        'description' => 'Simpler to selfhost than Pretix: just PHP and MySQL, where Pretix wants PostgreSQL and Redis in production.',
                         'icon' => 'globe',
                         'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30',
                         'border' => 'border-cyan-200 dark:border-cyan-500/20',
@@ -4402,7 +4452,7 @@ class MarketingController extends Controller
                     'points' => [
                         'No 2.5% per ticket on the hosted service: Pro is '.plan_price($this->planPrice()).'/mo with 0% on every sale',
                         'A selfhosted install that needs a PHP host and a MySQL database, and updates itself in one click from inside the app',
-                        'A browsable public calendar with search and filters, and an embed of it, where Pretix embeds a ticket widget',
+                        'A browsable public calendar with search and filters, and an embed of it, on every plan',
                         'Newsletters sent from the app itself, and subscribers told about new dates without you writing to them',
                         'Event polls and post-event feedback on Pro, neither of which Pretix has',
                         'AI import that turns a pasted listing, a link or a flyer into events, 50 a day on Free and unlimited when selfhosted',
@@ -4422,7 +4472,7 @@ class MarketingController extends Controller
                 'faq' => [
                     ['question' => 'Is it easy to switch from Pretix to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events immediately. No data migration or server setup required. AI import can parse pasted event details to speed up the process.'],
                     ['question' => 'How does Event Schedule pricing compare to Pretix?', 'answer' => 'Pretix Hosted charges per-ticket fees on each sale. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees. Both platforms are open source, but Event Schedule is simpler to selfhost.'],
-                    ['question' => 'Is Event Schedule easier to selfhost than Pretix?', 'answer' => 'Yes. Pretix selfhosting requires Docker, PostgreSQL, Redis, and significant server administration. Event Schedule runs on standard PHP hosting with MySQL, making it accessible to a much wider range of hosting environments.'],
+                    ['question' => 'Is Event Schedule easier to selfhost than Pretix?', 'answer' => 'Yes. A production Pretix install wants PostgreSQL and Redis, with Docker as the documented route, and more server administration. Event Schedule runs on standard PHP hosting with MySQL, making it accessible to a much wider range of hosting environments.'],
                     ['question' => 'Does Event Schedule have seating plans?', 'answer' => 'Yes, on Enterprise, and a selfhosted install resolves to Enterprise, so seating is included when you run it yourself. A venue schedule draws its room once, with sections, rows, tables, standing areas and wheelchair spaces, and buyers pick their seats from the map. On the hosted Free and Pro plans, ticket types have a name, a price and a quantity, without assigned seats.'],
                     ['question' => 'How do the two open source licences differ?', 'answer' => 'Pretix is published under the AGPLv3. Event Schedule\'s licence is the Attribution Assurance License, which is why a selfhosted install carries a small Event Schedule credit on its pages. Under both you can read the code, change it and run it yourself.'],
                     ['question' => 'Can a festival sell one pass for every day?', 'answer' => 'Yes, on Pro. A festival pass admits its holder once to each event it covers, a season pass covers the dates of a recurring event, and every use is tracked per pass. Without a pass, a buyer can still add several days to one cart and check out once.'],
@@ -4437,7 +4487,7 @@ class MarketingController extends Controller
                 'tagline' => 'Flat '.plan_price($this->planPrice()).'/mo pricing and zero platform fees, so only your payment processor\'s fee comes off a paid ticket.',
                 'description' => 'Compare Event Schedule with Humanitix. Get flat '.plan_price($this->planPrice()).'/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and selfhosting.',
                 'keywords' => 'humanitix alternative, humanitix alternative free, event ticketing platform, humanitix competitor, affordable event platform',
-                'about' => 'Humanitix is a ticketing platform that donates profits to charity, primarily children\'s education. It charges a per-ticket booking fee (under $3 for most tickets) with no subscription plans. It offers ticketing, QR check-in, promo codes, and embeddable widgets.',
+                'about' => 'Humanitix is a ticketing platform that donates profits to charity, primarily children\'s education. It charges a per-ticket booking fee (5% + $1.29 a ticket in the US) with no subscription plans. It offers ticketing, QR check-in, promo codes, and embeddable widgets.',
                 'competitor_strengths' => [
                     'Profits go to charity (children\'s education and humanitarian causes)',
                     'No subscription required with pay-as-you-go per-ticket pricing',
@@ -4447,7 +4497,7 @@ class MarketingController extends Controller
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for free events', false],
                         ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'No subscription (per-ticket only)', true],
-                        ['Platform fees', '0%', 'Booking fee on paid tickets (under $3 for most)', true],
+                        ['Platform fees', '0%', 'Booking fee on paid tickets (5% + $1.29 in the US)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Included in platform fee', false],
                     ],
                     'Events & Ticketing' => [
@@ -4464,7 +4514,10 @@ class MarketingController extends Controller
                         ['Event polls', 'Yes (Pro)', 'No', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
-                        ['Individual tickets', 'Yes (Pro)', 'No', true],
+                        ['Individual tickets', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'No (emails you schedule)', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Affiliate codes, no commission', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No', true],
@@ -4484,13 +4537,13 @@ class MarketingController extends Controller
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
                         ['Embeddable calendar', 'Yes (Free)', 'Widget only', true],
-                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Private (link only), no password', true],
                         ['Availability management', 'Yes (Enterprise)', 'No', true],
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -4502,7 +4555,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'Flat '.plan_price($this->planPrice()).'/mo Pricing',
-                        'description' => 'No per-ticket fees ever. Humanitix charges a booking fee on every paid ticket (under $3 for most tickets).',
+                        'description' => 'No per-ticket fees ever. Humanitix charges a booking fee on every paid ticket (5% + $1.29 a ticket in the US).',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -4563,7 +4616,7 @@ class MarketingController extends Controller
                 'why_choose' => [
                     'summary' => 'Humanitix pays for its giving out of the fee each buyer is charged. Here nothing is added to the ticket at all, so what would have gone in fees stays with you, and where it goes is your decision.',
                     'points' => [
-                        'No booking fee on a paid ticket, where Humanitix adds one (under $3 for most tickets)',
+                        'No booking fee on a paid ticket, where Humanitix adds one (5% + $1.29 a ticket in the US)',
                         'Newsletters from your own schedule, which Humanitix does not have, and a digest of new events mailed to subscribers',
                         'Branding removal and custom CSS on Pro, where Humanitix offers neither',
                         'Your own domain on Enterprise, which Humanitix does not support',
@@ -4583,9 +4636,9 @@ class MarketingController extends Controller
                     ['tag' => 'Processing is separate', 'title' => 'You hold the payment account', 'text' => 'Humanitix folds payment processing into its fee, but here Stripe or PayPal charge their own fee to the account you connect. You need that account before the first paid sale, and the money settles straight into it.'],
                 ],
                 'faq' => [
-                    ['question' => 'Is it easy to switch from Humanitix to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events right away. With zero platform fees, you keep more of your ticket revenue and can donate directly to causes you care about on your own terms.'],
-                    ['question' => 'How does Event Schedule pricing compare to Humanitix?', 'answer' => 'Humanitix charges a per-ticket booking fee on every paid event (under $3 for most tickets). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo regardless of ticket volume.'],
-                    ['question' => 'Does Humanitix donate to charity while Event Schedule does not?', 'answer' => 'Humanitix donates its profits to charity, which is funded by per-ticket fees on your sales. With Event Schedule, you keep 100% of your ticket revenue (minus Stripe or PayPal processing) and can donate to causes you choose directly.'],
+                    ['question' => 'Is it easy to switch from Humanitix to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events right away. With zero platform fees, you keep more of your ticket revenue and can donate directly to causes you care about on your own terms, or ask your own buyers for a donation at checkout on Pro.'],
+                    ['question' => 'How does Event Schedule pricing compare to Humanitix?', 'answer' => 'Humanitix charges a per-ticket booking fee on every paid event (5% + $1.29 a ticket in the US). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo regardless of ticket volume.'],
+                    ['question' => 'Does Humanitix donate to charity while Event Schedule does not?', 'answer' => 'Humanitix donates its profits to charity, which is funded by per-ticket fees on your sales. With Event Schedule, you keep 100% of your ticket revenue (minus Stripe or PayPal processing) and can donate to causes you choose directly. On Pro you can also ask buyers for a donation at checkout, and a free ticket with donations on becomes pay what you want.'],
                     ['question' => 'Can buyers pay in installments?', 'answer' => 'Yes, on Pro, with Stripe. You switch it on per event; the buyer pays the first part at checkout, the ticket is valid at once, and the rest is charged monthly to the saved card. A plan that falls behind shows a hold at the door instead of admitting the ticket, and a refund is issued payment by payment, in full.'],
                     ['question' => 'Can I offer a lower price for groups?', 'answer' => 'Yes, and it costs nothing extra. A ticket type can carry volume discounts, so a buyer taking several tickets in one order pays less for each, and every type can open and close on its own sales dates. Promo codes, with their own usage limits and expiry, are on Pro.'],
                     ['question' => 'Will my attendees still get a ticket with a QR code?', 'answer' => 'Yes. Every ticket and every free registration comes with a confirmation email carrying a QR code, and the door scanner reads it on any plan. A guest can cancel a free registration from the ticket page linked in that email, which frees the place for someone else.'],
@@ -4600,7 +4653,7 @@ class MarketingController extends Controller
                 'tagline' => 'A flat-rate open source alternative to Eventzilla with zero per-ticket fees.',
                 'description' => 'Compare Event Schedule with Eventzilla. Get flat '.plan_price($this->planPrice()).'/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and open source.',
                 'keywords' => 'eventzilla alternative, eventzilla alternative free, event registration platform, eventzilla competitor, affordable event platform',
-                'about' => 'Eventzilla is an event registration and ticketing platform offering per-ticket pricing across multiple tiers. Plans range from $1.50/registration (Basic) to $5,999/year (Unlimited). It includes features like badge printing, speaker management, live streaming, and CRM integrations.',
+                'about' => 'Eventzilla is an event registration and ticketing platform offering per-ticket pricing across multiple tiers. Plans run from $1.50 a registration (Basic) to 2.9% + $1.50 (Plus), with custom annual pricing on Scale. It includes features like badge printing, speaker management, live streaming, and CRM integrations.',
                 'competitor_strengths' => [
                     'Badge printing with customizable templates and QR codes',
                     'Speaker and session management for conferences',
@@ -4627,16 +4680,18 @@ class MarketingController extends Controller
                         ['Event polls', 'Yes (Pro)', 'Yes (surveys)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Post-event feedback', 'Yes (Pro)', 'Yes (surveys)', false],
-                        ['Individual tickets', 'Yes (Pro)', 'No', true],
+                        ['Individual tickets', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (2 days before; 7 days on Pro and up)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes (donation tickets)', false],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'No', true],
                         ['CalDAV sync', 'Yes (Free)', 'No', true],
-                        ['Newsletters', 'Yes (Free)', 'No (Mailchimp/HubSpot integration)', true],
+                        ['Newsletters', 'Yes (Free)', 'Yes (email invitations and campaigns)', false],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Enterprise)', 'Yes (Plus/Unlimited)', false],
-                        ['Remove branding', 'Yes (Pro)', 'Yes (Plus/Unlimited)', false],
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes (Plus and Scale)', false],
+                        ['Remove branding', 'Yes (Pro)', 'Yes (Plus and Scale)', false],
                         ['Custom fields', 'Yes (Pro)', 'Yes', false],
                         ['Custom CSS', 'Yes (Pro)', 'No', true],
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
@@ -4652,8 +4707,8 @@ class MarketingController extends Controller
                         ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                         ['Carpool matching', 'Yes (Pro)', 'No', true],
-                        ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
-                        ['Email scheduling', 'Yes (Enterprise)', 'No', true],
+                        ['Sponsor/partner logos', 'Yes (Pro)', 'Yes', false],
+                        ['Scheduled graphic emails', 'Yes (Enterprise)', 'No', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -4682,8 +4737,8 @@ class MarketingController extends Controller
                         'icon_color' => 'text-sky-600 dark:text-sky-400',
                     ],
                     [
-                        'title' => 'Built-in Newsletters',
-                        'description' => 'Engage your audience directly with built-in newsletters. Eventzilla requires third-party integrations.',
+                        'title' => 'Newsletters Beyond One Event',
+                        'description' => 'Write newsletters to a subscriber list that outlives any one event, with A/B testing, on every plan.',
                         'icon' => 'mail',
                         'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
                         'border' => 'border-teal-200 dark:border-teal-500/20',
@@ -4728,7 +4783,7 @@ class MarketingController extends Controller
                     'points' => [
                         'No $1.50 a ticket and no percentage on top: a paid ticket on Pro carries only your processor\'s fee',
                         'A Participants tab for speakers and an Agenda tab for timed sessions on every event, both free',
-                        'A built-in newsletter, where Eventzilla hands email off to Mailchimp or HubSpot',
+                        'A newsletter to your whole subscriber list, with A/B testing, on the free plan',
                         'Custom CSS on Pro, which Eventzilla does not offer',
                         'Fan photos, videos and comments on each event, free, shown once you approve them',
                         'Google, Outlook and CalDAV sync in both directions on the free plan',
@@ -4748,9 +4803,9 @@ class MarketingController extends Controller
                 'faq' => [
                     ['question' => 'Is it easy to switch from Eventzilla to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Share your new schedule URL and start selling tickets immediately. No complex migration needed.'],
                     ['question' => 'How does Event Schedule pricing compare to Eventzilla?', 'answer' => 'Eventzilla charges $1.50/ticket plus up to 2.9% in platform fees depending on the plan. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, making costs predictable regardless of ticket volume.'],
-                    ['question' => 'Can Event Schedule handle registration features like Eventzilla?', 'answer' => 'Yes. Ticketing and QR check-in are on every plan. Custom fields, the live check-in dashboard, ticket waitlists and sales CSV export are on Pro. It also adds features Eventzilla lacks, like two-way Google Calendar sync, newsletters and AI event import.'],
+                    ['question' => 'Can Event Schedule handle registration features like Eventzilla?', 'answer' => 'Yes. Free registration and QR check-in are on every plan, and paid tickets are on Pro. Custom fields, the live check-in dashboard, ticket waitlists and sales CSV export are on Pro. It also adds features Eventzilla lacks, like two-way Google Calendar sync, newsletters and AI event import.'],
                     ['question' => 'Can someone buy tickets for several events in one order?', 'answer' => 'Yes, on every plan. A buyer adds tickets for several of your events to one cart and pays once, through Stripe or PayPal, and gets one order page with every ticket on it. Each event in the cart is checked on its own, so a priced ticket needs that schedule to be on Pro.'],
-                    ['question' => 'What does a year cost next to Eventzilla Unlimited?', 'answer' => 'Eventzilla\'s Unlimited plan is $5,999 a year. Here the Pro plan runs '.plan_price($this->planPrice()).' a month and the Enterprise plan '.plan_price($this->planPrice(true)).' a month, and neither takes a share of ticket sales. A selfhosted install has no subscription at all.'],
+                    ['question' => 'What does a year cost next to Eventzilla?', 'answer' => 'Eventzilla charges per registration, from $1.50 on Basic to 2.9% + $1.50 on Plus, and quotes its Scale plan by the year. Here the Pro plan runs '.plan_price($this->planPrice()).' a month and the Enterprise plan '.plan_price($this->planPrice(true)).' a month, and neither takes a share of ticket sales. A selfhosted install has no subscription at all.'],
                     ['question' => 'Does each person in a group booking get their own ticket?', 'answer' => 'Yes, with Individual tickets on Pro: every attendee in the order gives their own details and receives their own confirmation and QR code. For free registration the same per-guest option is free on every plan.'],
                 ],
             ],
@@ -4763,7 +4818,7 @@ class MarketingController extends Controller
                 'slug' => 'timely-alternative',
                 'meta_title' => 'Timely Alternative With a Free Plan | Event Schedule',
                 'tagline' => 'An event calendar with ticketing built in, a free plan, and zero platform fees.',
-                'description' => 'Compare Event Schedule with Timely: a free plan where Timely starts at $9/mo billed annually, zero platform fees on tickets, and calendar sync both ways.',
+                'description' => 'Compare Event Schedule with Timely: a free plan and published prices where Timely quotes on request, zero platform fees on tickets, and calendar sync both ways.',
                 'keywords' => 'timely alternative, time.ly alternative, timely event calendar alternative, event calendar software, timely competitor',
                 'about' => 'Timely (time.ly) is hosted event calendar and event management software used by nonprofits, schools, universities, tourism boards and media companies. Its plans are billed annually, and registration and ticketing are sold as an add-on.',
                 'competitor_strengths' => [
@@ -4773,8 +4828,8 @@ class MarketingController extends Controller
                 ],
                 'sections' => [
                     'Pricing & Fees' => [
-                        ['Free plan', 'Yes (forever)', 'No (30-day free trial)', true],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $9/mo, billed annually', false],
+                        ['Free plan', 'Yes (forever)', 'No', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'Not published (request pricing or book a demo)', true],
                         ['Platform fees', '0%', '2.5% + $0.90 per paid ticket (add-on)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Timely Pay/Stripe/Square/PayPal/Authorize.net', false],
                     ],
@@ -4786,6 +4841,9 @@ class MarketingController extends Controller
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes ($0.90 per registration)', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes (add-on)', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (with the ticketing add-on)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'No', true],
+                        ['Promoter links with commission', 'Yes (Pro)', 'No', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'Imports feeds (two-way sync not listed)', true],
@@ -4800,7 +4858,7 @@ class MarketingController extends Controller
                     'Unique Features' => [
                         ['Embeddable calendar', 'Yes (Free)', 'Yes', false],
                         ['Private/password-protected events', 'Yes (Enterprise)', 'Yes (logged-in users only)', false],
-                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (1 to 4 users by plan)', false],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (3 on Growth, 4 on Professional, custom on Enterprise)', false],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes (Enterprise)', true],
@@ -4812,7 +4870,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'A Free Plan',
-                        'description' => 'Event Schedule has a free plan with unlimited events and the embeddable calendar. Every Timely plan is paid, billed annually, after a 30-day trial.',
+                        'description' => 'Event Schedule has a free plan with unlimited events and the embeddable calendar. Every Timely plan is paid and billed annually, at a price Timely quotes on request.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -4873,7 +4931,7 @@ class MarketingController extends Controller
                 'why_choose' => [
                     'summary' => 'Timely is calendar software for institutions, billed by the year, with registration and ticketing sold as an add-on. Event Schedule starts on a free plan, and the embed, calendar sync and unlimited free registration are part of it rather than extras.',
                     'points' => [
-                        'A free plan with no trial clock, where every Timely plan is paid once its 30 days are up',
+                        'A free plan, where every Timely plan is paid and quoted on request',
                         'Free registrations cost nothing per person, against $0.90 each on Timely\'s ticketing add-on',
                         'Sub-schedules for departments or programs, free, and an embed that can show just one of them',
                         'A request form for community submissions on every plan, with your approval before a submitted event goes live',
@@ -4894,7 +4952,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Timely to Event Schedule?', 'answer' => 'Yes. Create a free schedule, then paste event details or upload a flyer and the AI parser fills in the event for you to check. Visitors can follow the schedule, sign up by email, or subscribe to its live calendar feed.'],
-                    ['question' => 'How does Event Schedule pricing compare to Timely?', 'answer' => 'Timely plans start at $9/mo billed annually, with no free plan, and its ticketing add-on charges 2.5% + $0.90 per paid ticket. Event Schedule has a free plan, and Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
+                    ['question' => 'How does Event Schedule pricing compare to Timely?', 'answer' => 'Timely publishes no plan prices (Growth and Professional are quoted on request, Enterprise after a demo) and has no free plan, and its ticketing add-on charges 2.5% + $0.90 per paid ticket. Event Schedule has a free plan, and Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
                     ['question' => 'Can I embed the calendar on my website like Timely?', 'answer' => 'Yes, on every plan. The embeddable calendar shows your upcoming events on any website, and each event links to its own page, where people can register or buy tickets.'],
                     ['question' => 'Are free registrations charged per person?', 'answer' => 'No. Free registration and RSVP are unlimited on every plan, with no per-registration fee. You can set a capacity, and each guest gets a ticket with a QR code that is scanned at the door.'],
                     ['question' => 'My Timely calendar is fed from Google Calendar. Can Event Schedule use it?', 'answer' => 'Yes. Connect that Google calendar, or an Outlook one, under Integrations and it syncs both ways on the free plan, so a change made in either place reaches the other. A CalDAV calendar works the same way.'],
@@ -4911,7 +4969,7 @@ class MarketingController extends Controller
                 'slug' => 'the-events-calendar-alternative',
                 'meta_title' => 'The Events Calendar Alternative, No Plugins | Event Schedule',
                 'tagline' => 'Event pages, ticketing and calendar sync without installing or updating a WordPress plugin.',
-                'description' => 'Compare Event Schedule with The Events Calendar for WordPress: hosted or selfhosted, two-way calendar sync, and Pro at '.plan_price($this->planPrice()).'/mo instead of from $259 a year.',
+                'description' => 'Compare Event Schedule with The Events Calendar for WordPress: hosted or selfhosted, two-way calendar sync, and Pro at '.plan_price($this->planPrice()).'/mo instead of from $399 a year.',
                 'keywords' => 'the events calendar alternative, wordpress event calendar alternative, events calendar pro alternative, wordpress events plugin alternative, event tickets plus alternative',
                 'about' => 'The Events Calendar is a WordPress plugin, now sold by Liquid Web, that adds an event calendar to your own WordPress site. The core plugin is free and GPL-licensed on wordpress.org, and paid tiers add recurring events, check-in, seating maps and email campaigns.',
                 'competitor_strengths' => [
@@ -4922,7 +4980,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (core plugin)', false],
-                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $259/yr (Essentials)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'From $399/yr (Pro)', true],
                         ['Platform fees', '0%', '2% on the free Event Tickets plugin, 0% on Pro and Elite', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe/PayPal/Square, WooCommerce on Pro', false],
                     ],
@@ -4935,6 +4993,9 @@ class MarketingController extends Controller
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes (coupons, paid tiers)', false],
                         ['Reserved seating', 'Yes (Enterprise)', 'Yes (Elite tier)', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Elite tier only ($599/yr)', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Through WooCommerce or GiveWP add-ons', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'No', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'Calendar export and one-way imports', true],
@@ -4966,8 +5027,8 @@ class MarketingController extends Controller
                         'icon_color' => 'text-emerald-600 dark:text-emerald-400',
                     ],
                     [
-                        'title' => plan_price($this->planPrice()).'/mo vs $259/yr',
-                        'description' => 'Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with a '.$this->trialDays().'-day free trial. The Events Calendar paid tiers are $259, $399 and $599 a year, renewed annually.',
+                        'title' => plan_price($this->planPrice()).'/mo vs $399/yr',
+                        'description' => 'Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with a '.$this->trialDays().'-day free trial. The Events Calendar paid tiers are $399 and $599 a year, renewed annually.',
                         'icon' => 'dollar',
                         'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
                         'border' => 'border-sky-200 dark:border-sky-500/20',
@@ -5023,7 +5084,7 @@ class MarketingController extends Controller
                         'QR tickets scanned at the door on Free, where the plugin\'s check-in starts at its Pro tier',
                         'Newsletters to your followers on every plan, with no move up to Elite',
                         'Nothing added to your WordPress install: no plugin to update and no tables in its database, just one Custom HTML block',
-                        'Pro at '.plan_price($this->planPrice()).' a month, where the plugin\'s paid tiers start at $259 and renew each year',
+                        'Pro at '.plan_price($this->planPrice()).' a month, where the plugin\'s paid tiers start at $399 and renew each year',
                         'Open source on both sides, but here as its own PHP and MySQL app, and a selfhosted copy resolves to Enterprise',
                     ],
                 ],
@@ -5040,7 +5101,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Do I need a WordPress site to use Event Schedule?', 'answer' => 'No. Your schedule gets its own page and an embeddable calendar, so it works with WordPress or any other website builder. On a WordPress site, the calendar goes on a page with one iframe tag.'],
-                    ['question' => 'How does Event Schedule pricing compare to The Events Calendar?', 'answer' => 'The core plugin is free, and the paid tiers are $259, $399 and $599 a year. Event Schedule has a free plan, and Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
+                    ['question' => 'How does Event Schedule pricing compare to The Events Calendar?', 'answer' => 'The core plugin is free, and the paid tiers are $399 and $599 a year. Event Schedule has a free plan, and Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
                     ['question' => 'Is Event Schedule open source like The Events Calendar?', 'answer' => 'Yes, both are. The Events Calendar is GPL-licensed and runs inside WordPress. Event Schedule is a standalone app you can selfhost on PHP and MySQL, and a selfhosted install resolves to Enterprise.'],
                     ['question' => 'Can I move my events off WordPress?', 'answer' => 'Yes. Paste your event listings or upload flyers and the AI parser fills in the details for you to check, fifty a day on the free and Pro plans. Then embed the new calendar on your WordPress page, or link to your schedule instead.'],
                     ['question' => 'Can the embedded calendar match my WordPress site?', 'answer' => 'Mostly. The embed can follow each visitor\'s light or dark setting or be pinned to either, and you choose the month calendar or the list for it. The schedule\'s own colors and typeface style what is inside the frame, and custom CSS for the schedule\'s pages is on Pro.'],
@@ -5076,6 +5137,7 @@ class MarketingController extends Controller
                         ['Ticket waitlist', 'Yes (Pro)', 'RSVP waitlist, fans not notified automatically', true],
                         ['Online events', 'Yes (Free)', 'Yes (livestreams)', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (to RSVPs)', false],
                     ],
                     'Integrations' => [
                         ['Newsletters', 'Yes (Free)', 'Yes (10,000 free emails/mo, then per email)', false],
@@ -5197,16 +5259,16 @@ class MarketingController extends Controller
                 'tagline' => 'Tickets for parties and nights out, paid into your own account, with zero platform fees.',
                 'description' => 'Compare Event Schedule with Posh: zero platform fees instead of a service fee on every ticket, payouts through your own Stripe or PayPal, and calendar sync.',
                 'keywords' => 'posh alternative, posh.vip alternative, nightlife ticketing, party ticketing platform, posh competitor',
-                'about' => 'Posh (posh.vip) is a social platform for discovering and creating in-person events, from club nights and run clubs to fashion shows and festivals. Organizers sell tickets through Stripe Connect, and each ticket carries a Posh service fee that can be absorbed or passed to the buyer.',
+                'about' => 'Posh (posh.vip) is a social platform for discovering and creating in-person events, from club nights and run clubs to fashion shows and festivals. Organizers sell tickets through Stripe Connect, and each paid ticket carries a Posh service fee, added on top of the price the buyer sees.',
                 'competitor_strengths' => [
                     'SMS blasts to past attendees, with unlimited event-level blasts until shortly after the event',
                     'Promoter commissions tracked with unique links',
-                    'An explore feed that brings organizers new buyers',
+                    'Discovery in the Posh app and on its Explore page that brings organizers new buyers',
                 ],
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Paid plan price', plan_price($this->planPrice()).'/mo ('.$this->trialDays().'-day free trial)', 'No subscription (service fee per ticket)', false],
-                        ['Platform fees', '0%', 'Service fee on each ticket', true],
+                        ['Platform fees', '0%', '10% + $0.99 per paid ticket, paid by the buyer', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast/Razorpay (processor rates apply)', 'Stripe Connect', false],
                     ],
                     'Events & Ticketing' => [
@@ -5215,9 +5277,11 @@ class MarketingController extends Controller
                         ['Free event RSVP', 'Yes (Free)', 'Yes (RSVP and $0 tickets)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Promoter links with commission', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'No (abandoned-cart reminders only)', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'No', true],
                     ],
                     'Integrations' => [
-                        ['Newsletters', 'Yes (Free)', 'SMS blasts', false],
+                        ['Newsletters', 'Yes (Free)', 'SMS blasts, email through Mailchimp', false],
                     ],
                     'Customization' => [
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
@@ -5227,7 +5291,7 @@ class MarketingController extends Controller
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes (admin, host and door roles)', false],
                     ],
                     'Platform' => [
-                        ['Webhooks', 'Yes (Pro)', 'Yes (order created)', false],
+                        ['Webhooks', 'Yes (Pro)', 'Yes (orders, refunds and transfers)', false],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
                     ],
@@ -5235,7 +5299,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => '0% Platform Fees',
-                        'description' => 'Posh adds a service fee to every ticket, absorbed by you or passed to the buyer. Event Schedule takes no platform fee on any plan.',
+                        'description' => 'Posh adds a service fee to every paid ticket, charged to the buyer on top of your price. Event Schedule takes no platform fee on any plan.',
                         'icon' => 'percent',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -5315,7 +5379,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Posh to Event Schedule?', 'answer' => 'Yes. Create a free schedule, paste your upcoming nights or upload a flyer and the AI parser fills in each event, then connect Stripe or PayPal and move to Pro to sell paid tickets.'],
-                    ['question' => 'How does Event Schedule pricing compare to Posh?', 'answer' => 'Posh has no subscription and adds a service fee to every ticket. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so what you pay does not grow with the number of tickets you sell.'],
+                    ['question' => 'How does Event Schedule pricing compare to Posh?', 'answer' => 'Posh has no subscription and adds a service fee to every paid ticket. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so what you pay does not grow with the number of tickets you sell.'],
                     ['question' => 'Can I run guest lists and free entry?', 'answer' => 'Yes. Free registration and RSVP are unlimited on every plan, each guest gets a QR code, and the door scans it on any plan. The live check-in dashboard is on Pro.'],
                     ['question' => 'Can I set up a weekly club night once?', 'answer' => 'Yes. A recurring event repeats weekly, every few weeks or monthly, on every plan, and you can skip the dates you are closed. Each date keeps its own tickets and guest list.'],
                     ['question' => 'Can a night be free before midnight and paid after?', 'answer' => 'Yes. Each ticket type has its own sales start and end, on every plan, so a free early tier can stop selling at a set time while a priced tier carries on. A ticket priced at zero sells on any plan, and the priced tiers need Pro.'],
@@ -5352,6 +5416,8 @@ class MarketingController extends Controller
                         ['Recurring events', 'Yes (Free)', 'No (clone the event instead)', true],
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (SMS and push)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Chip In, paid outside Partiful', false],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'Subscription feed, one way', true],
@@ -5381,7 +5447,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'One Page for Everything',
-                        'description' => 'Your schedule lists every event you host on one public page, with followers who hear about the next one automatically.',
+                        'description' => 'Your schedule lists every event you host on one public page, and people who sign up by email hear about the next one automatically.',
                         'icon' => 'globe',
                         'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
                         'border' => 'border-sky-200 dark:border-sky-500/20',
@@ -5434,7 +5500,7 @@ class MarketingController extends Controller
                     'summary' => 'Partiful is built around one invite at a time. Event Schedule is built around the host: one public page for everything you run, dates that repeat, and people who follow you hear about the next event without being invited again.',
                     'points' => [
                         'A weekly or monthly event set up once, on Free, instead of a clone for every date',
-                        'Followers get an email digest when you publish new events, with no invite to send',
+                        'People who sign up by email get a digest when you publish new events, with no invite to send',
                         'Paid tickets on Pro wherever your Stripe, PayPal, Payfast or Razorpay account can take payments, not only in the US and UK',
                         'A calendar embed for a club or collective website, free',
                         'Events created in your Google or Outlook calendar can come into the schedule, and the other way round, free',
@@ -5445,7 +5511,7 @@ class MarketingController extends Controller
                     ['title' => 'Turn the organization profile into a schedule', 'description' => 'Your group\'s Partiful profile becomes a schedule: one free public page that lists every event you host.', 'doc' => 'getting-started#create-schedule'],
                     ['title' => 'Read the subscription feed', 'description' => 'Partiful\'s calendar subscription link goes into the import box as it is. Being a calendar feed, it is read without the AI and costs nothing from the daily allowance.', 'doc' => 'ai-import#link-import'],
                     ['title' => 'Fold the clones into a series', 'description' => 'Delete the copies you cloned week by week and set one event to repeat instead. A date you are skipping can be left out on its own.', 'doc' => 'creating-events#recurring'],
-                    ['title' => 'Ask guests to follow', 'description' => 'Share the schedule link or print its QR code. Guests who follow hear about new events by email, with nothing for you to send.', 'doc' => 'sharing#qr-code'],
+                    ['title' => 'Ask guests to follow', 'description' => 'Share the schedule link or print its QR code. Guests who sign up by email hear about new events, with nothing for you to send.', 'doc' => 'sharing#qr-code'],
                 ],
                 'limits' => [
                     ['tag' => 'No per-event themes', 'title' => 'One look for the whole schedule', 'text' => 'Partiful lets each invite pick its own theme, font, effects and music. Here the look is set once for the schedule, with its colors, background, header and typeface, and every event page follows it.'],
@@ -5489,6 +5555,7 @@ class MarketingController extends Controller
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (Interested or Going)', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Facebook notifications, not email', false],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'Per-event export (.ics)', true],
@@ -5528,7 +5595,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Reach People by Email',
-                        'description' => 'Followers get an email digest of your new events and your newsletters, instead of depending on what a feed decides to show them.',
+                        'description' => 'People who sign up by email get a digest of your new events and your newsletters, instead of depending on what a feed decides to show them.',
                         'icon' => 'mail',
                         'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
                         'border' => 'border-teal-200 dark:border-teal-500/20',
@@ -5629,10 +5696,12 @@ class MarketingController extends Controller
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Recurring events', 'Yes (Free)', 'Multi-date events', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
-                        ['Reserved seating', 'Yes (Enterprise)', 'Yes (seating chart)', false],
+                        ['Reserved seating', 'Yes (Enterprise)', 'Seating chart image, a ticket type per row', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (7 days before)', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'No', true],
                     ],
                     'Integrations' => [
-                        ['Newsletters', 'Yes (Free)', 'Yes (up to 5,000 contacts per email)', false],
+                        ['Newsletters', 'Yes (Free)', 'Yes (5,000 per email, 30,000 with your own domain)', false],
                     ],
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'No (email sender domain only)', true],
@@ -5645,7 +5714,7 @@ class MarketingController extends Controller
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Read access (payments, contacts, campaigns)', false],
-                        ['Webhooks', 'Yes (Pro)', 'Yes (payment completed)', false],
+                        ['Webhooks', 'Yes (Pro)', 'Yes (payments and contacts)', false],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
                     ],
@@ -5680,7 +5749,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'A Public Schedule Page',
-                        'description' => 'Every event you run sits on one public schedule page, with followers who hear about new events by email and an embeddable calendar for your website.',
+                        'description' => 'Every event you run sits on one public schedule page, with email subscribers who hear about new events and an embeddable calendar for your website.',
                         'icon' => 'layout',
                         'gradient' => 'from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30',
                         'border' => 'border-blue-200 dark:border-blue-500/20',
@@ -5772,6 +5841,7 @@ class MarketingController extends Controller
                         ['Recurring events', 'Yes (Free)', 'Yes (Premium)', true],
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (Premium)', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Opt-in on RSVP forms (Premium)', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'Google import only (read-only)', true],
@@ -5898,7 +5968,7 @@ class MarketingController extends Controller
                 'competitor_strengths' => [
                     'Open source and selfhostable, with an all-in-one Docker image',
                     'No monthly fee on the hosted Cloud service',
-                    'A broad ticketing feature set: waitlists, a check-in app, product add-ons, affiliates, an API and webhooks',
+                    'A broad ticketing feature set: waitlists, browser check-in lists, product add-ons, affiliate tracking, reserved seating, an API and webhooks',
                 ],
                 'sections' => [
                     'Pricing & Fees' => [
@@ -5909,16 +5979,18 @@ class MarketingController extends Controller
                     ],
                     'Events & Ticketing' => [
                         ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
-                        ['QR check-ins', 'Yes (Free)', 'Yes (check-in app)', false],
+                        ['QR check-ins', 'Yes (Free)', 'Yes (check-in lists opened from a link)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (free tickets)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
-                        ['Promoter or affiliate links', 'Yes (Pro)', 'Yes (affiliates)', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Tracking links, no commission', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'No (messages you schedule)', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes (donation tickets)', false],
                     ],
                     'Customization' => [
-                        ['Remove branding', 'Yes (Pro)', 'Selfhost licence, from 499 EUR/yr', false],
+                        ['Remove branding', 'Yes (Pro)', 'Cloud subscription, or a selfhost licence from 249 EUR/yr', true],
                         ['Custom fields', 'Yes (ticket questions free, event fields Pro)', 'Yes (questions per ticket type)', false],
                         ['Built-in analytics', 'Yes (Free)', 'Yes (sales reports)', false],
                     ],
@@ -6027,7 +6099,7 @@ class MarketingController extends Controller
                 ],
                 'limits' => [
                     ['tag' => 'A monthly price', 'title' => 'A quiet month still costs Pro', 'text' => 'Hi.Events Cloud charges nothing until a ticket sells, while a priced ticket here needs Pro at '.plan_price($this->planPrice()).'/mo whatever you sell. An organizer who sells only a few paid tickets a year may pay less per ticket there; registering for a free event is free with both.'],
-                    ['tag' => 'Credit stays on selfhost', 'title' => 'No licence takes our credit off', 'text' => 'Hi.Events sells a licence, from 499 EUR a year, that removes its link from a selfhosted install. Our license requires an attribution credit on every selfhosted install and nothing removes it there, though on the hosted service Pro takes the Event Schedule branding off.'],
+                    ['tag' => 'Credit stays on selfhost', 'title' => 'No licence takes our credit off', 'text' => 'Hi.Events sells a licence, from 249 EUR a year, that removes its link from a selfhosted install, and a subscription that removes it on its Cloud. Our license requires an attribution credit on every selfhosted install and nothing removes it there, though on the hosted service Pro takes the Event Schedule branding off.'],
                 ],
                 'faq' => [
                     ['question' => 'Are both platforms open source?', 'answer' => 'Yes. Hi.Events is AGPL-3.0 with additional terms that require a visible "Powered by Hi.Events" link unless you buy a licence. Event Schedule is open source under the Attribution Assurance License, and a selfhosted install resolves to Enterprise. It carries an attribution credit too: the license requires it, and no plan removes it on a selfhosted install.'],
@@ -6065,6 +6137,7 @@ class MarketingController extends Controller
                         ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Participation and place limits only', true],
                         ['Online events', 'Yes (Free)', 'Live stream link on the event', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (with optional approval)', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Opt-in by each participant', true],
                     ],
                     'Integrations' => [
                         ['Calendar sync, both ways', 'Yes (Free)', 'ICS and RSS feeds, one way', true],
@@ -6204,6 +6277,8 @@ class MarketingController extends Controller
                         ['Free event RSVP', 'Yes (Free)', 'Yes (no fees on free events)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Reserved seating', 'Yes (Enterprise)', 'Yes (seating chart builder, free)', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (24 hours before)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes (name your own price)', false],
                     ],
                     'Integrations' => [
                         ['Newsletters', 'Yes (Free)', 'Email campaigns to ticket buyers', false],
@@ -6343,7 +6418,7 @@ class MarketingController extends Controller
                 'tagline' => 'A schedule page that takes registrations and sells its own tickets, for artists and venues alike.',
                 'description' => 'Compare Event Schedule with Songkick: your own schedule page with free RSVPs and QR tickets, paid tickets on Pro, two-way calendar sync, and venue tools too.',
                 'keywords' => 'songkick alternative, songkick tourbox alternative, tour dates widget, concert listings for artists, songkick competitor',
-                'about' => 'Songkick is a concert discovery app and website that lists tour dates gathered from hundreds of sources and alerts fans when artists they track announce shows. Artist teams manage their dates with the Tourbox tool, and tickets are sold by outside vendors. Suno Inc. has operated Songkick since late 2025.',
+                'about' => 'Songkick is a concert discovery app and website that lists tour dates gathered from hundreds of sources and alerts fans when artists they track announce shows. Artist teams manage their dates with the Tourbox tool, and tickets are sold by outside vendors. Suno acquired Songkick from Warner Music Group in a deal announced in November 2025.',
                 'competitor_strengths' => [
                     'A large fan audience that gets alerts when the artists they track announce dates',
                     'The free Tourbox tool, with a tour-date widget and partners such as Deezer, Bandcamp and SoundCloud',
@@ -6503,6 +6578,9 @@ class MarketingController extends Controller
                         ['Free event RSVP', 'Yes (Free)', 'Yes (free tickets)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Reserved seating', 'Yes (Enterprise)', 'Seat map built by their team on request', false],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (Essential plan and up)', true],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes (donation tickets)', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Yes (Essential plan and up)', false],
                     ],
                     'Integrations' => [
                         ['Newsletters', 'Yes (Free)', 'Email invite credits, buyer broadcasts', false],
@@ -6518,7 +6596,7 @@ class MarketingController extends Controller
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Events data API by request only', true],
-                        ['Webhooks', 'Yes (Pro)', 'Professional plan (USD 60/mo) and up', true],
+                        ['Webhooks', 'Yes (Pro)', 'Essential plan (USD 12/mo) and up', true],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
                     ],
@@ -6553,7 +6631,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'API and Webhooks on Pro',
-                        'description' => 'Both come with Pro. On AllEvents, webhooks start on the Professional plan at USD 60 a month.',
+                        'description' => 'Both come with Pro. On AllEvents, webhooks start on the Essential plan at USD 12 a month.',
                         'icon' => 'link',
                         'gradient' => 'from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30',
                         'border' => 'border-blue-200 dark:border-blue-500/20',
@@ -6623,12 +6701,12 @@ class MarketingController extends Controller
                 'faq' => [
                     ['question' => 'How does Event Schedule pricing compare to AllEvents?', 'answer' => 'AllEvents adds a booking fee of USD 1 to each paid ticket sold online (10% + INR 10 on events priced in rupees), charged to buyers unless you absorb it, and its paid plans at USD 12, 60 and 200 a month raise how many upcoming events you can list at once. Event Schedule has no booking fee, and Pro at '.plan_price($this->planPrice()).'/mo adds paid tickets with zero platform fees.'],
                     ['question' => 'Do I need a paid plan to list more events?', 'answer' => 'No. The free plan has no limit on events, and free registration with QR tickets is unlimited too. The AllEvents free plan allows 5 upcoming events at a time, and its paid plans raise that to 20, 100 or more.'],
-                    ['question' => 'When do I get paid for ticket sales?', 'answer' => 'On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed. AllEvents also pays into your own PayPal or Stripe account, except for events priced in Indian rupees, which it pays out 3 to 5 business days after the event.'],
+                    ['question' => 'When do I get paid for ticket sales?', 'answer' => 'On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed. AllEvents also pays into your own PayPal or Stripe account, except for events priced in Indian rupees, which it pays out a few business days after the event.'],
                     ['question' => 'Can Event Schedule promote my event like AllEvents?', 'answer' => 'Event Schedule is built around your own schedule page rather than a shared marketplace. People who sign up on your schedule get an email when you add events, you can send newsletters, and on Pro you can boost an event with a Facebook and Instagram ad. If reaching strangers in your city matters most, AllEvents does more of that.'],
                     ['question' => 'Can I sell tickets on my own website?', 'answer' => 'Yes, on Pro. The ticket widget puts checkout on your own site, and the embeddable calendar, which is free, lists every upcoming event. AllEvents offers event list plugins and a ticket embed as well.'],
-                    ['question' => 'Are the API and webhooks included?', 'answer' => 'Yes, both are on Pro at '.plan_price($this->planPrice()).'/mo, with a REST API for events, schedules and sales. AllEvents includes webhooks from its Professional plan at USD 60 a month, and its API is a data product for event listings rather than for managing your own events.'],
+                    ['question' => 'Are the API and webhooks included?', 'answer' => 'Yes, both are on Pro at '.plan_price($this->planPrice()).'/mo, with a REST API for events, schedules and sales. AllEvents includes webhooks from its Essential plan at USD 12 a month, and its API is a data product for event listings rather than for managing your own events.'],
                     ['question' => 'Can people who do not know me still find my events?', 'answer' => 'Some can. Public events can appear on the Event Schedule browse page, which shows one upcoming event from each schedule, and every public event page can be listed by search engines. That is a much smaller audience than AllEvents\' city listings.'],
-                    ['question' => 'Can I sell tickets for an event priced in rupees?', 'answer' => 'Yes, on Pro, through Razorpay, which settles Indian rupees into your own Razorpay account with no platform fee from us. AllEvents charges 10% + INR 10 a ticket on rupee events and pays them out 3 to 5 business days after the event.'],
+                    ['question' => 'Can I sell tickets for an event priced in rupees?', 'answer' => 'Yes, on Pro, through Razorpay, which settles Indian rupees into your own Razorpay account with no platform fee from us. AllEvents charges buyers INR 10 a ticket on rupee events and takes 5% to 10% of sales from the organizer, and pays out a few business days after the event.'],
                 ],
             ],
 
@@ -6666,6 +6744,9 @@ class MarketingController extends Controller
                         ['Free event RSVP', 'Yes (Free)', 'Yes (no fees on free events)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                         ['Reserved seating', 'Yes (Enterprise)', 'No (retired in 2019)', true],
+                        ['Reminder emails before the event', 'Yes (Free, automatic)', 'Yes (24 hours before)', false],
+                        ['Donations / pay what you want', 'Yes (Pro)', 'Yes', false],
+                        ['Promoter links with commission', 'Yes (Pro)', 'Tracking links, no commission', true],
                     ],
                     'Integrations' => [
                         ['Newsletters', 'Yes (Free)', 'Message attendees, Mailchimp sync', false],
@@ -6677,7 +6758,7 @@ class MarketingController extends Controller
                     'Unique Features' => [
                         ['Embeddable calendar', 'Yes (Free)', 'Yes (ticket, listings and calendar widgets)', false],
                         ['Private/password-protected events', 'Yes (Enterprise)', 'Unlisted events, password-protected ticket types', false],
-                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (team permissions)', false],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (Standard tier)', false],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'GraphQL API', false],

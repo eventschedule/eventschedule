@@ -24,7 +24,7 @@
                 [
                     "Paid plan price",
                     "$5/mo (7-day free trial)",
-                    "Free (fees on tickets)",
+                    "Free (fees on tickets); Eventbrite Pro email marketing from $15/mo",
                     true
                 ],
                 [
@@ -116,14 +116,32 @@
                 [
                     "Post-event feedback",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (star ratings, public paid events in US, Canada and UK)",
+                    false
                 ],
                 [
                     "Individual tickets",
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (48 hours before)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Tracking links, no commission",
+                    true
                 ]
             ],
             "Integrations": [
@@ -148,7 +166,7 @@
                 [
                     "Newsletters",
                     "Yes (Free)",
-                    "Yes",
+                    "Yes (250 a day free, more on Eventbrite Pro)",
                     false
                 ]
             ],
@@ -188,7 +206,7 @@
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
                     "Parsing on Free, flyer and style on Enterprise",
-                    "No",
+                    "AI writes the description, summary and cover image",
                     true
                 ],
                 [
@@ -252,7 +270,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -492,10 +510,10 @@
         "tagline": "An open source alternative to Luma with zero platform fees, on the free plan too.",
         "description": "Luma's free plan takes 5% of paid tickets on top of Stripe, and Luma Plus is $59/mo billed annually. Event Schedule takes 0% on every plan, with Pro at $5/mo.",
         "keywords": "luma alternative, luma pricing, luma fees, luma plus pricing, is luma free, luma vs eventbrite, lu.ma alternative",
-        "about": "Luma (lu.ma) is a modern event platform popular with tech communities and creators. It offers sleek event pages, built-in video streaming, and community features.",
+        "about": "Luma (luma.com) is a modern event platform popular with tech communities and creators. It offers sleek event pages, Zoom and Google Meet integration for online events, and community features.",
         "competitor_strengths": [
             "Polished, modern event page design with strong visual focus",
-            "Built-in video streaming for virtual events",
+            "Zoom and Google Meet integration that creates the meeting and tracks attendance",
             "Popular in tech and startup communities with strong network effects"
         ],
         "sections": {
@@ -559,8 +577,8 @@
                 [
                     "Sale notifications",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (registration alerts by email and push)",
+                    false
                 ],
                 [
                     "Sales data export",
@@ -571,7 +589,7 @@
                 [
                     "Recurring events",
                     "Yes (Free)",
-                    "Clone only, no repeating series",
+                    "Clone with a repeat pattern (up to 20 copies), no linked series",
                     true
                 ],
                 [
@@ -601,13 +619,31 @@
                 [
                     "Post-event feedback",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (Free)",
+                    false
                 ],
                 [
                     "Individual tickets",
                     "Yes (Pro)",
                     "No",
+                    true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (email, SMS and push)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes (Free)",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Referral tracking, no commission",
                     true
                 ]
             ],
@@ -615,8 +651,8 @@
                 [
                     "Calendar sync, both ways",
                     "Yes (Free)",
-                    "Yes",
-                    false
+                    "No (one-way iCal feed)",
+                    true
                 ],
                 [
                     "CalDAV sync",
@@ -635,7 +671,7 @@
                 [
                     "Custom domains",
                     "Yes (Enterprise)",
-                    "Yes (Plus)",
+                    "No (custom luma.com URL on Plus)",
                     true
                 ],
                 [
@@ -731,7 +767,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -907,9 +943,9 @@
         ],
         "limits": [
             {
-                "tag": "No built-in streaming",
+                "tag": "No Zoom integration",
                 "title": "Bring your own video room",
-                "text": "Luma can host the stream for a virtual event itself, and Event Schedule cannot. An online event here carries the link to the meeting or stream you run somewhere else, and a schedule synced with Outlook can add a Teams meeting link to it."
+                "text": "Luma creates the Zoom or Google Meet meeting for a virtual event and records who attended, and Event Schedule does not. An online event here carries the link to the meeting or stream you run somewhere else, and a schedule synced with Outlook can add a Teams meeting link to it."
             },
             {
                 "tag": "No tech-scene network",
@@ -945,7 +981,7 @@
             },
             {
                 "question": "Does Event Schedule support virtual events like Luma?",
-                "answer": "Yes. Event Schedule supports online events with video links, descriptions, and ticketing. While Luma has built-in video streaming, Event Schedule integrates with any video platform you already use."
+                "answer": "Yes. Event Schedule supports online events with video links, descriptions, and ticketing. Luma creates Zoom and Google Meet meetings for you, while Event Schedule takes the link from any video platform you already use, and the Outlook sync can create a Teams meeting."
             },
             {
                 "question": "Can people be told when tickets go on sale?",
@@ -978,13 +1014,13 @@
                 [
                     "Paid plan price",
                     "$5/mo (7-day free trial)",
-                    "From $0.28/ticket",
+                    "No subscription ($0.30 to $0.85 a ticket)",
                     true
                 ],
                 [
                     "Platform fees",
                     "0%",
-                    "$0.28 to $0.60/ticket",
+                    "$0.30 to $0.85/ticket",
                     true
                 ],
                 [
@@ -1022,14 +1058,14 @@
                 [
                     "Check-in dashboard",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Sale notifications",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Sales data export",
@@ -1078,6 +1114,24 @@
                     "Yes (Pro)",
                     "No",
                     true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Scheduled broadcasts you set up (SMS paid)",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Tracking links, commission paid by hand",
+                    true
                 ]
             ],
             "Integrations": [
@@ -1104,8 +1158,8 @@
                 [
                     "Custom domains",
                     "Yes (Enterprise)",
-                    "Yes (paid)",
-                    true
+                    "Yes ($8/mo add-on)",
+                    false
                 ],
                 [
                     "Remove branding",
@@ -1136,7 +1190,7 @@
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
                     "Parsing on Free, flyer and style on Enterprise",
-                    "No",
+                    "No built-in AI (an MCP connector for outside AI tools)",
                     true
                 ],
                 [
@@ -1200,7 +1254,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -1236,7 +1290,7 @@
         "key_advantages": [
             {
                 "title": "Flat-Rate Pricing",
-                "description": "Pay $5/mo flat instead of $0.28 to $0.60 per ticket. The more tickets you sell, the more you save.",
+                "description": "Pay $5/mo flat instead of $0.30 to $0.85 per ticket. The more tickets you sell, the more you save.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -1380,9 +1434,9 @@
         "tagline": "A purpose-built event platform vs a general scheduling tool.",
         "description": "Compare Event Schedule with Google Calendar: public event pages, ticket sales, a live feed your audience can subscribe to, and two-way sync with Google.",
         "keywords": "google calendar alternative, google calendar for events, event calendar platform, public event calendar, google calendar vs event platform",
-        "about": "Google Calendar is a popular personal scheduling tool used by billions worldwide. It excels at managing appointments, meetings, and personal reminders with deep Google ecosystem integration. The good news? You don't have to choose - Event Schedule syncs with Google Calendar, so you can use both together.",
+        "about": "Google Calendar is a popular personal scheduling tool used by hundreds of millions of people. It excels at managing appointments, meetings, and personal reminders with deep Google ecosystem integration. The good news? You don't have to choose - Event Schedule syncs with Google Calendar, so you can use both together.",
         "competitor_strengths": [
-            "Free and ubiquitous with billions of existing users",
+            "Free and ubiquitous, with a huge existing user base",
             "Deep Google ecosystem integration (Gmail, Meet, Drive)",
             "Excellent mobile apps with push notifications"
         ],
@@ -1429,7 +1483,7 @@
                 [
                     "Payment processing",
                     "Stripe/PayPal/Payfast/Razorpay (processor rates apply)",
-                    "No",
+                    "Paid appointment bookings through your Stripe (premium plans)",
                     true
                 ],
                 [
@@ -1477,21 +1531,21 @@
                 [
                     "Free event RSVP",
                     "Yes (Free)",
-                    "No",
+                    "Invite link (up to 200 guests)",
                     true
                 ],
                 [
                     "Platform fees",
                     "0%",
-                    "N/A",
-                    true
+                    "0% (Stripe fees on paid bookings)",
+                    false
                 ]
             ],
             "Event Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
                     "Parsing on Free, flyer and style on Enterprise",
-                    "No",
+                    "Gemini creates events from a prompt",
                     true
                 ],
                 [
@@ -1503,13 +1557,13 @@
                 [
                     "Rich descriptions (Markdown)",
                     "Yes (Free)",
-                    "Plain text only",
+                    "Basic rich text, no Markdown",
                     true
                 ],
                 [
                     "Custom fields",
                     "Yes (Pro)",
-                    "No",
+                    "Booking-form questions (appointments)",
                     true
                 ],
                 [
@@ -1533,13 +1587,13 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
-                    true
+                    "Private visibility, no password",
+                    false
                 ],
                 [
                     "Availability management",
                     "Yes (Enterprise)",
-                    "No",
+                    "Personal working hours and booking pages",
                     true
                 ],
                 [
@@ -1555,7 +1609,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -1565,7 +1619,7 @@
                 [
                     "Shareable event pages",
                     "Yes (Free)",
-                    "No",
+                    "Basic public event link",
                     true
                 ],
                 [
@@ -1629,8 +1683,8 @@
                 [
                     "Webhooks",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Change notifications through the API",
+                    false
                 ],
                 [
                     "Open source",
@@ -1673,7 +1727,7 @@
             },
             {
                 "title": "AI Event Parsing",
-                "description": "Paste event details in any format and our AI extracts dates, times, and descriptions automatically. Google Calendar requires tedious manual entry.",
+                "description": "Paste event details in any format and our AI extracts dates, times, and descriptions automatically. Google Calendar does not read a flyer or a pasted listing into a public event page.",
                 "icon": "ai",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -1809,19 +1863,19 @@
                 [
                     "Free plan",
                     "Yes (forever)",
-                    "Yes (limited)",
+                    "Starter (first-time organizers: 2 events a month, 10 attendees each)",
                     true
                 ],
                 [
                     "Paid plan price",
                     "$5/mo (7-day free trial)",
-                    "From $16.79/mo (organizer)",
+                    "From $29.99/mo or $174.99/yr (organizer)",
                     true
                 ],
                 [
                     "Platform fees",
                     "0%",
-                    "0% (but subscription required)",
+                    "Service fee on each paid ticket, paid by the attendee",
                     true
                 ],
                 [
@@ -1847,20 +1901,20 @@
                 [
                     "QR check-ins",
                     "Yes (Free)",
-                    "No",
-                    true
+                    "Yes (in the Meetup app)",
+                    false
                 ],
                 [
                     "Ticket waitlist",
                     "Yes (Pro)",
-                    "No",
+                    "Free events only",
                     true
                 ],
                 [
                     "Check-in dashboard",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Attendee list with check-in status",
+                    false
                 ],
                 [
                     "Sale notifications",
@@ -1871,8 +1925,8 @@
                 [
                     "Sales data export",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Recurring events",
@@ -1901,11 +1955,23 @@
                 [
                     "Promo/discount codes",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Post-event feedback",
+                    "Yes (Pro)",
+                    "Yes (star ratings and reviews)",
+                    false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (email and push)",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
                     "Yes (Pro)",
                     "No",
                     true
@@ -1915,7 +1981,7 @@
                 [
                     "Calendar sync, both ways",
                     "Yes (Free)",
-                    "Add to calendar only",
+                    "Subscribe feed, one way",
                     true
                 ],
                 [
@@ -1947,7 +2013,7 @@
                 [
                     "Custom fields",
                     "Yes (Pro)",
-                    "No",
+                    "RSVP questions",
                     true
                 ],
                 [
@@ -1979,7 +2045,7 @@
                 [
                     "Fan videos & comments",
                     "Yes (Free)",
-                    "No",
+                    "Comments and photos, no video",
                     true
                 ],
                 [
@@ -2025,7 +2091,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -2035,7 +2101,7 @@
                 [
                     "REST API",
                     "Yes (Pro)",
-                    "Yes (limited)",
+                    "GraphQL, Meetup Pro only",
                     true
                 ],
                 [
@@ -2061,7 +2127,7 @@
         "key_advantages": [
             {
                 "title": "No Organizer Fee",
-                "description": "Meetup charges organizers $16.79 to $24.50/mo just to host a group. Event Schedule is free forever with optional $5/mo Pro upgrade - saving you up to $200/year.",
+                "description": "Past its Starter plan of two small events a month, Meetup charges organizers from $29.99/mo (or $174.99/yr) to run a group. Event Schedule is free forever, with an optional $5/mo Pro upgrade.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -2096,8 +2162,8 @@
                 "icon_color": "text-blue-600 dark:text-blue-400"
             },
             {
-                "title": "QR Check-Ins",
-                "description": "Scan attendees in at the door with QR codes. Meetup has no built-in check-in system for tracking who actually showed up.",
+                "title": "Check-In From Any Phone",
+                "description": "Scan attendees in at the door from any phone browser, with nothing to install. Meetup checks members in through its own app.",
                 "icon": "ticket",
                 "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
                 "border": "border-amber-200 dark:border-amber-500/20",
@@ -2106,7 +2172,7 @@
             },
             {
                 "title": "Fan Engagement",
-                "description": "Let your community share videos and comments on events. Build engagement that goes beyond RSVPs - something Meetup cannot offer.",
+                "description": "Let your community share videos and comments on events. Build engagement that goes beyond RSVPs, with videos as well as photos.",
                 "icon": "image",
                 "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
                 "border": "border-cyan-200 dark:border-cyan-500/20",
@@ -2131,10 +2197,10 @@
         "why_choose": {
             "summary": "Against Meetup it comes down to who holds the members and what hosting a group costs. Meetup charges the organizer a subscription; here running the group is free, and the people who sign up are on your own list.",
             "points": [
-                "Running the group costs nothing on the free plan, against Meetup's organizer subscription from $16.79/mo",
+                "Running the group costs nothing on the free plan, against Meetup's organizer subscription from $29.99/mo once a group outgrows Starter",
                 "Members who sign up by email are on your list, and the confirmed ones get a digest of each batch of new events automatically",
                 "A monthly meetup is one recurring event, on the 2nd Tuesday or any other pattern, on every plan",
-                "Free registration with an optional limit per date, and a QR scan at the door, which Meetup does not have",
+                "Free registration with an optional limit per date, and a QR scan at the door from any phone browser",
                 "The group's calendar embeds on your own website, so visitors never have to leave it to see what is next",
                 "Paid meetups on Pro, settled into a payment account in your name, with promo codes and a waitlist for sold-out tickets"
             ]
@@ -2185,7 +2251,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Meetup?",
-                "answer": "Meetup charges organizers a subscription starting at $16.79/mo for basic groups, with higher tiers for larger communities. Event Schedule has a free plan with unlimited events. The Pro plan is $5/mo with zero platform fees on ticket sales."
+                "answer": "Meetup has a free Starter plan for first-time organizers (one group, two events a month, ten attendees each), then charges a subscription from $29.99/mo or $174.99/yr, and attendees pay a service fee on paid tickets. Event Schedule has a free plan with unlimited events. The Pro plan is $5/mo with zero platform fees on ticket sales."
             },
             {
                 "question": "Can Event Schedule handle community events and recurring meetups?",
@@ -2268,8 +2334,8 @@
                 [
                     "Ticket waitlist",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (face-value resale waitlist)",
+                    false
                 ],
                 [
                     "Check-in dashboard",
@@ -2280,14 +2346,14 @@
                 [
                     "Sale notifications",
                     "Yes (Pro)",
-                    "No",
+                    "Scheduled sales reports",
                     true
                 ],
                 [
                     "Sales data export",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (reports and a read-only API)",
+                    false
                 ],
                 [
                     "Recurring events",
@@ -2304,8 +2370,8 @@
                 [
                     "Free event RSVP",
                     "Yes (Free)",
-                    "No",
-                    true
+                    "Yes (free tickets and guest lists)",
+                    false
                 ],
                 [
                     "Event polls",
@@ -2316,8 +2382,8 @@
                 [
                     "Promo/discount codes",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Post-event feedback",
@@ -2329,6 +2395,24 @@
                     "Individual tickets",
                     "Yes (Pro)",
                     "No",
+                    true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "On-sale alerts, no documented pre-show reminder",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Charity venues only",
+                    true
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Tracking links, no commission",
                     true
                 ]
             ],
@@ -2348,7 +2432,7 @@
                 [
                     "Newsletters",
                     "Yes (Free)",
-                    "Push notifications",
+                    "No newsletter tool (DICE emails its own users)",
                     true
                 ]
             ],
@@ -2446,7 +2530,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -2482,7 +2566,7 @@
         "key_advantages": [
             {
                 "title": "Web-First Access",
-                "description": "DICE requires fans to download their app to buy tickets. Event Schedule works in any browser - no app install required, no friction for your audience.",
+                "description": "DICE fans can buy on the web, but they need its app to open the ticket and get in. Event Schedule tickets open in any browser - no app install required, no friction for your audience.",
                 "icon": "globe",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -2527,7 +2611,7 @@
             },
             {
                 "title": "Newsletters",
-                "description": "Reach your audience directly with built-in newsletters. DICE limits you to push notifications that only work if fans have the app installed.",
+                "description": "Reach your audience directly with built-in newsletters. DICE emails and notifies its own users, and gives you no newsletter tool of your own.",
                 "icon": "mail",
                 "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
                 "border": "border-cyan-200 dark:border-cyan-500/20",
@@ -2555,8 +2639,8 @@
                 "Fans buy and open their tickets in any browser, with nothing to install",
                 "Ticket money settles into your own Stripe or PayPal account on Pro",
                 "No service fee from us on top of your price, so the figure you set is the one fans see",
-                "Free registration for guest-list nights and free-entry shows, which DICE does not offer",
-                "Promo codes, and a waitlist that emails fans when a sold-out show frees up, on Pro",
+                "Free registration for guest-list nights and free-entry shows, with no app needed to get in",
+                "Promo codes and a waitlist for sold-out shows on Pro, and a reminder email to every ticket holder before the night, free",
                 "A weekly club night set up once, on chosen days, as one recurring event on every plan"
             ]
         },
@@ -2606,7 +2690,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to DICE?",
-                "answer": "DICE absorbs its fees into ticket prices, meaning fans pay more than your listed price. Event Schedule charges zero platform fees and connects directly to your own Stripe or PayPal account, so you control exactly what attendees pay."
+                "answer": "DICE builds a booking fee into the advertised ticket price and shares it with the organiser, at a rate it does not publish. Event Schedule charges zero platform fees and connects directly to your own Stripe or PayPal account, so you control exactly what attendees pay."
             },
             {
                 "question": "Does Event Schedule support music and nightlife events like DICE?",
@@ -2614,7 +2698,7 @@
             },
             {
                 "question": "Do my fans need an app to get their tickets?",
-                "answer": "No. The ticket opens in any browser, from the confirmation email or the ticket page, each with its QR code, and buyers can also add it to Google Wallet where Wallet is switched on. The free scanner reads that same code at the door."
+                "answer": "No. The ticket opens in any browser, from the confirmation email or the ticket page, each with its QR code. The free scanner reads that same code at the door."
             },
             {
                 "question": "Can Event Schedule stop ticket touts?",
@@ -2632,9 +2716,9 @@
         "slug": "brown-paper-tickets-alternative",
         "meta_title": "Brown Paper Tickets Alternative, 0% Fees | Event Schedule",
         "tagline": "A modern, actively developed alternative to Brown Paper Tickets.",
-        "description": "Brown Paper Tickets is being retired. Compare Event Schedule: zero platform fees, Stripe or PayPal payouts, and unlimited free registration.",
+        "description": "Brown Paper Tickets has closed to new events. Compare Event Schedule: zero platform fees, Stripe or PayPal payouts, and unlimited free registration.",
         "keywords": "brown paper tickets alternative, brown paper tickets replacement, bpt alternative, event ticketing platform, brown paper tickets competitor",
-        "about": "Brown Paper Tickets was a ticketing platform known for its low fees and focus on independent events. Its website now says it is being retired and sends organizers to Events.com for their next event, so many are looking for a new home.",
+        "about": "Brown Paper Tickets was a ticketing platform known for its low fees and focus on independent events. It was acquired by Events.com, no longer takes new events and sends organizers to Events.com, so many are looking for a new home.",
         "competitor_strengths": [
             "Historically low per-ticket fees for organizers",
             "Long track record in the independent event space",
@@ -2657,7 +2741,7 @@
                 [
                     "Platform fees",
                     "0%",
-                    "$0.99 + 5% per ticket (buyer-paid)",
+                    "$1.49 + 6% per ticket (buyer-paid)",
                     true
                 ],
                 [
@@ -2707,8 +2791,8 @@
                 [
                     "Sales data export",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (spreadsheet reports)",
+                    false
                 ],
                 [
                     "Recurring events",
@@ -2737,8 +2821,8 @@
                 [
                     "Promo/discount codes",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Passwords and member discount codes",
+                    false
                 ],
                 [
                     "Post-event feedback",
@@ -2748,6 +2832,24 @@
                 ],
                 [
                     "Individual tickets",
+                    "Yes (Pro)",
+                    "No",
+                    true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "No (updates sent by hand)",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
                     "Yes (Pro)",
                     "No",
                     true
@@ -2839,7 +2941,7 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
+                    "Password-protected prices only",
                     true
                 ],
                 [
@@ -2867,7 +2969,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -2903,7 +3005,7 @@
         "key_advantages": [
             {
                 "title": "Reliable & Active",
-                "description": "Brown Paper Tickets is being retired and migrated to Events.com. Event Schedule is actively developed with regular updates and dependable uptime.",
+                "description": "Brown Paper Tickets no longer takes new events, and its past event data was not moved to Events.com. Event Schedule is actively developed with regular updates and dependable uptime.",
                 "icon": "globe",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -2971,20 +3073,20 @@
             }
         ],
         "why_choose": {
-            "summary": "With Brown Paper Tickets being retired, the real question is where to settle next. Event Schedule is actively developed, adds no platform fee, and its code is open source, so the software cannot be taken away from you a second time.",
+            "summary": "With Brown Paper Tickets closed to new events, the real question is where to settle next. Event Schedule is actively developed, adds no platform fee, and its code is open source, so the software cannot be taken away from you a second time.",
             "points": [
-                "No $0.99 + 5% service fee on each ticket: Event Schedule adds no platform fee to what buyers pay",
+                "No $1.49 + 6% service fee on each ticket: Event Schedule adds no platform fee to what buyers pay",
                 "Payouts on your processor's own timetable, straight into the Stripe or PayPal account you connect",
-                "Promo codes, a ticket waitlist and a sales CSV export on Pro, none of which Brown Paper Tickets has",
+                "Promo codes, a ticket waitlist and a reminder email to every ticket holder before the event, which Brown Paper Tickets never sent for you",
                 "A door scanner that runs on a phone on every plan, and a live check-in count on Pro",
-                "Cash at the door still works: a buyer can choose to pay there, and you mark the order paid",
+                "Cash at the door still works on Pro: set an event to cash, and you mark each order paid when the buyer pays at the door",
                 "Selfhosting under an open source license, which resolves to Enterprise, if you never want to be moved on again"
             ]
         },
         "switch_steps": [
             {
-                "title": "Copy your events while the pages are up",
-                "description": "Open each upcoming Brown Paper Tickets event page, copy its text and paste it into AI import, which fills in the event for you to check. Do it before those pages come down.",
+                "title": "Bring your events across with AI import",
+                "description": "Paste the text of an event, from an old listing, an email or a flyer, into AI import, which fills in the event for you to check.",
                 "doc": "ai-import#text-import"
             },
             {
@@ -2994,7 +3096,7 @@
             },
             {
                 "title": "Connect a payment account",
-                "description": "Brown Paper Tickets processed the cards itself. Here Stripe or PayPal does, into an account in your name, and cash at the door can stay as a second option.",
+                "description": "Brown Paper Tickets processed the cards itself. Here Stripe or PayPal does, into an account in your name, and an event can be set to cash at the door instead.",
                 "doc": "account-settings#payments"
             },
             {
@@ -3023,19 +3125,19 @@
         "faq": [
             {
                 "question": "Is it easy to switch from Brown Paper Tickets to Event Schedule?",
-                "answer": "Yes. Many organizers are moving away from Brown Paper Tickets as the platform is being retired and migrated to Events.com. Create a free schedule, add your events (AI import speeds this up), and share your new URL. You can be up and running in minutes."
+                "answer": "Yes. Many organizers are moving away from Brown Paper Tickets now that the platform no longer takes new events. Create a free schedule, add your events (AI import speeds this up), and share your new URL. You can be up and running in minutes."
             },
             {
                 "question": "How does Event Schedule pricing compare to Brown Paper Tickets?",
-                "answer": "Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. Free registration is unlimited, and selling paid tickets is on Pro. The Pro plan is a flat $5/mo for unlimited ticketing, with payouts straight into your own Stripe or PayPal account."
+                "answer": "Brown Paper Tickets charged $1.49 + 6% per ticket in the US as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. Free registration is unlimited, and selling paid tickets is on Pro. The Pro plan is a flat $5/mo for unlimited ticketing, with payouts straight into your own Stripe or PayPal account."
             },
             {
                 "question": "Is Event Schedule actively maintained?",
-                "answer": "Yes. Brown Paper Tickets is being retired and migrated to Events.com. Event Schedule is built with a modern tech stack and receives regular updates. It is fully open source, so you can inspect the code, track development activity, and even selfhost it for complete control over your platform."
+                "answer": "Yes. Brown Paper Tickets no longer takes new events. Event Schedule is built with a modern tech stack and receives regular updates. It is fully open source, so you can inspect the code, track development activity, and even selfhost it for complete control over your platform."
             },
             {
                 "question": "Can a buyer get tickets to several shows in one order?",
-                "answer": "Yes, on every plan. Tickets for several of your events go into one cart and are paid once, through Stripe or PayPal, with one order page listing every ticket."
+                "answer": "Yes. Tickets for several of your events go into one cart and are paid once, through Stripe or PayPal, with one order page listing every ticket. The cart itself is on every plan, and each paid ticket in it needs Pro."
             },
             {
                 "question": "What happens to tickets I already sold on Brown Paper Tickets?",
@@ -3055,7 +3157,7 @@
         "tagline": "A simpler, more affordable alternative to Splash for event marketing.",
         "description": "Compare Event Schedule with Splash: branded event pages, registration and ticketing with zero platform fees, and published pricing with no sales call.",
         "keywords": "splash alternative, splash event marketing alternative, splash competitor, event management platform, splash replacement",
-        "about": "Splash is an enterprise event marketing platform focused on branded event experiences, registration, and attendee engagement. It targets mid-to-large organizations with custom event pages and marketing automation.",
+        "about": "Splash, part of Cvent since 2024, is an enterprise event marketing platform focused on branded event experiences, registration, and attendee engagement. It targets mid-to-large organizations with custom event pages and marketing automation.",
         "competitor_strengths": [
             "Enterprise-grade event marketing and branding tools",
             "Advanced attendee engagement and analytics",
@@ -3110,8 +3212,8 @@
                 [
                     "Ticket waitlist",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (RSVP events, paid plans)",
+                    false
                 ],
                 [
                     "Check-in dashboard",
@@ -3122,8 +3224,8 @@
                 [
                     "Sale notifications",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (RSVP notifications, Slack)",
+                    false
                 ],
                 [
                     "Sales data export",
@@ -3158,13 +3260,31 @@
                 [
                     "Promo/discount codes",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Post-event feedback",
                     "Yes (Pro)",
-                    "No",
+                    "Survey pages you send by hand",
+                    true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (you build and schedule them)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes (donation tickets)",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Tracking links, no commission",
                     true
                 ]
             ],
@@ -3210,8 +3330,8 @@
                 [
                     "Custom CSS",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (paid plans)",
+                    false
                 ],
                 [
                     "Embeddable calendar",
@@ -3282,7 +3402,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -3298,8 +3418,8 @@
                 [
                     "Webhooks",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (Simple Postback)",
+                    false
                 ],
                 [
                     "Open source",
@@ -3316,7 +3436,7 @@
                 [
                     "Setup time",
                     "Minutes",
-                    "Weeks (implementation)",
+                    "Self-serve, or sales-led onboarding",
                     true
                 ]
             ]
@@ -3333,7 +3453,7 @@
             },
             {
                 "title": "Instant Setup",
-                "description": "Splash implementations can take weeks of onboarding. Event Schedule is ready in minutes - create your schedule, add events, and share with your audience right away.",
+                "description": "Splash is sold through its sales team, with onboarding for larger rollouts. Event Schedule is ready in minutes - create your schedule, add events, and share with your audience right away.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -3396,9 +3516,9 @@
             "points": [
                 "Published prices: a free plan, and Pro at $5/mo after a 7-day trial, with no annual contract",
                 "Unlimited free registration on every plan, with questions asked once per order on Pro",
-                "Custom CSS on Pro for whatever the theme settings do not cover, which Splash does not allow",
+                "Custom CSS on Pro for whatever the theme settings do not cover, at a price that is published",
                 "A ticket waitlist, promo codes and post-event feedback emails on Pro",
-                "The REST API on Pro, where Splash keeps it for enterprise, and webhooks, which Splash does not have",
+                "The REST API and webhooks on Pro, where Splash keeps its API for enterprise",
                 "The open source code can be selfhosted, so attendee data can stay on your company's own servers"
             ]
         },
@@ -3448,7 +3568,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Splash?",
-                "answer": "Splash uses custom enterprise pricing that requires contacting sales, with contracts typically running thousands of dollars per year. Event Schedule Pro is a transparent $5/mo with zero platform fees and no annual commitment."
+                "answer": "Splash uses custom enterprise pricing that requires contacting sales, on annual contracts. Event Schedule Pro is a transparent $5/mo with zero platform fees and no annual commitment."
             },
             {
                 "question": "Can Event Schedule handle corporate events like Splash?",
@@ -3493,13 +3613,13 @@
                 [
                     "Paid plan price",
                     "$5/mo (7-day free trial)",
-                    "From $50/mo",
+                    "From $50/mo, billed annually",
                     true
                 ],
                 [
                     "Platform fees",
                     "0%",
-                    "Ticketing add-on required",
+                    "1.9% + $0.99/ticket (0.99% on Ultra)",
                     true
                 ],
                 [
@@ -3513,7 +3633,7 @@
                 [
                     "Ticketing",
                     "Yes (free RSVP, paid on Pro)",
-                    "Yes (paid add-on)",
+                    "Yes (paid plans, fee per ticket)",
                     false
                 ],
                 [
@@ -3531,7 +3651,7 @@
                 [
                     "Ticket waitlist",
                     "Yes (Pro)",
-                    "No",
+                    "Session waitlists only (Boost plan and up)",
                     true
                 ],
                 [
@@ -3587,6 +3707,12 @@
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (Launch plan and up)",
+                    true
                 ]
             ],
             "Integrations": [
@@ -3645,7 +3771,7 @@
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
                     "Parsing on Free, flyer and style on Enterprise",
-                    "No",
+                    "AI writing tools (titles, descriptions, email)",
                     true
                 ],
                 [
@@ -3669,8 +3795,8 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
-                    true
+                    "Yes (password wall, invite-only)",
+                    false
                 ],
                 [
                     "Availability management",
@@ -3699,11 +3825,11 @@
                 [
                     "Sponsor/partner logos",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (Boost plan and up)",
+                    false
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -3814,7 +3940,7 @@
                 "Sessions as the parts of an event's agenda, open to comments, free on every plan",
                 "Ticketing built in on Pro rather than sold as an add-on, with no platform fee",
                 "Recurring events, which Sched does not support, for a meetup series that runs between conferences",
-                "A ticket waitlist and sale notifications, both on Pro, where Sched has neither"
+                "A waitlist for a sold-out ticket and sale notifications, both on Pro, where Sched waitlists sessions only"
             ]
         },
         "switch_steps": [
@@ -3914,7 +4040,7 @@
                 [
                     "Platform fees",
                     "0%",
-                    "3% + $0.99/ticket",
+                    "3% + $0.99 per paid ticket, plus a quoted fee",
                     true
                 ],
                 [
@@ -4002,6 +4128,18 @@
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Referral contest, no commission",
+                    true
                 ]
             ],
             "Integrations": [
@@ -4020,7 +4158,7 @@
                 [
                     "Newsletters",
                     "Yes (Free)",
-                    "Announcements only",
+                    "Email campaigns per event, and announcements",
                     true
                 ]
             ],
@@ -4060,7 +4198,7 @@
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
                     "Parsing on Free, flyer and style on Enterprise",
-                    "No",
+                    "AI writing assistant only",
                     true
                 ],
                 [
@@ -4120,11 +4258,11 @@
                 [
                     "Sponsor/partner logos",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (Sponsor Center, banners)",
+                    false
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -4235,7 +4373,7 @@
                 "Tracks as sub-schedules of one conference schedule, which visitors can filter by, on Free",
                 "An agenda on each event page with a start and end time per part, added by hand on every plan",
                 "A calendar of every session to embed on the conference website, where Whova offers an agenda widget",
-                "Newsletters with A/B testing, plus a digest that mails subscribers each batch of new sessions, rather than announcements alone"
+                "Newsletters with A/B testing to a list that outlives any one event, plus a digest that mails subscribers each batch of new sessions"
             ]
         },
         "switch_steps": [
@@ -4284,7 +4422,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Whova?",
-                "answer": "Whova uses quote-based enterprise pricing that requires a sales call, with costs typically running thousands of dollars per event. Event Schedule Pro is a flat $5/mo with unlimited events and zero platform fees on ticket sales."
+                "answer": "Whova uses quote-based enterprise pricing that requires a sales call, quoted per event. Event Schedule Pro is a flat $5/mo with unlimited events and zero platform fees on ticket sales."
             },
             {
                 "question": "Does Event Schedule offer attendee engagement features like Whova?",
@@ -4323,7 +4461,7 @@
                 [
                     "Free plan",
                     "Yes (forever)",
-                    "No (paid plans only)",
+                    "Limited free plan ($1.50 + 3.5% a ticket)",
                     true
                 ],
                 [
@@ -4429,6 +4567,24 @@
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (you schedule up to 5)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Tracking links, no commission",
+                    true
                 ]
             ],
             "Integrations": [
@@ -4511,8 +4667,8 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Availability management",
@@ -4541,11 +4697,11 @@
                 [
                     "Sponsor/partner logos",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -4579,7 +4735,7 @@
                 [
                     "Setup time",
                     "Minutes",
-                    "Weeks (implementation)",
+                    "Demo and account team on paid plans",
                     true
                 ]
             ]
@@ -4596,7 +4752,7 @@
             },
             {
                 "title": "Instant Setup",
-                "description": "Start in minutes vs weeks of enterprise onboarding. No implementation team needed.",
+                "description": "Start in minutes, with no demo or implementation team in front of you.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -4605,7 +4761,7 @@
             },
             {
                 "title": "No Sales Process",
-                "description": "Sign up and go. No demos, no contracts, no waiting for a sales rep to get back to you.",
+                "description": "Sign up and go. Accelevents sells its larger plans through a demo; here every plan is a published price.",
                 "icon": "globe",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -4707,7 +4863,7 @@
         "faq": [
             {
                 "question": "Is it easy to switch from Accelevents to Event Schedule?",
-                "answer": "Yes. Unlike Accelevents, there is no enterprise onboarding or implementation process. Sign up, create a free schedule, and start adding events immediately. AI import can parse pasted event details to speed things up."
+                "answer": "Yes. There is no demo or implementation process in front of any plan. Sign up, create a free schedule, and start adding events immediately. AI import can parse pasted event details to speed things up."
             },
             {
                 "question": "How does Event Schedule pricing compare to Accelevents?",
@@ -4806,8 +4962,8 @@
                 [
                     "Sale notifications",
                     "Yes (Pro)",
-                    "No (webhooks only)",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Sales data export",
@@ -4818,7 +4974,7 @@
                 [
                     "Recurring events",
                     "Yes (Free)",
-                    "No",
+                    "Series of separate events, no repeat pattern",
                     true
                 ],
                 [
@@ -4854,7 +5010,25 @@
                 [
                     "Individual tickets",
                     "Yes (Pro)",
-                    "No",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "No (messages you schedule)",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "UTM tracking, no commission",
                     true
                 ]
             ],
@@ -4882,8 +5056,8 @@
                 [
                     "Custom domains",
                     "Yes (Enterprise)",
-                    "No (discontinued)",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Remove branding",
@@ -4944,8 +5118,8 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
-                    true
+                    "Yes (unlisted, secret or invitation only)",
+                    false
                 ],
                 [
                     "Availability management",
@@ -4978,7 +5152,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -5040,9 +5214,9 @@
                 "icon_color": "text-teal-600 dark:text-teal-400"
             },
             {
-                "title": "Custom Domains",
-                "description": "Use your own domain for your event pages, on Enterprise. Tito discontinued custom domain support.",
-                "icon": "globe",
+                "title": "Automatic Reminders",
+                "description": "Every ticket holder gets a reminder email before the event, on every plan, with no message to write. Tito sends reminders only when you schedule them.",
+                "icon": "mail",
                 "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",
                 "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
@@ -5085,7 +5259,7 @@
             "summary": "Tito fits a tech conference that sells its tickets once a year and wants nothing else. A schedule that runs events all year, with a calendar and a mailing list beside the checkout, is where a flat monthly plan starts to beat 3% a ticket.",
             "points": [
                 "Pro at $5/mo costs less than Tito's 3% once a month's ticket sales pass $166.67",
-                "Recurring events with dates added or skipped, on Free, where Tito has no repeating series",
+                "Recurring events with dates added or skipped, on Free, where a Tito series is a set of separate events",
                 "Payfast for South African rand and Razorpay for Indian rupees, beside Stripe and PayPal",
                 "Individual tickets on Pro, so each attendee in a group order gets a QR code of their own",
                 "A calendar of all your events to embed, where Tito embeds a checkout widget",
@@ -5233,8 +5407,8 @@
                 [
                     "Online events",
                     "Yes (Free)",
-                    "No",
-                    true
+                    "Yes (join links, Zoom and webinar integrations)",
+                    false
                 ],
                 [
                     "Event polls",
@@ -5264,6 +5438,12 @@
                     "Subscription calendars",
                     "Yes (Free)",
                     "Yes (core feature)",
+                    false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (every plan)",
                     false
                 ]
             ],
@@ -5375,7 +5555,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -5429,7 +5609,7 @@
             },
             {
                 "title": "$5/mo vs $36/mo",
-                "description": "AddEvent Small Business is $36/mo on monthly billing, less when paid yearly, and has no ticketing. Event Schedule sells tickets from the free plan.",
+                "description": "AddEvent Small Business is $36/mo on monthly billing, less when paid yearly, and has no ticketing. Event Schedule takes free registrations on the free plan and sells paid tickets on Pro.",
                 "icon": "percent",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -5574,7 +5754,7 @@
                 [
                     "Free plan",
                     "Yes (forever)",
-                    "Selfhosted only (Community Edition)",
+                    "Hosted: 500 free tickets a year, then 0.50 EUR each; or selfhost",
                     true
                 ],
                 [
@@ -5680,6 +5860,24 @@
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (email rules you set up)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Tracking links, no commission",
+                    true
                 ]
             ],
             "Integrations": [
@@ -5762,8 +5960,8 @@
                 [
                     "Embeddable calendar",
                     "Yes (Free)",
-                    "Ticket widget only",
-                    true
+                    "Widget with a month, week or list of events",
+                    false
                 ],
                 [
                     "Private/password-protected events",
@@ -5802,7 +6000,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -5883,7 +6081,7 @@
             },
             {
                 "title": "Simpler Setup",
-                "description": "Simpler to selfhost than Pretix: just PHP and MySQL vs Docker, PostgreSQL, and Redis.",
+                "description": "Simpler to selfhost than Pretix: just PHP and MySQL, where Pretix wants PostgreSQL and Redis in production.",
                 "icon": "globe",
                 "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
                 "border": "border-cyan-200 dark:border-cyan-500/20",
@@ -5910,7 +6108,7 @@
             "points": [
                 "No 2.5% per ticket on the hosted service: Pro is $5/mo with 0% on every sale",
                 "A selfhosted install that needs a PHP host and a MySQL database, and updates itself in one click from inside the app",
-                "A browsable public calendar with search and filters, and an embed of it, where Pretix embeds a ticket widget",
+                "A browsable public calendar with search and filters, and an embed of it, on every plan",
                 "Newsletters sent from the app itself, and subscribers told about new dates without you writing to them",
                 "Event polls and post-event feedback on Pro, neither of which Pretix has",
                 "AI import that turns a pasted listing, a link or a flyer into events, 50 a day on Free and unlimited when selfhosted"
@@ -5966,7 +6164,7 @@
             },
             {
                 "question": "Is Event Schedule easier to selfhost than Pretix?",
-                "answer": "Yes. Pretix selfhosting requires Docker, PostgreSQL, Redis, and significant server administration. Event Schedule runs on standard PHP hosting with MySQL, making it accessible to a much wider range of hosting environments."
+                "answer": "Yes. A production Pretix install wants PostgreSQL and Redis, with Docker as the documented route, and more server administration. Event Schedule runs on standard PHP hosting with MySQL, making it accessible to a much wider range of hosting environments."
             },
             {
                 "question": "Does Event Schedule have seating plans?",
@@ -5990,7 +6188,7 @@
         "tagline": "Flat $5/mo pricing and zero platform fees, so only your payment processor's fee comes off a paid ticket.",
         "description": "Compare Event Schedule with Humanitix. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and selfhosting.",
         "keywords": "humanitix alternative, humanitix alternative free, event ticketing platform, humanitix competitor, affordable event platform",
-        "about": "Humanitix is a ticketing platform that donates profits to charity, primarily children's education. It charges a per-ticket booking fee (under $3 for most tickets) with no subscription plans. It offers ticketing, QR check-in, promo codes, and embeddable widgets.",
+        "about": "Humanitix is a ticketing platform that donates profits to charity, primarily children's education. It charges a per-ticket booking fee (5% + $1.29 a ticket in the US) with no subscription plans. It offers ticketing, QR check-in, promo codes, and embeddable widgets.",
         "competitor_strengths": [
             "Profits go to charity (children's education and humanitarian causes)",
             "No subscription required with pay-as-you-go per-ticket pricing",
@@ -6013,7 +6211,7 @@
                 [
                     "Platform fees",
                     "0%",
-                    "Booking fee on paid tickets (under $3 for most)",
+                    "Booking fee on paid tickets (5% + $1.29 in the US)",
                     true
                 ],
                 [
@@ -6105,7 +6303,25 @@
                 [
                     "Individual tickets",
                     "Yes (Pro)",
-                    "No",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "No (emails you schedule)",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Affiliate codes, no commission",
                     true
                 ]
             ],
@@ -6195,7 +6411,7 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
+                    "Private (link only), no password",
                     true
                 ],
                 [
@@ -6229,7 +6445,7 @@
                     true
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -6265,7 +6481,7 @@
         "key_advantages": [
             {
                 "title": "Flat $5/mo Pricing",
-                "description": "No per-ticket fees ever. Humanitix charges a booking fee on every paid ticket (under $3 for most tickets).",
+                "description": "No per-ticket fees ever. Humanitix charges a booking fee on every paid ticket (5% + $1.29 a ticket in the US).",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -6335,7 +6551,7 @@
         "why_choose": {
             "summary": "Humanitix pays for its giving out of the fee each buyer is charged. Here nothing is added to the ticket at all, so what would have gone in fees stays with you, and where it goes is your decision.",
             "points": [
-                "No booking fee on a paid ticket, where Humanitix adds one (under $3 for most tickets)",
+                "No booking fee on a paid ticket, where Humanitix adds one (5% + $1.29 a ticket in the US)",
                 "Newsletters from your own schedule, which Humanitix does not have, and a digest of new events mailed to subscribers",
                 "Branding removal and custom CSS on Pro, where Humanitix offers neither",
                 "Your own domain on Enterprise, which Humanitix does not support",
@@ -6385,15 +6601,15 @@
         "faq": [
             {
                 "question": "Is it easy to switch from Humanitix to Event Schedule?",
-                "answer": "Yes. Create a free schedule and start adding events right away. With zero platform fees, you keep more of your ticket revenue and can donate directly to causes you care about on your own terms."
+                "answer": "Yes. Create a free schedule and start adding events right away. With zero platform fees, you keep more of your ticket revenue and can donate directly to causes you care about on your own terms, or ask your own buyers for a donation at checkout on Pro."
             },
             {
                 "question": "How does Event Schedule pricing compare to Humanitix?",
-                "answer": "Humanitix charges a per-ticket booking fee on every paid event (under $3 for most tickets). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $5/mo regardless of ticket volume."
+                "answer": "Humanitix charges a per-ticket booking fee on every paid event (5% + $1.29 a ticket in the US). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $5/mo regardless of ticket volume."
             },
             {
                 "question": "Does Humanitix donate to charity while Event Schedule does not?",
-                "answer": "Humanitix donates its profits to charity, which is funded by per-ticket fees on your sales. With Event Schedule, you keep 100% of your ticket revenue (minus Stripe or PayPal processing) and can donate to causes you choose directly."
+                "answer": "Humanitix donates its profits to charity, which is funded by per-ticket fees on your sales. With Event Schedule, you keep 100% of your ticket revenue (minus Stripe or PayPal processing) and can donate to causes you choose directly. On Pro you can also ask buyers for a donation at checkout, and a free ticket with donations on becomes pay what you want."
             },
             {
                 "question": "Can buyers pay in installments?",
@@ -6417,7 +6633,7 @@
         "tagline": "A flat-rate open source alternative to Eventzilla with zero per-ticket fees.",
         "description": "Compare Event Schedule with Eventzilla. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and open source.",
         "keywords": "eventzilla alternative, eventzilla alternative free, event registration platform, eventzilla competitor, affordable event platform",
-        "about": "Eventzilla is an event registration and ticketing platform offering per-ticket pricing across multiple tiers. Plans range from $1.50/registration (Basic) to $5,999/year (Unlimited). It includes features like badge printing, speaker management, live streaming, and CRM integrations.",
+        "about": "Eventzilla is an event registration and ticketing platform offering per-ticket pricing across multiple tiers. Plans run from $1.50 a registration (Basic) to 2.9% + $1.50 (Plus), with custom annual pricing on Scale. It includes features like badge printing, speaker management, live streaming, and CRM integrations.",
         "competitor_strengths": [
             "Badge printing with customizable templates and QR codes",
             "Speaker and session management for conferences",
@@ -6532,8 +6748,20 @@
                 [
                     "Individual tickets",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (2 days before; 7 days on Pro and up)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes (donation tickets)",
+                    false
                 ]
             ],
             "Integrations": [
@@ -6552,21 +6780,21 @@
                 [
                     "Newsletters",
                     "Yes (Free)",
-                    "No (Mailchimp/HubSpot integration)",
-                    true
+                    "Yes (email invitations and campaigns)",
+                    false
                 ]
             ],
             "Customization": [
                 [
                     "Custom domains",
                     "Yes (Enterprise)",
-                    "Yes (Plus/Unlimited)",
+                    "Yes (Plus and Scale)",
                     false
                 ],
                 [
                     "Remove branding",
                     "Yes (Pro)",
-                    "Yes (Plus/Unlimited)",
+                    "Yes (Plus and Scale)",
                     false
                 ],
                 [
@@ -6652,11 +6880,11 @@
                 [
                     "Sponsor/partner logos",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
-                    "Email scheduling",
+                    "Scheduled graphic emails",
                     "Yes (Enterprise)",
                     "No",
                     true
@@ -6709,8 +6937,8 @@
                 "icon_color": "text-sky-600 dark:text-sky-400"
             },
             {
-                "title": "Built-in Newsletters",
-                "description": "Engage your audience directly with built-in newsletters. Eventzilla requires third-party integrations.",
+                "title": "Newsletters Beyond One Event",
+                "description": "Write newsletters to a subscriber list that outlives any one event, with A/B testing, on every plan.",
                 "icon": "mail",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -6764,7 +6992,7 @@
             "points": [
                 "No $1.50 a ticket and no percentage on top: a paid ticket on Pro carries only your processor's fee",
                 "A Participants tab for speakers and an Agenda tab for timed sessions on every event, both free",
-                "A built-in newsletter, where Eventzilla hands email off to Mailchimp or HubSpot",
+                "A newsletter to your whole subscriber list, with A/B testing, on the free plan",
                 "Custom CSS on Pro, which Eventzilla does not offer",
                 "Fan photos, videos and comments on each event, free, shown once you approve them",
                 "Google, Outlook and CalDAV sync in both directions on the free plan"
@@ -6820,15 +7048,15 @@
             },
             {
                 "question": "Can Event Schedule handle registration features like Eventzilla?",
-                "answer": "Yes. Ticketing and QR check-in are on every plan. Custom fields, the live check-in dashboard, ticket waitlists and sales CSV export are on Pro. It also adds features Eventzilla lacks, like two-way Google Calendar sync, newsletters and AI event import."
+                "answer": "Yes. Free registration and QR check-in are on every plan, and paid tickets are on Pro. Custom fields, the live check-in dashboard, ticket waitlists and sales CSV export are on Pro. It also adds features Eventzilla lacks, like two-way Google Calendar sync, newsletters and AI event import."
             },
             {
                 "question": "Can someone buy tickets for several events in one order?",
                 "answer": "Yes, on every plan. A buyer adds tickets for several of your events to one cart and pays once, through Stripe or PayPal, and gets one order page with every ticket on it. Each event in the cart is checked on its own, so a priced ticket needs that schedule to be on Pro."
             },
             {
-                "question": "What does a year cost next to Eventzilla Unlimited?",
-                "answer": "Eventzilla's Unlimited plan is $5,999 a year. Here the Pro plan runs $5 a month and the Enterprise plan $15 a month, and neither takes a share of ticket sales. A selfhosted install has no subscription at all."
+                "question": "What does a year cost next to Eventzilla?",
+                "answer": "Eventzilla charges per registration, from $1.50 on Basic to 2.9% + $1.50 on Plus, and quotes its Scale plan by the year. Here the Pro plan runs $5 a month and the Enterprise plan $15 a month, and neither takes a share of ticket sales. A selfhosted install has no subscription at all."
             },
             {
                 "question": "Does each person in a group booking get their own ticket?",
@@ -6842,7 +7070,7 @@
         "slug": "timely-alternative",
         "meta_title": "Timely Alternative With a Free Plan | Event Schedule",
         "tagline": "An event calendar with ticketing built in, a free plan, and zero platform fees.",
-        "description": "Compare Event Schedule with Timely: a free plan where Timely starts at $9/mo billed annually, zero platform fees on tickets, and calendar sync both ways.",
+        "description": "Compare Event Schedule with Timely: a free plan and published prices where Timely quotes on request, zero platform fees on tickets, and calendar sync both ways.",
         "keywords": "timely alternative, time.ly alternative, timely event calendar alternative, event calendar software, timely competitor",
         "about": "Timely (time.ly) is hosted event calendar and event management software used by nonprofits, schools, universities, tourism boards and media companies. Its plans are billed annually, and registration and ticketing are sold as an add-on.",
         "competitor_strengths": [
@@ -6855,14 +7083,14 @@
                 [
                     "Free plan",
                     "Yes (forever)",
-                    "No (30-day free trial)",
+                    "No",
                     true
                 ],
                 [
                     "Paid plan price",
                     "$5/mo (7-day free trial)",
-                    "From $9/mo, billed annually",
-                    false
+                    "Not published (request pricing or book a demo)",
+                    true
                 ],
                 [
                     "Platform fees",
@@ -6919,6 +7147,24 @@
                     "Yes (Pro)",
                     "Yes (add-on)",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (with the ticketing add-on)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "No",
+                    true
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "No",
+                    true
                 ]
             ],
             "Integrations": [
@@ -6977,7 +7223,7 @@
                 [
                     "Team collaboration",
                     "Yes (Enterprise)",
-                    "Yes (1 to 4 users by plan)",
+                    "Yes (3 on Growth, 4 on Professional, custom on Enterprise)",
                     false
                 ]
             ],
@@ -7011,7 +7257,7 @@
         "key_advantages": [
             {
                 "title": "A Free Plan",
-                "description": "Event Schedule has a free plan with unlimited events and the embeddable calendar. Every Timely plan is paid, billed annually, after a 30-day trial.",
+                "description": "Event Schedule has a free plan with unlimited events and the embeddable calendar. Every Timely plan is paid and billed annually, at a price Timely quotes on request.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -7081,7 +7327,7 @@
         "why_choose": {
             "summary": "Timely is calendar software for institutions, billed by the year, with registration and ticketing sold as an add-on. Event Schedule starts on a free plan, and the embed, calendar sync and unlimited free registration are part of it rather than extras.",
             "points": [
-                "A free plan with no trial clock, where every Timely plan is paid once its 30 days are up",
+                "A free plan, where every Timely plan is paid and quoted on request",
                 "Free registrations cost nothing per person, against $0.90 each on Timely's ticketing add-on",
                 "Sub-schedules for departments or programs, free, and an embed that can show just one of them",
                 "A request form for community submissions on every plan, with your approval before a submitted event goes live",
@@ -7135,7 +7381,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Timely?",
-                "answer": "Timely plans start at $9/mo billed annually, with no free plan, and its ticketing add-on charges 2.5% + $0.90 per paid ticket. Event Schedule has a free plan, and Pro is $5/mo with zero platform fees on ticket sales."
+                "answer": "Timely publishes no plan prices (Growth and Professional are quoted on request, Enterprise after a demo) and has no free plan, and its ticketing add-on charges 2.5% + $0.90 per paid ticket. Event Schedule has a free plan, and Pro is $5/mo with zero platform fees on ticket sales."
             },
             {
                 "question": "Can I embed the calendar on my website like Timely?",
@@ -7161,7 +7407,7 @@
         "slug": "the-events-calendar-alternative",
         "meta_title": "The Events Calendar Alternative, No Plugins | Event Schedule",
         "tagline": "Event pages, ticketing and calendar sync without installing or updating a WordPress plugin.",
-        "description": "Compare Event Schedule with The Events Calendar for WordPress: hosted or selfhosted, two-way calendar sync, and Pro at $5/mo instead of from $259 a year.",
+        "description": "Compare Event Schedule with The Events Calendar for WordPress: hosted or selfhosted, two-way calendar sync, and Pro at $5/mo instead of from $399 a year.",
         "keywords": "the events calendar alternative, wordpress event calendar alternative, events calendar pro alternative, wordpress events plugin alternative, event tickets plus alternative",
         "about": "The Events Calendar is a WordPress plugin, now sold by Liquid Web, that adds an event calendar to your own WordPress site. The core plugin is free and GPL-licensed on wordpress.org, and paid tiers add recurring events, check-in, seating maps and email campaigns.",
         "competitor_strengths": [
@@ -7180,7 +7426,7 @@
                 [
                     "Paid plan price",
                     "$5/mo (7-day free trial)",
-                    "From $259/yr (Essentials)",
+                    "From $399/yr (Pro)",
                     true
                 ],
                 [
@@ -7244,6 +7490,24 @@
                     "Yes (Enterprise)",
                     "Yes (Elite tier)",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Elite tier only ($599/yr)",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Through WooCommerce or GiveWP add-ons",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "No",
+                    true
                 ]
             ],
             "Integrations": [
@@ -7326,8 +7590,8 @@
                 "icon_color": "text-emerald-600 dark:text-emerald-400"
             },
             {
-                "title": "$5/mo vs $259/yr",
-                "description": "Event Schedule Pro is $5/mo with a 7-day free trial. The Events Calendar paid tiers are $259, $399 and $599 a year, renewed annually.",
+                "title": "$5/mo vs $399/yr",
+                "description": "Event Schedule Pro is $5/mo with a 7-day free trial. The Events Calendar paid tiers are $399 and $599 a year, renewed annually.",
                 "icon": "dollar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -7392,7 +7656,7 @@
                 "QR tickets scanned at the door on Free, where the plugin's check-in starts at its Pro tier",
                 "Newsletters to your followers on every plan, with no move up to Elite",
                 "Nothing added to your WordPress install: no plugin to update and no tables in its database, just one Custom HTML block",
-                "Pro at $5 a month, where the plugin's paid tiers start at $259 and renew each year",
+                "Pro at $5 a month, where the plugin's paid tiers start at $399 and renew each year",
                 "Open source on both sides, but here as its own PHP and MySQL app, and a selfhosted copy resolves to Enterprise"
             ]
         },
@@ -7442,7 +7706,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to The Events Calendar?",
-                "answer": "The core plugin is free, and the paid tiers are $259, $399 and $599 a year. Event Schedule has a free plan, and Pro is $5/mo with zero platform fees on ticket sales."
+                "answer": "The core plugin is free, and the paid tiers are $399 and $599 a year. Event Schedule has a free plan, and Pro is $5/mo with zero platform fees on ticket sales."
             },
             {
                 "question": "Is Event Schedule open source like The Events Calendar?",
@@ -7520,6 +7784,12 @@
                     "Free event RSVP",
                     "Yes (Free)",
                     "Yes",
+                    false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (to RSVPs)",
                     false
                 ]
             ],
@@ -7729,11 +7999,11 @@
         "tagline": "Tickets for parties and nights out, paid into your own account, with zero platform fees.",
         "description": "Compare Event Schedule with Posh: zero platform fees instead of a service fee on every ticket, payouts through your own Stripe or PayPal, and calendar sync.",
         "keywords": "posh alternative, posh.vip alternative, nightlife ticketing, party ticketing platform, posh competitor",
-        "about": "Posh (posh.vip) is a social platform for discovering and creating in-person events, from club nights and run clubs to fashion shows and festivals. Organizers sell tickets through Stripe Connect, and each ticket carries a Posh service fee that can be absorbed or passed to the buyer.",
+        "about": "Posh (posh.vip) is a social platform for discovering and creating in-person events, from club nights and run clubs to fashion shows and festivals. Organizers sell tickets through Stripe Connect, and each paid ticket carries a Posh service fee, added on top of the price the buyer sees.",
         "competitor_strengths": [
             "SMS blasts to past attendees, with unlimited event-level blasts until shortly after the event",
             "Promoter commissions tracked with unique links",
-            "An explore feed that brings organizers new buyers"
+            "Discovery in the Posh app and on its Explore page that brings organizers new buyers"
         ],
         "sections": {
             "Pricing & Fees": [
@@ -7746,7 +8016,7 @@
                 [
                     "Platform fees",
                     "0%",
-                    "Service fee on each ticket",
+                    "10% + $0.99 per paid ticket, paid by the buyer",
                     true
                 ],
                 [
@@ -7786,13 +8056,25 @@
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "No (abandoned-cart reminders only)",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "No",
+                    true
                 ]
             ],
             "Integrations": [
                 [
                     "Newsletters",
                     "Yes (Free)",
-                    "SMS blasts",
+                    "SMS blasts, email through Mailchimp",
                     false
                 ]
             ],
@@ -7822,7 +8104,7 @@
                 [
                     "Webhooks",
                     "Yes (Pro)",
-                    "Yes (order created)",
+                    "Yes (orders, refunds and transfers)",
                     false
                 ],
                 [
@@ -7842,7 +8124,7 @@
         "key_advantages": [
             {
                 "title": "0% Platform Fees",
-                "description": "Posh adds a service fee to every ticket, absorbed by you or passed to the buyer. Event Schedule takes no platform fee on any plan.",
+                "description": "Posh adds a service fee to every paid ticket, charged to the buyer on top of your price. Event Schedule takes no platform fee on any plan.",
                 "icon": "percent",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -7960,7 +8242,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Posh?",
-                "answer": "Posh has no subscription and adds a service fee to every ticket. Event Schedule Pro is a flat $5/mo with zero platform fees, so what you pay does not grow with the number of tickets you sell."
+                "answer": "Posh has no subscription and adds a service fee to every paid ticket. Event Schedule Pro is a flat $5/mo with zero platform fees, so what you pay does not grow with the number of tickets you sell."
             },
             {
                 "question": "Can I run guest lists and free entry?",
@@ -8045,6 +8327,18 @@
                     "Yes (Pro)",
                     "Yes",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (SMS and push)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Chip In, paid outside Partiful",
+                    false
                 ]
             ],
             "Integrations": [
@@ -8110,7 +8404,7 @@
             },
             {
                 "title": "One Page for Everything",
-                "description": "Your schedule lists every event you host on one public page, with followers who hear about the next one automatically.",
+                "description": "Your schedule lists every event you host on one public page, and people who sign up by email hear about the next one automatically.",
                 "icon": "globe",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -8172,7 +8466,7 @@
             "summary": "Partiful is built around one invite at a time. Event Schedule is built around the host: one public page for everything you run, dates that repeat, and people who follow you hear about the next event without being invited again.",
             "points": [
                 "A weekly or monthly event set up once, on Free, instead of a clone for every date",
-                "Followers get an email digest when you publish new events, with no invite to send",
+                "People who sign up by email get a digest when you publish new events, with no invite to send",
                 "Paid tickets on Pro wherever your Stripe, PayPal, Payfast or Razorpay account can take payments, not only in the US and UK",
                 "A calendar embed for a club or collective website, free",
                 "Events created in your Google or Outlook calendar can come into the schedule, and the other way round, free",
@@ -8197,7 +8491,7 @@
             },
             {
                 "title": "Ask guests to follow",
-                "description": "Share the schedule link or print its QR code. Guests who follow hear about new events by email, with nothing for you to send.",
+                "description": "Share the schedule link or print its QR code. Guests who sign up by email hear about new events, with nothing for you to send.",
                 "doc": "sharing#qr-code"
             }
         ],
@@ -8298,6 +8592,12 @@
                     "Yes (Free)",
                     "Yes (Interested or Going)",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Facebook notifications, not email",
+                    false
                 ]
             ],
             "Integrations": [
@@ -8378,7 +8678,7 @@
             },
             {
                 "title": "Reach People by Email",
-                "description": "Followers get an email digest of your new events and your newsletters, instead of depending on what a feed decides to show them.",
+                "description": "People who sign up by email get a digest of your new events and your newsletters, instead of depending on what a feed decides to show them.",
                 "icon": "mail",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -8578,15 +8878,27 @@
                 [
                     "Reserved seating",
                     "Yes (Enterprise)",
-                    "Yes (seating chart)",
+                    "Seating chart image, a ticket type per row",
+                    true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (7 days before)",
                     false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "No",
+                    true
                 ]
             ],
             "Integrations": [
                 [
                     "Newsletters",
                     "Yes (Free)",
-                    "Yes (up to 5,000 contacts per email)",
+                    "Yes (5,000 per email, 30,000 with your own domain)",
                     false
                 ]
             ],
@@ -8634,7 +8946,7 @@
                 [
                     "Webhooks",
                     "Yes (Pro)",
-                    "Yes (payment completed)",
+                    "Yes (payments and contacts)",
                     false
                 ],
                 [
@@ -8681,7 +8993,7 @@
             },
             {
                 "title": "A Public Schedule Page",
-                "description": "Every event you run sits on one public schedule page, with followers who hear about new events by email and an embeddable calendar for your website.",
+                "description": "Every event you run sits on one public schedule page, with email subscribers who hear about new events and an embeddable calendar for your website.",
                 "icon": "layout",
                 "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",
@@ -8862,6 +9174,12 @@
                     "Free event RSVP",
                     "Yes (Free)",
                     "Yes (Premium)",
+                    true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Opt-in on RSVP forms (Premium)",
                     true
                 ]
             ],
@@ -9081,7 +9399,7 @@
         "competitor_strengths": [
             "Open source and selfhostable, with an all-in-one Docker image",
             "No monthly fee on the hosted Cloud service",
-            "A broad ticketing feature set: waitlists, a check-in app, product add-ons, affiliates, an API and webhooks"
+            "A broad ticketing feature set: waitlists, browser check-in lists, product add-ons, affiliate tracking, reserved seating, an API and webhooks"
         ],
         "sections": {
             "Pricing & Fees": [
@@ -9120,7 +9438,7 @@
                 [
                     "QR check-ins",
                     "Yes (Free)",
-                    "Yes (check-in app)",
+                    "Yes (check-in lists opened from a link)",
                     false
                 ],
                 [
@@ -9154,9 +9472,21 @@
                     false
                 ],
                 [
-                    "Promoter or affiliate links",
+                    "Promoter links with commission",
                     "Yes (Pro)",
-                    "Yes (affiliates)",
+                    "Tracking links, no commission",
+                    true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "No (messages you schedule)",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes (donation tickets)",
                     false
                 ]
             ],
@@ -9164,8 +9494,8 @@
                 [
                     "Remove branding",
                     "Yes (Pro)",
-                    "Selfhost licence, from 499 EUR/yr",
-                    false
+                    "Cloud subscription, or a selfhost licence from 249 EUR/yr",
+                    true
                 ],
                 [
                     "Custom fields",
@@ -9365,7 +9695,7 @@
             {
                 "tag": "Credit stays on selfhost",
                 "title": "No licence takes our credit off",
-                "text": "Hi.Events sells a licence, from 499 EUR a year, that removes its link from a selfhosted install. Our license requires an attribution credit on every selfhosted install and nothing removes it there, though on the hosted service Pro takes the Event Schedule branding off."
+                "text": "Hi.Events sells a licence, from 249 EUR a year, that removes its link from a selfhosted install, and a subscription that removes it on its Cloud. Our license requires an attribution credit on every selfhosted install and nothing removes it there, though on the hosted service Pro takes the Event Schedule branding off."
             }
         ],
         "faq": [
@@ -9442,6 +9772,12 @@
                     "Yes (Free)",
                     "Yes (with optional approval)",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Opt-in by each participant",
+                    true
                 ]
             ],
             "Integrations": [
@@ -9717,6 +10053,18 @@
                     "Yes (Enterprise)",
                     "Yes (seating chart builder, free)",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (24 hours before)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes (name your own price)",
+                    false
                 ]
             ],
             "Integrations": [
@@ -9971,7 +10319,7 @@
         "tagline": "A schedule page that takes registrations and sells its own tickets, for artists and venues alike.",
         "description": "Compare Event Schedule with Songkick: your own schedule page with free RSVPs and QR tickets, paid tickets on Pro, two-way calendar sync, and venue tools too.",
         "keywords": "songkick alternative, songkick tourbox alternative, tour dates widget, concert listings for artists, songkick competitor",
-        "about": "Songkick is a concert discovery app and website that lists tour dates gathered from hundreds of sources and alerts fans when artists they track announce shows. Artist teams manage their dates with the Tourbox tool, and tickets are sold by outside vendors. Suno Inc. has operated Songkick since late 2025.",
+        "about": "Songkick is a concert discovery app and website that lists tour dates gathered from hundreds of sources and alerts fans when artists they track announce shows. Artist teams manage their dates with the Tourbox tool, and tickets are sold by outside vendors. Suno acquired Songkick from Warner Music Group in a deal announced in November 2025.",
         "competitor_strengths": [
             "A large fan audience that gets alerts when the artists they track announce dates",
             "The free Tourbox tool, with a tour-date widget and partners such as Deezer, Bandcamp and SoundCloud",
@@ -10303,6 +10651,24 @@
                     "Yes (Enterprise)",
                     "Seat map built by their team on request",
                     false
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (Essential plan and up)",
+                    true
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes (donation tickets)",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Yes (Essential plan and up)",
+                    false
                 ]
             ],
             "Integrations": [
@@ -10357,7 +10723,7 @@
                 [
                     "Webhooks",
                     "Yes (Pro)",
-                    "Professional plan (USD 60/mo) and up",
+                    "Essential plan (USD 12/mo) and up",
                     true
                 ],
                 [
@@ -10404,7 +10770,7 @@
             },
             {
                 "title": "API and Webhooks on Pro",
-                "description": "Both come with Pro. On AllEvents, webhooks start on the Professional plan at USD 60 a month.",
+                "description": "Both come with Pro. On AllEvents, webhooks start on the Essential plan at USD 12 a month.",
                 "icon": "link",
                 "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",
@@ -10537,7 +10903,7 @@
             },
             {
                 "question": "When do I get paid for ticket sales?",
-                "answer": "On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed. AllEvents also pays into your own PayPal or Stripe account, except for events priced in Indian rupees, which it pays out 3 to 5 business days after the event."
+                "answer": "On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed. AllEvents also pays into your own PayPal or Stripe account, except for events priced in Indian rupees, which it pays out a few business days after the event."
             },
             {
                 "question": "Can Event Schedule promote my event like AllEvents?",
@@ -10549,7 +10915,7 @@
             },
             {
                 "question": "Are the API and webhooks included?",
-                "answer": "Yes, both are on Pro at $5/mo, with a REST API for events, schedules and sales. AllEvents includes webhooks from its Professional plan at USD 60 a month, and its API is a data product for event listings rather than for managing your own events."
+                "answer": "Yes, both are on Pro at $5/mo, with a REST API for events, schedules and sales. AllEvents includes webhooks from its Essential plan at USD 12 a month, and its API is a data product for event listings rather than for managing your own events."
             },
             {
                 "question": "Can people who do not know me still find my events?",
@@ -10557,7 +10923,7 @@
             },
             {
                 "question": "Can I sell tickets for an event priced in rupees?",
-                "answer": "Yes, on Pro, through Razorpay, which settles Indian rupees into your own Razorpay account with no platform fee from us. AllEvents charges 10% + INR 10 a ticket on rupee events and pays them out 3 to 5 business days after the event."
+                "answer": "Yes, on Pro, through Razorpay, which settles Indian rupees into your own Razorpay account with no platform fee from us. AllEvents charges buyers INR 10 a ticket on rupee events and takes 5% to 10% of sales from the organizer, and pays out a few business days after the event."
             }
         ]
     },
@@ -10650,6 +11016,24 @@
                     "Yes (Enterprise)",
                     "No (retired in 2019)",
                     true
+                ],
+                [
+                    "Reminder emails before the event",
+                    "Yes (Free, automatic)",
+                    "Yes (24 hours before)",
+                    false
+                ],
+                [
+                    "Donations / pay what you want",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promoter links with commission",
+                    "Yes (Pro)",
+                    "Tracking links, no commission",
+                    true
                 ]
             ],
             "Integrations": [
@@ -10690,7 +11074,7 @@
                 [
                     "Team collaboration",
                     "Yes (Enterprise)",
-                    "Yes (team permissions)",
+                    "Yes (Standard tier)",
                     false
                 ]
             ],

@@ -7,8 +7,7 @@ namespace App\Utils;
  *
  * Every fee calculator on the marketing site reads this: <x-marketing.fee-calculator> on the
  * homepage, /compare and /ticket-fee-calculator, the savings panel on /pricing and the door-money
- * band on /for-talent. The homepage passes its own four platforms, leaving out the one whose rate
- * could not be re-checked (see 'ticket-tailor' below). Each renders its first paint
+ * band on /for-talent. The homepage passes its own set of platforms. Each renders its first paint
  * from cost(), and the scripts that recompute as a visitor types are handed rates() as a data-rates
  * attribute and run the same formula (marketing/partials/ticket-fee-math.blade.php), so a keystroke
  * cannot change the answer the page was rendered with. Before this class the rates were retyped in
@@ -102,16 +101,17 @@ final class TicketFees
                 'basis' => 'Luma is shown at whichever of its free and Plus plans is cheaper for the event, with Plus at its annual-billing price.',
             ],
 
-            // Carried over unchanged from the earlier /compare rates, NOT re-checked on 2026-09-24:
-            // tickettailor.com answers 403 to an automated fetch, its archived pricing page renders in
-            // pounds (0.22 to 0.60 GBP a ticket), and third-party summaries of its US prices disagree.
-            // Check the band by hand before quoting it anywhere new. The processor's fee is on top.
-            // The label, the basis and the calculator's card all say it was not re-checked.
+            // tickettailor.com/pricing, checked 2026-11-11: no subscription, a flat fee per paid ticket
+            // of $0.85 pay as you go, or prepaid credits from $0.70 (100 credits) down to $0.34
+            // (20,000+), headlined "from $0.30". The page's HTML renders pounds only (0.60 GBP pay as
+            // you go, from 0.22 GBP); the USD figures are in its pricing script
+            // (USD: {payg: .85, cheapest: .3}), and the site answers 403 to a fetch without a browser
+            // User-Agent. The calculator uses the middle of the range. The processor's fee is on top.
             'ticket-tailor' => [
                 'name' => 'Ticket Tailor',
-                'fixed' => 0.44,
-                'label' => '$0.28-$0.60 per ticket (not re-checked)',
-                'basis' => 'Ticket Tailor is shown at the middle of $0.28-$0.60 per ticket, the last US band we recorded, which could not be re-checked.',
+                'fixed' => 0.58,
+                'label' => '$0.30-$0.85 per ticket',
+                'basis' => 'Ticket Tailor is shown at $0.58, the middle of its US range: $0.85 a ticket pay as you go, down to $0.30 with prepaid credits.',
             ],
 
             // ticketleap.com/info/pricing, checked 2026-09-24: "$1 + 2% of the event ticket price" on

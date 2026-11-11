@@ -426,7 +426,10 @@ class MarketingPriceTest extends TestCase
         // literals it exists to catch would have failed - including every comparison-table row,
         // where the price sits alone in an array of strings with no prose around it.
         $competitorPrices = [
-            '$50', '$59', '$99', '$1.79', '$5,999', '$0.28',
+            '$50', '$59', '$99', '$1.79',
+            // Meetup Standard is $29.99 a month (help.meetup.com, checked 2026-11-11), and
+            // Eventbrite Pro starts at $15 a month: both sit on numbers our own plans use.
+            '$29.99', 'Eventbrite Pro email marketing from $15/mo',
             'Canva Pro costs $15/month', 'From $15/mo (Pro)',
             '$5 to $15/month', '$5 to $15/mo',
             // Linktree Pro and AddEvent happen to sit exactly on our Pro and Enterprise prices,
@@ -437,8 +440,6 @@ class MarketingPriceTest extends TestCase
             // Trello Standard is $5 a user a month billed annually, $6 monthly (trello.com/pricing),
             // the same figure as our retired Pro price, so it is exempted by phrase too.
             'Trello Standard costs $5 per user a month', 'From $5/mo per user', '$5-$6/user/mo',
-            // Timely Lite is $9 a month billed annually (time.ly/pricing), the same figure as our Pro.
-            'Timely starts at $9/mo', 'From $9/mo, billed annually', 'Timely plans start at $9/mo',
         ];
 
         // SeoUtils builds the product node's plan offers, which every marketing page carries.

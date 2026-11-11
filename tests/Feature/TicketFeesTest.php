@@ -93,8 +93,8 @@ class TicketFeesTest extends TestCase
 
     public function test_ticket_tailor_is_its_midpoint_plus_stripe(): void
     {
-        // 100 x 10: 0.44 on each ticket (44.00) plus Stripe (29.00 + 30.00).
-        $this->assertSame('103.00', $this->money(TicketFees::cost('ticket-tailor', 100, 10)));
+        // 100 x 10: 0.58 on each ticket (58.00) plus Stripe (29.00 + 30.00).
+        $this->assertSame('117.00', $this->money(TicketFees::cost('ticket-tailor', 100, 10)));
     }
 
     public function test_ticketleap_charges_its_own_processing_with_a_flat_fee_and_a_cap(): void

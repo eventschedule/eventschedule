@@ -126,7 +126,7 @@
         $feeRates = \App\Utils\TicketFees::rates();
         $calcTickets = \App\Utils\TicketFees::EXAMPLE_TICKETS;
         $calcPrice = \App\Utils\TicketFees::EXAMPLE_PRICE;
-        // Ticket Tailor is left out: its rate could not be re-checked (see TicketFees).
+        // Ticket Tailor is left out: its rate is a range that depends on prepaid credits (see TicketFees).
         $rivals = ['eventbrite', 'luma', 'ticketleap', 'universe', 'allevents', 'hi-events'];
         $rival = $rivals[0];
         $calcEs = \App\Utils\TicketFees::cost('eventschedule', $calcTickets, $calcPrice, $feeRates);

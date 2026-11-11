@@ -6,8 +6,8 @@
     {{-- Every rate on this page is App\Utils\TicketFees: the calculator's figures, the rate lines on
          the cards below and the worked example in the FAQ. The prose around them explains each fee
          MODEL (who pays by default, what is capped, what processing is on top), from the same
-         vendor pages TicketFees cites with the date each was checked. Ticket Tailor's band is the
-         one rate that was not re-checked on 2026-09-24; see its comment there.
+         vendor pages TicketFees cites with the date each was checked. Ticket Tailor's band was
+         re-checked on 2026-11-11 from its pricing script; see its comment there.
 
          Differentiation: /compare is the feature-by-feature hub with a four-platform calculator,
          /pricing explains what Event Schedule costs, each /x-alternative page is one head-to-head.
@@ -62,7 +62,7 @@
             [
                 'key' => 'ticket-tailor',
                 'rate' => $feeRates['ticket-tailor']['label'],
-                'how' => 'A flat fee on each paid ticket rather than a share of its price, with Stripe, PayPal or Square charging its own processing on top. This is the last US band we recorded, and it could not be re-checked against Ticket Tailor\'s current pricing, so confirm it on tickettailor.com. The calculator uses its middle.',
+                'how' => 'A flat fee on each paid ticket rather than a share of its price, with Stripe, PayPal or Square charging its own processing on top. It is $0.85 a ticket pay as you go and less with prepaid credits, so the calculator uses the middle of the range.',
                 'source' => null,
                 'route' => 'marketing.compare_ticket_tailor',
                 'link' => 'Ticket Tailor alternative',
@@ -135,7 +135,7 @@
             ],
             [
                 'q' => 'Where do these numbers come from?',
-                'a' => 'From each platform\'s own published pricing for the United States, read from its pricing page or help center, and each card above names its source. Ticket Tailor is the exception: its pricing page could not be re-checked, so its card shows the last band we recorded. Platforms change their prices, so confirm the figure on the platform\'s own page before you decide.',
+                'a' => 'From each platform\'s own published pricing for the United States, read from its pricing page or help center, and each card above names its source. Ticket Tailor charges a range, depending on whether you prepay, so its card uses the middle of it. Platforms change their prices, so confirm the figure on the platform\'s own page before you decide.',
             ],
         ];
     @endphp
