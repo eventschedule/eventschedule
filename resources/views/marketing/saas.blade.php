@@ -1100,6 +1100,55 @@
             #hp .sk-meter,
             #hp .sk-ring::before { transition: none !important; }
         }
+        /* ---- Buyer's guide and costs (after the four layers) ----
+           Built on the house kit and the page's own type (sk-h4, sk-p, sk-module-no); money stays
+           amber through sk-money. Cards inside the alt band take sk-tint, as the Billing cards do. */
+        #hp .sk-gd-three { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: clamp(2rem, 4vw, 3.25rem); }
+        @media (min-width: 900px) {
+            #hp .sk-gd-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        #hp .sk-gd-card { display: flex; flex-direction: column; padding: clamp(1.4rem, 2.2vw, 2rem); }
+        #hp .sk-gd-card .sk-p { font-size: 1rem; }
+        #hp .sk-gd-foot { margin-top: auto; padding-top: 1.1rem; }
+        #hp .sk-gd-foot p { padding-top: 1rem; border-top: 1px solid var(--hp-line-2); font-size: 0.95rem; line-height: 1.55; color: var(--hp-ink-2); }
+        #hp .sk-gd-six { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: clamp(2rem, 4vw, 3.25rem); }
+        @media (min-width: 720px) {
+            #hp .sk-gd-six { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (min-width: 1100px) {
+            #hp .sk-gd-six { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        #hp .sk-gd-ask { margin-top: 0.7rem; font-size: 1.02rem; line-height: 1.5; color: var(--hp-ink); font-variation-settings: 'wght' 650; }
+        #hp .sk-gd-here { margin-top: auto; padding-top: 1rem; }
+        #hp .sk-gd-here p { padding-top: 0.9rem; border-top: 1px solid var(--hp-line-2); font-size: 0.95rem; line-height: 1.6; color: var(--hp-ink-2); }
+        #hp .sk-gd-here b { display: block; margin-bottom: 0.3rem; font-family: var(--hp-mono); font-size: 0.7rem; font-variation-settings: normal; letter-spacing: 0.12em; text-transform: uppercase; color: var(--hp-blue); }
+        #hp .sk-gd-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: clamp(2rem, 4vw, 3.25rem); }
+        @media (min-width: 900px) {
+            #hp .sk-gd-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        #hp .sk-gd-lines { margin-top: 1.25rem; }
+        #hp .sk-gd-lines li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 0.25rem 1rem; padding-block: 0.75rem; border-top: 1px solid var(--hp-line); font-size: 0.97rem; line-height: 1.5; color: var(--hp-ink-2); }
+        #hp .sk-gd-lines li > b { font-family: var(--hp-mono); font-size: 0.88rem; font-variation-settings: normal; text-align: end; white-space: nowrap; }
+        #hp .sk-gd-lines li > b:not(.sk-money) { color: var(--hp-ink); }
+        #hp .sk-gd-figs { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: 1rem; }
+        @media (min-width: 768px) {
+            #hp .sk-gd-figs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        #hp .sk-gd-fig { padding: clamp(1.25rem, 2.6vw, 2rem); text-align: center; }
+        #hp .sk-gd-fig + .sk-gd-fig { border-top: 1px solid var(--hp-line); }
+        @media (min-width: 768px) {
+            #hp .sk-gd-fig + .sk-gd-fig { border-top: 0; border-inline-start: 1px solid var(--hp-line); }
+        }
+        #hp .sk-gd-fig > b { display: block; font-family: var(--hp-mono); font-size: clamp(1.9rem, 3vw, 2.6rem); font-variation-settings: normal; letter-spacing: -0.03em; line-height: 1.1; }
+        #hp .sk-gd-fig > span { display: block; margin-top: 0.6rem; font-size: 0.95rem; line-height: 1.5; color: var(--hp-ink-2); }
+        #hp .sk-gd-steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: clamp(2rem, 4vw, 3.25rem); counter-reset: sk-gd; }
+        @media (min-width: 900px) {
+            #hp .sk-gd-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        #hp .sk-gd-step { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem; padding: clamp(1.25rem, 2vw, 1.6rem); }
+        #hp .sk-gd-step > span { display: inline-flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem; border-radius: 0.75rem; background: rgba(78, 129, 250, 0.14); color: var(--hp-blue); font-family: var(--hp-mono); font-size: 0.95rem; font-variation-settings: normal; font-weight: 700; }
+        #hp .sk-gd-step .sk-p { margin-top: 0.4rem; font-size: 0.97rem; }
+        #hp .sk-gd-step code, #hp .sk-gd-here code, #hp .sk-gd-lines code { font-family: var(--hp-mono); font-size: 0.85em; overflow-wrap: anywhere; }
     </style>
 
     {{-- Two words for the stylesheet. sk-js: script is here, so the controls that need it may show.
@@ -1413,7 +1462,7 @@
                     <div data-reveal>
                         <span class="sk-module-no">Provisioning</span>
                         <h3 class="sk-h3">Per-customer subdomains</h3>
-                        <p class="sk-p">Every customer gets their own address the moment they sign up. Wildcard DNS in, tenant routing handled.</p>
+                        <p class="sk-p">Every customer gets their own address the moment they create a schedule. Wildcard DNS in, tenant routing handled.</p>
                     </div>
                     <div class="sk-stg sk-bigbar" data-reveal="panel" aria-hidden="true">
                         <div class="sk-win-bar"><span class="sk-dots"><i></i><i></i><i></i></span><span class="sk-url"><s>https://</s><span data-sk-tenant>acme</span>.<span data-sk="domain">yourdomain.com</span></span></div>
@@ -1429,7 +1478,7 @@
                 </div>
                 <div class="sk-scale" data-reveal>
                     <span class="sk-module-no" style="margin: 0;">Scale</span>
-                    <p class="sk-p" style="margin: 0;">Unlimited customers, unlimited schedules, and no operator tier to buy: every feature ships in the box.</p>
+                    <p class="sk-p" style="margin: 0;">Unlimited customers, up to 50 schedules on each account, and no operator tier to buy: every feature ships in the box.</p>
                 </div>
             </div>
 
@@ -1584,7 +1633,7 @@
                     <div>
                         <span class="sk-module-no">Trials</span>
                         <h3 class="sk-h4">Trials you control</h3>
-                        <p class="sk-p">One environment variable sets the trial length for your whole platform. Set it to 0 for no trial.</p>
+                        <p class="sk-p">One environment variable sets the trial length for your whole platform. Each account gets one trial, on whichever schedule it upgrades first.</p>
                         <code class="sk-env"><b>TRIAL_DAYS</b>=<em>14</em></code>
                     </div>
                     <div class="sk-ring" aria-hidden="true"><div><b>14</b><small>days</small></div></div>
@@ -1719,8 +1768,8 @@
                             Subscriptions are not the only meter
                         </h3>
                         <p class="sk-p">
-                            Three more rails ship in the box, all of them off until you switch them on, and none of them
-                            available to us on eventschedule.com because we do not run them.
+                            Three more rails ship in the box, all of them off until you switch them on. The first two run
+                            only on a platform like yours: eventschedule.com does not carry them.
                         </p>
                     </div>
                     <a href="{{ marketing_url('/docs/saas/monetization') }}" class="hp-more">
@@ -1738,7 +1787,7 @@
                         [
                             'Promotions between your tenants',
                             ['ADS_ENABLED', 'PROMOTIONS_ENGINE_ENABLED'],
-                            'A paying customer buys placement for one of their events on your free tier\'s pages, prepaid by CPM or CPC with unspent budget refunded. You approve each campaign before it serves, and any schedule can decline to carry them.',
+                            'A paying customer buys placement for one of their events on your free tier\'s pages, prepaid by CPM or CPC with unspent budget refunded. You review each campaign before it serves, until a schedule has the clean record you set, and any schedule can decline to carry them.',
                         ],
                         [
                             'Accommodation affiliate',
@@ -1974,6 +2023,203 @@
     </section>
     </div>
     <!-- ============================================================ -->
+    <!-- Buyer's guide: what white label means and what to check      -->
+    <!-- ============================================================ -->
+    @php
+        // Every "here" line is checked against docs/saas/setup, docs/saas/custom-domains,
+        // docs/account-settings#backup and docs/FEATURES.md; the eventschedule.com path against
+        // Role::creditChipReason() (Pro on the nexus carries no credit; any other install always does).
+        $gdKinds = [
+            [
+                'Your brand on a hosted service',
+                'You sell tickets to your own events. The pages, the checkout and the emails carry your name, and somebody else runs the software.',
+                'On eventschedule.com that is a schedule on Pro, at '.plan_price($proMonthly).' a month, which takes our branding off its pages, with Enterprise at '.plan_price($entMonthly).' for your own domain. Ticket money goes to your own Stripe or PayPal.',
+                'Pick it when the tickets you sell are your own.',
+            ],
+            [
+                'A reseller program',
+                'You sell somebody else\'s platform to organizers, under your name. You can start in days, and you never hold the code or the price list.',
+                'The provider\'s terms decide the fees on each ticket, what you may change and whether you can leave with your customers. Read the exit clause before the logo upload.',
+                'Pick it when you never want to run a server.',
+            ],
+            [
+                'Your own platform',
+                'You run the software and other organizers sign up to you. Their pages are on your domain, their subscriptions pay you, their ticket money goes to their own accounts.',
+                'That is Event Schedule in SaaS mode: free under the AAL, the whole codebase, every feature, and one small credit on public pages that no plan removes.',
+                'Pick it when the ticketing product is the business.',
+            ],
+        ];
+
+        $gdChecks = [
+            [
+                'Payment ownership',
+                'Whose account does the ticket money land in, and who can hold it back?',
+                'Each organizer connects their own: cards through your platform\'s Stripe Connect, or their own PayPal, Payfast, Razorpay or Invoice Ninja account. In SaaS mode there is no platform-wide PayPal, Payfast or Razorpay account, so ticket money never passes through you.',
+            ],
+            [
+                'Fees',
+                'Is there a fee on each ticket on top of card processing, and who can raise it?',
+                'Nothing in the checkout takes a cut, and there is no setting that adds one. Your income is the plans you sell, plus the optional ads, promotions and accommodation rails.',
+            ],
+            [
+                'Data export',
+                'Can each organizer take their data with them, and can you take all of it?',
+                'All of it is in your own MySQL database. An organizer exports a schedule as a .zip from Settings, Data (on a hosted platform it leaves out subscriber and newsletter addresses), exports sales to CSV on Pro, or reads events and sales over the API, also Pro.',
+            ],
+            [
+                'Custom domains',
+                'Can each customer use their own domain, without you issuing certificates by hand?',
+                'Every customer gets a subdomain under your wildcard DNS. On Enterprise, Redirect mode needs only the customer\'s Cloudflare; Direct mode issues certificates through DigitalOcean App Platform, so it needs your platform deployed there.',
+            ],
+            [
+                'Email sending',
+                'Whose address does the mail come from, and whose reputation does it spend?',
+                'Your mail transport sends invitations, ticket confirmations and receipts. Sale notifications, appointment and gift card emails and change notices to buyers go only through an organizer\'s own Email Settings, so put that in your onboarding.',
+            ],
+            [
+                'Support load',
+                'Who answers an organizer the night before their show, and with what?',
+                'You do. A support chat with its own inbox is built in, SUPPORT_EMAIL is on every admin page, and the Help button opens /docs on your APP_MARKETING_URL, so your site must answer those paths or redirect them.',
+            ],
+        ];
+    @endphp
+    <section id="guide" class="hp-sec hp-alt">
+        <div class="hp-wrap">
+            <div class="hp-head is-center">
+                <p class="hp-kicker" data-reveal>Buyer's Guide</p>
+                <h2 class="hp-h2" data-reveal>White-label ticketing, <span class="hp-ink-grad">before you choose</span></h2>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.1s;">"White label" is sold as three different things. Know which one you are buying, then put the same six questions to every option, this one included.</p>
+            </div>
+
+            <div class="sk-gd-three" data-reveal-group="90">
+                @foreach ($gdKinds as [$gdTitle, $gdWhat, $gdHow, $gdPick])
+                    <div class="hp-card sk-tint sk-gd-card" data-reveal="panel">
+                        <span class="sk-module-no">Meaning {{ $loop->iteration }}</span>
+                        <h3 class="sk-h4">{{ $gdTitle }}</h3>
+                        <p class="sk-p">{{ $gdWhat }}</p>
+                        <p class="sk-p">{{ $gdHow }}</p>
+                        <div class="sk-gd-foot"><p>{{ $gdPick }}</p></div>
+                    </div>
+                @endforeach
+            </div>
+            <p class="sk-small" style="margin-top: 1.25rem; text-align: center;" data-reveal>For your own events, <a href="{{ route('marketing.white_label') }}" class="hp-inline">white-label branding on eventschedule.com</a> is the short road. The rest of this page is the third meaning.</p>
+
+            <div class="hp-head is-center" style="margin-top: clamp(4rem, 8vw, 6.5rem);">
+                <p class="hp-kicker" data-reveal>What to Check</p>
+                <h3 class="hp-h2" data-reveal>Six questions <span class="hp-ink-grad">to ask any vendor</span></h3>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.1s;">The demo shows the screens. These decide what running the business is like a year in. Under each is how Event Schedule answers it.</p>
+            </div>
+
+            <div class="sk-gd-six" data-reveal-group="80">
+                @foreach ($gdChecks as [$gdName, $gdAsk, $gdHere])
+                    <div class="hp-card sk-tint sk-gd-card" data-reveal="panel">
+                        <span class="sk-module-no">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }} &middot; {{ $gdName }}</span>
+                        <p class="sk-gd-ask">{{ $gdAsk }}</p>
+                        <div class="sk-gd-here"><p><b>Here</b>{{ $gdHere }}</p></div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Costs to expect, and the launch checklist                    -->
+    <!-- ============================================================ -->
+    @php
+        // Stripe's card rate and the example event come from App\Utils\TicketFees, the one place
+        // every fee calculator on the site reads, so these figures match /ticket-fee-calculator.
+        $gdRates = \App\Utils\TicketFees::rates();
+        $gdTickets = \App\Utils\TicketFees::EXAMPLE_TICKETS;
+        $gdPrice = \App\Utils\TicketFees::EXAMPLE_PRICE;
+        $gdUsd = fn (float $amount) => '$'.number_format($amount, 0);
+        // Stripe charges per payment; the calculators assume one ticket per order, so say per charge here.
+        $gdStripeRate = str_replace('per ticket', 'per charge', $gdRates['stripe']['label']);
+        $gdStripeFee = \App\Utils\TicketFees::costOf(['name' => 'Event Schedule'], $gdRates['stripe'], $gdTickets, $gdPrice);
+        $gdEventbrite = \App\Utils\TicketFees::cost('eventbrite', $gdTickets, $gdPrice);
+
+        $gdSteps = [
+            ['Switch on SaaS mode', 'Set <code>IS_HOSTED=true</code>, <code>APP_URL</code> on an app subdomain and <code>APP_MARKETING_URL</code> on your own site, then a wildcard DNS record and a wildcard certificate. Your root domain sends visitors to sign in, so your landing page lives on your own site.'],
+            ['Make it yours', 'Your two logos, <code>SUPPORT_EMAIL</code>, and your own privacy policy, terms and cookie policy at /admin/legal: until you publish them, those links go to /privacy and /terms-of-service on your marketing site (ours, while APP_MARKETING_URL is left on its default). Rename words for your market in the translation manager.'],
+            ['Wire up billing', 'Stripe platform keys, the Price IDs for Pro and Enterprise, and the subscription webhook with its signing secret set, never blank. Set the prices you show, and the currency, at /admin/settings so they match what Stripe charges.'],
+            ['Choose the trial', '<code>TRIAL_DAYS</code> is the one trial each account gets when it first subscribes. The default is 7, and the shipped .env.example says 365, so set it on purpose.'],
+            ['Test like a customer', 'Create a schedule and verify its email: until then its page is not found by anyone signed out. Subscribe with Stripe\'s test card, then cancel in Stripe and watch the Plan tab follow, which proves the webhook.'],
+            ['Open the doors', 'demo.yourdomain.com is built for you and reset every hour, so prospects can try the admin before signing up. Then switch on what earns or brings traffic: federation, ads and promotions on your free tier, the accommodation map.'],
+        ];
+    @endphp
+    <section id="costs" class="hp-sec">
+        <div class="hp-wrap">
+            <div class="hp-head is-center">
+                <p class="hp-kicker" data-reveal>What It Costs</p>
+                <h2 class="hp-h2" data-reveal>Costs to expect, <span class="hp-ink-grad">line by line</span></h2>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.1s;">Whichever road you take, card processing is the one cost nobody removes. What changes is who else takes a share, and who pays for the servers.</p>
+            </div>
+
+            <div class="sk-gd-two" data-reveal-group="90">
+                <div class="hp-card sk-gd-card" data-reveal="panel">
+                    <span class="sk-module-no">Your own events, on eventschedule.com</span>
+                    <h3 class="sk-h4">Nothing to run</h3>
+                    <ul class="sk-gd-lines">
+                        <li><span>Pro: paid tickets, our branding off</span><b class="sk-money">{{ plan_price($proMonthly) }} / mo</b></li>
+                        <li><span>Enterprise: your own domain, a team</span><b class="sk-money">{{ plan_price($entMonthly) }} / mo</b></li>
+                        <li><span>Platform fee on each ticket</span><b class="sk-money">{{ plan_price(0) }}</b></li>
+                        <li><span>Card processing, to Stripe</span><b>{{ $gdStripeRate }}</b></li>
+                        <li><span>Servers, updates, support desk</span><b>ours</b></li>
+                    </ul>
+                </div>
+                <div class="hp-card sk-gd-card" data-reveal="panel">
+                    <span class="sk-module-no">Your own platform, selfhosted</span>
+                    <h3 class="sk-h4">Everything to run</h3>
+                    <ul class="sk-gd-lines">
+                        <li><span>License, revenue share, operator tier</span><b>none</b></li>
+                        <li><span>A server with PHP 8.2 and MySQL, a domain, a wildcard certificate, a mail transport</span><b>yours</b></li>
+                        <li><span>Stripe's fee on each plan payment you collect</span><b>Stripe's rate</b></li>
+                        <li><span>Optional: DigitalOcean App Platform for direct custom domains, a Google Wallet issuer account, an Apple Developer Program membership</span><b>as needed</b></li>
+                        <li><span>Your customers' tickets: their own processor's fee, nothing to you or to us</span><b>{{ $gdStripeRate }}</b></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="hp-card sk-gd-card" style="margin-top: 1rem;" data-reveal="panel">
+                <span class="sk-module-no">One event, {{ number_format($gdTickets) }} tickets at {{ $gdUsd($gdPrice) }}, at published US rates</span>
+                <div class="sk-gd-figs">
+                    <div class="sk-gd-fig"><b class="sk-money">{{ $gdUsd($gdStripeFee) }}</b><span>Stripe's fee on the event, on either road above. Nothing else comes off the tickets.</span></div>
+                    <div class="sk-gd-fig"><b class="sk-money">{{ plan_price($proMonthly) }}</b><span>The month of Pro that a priced ticket needs on eventschedule.com. On your platform, your own price list decides.</span></div>
+                    <div class="sk-gd-fig"><b class="sk-money">{{ $gdUsd($gdEventbrite) }}</b><span>Eventbrite's published fees on the same event, including its processing, for scale.</span></div>
+                </div>
+                <p class="sk-small" style="margin-top: 0.5rem;">Worked as in the <a href="{{ marketing_url('/ticket-fee-calculator') }}" class="hp-inline">ticket fee calculator</a>: fees absorbed, one ticket per order. Stripe's rate varies by country and card.</p>
+            </div>
+
+            <div class="hp-head is-center" style="margin-top: clamp(4rem, 8vw, 6.5rem);">
+                <p class="hp-kicker" data-reveal>Before You Open Sign-ups</p>
+                <h3 class="hp-h2" data-reveal>A launch checklist <span class="hp-ink-grad">for your own platform</span></h3>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.1s;">The three steps above get you running. These six are what the <a href="{{ route('marketing.docs.saas.setup') }}#go-live-checklist" class="hp-inline">setup guide</a> asks of a platform before strangers pay it.</p>
+            </div>
+
+            <ol class="sk-gd-steps" data-reveal-group="70">
+                @foreach ($gdSteps as [$gdStepTitle, $gdStepBody])
+                    <li class="hp-card sk-gd-step" data-reveal="panel">
+                        <span aria-hidden="true">{{ $loop->iteration }}</span>
+                        <div>
+                            <h4 class="sk-h4" style="font-size: 1.15rem;">{{ $gdStepTitle }}</h4>
+                            <p class="sk-p">{!! $gdStepBody !!}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="sk-docs" data-reveal>
+                <span class="sk-module-no" style="margin: 0 0.4rem 0 0;">Read next</span>
+                @foreach ([['Monetization', route('marketing.docs.saas.monetization')], ['Federation', route('marketing.docs.saas.federation')], ['Admin panel', route('marketing.docs.selfhost.admin')]] as $doc)
+                    <a href="{{ $doc[1] }}">
+                        {{ $doc[0] }}
+                        {!! $skArrow !!}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- FAQ                                                          -->
     <!-- ============================================================ -->
     @php
@@ -1996,7 +2242,7 @@
             ],
             [
                 'q' => 'Is there a limit on customers or ticket sales?',
-                'a' => 'There is no cap on the number of customers or schedules, and nobody takes a cut of a ticket sale. The built-in Free tier does have allowances your customers upgrade past: 10 newsletter emails a month (each recipient counts as one) and 25 fan photos. Selling a ticket that carries a price belongs to Pro and Enterprise, which is the upgrade most of your customers will buy, while free RSVPs and registration stay unlimited on every tier.',
+                'a' => 'There is no cap on the number of customers, each account can own up to 50 schedules, and nobody takes a cut of a ticket sale. The built-in Free tier does have allowances your customers upgrade past: 10 newsletter emails a month (each recipient counts as one) and 25 fan photos. Selling a ticket that carries a price belongs to Pro and Enterprise, which is the upgrade most of your customers will buy, while free RSVPs and registration stay unlimited on every tier.',
             ],
             [
                 'q' => 'How do my customers get paid for their tickets?',
@@ -2009,7 +2255,7 @@
             ],
             [
                 'q' => 'What do I need to host it?',
-                'a' => 'A server you control (a small VPS is enough to start), a domain with wildcard DNS for customer subdomains, and a Stripe account for billing. Install with Docker or the one-click Softaculous installer. The setup guide covers everything from environment variables to going live. One optional extra is worth knowing about: add Google Wallet issuer credentials once, and every customer\'s buyers get an Add to Google Wallet button with their tickets.',
+                'a' => 'A server you control with PHP 8.2 or newer and MySQL 5.7+ or MariaDB 10.3+, a domain with wildcard DNS and a wildcard certificate for customer subdomains, a working mail transport, and a Stripe account for billing. Install with Docker or the one-click Softaculous installer. The setup guide covers everything from environment variables to going live. One optional extra is worth knowing about: add Google Wallet issuer credentials once, and every customer\'s buyers get an Add to Google Wallet button with their tickets. An Apple Developer Program membership does the same for Apple Wallet.',
                 'more' => ['label' => 'Set up Google Wallet passes', 'href' => 'marketing.docs.selfhost.google_wallet'],
             ],
             [
@@ -2018,7 +2264,7 @@
             ],
             [
                 'q' => 'Can my customers use their own domain?',
-                'a' => 'Yes. Every customer gets a subdomain like acme.yourdomain.com out of the box, and a schedule on your Enterprise tier can additionally be served from the customer\'s own domain. The custom domains guide covers the DNS and proxy setup.',
+                'a' => 'Yes. Every customer gets a subdomain like acme.yourdomain.com out of the box, and a schedule on your Enterprise tier can add the customer\'s own domain. In Redirect mode the customer sends their domain to the schedule through Cloudflare, with nothing to set up on your side. In Direct mode the page is served on their domain itself, with certificates issued through DigitalOcean App Platform, so Direct needs your platform deployed there. The custom domains guide covers both.',
                 'more' => ['label' => 'Read the custom domains guide', 'href' => 'marketing.docs.saas.custom_domains'],
             ],
             [
@@ -2029,6 +2275,19 @@
                 'q' => 'What can I do from the admin panel?',
                 'a' => 'Run the platform. See users, revenue, analytics and usage across every customer, grant any schedule a plan by hand, approve paid promotions before they serve, and manage your customers\' custom domains. You can also edit any schedule\'s name, subdomain and contact details, release a subdomain someone is sitting on, and restore that schedule later. Each of those schedule changes is written to the audit log.',
                 'more' => ['label' => 'Read the admin panel guide', 'href' => 'marketing.docs.selfhost.admin'],
+            ],
+            [
+                'q' => 'How much does a white-label ticketing platform cost?',
+                'a' => 'Running your own on Event Schedule costs no license fee and no share of anything: your costs are a server, a domain with a wildcard certificate, a mail transport, and Stripe\'s fee on each plan payment you collect. Your customers pay their own processor\'s fee on their tickets ('.str_replace('per ticket', 'per charge', \App\Utils\TicketFees::rates()['stripe']['label']).' with Stripe in the US) and whatever you charge for your plans. If you only need white-label ticketing for your own events, eventschedule.com does it with nothing to run: Pro at '.plan_price($proMonthly).' a month takes our branding off and sells priced tickets, and Enterprise at '.plan_price($entMonthly).' adds your own domain.',
+            ],
+            [
+                'q' => 'Can I white-label ticketing without running a server?',
+                'a' => 'Yes, for your own events. A schedule on eventschedule.com\'s Pro plan carries none of our branding on its pages, Enterprise serves it on your own domain, and its Email Settings send its mail from your address. What you cannot do on eventschedule.com is sell the platform to other organizers under your name: that takes your own install, which costs no license fee.',
+                'more' => ['label' => 'White-label branding', 'href' => 'marketing.white_label'],
+            ],
+            [
+                'q' => 'Can I take a fee on every ticket my customers sell?',
+                'a' => 'No. Ticket money settles in each organizer\'s own Stripe, PayPal, Payfast, Razorpay or Invoice Ninja account, and nothing in the checkout takes a cut, yours included. A platform built on Event Schedule earns from the plans it sells and, if you switch them on, ads and paid promotions on your free tier and an accommodation affiliate. That is a selling point, so say it on your pricing page.',
             ],
         ];
     @endphp

@@ -940,9 +940,69 @@
                 'a' => 'Encoded strings, never sequential integers. An event, a ticket, a sale and a sub-schedule all identify themselves with a short opaque string, and an event\'s is the same string that appears in its public URL, so you can build a link straight from a response. Category IDs are the exception: they are small integers you read from the categories endpoint.',
             ],
             [
+                'q' => 'Can I give an AI agent read-only or limited access?',
+                'a' => 'Not through the key itself. There is one key per account and it carries that account\'s owner and admin rights over every schedule it owns or administers, buyer email addresses included; there are no read-only or per-schedule keys. Scope the account instead: give the agent an account of its own and make it an admin of only the schedules it should reach. On eventschedule.com a team belongs to the Enterprise plan, and a team admin\'s key reaches a schedule only while that schedule is on Enterprise. Then keep refunds, cancellations and deletes behind a confirmation step in your own code.',
+            ],
+            [
+                'q' => 'How do I stop an agent from publishing an event by mistake?',
+                'a' => 'Create events with is_draft set to true and publish with a PUT after a person has looked. A draft is on no public page and sends no webhook. Set the schedule\'s default for new events to Draft as well: when a create request says nothing about visibility, the API applies that default, so an agent that forgets the flag still cannot publish.',
+            ],
+            [
+                'q' => 'Is there an MCP server for Event Schedule?',
+                'a' => 'No. The API is plain REST with an OpenAPI 3.0 spec at /api/openapi.json, so an agent framework that reads OpenAPI can turn it into tool definitions directly, and a generic server that wraps an OpenAPI spec can expose it over MCP. Give the model llms.txt to decide whether the API fits, llms-full.txt for the reference, and agents.json for the multi-step flows.',
+            ],
+            [
                 'q' => 'Can I run this against my own installation?',
                 'a' => 'Yes. Event Schedule is open source and the API is the same in both modes: same routes, same spec, same discovery files served from your own domain. On a selfhosted install the Pro gate returns true unconditionally, so nothing is held back.',
             ],
+        ];
+
+        // Recipes: each call sequence is routes/api.php, with the parameters docs/developer/api names
+        // (external_id + upsert, event_create_limit, Idempotency-Key, notify_attendees + message,
+        // idempotency_key on a refund). Guardrails: ApiAuthentication (one key per account, 429 with
+        // Retry-After, 423 after ten bad keys), ApiSettingsController (a year, off and on to rotate),
+        // ApiEventController (is_draft, and the schedule's default visibility when none is sent).
+        $axRecipes = [
+            [
+                'A flyer or an email, to a draft event',
+                'Your own model reads the flyer or the message; the API never has to. Look up the schedule\'s categories so the id you send exists, create the event as a draft with the flyer\'s address, and tell the owner it is waiting. Publishing is one more call, after they say yes.',
+                "GET  /api/categories/{subdomain}\nPOST /api/events/{subdomain}  is_draft: true, flyer_image_url\nPUT  /api/events/{id}         is_draft: false",
+            ],
+            [
+                'Keep another system\'s list in step',
+                'A spreadsheet, a CMS, a club database. Send each row with its own external_id and upsert: true: the first run creates the event, every later run updates it, and nothing is doubled. Send ticket lists only when they changed, with each existing row\'s id. On eventschedule.com new events are capped per schedule per day; updates are not counted, and a refusal says event_create_limit so the job can stop and resume tomorrow.',
+                "POST /api/events/{subdomain}  external_id, upsert: true\nGET  /api/events?external_id=...\n422  code: event_create_limit",
+            ],
+            [
+                'Answer "how is Friday selling?"',
+                'Find the event by its date, then read its paid sales (for a recurring event, find it once and pass event_date to /api/sales). Free registrations come back as paid sales worth zero, so count quantities for a head count. In an order for several named guests the money sits on the primary row and each named guest\'s row reads zero, so a plain sum of payment_amount is right.',
+                "GET /api/events?subdomain=...&starts_after=...&starts_before=...\nGET /api/sales?event_id={id}&status=paid",
+            ],
+            [
+                'Book a lesson during a phone call',
+                'List the bookable types, read out the open times (each slot carries a sentence in the schedule\'s own timezone), and book the one the caller picks with an Idempotency-Key. A time somebody took a moment earlier answers 409 with the three nearest, so the agent can offer those instead of starting over.',
+                "GET  /api/schedules/{subdomain}/appointment-types\nGET  /api/appointment-types/{id}/slots\nPOST /api/appointment-types/{id}/bookings",
+            ],
+            [
+                'Hear about a sale, then file it',
+                'Subscribe a webhook to sale.paid and sale.refunded. Check the signature, answer 2xx within five seconds, and only then let the agent write the row to your CRM. Once a night, compare with the sales list, so a delivery that never arrived is filed anyway.',
+                "POST {your endpoint}  X-Webhook-Event: sale.paid\nverify X-Webhook-Signature, reply 200, queue the work\nGET  /api/sales?subdomain=...&status=paid",
+            ],
+            [
+                'Call off a night, after a person says yes',
+                'Cancelling keeps every sale, takes the event off the public calendar and out of connected calendars, and can email the people who bought, registered or asked to be told, with a note of up to 280 characters (on eventschedule.com, buyers only when the schedule sends from its own address). Refunds are separate: one PUT per sale, each with its own idempotency_key, so a retried call never pays twice.',
+                "POST /api/events/{id}/cancel  notify_attendees: true, message\nGET  /api/sales?event_id={id}&status=paid\nPUT  /api/sales/{id}  action: refund, idempotency_key",
+            ],
+        ];
+
+        $axGuards = [
+            ['one key', 'A key is the whole account', 'There are no read-only or per-schedule keys. A key carries its account\'s owner and admin rights over every schedule it owns or administers, buyer email addresses included. Give the agent an account of its own and make it an admin of only the schedules it should reach. On eventschedule.com a team belongs to Enterprise, and a team admin\'s key works on a schedule only while that schedule is on Enterprise.'],
+            ['is_draft', 'Draft first', 'A draft is on no public page and sends no webhook. Set the schedule\'s default for new events to Draft too: when a create request says nothing about visibility, the API applies the default, so an agent that forgets the flag still cannot publish.'],
+            ['confirm', 'A person says yes to what cannot be undone', 'A refund moves real money. Cancelling with notify_attendees sends email. A delete has no undo, which is why it is refused on an event with sales. Hand the model the read calls freely, and put these three behind a confirmation step in your own code rather than in the prompt.'],
+            ['idempotency_key', 'Retries that cannot double up', 'Replies get lost. A refund with your idempotency_key returns the first outcome when retried, a booking takes an Idempotency-Key, and a second create with the same external_id answers 409 with the first event\'s id. A 409 on a refund means its outcome is not confirmed yet: read the sale before trying again.'],
+            ['Retry-After', 'Back off by the header', '300 reads and 30 writes a minute per account, with a separate limit of 30 a minute on creating events. A 429 carries Retry-After in seconds. Wait that long; a loop that retries at once only spends the next window.'],
+            ['untrusted', 'Text from strangers is data', 'Event descriptions, fan comments and feedback are written by people you do not know, and a model that reads them can be told to do things. Keep what the API returns out of the instructions, and never let a field\'s contents decide which call runs next.'],
+            ['rotate', 'Keep the key where nobody reads it', 'On your server, never in a browser, an app bundle or a repository. It expires a year after it is issued. Rotate it by switching Enable API Access off and on again under Settings, Developers. Ten requests in a row with the same invalid key are refused with a 423 for 15 minutes, so your own key is never locked by somebody guessing.'],
         ];
 
         $dotSections = [
@@ -953,6 +1013,8 @@
             ['calls', 'Three exchanges'],
             ['push', 'Push, not poll'],
             ['rest', 'Everything else'],
+            ['tasks', 'Agent recipes'],
+            ['guard', 'Guardrails'],
             ['who', 'What gets built'],
             ['start', 'Three steps'],
             ['faq', 'Questions'],
@@ -970,7 +1032,7 @@
         // The manual's name for each section, beside the label the section nav already had.
         $axNames = [
             'top' => 'NAME', 'contract' => 'CONVENTIONS', 'ledger' => 'ENDPOINTS', 'discovery' => 'FILES',
-            'calls' => 'EXAMPLES', 'push' => 'SIGNALS', 'rest' => 'NOTES', 'who' => 'CALLERS',
+            'calls' => 'EXAMPLES', 'push' => 'SIGNALS', 'rest' => 'NOTES', 'tasks' => 'RECIPES', 'guard' => 'SAFETY', 'who' => 'CALLERS',
             'start' => 'QUICK START', 'faq' => 'QUESTIONS', 'claim' => 'RUN',
         ];
 
@@ -1650,6 +1712,77 @@ HTML,
                             </div>
                         </article>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- RECIPES: six agent tasks, call by call                       -->
+        <!-- ============================================================ -->
+        <section id="tasks" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">RECIPES</span>
+                    <span class="ax-ref"><a href="#tasks">#tasks</a></span>
+                </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        Six jobs an agent can do, <span class="ax-em">call by call.</span>
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        Wiring it in takes three files. Give the model <span class="ax-k">llms.txt</span> to decide whether this API fits the task, turn <span class="ax-k">/api/openapi.json</span> into tool definitions, and keep <span class="ax-k">llms-full.txt</span> in reach for the details. What remains is choosing which calls the agent may make on its own. These six are worth building first, with the calls in order. Each needs the schedule on Pro on eventschedule.com.
+                    </p>
+
+                    <div class="ax-notes ax-gap" data-reveal-group="70">
+                        @foreach ($axRecipes as [$axTaskTitle, $axTaskText, $axTaskCalls])
+                            <article class="ax-note" data-reveal>
+                                <div class="ax-note-tags">
+                                    <span class="ax-tag">recipe {{ $loop->iteration }}</span>
+                                    <span class="ax-tag ax-tag-pro">pro</span>
+                                </div>
+                                <h3>{{ $axTaskTitle }}</h3>
+                                <p>{{ $axTaskText }}</p>
+                                <div class="ax-box">
+<pre class="ax-code" dir="ltr" data-clip-ok>{{ $axTaskCalls }}</pre>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- SAFETY: guardrails for an agent with a key                   -->
+        <!-- ============================================================ -->
+        <section id="guard" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">SAFETY</span>
+                    <span class="ax-ref"><a href="#guard">#guard</a></span>
+                </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        An agent with a key can sell, refund and email. <span class="ax-em">Decide what it may do alone.</span>
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        The API trusts the key, so the limits belong in how you set the agent up. Seven rules that hold whichever model or framework you use.
+                    </p>
+
+                    <dl class="ax-facts ax-gap" data-reveal-group="70">
+                        @foreach ($axGuards as [$axGuardKey, $axGuardTitle, $axGuardText])
+                            <div class="ax-fact" data-reveal>
+                                <dt>{{ $axGuardKey }}</dt>
+                                <dd>
+                                    <strong>{{ $axGuardTitle }}</strong>
+                                    <p>{{ $axGuardText }}</p>
+                                </dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                    <p class="ax-prose ax-gap-1" data-reveal>
+                        The <a href="{{ route('marketing.docs.developer.api') }}#authentication" class="ax-link">authentication</a> and <a href="{{ route('marketing.docs.developer.api') }}#error-handling" class="ax-link">error handling</a> sections of the API reference, and the <a href="{{ route('marketing.docs.developer.webhooks') }}#best-practices" class="ax-link">webhook best practices</a>, have the rest.
+                    </p>
                 </div>
             </div>
         </section>
