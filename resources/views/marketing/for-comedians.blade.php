@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Comedians | Mics, Sets & Tickets</x-slot>
-    <x-slot name="description">One link for every mic, guest set, and headline. Sell tickets with zero fees, email fans directly, and let clubs book you onto your schedule. Free forever.</x-slot>
+    <x-slot name="description">Every open mic, guest spot and headline on one public list, with clubs tagging you onto lineups. Free to list; your own tickets sell on Pro with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Comedians</x-slot>
 
     <x-slot name="headMeta">
@@ -14,7 +14,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Comedians"
-        description="One link for every mic, guest set, and headline. Sell tickets with zero fees, email fans directly, and let clubs book you onto your schedule. Free forever."
+        description="Every open mic, guest spot and headline on one public list, with clubs tagging you onto lineups. Free to list; your own tickets sell on Pro with zero platform fees."
         audience="Comedians"
         keywords="comedian schedule, comedy show calendar, stand-up comedy booking, comedy event management, free comedian scheduling, open mic tracker, comedy tour schedule, comedian link in bio" />
     <!-- HowTo Schema for Rich Snippets -->
@@ -1038,6 +1038,12 @@
         }
         @keyframes co-leave { to { opacity: 0; visibility: hidden; } }
 
+        /* The whole week, the door and getting tagged: links written into a sheet stay inline
+           with the words around them, as a pen would leave them. */
+        #co .co-x a { display: inline; }
+        .co-napkin-obj b { font-weight: 700; color: var(--co-ink); }
+        .co-napkin-obj p { color: var(--co-ink-2); }
+
         @media (prefers-reduced-motion: reduce) {
             .co-gaff, .co-napkin, .co-type, .co-label, .co-note, .co-setlist a { transition: none; }
         }
@@ -1146,8 +1152,8 @@
                             <p>clubs where you're trying to get regular</p>
                         </div>
                         <div class="co-stat">
-                            <div class="co-sharpie co-stat-n"><span class="co-circled" style="--co-red: #7d130c;">~3%</span></div>
-                            <p>of your followers actually see your show posts</p>
+                            <div class="co-sharpie co-stat-n"><span class="co-circled" style="--co-red: #7d130c;">Few</span></div>
+                            <p>of your followers see any one show post</p>
                         </div>
                     </div>
 
@@ -1250,7 +1256,7 @@
                             <p class="co-pen co-setup">Ticket platforms take a cut of every seat you fill.</p>
                             <p class="co-pen co-beat" aria-hidden="true">(beat)</p>
                             <h3 class="co-sharpie">We take <span class="co-circled">{{ plan_price(0) }}.</span> That's the whole bit.</h3>
-                            <p>Producing your own show? Sell tickets directly. Money goes straight to your own Stripe or <a href="{{ marketing_url('/paypal') }}">PayPal</a> account, or you take cash at the door - we don't take a cut. Your hustle, your earnings.</p>
+                            <p>Producing your own show? On Pro, sell tickets directly. Money goes straight to your own Stripe or <a href="{{ marketing_url('/paypal') }}">PayPal</a> account, or you take cash at the door - we don't take a cut. Your hustle, your earnings.</p>
                             <p>General admission, VIP, early bird - every ticket gets a QR code for the door. Pro adds promo codes for your regulars and waitlists for the sellouts.</p>
                         </div>
                         <div class="co-bit-obj" aria-hidden="true">
@@ -1334,8 +1340,8 @@
                             <p class="co-pen co-setup">You are not famous yet. Your show page does not know that.</p>
                             <p class="co-pen co-beat" aria-hidden="true">(beat)</p>
                             <h3 class="co-sharpie">Look like the headliner <span class="co-hl">before you are one.</span></h3>
-                            <p>Download Instagram-ready flyers for any set in one click. Stop begging your friend who 'knows Canva.'</p>
-                            <p>And when the show is worth announcing, email it. You posted about your last one and 3% of your followers saw it. Email reaches everyone who signed up. No algorithm deciding who deserves to see it.</p>
+                            <p>Open Events graphic and your next sets become one Instagram-ready image with a caption, free on every plan (only sets with a flyer are drawn). Stop begging your friend who 'knows Canva.'</p>
+                            <p>And when the show is worth announcing, email it. You posted about your last one and only a slice of your followers saw it. Fans who signed up get your new dates in an automatic digest on every plan, and a newsletter of your own goes on top. No algorithm deciding who deserves to see it.</p>
                         </div>
                         <div class="co-bit-obj" aria-hidden="true">
                             <div class="co-post co-tilt-l">
@@ -1406,6 +1412,128 @@
                             <p class="co-quote">"The Tuesday callback destroyed. See you next week."</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5b. The whole week: every kind of spot, on index cards       -->
+        <!-- ============================================================ -->
+        <section id="every-spot" class="co-part" style="scroll-margin-top: 4rem;">
+            <div class="co-wrap">
+                <div class="co-head">
+                    <span class="co-pen co-kick" data-reveal>the whole week</span>
+                    <h2 class="co-sharpie co-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Every spot on one list. <span class="co-redink">Even the 11:40 one.</span>
+                    </h2>
+                    <p class="co-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A working comic plays six kinds of spot, and they do not all belong in front of fans. Here is where each one goes, and what it needs to say.
+                    </p>
+                </div>
+
+                @php
+                    $coSpots = [
+                        ['Open mics', 'Keep sign-up mics as Drafts, seen only by you and your team: you know where you are tonight, and nobody is sent to a list that may never reach you. Publish one once you have a booked spot worth a friend\'s trip. A weekly mic is one recurring event.', '-1.2deg'],
+                        ['Bringer shows', 'A bringer books you for the people you bring, so this one goes public and loud: the time you go up, the door deal, and an event link of its own to text to every friend you are dragging along.', '0.8deg'],
+                        ['Guest spots', 'When the producer runs the show on Event Schedule and names you on the lineup, it reaches your Requests tab. Accept, and it is on your list with their time, room and ticket link. Otherwise add it yourself and paste their link.', '-0.6deg'],
+                        ['Club weekends', 'The club sells the seats and hopes you will help. List each show you are on, with the club\'s ticket link and price under Tickets elsewhere, and say whether you are hosting, featuring or headlining.', '1.1deg'],
+                        ['Your own show', 'The room you produce. Priced tickets sell here on Pro. A free show can take registrations instead, with a limit for the room, at no cost on any plan. Either way, put every comic on the Participants tab so each name on the poster links to its own page.', '-1deg'],
+                        ['Tour dates', 'One event per city, each at its own address, so the post in Denver links to the Denver show and nobody there scrolls past Austin. Fans who signed up hear about a new run of dates in one digest.', '0.7deg'],
+                    ];
+                @endphp
+                <div class="co-cards" data-reveal-group="80">
+                    @foreach ($coSpots as [$coSpotName, $coSpotCopy, $coSpotTilt])
+                        <article class="co-card co-type" style="--a: {{ $coSpotTilt }};" data-reveal>
+                            <h3>{{ $coSpotName }}</h3>
+                            <p>{{ $coSpotCopy }}</p>
+                        </article>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5c. The door: ticket link, your own tickets, or free         -->
+        <!-- ============================================================ -->
+        <section id="way-in" class="co-part" style="scroll-margin-top: 4rem; padding-top: 1rem;">
+            <div class="co-wrap">
+                <div class="co-head co-head-mid">
+                    <span class="co-pen co-kick" data-reveal>the door</span>
+                    <h2 class="co-sharpie co-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Ticket link, your own tickets, <span class="co-redink co-break">or free?</span>
+                    </h2>
+                    <p class="co-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Every public spot needs a way in, chosen on the event's Tickets tab. Pick by who owns the door.
+                    </p>
+                </div>
+
+                <div class="co-napkins" data-reveal-group="110">
+                    <div class="co-napkin" style="--a: -1.2deg;" data-reveal>
+                        <h3>Tickets elsewhere</h3>
+                        <p>The club or the producer sells the seats. Paste their page as the Registration URL and add the price, which your event page then shows. A discount code the producer gave you can go in Coupon Code. Every plan.</p>
+                        <div class="co-napkin-obj"><p><b>Best for:</b> club shows, showcases, guest spots.</p></div>
+                    </div>
+                    <div class="co-napkin" style="--a: 0.9deg;" data-reveal>
+                        <h3>Sell tickets</h3>
+                        <p>Your show, your door. Priced tickets are Pro: the takings go to your own Stripe or PayPal account and nothing is taken as a platform fee, and every ticket carries a QR code you scan on any phone as people walk in.</p>
+                        <div class="co-napkin-obj"><p><b>Best for:</b> shows you produce and headline.</p></div>
+                    </div>
+                    <div class="co-napkin" style="--a: -0.7deg;" data-reveal>
+                        <h3>Free registration</h3>
+                        <p>No cover, but you still want a headcount. Guests sign up on the event page, a Registration Limit stops sign-ups at the size of the room, and it is unlimited on every plan.</p>
+                        <div class="co-napkin-obj"><p><b>Best for:</b> free showcases and bar shows. For a walk-in mic, choose Not needed and write "free, sign-up at 7" in the Short Description.</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5d. Getting tagged, and the Sunday-night fifteen             -->
+        <!-- ============================================================ -->
+        <section id="tagged" class="co-part" style="scroll-margin-top: 4rem; padding-top: 1rem;">
+            <div class="co-page" data-reveal="flip">
+                <div class="co-sheet co-torn co-on-paper">
+                    <span class="co-scribble" style="--y: 6.4rem; --a: -5deg;" aria-hidden="true">ask nicely</span>
+                    <span class="co-scribble" style="--y: 27rem; --a: 6deg;" aria-hidden="true">every week!</span>
+                    <h2 class="co-sharpie co-faq-h2">
+                        Getting producers to <span class="co-hl">tag you</span>
+                    </h2>
+                    <p class="co-pen" style="color: var(--co-red);">
+                        A lineup you are named on is a show you never have to type
+                    </p>
+
+                    <div class="co-years">
+                        @foreach ([
+                            ['step 1', 'Claim your name', 'If a club already put you on a lineup, a page with your name on it exists. Claim it with the email address they entered, and the rooms that listed you keep listing you.'],
+                            ['step 2', 'Hand over the right email', 'A producer adding you types your name and, if they have it, an email. The email address in your schedule\'s Contact info (or its phone number) brings your schedule up under Matching schedules, so the show links to your page instead of making a second one. Put that address on your one-sheet.'],
+                            ['step 3', 'Accept the same day', 'A new lineup you are named on waits on your Requests tab until you accept it. Once accepted it is one shared event, so when the producer moves the start, your list moves with it.'],
+                            ['step 4', 'Return the favour', 'On a show you produce, name every comic on the Participants tab. Each one gets a request, or a page they can claim, and a reason to share your link.'],
+                        ] as [$coStepTag, $coStepTitle, $coStepCopy])
+                            <div class="co-year">
+                                <span class="co-pen co-year-tag" aria-hidden="true">{{ $coStepTag }}</span>
+                                <h3>{{ $coStepTitle }}</h3>
+                                <p>{{ $coStepCopy }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <h2 class="co-sharpie co-faq-h2" style="margin-top: var(--co-r);">
+                        The Sunday-night <span class="co-hl">fifteen</span>
+                    </h2>
+                    <p class="co-pen" style="color: var(--co-red);">
+                        Once a week, before the week starts
+                    </p>
+                    <ul class="co-checks" style="margin-top: var(--co-r);">
+                        <li>Add the spots you know about. Mics you are not sure of stay as Drafts.</li>
+                        <li>Clear the Requests tab: accept the lineups you are on, decline the ones you are not.</li>
+                        <li>Check every public spot says when you go up, where, and how to get in.</li>
+                        <li>Open Events graphic and post your next sets as one image with its caption. Only shows that have a flyer are drawn; it is free on every plan.</li>
+                        <li>On the day, post that show's own link, not the whole list.</li>
+                        <li>Bumped from a spot? Fix the list that night: delete it if it is your own entry, or ask the producer to take you off theirs.</li>
+                    </ul>
+                    <p class="co-x" style="margin-top: var(--co-r);">
+                        More on how names on a bill work: <x-link href="{{ marketing_url('/features/lineup') }}">lineups</x-link> and the <x-link href="{{ marketing_url('/docs/creating-events#participants') }}">Participants guide</x-link>.
+                    </p>
                 </div>
             </div>
         </section>
@@ -1617,11 +1745,14 @@
                         @php
                             $faqs = [
                                 ['q' => 'Is Event Schedule free for comedians?', 'a' => 'Yes. Event Schedule is free forever for sharing your show dates and building a fan following, and free door lists never run out. Newsletters are free too, at 10 a month counted per recipient. Charging for a ticket is the Pro part, and Pro lifts the newsletter ceiling with it. Zero platform fees on any ticket sale, on any plan.'],
-                                ['q' => 'Can I sell tickets to my comedy shows?', 'a' => 'Yes. Connect your own Stripe or PayPal account, or take cash at the door, and sell tickets directly from your schedule. Create multiple ticket types like general admission, VIP, and early bird. Every ticket includes a QR code for check-in at the door. Zero platform fees - you only pay your payment provider\'s own processing fee. Refunds come with it: from the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider.'],
-                                ['q' => 'Can fans get told when tickets for my show go on sale?', 'a' => 'Yes, on every plan. Switch on the "Notify me" card, announce the show before tickets exist, and a fan can leave just an email address on the event page, no account needed. They get one email when tickets go on sale, one if the show is cancelled, and a reminder shortly before it starts, plus any change notice you choose to send. Nothing else. The event\'s Tickets panel shows you how many people are waiting.'],
+                                ['q' => 'Can I sell tickets to my comedy shows?', 'a' => 'Yes. A free show takes registrations or zero-price tickets on any plan; a ticket with a price needs Pro. Connect your own Stripe or PayPal account, or take cash at the door, and sell tickets directly from your schedule. Create multiple ticket types like general admission, VIP, and early bird. Every ticket includes a QR code for check-in at the door. Zero platform fees - you only pay your payment provider\'s own processing fee. Refunds come with it: from the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider.'],
+                                ['q' => 'Can fans get told when tickets for my show go on sale?', 'a' => 'Yes, when you sell the tickets here. Switch on the "Notify me" card in Edit schedule > Engagement > Mailing list (free on every plan, off until you do), announce the show before tickets exist, and a fan can leave just an email address on the event page, no account needed. They get one email when your tickets go on sale here, one if the show is cancelled, and a reminder in the two days before it starts, plus any change notice you choose to send. Nothing else, and every one has a one-click unsubscribe. The event\'s Tickets panel shows you how many people are waiting.'],
                                 ['q' => 'How do fans hear about my new shows?', 'a' => 'Fans who sign up with their email get an automatic digest when you add new shows, batched so a run of new dates arrives as one email. You can also send newsletters with upcoming dates yourself. Fans who would rather not give an address can subscribe to your calendar feed, which updates itself when a show moves. And your schedule link goes in your social bios, on podcasts, or anywhere fans find you.'],
                                 ['q' => 'Can comedy clubs add me to their lineup?', 'a' => 'Yes. When a comedy club adds you to their event on Event Schedule, it arrives as a request on your schedule. Accept it and the show appears there too, so you never add the same gig in two places, and because both schedules share one event, a changed start time shows on both. Not on Event Schedule yet? The club\'s listing creates a page with your name on it, kept out of search engines until you claim it by signing in with the email address it carries.'],
                                 ['q' => 'Can I track open mics and bringer shows without announcing them?', 'a' => 'Yes. Save any set as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can plan a whole week of mics privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for corporate and private gigs.'],
+                                ['q' => 'How do comedians keep track of open mics and spots?', 'a' => 'Put every spot on one calendar and decide, spot by spot, whether fans should see it. Sign-up mics where you may not get up stay as Drafts that only you and your team see, a weekly mic is one recurring event, and booked spots, showcases and your own shows are public, each with a page of its own. Two-way sync with Google Calendar, Outlook or CalDAV puts the same list in the calendar on your phone.'],
+                                ['q' => 'How do I get added to a producer\'s lineup on Event Schedule?', 'a' => 'Ask the producer to add you on their event\'s Participants tab using the email address in your schedule\'s Contact info (or its phone number). Your schedule comes up under Matching schedules, and the show arrives on your Requests tab for you to accept. If they type your name with no matching address, a page is made for you that you can claim later with the email address they entered.'],
+                                ['q' => 'Should I list free shows and open mics publicly?', 'a' => 'List the ones where a fan can actually see you: a booked spot, a showcase, a bringer you need people for, your own free show. A sign-up mic where you might go up at the end of the night is better kept as a Draft. For a free show where you want a headcount, use free registration with a limit for the room, on every plan; for a walk-in show, say that it is free and needs no ticket in the Short Description.'],
                                 ['q' => 'Can I run stand-up, improv, and a podcast on one schedule?', 'a' => 'Yes. Sub-schedules let you split your calendar into separate lineups like stand-up sets, improv nights, and podcast tapings. Fans can see everything in one place, or you can share each lineup with its own link. Sub-schedules are included on the free plan.'],
                             ];
                         @endphp

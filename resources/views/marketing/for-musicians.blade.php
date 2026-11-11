@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Band Tour Dates Page, Free | For Musicians and Solo Artists</x-slot>
-    <x-slot name="description">Put every gig and tour date on one link. Sell tickets with zero platform fees, email fans directly, and let venues add you to their bills. Free forever.</x-slot>
+    <x-slot name="description">Build a band tour dates page fans can trust: every date, venue, support act and ticket link on one link that stays current. Free, with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Musicians</x-slot>
 
     <x-slot name="headMeta">
@@ -13,7 +13,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Musicians"
-        description="Put every gig and tour date on one link. Sell tickets with zero platform fees, email fans directly, and let venues add you to their bills. Free forever."
+        description="Build a band tour dates page fans can trust: every date, venue, support act and ticket link on one link that stays current. Free, with zero platform fees."
         audience="Musicians"
         keywords="musician schedule, band tour dates, share gig schedule, musician event calendar, band booking platform, free musician scheduling, band website with tour dates, residency schedule" />
     <!-- HowTo Schema for Rich Snippets -->
@@ -1067,6 +1067,73 @@
         .mu-white-note { margin-top: 1rem; color: #675d50; font-size: 0.95rem; }
         .mu-white-foot { margin-top: 1.1rem; padding-top: 0.9rem; border-top: 2px dashed rgba(21, 18, 15, 0.35); color: #473f35; font-size: 0.7rem; }
 
+        /* ---------------------------------------------------------------
+           The track listing, the pressings and the release plan: the
+           field guide to a tour dates page, set as the back of the sleeve
+           (credits), the pressing plant's run sheet and the label's
+           release schedule. Tokens only, so dark mode follows.
+           --------------------------------------------------------------- */
+        .mu-credits { border-top: 2px solid var(--mu-ink); }
+        .mu-credit {
+            display: grid;
+            gap: 0.6rem 2rem;
+            padding: 1.6rem 0.25rem 1.5rem;
+            border-bottom: 1px solid var(--mu-line);
+        }
+        @media (min-width: 900px) {
+            .mu-credit { grid-template-columns: 4.2rem minmax(0, 0.75fr) minmax(0, 1.6fr); align-items: start; }
+        }
+        .mu-credit > .mu-m { color: var(--mu-hot-ink); padding-top: 0.4rem; }
+        .mu-credit h3 { font-size: clamp(1.7rem, 2.8vw, 2.3rem); text-wrap: balance; }
+        .mu-credit p { color: var(--mu-ink-2); max-width: 46rem; }
+        .mu-credit p + p { margin-top: 0.65rem; }
+        #mu .mu-credit a,
+        #mu .mu-inline a {
+            display: inline;
+            color: var(--mu-ink);
+            font-weight: 700;
+            text-decoration: underline;
+            text-decoration-color: var(--mu-hot);
+            text-decoration-thickness: 2px;
+            text-underline-offset: 0.2em;
+        }
+        #mu .mu-credit a:hover,
+        #mu .mu-inline a:hover { color: var(--mu-hot-ink); }
+
+        .mu-run { border-top: 2px solid var(--mu-ink); }
+        .mu-run-row {
+            display: grid;
+            gap: 0.75rem 2rem;
+            padding: 1.5rem 0.25rem 1.4rem;
+            border-bottom: 2px solid var(--mu-ink);
+        }
+        @media (min-width: 900px) {
+            .mu-run-row { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr) minmax(0, 0.9fr); align-items: start; }
+        }
+        .mu-run-row h3 { font-size: clamp(1.5rem, 2.4vw, 1.9rem); text-wrap: balance; }
+        .mu-run-row p { color: var(--mu-ink-2); font-size: 1rem; }
+        .mu-run-row small { display: block; margin-bottom: 0.35rem; color: var(--mu-hot-ink); }
+        .mu-run-auto { color: var(--mu-teal); }
+
+        .mu-plan { display: grid; gap: 1.25rem; max-width: 62rem; }
+        .mu-plan-row { display: grid; background: var(--mu-card); border: 2px solid var(--mu-ink); box-shadow: 6px 6px 0 var(--mu-ink); }
+        @media (min-width: 760px) { .mu-plan-row { grid-template-columns: 11rem minmax(0, 1fr); } }
+        .mu-plan-when {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.35rem;
+            padding: 1.1rem 1.1rem 0.9rem;
+            background: var(--mu-ink);
+            color: var(--mu-paper);
+        }
+        .mu-plan-when .mu-d { font-size: 1.9rem; }
+        .mu-plan-body { padding: 1.2rem 1.25rem 1.1rem; }
+        .mu-plan-body h3 { font-size: 1.6rem; }
+        .mu-plan-body ul { margin-top: 0.7rem; display: grid; gap: 0.45rem; color: var(--mu-ink-2); font-size: 1rem; }
+        .mu-plan-body li { position: relative; padding-inline-start: 1.25rem; }
+        .mu-plan-body li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.6em; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--mu-hot); }
+
         @media (prefers-reduced-motion: reduce) {
             .mu-label,
             .mu-turn i { animation: none; }
@@ -1079,6 +1146,8 @@
             ['top', 'Cover'],
             ['features', 'Side A'],
             ['side-b', 'Side B'],
+            ['tour-dates', 'Track listing'],
+            ['upkeep', 'Pressings'],
             ['discography', 'Discography'],
             ['filed-under', 'Filed under'],
             ['run-of-show', 'Run of show'],
@@ -1226,7 +1295,7 @@
                     </div>
                     <div class="mu-stat" data-reveal style="--c: #f0bd4a;">
                         <div class="es-od mu-d mu-stat-big" data-odometer="10-20%">10-20%</div>
-                        <p>of ticket revenue lost to platform fees elsewhere. Event Schedule charges zero.</p>
+                        <p>of a $15 to $50 ticket goes to Eventbrite's fees when you absorb them (3.7% + $1.79 a ticket, plus 2.9% processing). Event Schedule takes no platform fee.</p>
                         <span class="mu-m mu-stamp" style="--r: -2deg;">Gone</span>
                     </div>
                 </div>
@@ -1298,7 +1367,7 @@
                     <div data-reveal>
                         <div class="mu-m mu-track-kind">Ticketing</div>
                         <h3 class="mu-d">Zero-fee tickets</h3>
-                        <p>Connect Stripe or <a href="{{ marketing_url('/paypal') }}">PayPal</a>, or take cash on the night, and sell pre-sales or door tickets with QR check-in. Pro adds promo codes for the fan club and waitlists for the sellouts.</p>
+                        <p>Free shows take registrations with QR tickets on every plan. On Pro, connect Stripe or <a href="{{ marketing_url('/paypal') }}">PayPal</a>, or take cash on the night, and sell priced pre-sales or door tickets, with promo codes for the fan club and waitlists for the sellouts. Scanning at the door is free either way.</p>
                     </div>
                     <div class="mu-prop" aria-hidden="true" data-reveal="zoom">
                         <div class="mu-stub" dir="ltr">
@@ -1411,6 +1480,220 @@
                         </div>
                     </div>
                 </article>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3b. The track listing: what every tour date needs            -->
+        <!-- ============================================================ -->
+        <section id="tour-dates" class="mu-section mu-alt" style="scroll-margin-top: 5rem;">
+            <div class="mu-wrap">
+                <div class="mu-disco-head">
+                    <div><span class="mu-m mu-tag" data-reveal>The track listing</span></div>
+                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        What every line of a tour dates page needs
+                    </h2>
+                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A fan opens your tour page looking for one city. Each line has to answer five questions before they scroll past it: when, where, with whom, how to get in, and whether there is still room.
+                    </p>
+                </div>
+
+                <ol class="mu-credits" data-reveal-group="70">
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">01</span>
+                        <h3 class="mu-d">Date, doors and stage time</h3>
+                        <div>
+                            <p>The date and start time go in the event's Date &amp; Time. Doors and set times are what people actually plan their evening around, so add them as parts on the event's Agenda tab: doors 7:00, support 7:45, your set 9:00. Agenda parts are free on every plan and show on the event page in the order you set.</p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">02</span>
+                        <h3 class="mu-d">City and venue</h3>
+                        <div>
+                            <p>Somebody in Leeds is scanning for Leeds, so the city belongs on the line, not one click away. In the event's Location, pick the venue from your list or choose New Venue and type its name, street address and city. A venue already on Event Schedule brings its own address, and the date can appear on its schedule too; a venue that is not gets a page of its own.</p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">03</span>
+                        <h3 class="mu-d">The way in</h3>
+                        <div>
+                            <p>Choose one on the event's Tickets tab. When the venue or a promoter sells the tickets, choose Tickets elsewhere, paste their link and add the price, so nobody has to click through to find it. That works on every plan. When you sell your own, choose Sell tickets. A ticket with a price needs Pro, and the money goes straight into your Stripe or PayPal account with no platform fee. A zero-price ticket needs no paid plan at all.</p>
+                            <p>Never leave a date with no way in. If tickets are not on sale yet, say when they will be. With tickets sold here, switch on the &ldquo;Notify me&rdquo; card and a fan can leave an email address to be told when they go on sale. <x-link href="{{ marketing_url('/docs/tickets#external') }}">How Tickets elsewhere works</x-link></p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">04</span>
+                        <h3 class="mu-d">Every act on the bill</h3>
+                        <div>
+                            <p>The opener's name sells tickets in the opener's town, so list every act. Add them on the event's Participants tab: the whole bill shows on the event page, each act with a schedule of its own is linked to it, and an act that is not on Event Schedule yet gets a page it can claim with the email address you enter. <x-link href="{{ marketing_url('/features/lineup') }}">More on lineups</x-link></p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">05</span>
+                        <h3 class="mu-d">Sold out, few left, cancelled</h3>
+                        <div>
+                            <p>A sold-out show that still says Tickets costs a fan a wasted trip and you a pile of messages. Sell through Event Schedule with a quantity on each ticket type and the show says Sold Out on your list by itself, and Few left as it gets close. A link to another seller's page cannot be read from here, so when that show sells out, say so in the event's Short Description the same day.</p>
+                            <p>If a show is off, choose Cancel event from the Actions menu rather than deleting it. The event page then says it is cancelled, and when there is somebody to tell, the button reads Cancel and notify and the notice goes to all of them.</p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">06</span>
+                        <h3 class="mu-d">Age policy</h3>
+                        <div>
+                            <p>All ages, 18+ or 21+ decides who can come, and a parent looks for it before buying. Put it in the Short Description, which shows on the event page and on your list. On Pro, make it a custom field called Age policy and tick On event page, and it shows in a row under the venue on every show you fill it in for.</p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">07</span>
+                        <h3 class="mu-d">One page per date</h3>
+                        <div>
+                            <p>Each show is its own event at its own address. Send Glasgow the Glasgow link: it opens on that night, and when it is shared the preview card uses that show's flyer.</p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">08</span>
+                        <h3 class="mu-d">A name a fan would say</h3>
+                        <div>
+                            <p>&ldquo;The Midnight Hour, Seattle&rdquo; reads at a glance. &ldquo;Summer Tour Leg 2, Night 9&rdquo; means something only to your tour manager. Keep the tour's name in the description, or give the run a sub-schedule of its own so fans can filter your page down to it.</p>
+                        </div>
+                    </li>
+                </ol>
+
+                <div class="mu-bins-head" style="margin-top: clamp(4rem, 8vw, 6rem);">
+                    <span class="mu-m mu-tag" data-reveal>Skips</span>
+                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Three mistakes that empty a room
+                    </h2>
+                </div>
+
+                <div class="mu-bins" data-reveal-group="80">
+                    <article class="mu-bin" data-reveal>
+                        <span class="mu-m mu-bin-tab" style="--x: 8%;" aria-hidden="true">Skip 01</span>
+                        <h3 class="mu-d">Last year's tour on top</h3>
+                        <p>Nothing says a band has stopped playing like a page of dates that have passed. Switch on Hide Past Events in the Events row of your schedule's Style settings, free on every plan, and past shows leave the public page by themselves while staying in your own records.</p>
+                    </article>
+                    <article class="mu-bin" data-reveal>
+                        <span class="mu-m mu-bin-tab" style="--x: 36%;" aria-hidden="true">Skip 02</span>
+                        <h3 class="mu-d">Beating the venue to it</h3>
+                        <p>A venue or promoter usually picks the announce day, and often runs a pre-sale before it. Post a date early and you can upset the room that is paying you. Keep each date as a Draft on its Listing tab, seen only by your schedule's team, until the agreed morning.</p>
+                    </article>
+                    <article class="mu-bin" data-reveal>
+                        <span class="mu-m mu-bin-tab" style="--x: 58%;" aria-hidden="true">Skip 03</span>
+                        <h3 class="mu-d">A link per show in the bio</h3>
+                        <p>Ten ticket links in a link-in-bio page go stale one by one, the night after each gig. One link to your schedule stays right: a date you add is on it at once, and each line leads to that show's own page.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3c. The pressings: one master copy, and the release plan     -->
+        <!-- ============================================================ -->
+        <section id="upkeep" class="mu-section" style="scroll-margin-top: 5rem;">
+            <div class="mu-wrap">
+                <div class="mu-disco-head">
+                    <div><span class="mu-m mu-tag" data-reveal>The pressings</span></div>
+                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        One master copy. Every other listing reads from it.
+                    </h2>
+                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Your dates live on your page, your website, fans' phones, your mailing list, your socials, Bandsintown, Songkick and the venue's own calendar. Typed into each by hand, one of them is always wrong. Enter each date once, here, and make every other copy either read from it or point back to it.
+                    </p>
+                </div>
+
+                <div class="mu-run" data-reveal-group="60">
+                    @php
+                        // [where, kept current by itself?, how it stays current, your job]
+                        $muRun = [
+                            ['Your schedule page', false, 'The master. Every new date, change and cancellation is made here, once.', 'Put its link in every bio: Spotify, Bandcamp, Instagram, your EPK.'],
+                            ['Your band website', true, 'Embed the calendar with the code from the Embed dialog, on every plan, and the site shows whatever the schedule shows.', 'Paste the code into the site once.'],
+                            ['Fans\' phone calendars', true, 'A fan who subscribes to your calendar feed sees a new date appear and a moved one move, without giving you an email address.', 'Tell people the feed exists when you post a tour.'],
+                            ['Your mailing list', true, 'When you publish new dates of your own, confirmed subscribers get one short digest of them: up to 25 in one email, never more than one every 72 hours, on every plan, and outside your newsletter allowance. On eventschedule.com, reaching more than 50 subscribers needs a verified phone number or the schedule\'s own email settings.', 'Write a newsletter yourself only for the big news.'],
+                            ['Your own calendar', true, 'Two-way sync with Google Calendar, Outlook or CalDAV, free on every plan, keeps the calendar you plan the year in and your public dates in step.', 'Keep rehearsals and holds in a calendar you do not sync.'],
+                            ['Instagram, Facebook, TikTok', false, 'Nothing posts for you. Events graphic, in your schedule\'s Actions menu, draws an image of your next dates with a caption to paste, free on every plan. Only shows that have a flyer are drawn; the caption lists them all.', 'Post it each week, with the schedule link rather than one show\'s.'],
+                            ['Bandsintown and Songkick', false, 'Event Schedule has no connection to them or to streaming apps, so dates are not passed either way.', 'Enter each date there too, and where a listing takes a ticket link, give it the event page\'s address so fans land on your page.'],
+                            ['The venue\'s calendar', true, 'When a venue on Event Schedule adds you to its bill, it is one event on both pages, so a changed time changes on both.', 'Accept the request when it reaches your Requests tab.'],
+                        ];
+                    @endphp
+                    @foreach ($muRun as $muRunIndex => [$muRunWhere, $muRunAuto, $muRunHow, $muRunJob])
+                        <div class="mu-run-row" data-reveal>
+                            <div>
+                                <small class="mu-m">Copy {{ str_pad($muRunIndex + 1, 2, '0', STR_PAD_LEFT) }}</small>
+                                <h3 class="mu-d">{{ $muRunWhere }}</h3>
+                            </div>
+                            <div>
+                                <small class="mu-m {{ $muRunAuto ? 'mu-run-auto' : '' }}">{{ $muRunAuto ? 'Updates itself' : 'Kept by hand' }}</small>
+                                <p>{{ $muRunHow }}</p>
+                            </div>
+                            <div>
+                                <small class="mu-m">Your job</small>
+                                <p>{{ $muRunJob }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="mu-sub mu-inline" style="margin-top: 1.5rem; font-size: 1rem;" data-reveal>
+                    Already listed on one of them? See how a schedule here sits beside <x-link href="{{ marketing_url('/bandsintown-alternative') }}">Bandsintown</x-link> and <x-link href="{{ marketing_url('/songkick-alternative') }}">Songkick</x-link>, and how the <x-link href="{{ marketing_url('/docs/sharing#calendar-feeds') }}">calendar feed</x-link> works.
+                </p>
+
+                <div id="release-plan" class="mu-disco-head" style="margin-top: clamp(4rem, 8vw, 6rem); scroll-margin-top: 5rem;">
+                    <div><span class="mu-m mu-tag" data-reveal>The release plan</span></div>
+                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Announcing a tour, and the routine after
+                    </h2>
+                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A tour is announced once and sold for weeks. Most of the selling happens in small, regular posts, so put them on a calendar of their own.
+                    </p>
+                </div>
+
+                <div class="mu-plan" data-reveal-group="80">
+                    @php
+                        $muPlan = [
+                            ['Before', 'The week ahead', 'Load the run as drafts', [
+                                'Add each date with Add Event and choose Draft on its Listing tab, or first set Default visibility for new events to Draft in your schedule\'s settings. Then add the venue, the support acts, the ticket link and a flyer while nobody outside the team can see it.',
+                                'Import Events (paste the routing, or a photo of the tour poster) publishes what it adds at once, so keep it for announce morning. It is free on every plan, within a daily allowance.',
+                            ]],
+                            ['Day one', 'Announce day', 'Publish the whole run at once', [
+                                'Switch every date to Public in one sitting, so they all go into the same digest (up to 25 dates). A date published after that digest waits for the next one, at least 72 hours later.',
+                                'Post the Events graphic of the run, and put the schedule link, not one show\'s, in every bio.',
+                            ]],
+                            ['Mondays', 'Fifteen minutes', 'Walk the road book', [
+                                'Open each date in the next month: does the ticket link still open, is every act named, is the flyer there?',
+                                'Add Sold out to the Short Description of any show that sold out at another seller.',
+                                'Post a fresh Events graphic of what is coming up.',
+                            ]],
+                            ['Show week', 'One city at a time', 'Sell the night, not the tour', [
+                                'Post that city\'s event link in local stories and groups. A fan near Leeds wants the Leeds page, not a list of twenty dates.',
+                                'If you switched on the "Notify me" card, the fans who left an address for that show get a reminder in the two days before it starts, with nothing for you to send.',
+                            ]],
+                            ['The night', 'Door and merch', 'Scan in, sign up', [
+                                'Tickets sold here are scanned on any phone at the door, free on every plan.',
+                                'Print the QR code from your schedule\'s Followers tab for the merch table: a scan opens your page with the sign-up form ready.',
+                            ]],
+                            ['After', 'The next morning', 'Let the fans post the show', [
+                                'Switch on fan content in your schedule\'s Engagement settings, and fans\' clips and photos wait for your approval before they appear on the event.',
+                                'Each social link on your schedule has a short address, like your-band.eventschedule.com/instagram, that counts its clicks, so you can see which post sent people.',
+                                'If a later date moves, change it on the event. For a one-time show, saving asks whether to tell the people who bought or asked to hear about it.',
+                            ]],
+                        ];
+                    @endphp
+                    @foreach ($muPlan as [$muPlanWhen, $muPlanSmall, $muPlanTitle, $muPlanItems])
+                        <div class="mu-plan-row" data-reveal>
+                            <div class="mu-plan-when">
+                                <span class="mu-d">{{ $muPlanWhen }}</span>
+                                <small class="mu-m">{{ $muPlanSmall }}</small>
+                            </div>
+                            <div class="mu-plan-body">
+                                <h3 class="mu-d">{{ $muPlanTitle }}</h3>
+                                <ul>
+                                    @foreach ($muPlanItems as $muPlanItem)
+                                        <li>{{ $muPlanItem }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </section>
 
@@ -1654,10 +1937,14 @@
                 <div class="mu-qa" data-reveal>
                     @php
                         $faqs = [
-                            ['q' => 'Is Event Schedule free for musicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also takes unlimited free registrations and sends 10 newsletter emails a month, counted per recipient. Scanning tickets at the door is free too. Charging at the door is where Pro starts, and it brings the rest of the door kit with it: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.'],
+                            ['q' => 'What should a band\'s tour dates page include?', 'a' => 'For every show: the date, the doors and stage times, the city and venue, every act on the bill, a way in (a ticket link, your own tickets, or free entry), the age policy, and whether it has sold out. Put the city on the line itself, give each show its own page you can send to that city, and keep past dates off the page. Event Schedule has a place for each: Date & Time and Location on the Event tab, the Agenda and Participants tabs, the Tickets tab, and the Short Description.'],
+                            ['q' => 'Is Event Schedule free for musicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also takes unlimited free registrations and sends 10 newsletter emails a month, counted per recipient. Scanning tickets at the door is free too. Selling a ticket with a price is where Pro starts, and it brings the rest of the door kit with it: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.'],
                             ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'A fan who leaves an email address on your page and confirms it gets a digest when you announce new shows, batched so a run of dates is one message rather than six, and never more than once every few days. Beyond that you write the newsletter yourself. Fans who would rather not give an address can subscribe to your calendar feed instead, which updates itself when a date moves. Your schedule link also goes anywhere a link goes: Spotify, Bandcamp, your EPK, any social profile.'],
-                            ['q' => 'Can I sell tickets to my own shows?', 'a' => 'Yes. Connect your own Stripe or PayPal account, or take cash or a payment link, and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay your payment provider\'s own processing fee. Refunds are built in too: from the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider.'],
-                            ['q' => 'Can fans get told when tickets go on sale?', 'a' => 'Yes, on every plan. Switch on the "Notify me" card and, on a public event page, a fan can leave just an email address, with no account, and get one email when tickets go on sale, one if the show is cancelled, and a reminder shortly before it starts, plus any change notice you choose to send. Nothing else, and every one of those emails has a one-click unsubscribe. The event\'s Tickets panel shows you how many people are waiting.'],
+                            ['q' => 'Can I sell tickets to my own shows?', 'a' => 'Yes. Free tickets and registrations work on every plan; tickets with a price need Pro. Connect your own Stripe or PayPal account, or take cash or a payment link, and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay your payment provider\'s own processing fee. Refunds are built in too: from the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider.'],
+                            ['q' => 'Can fans get told when tickets go on sale?', 'a' => 'Yes, when you sell the tickets here. Switch on the "Notify me" card in Edit schedule > Engagement > Mailing list (free on every plan, off until you do) and, on a public event page, a fan can leave just an email address, with no account. They get one email when your tickets go on sale here, one if the show is cancelled, and a reminder in the two days before it starts, plus any change notice you choose to send. Nothing else, and every one has a one-click unsubscribe. The event\'s Tickets panel shows you how many people are waiting.'],
+                            ['q' => 'Does Event Schedule send my dates to Bandsintown, Songkick or Spotify?', 'a' => 'No. Event Schedule has no connection to Bandsintown, Songkick or streaming apps, so dates are not passed either way. What it publishes is your own page, an embed for your website and a calendar feed, all kept current from one place. If you keep listings on those services for their fan alerts, enter each date there too and, where a listing takes a ticket link, use your event page\'s address, so fans who find you there land on your own page.'],
+                            ['q' => 'How do I show that a gig has sold out?', 'a' => 'If you sell the tickets on Event Schedule with a quantity on each ticket type, the show says Sold Out on your list by itself, and Few left as it gets close. On Pro, a waitlist lets fans sign up for any tickets that come back and tells them when they do. If the tickets are sold somewhere else, Event Schedule cannot see that seller\'s stock, so add Sold out to the event\'s Short Description the day it happens.'],
+                            ['q' => 'How far ahead should a band announce tour dates?', 'a' => 'There is no fixed rule, and the venue or promoter usually sets the announce day and any pre-sale, so ask them first. Many club runs are announced around two months out, and bigger rooms further ahead. What matters as much is announcing the run in one go: load the dates as Drafts, switch them all to Public in one sitting on the agreed morning, and they go into one digest (up to 25 dates) instead of one email per date. A date published after that digest waits at least 72 hours for the next.'],
                             ['q' => 'What happens when a venue books me for a show?', 'a' => 'When a venue adds you to its event on Event Schedule, the date arrives as a request on your schedule. Accept it and the gig shows on your page too, so you never enter the same show twice, and because both schedules share one event, a changed time shows on both. The event page lists the whole bill, whether or not every act on it has signed up.'],
                             ['q' => 'A venue listed me before I joined. Is that page mine?', 'a' => 'It can be. When a venue or promoter names an act who is not on Event Schedule, a page is created for them so the name can appear on the event. It says who created it and that the act has not claimed it, credits each date to the schedule that added it, and stays out of search engines. Press Claim this page and sign in with the email address it carries, and it becomes your schedule, with the venues that already list you still listing you. If it is not you, press This is not me.'],
                             ['q' => 'Can I list a weekly residency or recurring gigs?', 'a' => 'Yes. Recurring events are free. Set the day-of-week pattern once, like every Thursday at the same club, and Event Schedule fills in the dates. You can exclude the weeks you skip, and fans always see the next upcoming show.'],

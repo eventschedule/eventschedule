@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Magicians | Gigs, Residencies</x-slot>
-    <x-slot name="description">Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.</x-slot>
+    <x-slot name="description">Every show and residency on one link, a booking form for corporate and private gigs, and private dates kept off your page. Free, with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Magicians</x-slot>
 
     <x-slot name="headMeta">
@@ -14,7 +14,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Magicians"
-        description="Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever."
+        description="Every show and residency on one link, a booking form for corporate and private gigs, and private dates kept off your page. Free, with zero platform fees."
         audience="Magicians"
         keywords="magician schedule, magic show calendar, magician booking platform, magic event management, free magician scheduling, private event magician booking, close-up magic schedule, corporate magician calendar, mentalist show scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
@@ -814,6 +814,62 @@
         html.es-anim #mg .mg-yours .mg-floor { animation: mg-shade 7s ease-in-out infinite alternate; }
         @keyframes mg-hang { from { translate: 0 -0.6rem; } to { translate: 0 -2.4rem; } }
 
+        /* ---------------------------------------------------------------
+           Two diaries, one schedule, and the billing: the field guide to
+           a magician's year. The ledger is the booking book, ruled in the
+           page's own hairlines; the steps and the split are cards on the
+           same bare stage. Tokens only, so dark mode follows.
+           --------------------------------------------------------------- */
+        .mg-ledger { margin-top: clamp(3.5rem, 6vw, 5.5rem); border-top: 1px solid var(--mg-ink); }
+        .mg-ledger-row {
+            display: grid;
+            gap: 0.6rem 2.5rem;
+            padding-block: 1.6rem 1.7rem;
+            border-bottom: 1px solid var(--mg-line);
+        }
+        @media (min-width: 960px) {
+            .mg-ledger-row { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 1.15fr); align-items: start; }
+            .mg-ledger-head { padding-block: 1rem; }
+        }
+        .mg-ledger-head { display: none; }
+        @media (min-width: 960px) { .mg-ledger-head { display: grid; } }
+        .mg-ledger-row h3 { font-size: clamp(1.6rem, 2.2vw, 2rem); }
+        .mg-ledger-row p { color: var(--mg-ink-2); font-size: 1.0625rem; }
+        .mg-ledger-row p .mg-k { display: block; margin-bottom: 0.2rem; }
+        @media (min-width: 960px) { .mg-ledger-row p .mg-k { display: none; } }
+
+        .mg-form-head { margin-top: clamp(4.5rem, 9vw, 7rem); }
+        .mg-form-steps { display: grid; gap: 1.25rem; margin-top: clamp(2.5rem, 5vw, 3.5rem); counter-reset: mg-step; }
+        @media (min-width: 900px) { .mg-form-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .mg-form-step {
+            display: flex;
+            flex-direction: column;
+            padding: 1.75rem 1.6rem 1.6rem;
+            background: var(--mg-card);
+            border: 1px solid var(--mg-ink);
+        }
+        .mg-form-step:last-child:nth-child(odd) { grid-column: 1 / -1; }
+        .mg-form-step h3 { margin-top: 0.8rem; font-size: clamp(1.6rem, 2.2vw, 2rem); }
+        .mg-form-step p { margin-top: 0.7rem; color: var(--mg-ink-2); font-size: 1.0625rem; }
+        .mg-form-foot { margin-top: 2rem; max-width: 46rem; color: var(--mg-ink-2); }
+        #mg .mg-form-foot a,
+        #mg .mg-split a {
+            display: inline;
+            color: var(--mg-ink);
+            text-decoration: underline;
+            text-decoration-color: var(--mg-red);
+            text-decoration-thickness: 1px;
+            text-underline-offset: 0.2em;
+        }
+        #mg .mg-form-foot a:hover,
+        #mg .mg-split a:hover { color: var(--mg-red); }
+
+        .mg-split { display: grid; gap: 3rem 4rem; margin-top: clamp(3rem, 5vw, 4.5rem); }
+        @media (min-width: 900px) { .mg-split { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .mg-split ul { margin-top: 1.1rem; display: grid; gap: 0.9rem; }
+        .mg-split li { position: relative; padding-inline-start: 1.5rem; color: var(--mg-ink-2); font-size: 1.0625rem; }
+        .mg-split li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.65em; width: 0.45rem; aspect-ratio: 1; border-radius: 50%; background: var(--mg-red); }
+
         @media (prefers-reduced-motion: reduce) {
             #mg .es-spot,
             .mg-btn, .mg-btn svg, .mg-link::after, .mg-link svg,
@@ -929,6 +985,83 @@
             </div>
         </section>
 
+        <!-- ============================================================ -->
+        <!-- 2b. Two diaries: public shows and private bookings           -->
+        <!-- ============================================================ -->
+        <section id="bookings" class="mg-section mg-alt" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap">
+                <div class="mg-head">
+                    <p class="mg-k" data-reveal>Two diaries, one schedule</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Public shows and private bookings. <span class="mg-red">Each in its place.</span>
+                    </h2>
+                    <p class="mg-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A magician's year mixes shows anyone can buy into with gigs nobody outside the room should hear about. Decide once where each kind of gig goes, and the schedule keeps the secret for you.
+                    </p>
+                </div>
+
+                @php
+                    // [kind of gig, where it goes, who sees it, how people get in]
+                    $mgLedger = [
+                        ['The theatre or festival show', 'A public event.', 'Everyone: your page, your embedded calendar and your calendar feed.', 'Paste the venue\'s box office link under Tickets elsewhere, on every plan, or sell your own (a price needs Pro).'],
+                        ['The weekly residency', 'One recurring public event, with the weeks you are away left out.', 'Everyone, always with the next date showing.', 'Often free entry at the restaurant, bar or hotel. The list of dates does the selling.'],
+                        ['The parlor or close-up show', 'A public event with a fixed number of places.', 'Everyone; it says Sold Out by itself when the seats are gone.', 'Tickets with a quantity equal to the seats, or free registration with a Registration Limit.'],
+                        ['The corporate gig, wedding or private party', 'A Draft, free on every plan, or Internal on Enterprise.', 'You and your schedule\'s team. Never your page, your feed or an email digest.', 'Nobody buys in. The client is invoiced outside the schedule.'],
+                        ['An invite-only show for one company', 'Unlisted, with an optional password, on Enterprise.', 'Only the people you send the link to.', 'Registration on the event page, so you know who is coming.'],
+                        ['Walk-around at someone else\'s event', 'The host\'s own event, with you named on it.', 'Whoever the host shows it to.', 'When the host is on Event Schedule and names you as a participant, it shows up as a request you can accept or decline.'],
+                    ];
+                @endphp
+                <div class="mg-ledger" data-reveal-group="70">
+                    <div class="mg-ledger-row mg-ledger-head" aria-hidden="true">
+                        <span class="mg-k">The gig</span>
+                        <span class="mg-k">Where it goes</span>
+                        <span class="mg-k">Who sees it</span>
+                        <span class="mg-k">How people get in</span>
+                    </div>
+                    @foreach ($mgLedger as [$ledgerKind, $ledgerWhere, $ledgerWho, $ledgerIn])
+                        <div class="mg-ledger-row" data-reveal>
+                            <h3 class="mg-d">{{ $ledgerKind }}</h3>
+                            <p><span class="mg-k">Where it goes</span>{{ $ledgerWhere }}</p>
+                            <p><span class="mg-k">Who sees it</span>{{ $ledgerWho }}</p>
+                            <p><span class="mg-k">How people get in</span>{{ $ledgerIn }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="mg-head mg-form-head">
+                    <p class="mg-k" data-reveal>The booking request form</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Let planners ask. <span class="mg-red">On your terms.</span>
+                    </h2>
+                    <p class="mg-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Corporate and private work rarely starts with a ticket. It starts with somebody asking whether you are free on the fourteenth. Give them one form on your page instead of a DM, and set it up so the answers you need arrive with the question.
+                    </p>
+                </div>
+
+                @php
+                    $mgSteps = [
+                        ['Switch on Accept requests', 'In Edit schedule, open Engagement and its Requests row. A talent schedule always uses the Booking Form: a planner fills in one plain form on your page, with their name and email, and never has to make an account. Free on every plan.'],
+                        ['Write your Request Terms', 'They sit at the top of the form and are read before anything is typed. Put there what ends a wrong conversation early: how far ahead you book, how far you travel, the shortest set you do, the space and power a stage show needs, and how a deposit works.'],
+                        ['Make the date and place required', 'Under Required fields, tick Date & Time and Location, so no request arrives as "sometime in spring, somewhere downtown". Turn on Ask for phone number if you would rather call a corporate client back than trade emails.'],
+                        ['Ask your own questions, on Pro', 'Custom fields marked On request form: a dropdown for the kind of event (corporate, wedding, birthday, private dinner), the head count, whether they want close-up, a stage set or both, and the age of the youngest guest.'],
+                        ['Check the night, then answer', 'Neither the form nor the Accept button compares a request with the gigs you already have, so look at that date on your Schedule tab first. Accept puts the event on your public schedule; for a private party, open it and set its Visibility to Draft on the Listing tab straight away.'],
+                    ];
+                @endphp
+                <ol class="mg-form-steps" data-reveal-group="90">
+                    @foreach ($mgSteps as $stepIndex => [$stepTitle, $stepCopy])
+                        <li class="mg-form-step" data-reveal>
+                            <span class="mg-k" aria-hidden="true">Step {{ $mgRoman[$stepIndex] }}</span>
+                            <h3 class="mg-d">{{ $stepTitle }}</h3>
+                            <p>{{ $stepCopy }}</p>
+                        </li>
+                    @endforeach
+                </ol>
+                <p class="mg-form-foot" data-reveal>
+                    The form, the Requests tab and what each request carries are in the <x-link href="{{ marketing_url('/docs/creating-schedules#engagement-requests') }}">Requests guide</x-link>, and <x-link href="{{ marketing_url('/features/booking-requests') }}">booking requests</x-link> has the rest. On Enterprise, <x-link href="{{ marketing_url('/features/availability') }}">availability</x-link> lets you and your team mark the dates you cannot work on the shared calendar; it is never shown to the public.
+                </p>
+            </div>
+        </section>
+
         <!-- The saw: act two -->
         <div class="mg-saw" aria-hidden="true">
             <div class="mg-d mg-saw-word">
@@ -957,12 +1090,12 @@
                     $dealCards = [
                         [
                             'title' => 'Zero-fee ticketing',
-                            'copy' => 'Take payment through Stripe or PayPal, or cash at the door, for general admission, VIP, and meet-and-greet tickets. Every ticket carries a QR code for the door, and Event Schedule takes no platform fee.',
+                            'copy' => 'On Pro, take payment through Stripe or PayPal, or cash at the door, for general admission, VIP, and meet-and-greet tickets. Free shows take registrations on every plan. Every ticket carries a QR code for the door, and Event Schedule takes no platform fee.',
                             'url' => '/features/ticketing', 'link' => 'Sell tickets',
                         ],
                         [
                             'title' => 'Show posters, produced',
-                            'copy' => 'Every event auto-generates a poster sized for socials. Post the date, not a blank story.',
+                            'copy' => 'Open Events graphic from your schedule\'s Actions menu and your upcoming shows become one image and a caption, ready for socials. Only shows that have a flyer are drawn. Free on every plan. Post the date, not a blank story.',
                             'url' => '/features/event-graphics', 'link' => 'See event graphics',
                         ],
                         [
@@ -1048,7 +1181,7 @@
                             <div class="mg-pcard-face">
                                 <span class="mg-k" aria-hidden="true">The second card</span>
                                 <h3 class="mg-d">The residency</h3>
-                                <p>A recurring Tuesday show, a season pass for the regulars, and a poster that makes itself every week.</p>
+                                <p>A recurring Tuesday show, an Events graphic of what is coming up whenever you open it, and on Pro a season pass for the regulars.</p>
                                 <span class="mg-link mg-pcard-go">Set the pattern {!! $mgArrow !!}</span>
                             </div>
                             <div class="mg-pcard-back" aria-hidden="true"><i class="mg-pcard-ring"></i><i class="mg-pcard-mark"></i></div>
@@ -1108,6 +1241,68 @@
                         <span class="mg-k" aria-hidden="true">Move three</span>
                         <h3 class="mg-d">Fill the room</h3>
                         <p>Fans who sign up with their email get a digest automatically when you add shows, at most one every three days. The newsletters you write reach their inboxes directly.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5b. The billing: what goes on a magic show listing           -->
+        <!-- ============================================================ -->
+        <section id="listing" class="mg-section mg-alt" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap">
+                <div class="mg-head">
+                    <p class="mg-k" data-reveal>The billing</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        What a magic show listing says. <span class="mg-red">And what it keeps back.</span>
+                    </h2>
+                    <p class="mg-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A ticket buyer wants to know what kind of evening it is, who it suits and what they might be asked to do. They do not want the effects explained. Write the listing like a poster, not a programme.
+                    </p>
+                </div>
+
+                @php
+                    $mgBilling = [
+                        ['Say the format', 'Close-up, parlor, stage illusion and mentalism are four different evenings. Put it in the event\'s name or the first words of its Short Description: "An Evening of Close-Up Magic" sells a different seat from "Mind Games, Live".'],
+                        ['Give the running time', 'Enter the start and the end in Date & Time, so a couple can book dinner around it. If there is an interval, add it as a part on the Agenda tab, free on every plan.'],
+                        ['Name who it suits', 'A family show, adults only, or a minimum age, and the reason: a late set with adult humour, or a mentalism act too unsettling for small children. Put it in the Short Description, or on Pro as a custom field shown on the event page.'],
+                        ['Mention volunteers', 'Plenty of people dread being picked. One line such as "Volunteers are invited up, and nobody is made to take part" sells seats to them as well.'],
+                        ['Seats and latecomers', 'Say how many seats there are and what happens to a late arrival. In a twenty-seat room a late entrance can break a routine, so if the door closes at the start, the listing is the place to say it.'],
+                        ['Ticket tiers', 'General admission, front row and a meet-and-greet are separate ticket types, each with its own price and quantity, on Pro. A free show takes registrations on every plan, with a Registration Limit for the room.'],
+                        ['Filming', 'If you would rather the routine stayed off phones, say so on the listing, before the night, rather than from the stage.'],
+                        ['A photograph, not a logo', 'The event\'s flyer becomes the picture when its link is shared. A face mid-reaction sells a magic show better than a top hat.'],
+                    ];
+                @endphp
+                <div class="mg-bill" data-reveal-group="70">
+                    @foreach ($mgBilling as $billIndex => [$billTitle, $billCopy])
+                        <article class="mg-act-row" data-reveal>
+                            <span class="mg-k" aria-hidden="true">{{ str_pad($billIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <h3 class="mg-d">{{ $billTitle }}</h3>
+                            <p>{{ $billCopy }}</p>
+                        </article>
+                    @endforeach
+                </div>
+
+                <div class="mg-split" data-reveal-group="120">
+                    <div class="mg-move" data-reveal>
+                        <span class="mg-k">Close-up and parlor</span>
+                        <h3 class="mg-d">The room is the ticket count</h3>
+                        <ul>
+                            <li>A few dozen seats at most, so set each ticket type's quantity to the room. When it shows Sold Out, a waitlist on Pro tells the next fan when a seat frees up.</li>
+                            <li>Every seat is a good one, so a single ticket type often does.</li>
+                            <li>Often run as a residency: one <x-link href="{{ marketing_url('/features/recurring-events') }}">recurring event</x-link>, with the weeks you are away taken out as exceptions.</li>
+                            <li>Walk-around and table-hopping work is almost always somebody else's private event: a Draft on your side, not a listing.</li>
+                        </ul>
+                    </div>
+                    <div class="mg-move" data-reveal>
+                        <span class="mg-k">Stage and theatre</span>
+                        <h3 class="mg-d">The house sells, you fill it</h3>
+                        <ul>
+                            <li>The theatre usually sells the tickets: paste its link under Tickets elsewhere and show the price beside it.</li>
+                            <li>Numbered seats? <x-link href="{{ marketing_url('/features/allocated-seating') }}">Allocated seating</x-link> is an Enterprise feature for venue schedules: the theatre's schedule draws the seat map, and a show on it sells from that map.</li>
+                            <li>A family matinee and a late show for adults are two events with two age lines, not one event with a footnote.</li>
+                            <li>On a variety bill, the host names every act on its Participants tab, and the date reaches your schedule as a request to accept.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -1280,6 +1475,9 @@
                         $faqs = [
                             ['q' => 'Is Event Schedule free for magicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Free registration is unlimited on it, and the QR on each place is scanned at the door on any plan. Putting a price on a ticket is the Pro half. Newsletters are free at 10 a month, counted per recipient rather than per send. Zero platform fees on ticket sales, on any plan.'],
                             ['q' => 'Can I keep private and corporate bookings off my public schedule?', 'a' => 'Yes. Save any booking as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can hold close-up gigs and corporate dates privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for private and corporate clients.'],
+                            ['q' => 'How do I take booking requests for corporate events and private parties?', 'a' => 'Switch on Accept requests in the Requests row of your schedule\'s Engagement settings. A talent schedule always uses the Booking Form, so a planner fills in one plain form on your page with their name and email, needs no account, and the request waits on your Requests tab. Add Request Terms with your booking policy, make the date and location required, and on Pro ask questions of your own, such as the head count and the kind of event. The form itself is free on every plan. Accepting puts the event on your public schedule, so set a private booking to Draft once you have accepted it.'],
+                            ['q' => 'Should a magician publish their availability?', 'a' => 'Usually not as a calendar of free dates. Planners ask for a specific date, and the booking form lets them. With private gigs kept as Drafts, your public page shows only the shows people can attend, so an empty-looking Saturday may not be free: say "ask about your date" in your Request Terms. On Enterprise, availability lets you and your team mark the dates you cannot work on the shared calendar, and it is never shown to the public.'],
+                            ['q' => 'What should a magic show listing include?', 'a' => 'The format (close-up, parlor, stage illusion or mentalism), the start and end time, who the show suits and any minimum age, whether volunteers are invited up, how many seats there are and what happens to latecomers, the ticket tiers, and a photograph rather than a logo. Leave the effects unexplained: the listing sells the evening, not the secret.'],
                             ['q' => 'Can I sell gift cards or season passes for my shows?', 'a' => 'Yes. On the Pro plan, once your schedule has its own email settings on eventschedule.com, you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both.'],
                             ['q' => 'Can I sell tickets to my magic shows?', 'a' => 'Yes, on the Pro plan, which is what a ticket carrying a price needs; free registration for a show you are not charging for is unlimited without it. Take payment through Stripe or PayPal straight to your own account, or through Payfast (rand only), Razorpay (Indian rupees only), Invoice Ninja, a payment link or cash. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. On Pro, a waitlist tells fans when a sold-out show frees a seat. If a show is called off, a Stripe, PayPal or Razorpay sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. Zero platform fees, so the only deduction is your payment provider\'s own.'],
                             ['q' => 'Can I run a weekly residency without re-entering the same show?', 'a' => 'Yes. Set up your show once as a recurring event with a day-of-week pattern, and add date exceptions for the weeks you are away. On the Pro plan you can also save any event as a template, so repeat corporate formats take two clicks instead of a blank form.'],
