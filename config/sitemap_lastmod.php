@@ -95,7 +95,7 @@ return [
     '/features/boost' => '2026-10-23',
     '/features/calendar-sync' => '2026-11-11',
     '/features/carpool' => '2026-10-23',
-    '/features/check-in' => '2026-11-08',
+    '/features/check-in' => '2026-11-11',
     '/features/custom-css' => '2026-10-23',
     '/features/custom-domain' => '2026-10-23',
     '/features/custom-fields' => '2026-10-23',

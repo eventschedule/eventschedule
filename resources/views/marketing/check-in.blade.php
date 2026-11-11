@@ -395,7 +395,7 @@
             $doorChecklist = [
                 ['Scan a real ticket at the door itself', 'Register yourself for the event and scan it where the door will be, an hour before. The office has signal. The doorway, the basement and the far end of a field often do not.'],
                 ['Set every phone to the right event and night', 'The scanner opens on today\'s event with sales, and the choice is remembered on that phone. Check it anyway on a recurring night, where a ticket for the next night stops in amber.'],
-                ['Sign in on each door phone', 'Each person scanning signs in as themselves and allows the camera once; after that the camera starts by itself on that phone.'],
+                ['Sign in on each door phone', 'Each door phone signs in and allows the camera once; after that the camera starts by itself on that phone. Free and Pro schedules have one account, so every phone signs in as you; on Enterprise each scanner can be a viewer on the team with an account of their own.'],
                 ['Charge everything, and bring a power bank', 'The screen stays on while the camera runs, which is what you want at a door and what empties a battery by the second hour.'],
                 ['Plan for the dark', 'Where the phone offers it, use Light, the torch, in a dark doorway, and ask guests to turn their screen brightness up. A dim or cracked screen is the code that fails to read most often.'],
                 ['Decide the connection', 'If mobile signal at the door is weak, put the door phones on the venue\'s wifi or a hotspot, and test that too. A scan needs a connection to check the code.'],

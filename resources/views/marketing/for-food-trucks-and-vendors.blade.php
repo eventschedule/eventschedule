@@ -1469,7 +1469,7 @@
             ],
             [
                 'q' => 'Can customers put my stops in their own calendar?',
-                'a' => 'Yes, without giving you an email address. Your page offers a subscription to your calendar in its sign-up panel, and every stop offers the same thing in its Add to Calendar menu. Subscribe once and each new stop turns up in their calendar, the regular pitches included, and a stop you move, cancel or take out with a date exception changes there too. It is a live feed rather than a one-off download, and it is free on every plan.',
+                'a' => 'Yes, without giving you an email address. Your page offers a subscription to your calendar in its sign-up panel, and every stop that is not selling tickets or taking sign-ups offers the same thing in its Add to Calendar menu. Subscribe once and each new stop turns up in their calendar, the regular pitches included, and a stop you move, cancel or take out with a date exception changes there too. It is a live feed rather than a one-off download, and it is free on every plan.',
             ],
             [
                 'q' => 'What happens the week I lose a pitch?',
