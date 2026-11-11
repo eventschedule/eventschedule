@@ -1233,7 +1233,7 @@
                 'when'   => 'Sat Jun 20, 10am',
                 'note'   => 'Places sold in advance, counted for that date',
                 'tilt'   => '-0.8deg',
-                'plan'   => 'Free',
+                'plan'   => 'Pro',
             ],
         ];
 
@@ -1284,12 +1284,28 @@
                 'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a place carry a price. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Check people in with a QR code at the door on any plan, and take the money through your own Stripe or PayPal account, or as cash, a payment link or Invoice Ninja. Pro also adds your own questions at checkout. A free opening asks for none of it: registration with a capacity is on every plan. Event Schedule charges zero platform fees either way, so what you keep is the price less the processor\'s fee, and a Stripe, PayPal or Razorpay sale can be refunded in full or in part from the Sales page.',
             ],
             [
+                'q' => 'What should an artist exhibition calendar include?',
+                'a' => 'Every show you are in, entered the way it will be read: the show title (not "Opening"), the gallery or fair as the venue, the dates of the whole run, the gallery hours, and whether it is solo or a group show. Then the dates people can come to you: open studio days, talks and workshops. Make the opening its own event if you want people to register for it, and give each show an image, because that is what a shared link shows. Keep the past shows on the page rather than deleting them: they are your exhibition history, and the schedule lists them under Past Events.',
+            ],
+            [
+                'q' => 'How do I show past exhibitions on my website?',
+                'a' => 'Leave them on your schedule. Past events stay on the public page under Past Events, below what is coming, unless you switch on Hide Past Events in the Style settings, and visitors can load further back. To build the archive, enter old shows with their real dates: the automatic email to your list only covers events still to come, so nobody is emailed about them. Then link the schedule from your portfolio site, or embed its calendar there, which is free on every plan.',
+            ],
+            [
+                'q' => 'Should the opening be a separate event from the exhibition?',
+                'a' => 'Usually, yes. Enter the run as one Multi-day event, first day to last, so the show counts as on until it closes, and the opening as a second event of a few hours on its night. Registration counts per date, so on its own event it counts the people coming to the opening rather than anyone across five weeks. If the gallery lists the opening and adds you as a participant, accept theirs instead of making a copy.',
+            ],
+            [
+                'q' => 'How many collectors can I email about an opening?',
+                'a' => 'Newsletters are counted in emails, one per recipient, against a monthly allowance: 10 on the free plan, 100 on Pro and 1,000 on Enterprise. An invitation to 85 people uses 85. Send through your own mail server, under Email Settings on any plan, and there is no cap. On eventschedule.com a send to more than 50 people also needs a verified phone number or your own email settings. The automatic digest of new events you created yourself is separate and does not count.',
+            ],
+            [
                 'q' => 'What happens to the photographs people take at the opening?',
                 'a' => 'They can go on the event. Visitors can add photos, videos and comments with just a name and an email, and everything lands in an approval queue first, so nothing is public until you have looked at it. A per-schedule setting can require an account instead. Free schedules hold up to 25 photos; the Pro plan removes the cap and lets you download an event\'s approved photos as a zip.',
             ],
             [
                 'q' => 'Can I show a gallery\'s exhibition without retyping it?',
-                'a' => 'Yes. When a gallery lists you on their event, it arrives on your schedule and waits for you to accept it, unless you have added that gallery to your Approved Schedules, in which case it goes straight on. Accept it and the same entry appears on both pages, so the dates cannot end up saying two different things. Nothing shows on your page that you have not agreed to.',
+                'a' => 'Yes. When a gallery lists you on their event, it arrives on your schedule and waits for you to accept it, unless that gallery had already listed you before you claimed your page, in which case it goes straight on. Accept it and the same entry appears on both pages, so the dates cannot end up saying two different things. Nothing shows on your page that you have not agreed to.',
             ],
             [
                 'q' => 'A gallery listed me, but I am not on Event Schedule. What happens?',
@@ -1302,9 +1318,12 @@
             ['year', 'The year'],
             ['pin', 'What a pin holds'],
             ['plates', 'Where you have shown'],
+            ['entries', 'Entering a show'],
             ['opening', 'After the opening'],
             ['sell', 'Putting a price on it'],
             ['tell', 'Telling people'],
+            ['invite', 'The private view'],
+            ['archive', 'Exhibition history'],
             ['who', 'Perfect for'],
             ['faq', 'Questions'],
             ['claim', 'Get started'],
@@ -1312,8 +1331,8 @@
 
         // Which pigment each section is ground in, for the rail.
         $vaSectionPigment = [
-            'top' => 'red', 'year' => 'red', 'pin' => 'ochre', 'plates' => 'sienna', 'opening' => 'black',
-            'sell' => 'viridian', 'tell' => 'teal', 'who' => 'ochre', 'faq' => 'sienna', 'claim' => 'red',
+            'top' => 'red', 'year' => 'red', 'pin' => 'ochre', 'plates' => 'sienna', 'entries' => 'viridian', 'opening' => 'black',
+            'sell' => 'viridian', 'tell' => 'teal', 'invite' => 'red', 'archive' => 'sienna', 'who' => 'ochre', 'faq' => 'sienna', 'claim' => 'red',
         ];
 
         // The numbered chip that opens a section, as a tube manufacturer's card.
@@ -1668,6 +1687,86 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 4b. Entering a show (04): what each moment becomes           -->
+        <!-- ============================================================ -->
+        @php
+            // [moment, strand, how to enter it, plan, why]
+            $vaEntries = [
+                ['A solo exhibition', 'exhibitions', 'One Multi-day event from the first day of the run to the last, with the gallery as its venue. Put the gallery hours in the description.', 'Free', 'An event of a day or more counts as on now until its last day, so the show stays with what is on for the whole run instead of slipping into Past Events after the opening night.'],
+                ['The opening', 'exhibitions', 'Its own event, three hours on one evening, at the same venue, with free registration if you want to know who is coming.', 'Free', 'Registration counts per date. On a five-week run it would count the whole run; on its own event it counts the night.'],
+                ['A group show the gallery runs', 'exhibitions', 'Nothing to type. The gallery names you as a participant on its event; you accept it, or it goes straight on if the gallery had already listed you before you claimed your page.', 'Free', 'One entry on both pages, with every artist in the show listed on the event and linked to their own page.'],
+                ['A group show you organise', 'exhibitions', 'One event at the venue, with each artist added on the Participants tab. Give each one an email address so their page can be theirs.', 'Free', 'An artist not on Event Schedule gets a page in their name, which they claim by signing in with that address.'],
+                ['An art fair', 'exhibitions', 'One Multi-day event with the fair as the venue. The booth number goes in the short description, which shows under the name.', 'Free', 'A collector looking at the listing on the day needs the booth more than the address.'],
+                ['A talk or a paid workshop', 'teaching', 'An event with free registration for a talk, or ticket types with a price for a workshop.', 'Pro for a price', 'A ticket with a price needs Pro; free registration with a capacity is on every plan.'],
+            ];
+        @endphp
+        <section id="entries" class="va-sec va-pg va-p-viridian" style="scroll-margin-top: 4rem;">
+            <div class="va-washes" aria-hidden="true">
+                <i class="va-w" style="width: 22rem; height: 17rem; left: -8rem; top: 2rem;"></i>
+            </div>
+            <div class="va-wrap">
+                <div class="va-head">
+                    <div data-reveal>{!! $vaChip('viridian', '04') !!}</div>
+                    <div>
+                        <span class="va-tag" data-reveal style="--reveal-delay: 0.05s;">Entering a show</span>
+                        <h2 class="va-d va-h2" data-reveal style="--reveal-delay: 0.1s;">
+                            The run, the opening and the fair are <span class="va-wet">three different entries</span>.
+                        </h2>
+                        <p class="va-sub" data-reveal style="--reveal-delay: 0.15s;">
+                            Most exhibition calendars go wrong in the same place: the opening is entered as the show, so the work disappears from the page the morning after the private view while it hangs for another five weeks. Decide what each moment is before you type it.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="va-paper va-year" data-reveal="panel">
+                    <span class="va-tape" aria-hidden="true" style="left: 7%; --tape-r: -30deg;"></span>
+                    <span class="va-tape" aria-hidden="true" style="left: 93%; --tape-r: 29deg;"></span>
+                    <table class="va-ledger">
+                        <caption class="sr-only">Six moments in an artist's year, how to enter each one in Event Schedule, the plan it needs, and why it is entered that way.</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Moment</th>
+                                <th scope="col">How to enter it</th>
+                                <th scope="col">Plan</th>
+                                <th scope="col">Why</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($vaEntries as [$eMoment, $eStrand, $eHow, $ePlan, $eWhy])
+                                @php [$sName, $sPig] = $strands[$eStrand]; @endphp
+                                <tr class="va-row va-pg va-p-{{ $sPig }}">
+                                    <th scope="row">
+                                        {{ $eMoment }}
+                                        <small>{{ $sName }}</small>
+                                    </th>
+                                    <td class="va-where">{{ $eHow }}</td>
+                                    <td class="va-dates"><span class="va-tier {{ $ePlan === 'Free' ? '' : 'va-tier-pro' }}">{{ $ePlan }}</span></td>
+                                    <td class="va-setup" style="padding-bottom: 0.95rem;">{{ $eWhy }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <p class="va-year-note">
+                        Two more things worth deciding early. Name each event what your CV will call it, the show's title rather than "Opening", because that name is what stays on the page. And keep a show the gallery has not announced as a Draft: it is off your public page until you publish it, and nobody is emailed about it before then.
+                    </p>
+                </div>
+
+                <ul class="va-points" data-reveal-group="80" style="max-width: 52rem; margin-top: clamp(2.25rem, 4vw, 3rem);">
+                    @foreach ([
+                        ['What a listing needs that a CV line does not', 'The hours the gallery is open, the nearest station, whether the space is step-free, and whether the opening is open to all or by invitation. People read a listing to decide whether to go.'],
+                        ['A flyer on every show', 'The flyer image on an event is what the Events graphic is built from, and the picture a link to the event shows when it is shared. Use an installation view or the work on the invitation card, and credit the photographer in the description.'],
+                        ['The same title everywhere', 'Use the gallery\'s spelling of the show title and your own name as it appears on the wall text, so the listing, the press release and the CV agree when somebody searches for them.'],
+                    ] as $epIndex => [$epTitle, $epBody])
+                        <li data-reveal style="--k: {{ $epIndex }};">
+                            <div><strong>{{ $epTitle }}</strong> <span>{{ $epBody }}</span></div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 5. After the opening (04): black paper, in both modes        -->
         <!-- ============================================================ -->
         <section id="opening" class="va-sec va-night va-pg" style="scroll-margin-top: 4rem;">
@@ -1678,7 +1777,7 @@
             </div>
             <div class="va-wrap">
                 <div class="va-head">
-                    <div data-reveal>{!! $vaChip('black', '04') !!}</div>
+                    <div data-reveal>{!! $vaChip('black', '05') !!}</div>
                     <div>
                         <span class="va-tag" data-reveal style="--reveal-delay: 0.05s;">After the opening</span>
                         <h2 class="va-d va-h2" data-reveal style="--reveal-delay: 0.1s;">
@@ -1752,7 +1851,7 @@
             </div>
             <div class="va-wrap">
                 <div class="va-head">
-                    <div data-reveal>{!! $vaChip('viridian', '05') !!}</div>
+                    <div data-reveal>{!! $vaChip('viridian', '06') !!}</div>
                     <div>
                         <span class="va-tag" data-reveal style="--reveal-delay: 0.05s;">Putting a price on it</span>
                         <h2 class="va-d va-h2" data-reveal style="--reveal-delay: 0.1s;">
@@ -1820,10 +1919,12 @@
                                 <span class="va-tier">Free</span>
                             </div>
                             <p>
-                                Publish bookable slots instead of a fixed date. Set your weekly hours, how
-                                far apart slots start, a buffer between them, and per-date overrides for the
-                                days you are away or installing. Charge by Stripe, PayPal, Payfast, Razorpay, a
-                                payment link or cash, or keep it free. One bookable type is free; Pro adds more.
+                                Publish bookable slots instead of a fixed date. Set your weekly hours and how
+                                far apart slots start, and one bookable type is free on every plan (on
+                                eventschedule.com its emails go through your own email settings). Pro adds more
+                                types, a price on a visit (Stripe, PayPal, Payfast, Razorpay, a payment link or
+                                cash), and the finer rules: a buffer between visits, per-date overrides for the
+                                days you are away or installing, and minimum notice.
                             </p>
                             <div class="va-pan-fig" aria-hidden="true">
                                 <div>
@@ -1854,7 +1955,7 @@
             </div>
             <div class="va-wrap">
                 <div class="va-head">
-                    <div data-reveal>{!! $vaChip('teal', '06') !!}</div>
+                    <div data-reveal>{!! $vaChip('teal', '07') !!}</div>
                     <div>
                         <span class="va-tag" data-reveal style="--reveal-delay: 0.05s;">Telling people</span>
                         <h2 class="va-d va-h2" data-reveal style="--reveal-delay: 0.1s;">
@@ -1895,6 +1996,155 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 7b. The private view (08): four weeks of an invitation       -->
+        <!-- ============================================================ -->
+        <section id="invite" class="va-sec va-pg va-p-red" style="scroll-margin-top: 4rem;">
+            <div class="va-washes" aria-hidden="true">
+                <i class="va-w va-pg va-p-ochre" style="width: 21rem; height: 16rem; right: -7rem; top: 3rem;"></i>
+            </div>
+            <div class="va-wrap">
+                <div class="va-head">
+                    <div data-reveal>{!! $vaChip('red', '08') !!}</div>
+                    <div>
+                        <span class="va-tag" data-reveal style="--reveal-delay: 0.05s;">The private view</span>
+                        <h2 class="va-d va-h2" data-reveal style="--reveal-delay: 0.1s;">
+                            Collectors, press, and <span class="va-wet">the people who came last time</span>.
+                        </h2>
+                        <p class="va-sub" data-reveal style="--reveal-delay: 0.15s;">
+                            An opening is three audiences with three reasons to come. The collector wants first sight of the work, the critic wants a quiet look and the press release, the friends want the evening. Here is the month before an opening, in the order the work falls.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="va-notes" data-reveal-group="100">
+                    @foreach ([
+                        ['exhibitions', 'Free', 'Five weeks out: the listing goes up', 'Enter the run and the opening as soon as the gallery has announced the show, or as Drafts until it has. The people on your email list hear about events you created yourself in one automatic digest, at most one every 72 hours. If the gallery made the event and you accepted it, the digest leaves it out, so that show is the one to write a newsletter about.'],
+                        ['exhibitions', 'Free', 'Three weeks out: the invitation', 'Keep two lists as manual segments in your newsletters: collectors, and press. Import each from the spreadsheet you already have, people who agreed to hear from you only. Send the invitation with an Events block set to Events I choose and the opening picked, so the email\'s button opens the event page with Register on it. Offer press a separate hour before the doors open, in a line of its own.'],
+                        ['exhibitions', 'Free', 'The week of: the reminder', 'Everyone who registered gets a reminder email before the night without you doing anything: it is on by default, and you choose 3 hours or 1, 2 or 3 days before. Use your own week for the people a reminder email will not move, the two or three collectors you would phone.'],
+                        ['studio', 'Free', 'The morning after: the thank-you', 'A Ticket Buyers segment narrowed to the opening reaches everyone who registered for it, free registration included. Thank them, say how long the show is up, and link the event, where visitors\' photographs of the night wait for your approval before anyone else sees them.'],
+                    ] as $iv => [$ivStrand, $ivPlan, $ivTitle, $ivBody])
+                        @php [$sName, $sPig] = $strands[$ivStrand]; @endphp
+                        <div data-reveal class="va-note va-pg va-p-{{ $sPig }}" style="--tilt: {{ $iv % 2 === 0 ? '0.6deg' : '-0.6deg' }};">
+                            <div class="va-grade" aria-hidden="true"><i></i></div>
+                            <div class="va-note-body">
+                                <div class="va-note-meta">
+                                    <span class="va-strand">{{ $sName }}</span>
+                                    <span class="va-tier">{{ $ivPlan }}</span>
+                                </div>
+                                <h3>{{ $ivTitle }}</h3>
+                                <p>{{ $ivBody }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="va-duo" style="margin-top: clamp(2.5rem, 5vw, 3.5rem);" data-reveal-group="110">
+                    <div class="va-plate va-pg va-p-teal" data-reveal="panel">
+                        <span class="va-tag">The arithmetic</span>
+                        <h3>An invitation counts every inbox it reaches</h3>
+                        <p>
+                            The newsletter allowance is counted in emails, one per recipient, not per send. Sixty collectors and twenty-five press is 85 emails each time you write. Write to both lists three times in a month (an invitation, a last call and a follow-up) and it is 255, plus a copy to each team member. The reminder to people who registered is automatic and is not counted.
+                        </p>
+                        <ul>
+                            @foreach ([
+                                ['Free', '10 emails a month: a note to ten people, not a mailing', '#c9952b', '-12deg'],
+                                ['Pro', '100 a month: the invitation to all 85, once', '#e03c31', '18deg'],
+                                ['Enterprise', '1,000 a month: all three sends, with room to spare', '#2f8f7a', '-24deg'],
+                                ['Your own mail server', 'Email Settings, on any plan, and there is no cap', '#1ba7b4', '10deg'],
+                            ] as [$arName, $arBody, $arColour, $arTurn])
+                                <li>
+                                    <i aria-hidden="true" style="--c: {{ $arColour }}; --r: {{ $arTurn }};"></i>
+                                    <div><strong>{{ $arName }}</strong><span>{{ $arBody }}</span></div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <div class="va-plate va-pg va-p-ochre" data-reveal="panel">
+                        <span class="va-tag">Before you send</span>
+                        <h3>Three things that stop a send</h3>
+                        <p>
+                            A send that would go past the month's allowance is refused whole, never delivered to half the list, so check the meter on the Newsletters tab first.
+                        </p>
+                        <ul>
+                            @foreach ([
+                                ['More than 50 people', 'On eventschedule.com that needs a verified phone number or your own email settings', '#a5512b', '14deg'],
+                                ['Your team is copied', 'Owners, admins and viewers of the schedule always receive it, and count', '#c9952b', '-16deg'],
+                                ['One address, one email', 'Someone on both lists is sent it once and counted once', '#1ba7b4', '22deg'],
+                            ] as [$arName, $arBody, $arColour, $arTurn])
+                                <li>
+                                    <i aria-hidden="true" style="--c: {{ $arColour }}; --r: {{ $arTurn }};"></i>
+                                    <div><strong>{{ $arName }}</strong><span>{{ $arBody }}</span></div>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p class="va-plate-foot">
+                            <x-link href="{{ marketing_url('/docs/newsletters') }}#recipients">Segments and recipients in the guide</x-link>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7c. Exhibition history (09): the past stays on the wall      -->
+        <!-- ============================================================ -->
+        <section id="archive" class="va-sec va-pg va-p-sienna va-sec-tint" style="scroll-margin-top: 4rem;">
+            <div class="va-washes" aria-hidden="true">
+                <i class="va-w" style="width: 24rem; height: 18rem; left: -9rem; bottom: -4rem;"></i>
+            </div>
+            <div class="va-wrap va-split" style="align-items: start;">
+                <div>
+                    <div data-reveal style="margin-bottom: 1.75rem;">{!! $vaChip('sienna', '09') !!}</div>
+                    <span class="va-tag" data-reveal style="--reveal-delay: 0.05s;">Exhibition history</span>
+                    <h2 class="va-d va-h2" data-reveal style="--reveal-delay: 0.1s; margin-block: 0.9rem 1.2rem;">
+                        Last year's shows are <span class="va-wet">the CV</span>.
+                    </h2>
+                    <p class="va-sub" data-reveal style="--reveal-delay: 0.15s;">
+                        A curator reading an application, a collector deciding whether you are serious, a journalist checking a date: they all want the shows you have done, not only the next one. A page that forgets a show the day it closes throws that away.
+                    </p>
+
+                    <ul class="va-points" data-reveal-group="90">
+                        @foreach ([
+                            ['Past shows stay on the page', 'In the list layout they sit under Past Events, below what is coming, and visitors can load further back. Hide Past Events, under Style, is off unless you turn it on, so leave it off.'],
+                            ['Back-fill it in an afternoon', 'Enter old shows with their real dates and venues. The automatic email to your list only covers events still to come, so nobody is told about a show from 2019.'],
+                            ['Filters are for what is coming', 'A visitor who filters to Exhibitions, or searches, narrows the upcoming list; the past list shows when the filters are cleared. Keep the strands for the year ahead and let the archive be the whole archive.'],
+                            ['One link in every application', 'Put the schedule\'s address at the top of the CV you send, and on the back of the show card as its QR code. It is the version of your history that is never out of date.'],
+                        ] as $arIndex => [$arTitle, $arBody])
+                            <li data-reveal style="--k: {{ $arIndex }};">
+                                <div><strong>{{ $arTitle }}</strong> <span>{{ $arBody }}</span></div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="va-plate va-pg va-p-sienna" data-reveal="panel">
+                    <span class="va-tag">How the entries read</span>
+                    <h3>The same events, set as a CV</h3>
+                    <p>
+                        Name each event as the CV would and enter the venue as the gallery, and the page already holds every line a CV needs: the title, the place, the dates, and who else was in it.
+                    </p>
+                    <ul>
+                        @foreach ([
+                            ['2026 · Ten Windows', 'Bell Street Gallery. Solo. One Multi-day event, Mar 6 to Apr 4', '#e03c31', '-10deg'],
+                            ['2026 · Spring Art Fair', 'Riverside Fair, booth 14. One Multi-day event at the fair', '#c9952b', '16deg'],
+                            ['2025 · Common Ground', 'Kiln Room. Group show, listed by the gallery with eight artists as participants', '#2f8f7a', '-22deg'],
+                            ['2025 · Monotype workshop', 'The studio. Teaching, with eight places', '#1ba7b4', '12deg'],
+                        ] as [$cvLine, $cvNote, $cvColour, $cvTurn])
+                            <li>
+                                <i aria-hidden="true" style="--c: {{ $cvColour }}; --r: {{ $cvTurn }};"></i>
+                                <div><strong>{{ $cvLine }}</strong><span>{{ $cvNote }}</span></div>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="va-plate-foot">
+                        Names here are illustrative. Solo or group, and the curator, go in the short description, which shows under the name on the list.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 8. Perfect for (07): six swatch cards                        -->
         <!-- ============================================================ -->
         <section id="who" class="va-sec va-pg va-p-ochre" style="scroll-margin-top: 4rem;">
@@ -1904,7 +2154,7 @@
             </div>
             <div class="va-wrap">
                 <div class="va-head">
-                    <div data-reveal>{!! $vaChip('ochre', '07') !!}</div>
+                    <div data-reveal>{!! $vaChip('ochre', '10') !!}</div>
                     <div>
                         <span class="va-tag" data-reveal style="--reveal-delay: 0.05s;">Perfect for</span>
                         <h2 class="va-d va-h2" data-reveal style="--reveal-delay: 0.1s;">
@@ -2038,7 +2288,7 @@
         <section id="faq" class="va-sec va-pg va-p-sienna va-sec-tint" style="scroll-margin-top: 4rem;">
             <div class="va-wrap va-faq-grid">
                 <div class="va-faq-head">
-                    <div data-reveal>{!! $vaChip('sienna', '08') !!}</div>
+                    <div data-reveal>{!! $vaChip('sienna', '11') !!}</div>
                     <span class="va-tag" data-reveal style="--reveal-delay: 0.05s;">Questions</span>
                     <h2 class="va-d va-h2" data-reveal style="--reveal-delay: 0.1s;">
                         Asked <span class="va-wet">in the studio</span>.

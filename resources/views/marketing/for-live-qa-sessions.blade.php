@@ -973,11 +973,11 @@
         $faqs = [
             [
                 'q' => 'Can I collect audience questions before the session?',
-                'a' => 'Yes, three ways, and it is worth knowing exactly what each one is. A poll on the session lets people vote between your options and, if you allow it, suggest their own, which you approve before anyone sees them; polls are on the Pro plan. Comments are free: your audience can leave one on the session, or on a single agenda segment, and nothing appears until you approve it. And the note you attach to registration goes out with every confirmation email, so you can simply ask people to reply with what they want covered.',
+                'a' => 'Yes, three ways, and it is worth knowing exactly what each one is. A poll on the session lets people vote between your options and, if you allow it, suggest their own, which you approve before anyone sees them; polls are on the Pro plan. Comments are free: your audience can leave one on the session, or on a single agenda segment, and nothing appears until you approve it. And the note you attach to registration goes out with every confirmation email, so you can simply ask people to reply with what they want covered. If you want a question with every sign-up on the free plan, give the session one ticket type priced at zero and add a field to that ticket type: ticket-type questions are free on every plan, while questions on the Registration form are Pro.',
             ],
             [
                 'q' => 'What streaming platforms work with Event Schedule?',
-                'a' => 'Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, YouTube Live, or whatever you move to next year. Mark the session as online and paste the link: it shows on the session page and on each attendee\'s own registration page. To be straight with you, this is one link field rather than a streaming integration, and there is no embedded player.',
+                'a' => 'Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, YouTube Live, or whatever you move to next year. Mark the session as online and paste the link. The public session page names only the platform\'s domain, such as zoom.us; the link itself is on each attendee\'s own registration page, which their confirmation email opens, and in the reminder email before the session. To be straight with you, this is one link field rather than a streaming integration, and there is no embedded player.',
             ],
             [
                 'q' => 'Can I charge for live Q&A sessions?',
@@ -999,6 +999,22 @@
                 'q' => 'Can people get a reminder without registering?',
                 'a' => 'Yes. Switch on the free "Notify me" card and, beside the register button, "Tell me if anything changes" takes an email address and nothing else, no account and no name. That person gets a reminder shortly before the session, a notice if it is cancelled, and any change notice you choose to send, say when the join link moves. Every one of those emails unsubscribes in one click. Each date of a weekly office hour is its own list, it is not a subscription to your schedule, and it is free on every plan. For every date at once, your schedule\'s live calendar feed updates itself and costs no email address at all.',
             ],
+            [
+                'q' => 'How do you run a live Q&A session?',
+                'a' => 'Pick one hour that suits the audience you most need, publish it with registration so you know who is coming and can send them the link, and collect questions before you start so the first minutes are not silent. On the day, have a moderator read each question aloud and merge duplicates while the host answers, open with the best of the advance questions, announce the last two questions before you take them, and end with where the recording will be and when the next session is. In Event Schedule the session, its agenda, free registration with a place limit, comments held for approval and the reminder email are free on every plan.',
+            ],
+            [
+                'q' => 'What is the best time for a live Q&A with a global audience?',
+                'a' => 'There is no hour that suits everyone, so choose for where your registrations come from. 17:00 UTC in winter is 12:00 in New York, 17:00 in London and 18:00 in Berlin, which is why transatlantic sessions often land there; it is 04:00 the next morning in Sydney. For an audience split across far-apart regions, alternate the hour between sessions. Event Schedule shows the time in your schedule\'s timezone with the zone\'s short name beside it, and anyone who adds the session to their calendar sees it in their own time.',
+            ],
+            [
+                'q' => 'How do attendees get the link to join?',
+                'a' => 'Mark the session online and paste the meeting or stream link. The public page names only the platform, such as zoom.us. Everyone who registers gets a confirmation email that opens their own registration page, where the link is, and the reminder email before the session, which is on by default, carries the link too. So give an online session registration or tickets if people need the link.',
+            ],
+            [
+                'q' => 'Can I record a live Q&A and share it afterwards?',
+                'a' => 'Record it on the platform you host on: Event Schedule does not stream, store or play video. Afterwards, send the link to a Ticket Buyers segment narrowed to that session, which reaches everyone who registered, free registration included, and counts each recipient against the newsletter allowance. For a one-off session, add the link to its description; for a weekly series, whose description is shared by every date, add each recording under Videos on the schedule instead.',
+            ],
         ];
 
         $dotSections = [
@@ -1007,6 +1023,9 @@
             ['ask', 'Asking early'],
             ['link', 'The link'],
             ['series', 'Every Thursday'],
+            ['zones', 'Time zones'],
+            ['run', 'Running the hour'],
+            ['after', 'Afterwards'],
             ['asks', 'Six asks'],
             ['rest', 'Everything else'],
             ['who', 'Perfect for'],
@@ -1366,7 +1385,7 @@
                 <div class="qa-reply">
                     <span class="qa-typing" data-reveal aria-hidden="true">{!! $qaDots !!}</span>
                     <div class="qa-bub qa-bub-a" data-reveal="right" style="--reveal-delay: 0.7s;">
-                        <p>Wherever you already host. Mark the session online, paste the link, and it appears on the session page and on each attendee's own registration page.</p>
+                        <p>Wherever you already host. Mark the session online and paste the link. The session page names the platform, such as zoom.us, and the link itself is on each attendee's own registration page and in the reminder email before the hour.</p>
                         <i class="qa-tail" aria-hidden="true"></i>
                     </div>
                     <div class="qa-unfurl" data-reveal="right" style="--reveal-delay: 0.85s;" aria-hidden="true">
@@ -1538,6 +1557,287 @@
                             </div>
                             <p>Anyone can download a single date as a calendar file, and your own Google, Outlook or CalDAV calendar syncs both ways.</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6b. Q5: time zones                                           -->
+        <!-- ============================================================ -->
+        @php
+            // One January week, before any clock changes: UTC, then each city's own clock.
+            // London GMT+0, Berlin CET+1, New York EST-5, Los Angeles PST-8, Mumbai IST+5:30,
+            // Sydney AEDT+11. "+1" is the next day.
+            $zoneRows = [
+                ['15:00 UTC', '15:00', '16:00', '10:00', '07:00', '20:30', '02:00 +1'],
+                ['17:00 UTC', '17:00', '18:00', '12:00', '09:00', '22:30', '04:00 +1'],
+                ['21:00 UTC', '21:00', '22:00', '16:00', '13:00', '02:30 +1', '08:00 +1'],
+                ['23:00 UTC', '23:00', '00:00 +1', '18:00', '15:00', '04:30 +1', '10:00 +1'],
+            ];
+            $zoneCities = ['London', 'Berlin', 'New York', 'Los Angeles', 'Mumbai', 'Sydney'];
+        @endphp
+        <section id="zones" class="qa-sec">
+            <div class="qa-wrap qa-thread">
+                <span class="qa-time" aria-hidden="true">18:33</span>
+
+                <div class="qa-in" data-reveal="left">
+                    <span class="qa-av" aria-hidden="true">Q5</span>
+                    <div class="qa-in-col">
+                        <span class="qa-who" aria-hidden="true">From the audience</span>
+                        <div class="qa-bub qa-bub-q">
+                            <h2 class="qa-h2">What time is that <span class="qa-em">where I am?</span></h2>
+                            <i class="qa-tail" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-reply">
+                    <span class="qa-typing" data-reveal aria-hidden="true">{!! $qaDots !!}</span>
+                    <div class="qa-bub qa-bub-a" data-reveal="right" style="--reveal-delay: 0.7s;">
+                        <p>A live Q&amp;A happens at one moment for everyone, so somebody is always up early or late. Pick the hour for the people you most need in the room, then make the time impossible to misread.</p>
+                        <i class="qa-tail" aria-hidden="true"></i>
+                    </div>
+                    <span class="qa-seen" aria-hidden="true">Answered</span>
+                </div>
+
+                <div class="qa-table-card" data-reveal="panel">
+                    <table class="qa-table">
+                        <caption class="sr-only">Four candidate start times for a live Q&amp;A in January, in UTC and in six cities' local time. +1 means the next day.</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Start</th>
+                                @foreach ($zoneCities as $zoneCity)
+                                    <th scope="col">{{ $zoneCity }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($zoneRows as $zoneRow)
+                                <tr>
+                                    <th scope="row"><span>{{ $zoneRow[0] }}</span></th>
+                                    @foreach ($zoneCities as $zoneIndex => $zoneCity)
+                                        <td data-label="{{ $zoneCity }}">{{ $zoneRow[$zoneIndex + 1] }}</td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <p class="qa-table-note">
+                        Times for a week in January, before any clocks change; +1 is the next day. Read it by audience: 17:00 UTC is lunchtime in New York and early evening in Europe, which is why so many transatlantic AMAs land there, and nothing in this table suits Europe and Sydney at once: 23:00 UTC works for California and Sydney but is midnight in Berlin. If your registrations come from two far-apart places, alternate the hour from one session to the next rather than asking one side to stay up every time.
+                    </p>
+                </div>
+
+                <div class="qa-cards qa-cards-2" data-reveal-group="100">
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>One zone, named on the page</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>Every session is entered and shown in your schedule's timezone, set under Details, Language and time. The session page prints the time with the zone's short name beside it, such as GMT, or GMT+2 for a zone without one, so a visitor elsewhere knows which clock it is.</p>
+                    </div>
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>Their own clock, in their calendar</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>The page does not convert the time for each visitor. Their calendar does: a session added from the Add to Calendar menu lands at the right moment in whatever zone their phone is in. Say so in the description, and write two or three cities' times in the short description, which shows under the name.</p>
+                    </div>
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>The weeks the clocks change</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>A weekly session keeps the same clock time in your zone all year. Everyone else's moves: the United States changes its clocks two or three weeks before Europe in March and a week after it in the autumn, so for those weeks a London 17:00 is 13:00 in New York, not 12:00. Tell your list before the first of those weeks.</p>
+                    </div>
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>One-to-one office hours</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>For a slot each rather than one hour together, use an appointment type instead of a session. Its booking page shows every guest the open times in their own timezone, with yours beside it, and an online type sends the meeting link with the confirmation. One free type on every plan; on eventschedule.com the booking emails need your own email settings.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6c. Q6: running the hour (the room with the lights down)     -->
+        <!-- ============================================================ -->
+        @php
+            // A 45-minute AMA, as a run of show. General practice, not a product setting:
+            // the agenda tab is where it can be written down for the audience to read.
+            $runOfShow = [
+                ['-15', 'Host and moderator in the room', 'Sound, screen share, the questions sent in advance open in a second window'],
+                ['0', 'Start on time, with the rules', 'One minute: how to ask, how long answers are, that it is recorded if it is'],
+                ['2', 'The questions people sent ahead', 'Ten minutes on the strongest three, which gives the live room time to warm up'],
+                ['12', 'Open floor', 'The moderator reads questions aloud and groups duplicates; the host only answers'],
+                ['38', 'The last two questions', 'Announced as the last two, so nobody waits for a turn that is not coming'],
+                ['42', 'What happens next', 'Where the recording will be, the date of the next session, and the link to register'],
+            ];
+        @endphp
+        <section id="run" class="qa-sec qa-night">
+            <div class="qa-wrap qa-thread">
+                <span class="qa-time" aria-hidden="true">18:36</span>
+
+                <div class="qa-in" data-reveal="left">
+                    <span class="qa-av" aria-hidden="true">Q6</span>
+                    <div class="qa-in-col">
+                        <span class="qa-who" aria-hidden="true">From the audience</span>
+                        <div class="qa-bub qa-bub-q">
+                            <h2 class="qa-h2">What if nobody asks <span class="qa-em">anything?</span></h2>
+                            <i class="qa-tail" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-reply">
+                    <span class="qa-typing" data-reveal aria-hidden="true">{!! $qaDots !!}</span>
+                    <div class="qa-bub qa-bub-a" data-reveal="right" style="--reveal-delay: 0.7s;">
+                        <p>The first two minutes of a live Q&amp;A are the quietest, and the last ten are the busiest. Arrive with questions already in hand, give the room a shape, and have a second person read the questions so the host can think.</p>
+                        <i class="qa-tail" aria-hidden="true"></i>
+                    </div>
+                    <span class="qa-seen" aria-hidden="true">Answered</span>
+                </div>
+
+                <div class="qa-two">
+                    <div data-reveal="panel">
+                        <div class="qa-sheet">
+                            <div class="qa-sheet-head">
+                                <span class="qa-sheet-av" aria-hidden="true">45</span>
+                                <div>
+                                    <span class="qa-sheet-title">A 45-minute AMA</span>
+                                    <span class="qa-sheet-meta">RUN OF SHOW &middot; MINUTES FROM THE START</span>
+                                </div>
+                            </div>
+                            <div>
+                                @foreach ($runOfShow as [$runAt, $runName, $runNote])
+                                    <div class="qa-slot">
+                                        <span class="qa-slot-time">{{ $runAt }}</span>
+                                        <span>
+                                            <span class="qa-slot-name">{{ $runName }}</span>
+                                            <span class="qa-slot-note">{{ $runNote }}</span>
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="qa-sheet-note">
+                                Write the public half of this into the session's agenda, free on every plan, so people can see when the open floor starts. Each part can take its own comments, so a question sent ahead lands under the part it belongs to.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="qa-cards qa-cards-2" data-reveal-group="100">
+                        <div class="qa-card qa-span" data-reveal="panel">
+                            <p class="qa-tag">Questions in advance: pick by plan</p>
+                            <p>Four ways to have questions waiting before you start, and what each one costs.</p>
+                        </div>
+                        <div class="qa-card" data-reveal="panel">
+                            <div class="qa-card-head">
+                                <h3>Comments on the session</h3>
+                                <span class="qa-tier">Free</span>
+                            </div>
+                            <p>On by default for a new schedule. Anyone can leave one with a name and an email, and nothing shows until you approve it, so the questions you read out are the ones you chose.</p>
+                        </div>
+                        <div class="qa-card" data-reveal="panel">
+                            <div class="qa-card-head">
+                                <h3>A question with each sign-up</h3>
+                                <span class="qa-tier">Free</span>
+                            </div>
+                            <p>Instead of free registration, give the session one ticket type priced at zero and add a field to it: "What should we cover?" Ticket-type questions are free on every plan, and each answer sits on that order's row on the Sales page. A sold-out free ticket's waitlist is Pro; free registration's is not.</p>
+                        </div>
+                        <div class="qa-card" data-reveal="panel">
+                            <div class="qa-card-head">
+                                <h3>Questions on the registration form</h3>
+                                <span class="qa-tier qa-tier-pro">Pro</span>
+                            </div>
+                            <p>Keep free registration, with its free waitlist and per-date places, and ask your own questions on it. Custom fields on the Registration form are a Pro feature.</p>
+                        </div>
+                        <div class="qa-card" data-reveal="panel">
+                            <div class="qa-card-head">
+                                <h3>A poll on the topic</h3>
+                                <span class="qa-tier qa-tier-pro">Pro</span>
+                            </div>
+                            <p>Not a question queue, a vote on what the hour covers. Voters sign in, and you can let them suggest options for your approval.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="qa-aside" data-reveal>
+                    On the day, the moderator is the most useful person in the room. They read each question aloud before it is answered, so the recording makes sense without the chat, merge the five versions of the same question into one, and pass on anything rude without reading it out.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6d. Q7: afterwards                                           -->
+        <!-- ============================================================ -->
+        <section id="after" class="qa-sec qa-alt">
+            <div class="qa-wrap qa-thread">
+                <span class="qa-time" aria-hidden="true">18:38</span>
+
+                <div class="qa-in" data-reveal="left">
+                    <span class="qa-av" aria-hidden="true">Q7</span>
+                    <div class="qa-in-col">
+                        <span class="qa-who" aria-hidden="true">From the audience</span>
+                        <div class="qa-bub qa-bub-q">
+                            <h2 class="qa-h2">I can't make it. <span class="qa-em">Is there a recording?</span></h2>
+                            <i class="qa-tail" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-reply">
+                    <span class="qa-typing" data-reveal aria-hidden="true">{!! $qaDots !!}</span>
+                    <div class="qa-bub qa-bub-a" data-reveal="right" style="--reveal-delay: 0.7s;">
+                        <p>Record it on the platform you host on, because Event Schedule does not stream, store or play video. What it does is get the link to the people who registered, and keep it where the next visitor will find it.</p>
+                        <i class="qa-tail" aria-hidden="true"></i>
+                    </div>
+                    <span class="qa-seen" aria-hidden="true">Answered</span>
+                </div>
+
+                <div class="qa-cards" data-reveal-group="100">
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>Say so when they register</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>Put "this session is recorded" in the registration notes, which go out with every confirmation. People ask differently when they know, and some register only for the recording.</p>
+                    </div>
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>Send it to everyone who signed up</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>A Ticket Buyers segment narrowed to the session reaches everyone who registered for it, free registration included. Each recipient counts once against the month's newsletter allowance.</p>
+                    </div>
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>A one-off: on the session page</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>Edit the description and add the link. Past sessions stay on your schedule unless you hide them, so the page keeps working as the place the recording lives.</p>
+                    </div>
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>A weekly series: on the schedule</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>A recurring session has one description for every date, so a link added there shows on next week's page too. Add each recording under Videos in the schedule's Page content instead: a YouTube link appears with its thumbnail on your schedule page.</p>
+                    </div>
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>Ask how it went</h3>
+                            <span class="qa-tier qa-tier-pro">Pro</span>
+                        </div>
+                        <p>Post-event feedback is off until you switch it on, then asks attendees for a star rating and a comment. On eventschedule.com it sends through your own email settings.</p>
+                    </div>
+                    <div class="qa-card" data-reveal="panel">
+                        <div class="qa-card-head">
+                            <h3>The questions you did not reach</h3>
+                            <span class="qa-tier">Free</span>
+                        </div>
+                        <p>They are next session's opening ten minutes. Read them out first and say who asked, and the people who waited last time have a reason to come back.</p>
                     </div>
                 </div>
             </div>

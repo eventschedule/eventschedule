@@ -1345,7 +1345,7 @@
             ],
             [
                 'q' => 'How do patrons find out about library programs?',
-                'a' => 'Four ways, and none of them is an algorithm. Patrons follow your schedule and you email them a newsletter when you have something to say. Your calendar embeds on the library website you already have. Every schedule has a downloadable QR code you can print on a bookmark, a poster or a shelf label. And each date has an iCal download so it lands in the patron\'s own calendar, or a patron can subscribe to the whole calendar as a live feed that follows when a date moves or comes out. Being exact about the two kinds of email: programs you publish reach the list on their own, as one digest covering the batch, while a newsletter with anything else in it is written and sent by you. A community group\'s accepted request stays the group\'s own event, so it is not in your digest.',
+                'a' => 'Four ways, and none of them is an algorithm. Patrons follow your schedule and you email them a newsletter when you have something to say. Your calendar embeds on the library website you already have. Every schedule has a downloadable QR code you can print on a bookmark, a poster or a shelf label. And each date has an iCal download so it lands in the patron\'s own calendar, or a patron can subscribe to the whole calendar as a live feed that follows when a date moves or comes out. Being exact about the two kinds of email: programs you publish reach the list on their own, as one digest covering the batch, while a newsletter with anything else in it is written and sent by you. A meeting-room request that arrives through your form is filed on your schedule, so do not count on it staying out of that digest; if you would rather patrons heard only about programs you put out yourself, the digest has an off switch under Settings, Notifications.',
             ],
             [
                 'q' => 'Can patrons register for programs?',
@@ -1368,6 +1368,22 @@
                 'a' => 'Yes. Turn on event requests and your schedule gets a public form. A submission arrives as a pending request rather than a published event, you approve or decline it, and you can keep a list of schedules whose submissions are approved without review. Requests are free, and so is the approval queue.',
             ],
             [
+                'q' => 'How should a library program calendar be organised by age group?',
+                'a' => 'Give each audience a sub-schedule (Under 5s, Children, Teens, Adults, Seniors) and each kind of session a category (Story time, Crafts, Book club, Tech help). An event sits in one sub-schedule and carries one category, so the two never compete, and a patron can filter by both at once in the Filters panel. Each sub-schedule has its own address, so the children\'s page of your website can embed the Children strand alone. Write the age range in numbers in the short description too: the search box reads it. All of this is free.',
+            ],
+            [
+                'q' => 'Can each branch have its own calendar and the library system one for all of them?',
+                'a' => 'Yes, on the free plan. Give each branch its own Venue schedule, so its programs carry its address and map. Then create one Curator schedule for the system and add every branch under Event Sources: what a branch publishes appears on the system calendar within minutes, and each branch can be filed under a sub-schedule of its own name so patrons filter by branch. One account can own up to 50 schedules on eventschedule.com. The automatic email to subscribers covers only events a schedule created itself, so a patron who wants new programs by email should subscribe to their branch.',
+            ],
+            [
+                'q' => 'Can I print a monthly program calendar?',
+                'a' => 'Not as a ready-made month grid. Two free tools get you most of the way. The Events graphic, in the schedule\'s Actions menu, draws up to 20 upcoming programs from their flyers in one image, with a List layout that gives each a line with its name, venue and time; programs without a flyer are left out of the image. Its caption is plain text that can list every upcoming program, which you can paste into the sheet you print. A recurring program appears once, under its next date, so name it with its day ("Tuesdays"). For a monthly email instead, set a newsletter to repeat on the 1st with its Events block on The rest of the month it is sent in.',
+            ],
+            [
+                'q' => 'Do patrons get a reminder before a program they registered for?',
+                'a' => 'Yes, on every plan, and it is on by default. Each registration gets one reminder email before its date: 3 hours, or 1, 2 or 3 days before, chosen under Tickets, Reminders in the schedule\'s settings. The confirmation email links to the patron\'s ticket page, where they can cancel, which frees the place and tells the next person on the waitlist.',
+            ],
+            [
                 'q' => 'Can the whole staff have logins?',
                 'a' => 'Not on the free plan, which is one team member. Multiple team members, up to five, are an Enterprise feature at '.plan_price($entMonthly).' a month, along with custom domains. Plenty of branches run the whole calendar from one shared account, so it is worth knowing which you need before you pay for it. On Enterprise, a viewer login is read-only and sees no sales, but can scan tickets at the door. And before whoever set the schedule up moves on, they can hand it to a colleague, on any plan.',
             ],
@@ -1378,8 +1394,11 @@
             ['card', 'One card, one program'],
             ['slip', 'The date-due slip'],
             ['week', 'The shelf list'],
+            ['plan', 'Filing programs'],
+            ['places', 'Popular programs'],
             ['room', 'The meeting room'],
             ['reach', 'Reaching patrons'],
+            ['access', 'Every patron'],
             ['rest', 'Everything else'],
             ['who', 'Every branch'],
             ['steps', 'Three steps'],
@@ -1395,7 +1414,7 @@
         // Each section's label, by id, and the class it is shelved under.
         $lbLabels = array_column($dotSections, 1, 0);
         $lbCalls = [
-            'card' => '025.3', 'slip' => '025.6', 'week' => '790.1', 'room' => '394.2', 'reach' => '021.7',
+            'card' => '025.3', 'slip' => '025.6', 'week' => '790.1', 'plan' => '025.8', 'places' => '025.7', 'room' => '394.2', 'reach' => '021.7', 'access' => '021.2',
             'rest' => '658', 'who' => '027', 'steps' => '371.3', 'faq' => '025.5', 'claim' => '027.4',
         ];
 
@@ -1408,13 +1427,13 @@
             ['fill', 'o', '11.3rem', '1.15rem', ''],
             ['nav', 'o', '15.6rem', '3.2rem', 'slip'],
             ['nav', 't', '15rem', '3.6rem', 'week'],
-            ['fill', 'r', '12.8rem', '1.7rem', 'lb-bands'],
-            ['fill', 'k', '14.8rem', '2.3rem', ''],
+            ['nav', 'm', '15.8rem', '3.3rem', 'plan'],
+            ['nav', 'k', '15.6rem', '3.2rem', 'places'],
             ['nav', 'n', '15.4rem', '3.1rem', 'room'],
             ['out', '', '', '', ''],
             ['nav', 'g', '16rem', '3.5rem', 'reach'],
             ['fill', 't', '10.4rem', '1.25rem', ''],
-            ['fill', 'o', '13.5rem', '1.9rem', 'lb-bands'],
+            ['nav', 'o', '14.8rem', '3.1rem', 'access'],
             ['nav', 'k', '15.2rem', '3.3rem', 'rest'],
             ['nav', 'r', '14.6rem', '3.1rem', 'who'],
             ['pile', '', '', '', ''],
@@ -1777,6 +1796,178 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 4b. Filing the programs: audiences, kinds, branches          -->
+        <!-- ============================================================ -->
+        <section id="plan" class="lb-section lb-alt" style="scroll-margin-top: 5rem;">
+            <div class="lb-wrap">
+                <div>
+                    <div class="lb-mark" data-reveal>
+                        <span class="lb-call" aria-hidden="true">025.8<br>ORG</span>
+                        <p class="lb-typed lb-kicker">Filing the programs</p>
+                    </div>
+                    <h2 class="lb-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Shelve by audience. <span class="lb-em">Tag by kind of session.</span>
+                    </h2>
+                    <p class="lb-lede" data-reveal style="--reveal-delay: 0.16s;">
+                        A parent opening the library calendar asks two things: is this for my child's age, and is it a story time, a craft or a film? Answer them with two different tools. An event sits in one sub-schedule and carries one category, so give each tool one job and the calendar never has to choose.
+                    </p>
+                </div>
+
+                <div class="lb-slip-grid">
+                    <div>
+                        <div class="lb-rules" data-reveal-group="90">
+                            <div class="lb-rule" data-reveal>
+                                <h3>Sub-schedules: who it is for</h3>
+                                <span class="lb-stamp" style="--r: -3deg;">Free</span>
+                                <p>Under 5s, Children, Teens, Adults, Seniors. Each strand has a colour and its own address, so the children's page of the library website can embed the Children strand alone and the teen page the Teens strand.</p>
+                            </div>
+                            <div class="lb-rule" data-reveal>
+                                <h3>Categories: what kind of session</h3>
+                                <span class="lb-stamp" style="--r: 2deg;">Free</span>
+                                <p>Rename the twelve defaults into your own list: Story time, Crafts, Book club, Tech help, Conversation group, Author talk. Up to 32, each with a colour dot if you want one. A patron combines both in the Filters panel: Children, and only crafts.</p>
+                            </div>
+                            <div class="lb-rule" data-reveal>
+                                <h3>The search box</h3>
+                                <span class="lb-stamp" style="--r: -2deg;">Free</span>
+                                <p>The same panel searches names, short descriptions and venues, so write the age range and the word parents use into the short description ("toddlers, ages 3 to 5"), and a parent who types either finds it.</p>
+                            </div>
+                        </div>
+                        <p class="lb-slip-after" data-reveal>
+                            Add <span class="lb-typed">schedule=children</span> to the embed address and the frame shows one strand.
+                            <a href="{{ marketing_url('/docs/sharing') }}#embed-parameters" class="lb-link lb-arrow-link">
+                                The embed options
+                                {!! $lbArrow !!}
+                            </a>
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="lb-typed lb-kicker" style="margin-bottom: 0.9rem;" data-reveal>Three shapes of library, three setups</h3>
+                        <div class="lb-rules" data-reveal-group="90">
+                            <div class="lb-rule" data-reveal>
+                                <h3>One building</h3>
+                                <span class="lb-stamp" style="--r: 3deg;">Free</span>
+                                <p>One Venue schedule with the branch's address, so every program shows the map without anyone typing it. Audiences as sub-schedules, kinds of session as categories. This is the setup the rest of this page describes.</p>
+                            </div>
+                            <div class="lb-rule" data-reveal>
+                                <h3>A system of branches</h3>
+                                <span class="lb-stamp" style="--r: -2deg;">Free</span>
+                                <p>Give each branch its own Venue schedule, because a Venue schedule puts every event at its own address. Then make one Curator schedule for the whole system and list the branches under Event Sources: everything a branch publishes appears on the system calendar within minutes, and each source can be filed under a sub-schedule named after its branch. Each branch embeds its own calendar; the system homepage embeds the curator's. One account can own all of them, up to 50 schedules on eventschedule.com.</p>
+                            </div>
+                            <div class="lb-rule" data-reveal>
+                                <h3>A bookmobile or outreach team</h3>
+                                <span class="lb-stamp" style="--r: 2deg;">Free</span>
+                                <p>No building of its own, so no fixed address. Only a Venue schedule has an address of its own, so set this one up as a Talent or Curator schedule and let each stop name its venue: the school, the care home, the market square. A weekly stop is one recurring event at that venue.</p>
+                            </div>
+                        </div>
+                        <p class="lb-slip-after" data-reveal>
+                            One thing to know about the system calendar: the automatic email to subscribers covers only events a schedule created itself, so patrons who want the digest should subscribe to their branch.
+                            <a href="{{ marketing_url('/docs/creating-schedules') }}#event-sources" class="lb-link lb-arrow-link">
+                                How event sources work
+                                {!! $lbArrow !!}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4c. Popular programs: six decisions before registration      -->
+        <!-- ============================================================ -->
+        <section id="places" class="lb-section" style="scroll-margin-top: 5rem;">
+            <div class="lb-wrap">
+                <div class="lb-mark" data-reveal>
+                    <span class="lb-call" aria-hidden="true">025.7<br>REG</span>
+                    <p class="lb-typed lb-kicker">Popular programs</p>
+                </div>
+                <h2 class="lb-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    Twenty-four places. <span class="lb-em">Sixty families want them.</span>
+                </h2>
+                <p class="lb-lede" data-reveal style="--reveal-delay: 0.16s;">
+                    The programs that fill within an hour of opening are the ones that need their rules written down first. Six decisions, in the order they come up, and what each one looks like on the form.
+                </p>
+
+                <div class="lb-items" style="margin-top: clamp(2.25rem, 4vw, 3.5rem);">
+                    <article class="lb-item" data-reveal>
+                        <span class="lb-typed lb-item-no" aria-hidden="true">025.71</span>
+                        <div>
+                            <div class="lb-item-head">
+                                <h3>Decide what one place is</h3>
+                                <span class="lb-stamp" style="--r: -3deg;">Free</span>
+                            </div>
+                            <p>A household or a person. Out of the box, one registration takes one place, however many people walk in with it, which suits a baby rhyme time where a place means one carer and one baby. Where the limit is really about bodies in the room, switch on Individual tickets in the Registration form row: the person registering adds each guest by name and email, every guest takes a place, and each gets their own QR code. On free registration that switch is free.</p>
+                        </div>
+                    </article>
+
+                    <article class="lb-item" data-reveal>
+                        <span class="lb-typed lb-item-no" aria-hidden="true">025.72</span>
+                        <div>
+                            <div class="lb-item-head">
+                                <h3>Work the limit back from the room</h3>
+                                <span class="lb-stamp" style="--r: 2deg;">Free</span>
+                            </div>
+                            <p>Start from the number the room can hold, not from the number of chairs. Say the children's room holds 72 people and last term's sign-in sheets show about three people per family at toddler story time: 72 &divide; 3 is 24 registrations, the 24 places on the slip above. Then count the empty mats for four weeks. If 24 places reliably leave three families missing, a limit of 27 fills the room on an ordinary week. On the week all 27 come that is 81 people, so overbook only as far as the room really has give.</p>
+                            <p>The limit counts each date on its own, so this Tuesday filling up never closes next Tuesday.</p>
+                        </div>
+                    </article>
+
+                    <article class="lb-item" data-reveal>
+                        <span class="lb-typed lb-item-no" aria-hidden="true">025.73</span>
+                        <div>
+                            <div class="lb-item-head">
+                                <h3>Ask only what the session needs</h3>
+                                <span class="lb-stamp lb-stamp-pro" style="--r: -2deg;">Pro for questions</span>
+                            </div>
+                            <p>Name and email come with every registration. A phone number for the day you have to cancel is one switch, free. Registration notes, also free, go into the confirmation email and onto the ticket: which entrance, where the buggies go, bring a towel for the baby. Your own questions, a child's age or an access need, are custom fields, which on the Registration form are a Pro feature.</p>
+                        </div>
+                    </article>
+
+                    <article class="lb-item" data-reveal>
+                        <span class="lb-typed lb-item-no" aria-hidden="true">025.74</span>
+                        <div>
+                            <div class="lb-item-head">
+                                <h3>Make giving a place back easy</h3>
+                                <span class="lb-stamp" style="--r: 3deg;">Free</span>
+                            </div>
+                            <p>A family that cannot come will usually say so if it takes one tap. Every confirmation email links to the patron's ticket page, where they can cancel and the place goes straight back. A reminder email goes out before each date on every plan, and it is on by default: choose 3 hours, or 1, 2 or 3 days before, under Tickets, Reminders in the schedule's settings. A day before suits a weekly session: it lands while there is still time to give the place to someone else.</p>
+                        </div>
+                    </article>
+
+                    <article class="lb-item" data-reveal>
+                        <span class="lb-typed lb-item-no" aria-hidden="true">025.75</span>
+                        <div>
+                            <div class="lb-item-head">
+                                <h3>Let the waitlist do the phoning</h3>
+                                <span class="lb-stamp" style="--r: -3deg;">Free</span>
+                            </div>
+                            <p>When a date fills, its button becomes Join Waitlist. When a place comes back, the first person waiting is emailed and has a 24-hour head start before the next is told. The place is not held for them: the date is simply open again. Say so in the program description, so a parent who gets the email on a Monday morning knows to register then and not after lunch.</p>
+                        </div>
+                    </article>
+
+                    <article class="lb-item" data-reveal>
+                        <span class="lb-typed lb-item-no" aria-hidden="true">025.76</span>
+                        <div>
+                            <div class="lb-item-head">
+                                <h3>Count who came, not who signed up</h3>
+                                <span class="lb-stamp" style="--r: 2deg;">Free</span>
+                            </div>
+                            <p>Boards and annual returns usually ask for attendance. Registrations are listed on the Sales page, date by date. Arrivals are a different number: the door scanner reads a registration's code and turns it green, but it does not keep a check-in record for free registration. Keep a tally sheet or a clicker at the door, and write the head count against the date the same afternoon.</p>
+                        </div>
+                    </article>
+                </div>
+
+                <p class="lb-slip-after" data-reveal>
+                    Every switch above, step by step.
+                    <a href="{{ marketing_url('/docs/tickets') }}#registration" class="lb-link lb-arrow-link">
+                        Free registration in the guide
+                        {!! $lbArrow !!}
+                    </a>
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 5. The meeting room: requests                                -->
         <!-- ============================================================ -->
         <section id="room" class="lb-section lb-alt" style="scroll-margin-top: 5rem;">
@@ -1935,6 +2126,65 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 6b. Every patron: access, language, and the month on paper    -->
+        <!-- ============================================================ -->
+        <section id="access" class="lb-section lb-alt" style="scroll-margin-top: 5rem;">
+            <div class="lb-wrap lb-room-grid" style="align-items: start;">
+                <div>
+                    <div class="lb-mark" data-reveal>
+                        <span class="lb-call" aria-hidden="true">021.2<br>ALL</span>
+                        <p class="lb-typed lb-kicker">Every patron</p>
+                    </div>
+                    <h2 class="lb-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        A program nobody can find out about <span class="lb-em">is closed to them.</span>
+                    </h2>
+                    <p class="lb-lede" data-reveal style="--reveal-delay: 0.16s;">
+                        The people a library most wants at a program are often the ones the listing serves worst: a wheelchair user who cannot tell which door is step-free, a parent whose first language is not the calendar's, a regular who reads the paper sheet at the desk and never the website. Write each listing for them first.
+                    </p>
+
+                    <p class="lb-typed lb-kicker" style="margin-top: 2rem;" data-reveal>Put these in every description</p>
+                    <ul class="lb-ticks" data-reveal-group="70">
+                        <li data-reveal><span>The age range in numbers, not "little ones": "ages 0 to 2 with a carer".</span></li>
+                        <li data-reveal><span>Whether a carer must stay, and whether siblings may come along.</span></li>
+                        <li data-reveal><span>The route in: the step-free entrance, the lift, how far from the bus stop.</span></li>
+                        <li data-reveal><span>What the room has: a hearing loop, seating with arms, a quiet corner, dimmed lights for a relaxed session.</span></li>
+                        <li data-reveal><span>The language the session is held in, which is not always the language of the page.</span></li>
+                        <li data-reveal><span>What it costs, even when the answer is nothing, and whether to bring anything.</span></li>
+                        <li data-reveal><span>A name and a number to ask about access before the day.</span></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <div class="lb-rules" data-reveal-group="90">
+                        <div class="lb-rule" data-reveal>
+                            <h3>The accessibility widget</h3>
+                            <span class="lb-stamp" style="--r: -3deg;">Free</span>
+                            <p>Switch on Show Accessibility Widget in the Advanced row of the schedule's settings, and the public calendar carries a panel where each visitor sets the text size, the contrast and the motion for themselves. Useful where the library has an accessibility commitment to meet.</p>
+                        </div>
+                        <div class="lb-rule" data-reveal>
+                            <h3>A second language</h3>
+                            <span class="lb-stamp" style="--r: 2deg;">Free</span>
+                            <p>Write the calendar in one of twelve languages, then turn on Offer a second language to visitors: your programs are translated automatically, and patrons get a button to switch. Allow up to an hour for a new program's translation. The library website's page in that language can embed it with <span class="lb-typed">lang=</span> and the language code. Translation changes the listing, not the session, which is why the language a session is held in belongs in its description.</p>
+                        </div>
+                        <div class="lb-rule" data-reveal>
+                            <h3>The month on paper</h3>
+                            <span class="lb-stamp" style="--r: -2deg;">Free</span>
+                            <p>There is no button that prints the month as a grid. Two things do the job instead. The Events graphic, in the Actions menu, draws up to 20 upcoming programs from their flyers in one image, with a List layout that puts each on its own line with its name, venue and time; only programs with a flyer are drawn. Its caption is plain text, and with Include every upcoming event switched on it lists all of them, ready to paste into the sheet you print. Either way a recurring program appears once, under its next date, so its name should say "Tuesdays".</p>
+                        </div>
+                        <div class="lb-rule" data-reveal>
+                            <h3>The month by email</h3>
+                            <span class="lb-stamp" style="--r: 3deg;">Free</span>
+                            <p>A newsletter set to repeat every month, sent on the 1st with its Events block on The rest of the month it is sent in, is that month's program, worked out on the day it goes. Put {month} in the subject and each one reads "What's on in" and the month. Each copy counts every recipient against the monthly allowance (10 on Free, 100 on Pro, 1,000 on Enterprise), and a repeat that could never fit is refused when you set it up. On eventschedule.com a send to more than 50 people also needs a verified phone number or your own email settings. Send through the library's own mail server, under Email Settings on any plan, and there is no cap.</p>
+                        </div>
+                    </div>
+                    <p class="lb-not" data-reveal>
+                        Print the schedule's QR code at the foot of the paper sheet. The sheet is out of date the first time a session is cancelled; the code never is.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 7. Everything else: six volumes lying on the table           -->
         <!-- ============================================================ -->
         <section id="rest" class="lb-section" style="scroll-margin-top: 5rem;">
@@ -2031,7 +2281,7 @@
                                 </div>
                                 <p>Being honest about the shape of this: the free plan is one team member, so if two people need their own login you are looking at Enterprise, which allows up to five, and which also puts the calendar on your own domain.</p>
                                 <p>
-                                    A separate schedule per branch is free and unlimited, and plenty of library systems run one shared account per branch instead.
+                                    A separate schedule per branch is free, up to 50 on one account on eventschedule.com, and plenty of library systems run one shared account per branch instead.
                                     <a href="{{ marketing_url('/pricing') }}" class="lb-link">Compare the plans</a>
                                 </p>
                             </div>
