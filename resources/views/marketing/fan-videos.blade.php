@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Fan Photos, Videos & Comments for Events - Event Schedule</x-slot>
-    <x-slot name="description">Let fans add YouTube videos, photos, and comments to your event pages for free, with organizer approval before anything goes live.</x-slot>
+    <x-slot name="description">How to collect fan photos and videos after an event, what to approve, consent, and a free approval queue for photos, YouTube clips and comments.</x-slot>
     <x-slot name="breadcrumbTitle">Fan Videos, Photos & Comments</x-slot>
 
     <x-slot name="structuredData">
@@ -70,9 +70,9 @@
                email and a Turnstile check.
              - Harvesting from social platforms. Nothing is fetched from
                anywhere; a fan submits on the event page.
-             - Follower notifications. A signed-in poster is ATTACHED as a
-               follower, which is what makes them newsletter-able; nothing
-               emails them on its own.
+             - Followers. Posting does NOT make anybody a follower (since
+               56a4a85ea; see the comment in EventController::submitPhoto),
+               and nothing emails a fan when their item is approved.
 
            ADDED BY REVIEW (each was on the page and is now corrected):
              - The per-event override of the three switches is PRO. In
@@ -88,9 +88,9 @@
                which deep-links to ?engagement=fan_content. There is also an
                optional owner email (notification_new_fan_content, default
                OFF) via NewFanContentNotification.
-             - The gallery lightbox credits `$p->user?->first_name` and falls
-               back to __('messages.user'), so a GUEST photo is not credited
-               by name. The page claimed it "names who sent each shot".
+             - The lightbox meta is HasFanSubmitter::submitterName(): the
+               account name, or the name a guest typed. A fan photo file is
+               stored as uploaded; only a gallery copy is re-encoded.
              - downloadPhotos zips `is_approved = true` rows only.
 
            COLOUR: the page's existing orange, pulled down until it
@@ -622,7 +622,7 @@
         $faqs = [
             [
                 'q' => 'Are fan photos, videos and comments moderated before they appear?',
-                'a' => 'Yes. A fan submission is created unapproved and never reaches the public page on its own. You approve or reject each one from the Fan Content tab on the event, and your dashboard counts what is waiting across every event and links straight there. Rejecting deletes the submission rather than hiding it, and a rejected photo takes its stored file with it.',
+                'a' => 'Yes. A fan submission is created unapproved and never reaches the public page on its own. You approve or reject each one from the Fan content row of the event\'s Engagement tab, and your dashboard counts what is waiting across every event and links straight there. Rejecting deletes the submission rather than hiding it, and a rejected photo takes its stored file with it.',
             ],
             [
                 'q' => 'What video platforms are supported?',
@@ -630,7 +630,7 @@
             ],
             [
                 'q' => 'Where do approved photos, videos and comments appear?',
-                'a' => 'On the event page, inside the part of the night they were sent from. A three-band bill ends up with three galleries plus one for the event as a whole, and photos also get a page of their own at the event URL followed by /photos, with a lightbox that shows when each shot arrived and credits the poster by first name when they were signed in.',
+                'a' => 'On the event page, inside the part of the night they were sent from. A three-band bill ends up with three galleries plus one for the event as a whole, and photos also get a page of their own at the event URL followed by /photos, with a lightbox that shows who sent each shot, under the name they gave, and when it arrived.',
             ],
             [
                 'q' => 'Do fans need an account?',
@@ -646,7 +646,19 @@
             ],
             [
                 'q' => 'What happens to the people who post?',
-                'a' => 'A fan who is signed in when they submit is added to your schedule as a follower, which puts them on the list the next time you write a newsletter. Newsletters are free and the monthly allowance counts recipients: 10 on the free plan, 100 on Pro and 1,000 on Enterprise. Following on its own does not sign anybody up for automatic email: a fan who only followed, or only posted while signed in, hears from you only through one of those. The list that hears on its own is the other one: the people who left an email address on your page and confirmed it get a digest of your newly published events, at most one every 72 hours.',
+                'a' => 'Nothing they did not ask for. Posting a photo, a video or a comment does not make anybody a follower and puts nobody on a mailing list. Their name appears beside what they sent, and a guest\'s email address appears in your queue and nowhere else. To stay in touch, ask them to press Follow or leave their email address on your page: both are who your newsletters go to, and newsletters are free, with a monthly allowance counted in recipients: 10 on the free plan, 100 on Pro and 1,000 on Enterprise. People who left and confirmed an email address also get a digest of your newly published events, at most one every 72 hours.',
+            ],
+            [
+                'q' => 'How do I collect photos and videos from attendees after an event?',
+                'a' => 'Give them one place to send them, and ask at the moments they have their phones out. In Event Schedule that place is the event page: Add Photo, Add Video and Add Comment buttons sit under each part of the running order, on by default for a new schedule. Mention it in the event description, say it from the stage near the end of the night, and share the event page again the next morning. Photos are uploaded straight from a phone, videos arrive as YouTube links, and everything waits for your approval.',
+            ],
+            [
+                'q' => 'Do I need permission to post photos of people at my event?',
+                'a' => 'It depends on where you are, so check the rules that apply to you; this is general practice, not legal advice. Most organizers tell people in advance that photos will be taken and shared, with a line on the event page and a sign at the entrance, offer a wristband or sticker for anyone who would rather not appear, and are stricter where children are present. Approving a fan photo on your event page is also not permission to use it in an advert: ask the person who took it.',
+            ],
+            [
+                'q' => 'Someone asked me to remove a photo. How do I take it down?',
+                'a' => 'Open the event, go to the Fan content row of its Engagement tab, find the photo under Approved and press Reject. That deletes the photo and its stored file, not just hides it. If you had copied it into the event\'s gallery, that copy is a separate file: remove it from the Gallery row as well.',
             ],
         ];
 
@@ -656,6 +668,10 @@
             ['intake', 'Three channels'],
             ['reels', 'Three reels'],
             ['plays', 'Where it plays'],
+            ['ask', 'How to ask'],
+            ['rules', 'House rules'],
+            ['consent', 'Consent'],
+            ['recap', 'After the night'],
             ['control', 'The switches'],
             ['more', 'Keep exploring'],
             ['faq', 'Questions'],
@@ -800,7 +816,7 @@
                         A reel is <span class="es-reel-lit">cut</span>, not collected.
                     </h2>
                     <p class="mt-5 es-reel-ondim text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        Nothing a fan sends is live when it arrives. It waits on the event's Fan Content tab until you decide, which is the whole difference between a comments section and an edit.
+                        Nothing a fan sends is live when it arrives. It waits in the Fan content row of the event's Engagement tab until you decide, which is the whole difference between a comments section and an edit.
                     </p>
                 </div>
 
@@ -880,7 +896,7 @@
                     <div class="mt-5 flex items-start gap-3">
                         <span class="es-reel-count mt-px" aria-hidden="true">2</span>
                         <p class="es-reel-ondim text-xs leading-relaxed">
-                            Your dashboard counts what is waiting across every event and links straight to this tab, and you can switch on an email for the moment new fan content lands.
+                            Your dashboard counts what is waiting across every event and links straight to this row, and you can switch on an email for the moment new fan content lands.
                         </p>
                     </div>
 
@@ -1070,7 +1086,7 @@
                         <h3 class="es-reel-ink text-base font-bold">A gallery of its own</h3>
                         <span class="es-reel-plan">Free</span>
                     </div>
-                    <p class="es-reel-muted text-sm">Every event with fan photos gets a photo gallery page at its URL followed by /photos, with a lightbox that shows when each shot arrived, credits a signed-in poster by first name, and a share button.</p>
+                    <p class="es-reel-muted text-sm">Every event with fan photos gets a photo gallery page at its URL followed by /photos, with a lightbox that names who sent each shot and when it arrived, and a share button.</p>
                 </div>
 
                 <div class="es-reel-card flex flex-col p-6" data-reveal="panel">
@@ -1100,9 +1116,9 @@
                 <div class="es-reel-card flex flex-col p-6" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-reel-ink text-base font-bold">One feed for your own site</h3>
-                        <span class="es-reel-plan es-reel-plan-pro">Pro</span>
+                        <span class="es-reel-plan">Any plan</span>
                     </div>
-                    <p class="es-reel-muted text-sm">The REST API returns comments, photos and videos as one list, filtered by event, night or type. Approved rows by default, or the pending queue if you ask for it.</p>
+                    <p class="es-reel-muted text-sm">The REST API returns comments, photos and videos as one list, filtered by event, night or type. Approved rows by default, or the pending queue if you ask for it. It reads your own schedules on any plan.</p>
                 </div>
             </div>
 
@@ -1129,13 +1145,284 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. The switches                                              -->
+    <!-- 6. Asking for it: before, on the night, the morning after    -->
+    <!-- ============================================================ -->
+    @php
+        $askMoments = [
+            [
+                'A week out',
+                'Before',
+                'Tell people where it goes',
+                [
+                    'Put one line in the event description: took a photo or a clip? Add it to this page after the show. The buttons sit on the event page itself, so the page people opened for the tickets is the page they post to.',
+                    'Add the running order. Each part of the agenda gets its own Add Photo, Add Video and Add Comment buttons, so a fan files the encore under the encore without being told how.',
+                    'Decide whether guests may post with a name and an email, or must sign in first. Fewer steps means more footage; an account means fewer strangers in the queue.',
+                ],
+            ],
+            [
+                'Doors to encore',
+                'On the night',
+                'Ask once, when phones are out',
+                [
+                    'Say it from the stage near the end, when half the room is already filming: name the page and the button. Once is enough; at the start nobody has anything to send yet.',
+                    'Put the event page address on the screen between sets, or on a card at the bar as a short link or a QR code.',
+                    'Ask for what you want to keep: landscape video, one clip per song rather than the whole set, and photos of the stage rather than of strangers.',
+                    'Your own photographer can skip the queue: anyone signed in who can edit the event (you, or a team member, which on eventschedule.com is Enterprise) is approved on arrival, so their shots are up before the room empties.',
+                ],
+            ],
+            [
+                'Next 48 hours',
+                'The morning after',
+                'Ask again while they are scrolling',
+                [
+                    'The morning after is when people go through their camera roll. Post the event page link on your own channels with one line asking for the best shot of the night.',
+                    'On Pro, the post-event feedback email (off until you switch it on, and sent through your own email settings on eventschedule.com) carries a note, Were you at the event? Share your content!, that links straight to the event page, and the thank-you page after a rating repeats it.',
+                    'Write to your followers with a newsletter whose button opens the event page. Newsletters are free; the allowance counts recipients.',
+                ],
+            ],
+        ];
+    @endphp
+    <section id="ask" class="scroll-mt-24 es-reel-edge border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-reel-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How to collect fan photos and videos</p>
+                <h2 class="es-balance es-reel-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Footage arrives when you <span class="es-reel-grad">ask for it by name.</span>
+                </h2>
+                <p class="es-reel-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most of what an audience shoots is never posted anywhere. People will send it when they know where it goes, which part of the night it belongs to, and that somebody will actually look at it. Ask three times: before, during and after.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($askMoments as [$askWhen, $askLabel, $askTitle, $askPoints])
+                    <div class="es-reel-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <span class="es-reel-tag">{{ $askLabel }}</span>
+                            <span class="es-reel-night @if ($loop->index === 1) es-reel-night-on @endif">{{ $askWhen }}</span>
+                        </div>
+                        <h3 class="es-reel-ink mb-4 text-lg font-bold">{{ $askTitle }}</h3>
+                        <ul class="es-reel-muted space-y-3 text-sm leading-relaxed">
+                            @foreach ($askPoints as $askPoint)
+                                <li class="flex gap-2.5">
+                                    <span class="es-reel-accent mt-px flex-none font-bold" aria-hidden="true">&rarr;</span>
+                                    <span>{{ $askPoint }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-reel-card mt-4 p-6 sm:p-7" data-reveal="panel">
+                <h3 class="es-reel-ink mb-4 text-base font-bold">Three things to tell people before they try</h3>
+                <dl class="grid gap-5 text-sm md:grid-cols-3">
+                    <div>
+                        <dt class="es-reel-ink font-semibold">Photos: 5 MB, from a phone</dt>
+                        <dd class="es-reel-muted mt-1 leading-relaxed">JPG, PNG, GIF or WebP up to 5 MB. A phone photo fits; a full-size file straight off a camera is often several times that, so ask camera people for an exported copy.</dd>
+                    </div>
+                    <div>
+                        <dt class="es-reel-ink font-semibold">Video: YouTube first</dt>
+                        <dd class="es-reel-muted mt-1 leading-relaxed">A clip is sent as a YouTube link, so the fan uploads it there and pastes the address. A fan who does not want it on their public channel can upload it as Unlisted, which anyone with the link can still watch.</dd>
+                    </div>
+                    <div>
+                        <dt class="es-reel-ink font-semibold">Free plan: 25 photos in all</dt>
+                        <dd class="es-reel-muted mt-1 leading-relaxed">On eventschedule.com a free schedule holds 25 fan photos across every event, pending ones included. When it is full the Add Photo button leaves your pages, so on a busy night ask for the best shot, not every shot.</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. The house rules (fixed-dark band): what makes the cut     -->
+    <!-- ============================================================ -->
+    @php
+        $keepList = [
+            'The stage, the act, and the crowd from behind or from far off.',
+            'Short clips of one song or one moment, which is what an event page is for.',
+            'Comments about the night, the critical ones included, as long as they are about the night and not about a person.',
+            'The one sharp shot of a moment, out of the five that came in.',
+        ];
+        $cutList = [
+            'A close-up of somebody who is not on stage and may not know a camera was on them.',
+            'Any picture in which a child can be recognised, unless you know a parent agreed.',
+            'A whole set filmed from the front row, unless the act has said yes. Plenty of performers do not want full recordings out.',
+            'A comment that names or describes another guest, or carries a phone number, an email address, an advert or an insult.',
+            'Near-duplicates. On the free plan every pending photo counts toward the 25, and rejecting one gives its place back.',
+        ];
+        $queueFacts = [
+            ['Reject cannot be undone', 'It deletes the submission, and a photo\'s file with it. Not sure yet? Leave it pending and come back.'],
+            ['Approved is not final', 'The Approved list on the same Fan content row has its own Reject button. Pull something down the moment you see a problem.'],
+            ['Nobody is told', 'A fan is not emailed when you approve or reject. A signed-in fan sees their own pending item on the page until you decide.'],
+        ];
+    @endphp
+    <section id="rules" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-reel-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <p class="es-reel-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Moderating fan content</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Write the house rules <span class="es-reel-lit">before the queue fills.</span>
+                    </h2>
+                    <p class="mt-5 es-reel-ondim text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Moderating takes seconds when the rules were decided beforehand, and turns awkward when every photo is a fresh judgment call at midnight. This set fits most live events. Change it to suit your room, then share it with whoever else approves.
+                    </p>
+                </div>
+
+                <div class="mb-6 grid gap-4 md:grid-cols-2" data-reveal-group="110">
+                    <div class="es-reel-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <div class="mb-4 flex items-center gap-2">
+                            <span class="es-reel-act" aria-hidden="true">Approve</span>
+                            <h3 class="es-reel-onink text-lg font-bold">Splice it in</h3>
+                        </div>
+                        <ul class="space-y-3 text-sm leading-relaxed">
+                            @foreach ($keepList as $keepItem)
+                                <li class="flex gap-2.5">
+                                    <span class="es-reel-lit mt-px flex-none font-bold" aria-hidden="true">+</span>
+                                    <span class="es-reel-ondim">{{ $keepItem }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <div class="es-reel-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <div class="mb-4 flex items-center gap-2">
+                            <span class="es-reel-act es-reel-act-cut" aria-hidden="true">Reject</span>
+                            <h3 class="es-reel-onink text-lg font-bold">Cut it</h3>
+                        </div>
+                        <ul class="space-y-3 text-sm leading-relaxed">
+                            @foreach ($cutList as $cutItem)
+                                <li class="flex gap-2.5">
+                                    <span class="es-reel-lit mt-px flex-none font-bold" aria-hidden="true">&minus;</span>
+                                    <span class="es-reel-ondim">{{ $cutItem }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                    @foreach ($queueFacts as [$qfTitle, $qfBody])
+                        <div class="es-reel-row p-5" data-reveal="panel">
+                            <h3 class="es-reel-onink mb-1.5 text-sm font-bold">{{ $qfTitle }}</h3>
+                            <p class="es-reel-ondim text-sm leading-relaxed">{{ $qfBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <p class="mx-auto mt-8 max-w-3xl text-center es-reel-ondim text-sm leading-relaxed" data-reveal>
+                    How often to check: your dashboard lists what is waiting across every event and links straight to it, and the New fan content email in your schedule's notification settings, off until you switch it on, tells you when something lands. On the night after a show, look twice: once before bed, once the next afternoon.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. People in the frame: consent and privacy                  -->
+    <!-- ============================================================ -->
+    @php
+        $consentCards = [
+            ['Say it before they arrive', 'A line on the event page and a sign at the entrance: photos and video are taken here and may appear on this event\'s page. People decide differently when they know, and nobody can say they were not told.'],
+            ['Give an easy way out', 'A coloured wristband or a sticker for anyone who would rather not appear, and a word to your own photographer. In the queue, anything showing that wristband is a cut.'],
+            ['Be stricter where there are children', 'At a school concert or a family day, approve only shots where no child can be recognised. Or turn Photos off: per schedule on any plan, or for that one event on Pro, while comments stay open.'],
+            ['Answer a take-down the same day', 'Open the event\'s Fan content row, find it under Approved and press Reject: the photo and its file are deleted. A copy you added to the event\'s gallery is a separate file, so remove it from the Gallery row too.'],
+        ];
+    @endphp
+    <section id="consent" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-reel-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Consent and privacy</p>
+                <h2 class="es-balance es-reel-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Every photo has people in it <span class="es-reel-grad">who did not post it.</span>
+                </h2>
+                <p class="es-reel-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The fan who sent a photo chose to share it. The twenty people behind them did not. What follows is common practice, not legal advice: the rules on photographing people differ from country to country, and a school, a church or a venue may have rules of its own.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($consentCards as $consentIndex => [$consentTitle, $consentBody])
+                    <div class="es-reel-card flex gap-4 p-6" data-reveal="panel">
+                        <span class="es-reel-accent flex-none font-mono text-lg font-black" aria-hidden="true">{{ str_pad($consentIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="es-reel-ink text-base font-bold">{{ $consentTitle }}</h3>
+                            <p class="es-reel-muted mt-1.5 text-sm leading-relaxed">{{ $consentBody }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-reel-card mt-4 p-6 sm:p-7" data-reveal="panel">
+                <h3 class="es-reel-ink mb-3 text-base font-bold">What the public sees about the sender</h3>
+                <ul class="es-reel-muted space-y-2.5 text-sm leading-relaxed">
+                    <li class="flex gap-2.5"><span class="es-reel-accent mt-px flex-none font-bold" aria-hidden="true">&rarr;</span><span>The name they gave appears beside what they sent: their account name, or the name a guest typed. Tell people that before they post under their full name.</span></li>
+                    <li class="flex gap-2.5"><span class="es-reel-accent mt-px flex-none font-bold" aria-hidden="true">&rarr;</span><span>The email address a guest typed is shown in your queue and nowhere public, and it is not added to any mailing list.</span></li>
+                    <li class="flex gap-2.5"><span class="es-reel-accent mt-px flex-none font-bold" aria-hidden="true">&rarr;</span><span>A phone can store where a photo was taken inside the file. A fan photo on your event page is published as it was uploaded; a JPEG or WebP copy you add to your gallery has that location removed before it is published.</span></li>
+                    <li class="flex gap-2.5"><span class="es-reel-accent mt-px flex-none font-bold" aria-hidden="true">&rarr;</span><span>Approval on your event page is not permission to use a photo anywhere else. Ask the sender before it goes into an advert or onto your social accounts, and credit them when it does.</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 9. After the night: what to do with the reel                 -->
+    <!-- ============================================================ -->
+    @php
+        $recapCards = [
+            ['Free', false, 'Send each act their set', 'With a running order, every set has its own photos, clips and comments under its name on the event page. Send each act the link the next day: it is the thank-you that gets shared.'],
+            ['Free', false, 'A recap newsletter', 'A Video block takes a fan\'s YouTube link and shows its thumbnail with a play badge, and a Quote block takes a fan\'s comment with their name as the author. Uploading an image into a newsletter is Pro; on Free an Image block takes an image address instead.'],
+            ['Free', false, 'Sell the next one with it', 'The event\'s photo page, its address followed by /photos, keeps working after the night. Link last edition\'s from the next one\'s description, where a doubtful buyer can see the room full.'],
+            ['Pro', true, 'Curate the best into the gallery', 'Add from fan photos, in the event\'s Gallery row, copies the approved shots you pick into the event\'s own gallery, credited to whoever sent them. Put the strongest first: it leads and is shown largest.'],
+            ['Pro', true, 'Keep the whole night', 'Download all photos zips every approved photo on the event, for the poster, the sponsor report, the grant application or the band that asked.'],
+            ['Tip', false, 'Ask before you repost', 'For your own social accounts, message the sender first and tag them. Most say yes, and a credited repost brings the next person to the event page with their own photos.'],
+        ];
+    @endphp
+    <section id="recap" class="scroll-mt-24 es-reel-edge border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <p class="es-reel-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">After the night</p>
+                <h2 class="es-balance es-reel-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    An approved reel is <span class="es-reel-grad">the next poster.</span>
+                </h2>
+                <p class="es-reel-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Approved photos and clips are already on the event page. Six more steps turn them into the reason somebody buys a ticket for the next one.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                @foreach ($recapCards as [$recapPlan, $recapIsPro, $recapTitle, $recapBody])
+                    <div class="es-reel-card flex flex-col p-6" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-reel-ink text-base font-bold">{{ $recapTitle }}</h3>
+                            <span class="es-reel-plan @if ($recapIsPro) es-reel-plan-pro @endif">{{ $recapPlan }}</span>
+                        </div>
+                        <p class="es-reel-muted text-sm leading-relaxed">{{ $recapBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-reel-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                Building the newsletter: <x-link href="{{ route('marketing.docs.newsletters') }}#block-types">newsletter block types</x-link>. Moderating and the Pro per-event switches: <x-link href="{{ route('marketing.docs.creating_events') }}#fan-content">the Fan Content guide</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 10. The switches                                             -->
     <!-- ============================================================ -->
     <section id="control" class="scroll-mt-24 es-reel-edge border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-12 lg:grid-cols-[1fr_1.05fr]">
                 <div>
-                    <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                     <p class="es-reel-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The switches</p>
                     <h2 class="es-balance es-reel-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                         Four switches, and the <span class="es-reel-grad">defaults are sane.</span>
@@ -1212,12 +1499,12 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 7. Keep exploring                                            -->
+    <!-- 11. Keep exploring                                           -->
     <!-- ============================================================ -->
     <section id="more" class="scroll-mt-24 es-reel-edge border-t py-20">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>11</span></div>
                 <h2 class="es-balance es-reel-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Keep <span class="es-reel-grad">exploring</span>
                 </h2>
@@ -1270,7 +1557,7 @@
                     <div data-reveal>
                         <x-feature-link-card
                             name="Newsletters"
-                            description="Email the followers a fan submission just added, with open rates"
+                            description="Write to the people who chose to follow your schedule, with open rates"
                             :url="marketing_url('/features/newsletters')"
                             icon-color="orange"
                         >
@@ -1315,14 +1602,14 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. FAQ                                                       -->
+    <!-- 12. FAQ                                                      -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="scroll-mt-24 es-reel-edge border-t py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-reel-num mb-6" data-reveal aria-hidden="true"><span>12</span></div>
                 <h2 class="es-balance es-reel-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>
@@ -1347,7 +1634,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. Finale                                                    -->
+    <!-- 13. Finale                                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">

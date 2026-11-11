@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Event Carpool Matching | The Driver Approves Every Rider</x-slot>
-    <x-slot name="description">Attendees offer and request lifts on the event page. The driver approves each rider before any email or phone number is shared. Ratings follow the ride.</x-slot>
+    <x-slot name="description">How to organize an event carpool: attendees offer and request lifts on the event page, and the driver approves each rider before any contact is shared.</x-slot>
     <x-slot name="breadcrumbTitle">Carpool</x-slot>
 
     <x-slot name="structuredData">
@@ -307,6 +307,8 @@
             border-collapse: collapse;
             font-size: 0.875rem;
         }
+        /* The parking table has four short columns, so it may shrink to its box. */
+        .es-seat-table.es-seat-table-fit { min-width: 0; }
         .es-seat-table th {
             text-align: start;
             padding: 0.7rem 1rem;
@@ -536,7 +538,7 @@
             ],
             [
                 'q' => 'Can drivers charge riders for fuel?',
-                'a' => 'Not through Event Schedule. A ride offer has no price and no payment step, so nothing is charged, collected or split in the app. Anything a driver and their riders agree between themselves happens outside it.',
+                'a' => 'Not through Event Schedule. A ride offer has no price and no payment step, so nothing is charged, collected or split in the app. Anything a driver and their riders agree between themselves happens outside it. As general advice, keep it to a share of fuel and tolls agreed before the trip: rules on charging for lifts differ from country to country, and a driver should check that their insurance covers passengers.',
             ],
             [
                 'q' => 'Does it work on a weekly or repeating event?',
@@ -545,6 +547,18 @@
             [
                 'q' => 'How does carpool handle safety?',
                 'a' => 'Four ways. Everyone accepts the carpool notice once before taking part. Once the event has finished, a driver and the riders they approved can rate each other from 1 to 5 stars with an optional comment, and the average shows next to that person\'s name on later rides. Those same people, and only those people, can report each other with a reason. And the schedule owner sees every active offer and every report on the event\'s Engagement tab, and can remove an offer, which cancels its requests and emails the riders. Nothing is emailed to the owner, so the tab is where to look.',
+            ],
+            [
+                'q' => 'How do I organize a carpool for my event?',
+                'a' => 'Give drivers and riders one place to find each other, then fill it. With Event Schedule on Pro you switch on Carpool matching once for the schedule, and every event page gets a Carpool link. Before you announce it, connect your schedule\'s own email settings (on eventschedule.com the carpool emails go out only through them), ask a few regulars who drive to post offers first, and name two or three public meeting points in the event description. Then mention it in the description, in a newsletter a week out and again two days before.',
+            ],
+            [
+                'q' => 'What happens if a driver cancels at the last minute?',
+                'a' => 'The driver pulls the offer, and every rider on it, waiting or approved, is emailed that it has been cancelled. They go back to the carpool page and ask for a spot on another offer, which works up until the event starts for a ride there, and until it ends for a ride home. A rider who drops out withdraws in the same way, the driver is emailed if that rider had been approved, and the spot opens again.',
+            ],
+            [
+                'q' => 'How do people get home from a late event with no public transport?',
+                'a' => 'Plan the ride home separately from the ride there. A from-the-event offer can be posted and asked for until the event ends, so you can mention it from the stage or at the interval, when people realise the last train has gone. Put a taxi number and the last bus time on the event page as a back-up, and remind drivers who are taking people home that they are the ones not drinking.',
             ],
         ];
 
@@ -556,6 +570,8 @@
             ['ledger', 'The ledger'],
             ['trust', 'Trust'],
             ['switch', 'The switch'],
+            ['organize', 'Organize it'],
+            ['safety', 'Safety'],
             ['faq', 'Questions'],
             ['claim', 'Get started'],
         ];
@@ -1068,7 +1084,191 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Key features                                              -->
+    <!-- 8. How to organize an event carpool (07)                     -->
+    <!-- ============================================================ -->
+    @php
+        $playbook = [
+            ['Check that it is worth it', 'Carpool earns its place when getting there is the hard part: a venue outside town, a last train that leaves before the encore, a car park with eighty spaces for three hundred people, an audience of students without cars. For a city-centre show on a tram line, leave it off.'],
+            ['Set up email before the switch', 'Carpool runs on email: a request reaches the driver, an approval carries the contact details, and approved riders and their driver each get a reminder email in the 24 hours before the ride. On eventschedule.com those are sent only through your schedule\'s own email settings, so connect them first, then turn on Carpool matching under Engagement, Carpool (Pro).'],
+            ['Seed the board', 'An empty list gets no requests, and a list with no requests gets no more offers. Ask three or four regulars who drive to post their offers first, a week or more ahead. Each driver with three spare seats covers three people who could not otherwise come.'],
+            ['Name the meeting points', 'Pick two or three public, well-lit places on the main roads in: a station car park, a supermarket, a petrol station. Put them in the event description, so drivers copy one into Meeting point instead of giving strangers their street.'],
+            ['Tell people it exists, three times', 'In the event description, in your newsletter a week out, and two days before, when plans firm up. Say that they will need a free account to see the rides. Approved riders and their driver each get a reminder email in the 24 hours before the ride.'],
+            ['Sort the ride home during the event', 'A lift home can be offered and asked for until the event ends. Mention it from the stage or at the interval, which is when the people who came by train find out the last one has gone.'],
+            ['Close the loop afterwards', 'Once the event is over, drivers and the riders they approved can rate each other, and the averages follow them to your next event. Look at the event\'s Engagement tab for reports in the days after.'],
+        ];
+
+        // People arriving by car, and the cars that takes at two occupancies. Rounded up:
+        // a third of a car still needs a whole space.
+        $parkRows = [];
+        foreach ([100, 300, 1000] as $byCar) {
+            $solo = (int) ceil($byCar / 1.5);
+            $shared = (int) ceil($byCar / 2.5);
+            $parkRows[] = [$byCar, $solo, $shared, $solo - $shared];
+        }
+    @endphp
+    <section id="organize" class="es-seat-hr scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-seat-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-seat-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How to organize an event carpool</p>
+                <h2 class="es-balance es-seat-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Seven steps, and most of them <span class="es-seat-grad">happen before the event</span>.
+                </h2>
+                <p class="es-seat-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A carpool board does not fill itself. The ones that work have a few drivers on them
+                    early, somewhere sensible to meet, and an organizer who mentions them more than once.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="80">
+                @foreach ($playbook as $stepIndex => [$stepTitle, $stepBody])
+                    <li class="es-seat-card flex gap-4 p-6 {{ $loop->last ? 'md:col-span-2' : '' }}" data-reveal>
+                        <span class="es-seat-accent es-seat-num shrink-0 text-lg font-black" aria-hidden="true">{{ str_pad($stepIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="es-seat-ink text-base font-bold">{{ $stepTitle }}</h3>
+                            <p class="es-seat-muted mt-1.5 text-sm leading-relaxed">{{ $stepBody }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            {{-- The arithmetic: the same seat count the page is built on, read as parking. --}}
+            <div class="mt-12 grid gap-4 lg:grid-cols-5" data-reveal-group="100">
+                <div class="es-seat-card flex flex-col p-6 sm:p-7 lg:col-span-2" data-reveal="panel">
+                    <p class="es-seat-tag mb-3">The arithmetic</p>
+                    <p class="es-seat-ink es-seat-num text-2xl font-black">cars = people &divide; per car</p>
+                    <p class="es-seat-muted mt-3 text-sm leading-relaxed">
+                        A car park fills with cars, not people. Move the average from one and a half
+                        people a car to two and a half, and every hundred people arriving by car need
+                        about twenty-seven fewer spaces.
+                    </p>
+                    <div class="es-seat-ledger mt-5" aria-hidden="true">
+                        @for ($i = 0; $i < 4; $i++)
+                            <span class="es-seat-cell {{ $i < 3 ? 'es-seat-cell-taken' : 'es-seat-cell-open' }}"></span>
+                        @endfor
+                    </div>
+                    <p class="es-seat-muted es-seat-micro mt-2">Three in a four-seat car: one car, not three.</p>
+                    <p class="es-seat-muted es-seat-foot mt-auto pt-4 text-sm leading-relaxed">
+                        The two averages are examples, not measurements. Count the cars at your next
+                        event, divide the people who came by car by that number, and use your own.
+                    </p>
+                </div>
+
+                <div class="es-seat-card es-seat-scroll lg:col-span-3" data-reveal="panel">
+                    <table class="es-seat-table es-seat-table-fit">
+                        <caption class="sr-only">Parking spaces needed for 100, 300 and 1,000 people arriving by car, at 1.5 and 2.5 people per car, and the spaces saved.</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Arriving by car</th>
+                                <th scope="col">At 1.5 a car</th>
+                                <th scope="col">At 2.5 a car</th>
+                                <th scope="col">Spaces saved</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($parkRows as [$prPeople, $prSolo, $prShared, $prSaved])
+                                <tr>
+                                    <th scope="row" class="es-seat-ink es-seat-num">{{ number_format($prPeople) }} people</th>
+                                    <td class="es-seat-num">{{ number_format($prSolo) }} cars</td>
+                                    <td class="es-seat-num">{{ number_format($prShared) }} cars</td>
+                                    <td class="es-seat-accent es-seat-num font-bold">{{ number_format($prSaved) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <p class="es-seat-muted px-5 pb-5 pt-3 text-sm leading-relaxed">
+                        Fewer cars also means a shorter queue to leave a field with one gate, and fewer
+                        people driving home tired after a late finish. At a rural festival the saving is
+                        often the difference between one car park and renting a second field.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 9. Safe rides: what to tell people (08)                      -->
+    <!-- ============================================================ -->
+    @php
+        $safeRides = [
+            ['Riders', [
+                'For a first ride with somebody new, meet at the meeting point, not at your home.',
+                'Check that the name and rating on the carpool page match the person, and tell a friend which car, what time and the driver\'s name.',
+                'Keep the approval email. It has the driver\'s contact details if plans change on the day.',
+                'Withdraw the moment you know you are not going, so the seat goes to somebody who is.',
+            ]],
+            ['Drivers', [
+                'Check that your insurance covers passengers. If riders chip in, keep it to a share of fuel or tolls agreed in advance: rules on charging for lifts differ from country to country.',
+                'The driver does not drink. Agree it before you leave, not in the car park at midnight.',
+                'Use the Note for what matters: luggage, a car seat in the back, how long you will wait.',
+                'A request with no message from somebody you know nothing about can be a decline. You owe nobody a seat.',
+            ]],
+            ['You, the organizer', [
+                'Every participant accepts a notice that rides are arranged between attendees and confirms they are 18 or older. It is not legal cover for you, so check your own position if you are unsure.',
+                'Keep children\'s transport with their parents: carpool is for adults only.',
+                'Put a plan B on the event page for a late finish: a taxi number, the last bus.',
+                'Read the reports after the event, and remove an offer if you need to.',
+            ]],
+        ];
+        $planChanges = [
+            ['The driver drops out', 'They pull the offer. Every rider on it, waiting or approved, is emailed, and goes back to the list to ask another driver.'],
+            ['A rider drops out', 'They withdraw. If they had been approved the driver is emailed, and the spot opens again for the next request.'],
+            ['The car is smaller than thought', 'The driver lowers the spot count, down to the riders already approved and no further.'],
+            ['The event is over', 'Nothing more can be offered, asked for, approved or withdrawn. What is left is the rating.'],
+        ];
+    @endphp
+    <section id="safety" class="es-seat-hr scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-seat-mark mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-seat-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Carpool safety</p>
+                <h2 class="es-balance es-seat-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    What to tell people <span class="es-seat-grad">before they get in</span>.
+                </h2>
+                <p class="es-seat-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Ride sharing between attendees is ordinary and mostly uneventful. A few habits keep it
+                    that way. Copy these into the event description or the newsletter that announces the
+                    carpool; they are general advice and hold whatever tool you use.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-3" data-reveal-group="100">
+                @foreach ($safeRides as [$safeWho, $safeList])
+                    <div class="es-seat-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <h3 class="es-seat-ink mb-4 text-lg font-bold">{{ $safeWho }}</h3>
+                        <ul class="space-y-3">
+                            @foreach ($safeList as $safeItem)
+                                <li class="es-seat-sub es-seat-muted p-3.5 text-sm leading-relaxed">{{ $safeItem }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-seat-card mt-8 p-6 sm:p-7" data-reveal="panel">
+                <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 class="es-seat-ink text-lg font-bold">When plans change</h3>
+                    <span class="es-seat-muted es-seat-micro uppercase tracking-[0.12em]">Cancellations, in the product</span>
+                </div>
+                <dl class="grid gap-3 md:grid-cols-2">
+                    @foreach ($planChanges as [$pcWhen, $pcThen])
+                        <div class="es-seat-sub p-4">
+                            <dt class="es-seat-ink text-sm font-semibold">{{ $pcWhen }}</dt>
+                            <dd class="es-seat-muted mt-1 text-sm leading-relaxed">{{ $pcThen }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+                <p class="es-seat-muted es-seat-foot mt-5 pt-4 text-sm leading-relaxed">
+                    One timing rule to know: a ride to the event, or a round trip, cannot be posted or asked
+                    for once the event has started. At a festival that runs over several days, people who
+                    turn up late arrange the ride home as a from-the-event offer instead.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 10. Key features                                             -->
     <!-- ============================================================ -->
     <section class="es-seat-hr scroll-mt-24 py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
@@ -1109,7 +1309,7 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 9. Related pages                                             -->
+    <!-- 11. Related pages                                            -->
     <!-- ============================================================ -->
     <section class="es-seat-hr py-16">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
@@ -1146,12 +1346,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 10. FAQ (07)                                                 -->
+    <!-- 12. FAQ (09)                                                 -->
     <!-- ============================================================ -->
     <section id="faq" class="es-seat-hr scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-seat-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-seat-mark mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                 <p class="es-seat-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-seat-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked <span class="es-seat-grad">from the kerb</span>.
@@ -1177,7 +1377,7 @@
     <x-seo.faq-schema :items="$faqs" />
 
     <!-- ============================================================ -->
-    <!-- 11. Finale                                                   -->
+    <!-- 13. Finale                                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">

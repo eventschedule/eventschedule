@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Custom Domain | Use Your Own Domain - Event Schedule</x-slot>
-    <x-slot name="description">Serve your schedule from events.yourdomain.com. HTTPS is issued once the CNAME resolves, and event links in emails and feeds carry your domain.</x-slot>
+    <x-slot name="description">Put your events on a custom domain like events.yourdomain.com: subdomain or root, the one CNAME record to add, HTTPS, search and email.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Domain</x-slot>
 
     <x-slot name="structuredData">
@@ -501,7 +501,7 @@
         $directSteps = [
             ['01', 'Name the domain', 'In your schedule settings, type the domain you own and choose Direct.'],
             ['02', 'Open DNS at your registrar', 'GoDaddy, Namecheap, Cloudflare, anywhere. You are looking for the DNS records screen.'],
-            ['03', 'Add one CNAME', 'Name it @ for the root, or a label like events. Point it at the hostname the settings panel shows you.'],
+            ['03', 'Add one CNAME', 'Name it with a label like events, or @ for the root if your DNS provider allows a CNAME there. Point it at the hostname the settings panel shows you.'],
             ['04', 'Wait for the record', 'Usually minutes, up to 48 hours. HTTPS is provisioned automatically once the record resolves.'],
         ];
 
@@ -568,6 +568,18 @@
                 'q' => 'Are ads ever shown on my custom domain?',
                 'a' => 'No. Paid plans never carry ads at all, and requests that arrive on a custom domain are excluded from ads regardless of plan, so a lapsed subscription cannot put someone else\'s advert on a domain you own.',
             ],
+            [
+                'q' => 'Should I use a subdomain or my root domain for my events page?',
+                'a' => 'Use a subdomain such as events.yourdomain.com if you already have a website. It needs one CNAME record that every DNS provider accepts, and it leaves your main site and your email exactly as they are. Use the root domain only for a domain bought for the schedule, and only if your DNS provider supports a CNAME at the root (often called CNAME flattening, ALIAS or ANAME), because the DNS standard does not allow a plain CNAME there. A schedule answers on the one name you enter, so www needs its own forward at your DNS provider.',
+            ],
+            [
+                'q' => 'Will connecting a custom domain affect my email?',
+                'a' => 'Not in Direct mode on a subdomain. Email to your domain runs on MX records, and a CNAME on a name like events touches no other record. Redirect mode is different: its setup puts the whole domain\'s DNS on Cloudflare, so check that your MX and TXT records were copied across before you switch, or email to that domain stops. Emails your schedule sends keep coming from the same sender; what changes is that their links point at your domain.',
+            ],
+            [
+                'q' => 'What happens to my old eventschedule.com address?',
+                'a' => 'It keeps working. In Direct mode both addresses serve every page once your domain is Active, so links already printed on posters, sent in emails or listed in search results still open. Search engines are told your domain is the main address through the canonical tag and the sitemap, and they move over in a few weeks. If your eventschedule.com address already ranks well, you can keep it as the main address instead, and your domain will still serve the pages.',
+            ],
         ];
 
         $dotSections = [
@@ -576,6 +588,9 @@
             ['modes', 'Two ways to fix it'],
             ['engrave', 'Cutting the letters'],
             ['status', 'Until the plate is on'],
+            ['choose', 'Which address'],
+            ['dns', 'The DNS record'],
+            ['after', 'What moves'],
             ['covers', 'What it covers'],
             ['plan', 'Enterprise'],
             ['faq', 'Questions'],
@@ -813,7 +828,7 @@
                             <span class="es-plate-label">The record</span>
                             <div class="es-plate-hair my-3"></div>
                             <span class="es-plate-url">CNAME</span>
-                            <p class="es-plate-note mt-2">Name: @ for the root, or a label like events</p>
+                            <p class="es-plate-note mt-2">Name: a label like events, or @ where allowed</p>
                             <p class="es-plate-note">Value: the hostname shown in your schedule settings</p>
                         </div>
                     </div>
@@ -938,12 +953,278 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. What the plate covers: bento                              -->
+    <!-- 6. Which door: subdomain, root domain, or an embed           -->
+    <!-- ============================================================ -->
+    @php
+        $addressChoices = [
+            [
+                'events.yourdomain.com',
+                'A subdomain',
+                'Pick this when you already have a website.',
+                [
+                    'Your main site stays exactly where it is. One CNAME on one new name touches no other record.',
+                    'Every DNS provider accepts a CNAME on a subdomain, so the setup is the same everywhere.',
+                    'Visitors read it as part of your site, and you can link it from your site\'s menu as Events.',
+                ],
+                'Recommended',
+            ],
+            [
+                'yourdomain.com',
+                'The root domain',
+                'Pick this only for a domain bought for the schedule.',
+                [
+                    'The DNS standard does not allow a CNAME at the root, beside the records the root has to hold. Many registrars refuse it; others offer a stand-in called CNAME flattening, ALIAS or ANAME. Check yours has one first.',
+                    'A schedule answers on the one name you enter, so www.yourdomain.com is a separate name that needs its own forward at your DNS provider.',
+                    'Never point the root of the domain your main website lives on.',
+                ],
+                'Dedicated domain',
+            ],
+            [
+                'yourdomain.com/events',
+                'A page on your site',
+                'Pick this when the address must be a path.',
+                [
+                    'A custom domain is always a whole host name, never a folder. Serving a path would mean your own web server proxying every request.',
+                    'The simpler route is to embed the calendar on a page you already have at that path. The embed works on every plan.',
+                    'You can do both: embed the calendar at /events and serve the full schedule on events.yourdomain.com.',
+                ],
+                'Any plan',
+            ],
+        ];
+    @endphp
+    <section id="choose" class="es-plate-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-plate-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Subdomain or root domain</p>
+                <h2 class="es-balance es-plate-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Choose the door <span class="es-plate-accent">before you cut the plate</span>
+                </h2>
+                <p class="es-plate-muted mt-5 text-lg sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
+                    The name you pick decides how much DNS work there is, whether your main website is touched, and what people type. For most organizers the answer is a subdomain of the site they already have.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3" data-reveal-group="100">
+                @foreach ($addressChoices as [$choiceHost, $choiceTitle, $choiceWhen, $choicePoints, $choiceChip])
+                    <div class="es-plate-card flex flex-col p-7" data-reveal="panel">
+                        <div class="mb-5 flex items-center justify-between gap-3">
+                            <p class="es-plate-tag">{{ $choiceTitle }}</p>
+                            <span class="es-plate-chip">{{ $choiceChip }}</span>
+                        </div>
+                        <p class="es-plate-mono mb-3 text-base font-semibold">{{ $choiceHost }}</p>
+                        <p class="es-plate-ink mb-4 font-semibold">{{ $choiceWhen }}</p>
+                        <ul class="space-y-3">
+                            @foreach ($choicePoints as $choicePoint)
+                                <li class="es-plate-muted text-sm leading-relaxed">{{ $choicePoint }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-plate-card mt-6 p-7 lg:p-8" data-reveal="panel">
+                <h3 class="es-plate-ink mb-3 text-sm font-bold uppercase tracking-widest">Naming the subdomain</h3>
+                <p class="es-plate-muted text-sm leading-relaxed">
+                    Use a word your audience would say out loud: <span class="es-plate-mono">events.</span>, <span class="es-plate-mono">tickets.</span>, <span class="es-plate-mono">calendar.</span> or <span class="es-plate-mono">whatson.</span> Keep it short, skip hyphens and numbers, and choose once: the name you print on posters is the name people will type for years, and a change means a new record and a new wait. If a venue and its festival share one domain, two schedules, each on Enterprise, can have a subdomain each, since a host name belongs to one schedule at a time.
+                </p>
+                <p class="es-plate-muted mt-4 text-sm">
+                    Embedding instead: <a href="{{ marketing_url('/features/embed-calendar') }}" class="es-plate-link font-medium hover:underline">embed your calendar on your website</a>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. The record, field by field, and when it does not resolve -->
+    <!-- ============================================================ -->
+    @php
+        $dnsBefore = [
+            ['Find where your DNS lives', 'It is not always where you bought the domain. If your nameservers point at Cloudflare, your web host or another service, the record goes there. Your registrar\'s dashboard lists the nameservers.'],
+            ['Clear the name first', 'A name can hold a CNAME or other records, not both. Delete any A, AAAA or old CNAME record already on events before you add the new one.'],
+            ['Lower the TTL a day ahead', 'If you are replacing a record that already exists, set its TTL to five minutes the day before. Resolvers then let go of the old answer quickly when you change it.'],
+        ];
+        $dnsMistakes = [
+            ['The name was typed in full', 'Most DNS screens add your domain on their own. Typing events.yourdomain.com as the name creates events.yourdomain.com.yourdomain.com. Type only events.'],
+            ['The record is proxied', 'On Cloudflare, set the CNAME to DNS only (the grey cloud). Proxied, it answers with Cloudflare\'s addresses and the certificate cannot be issued.'],
+            ['Another record is still on the name', 'An A or AAAA record left beside the CNAME, or a parked-page record from the registrar, keeps the CNAME from resolving.'],
+            ['A CAA record blocks the certificate', 'A CAA record limits which certificate authorities may issue for your domain. If you have one, it can stop the certificate; ask whoever manages it.'],
+        ];
+    @endphp
+    <section id="dns" class="es-plate-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-plate-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Custom domain DNS, step by step</p>
+                <h2 class="es-balance es-plate-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    One record, <span class="es-plate-accent">four fields</span>
+                </h2>
+                <p class="es-plate-muted mt-5 text-lg sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Direct mode asks for one CNAME record. Here is what goes in each box, the three checks that save a day of waiting, and the four mistakes behind almost every domain stuck on Setting up.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2" data-reveal-group="100">
+                <div class="es-plate-card flex flex-col p-7 lg:p-9" data-reveal="panel">
+                    <p class="es-plate-tag mb-5">The record, for events.yourdomain.com</p>
+                    <div class="es-plate-tablewrap">
+                        <table class="es-plate-table">
+                            <caption>What to type into your DNS provider's form. Field names vary a little between providers.</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Field</th>
+                                    <th scope="col">What to enter</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Type</th>
+                                    <td>CNAME</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Name or Host</th>
+                                    <td><span class="es-plate-mono">events</span>, the label only</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Value or Target</th>
+                                    <td>The hostname your schedule settings show beside the copy button, pasted, not typed</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">TTL</th>
+                                    <td>Automatic, or one hour</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="es-plate-rule mt-auto pt-6">
+                        <h3 class="es-plate-ink mb-2 text-sm font-bold uppercase tracking-widest">Check it yourself</h3>
+                        <p class="es-plate-muted mb-3 text-sm leading-relaxed">From a terminal, this prints the target once the record is visible. Any online DNS lookup tool gives the same answer.</p>
+                        <p class="es-plate-mono rounded-lg border border-gray-300 px-4 py-3 dark:border-white/15">dig events.yourdomain.com CNAME +short</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-6">
+                    <div class="es-plate-card p-7" data-reveal="panel">
+                        <p class="es-plate-tag mb-5">Before you add it</p>
+                        <ol class="space-y-4">
+                            @foreach ($dnsBefore as $beforeIndex => [$beforeTitle, $beforeBody])
+                                <li class="flex gap-4">
+                                    <span class="es-plate-accent flex-none font-mono text-sm font-black tabular-nums">{{ str_pad($beforeIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                    <div>
+                                        <h3 class="es-plate-ink mb-1 font-bold">{{ $beforeTitle }}</h3>
+                                        <p class="es-plate-muted text-sm leading-relaxed">{{ $beforeBody }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </div>
+                    <div class="es-plate-card flex-1 p-7" data-reveal="panel">
+                        <p class="es-plate-tag mb-3">How long it takes</p>
+                        <p class="es-plate-muted text-sm leading-relaxed">
+                            A new name usually resolves within minutes. The 48 hours you read everywhere is the worst case, mostly for changed records whose old answer is still cached somewhere. Once the record resolves, the certificate is issued and renewed for you, and your schedule settings move from Setting up to Active by themselves, checked every few minutes. Your eventschedule.com address keeps serving the whole time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="es-plate-card mt-6 p-7 lg:p-8" data-reveal="panel">
+                <h3 class="es-plate-ink mb-5 text-sm font-bold uppercase tracking-widest">Stuck on Setting up: the usual four</h3>
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    @foreach ($dnsMistakes as [$mistakeTitle, $mistakeBody])
+                        <div>
+                            <h4 class="es-plate-ink mb-1 font-bold">{{ $mistakeTitle }}</h4>
+                            <p class="es-plate-muted text-sm leading-relaxed">{{ $mistakeBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="es-plate-muted es-plate-rule mt-6 pt-5 text-sm leading-relaxed">
+                    Fixed it? Nothing to press: the next check, within about five minutes, picks it up once the record resolves. If the status says Setup failed, save the schedule settings again and the setup is requested again.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. What changes, and what does not                           -->
+    <!-- ============================================================ -->
+    @php
+        $staysSame = [
+            ['Your email', 'A CNAME on events changes nothing about mail to you@yourdomain.com, which runs on MX records the new name never touches.'],
+            ['Your main website', 'With a subdomain, yourdomain.com and every page on it are exactly where they were.'],
+            ['Your old address', 'Your eventschedule.com address keeps serving every page, so links already on posters, in old emails and in search results still work.'],
+            ['Sign-in and your admin', 'You still sign in and manage the schedule on eventschedule.com. Only the pages your audience sees move to your domain.'],
+        ];
+        $doesChange = [
+            ['What search engines index', 'Once the domain is Active, your domain is the main address by default: canonical tags, structured data and the sitemap name it. Search results take a few weeks to move over, and switching back and forth starts the wait again.'],
+            ['Links you send', 'Newsletters, the new-event digest and the emails to people waiting for tickets link to your domain. Ticket links in purchase confirmations stay on eventschedule.com.'],
+            ['Calendar subscriptions', 'Guests who subscribe from the Add to Calendar menu, which an event offers when it is not selling tickets or taking registrations, get a feed served from your domain.'],
+            ['The QR code and the address you copy', 'The schedule\'s QR code, and the address shown at the top of your schedule\'s settings, use the main address.'],
+        ];
+    @endphp
+    <section id="after" class="es-plate-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-plate-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">After the switch</p>
+                <h2 class="es-balance es-plate-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    What moves, and <span class="es-plate-accent">what stays put</span>
+                </h2>
+                <p class="es-plate-muted mt-5 text-lg sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
+                    The two fears people bring to a domain change are broken email and lost search rankings. In Direct mode on a subdomain, email is untouched and search engines are told where the pages moved; if your eventschedule.com address ranks well, you can keep it as the main address. Here is the full list.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2" data-reveal-group="110">
+                <div class="es-plate-card flex flex-col p-7 lg:p-9" data-reveal="panel">
+                    <div class="mb-6 flex items-center justify-between gap-3">
+                        <p class="es-plate-tag">Stays put</p>
+                        <span class="es-plate-chip">Untouched</span>
+                    </div>
+                    <dl class="space-y-5">
+                        @foreach ($staysSame as [$staysTitle, $staysBody])
+                            <div>
+                                <dt class="es-plate-ink mb-1 font-bold">{{ $staysTitle }}</dt>
+                                <dd class="es-plate-muted text-sm leading-relaxed">{{ $staysBody }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </div>
+                <div class="es-plate-card flex flex-col p-7 lg:p-9" data-reveal="panel">
+                    <div class="mb-6 flex items-center justify-between gap-3">
+                        <p class="es-plate-tag">Moves to your domain</p>
+                        <span class="es-plate-chip">Once Active</span>
+                    </div>
+                    <dl class="space-y-5">
+                        @foreach ($doesChange as [$changeTitle, $changeBody])
+                            <div>
+                                <dt class="es-plate-ink mb-1 font-bold">{{ $changeTitle }}</dt>
+                                <dd class="es-plate-muted text-sm leading-relaxed">{{ $changeBody }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2" data-reveal-group="110">
+                <div class="es-plate-card p-7" data-reveal="panel">
+                    <h3 class="es-plate-ink mb-2 font-bold">Your subdomain already ranks? Keep it as the main address</h3>
+                    <p class="es-plate-muted text-sm leading-relaxed">In Direct mode the Main address choice can stay on your eventschedule.com subdomain. Your domain still serves every page, while search engines, emails and shared links keep naming the address that already has the rankings. Move the main address over later, once, when you are ready to wait out the change.</p>
+                </div>
+                <div class="es-plate-card p-7" data-reveal="panel">
+                    <h3 class="es-plate-ink mb-2 font-bold">Redirect mode takes over the whole domain</h3>
+                    <p class="es-plate-muted text-sm leading-relaxed">Its setup puts the whole domain's DNS on Cloudflare and forwards the root, and through a wildcard record the other names on it, to your schedule, so it suits a domain bought for the schedule, not the one your website lives on. Before you switch nameservers, check that Cloudflare has copied your MX and TXT records, or email to that domain stops.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 9. What the plate covers: bento                              -->
     <!-- ============================================================ -->
     <section id="covers" class="es-plate-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                 <h2 class="es-balance es-plate-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
                     What the plate <span class="es-plate-accent">covers</span>
                 </h2>
@@ -975,7 +1256,7 @@
                     <div class="es-tilt-inner es-plate-card relative flex h-full flex-col overflow-hidden p-7">
                         <p class="es-plate-tag mb-4">Subscriptions</p>
                         <h3 class="es-plate-ink mb-3 text-xl font-bold">Feeds on your host</h3>
-                        <p class="es-plate-muted mb-6 leading-relaxed">Guests subscribe from the Add to Calendar menu, and the live iCal feed they get is served from your domain, as is the RSS feed. Each event inside links back to your domain too.</p>
+                        <p class="es-plate-muted mb-6 leading-relaxed">The live iCal feed is served from your domain, as is the RSS feed, and each event inside links back to it. Guests subscribe from the Add to Calendar menu, which an event page offers when it is not selling tickets or taking registrations.</p>
                         <div class="mt-auto flex flex-wrap gap-2">
                             <span class="es-plate-chip">/feed/ical</span>
                             <span class="es-plate-chip">/feed/rss</span>
@@ -1052,7 +1333,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Enterprise (fixed-dark band)                              -->
+    <!-- 10. Enterprise (fixed-dark band)                             -->
     <!-- ============================================================ -->
     <section id="plan" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="mx-auto max-w-6xl">
@@ -1063,7 +1344,7 @@
 
                 <div class="relative z-10">
                     <div class="mx-auto mb-12 max-w-3xl text-center">
-                        <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                        <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                         <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                             Part of <span class="es-plate-lit">Enterprise</span>
                         </h2>
@@ -1093,7 +1374,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Guides and who uses this                                  -->
+    <!-- 11. Guides and who uses this                                 -->
     <!-- ============================================================ -->
     <section class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -1146,7 +1427,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. Related features                                          -->
+    <!-- 12. Related features                                         -->
     <!-- ============================================================ -->
     <section class="es-plate-rule py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
@@ -1209,14 +1490,14 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 10. FAQ                                                      -->
+    <!-- 13. FAQ                                                      -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="es-plate-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-plate-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <h2 class="es-balance es-plate-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>
@@ -1241,7 +1522,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 11. Finale                                                   -->
+    <!-- 14. Finale                                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
