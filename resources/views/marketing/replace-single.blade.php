@@ -68,6 +68,7 @@
 
         $dotSections = [
             ['top', 'The swap'],
+            ...(! empty($today) ? [['today', 'The job today']] : []),
             ['gaps', 'The gaps'],
             ['native', 'Done natively'],
             ['sheet', 'The swap sheet'],
@@ -648,7 +649,7 @@
                             @endforeach
                         </div>
                         <p class="es-swap-muted mb-6 text-sm">
-                            Not everyone runs all {{ $tabCountWord }}. Whichever of them you do run, the event details get copied between them by hand, because none of them was built for events.
+                            Not everyone runs all {{ $tabCountWord }}. Whichever of them you do run, the event details get copied between them by hand, because each one keeps a copy of its own.
                         </p>
 
                         <div class="es-swap-hr flex items-center gap-3 pt-5">
@@ -680,6 +681,43 @@
         </div>
     </section>
 
+    {{-- The job as it is done today: the real sequence of steps an organizer goes through on
+         this tool, written per tool. Optional, so an entry without one renders as before. --}}
+    @if (! empty($today))
+    <section id="today" class="es-swap-hr scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <p class="es-swap-tag mb-4" data-reveal>The job today</p>
+                <h2 class="es-balance es-swap-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    {{ $today['title'] }}
+                </h2>
+                <p class="es-swap-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">{{ $today['intro'] }}</p>
+            </div>
+
+            <div class="es-swap-chrome mx-auto max-w-3xl p-6 sm:p-8" data-reveal="panel">
+                <div class="es-swap-tabs mb-5">
+                    <span class="es-swap-tab">{{ $shortName }}</span>
+                </div>
+                <ol class="mb-0">
+                    @foreach ($today['steps'] as $todayIndex => $todayStep)
+                        <li class="es-swap-row">
+                            <span class="es-swap-rownum" aria-hidden="true">{{ str_pad($todayIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span>
+                                <span class="es-swap-ink block text-sm font-bold sm:text-base">{{ $todayStep['title'] }}</span>
+                                <span class="es-swap-muted mt-1 block text-sm leading-relaxed">{{ $todayStep['description'] }}</span>
+                            </span>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
+
+            @if (! empty($today['outro']))
+                <p class="es-swap-muted mx-auto mt-8 max-w-2xl text-center" data-reveal>{{ $today['outro'] }}</p>
+            @endif
+        </div>
+    </section>
+    @endif
+
     <!-- ============================================================ -->
     <!-- 2. The gaps: the ledger, in the "before" material            -->
     <!-- ============================================================ -->
@@ -689,10 +727,10 @@
                 <div class="es-swap-mark mb-6" data-reveal aria-hidden="true"><span>Swap 01</span></div>
                 <p class="es-swap-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gaps</p>
                 <h2 class="es-balance es-swap-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Where {{ $name }} <span class="es-swap-accent">limits you</span> for events
+                    Where {{ $name }} <span class="es-swap-accent">{{ empty($plural) ? 'limits' : 'limit' }} you</span> for events
                 </h2>
                 <p class="es-swap-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    {{ $name }} was not built for event management. These are the places the event part has to be done somewhere else.
+                    {{ $gaps_lead ?? $name.' was not built for event management. These are the places the event part has to be done somewhere else.' }}
                 </p>
             </div>
 
@@ -711,7 +749,7 @@
             </div>
 
             <p class="es-swap-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                None of that is a fault in {{ $name }}. It is a general-purpose tool being asked to run an event, which is why the rest of the job ends up in other tabs.
+                {{ $gaps_close ?? 'None of that is a fault in '.$name.'. It is a general-purpose tool being asked to run an event, which is why the rest of the job ends up in other tabs.' }}
             </p>
         </div>
     </section>
@@ -728,7 +766,7 @@
                     What Event Schedule gives you over <span class="es-swap-accent">{{ $name }}</span>
                 </h2>
                 <p class="es-swap-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    The same work, in the tool that already knows what an event is.
+                    {{ $native_lead ?? 'The same work, in the tool that already knows what an event is.' }}
                 </p>
             </div>
 
@@ -869,7 +907,7 @@
                     How to switch from {{ $name }} in <span class="es-swap-accent">{{ count($steps) }} steps</span>
                 </h2>
                 <p class="es-swap-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    No migration project. Your next event is the first one you put here.
+                    {{ $switch_lead ?? 'No migration project. Your next event is the first one you put here.' }}
                 </p>
             </div>
 
@@ -938,13 +976,24 @@
                             </li>
                         @endforeach
                     </ul>
+                    @if (! empty($keep_when))
+                        <p class="es-swap-tag mb-4 mt-8">Stay with {{ $stay_name ?? $shortName }} when</p>
+                        <ul class="space-y-3">
+                            @foreach ($keep_when as $keep)
+                                <li class="flex items-start gap-3">
+                                    <svg aria-hidden="true" class="es-swap-muted mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                    <span class="es-swap-muted">{{ $keep }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
 
                 <div class="es-swap-seam" data-reveal style="--reveal-delay: 0.1s;">
                     <div class="es-swap-tabs mb-6">
                         <span class="es-swap-tab es-swap-tab-in">Event Schedule</span>
                     </div>
-                    <h3 class="es-swap-ink mb-4 text-2xl font-bold">Why switch to Event Schedule?</h3>
+                    <h3 class="es-swap-ink mb-4 text-2xl font-bold">What Event Schedule takes over</h3>
                     <p class="es-swap-muted mb-6 leading-relaxed">
                         {{ $why_switch['intro'] ?? 'Event Schedule offers a unique combination of features that no other platform matches: zero platform fees, open source transparency, and powerful AI tools.' }}
                     </p>
