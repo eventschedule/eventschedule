@@ -406,6 +406,11 @@
         @media (min-width: 640px) {
             .es-req-terms { grid-template-columns: 6rem 1fr; }
         }
+        /* The guest-subscribe steps name an Outlook version in the term column,
+           which needs more room than a one-word field name. */
+        @media (min-width: 640px) {
+            .es-req-terms-wide { grid-template-columns: 10rem 1fr; }
+        }
 
         /* --- A plain marked list. Tailwind's preflight strips list markers,
                so the page has to put them back. --- */
@@ -566,7 +571,7 @@
         $inbound = [
             ['Subject', 'Sound check with Marla', 'Becomes the event name.'],
             ['When', 'Wed 21 Oct 2026, 4:00 PM to 6:00 PM', 'Start becomes the start, and the length of the item becomes the duration in whole hours.'],
-            ['Where', 'The Blue Room', 'Matched against the venues you already have, and added as one if it is new.'],
+            ['Where', 'The Blue Room', 'Matched against the venues you already have, and added as one if it is new, for an event that has no venue yet. A Teams or Zoom link here never becomes a venue.'],
             ['Body', 'Bring the spare cable.', "Outlook's HTML body is converted back to Markdown, and only rewritten when it actually changed."],
         ];
 
@@ -582,7 +587,7 @@
 
         // The four conditions on role->microsoft_create_teams_meetings.
         $teamsRules = [
-            ['Toggle', 'On, per schedule', 'Off by default. It sits beside the sync direction on the Outlook tab.'],
+            ['Toggle', 'On, per schedule', 'Off by default. It is Create Teams meetings for online events, beside the sync direction in the Outlook Calendar row.'],
             ['Event', 'No venue', 'An event with a venue is a room, not a meeting, so nothing is created for it.'],
             ['Account', 'Work or school', 'Personal Microsoft accounts cannot host a Teams meeting. The Outlook item is still created, just without one.'],
             ['Link', 'Yours wins', 'The join link is only saved when the event has no link yet. A link you typed is never overwritten.'],
@@ -593,7 +598,7 @@
             ['Subject', 'The event name', 'Renames the event'],
             ['Start and end', 'Start time plus duration, in the schedule timezone', 'Start and length become start and duration'],
             ['All day', 'A whole-day item when the event has no duration', 'A one-day item arrives with no duration, a longer one with its length'],
-            ['Location', 'The venue address', 'Matched to a venue, or added as one'],
+            ['Location', 'The venue address', 'Matched to a venue, or added as one, while the event has none'],
             ['Body', 'The description, or your calendar template', 'Converted back to Markdown'],
             ['Sensitivity', 'Private for an unlisted event, normal otherwise', 'Not read back'],
             ['Online meeting', 'A Teams meeting when you ask for one, and its join link comes straight back to the event link field while that field is empty', 'Not read back: a Teams link on an item somebody else made stays in Outlook'],
@@ -619,7 +624,7 @@
 
         $steps = [
             ['01', 'Sign in with Microsoft', 'One OAuth round trip from your account settings. Event Schedule asks for calendar read and write, never sees a password, and keeps a refresh token so the connection does not need redoing.'],
-            ['02', 'Pick the calendar and the direction', 'Your Outlook calendars are listed for you. Choose one, choose to, from, both or off, and optionally turn on Teams meetings and a deletion policy.'],
+            ['02', 'Pick the calendar and the direction', 'In Edit Schedule, Integrations, the Outlook Calendar row lists your calendars; Refresh list loads one you made a minute ago. Choose one, choose to, from, both or off, and optionally turn on Teams meetings and a deletion policy.'],
             ['03', 'Save an event', 'Saving, editing or deleting an event goes straight out to Outlook. Anything coming the other way arrives by notification, with the fifteen-minute poll behind it.'],
         ];
 
@@ -636,6 +641,10 @@
                 'a' => 'Yes. Outlook Calendar sync is free on every plan, in both directions, including the optional Teams meetings and the deletion policy. There is no calendar feature behind the paywall.',
             ],
             [
+                'q' => 'How do I sync Event Schedule with my Outlook calendar?',
+                'a' => 'Connect your Microsoft account once in Account Settings with Connect Outlook Calendar. Then open the schedule, choose Edit Schedule, Integrations and the Outlook Calendar row, pick a calendar under Select Outlook Calendar, and choose a Sync Direction: To Outlook Calendar, From Outlook Calendar or Bidirectional Sync. Turn on Create Teams meetings for online events if you want them, and save. The schedule\'s owner is the one who sets it, and it is free on every plan.',
+            ],
+            [
                 'q' => 'Which direction does it sync?',
                 'a' => 'Whichever you choose, per schedule. To Outlook pushes your events out. From Outlook pulls Outlook items in. Both ways does both, so a change in either place reaches the other. Off leaves the account connected but stops the sync.',
             ],
@@ -648,16 +657,28 @@
                 'a' => 'Both. Personal Microsoft accounts such as Outlook.com, Hotmail and Live work, and so do Microsoft 365 work or school accounts. The one difference is Teams: personal accounts cannot host a Teams meeting, so the event is still created in Outlook, just without one attached.',
             ],
             [
+                'q' => 'Why does Microsoft say I need admin approval?',
+                'a' => 'Your organization has switched off the right for people to approve apps for themselves, which many Microsoft 365 tenants do. Nothing is wrong with your account. Ask your IT team to approve Event Schedule for the calendar permission it asks for, which is delegated: it acts as you and reaches only what your own account can. Then connect again. Personal Outlook.com accounts never see this screen.',
+            ],
+            [
+                'q' => 'Can I sync a calendar that only lives in Outlook on my computer?',
+                'a' => 'No. The sync talks to Microsoft\'s cloud through Microsoft Graph, so it reaches calendars stored in a Microsoft 365 or Outlook.com account. A calendar kept in a local data file, or under an IMAP mail account, never leaves your PC, so no online service can see it. A Google or iCloud calendar that Outlook merely displays is reached through Google Calendar sync or CalDAV sync instead.',
+            ],
+            [
                 'q' => 'What happens if I delete an event in Outlook?',
                 'a' => 'That is your call, set once per schedule: keep the event, mark it cancelled so the date leaves your public calendar, or delete it here too. Delete has one brake: an event with ticket sales on it is hidden instead, so its sales records survive. The same setting governs Google Calendar inbound sync. Event Schedule also checks why Graph reported the event as gone, and only applies the policy to a real deletion, so an event that merely moved out of the sync window is left alone.',
             ],
             [
                 'q' => 'Can I sync a single event rather than the whole schedule?',
-                'a' => 'Yes, once the schedule is set to send events out (to Outlook, or both ways). Each event then carries its own Outlook Calendar panel in the editor: sync just that one, or remove it from Outlook again. The schedule-level direction covers everything else.',
+                'a' => 'Yes, once the schedule is set to send events out (To Outlook Calendar, or Bidirectional Sync). Each saved event then has a Calendar sync line at the end of its Listing tab, reading Synced or Not synced with the reason, and Sync Now copies just that event at once while Remove takes it off Outlook again. A draft, an Internal event or a cancelled one is not offered Sync Now. The schedule-level direction covers everything else.',
             ],
             [
                 'q' => 'Do recurring events send every date to Outlook?',
                 'a' => 'No. Outlook sync works at the event level, so a recurring event goes across as one Outlook item rather than one per date. If you want every date in a calendar, use the published iCal feed or the per-date iCal download, which do expand recurring events.',
+            ],
+            [
+                'q' => 'Why is my event not showing up in Outlook?',
+                'a' => 'Check, in order: the event is published, because Draft and Internal events are never sent; the schedule is set to To Outlook Calendar or Bidirectional Sync, because From only reads; you are looking at the calendar chosen for the schedule, which may not be your main one, so tick it in Outlook\'s calendar list; and the event was saved after you connected, or has been saved since. The Calendar sync line at the end of the event\'s Listing tab says Synced or Not synced, with the reason, and Sync Now sends it at once.',
             ],
             [
                 'q' => 'Can guests subscribe to my schedule in Outlook without an account?',
@@ -673,13 +694,16 @@
             ['top', 'The request'],
             ['record', 'One record'],
             ['direction', 'Direction'],
+            ['accounts', 'Which Outlook'],
             ['fields', 'The fields'],
             ['teams', 'Teams'],
             ['delivery', 'Delivery'],
             ['cancelled', 'Cancelled'],
             ['inbound', 'Inbound'],
             ['feed', 'The feed'],
+            ['share', 'Sharing'],
             ['how-it-works', 'Connecting'],
+            ['fix', 'Troubleshooting'],
             ['faq', 'Questions'],
             ['claim', 'Connect'],
         ];
@@ -863,9 +887,83 @@
                         <h3 class="es-req-ink text-lg font-bold">Or one event by hand</h3>
                         <span class="es-req-plan">Free</span>
                     </div>
-                    <p class="es-req-muted text-sm">Answer to Outlook or both ways and every event also carries its own Outlook panel in the editor. Push a single event across from there on demand, or take that one back out of Outlook, without changing what the schedule does with the rest.</p>
+                    <p class="es-req-muted text-sm">Answer to Outlook or both ways and every saved event also carries a Calendar sync line at the end of its Listing tab. It says whether that event is in Outlook and why not, and offers Sync Now to push it across on demand or Remove to take that one back out, without changing what the schedule does with the rest.</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3b. Which Outlook: what the sync can reach                   -->
+    <!-- ============================================================ -->
+    @php
+        // "Outlook" is a mail program and also several different account types. The sync
+        // talks to Microsoft Graph, so what matters is where the calendar is stored.
+        $accounts = [
+            ['Microsoft 365 work or school account', 'Yes, both ways', 'The calendar lives in Microsoft\'s cloud, which is what the sync talks to. This is the only kind that can host a Teams meeting for an online event.'],
+            ['Outlook.com, Hotmail or Live', 'Yes, both ways', 'A personal Microsoft account works the same way. The Outlook item is created without a Teams meeting, even with that switch on.'],
+            ['A Google account opened in Outlook', 'Use Google Calendar sync', 'Outlook is only showing a calendar that Google stores. Connect Google Calendar on the schedule instead, and the entries appear in Outlook as they always did.'],
+            ['An iCloud or other CalDAV calendar opened in Outlook', 'Use CalDAV sync', 'The calendar is stored by Apple or another CalDAV server, so the CalDAV row is the one that reaches it.'],
+            ['A calendar kept only on your PC', 'Not reachable', 'A calendar in a local data file, or under a plain IMAP mail account, never reaches Microsoft\'s cloud, so no online service can sync with it. Move your listings to a calendar in your Microsoft account.'],
+        ];
+    @endphp
+    <section id="accounts" class="es-req-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-req-mark mb-6" data-reveal aria-hidden="true"><span>Accounts</span></div>
+                <p class="es-req-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Which Outlook do you have?</p>
+                <h2 class="es-balance es-req-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Outlook is the program. <span class="es-req-accent">The account decides.</span>
+                </h2>
+                <p class="es-req-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Outlook can show calendars from several places at once, and only some of them are Outlook's own. The sync connects to Microsoft's cloud through Microsoft Graph, so the question is not which app you open but where the calendar is stored. Look at the account name above the calendar in Outlook's list, then find it here.
+                </p>
+            </div>
+
+            <div class="es-req-card overflow-x-auto p-5 sm:p-7" data-reveal="panel">
+                <table class="es-req-table">
+                    <caption class="sr-only">Which kinds of calendar shown in Outlook the Outlook sync can reach, and what to use for the others</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="es-req-th">Where the calendar is stored</th>
+                            <th scope="col" class="es-req-th">Outlook sync?</th>
+                            <th scope="col" class="es-req-th">Why</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($accounts as [$aWhere, $aAnswer, $aWhy])
+                            <tr>
+                                <th scope="row" class="text-sm">{{ $aWhere }}</th>
+                                <td class="es-req-ink text-sm font-semibold">{{ $aAnswer }}</td>
+                                <td class="es-req-muted text-sm">{{ $aWhy }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 grid gap-6 md:grid-cols-2" data-reveal-group="90">
+                <div class="es-req-card p-6" data-reveal="panel">
+                    <h3 class="es-req-ink text-base font-bold">Connecting a work account</h3>
+                    <p class="es-req-muted mt-2 text-sm leading-relaxed">
+                        Microsoft asks you to let Event Schedule read and write your calendars and to stay connected. Many organizations switch off the right to approve apps for yourself, and then Microsoft shows a Need admin approval screen instead. That is your IT team's setting, not a fault: ask them to approve the app for the calendar permission, then connect again.
+                    </p>
+                </div>
+                <div class="es-req-card p-6" data-reveal="panel">
+                    <h3 class="es-req-ink text-base font-bold">Only your own calendars</h3>
+                    <p class="es-req-muted mt-2 text-sm leading-relaxed">
+                        The permission is delegated, so the sync acts as you and reaches only what your own account can reach, never every calendar in the organization. To put the schedule in front of colleagues, sync it to a calendar of yours and share that calendar from Outlook, as described further down.
+                    </p>
+                </div>
+            </div>
+
+            <p class="es-req-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Not on Microsoft at all? The same two-way sync runs on
+                <x-link :href="marketing_url('/google-calendar')" class="es-req-link font-medium">Google Calendar</x-link>
+                and on any
+                <x-link :href="marketing_url('/caldav')" class="es-req-link font-medium">CalDAV</x-link>
+                server.
+            </p>
         </div>
     </section>
 
@@ -1053,12 +1151,12 @@
                         The same document, <span class="es-req-accent">read the other way.</span>
                     </h2>
                     <p class="es-req-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        An item added in Outlook becomes a real event here, not a shadow copy. It is accepted on the schedule the moment it lands, named from the subject, given a URL from your own event URL pattern, and filed under your default category if you set one.
+                        An item added in Outlook becomes a real event here, not a shadow copy. It is named from the subject, given a URL from your own event URL pattern and filed under your default category if you set one, and it arrives as a draft for you to publish unless you switched on Publish new events automatically. Items Outlook marks private, invitations you declined, out-of-office blocks and cancelled meetings are not read in.
                     </p>
                     <div class="es-req-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-req-ink text-base font-bold">Bookings are not overwritten</h3>
-                            <span class="es-req-plan es-req-plan-pro">Pro</span>
+                            <span class="es-req-plan">Free</span>
                         </div>
                         <p class="es-req-muted text-sm">An appointment booked on your booking page also lands on your Outlook calendar, but the calendar never writes back over it. A rescheduled booking cannot be dragged back to its old time by a stale sync.</p>
                     </div>
@@ -1150,6 +1248,84 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 9b. Sharing it inside Microsoft 365, and with the public     -->
+    <!-- ============================================================ -->
+    @php
+        $outlookShares = [
+            [
+                'who' => 'Front of house needs the dates',
+                'do' => 'Share the synced calendar from Outlook with Can view all details. Everyone you add sees each show with its time, place and notes, in the Outlook they already use, without an Event Schedule account.',
+                'note' => 'An unlisted event goes out with private sensitivity, so people who can only view the calendar see the time taken and not the details.',
+            ],
+            [
+                'who' => 'A colleague books the room in Outlook',
+                'do' => 'Share the calendar with Can edit and set the schedule to Bidirectional Sync. A time they change in Outlook reaches your public page, usually within a minute or two.',
+                'note' => 'Can edit lets them delete as well, and a deletion follows your delete policy. With somebody else editing, Keep it or Mark it cancelled is the safer answer.',
+            ],
+            [
+                'who' => 'The public should see the season',
+                'do' => 'Publish nothing from Outlook. Send people to your schedule page, or give them its calendar feed, which carries public events only and leaves out drafts, unlisted, cancelled and password-protected ones.',
+                'note' => 'A calendar published from Outlook would show whatever is in it, including anything private you later add there by mistake.',
+            ],
+        ];
+
+        $outlookSubscribe = [
+            ['Outlook on the web and the new Outlook', 'Open Calendar, choose Add calendar, then Subscribe from web. Paste the schedule\'s feed address, give it a name, and import it.'],
+            ['Classic Outlook for Windows', 'In Calendar, choose Add Calendar, then From Internet, and paste the same address.'],
+            ['Where to find the address', 'Subscribe to all events from the schedule, at the end of an event page\'s Add to Calendar menu or of the Stay up to date panel. Copy the link rather than opening it.'],
+        ];
+    @endphp
+    <section id="share" class="es-req-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-req-mark mb-6" data-reveal aria-hidden="true"><span>Sharing</span></div>
+                <p class="es-req-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Inside Microsoft 365, and outside it</p>
+                <h2 class="es-balance es-req-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    One synced calendar. <span class="es-req-accent">Three kinds of reader.</span>
+                </h2>
+                <p class="es-req-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The sync puts your events in one Outlook calendar on the owner's account. Who else sees that calendar is decided in Outlook, with Outlook's own sharing, and the right setting depends on whether the reader works with you, books for you, or buys a ticket from you.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-3" data-reveal-group="100">
+                @foreach ($outlookShares as $oShare)
+                    <div class="es-req-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <h3 class="es-req-ink text-lg font-bold">{{ $oShare['who'] }}</h3>
+                        <p class="es-req-muted mt-3 text-sm leading-relaxed">{{ $oShare['do'] }}</p>
+                        <p class="es-req-muted es-req-rule mt-auto pt-4 text-sm leading-relaxed">{{ $oShare['note'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-req-card mt-8 p-6 sm:p-8" data-reveal="panel">
+                <div class="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
+                    <div>
+                        <p class="es-req-tag mb-3">For your audience</p>
+                        <h3 class="es-req-ink text-xl font-bold">How a guest subscribes in Outlook</h3>
+                        <p class="es-req-muted mt-3 text-sm leading-relaxed">
+                            A guest who downloads one event's file gets a copy that never changes. A guest who subscribes to the feed gets every public date, and a date you move moves in their Outlook too.
+                        </p>
+                        <p class="es-req-muted mt-3 text-sm leading-relaxed">
+                            Outlook re-reads a subscribed calendar on Microsoft's own timetable, which can take hours, and the feed itself is cached for an hour, so neither you nor the guest can make it faster. Tell people about a same-day change by email as well.
+                        </p>
+                    </div>
+                    <dl>
+                        @foreach ($outlookSubscribe as [$subWhere, $subHow])
+                            <div class="es-req-terms es-req-terms-wide">
+                                <dt class="es-req-tag">{{ $subWhere }}</dt>
+                                <dd class="m-0">
+                                    <p class="es-req-muted text-sm leading-relaxed">{{ $subHow }}</p>
+                                </dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 10. Connecting it                                            -->
     <!-- ============================================================ -->
     <section id="how-it-works" class="es-req-rule scroll-mt-24 py-20 lg:py-28">
@@ -1187,6 +1363,50 @@
                     </svg>
                 </a>
             </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 10b. Outlook calendar sync not working                       -->
+    <!-- ============================================================ -->
+    @php
+        $outlookFixes = [
+            ['Microsoft says Need admin approval', 'Your organization does not let people approve apps for themselves. Ask your IT team to approve Event Schedule for the calendar permission, then press Connect Outlook Calendar again.'],
+            ['The calendar I want is not in the list', 'If you made it a minute ago, press Refresh list under Select Outlook Calendar. If it still is not there, it probably belongs to another account shown in Outlook, such as a Google or iCloud one; see the table near the top of this page.'],
+            ['Saving says "Choose the calendar to read events from."', 'From Outlook Calendar and Bidirectional Sync read a calendar, and your main one is never assumed. Pick one under Select Outlook Calendar, then save.'],
+            ['Online events have no Teams link', 'Teams meetings are made only for an event with no venue, only with Create Teams meetings for online events switched on, and only from a work or school account. A link you typed into the event yourself is never replaced.'],
+            ['Sync stopped after a password change or a security review', 'When Microsoft stops accepting the connection, the schedule goes back to No Sync, but the links between events and Outlook items are kept. Connect again in Account Settings and choose the direction again; nothing is written twice.'],
+            ['Every event is in Outlook twice', 'Pressing Disconnect yourself forgets which item belongs to which event, so sending to the same calendar afterwards writes each one again. Delete the old items first, or choose a fresh calendar.'],
+            ['An Outlook item never reached the schedule', 'Items marked private, confidential or personal, invitations you declined, out-of-office and working-elsewhere blocks and cancelled meetings are never read in. Anything else waits as a draft on the Schedule tab unless you publish automatically.'],
+            ['Selfhosted: changes from Outlook take fifteen minutes', 'Microsoft Graph has to reach your install over public HTTPS to deliver a change notification. Without that, the fifteen-minute poll still brings every change in.'],
+        ];
+    @endphp
+    <section id="fix" class="es-req-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-req-mark mb-6" data-reveal aria-hidden="true"><span>Fixes</span></div>
+                <p class="es-req-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Troubleshooting</p>
+                <h2 class="es-balance es-req-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Outlook calendar sync <span class="es-req-accent">not working?</span>
+                </h2>
+                <p class="es-req-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The eight problems that are particular to a Microsoft connection, and what to do about each. For a single event, look first at the Calendar sync line at the end of its Listing tab: it says Synced or Not synced, and why.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                @foreach ($outlookFixes as [$oFixTitle, $oFixBody])
+                    <div class="es-req-card p-6" data-reveal="panel">
+                        <h3 class="es-req-ink text-base font-bold">{{ $oFixTitle }}</h3>
+                        <p class="es-req-muted mt-1.5 text-sm leading-relaxed">{{ $oFixBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-req-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Drafts that never leave, a wrong time zone, and the other problems every calendar shares are in the
+                <x-link :href="marketing_url('/features/calendar-sync').'#fix'" class="es-req-link font-medium">calendar sync troubleshooting guide</x-link>.
+            </p>
         </div>
     </section>
 

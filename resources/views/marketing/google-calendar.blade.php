@@ -41,19 +41,16 @@
            role_user.google_calendar_id), and the Add to Google Calendar
            link on public event pages.
 
-           THE PER-PERSON CALENDAR IS FREE AND IT IS NOT A TEAM-ONLY
-           FEATURE. Do not re-label it Enterprise. The only UI that
-           writes role_user.google_calendar_id for a non-owner is "Sync
-           to my calendar" on the FOLLOWING list
-           (role/following_table.blade.php, and RoleController::
-           following() scopes that list to level='follower'), plus the
-           member block in role/edit.blade.php for a non-owner editor.
-           GoogleCalendarController::memberSync() checks only for a
-           google_token and a role_user row: no isPro / isEnterprise
-           anywhere. What IS Enterprise is having more than one team
-           member at all (RoleController:1210, capped at 5), so the
+           THE PER-PERSON CALENDAR IS FOR ADMINS ONLY. Since
+           2026-10 GoogleCalendarController::memberSync() refuses a
+           follower's row and Role::getMembersWithCalendarSync() skips
+           followers, and the only control is in role/edit.blade.php,
+           which needs isEditor() (owner or admin), so the section names
+           admins, never a viewer or a follower. The setting itself has no plan gate; what IS
+           Enterprise on hosted is having more than one team member at
+           all (capped at 5 in RoleController::storeMember()), so the
            section says that in prose instead of pinning an Enterprise
-           pill on a free capability.
+           pill on the setting.
 
            COLOUR: Google Calendar's own palette, which is legitimate
            here because the whole page is about that one product and the
@@ -569,7 +566,7 @@
             ['Description', 'The event description, or the calendar template you write for this schedule.', true, 'Yes'],
             ['Start', 'The start date and time, stamped in the schedule\'s timezone.', true, 'Yes'],
             ['End', 'The start plus the event\'s duration. There is no separate end field to keep in step.', true, 'Yes'],
-            ['Location', 'The address of the venue on the event.', true, 'Yes'],
+            ['Location', 'The address of the venue on the event.', true, 'If no venue yet'],
             ['Time zone', 'The schedule\'s timezone, so an entry does not drift for anybody reading it elsewhere.', false, 'Set here'],
             ['Visibility', 'Public, or private when the event is unlisted.', false, 'Stays as set here'],
         ];
@@ -585,6 +582,10 @@
             [
                 'q' => 'Is two-way sync available on the free plan?',
                 'a' => 'Yes. Google Calendar sync is available on all plans, including the free plan. You can push events to Google, pull events from Google, or sync both ways at no cost.',
+            ],
+            [
+                'q' => 'How do I sync my events with Google Calendar?',
+                'a' => 'Connect Google once under Settings, Integrations, Connect Google Calendar. Then open the schedule, choose Edit Schedule, Integrations and the Google Calendar row, pick a calendar under Select Google Calendar, and choose a Sync Direction: To Google Calendar, From Google Calendar or Bidirectional Sync. Save. Events are written to Google as you save them, and Resync to Google Calendar in the same row sends the ones you already had. It is free on every plan, and the schedule\'s owner is the one who sets it.',
             ],
             [
                 'q' => 'How quickly do changes sync?',
@@ -604,11 +605,19 @@
             ],
             [
                 'q' => 'I connected after I had already added events. Do the old ones go across?',
-                'a' => 'Not on their own. Connecting starts the sync from that moment, so events you save afterwards are written out and the ones already on the schedule sit where they are. The re-send button on the schedule\'s calendar tab is what backfills them: it walks every published event and puts it on the calendar the schedule points at now. It is owner-only, it needs a direction that pushes, and it runs in the background rather than making you wait.',
+                'a' => 'Not on their own. Connecting starts the sync from that moment, so events you save afterwards are written out and the ones already on the schedule sit where they are. Resync to Google Calendar, in the Google Calendar row of the schedule\'s Integrations, is what backfills them: it walks every published event and puts it on the calendar the schedule points at now, skipping the ones already there. It is owner-only, it needs a direction that sends events to Google, and it runs in the background rather than making you wait. Save the form before you press it, because it uses the saved calendar.',
             ],
             [
                 'q' => 'What happens to the entries in Google if I disconnect?',
-                'a' => 'They stay. Disconnecting closes the notification channels, clears each schedule\'s direction and calendar choice, and drops the tokens, so nothing further is written or read. It deliberately does not go back through Google deleting what it wrote, because that is not a decision worth making on your behalf. If you reconnect later, use the re-send button to bring the two back into step.',
+                'a' => 'They stay. Disconnecting closes the notification channels, clears each schedule\'s direction and calendar choice, and drops the tokens, so nothing further is written or read. It deliberately does not go back through Google deleting what it wrote, because that is not a decision worth making on your behalf. It also forgets which entry belongs to which event, so if you reconnect later and send events to the same calendar, each one is written again beside its old entry. Delete the old entries first, or point the schedule at a fresh calendar.',
+            ],
+            [
+                'q' => 'Why is my event not showing up in Google Calendar?',
+                'a' => 'Usually one of five things. The event is a draft or Internal, and those are never sent. The schedule is set to From Google Calendar, which only reads. The entry went to the calendar chosen for the schedule rather than your main one, so tick that calendar in Google Calendar\'s list on the left. The event was saved before you connected, so it waits for its next save or for Resync to Google Calendar. Or the connection only reads, because it was made from the import page, and needs Allow at Google. The Calendar sync line at the end of the event\'s Listing tab says which.',
+            ],
+            [
+                'q' => 'Can I sync with a Google calendar somebody shared with me?',
+                'a' => 'Yes, if it shows in your own Google Calendar list, because that list is what the schedule offers. What you can do with it follows the permission you were given in Google: with Make changes to events you can send events to it and read from it, and with See all event details you can only read from it, so choose From Google Calendar. The sync runs on the schedule owner\'s Google account, so it is the owner who needs that access.',
             ],
             [
                 'q' => 'Can guests subscribe to my whole schedule in Google Calendar?',
@@ -625,10 +634,13 @@
             ['ledger', 'What it carries'],
             ['reply', 'Saying yes'],
             ['direction', 'Which way'],
+            ['setup', 'Setting it up'],
             ['moved', 'When it moves'],
             ['list', 'The distribution list'],
             ['guests', 'Your audience'],
+            ['share', 'Sharing'],
             ['rest', 'Everything else'],
+            ['fix', 'Troubleshooting'],
             ['faq', 'Questions'],
             ['claim', 'Send the first one'],
         ];
@@ -743,7 +755,7 @@
                     What the invitation <span class="es-invite-accent">carries.</span>
                 </h2>
                 <p class="es-invite-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Seven fields cross, and five of them cross back. This is the whole list, so there is nothing to discover later.
+                    Seven fields cross, and five of them can cross back. This is the whole list, so there is nothing to discover later.
                 </p>
             </div>
 
@@ -779,7 +791,7 @@
                     </table>
                 </div>
                 <p class="es-invite-muted mt-4 px-3 text-xs">
-                    An address that arrives in the Location field is matched against the venues you already have, and becomes a new venue only when none of them fit.
+                    An address that arrives in the Location field is matched against the venues you already have, and becomes a new venue only when none of them fit. It is only used for an event that has no venue yet: a changed location never moves an event off the venue you gave it here, and a meeting link is never turned into a venue.
                 </p>
             </div>
 
@@ -867,11 +879,11 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-invite-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Leave it unset and the schedule uses your primary calendar, which is what most people want on day one.</span>
+                            <span>Leave it unset and events you send go to your main calendar. Reading is different: it needs a calendar chosen, your main calendar is never read unless you pick it, and picking it shows a warning, because that is where meetings and reminders live.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-invite-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Change your mind and there is a re-send button on the same tab that writes every published event out again.</span>
+                            <span>Change your mind and Resync to Google Calendar, in the same row, writes every published event out to the calendar you now point at.</span>
                         </li>
                     </ul>
                 </div>
@@ -901,12 +913,61 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 4b. Setting it up, step by step                              -->
+    <!-- ============================================================ -->
+    @php
+        $setupSteps = [
+            ['Make a calendar for the schedule in Google first', 'In Google Calendar on a computer, press + beside Other calendars and choose Create new calendar. Name it after what it will hold, such as "Gigs" or "Public nights". A calendar of its own keeps your listings apart from your appointments, can be shared on its own, and can be deleted whole if you ever stop.'],
+            ['Connect Google once, in Account Settings', 'Settings, then Integrations, then Connect Google Calendar. Google\'s own consent screen asks to see your calendars and to view and edit their events. If you first connected Google from the import page, that connection can only read: the directions that send events stay off until you press Allow at Google.'],
+            ['Pick the calendar for this schedule', 'Edit Schedule, Integrations, the Google Calendar row, then Select Google Calendar. The calendar from step 1 is in the list; if you made it a minute ago, press Refresh list under it. Your main calendar is marked (main calendar), and choosing it shows a warning.'],
+            ['Choose a Sync Direction', 'To Google Calendar, From Google Calendar, Bidirectional Sync or No Sync. A direction that reads needs a calendar chosen, and saving one without is refused with "Choose the calendar to read events from."'],
+            ['Decide what arrives, and what a deletion means', 'If you read from Google, leave Publish new events automatically off at first, so new entries wait as drafts. Then set what happens here when an event is deleted in Google: Keep it here, Mark as cancelled, or Delete it here. Save.'],
+            ['Bring the events you already had across', 'Events are written to Google as they are saved, so older ones wait for their next save. To send them all now, press Resync to Google Calendar in the same row. As the owner you can also run Sync Events from the Actions menu at the top of the schedule\'s page.'],
+        ];
+    @endphp
+    <section id="setup" class="es-invite-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <p class="es-invite-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How to set up Google Calendar sync</p>
+                <h2 class="es-balance es-invite-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Six steps, <span class="es-invite-accent">about ten minutes.</span>
+                </h2>
+                <p class="es-invite-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The order matters more than the speed. The step people skip is the first one, and it is the one that decides whether the sync stays tidy a year from now.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="80">
+                @foreach ($setupSteps as $setupIndex => [$setupTitle, $setupBody])
+                    <li class="es-invite-card flex gap-4 p-6" data-reveal="panel">
+                        <span class="es-invite-accent shrink-0 font-mono text-lg font-black" aria-hidden="true">{{ str_pad($setupIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="es-invite-ink text-base font-bold">{{ $setupTitle }}</h3>
+                            <p class="es-invite-muted mt-1.5 text-sm leading-relaxed">{{ $setupBody }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-invite-card mt-8 p-6 sm:p-7" data-reveal="panel">
+                <h3 class="es-invite-ink text-lg font-bold">Which direction a Google user usually wants</h3>
+                <p class="es-invite-muted mt-2 text-sm leading-relaxed">
+                    If Google Calendar is where you already book your dates, start with From Google Calendar and publish what arrives. If the schedule is where events are made and Google is where you look at your week, To Google Calendar is enough, and nothing dragged around in Google can move a public listing. Bidirectional Sync is for the case where both happen, and it works best when each event is edited in one place at a time, because the newest change wins.
+                    The settings are described in full in the
+                    <x-link :href="route('marketing.docs.creating_schedules').'#integrations-google'" class="es-invite-link font-semibold">Google Calendar section of the guide</x-link>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 5. When somebody moves it in Google                          -->
     <!-- ============================================================ -->
     <section id="moved" class="es-invite-shade es-invite-rule-y scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>05</span></div>
                 <p class="es-invite-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The channel</p>
                 <h2 class="es-balance es-invite-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Somebody drags it to Friday. <span class="es-invite-accent">Now what?</span>
@@ -964,18 +1025,18 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                     <p class="es-invite-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The distribution list</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         The same entry, on <span class="es-invite-lit">everybody's</span> calendar.
                     </h2>
                     <p class="mt-5 text-lg es-invite-band-muted" data-reveal style="--reveal-delay: 0.15s;">
-                        This one is Google only, and it costs nothing. Anybody who follows your schedule, and any team member on it, can point it at a Google Calendar of their own, so the entry is written there as well as wherever the schedule itself syncs.
+                        This one is Google only. Each admin on your schedule can point it at a Google Calendar of their own, so the entry is written there as well as wherever the schedule itself syncs.
                     </p>
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-3" data-reveal-group="90">
-                    @foreach ([['Ada', 'Team member', 'ada@ &middot; Work'], ['Marco', 'Follower', 'marco@ &middot; Personal'], ['Priya', 'Follower', 'priya@ &middot; Primary']] as [$mName, $mRoleLabel, $mCal])
+                    @foreach ([['Ada', 'Admin', 'ada@ &middot; Work'], ['Marco', 'Admin', 'marco@ &middot; Personal'], ['Priya', 'Admin', 'priya@ &middot; Primary']] as [$mName, $mRoleLabel, $mCal])
                         <div data-reveal>
                             <div class="es-invite-note-mini">
                                 <div class="es-invite-note-mini-bar" aria-hidden="true"></div>
@@ -996,7 +1057,7 @@
                             <h3 class="text-lg font-bold es-invite-band-ink">Each person picks their own</h3>
                             <span class="es-invite-plan">Free</span>
                         </div>
-                        <p class="text-sm es-invite-band-muted">They connect their own Google account and choose which of their calendars receives your schedule, from their own following list. Nobody sees anybody else's calendar, and turning it back off takes the entries that were written off their calendar again.</p>
+                        <p class="text-sm es-invite-band-muted">They connect their own Google account and choose which of their calendars receives your schedule, under Sync to My Calendar in the schedule's Google Calendar row. Nobody sees anybody else's calendar, and turning it back off takes the entries that were written off their calendar again.</p>
                     </div>
                     <div class="es-invite-card p-7" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1008,7 +1069,7 @@
                 </div>
 
                 <p class="mt-10 text-center es-invite-band-muted" data-reveal>
-                    Following is free and open to anybody with an account; adding team members beyond yourself is an Enterprise feature, capped at five. Outlook and CalDAV connect at the schedule level only, so this part is a Google thing.
+                    The setting costs nothing, but a team is an Enterprise feature on eventschedule.com, capped at five members; a selfhosted install has it. Followers do not get a copy this way: a follower who wants your events in their calendar subscribes to the feed. Outlook and CalDAV connect at the schedule level only, so this part is a Google thing.
                 </p>
             </div>
         </div>
@@ -1020,7 +1081,7 @@
     <section id="guests" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                 <p class="es-invite-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Your audience</p>
                 <h2 class="es-balance es-invite-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     They can take one <span class="es-invite-accent">too.</span>
@@ -1059,12 +1120,89 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 7b. Who should see the Google calendar                       -->
+    <!-- ============================================================ -->
+    @php
+        $shareChoices = [
+            [
+                'who' => 'Your crew needs to see the dates',
+                'do' => 'Share the calendar in Google: open its Settings and sharing, add people under Share with specific people or groups, and give them See all event details. Google does the sharing, so it works on every plan.',
+                'or' => 'If each admin wants the entries in a calendar of their own instead, they use Sync to My Calendar on the schedule (team members are Enterprise on eventschedule.com).',
+            ],
+            [
+                'who' => 'Somebody else moves the times in Google',
+                'do' => 'Share the calendar with Make changes to events and run Bidirectional Sync, so a time they drag in Google reaches your public page a minute or two later.',
+                'or' => 'That permission lets them delete entries too. Set a deletion in Google to Keep it here or Mark as cancelled, never Delete it here, unless you are sure.',
+            ],
+            [
+                'who' => 'The public should see your events',
+                'do' => 'Do not make the Google calendar public. Send people to your schedule page, which carries tickets and sign-ups, or to its calendar feed, which leaves out drafts, unlisted and cancelled events.',
+                'or' => 'An unlisted event is written to Google marked private, which Google shows as busy to anybody who can only see the calendar.',
+            ],
+        ];
+
+        $subscribeSteps = [
+            'Find Subscribe to all events from the schedule, at the end of an event page\'s Add to Calendar menu or of the Stay up to date panel, and copy the link rather than opening it.',
+            'Open Google Calendar on a computer. The phone app cannot add a calendar from an address.',
+            'Beside Other calendars, press + and choose From URL.',
+            'Paste the address and choose Add calendar. It appears on the phone too, under the same Google account.',
+        ];
+    @endphp
+    <section id="share" class="es-invite-shade es-invite-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-invite-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Sharing</p>
+                <h2 class="es-balance es-invite-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Who should see <span class="es-invite-accent">the Google calendar?</span>
+                </h2>
+                <p class="es-invite-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Syncing puts your events in one Google calendar. Who else sees that calendar is a separate decision, made in Google, and the right answer is different for the crew, for a co-organizer and for the public.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-3" data-reveal-group="100">
+                @foreach ($shareChoices as $shareChoice)
+                    <div class="es-invite-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <h3 class="es-invite-ink text-lg font-bold">{{ $shareChoice['who'] }}</h3>
+                        <p class="es-invite-muted mt-3 text-sm leading-relaxed">{{ $shareChoice['do'] }}</p>
+                        <p class="es-invite-muted es-invite-rule-t mt-auto pt-4 text-sm leading-relaxed">{{ $shareChoice['or'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-invite-card mt-8 p-6 sm:p-8" data-reveal="panel">
+                <div class="grid gap-8 lg:grid-cols-2">
+                    <div>
+                        <p class="es-invite-tag mb-3">For your audience</p>
+                        <h3 class="es-invite-ink text-xl font-bold">How a guest gets every date into Google Calendar</h3>
+                        <p class="es-invite-muted mt-3 text-sm leading-relaxed">
+                            Add to Google Calendar copies one event, once, and never hears about a change. A guest who wants all your nights, and wants a moved date to move for them, subscribes to the schedule's feed instead. It is worth putting these four steps in a newsletter, because most people have never added a calendar by address.
+                        </p>
+                        <p class="es-invite-muted mt-3 text-sm leading-relaxed">
+                            Google re-reads a subscribed calendar on its own timetable, which can take several hours, and the feed itself is cached for an hour. A change made at 6 PM for a show that night should go out by email as well.
+                        </p>
+                    </div>
+                    <ol class="space-y-3">
+                        @foreach ($subscribeSteps as $subIndex => $subStep)
+                            <li class="flex gap-3 text-sm leading-relaxed">
+                                <span class="es-invite-accent shrink-0 font-mono font-black" aria-hidden="true">{{ $subIndex + 1 }}.</span>
+                                <span class="es-invite-muted">{{ $subStep }}</span>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 8. Everything else: bento                                    -->
     <!-- ============================================================ -->
     <section id="rest" class="es-invite-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                 <p class="es-invite-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Everything else</p>
                 <h2 class="es-balance es-invite-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     The small print, in full.
@@ -1141,7 +1279,7 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-invite-ink text-xl font-bold">Bookings are protected</h3>
-                                <span class="es-invite-plan">Pro</span>
+                                <span class="es-invite-plan">Free</span>
                             </div>
                             <p class="es-invite-muted">An appointment somebody booked with you is owned here, not by the calendar, so an inbound edit never rewrites the guest's own notes or drags the booking back to its old time.</p>
                         </div>
@@ -1171,6 +1309,50 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8b. Google Calendar sync not working                         -->
+    <!-- ============================================================ -->
+    @php
+        $googleFixes = [
+            ['The directions that send to Google are greyed out', 'The Google connection was made from the import page, which asks Google for read access only. Press Allow at Google in the row and agree to the wider permission; the directions that send events then open up.'],
+            ['A calendar I just made is not in the list', 'The list is read from Google when the row opens. Press Refresh list under Select Google Calendar and it loads.'],
+            ['Saving says "Choose the calendar to read events from."', 'From Google Calendar and Bidirectional Sync read a calendar, and the main one is never assumed. Pick one under Select Google Calendar, then save again.'],
+            ['Birthdays, focus time and out-of-office blocks never arrive', 'Only ordinary events are read. Google\'s other kinds (out of office, focus time, working location, birthdays and entries Google makes from Gmail) are left out, and so are entries marked private and invitations you declined.'],
+            ['Sync stopped after I removed access in my Google account', 'When Google refuses the connection, it is forgotten: each schedule goes back to No Sync and its calendar choice is cleared. Connect again in Account Settings, then choose the calendar and the direction again.'],
+            ['Every event is in Google twice', 'A disconnect forgets which entry belongs to which event, so sending to the same calendar afterwards writes each one again. Delete the old entries, or switch to a fresh calendar and use Resync to Google Calendar.'],
+            ['Selfhosted: it worked for a week, then stopped', 'Google\'s policy: refresh tokens expire after seven days when the OAuth consent screen\'s user type is External and its publishing status is Testing. Set the status to In production in the Google Cloud Console and connect once more.'],
+            ['Selfhosted: changes from Google take a quarter of an hour', 'Instant notifications need the install reachable over HTTPS on a domain verified with Google. Without that, the fifteen-minute sweep still brings every change in.'],
+        ];
+    @endphp
+    <section id="fix" class="es-invite-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <p class="es-invite-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Troubleshooting</p>
+                <h2 class="es-balance es-invite-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Google Calendar sync <span class="es-invite-accent">not working?</span>
+                </h2>
+                <p class="es-invite-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The eight things that go wrong with a Google connection in particular, and what to press. For an event that will not appear on one side or the other, start with the Calendar sync line at the end of the event's Listing tab, which says Synced or Not synced and why.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                @foreach ($googleFixes as [$fixTitle, $fixBody])
+                    <div class="es-invite-card p-6" data-reveal="panel">
+                        <h3 class="es-invite-ink text-base font-bold">{{ $fixTitle }}</h3>
+                        <p class="es-invite-muted mt-1.5 text-sm leading-relaxed">{{ $fixBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-invite-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Problems that are not Google's own, such as drafts that never leave, a wrong time zone or a deletion rule that surprised you, are covered in the
+                <x-link :href="marketing_url('/features/calendar-sync').'#fix'" class="es-invite-link font-semibold">calendar sync troubleshooting guide</x-link>.
+            </p>
         </div>
     </section>
 
@@ -1252,7 +1434,7 @@
     <section id="faq" class="es-invite-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-invite-stamp mb-6" data-reveal aria-hidden="true"><span>11</span></div>
                 <h2 class="es-balance es-invite-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

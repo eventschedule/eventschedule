@@ -565,7 +565,7 @@
             ],
             [
                 'there' => 'You moved it, renamed it, or changed the place',
-                'here' => 'The same event is updated in place. It is matched by the id we stored when the copy was made, with a name-and-time fallback behind that on Google and Outlook, so you do not end up holding two of them.',
+                'here' => 'The same event is updated in place. It is matched by the id we stored when the copy was made, with a check on name and start time behind that, so you do not end up holding two of them.',
             ],
             [
                 'there' => 'You deleted it',
@@ -576,7 +576,15 @@
         $faqs = [
             [
                 'q' => 'How do I connect Google Calendar?',
-                'a' => 'Connect your Google account once in Account Settings, then open your schedule, go to Edit and open Integrations. On the Google Calendar tab, pick which calendar this schedule uses and pick the direction: out, back, or both. If you chose out or both, events start moving from your next save. It is on the free plan.',
+                'a' => 'Connect your Google account once in Account Settings, then open your schedule, choose Edit Schedule and open Integrations. In the Google Calendar row, pick which calendar this schedule uses and a Sync Direction: To Google Calendar, From Google Calendar or Bidirectional Sync. If it sends events to Google, they start moving from your next save. It is on the free plan, and the schedule\'s owner is the one who sets it.',
+            ],
+            [
+                'q' => 'What is two-way calendar sync?',
+                'a' => 'Two-way sync keeps two calendars in step in both directions. An event you create or change on your schedule is written to your Google, Outlook or CalDAV calendar, and an event you create or change in that calendar is read back onto your schedule. One-way sync does only half of that: it either publishes your schedule into a calendar or reads a calendar into your schedule. A subscribed iCal feed is one-way too, and read-only for the person subscribing.',
+            ],
+            [
+                'q' => 'Should I use one-way or two-way sync?',
+                'a' => 'Use the one that matches where changes are made. If events are always created and edited on your schedule, one-way out is simpler, and nobody can move a public listing by dragging an entry in a calendar. If you already plan in a calendar, one-way in builds your public page from it, with new entries arriving as drafts. Choose two-way only when people genuinely edit on both sides, and agree that each event is edited in one place at a time.',
             ],
             [
                 'q' => 'How often does the calendar sync?',
@@ -599,6 +607,18 @@
                 'a' => 'That is a per-schedule setting with three options: keep it here, mark it cancelled here, or delete it here. Cancelling is the reversible one and is the right choice once tickets are sold. If you choose delete, events that have ticket sales or ad spend are hidden instead of destroyed, so the sales records survive. An event that belongs to another schedule is never cancelled or deleted for everyone: it is only taken off yours.',
             ],
             [
+                'q' => 'What happens if an event is changed in both places at once?',
+                'a' => 'The most recent change wins. Two-way sync here does not merge field by field: a save on your schedule writes the whole entry to the calendar, and a change read back from the calendar rewrites the event\'s name, times and description on your schedule. So if the time is moved in Outlook and the description is edited on the schedule a moment later, before the Outlook change has come back, the save sends the old time out again. Make one change, let it arrive, then make the next.',
+            ],
+            [
+                'q' => 'Why is my synced event not showing up in my calendar?',
+                'a' => 'Check five things in order. Drafts and Internal events are never copied out. A cancelled event is taken off the calendar. A schedule set to From only reads. The entry goes to the calendar chosen for that schedule, which may not be your main one, so make sure it is switched on in your calendar app. And an event saved before you connected is written the next time you save it. On Google and Outlook, the Calendar sync line at the end of the event\'s Listing tab says Synced or Not synced and why.',
+            ],
+            [
+                'q' => 'Will connecting a calendar put my private appointments on my public page?',
+                'a' => 'Not unless you ask it to. Nothing is read from a calendar until you choose a direction that reads, the calendar it reads is the one you pick (your main calendar is never chosen for you), and what it reads arrives as drafts that the public does not see until you publish them. Entries the calendar marks private, invitations you declined, out-of-office blocks and cancelled meetings are left out, and a meeting link never becomes a venue.',
+            ],
+            [
                 'q' => 'Does calendar sync cost anything?',
                 'a' => 'No. Google Calendar, Outlook and CalDAV sync are all on the free plan, in both directions, and selfhosted installs get them too. The paid plans are about selling without a monthly cap, the extras around a ticket and your branding, not about your calendar.',
             ],
@@ -608,9 +628,12 @@
             ['top', 'The ticket'],
             ['out', 'Leg 01: out'],
             ['back', 'Leg 02: back'],
+            ['choose', 'Which direction'],
             ['carriers', 'The carriers'],
             ['audience', 'Your audience'],
             ['rest', 'Everything else'],
+            ['rules', 'Eight rules'],
+            ['fix', 'Troubleshooting'],
             ['faq', 'Questions'],
             ['claim', 'Book it'],
         ];
@@ -865,6 +888,129 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 3b. Which direction: one-way, two-way or a feed              -->
+    <!-- ============================================================ -->
+    @php
+        // A decision guide: one card per way of keeping two calendars in step, each with
+        // who it suits, what it does and the mistake it invites.
+        $directionChoices = [
+            [
+                'tag' => 'One-way out',
+                'setting' => 'To Google Calendar, To Outlook Calendar, To CalDAV',
+                'title' => 'Pick it when your schedule is the record',
+                'who' => 'A venue whose events are entered on its schedule, and a bar manager who wants them in the Outlook calendar already open on the office PC.',
+                'gets' => 'Every published event lands in the calendar the moment it is saved. Nothing typed in the calendar can move a public listing.',
+                'watch' => 'An edit made in the calendar is not read back, and the next save here writes the whole entry again over it. Tell everyone who shares that calendar to change events on the schedule, not in the calendar.',
+                'leg' => 'out',
+            ],
+            [
+                'tag' => 'One-way in',
+                'setting' => 'From Google Calendar, From Outlook Calendar, From CalDAV',
+                'title' => 'Pick it when you already plan in a calendar',
+                'who' => 'A musician who has kept every gig in Google Calendar for years and wants a public page built from it without typing anything twice.',
+                'gets' => 'New entries arrive on your schedule as drafts. You publish them from the Review list, or switch on Publish new events automatically once you trust the calendar.',
+                'watch' => 'Point it at a calendar that holds only what the public may see. Your main calendar is never read unless you choose it, and choosing it shows a warning, because that is where the dentist and the team meeting live.',
+                'leg' => 'back',
+            ],
+            [
+                'tag' => 'Two-way',
+                'setting' => 'Bidirectional Sync',
+                'title' => 'Pick it when changes happen on both sides',
+                'who' => 'A small theatre where the producer builds the season on the schedule and the stage manager drags rehearsal times around in the calendar.',
+                'gets' => 'The round trip: saves here go out at once, and edits there come back, usually within a minute or two on Google and Outlook.',
+                'watch' => 'Two-way sync does not merge. Each side writes the whole entry, so the most recent change wins. Let one edit arrive before you make the next one on the other side.',
+                'leg' => 'both',
+            ],
+            [
+                'tag' => 'Subscription',
+                'setting' => 'The iCal feed',
+                'title' => 'Pick it when other people only need to see',
+                'who' => 'A choir that wants every rehearsal on each singer\'s phone, or a regular audience that wants your nights in their own calendar.',
+                'gets' => 'A read-only calendar address anybody can subscribe to, with no account and no email address. A weekly night arrives as one entry per date for the next ninety days.',
+                'watch' => 'It is not instant. The feed is cached for an hour, and then each subscriber\'s calendar app re-reads it on its own timetable, which is often several hours. Nothing a subscriber does comes back.',
+                'leg' => 'out',
+            ],
+        ];
+
+        // How long a change takes to reach the other side, by route.
+        $directionTiming = [
+            ['Saved on your schedule', 'Your connected calendar (any carrier)', 'When you save. The copy is written as part of the save, not by a nightly job.'],
+            ['Changed in Google Calendar or Outlook', 'Your schedule', 'Usually within a minute or two, on a push notification. A sweep every fifteen minutes catches one that never arrived.'],
+            ['Changed in a CalDAV calendar', 'Your schedule', 'On the next fifteen-minute poll. CalDAV has no push, so this is the slowest of the three.'],
+            ['Saved on your schedule', 'A calendar subscribed to your feed', 'Up to an hour for the feed, then whenever that calendar app next refreshes its subscriptions. Google Calendar can take several hours.'],
+        ];
+    @endphp
+    <section id="choose" class="es-trip-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-trip-leg mb-6" data-reveal><span>Choose a direction</span></div>
+                <p class="es-trip-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">One-way, two-way, or a feed</p>
+                <h2 class="es-balance es-trip-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Pick by where <span class="es-trip-out">the change is made.</span>
+                </h2>
+                <p class="es-trip-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Two-way sync is not automatically the best setting. The right one depends on a single question: when an event moves, where does somebody type the new time? If the answer is always "on the schedule", one-way out is simpler and safer. If it is "in the calendar", you need the return leg.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2" data-reveal-group="100">
+                @foreach ($directionChoices as $choice)
+                    <div class="es-trip-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <p class="es-trip-tag">{{ $choice['tag'] }}</p>
+                            <span class="es-trip-plan">Free</span>
+                        </div>
+                        <h3 class="es-trip-ink text-xl font-bold">{{ $choice['title'] }}</h3>
+                        <p class="es-trip-muted mt-3 text-sm leading-relaxed">{{ $choice['who'] }}</p>
+                        <dl class="mt-5 space-y-3 text-sm leading-relaxed">
+                            <div>
+                                <dt class="es-trip-ink font-semibold">What you get</dt>
+                                <dd class="es-trip-muted mt-1">{{ $choice['gets'] }}</dd>
+                            </div>
+                            <div>
+                                <dt class="es-trip-ink font-semibold">Watch out for</dt>
+                                <dd class="es-trip-muted mt-1">{{ $choice['watch'] }}</dd>
+                            </div>
+                        </dl>
+                        <div class="es-trip-rule-t mt-auto pt-4">
+                            <p class="es-trip-muted mt-1 text-xs">
+                                Setting: <span class="{{ $choice['leg'] === 'back' ? 'es-trip-back' : 'es-trip-out' }} font-semibold">{{ $choice['setting'] }}</span>
+                            </p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-trip-card mt-10 overflow-x-auto p-2 sm:p-4" data-reveal="panel">
+                <table class="es-trip-table text-sm">
+                    <caption class="es-trip-muted px-3 pb-2 pt-2 text-left text-sm">How long a change takes to reach the other side</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="es-trip-tag">A change is made</th>
+                            <th scope="col" class="es-trip-tag">It has to reach</th>
+                            <th scope="col" class="es-trip-tag">How long it takes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($directionTiming as [$timingFrom, $timingTo, $timingHow])
+                            <tr>
+                                <th scope="row" class="es-trip-ink font-bold">{{ $timingFrom }}</th>
+                                <td class="es-trip-muted">{{ $timingTo }}</td>
+                                <td class="es-trip-muted">{{ $timingHow }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="es-trip-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                You are not locked into one answer. Direction is set per schedule and per carrier, so a venue can send its public nights one way to Outlook for the staff and still pull a booking calendar in from Google on another schedule. The settings and their exact names are in the
+                <x-link :href="route('marketing.docs.creating_schedules').'#calendar-sync'" class="es-trip-link font-semibold">calendar sync guide</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 4. The carriers: a real comparison record                    -->
     <!-- ============================================================ -->
     <section id="carriers" class="scroll-mt-24 es-trip-rule-y py-20 lg:py-28">
@@ -1100,7 +1246,7 @@
                     <div class="es-tilt-inner es-trip-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <h3 class="es-trip-ink mb-4 text-xl font-bold">One schedule, several calendars</h3>
-                            <p class="es-trip-muted">Google sync also has a per-member setting, so each person on a schedule can point it at their own calendar instead of sharing the owner's. Worth knowing where the line is: the setting costs nothing, but a schedule with more than one team member is on the Enterprise plan.</p>
+                            <p class="es-trip-muted">Google sync also has a per-member setting, so each admin on a schedule can point it at their own calendar instead of sharing the owner's. Worth knowing where the line is: the setting costs nothing, but a schedule with more than one team member is on the Enterprise plan.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1158,6 +1304,138 @@
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6b. House rules for a clean two-way sync (fixed-dark band)   -->
+    <!-- ============================================================ -->
+    @php
+        $syncRules = [
+            ['Give the schedule a calendar of its own', 'Make a new calendar in Google, Outlook or on your CalDAV server for these events alone, and pick it for the schedule. Public nights stay apart from private appointments, the calendar can be shared or hidden as one unit, and if you ever stop syncing you can delete that whole calendar instead of picking entries out one by one.'],
+            ['Set the time zone before the first event', 'Times you type are read in the schedule\'s time zone, and every entry goes out carrying it. A schedule left on the wrong zone puts every entry at the wrong hour in every calendar it reaches, so check it under Edit Schedule before you connect anything.'],
+            ['Connect as the owner', 'The schedule-wide sync runs on the owner\'s account, so the owner is the one who sets it. On Google, each admin can still send the schedule\'s events to a calendar of their own with Sync to My Calendar. Team members are part of the Enterprise plan.'],
+            ['Start the return leg on drafts', 'Leave Publish new events automatically off for the first week. Read what arrives in the Review list, publish what belongs and keep the rest hidden. Switch it on once the calendar has shown you that it only holds public events.'],
+            ['Decide what a deletion means before tickets sell', 'Keep it here is the default and the safest. Mark as cancelled hides the event and can be undone. Delete it here is permanent, although an event with a ticket sale or ad spend on record is hidden instead.'],
+            ['Edit in one place at a time', 'There is no merge. Each side writes the whole entry, so the most recent change wins. Change the time in Outlook, wait the minute or two it takes to come back, and only then edit the description on the schedule.'],
+            ['Keep meeting details out of public calendars', 'A meeting link or a dial-in in the location never becomes a venue, and an entry that shows a passcode or a dial-in code waits for you even with publishing switched on. Safer still: keep internal meetings in a calendar the schedule does not read.'],
+            ['Expect repeats to travel differently each way', 'A weekly event on your schedule goes out as one entry on its start date, not as a repeating series. A repeating entry in Google or Outlook comes in as one event per date. If people need every date of your series in their calendar, give them the feed, which lists each date for the next 90 days.'],
+        ];
+    @endphp
+    <section id="rules" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-trip-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+                <div class="es-trip-rail absolute inset-x-8 bottom-8 opacity-60" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
+                    <div class="es-trip-track es-trip-track-out"></div>
+                    <div class="es-trip-track es-trip-track-back"></div>
+                </div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-trip-leg mb-6" data-reveal><span>Pre-flight checks</span></div>
+                    <p class="es-trip-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before you switch on both legs</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Eight rules for a two-way sync <span class="es-trip-lit-back">that stays clean.</span>
+                    </h2>
+                    <p class="mt-5 text-lg text-gray-300" data-reveal style="--reveal-delay: 0.15s;">
+                        Most sync trouble is decided in the first ten minutes: the wrong calendar chosen, a time zone left on its default, a deletion rule nobody thought about until a show vanished. None of these takes long to get right.
+                    </p>
+                </div>
+
+                <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                    @foreach ($syncRules as $ruleIndex => [$ruleTitle, $ruleBody])
+                        <li class="es-trip-card flex gap-4 p-6" data-reveal="panel">
+                            <span class="es-trip-lit-out shrink-0 font-mono text-sm font-black" aria-hidden="true">{{ str_pad($ruleIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div>
+                                <h3 class="text-base font-bold text-white">{{ $ruleTitle }}</h3>
+                                <p class="es-trip-muted mt-1.5 text-sm leading-relaxed">{{ $ruleBody }}</p>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6c. Troubleshooting: why is my event not showing up?         -->
+    <!-- ============================================================ -->
+    @php
+        $fixColumns = [
+            [
+                'title' => 'Not in your calendar',
+                'leg' => 'out',
+                'checks' => [
+                    ['Is it a draft or Internal?', 'Neither is ever copied out, and making a published event a draft again takes its entry off.'],
+                    ['Is it cancelled?', 'Cancelling takes the entry off the calendar, and saving it while cancelled does not put it back. Restoring the event does.'],
+                    ['Does the direction send?', 'A From direction only reads. Events go out on To or Bidirectional Sync.'],
+                    ['Are you looking at the right calendar?', 'Entries go to the calendar chosen for this schedule, which may not be your main one. Make sure that calendar is switched on in your calendar app\'s list.'],
+                    ['Did it exist before you connected?', 'Events are written as they are saved, so saving it again writes it. On Google, the owner can also run Sync Events from the Actions menu to fill in what is missing.'],
+                ],
+            ],
+            [
+                'title' => 'Not on your schedule',
+                'leg' => 'back',
+                'checks' => [
+                    ['Is it waiting as a draft?', 'Events read in from a calendar arrive as drafts. The Schedule tab says how many are waiting, with a Review button.'],
+                    ['Does the direction read?', 'A To direction only sends. Events come in on From or Bidirectional Sync.'],
+                    ['Is it private, declined or not an event?', 'An entry the calendar marks private, an invitation you declined, an out-of-office block and a cancelled meeting are never read in.'],
+                    ['Does it carry meeting details?', 'An entry showing a passcode or a dial-in code, or made from an email, waits for you even with publishing switched on.'],
+                    ['Is it older than a month?', 'The first read of a newly connected calendar covers the last 30 days and the next 365.'],
+                    ['Is there an amber notice in the row?', 'Reading stops when the schedule changes owner, or when the site\'s operator pauses it, and the row says which.'],
+                ],
+            ],
+            [
+                'title' => 'At the wrong time, or in twice',
+                'leg' => 'both',
+                'checks' => [
+                    ['Every entry is out by the same hours', 'The schedule\'s time zone is wrong. Every entry carries it, so fix it there rather than event by event.'],
+                    ['Copies on a calendar you no longer use', 'Resync to Google Calendar removes the copies it can find on the old calendar, but some may be left behind to delete by hand.'],
+                    ['Two of everything after reconnecting', 'On Google, or after pressing Disconnect on Outlook, the app forgets which entry belongs to which event, so after you connect again the next save of each event writes a new entry beside the old one. Delete the old entries first, or choose a fresh calendar.'],
+                    ['A weekly night shows once', 'That is by design: a series goes out as one entry on its start date. The feed lists each date for the next 90 days.'],
+                ],
+            ],
+        ];
+    @endphp
+    <section id="fix" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-trip-leg es-trip-leg-in mb-6" data-reveal><span>Lost luggage</span></div>
+                <p class="es-trip-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Troubleshooting</p>
+                <h2 class="es-balance es-trip-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Why is my event <span class="es-trip-back">not showing up?</span>
+                </h2>
+                <p class="es-trip-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    First work out which leg it went missing on. An event missing from your calendar is an outbound problem; an entry missing from your schedule is a return-leg one. The checks below are in the order worth trying them.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-3" data-reveal-group="100">
+                @foreach ($fixColumns as $fixColumn)
+                    <div class="es-trip-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <p class="es-trip-tag mb-2">{{ $fixColumn['leg'] === 'out' ? 'Leg 01' : ($fixColumn['leg'] === 'back' ? 'Leg 02' : 'Either leg') }}</p>
+                        <h3 class="{{ $fixColumn['leg'] === 'back' ? 'es-trip-back' : 'es-trip-out' }} mb-5 text-xl font-bold">{{ $fixColumn['title'] }}</h3>
+                        <ul class="space-y-4">
+                            @foreach ($fixColumn['checks'] as [$checkQuestion, $checkAnswer])
+                                <li>
+                                    <p class="es-trip-ink text-sm font-semibold">{{ $checkQuestion }}</p>
+                                    <p class="es-trip-muted mt-1 text-sm leading-relaxed">{{ $checkAnswer }}</p>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-trip-card mt-8 p-6 sm:p-7" data-reveal="panel">
+                <h3 class="es-trip-ink text-lg font-bold">Ask the event itself</h3>
+                <p class="es-trip-muted mt-2 text-sm leading-relaxed">
+                    On a schedule that sends its events to Google Calendar or Outlook, every saved event has a Calendar sync line at the end of its Listing tab. It reads Synced or Not synced for each connected calendar, says why when the answer is no, and offers Sync Now to copy the event at once or Remove to take it off. It is the quickest way to tell a setting from a fault. More in the guide to
+                    <x-link :href="route('marketing.docs.creating_events').'#google-calendar'" class="es-trip-link font-semibold">calendar sync on an event</x-link>.
+                </p>
             </div>
         </div>
     </section>
