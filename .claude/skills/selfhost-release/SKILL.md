@@ -70,14 +70,15 @@ release step may have left a tag or release behind, so check before re-running.
 
 ```bash
 gh release edit vX.Y.Z --notes-file <scratchpad>/release-notes-vX.Y.Z.md
-gh release view vX.Y.Z --json tagName,name,isDraft,isLatest,body,assets,targetCommitish
+gh release view vX.Y.Z --json tagName,name,isDraft,isPrerelease,assets,url
 ```
 
 Confirm all of these, and say so:
 - the body is the notes file, byte for byte. Compare them with
   `diff <(gh release view vX.Y.Z --json body --jq .body) <notes file>`, which should print nothing
-  but a possible trailing newline;
-- `isLatest` is true and `isDraft` false, and `eventschedule.zip` is attached;
+  but the one trailing newline `--jq` adds;
+- `isDraft` and `isPrerelease` are false, and `eventschedule.zip` is attached at about the size of
+  the last release's (`gh release view <last tag> --json assets`; around 500 MB in 2026-11);
 - `gh api repos/eventschedule/eventschedule/releases/latest --jq .tag_name` answers the new tag,
   which is what the updaters read.
 
