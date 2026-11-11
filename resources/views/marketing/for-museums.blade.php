@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Museum Event Calendar | Tours, Talks and Family Days</x-slot>
-    <x-slot name="description">Guided tours set once as recurring events, talks and family mornings with a place count per date, and memberships on one QR code. Free to start.</x-slot>
+    <x-slot name="description">A museum event calendar for tours, talks, family days and exhibitions: tours set once, places capped per date, embedded on your own site. Free to start.</x-slot>
     <x-slot name="breadcrumbTitle">For Museums</x-slot>
 
     <x-slot name="structuredData">
@@ -66,7 +66,10 @@
            Group visits use the one free appointment type; more types, a
            price on one and the approval step are Pro. Members-only
            previews are Unlisted (Enterprise), because Draft hides an
-           event from everyone but the schedule's own team.
+           event from everyone but the schedule's own team. The timed-entry
+           section describes the one shape that works for a ticketed
+           exhibition (a ticket type per entry time on a daily recurring
+           event) and states its two limits.
 
            COLOUR: verdigris, the green of weathered bronze. Accent
            #1d5c55 (hue 173) is 6.8:1 on the stone ground; #8fd3c7 is
@@ -332,7 +335,7 @@
             ],
             [
                 'q' => 'Can schools and groups book a visit through it?',
-                'a' => 'Yes, through appointment booking. The free plan gives you one appointment type: write down the hours your learning team takes group visits, and a teacher picks an open time on a public booking page and gets a confirmation. Pro adds more types (say, one for schools and one for adult groups), a price on a type, and advanced rules such as buffers between visits, minimum notice and an approval step. On the hosted service the confirmation and reminder emails need the schedule\'s own email settings.',
+                'a' => 'Yes, through appointment booking. The free plan gives you one appointment type: write down the hours your learning team takes group visits, and a teacher picks an open time on a public booking page and gets a confirmation. Every booking takes a name and an email, and the teacher can leave notes, so use the type\'s description to ask for the class size, the age group and any access needs there. Pro adds more types (say, one for schools and one for adult groups), a price on a type, and advanced rules such as buffers between visits, minimum notice and an approval step. On the hosted service the confirmation and reminder emails need the schedule\'s own email settings.',
             ],
             [
                 'q' => 'Can members get into events free?',
@@ -341,6 +344,22 @@
             [
                 'q' => 'Can we hold a members-only preview evening?',
                 'a' => 'Two ways, depending on who should see it. A Draft event is free and visible only to the people on your schedule\'s own team, which suits planning an exhibition before it is announced. For a preview that members can reach but the public cannot find, the Unlisted setting keeps the event off your calendar while anyone with the link can open it, optionally behind a password. Unlisted and Internal events are on the Enterprise plan.',
+            ],
+            [
+                'q' => 'How should a museum list a long-running exhibition on its event calendar?',
+                'a' => 'As one entry with a date range, not as an event on every day. If the exhibition is free to walk into, make it a multi-day event from opening day to closing day: it gets one page and shows as a single span on the calendar. If you sell entry by the day, make it a recurring event on the days you open, ending on closing day, so each date has its own ticket count. Either way, put exhibitions on a sub-schedule of their own and give the tours and talks around them their own events, so a visitor looking for this Saturday\'s programme is not wading through four months of exhibition.',
+            ],
+            [
+                'q' => 'Can we sell timed-entry tickets to an exhibition?',
+                'a' => 'There is no timed-entry system for general admission, but a ticketed exhibition can be set up with entry times. Make one recurring event for the opening hours on the days you open, add a ticket type for each entry time (10:00, 10:30 and so on) with its own quantity, which is kept separately for every date, and turn on Allow sales after event starts so tickets sell until closing. Two limits to know: an entry time stays on sale until closing rather than until its own time, and the door scanner checks the date and the ticket, not the clock, so staff read the entry time printed on the ticket. Selling tickets with a price needs Pro.',
+            ],
+            [
+                'q' => 'How do we give members a discount on event tickets?',
+                'a' => 'Three ways, all on the Pro plan. Add a Member ticket type at the lower price and check membership cards at the door; send members a promo code that applies to the ticket types you choose and expires at the end of the membership year (codes are set per event, so add it to each one); or sell the membership as a pass that covers the events you choose, so members come in on the pass itself and every visit is counted.',
+            ],
+            [
+                'q' => 'How do we add the events calendar to the museum website?',
+                'a' => 'Copy the embed code from your schedule and paste it into the page; it always shows the current programme, free on every plan. Add a parameter to tailor each page: schedule= shows one sub-schedule, so the families page shows only family sessions, layout=list shows a list instead of a month, and lang= shows your second language. Give the frame a height, since it does not resize itself. Each public event also has its own page with schema.org Event data for search engines, so link to those from your site too. On Enterprise the schedule can be served from your own domain.',
             ],
             [
                 'q' => 'Many of our visitors are tourists. Can the calendar be in two languages?',
@@ -356,9 +375,12 @@
             ['top', 'The programme'],
             ['tours', 'Tours'],
             ['strands', 'Strands'],
+            ['exhibitions', 'Exhibitions'],
             ['places', 'Places'],
+            ['timed', 'Timed entry'],
             ['members', 'Members'],
             ['groups', 'Groups'],
+            ['listing', 'The listing'],
             ['visitors', 'Visitors'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
@@ -588,12 +610,58 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Places (03)                                               -->
+    <!-- 3b. Exhibitions and the programme (03)                       -->
+    <!-- ============================================================ -->
+    <section id="exhibitions" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">03</div>
+                <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Exhibitions</p>
+                <h2 class="es-balance es-muse-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    An exhibition is a span. <span class="es-muse-grad">A tour is a moment.</span>
+                </h2>
+                <p class="es-muse-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The most common mistake on a museum event calendar is treating the two the same. Put a
+                    four-month exhibition on every day of the month as if it were an event, and the curator's
+                    talk on Thursday disappears under it. Give each its own shape instead.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ([
+                    ['Free to walk in', 'One multi-day event from opening day to closing day. It has one page and shows as a single span with its dates, such as Sep 12 to Jan 3, rather than a hundred entries.', 'free'],
+                    ['Ticketed entry', 'A recurring event on the days the galleries open, ending on closing day. Each date keeps its own ticket count, so a sold-out Saturday does not stop anyone buying Sunday.', 'pro'],
+                    ['The programme around it', 'The opening talk, the curator\'s tours, the family trail: events of their own on their own strands, each linked from the exhibition\'s description and back again.', 'free'],
+                ] as [$t, $d, $tier])
+                    <div class="es-muse-card flex flex-col p-6" data-reveal>
+                        <h3 class="es-muse-ink text-lg font-bold">{{ $t }}</h3>
+                        <p class="es-muse-muted mt-2 text-sm">{{ $d }}</p>
+                        <p class="mt-auto pt-4">
+                            @if ($tier === 'pro')
+                                <span class="es-muse-plan es-muse-plan-pro">Pro plan, for a price</span>
+                            @else
+                                <span class="es-muse-plan es-muse-plan-free">Free plan</span>
+                            @endif
+                        </p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-muse-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                Put the exhibitions on an Exhibitions sub-schedule of their own. Visitors deciding what is on
+                this weekend can then pick the strand they want, and the exhibitions page of
+                your website can show nothing else.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. Places (04)                                               -->
     <!-- ============================================================ -->
     <section id="places" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">03</div>
+                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">04</div>
                 <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Places</p>
                 <h2 class="es-balance es-muse-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Most of it is free. <span class="es-muse-grad">All of it is counted.</span>
@@ -658,7 +726,99 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Members (04)                                              -->
+    <!-- 4b. Timed entry and member prices (05)                       -->
+    <!-- ============================================================ -->
+    <section id="timed" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">05</div>
+                    <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Timed entry</p>
+                    <h2 class="es-balance es-muse-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Entry slots for the show <span class="es-muse-grad">everyone wants to see</span>.
+                    </h2>
+                    <p class="es-muse-muted mb-6 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Event Schedule has no timed-entry system for general admission. When one ticketed
+                        exhibition needs entry times, though, there is a shape that works: one event for the
+                        day, and a ticket type for each entry time.
+                    </p>
+
+                    <ul class="space-y-4" data-reveal-group="90">
+                        @foreach ([
+                            ['Size each slot from the rooms', 'Tickets per slot = how many the rooms hold at once, times the slot length, divided by the usual visit. Rooms that hold 120, a visit of about an hour and half-hourly slots: 120 x 30 / 60 = 60 tickets a slot.'],
+                            ['One count per slot, per day', 'Each ticket type has its own quantity, and on a recurring event that quantity is kept for every date, so the 11:00 can sell out on Saturday while Sunday\'s is still open.'],
+                            ['Keep selling through the day', 'Turn on Allow sales after event starts, or sales stop at the day\'s first entry time. Sales then run until closing. Leave Individual Quantities chosen, so each time keeps its own 60; Combined Total would make 60 the whole day.'],
+                            ['Know the two limits', 'A slot stays on sale until closing, not until its own time, and the scanner checks the date and the ticket, not the clock. The entry time is printed on the ticket for the person at the door to read.'],
+                        ] as [$t, $d])
+                            <li class="flex items-start gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-muse-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span><span class="es-muse-ink font-semibold">{{ $t }}</span> <span class="es-muse-muted">- {{ $d }}</span></span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
+                    <div class="es-tilt-inner es-muse-card overflow-hidden p-6 sm:p-7">
+                        <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-muse-ink text-lg font-bold">A ticketed exhibition, with entry times</h3>
+                            <span class="es-muse-plan es-muse-plan-pro">Pro plan</span>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            @foreach ([
+                                ['Event', 'Exhibition entry'],
+                                ['Repeats', 'Tue to Sun, until closing day'],
+                                ['Open', '10:00 to 17:00'],
+                                ['Tickets', '10:00, 10:30, 11:00 ... 16:00'],
+                                ['Each', '60 per date'],
+                                ['Sales', 'Allowed after the day starts'],
+                            ] as [$fLabel, $fValue])
+                                <div class="es-muse-sub flex items-baseline justify-between gap-3 p-3.5">
+                                    <span class="es-muse-muted w-20 shrink-0 text-xs uppercase tracking-wider">{{ $fLabel }}</span>
+                                    <span class="es-muse-ink es-muse-num min-w-0 flex-1 truncate text-right text-sm font-semibold">{{ $fValue }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <p class="es-muse-muted mt-5 border-t border-[rgba(23,26,25,0.1)] pt-4 text-xs dark:border-[rgba(233,238,236,0.12)]">
+                            Thirteen entry times, 780 tickets a day, one event to look after.
+                        </p>
+
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-3xl text-center">
+                <p class="es-muse-tag mb-4" data-reveal>Member prices</p>
+                <h3 class="es-balance es-muse-ink mb-4 text-2xl font-black tracking-tight md:text-3xl" data-reveal>
+                    Three ways to let members in for less.
+                </h3>
+                <p class="es-muse-muted" data-reveal>
+                    Pick by how much checking you want to do at the door. All three need the Pro plan, because each one puts a price on a ticket or sells a pass.
+                </p>
+            </div>
+
+            <div class="mt-10 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ([
+                    ['A member ticket type', 'A "Member" price beside the standard one. The simplest to set up, and it trusts the buyer, so the person scanning checks the ticket type against a membership card.'],
+                    ['A members\' promo code', 'A code that takes a percentage or a fixed amount off, applied to the ticket types you choose, expiring at the end of the membership year. Codes belong to an event, so add the same code to each event members get money off.'],
+                    ['Free entry on the pass', 'A membership sold as a pass covers the events you choose. Members scan in at the door, or book ahead from their pass page when advance booking is on, and every use is counted.'],
+                ] as [$t, $d])
+                    <div class="es-muse-card flex flex-col p-5" data-reveal>
+                        <p class="es-muse-ink text-sm font-bold">{{ $t }}</p>
+                        <p class="es-muse-muted mt-1 text-sm">{{ $d }}</p>
+                        <p class="mt-auto pt-3"><span class="es-muse-plan es-muse-plan-pro">Pro plan</span></p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. Members (06)                                              -->
     <!-- ============================================================ -->
     <section id="members" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -697,7 +857,7 @@
                 </div>
 
                 <div class="order-1 lg:order-2">
-                    <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">04</div>
+                    <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">06</div>
                     <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Members</p>
                     <h2 class="es-balance es-muse-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         The Friends scheme <span class="es-muse-grad">in their pocket</span>.
@@ -733,12 +893,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Groups and schools (05)                                   -->
+    <!-- 6. Groups and schools (07)                                   -->
     <!-- ============================================================ -->
     <section id="groups" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">05</div>
+                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">07</div>
                 <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Groups and schools</p>
                 <h2 class="es-balance es-muse-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Class visits, <span class="es-muse-grad">without the phone tag</span>.
@@ -794,13 +954,71 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Visitors (06)                                             -->
+    <!-- 6b. The listing, and the museum website (08)                 -->
+    <!-- ============================================================ -->
+    <section id="listing" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-start gap-14 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">08</div>
+                    <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The listing</p>
+                    <h2 class="es-balance es-muse-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Answer the questions <span class="es-muse-grad">before the front desk gets them</span>.
+                    </h2>
+                    <p class="es-muse-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Many calls to a museum about an event ask something the listing could have said. Run
+                        each one past this list before it goes out.
+                    </p>
+
+                    <ul class="space-y-4" data-reveal-group="90">
+                        @foreach ([
+                            ['How long, and where in the building', 'Ninety minutes, meeting at the information desk on level 1. A visitor planning lunch around a tour needs the end time as much as the start.'],
+                            ['Who it is for', 'An age range for family sessions, and for talks whether it assumes some knowledge. "Suitable for 5 to 8" saves a disappointed four-year-old.'],
+                            ['Book or just turn up', 'Say which. A drop-in that looks bookable puts people off, and a bookable session that looks like a drop-in fills the gallery with people who cannot get in.'],
+                            ['Free, or what it costs', 'Including whether museum admission is extra, which tourists often ask about a ticketed talk.'],
+                            ['Access', 'The step-free route, whether there is seating on a standing tour, a hearing loop in the lecture theatre, and which sessions are signed, audio-described or held as a quiet hour.'],
+                        ] as [$t, $d])
+                            <li class="flex items-start gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-muse-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span><span class="es-muse-ink font-semibold">{{ $t }}</span> <span class="es-muse-muted">- {{ $d }}</span></span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="space-y-3" data-reveal-group="90">
+                    @foreach ([
+                        ['Filters that match how people look', 'Each event takes one category, which you can rename to your own (Tour, Talk, Family, Late) and give a colour; the calendar filters by category, by sub-schedule and by free entry.', 'Free plan'],
+                        ['What cuts across the strands', 'A multi-select custom field, such as Age or Access, set to Show as filter, lets a parent find every session for under-fives or a visitor every signed tour, whichever strand it sits on. Tick On event page and the answer shows on the event too.', 'Pro plan'],
+                        ['On the museum website', 'Paste the embed code into each page with a parameter of its own: the families page shows only the Families sub-schedule, the what\'s-on page a list, and lang= shows your second language. The frame does not resize itself, so give it a height.', 'Free plan'],
+                        ['Found in search', 'Every public event has its own page carrying schema.org Event data, which is what search engines read to list an event with its date and place. Link to those pages from the museum site, not only to the calendar.', 'Free plan'],
+                        ['On your own address', 'Serve the schedule from a domain of your own, such as events on the museum\'s domain, instead of an eventschedule.com address.', 'Enterprise plan'],
+                    ] as [$t, $d, $tier])
+                        <div class="es-muse-card es-muse-hover p-4" data-reveal>
+                            <div class="flex flex-wrap items-baseline justify-between gap-2">
+                                <p class="es-muse-ink text-sm font-bold">{{ $t }}</p>
+                                <span class="es-muse-plan {{ $tier === 'Pro plan' ? 'es-muse-plan-pro' : ($tier === 'Enterprise plan' ? 'es-muse-plan-ent' : 'es-muse-plan-free') }}">{{ $tier }}</span>
+                            </div>
+                            <p class="es-muse-muted mt-1 text-sm">{{ $d }}</p>
+                        </div>
+                    @endforeach
+                    <p class="es-muse-muted pt-2 text-sm" data-reveal>
+                        Every embed parameter is in the guide to
+                        <x-link href="{{ marketing_url('/docs/sharing') }}#embed-parameters">embedding your schedule</x-link>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Visitors (09)                                             -->
     <!-- ============================================================ -->
     <section id="visitors" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-14 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">06</div>
+                    <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">09</div>
                     <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Visitors</p>
                     <h2 class="es-balance es-muse-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Reach the people <span class="es-muse-grad">who came once</span>.
@@ -841,12 +1059,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Who it is for (07)                                        -->
+    <!-- 8. Who it is for (10)                                        -->
     <!-- ============================================================ -->
     <section id="who" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">07</div>
+                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">10</div>
                 <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
                 <h2 class="es-balance es-muse-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Anywhere the building is open <span class="es-muse-grad">and the programme is the reason to come</span>.
@@ -910,7 +1128,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. How it works (08, dark band)                              -->
+    <!-- 9. How it works (11, dark band)                              -->
     <!-- ============================================================ -->
     <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-muse-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -920,7 +1138,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">08</div>
+                    <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">11</div>
                     <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Set up in a morning, <span class="es-muse-grad">good for the season</span>.
@@ -1028,12 +1246,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 12. FAQ (09)                                                 -->
+    <!-- 12. FAQ (12)                                                 -->
     <!-- ============================================================ -->
     <section id="faq" class="scroll-mt-24 border-t border-[rgba(23,26,25,0.1)] py-20 dark:border-[rgba(233,238,236,0.1)] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">09</div>
+                <div class="es-muse-chip mb-6" data-reveal aria-hidden="true">12</div>
                 <p class="es-muse-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-muse-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked by <span class="es-muse-grad">the learning team</span>.

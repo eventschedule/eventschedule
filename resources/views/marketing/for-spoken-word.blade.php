@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Open Mic and Reading Schedules for Poets | Event Schedule</x-slot>
-    <x-slot name="description">Run open mic sign-ups, reading series, and workshops from one link. Free registration with a capacity limit, and recurring dates that skip the holidays.</x-slot>
+    <x-slot name="description">How to run an open mic schedule: slot lengths, how many names fit a night, online or door sign-ups, and house rules. Free registration, capped per night.</x-slot>
     <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 
     <x-slot name="headMeta">
@@ -840,7 +840,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for open mics and readings?',
-                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, generating a flyer for each night, and syncing with Google, Outlook, or CalDAV are all free forever, and no ceiling sits on the sign-ups. Charging at the door is the Pro plan at '.plan_price($proMonthly).' a month, which also adds custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
+                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, turning your nights\' flyers into a shareable events graphic, and syncing with Google, Outlook, or CalDAV are all free forever, and no ceiling sits on the sign-ups. Charging at the door is the Pro plan at '.plan_price($proMonthly).' a month, which also adds custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
             ],
             [
                 'q' => 'Can poets sign up for a slot themselves?',
@@ -853,6 +853,22 @@
             [
                 'q' => 'How do I run a mic that happens every second Tuesday?',
                 'a' => 'Set it up once as a recurring event with a day-of-week pattern, then add date exceptions for the weeks the room is closed or the holiday lands on your night. Recurring events and exceptions are free on every plan.',
+            ],
+            [
+                'q' => 'How long should an open mic slot be?',
+                'a' => 'Three minutes suits a poetry or slam-style mic, where most readers bring one piece. Five minutes, or two short poems, whichever comes first, suits a mixed room with first-timers and poets trying new work. Prose, memoir and storytelling nights need eight to ten minutes, because a story cut at minute five does not land. Whatever you choose, add about a minute per reader for the walk to the mic and the applause when you work out how many fit.',
+            ],
+            [
+                'q' => 'How many people should be on an open mic list?',
+                'a' => 'Work backwards from the time you have. Take the length of the night, subtract the welcome, the feature, any break and the close, then divide what is left by the slot length plus a minute for changeover. A two-hour night with a five-minute welcome, a 20-minute feature, a 10-minute break and a five-minute close leaves 80 minutes: twenty readers at three minutes, thirteen at five, or eight at eight. Set that number as the Registration Limit, which counts per date on a recurring mic.',
+            ],
+            [
+                'q' => 'Should open mic sign-ups be online or at the door?',
+                'a' => 'Online suits a small room that fills early or poets who travel to read; at the door suits a walk-in scene where the list rarely fills. Many busy mics split it: part of the list online, the rest on paper at the door from a set time. To split it, set the Registration Limit to the online share only and say in the description how many slots go up at the door and when. The form refuses a second sign-up from the same email address for the same date, so nobody books twice under one address.',
+            ],
+            [
+                'q' => 'How do I cut down on no-shows at an open mic?',
+                'a' => 'Make it easy to give a slot back. Everyone registered by then gets a reminder email before the night, one day ahead by default, with a link to cancel that frees the spot, and when a full night has a waitlist the next person is emailed. Say in your house rules that a poet who misses their name goes to the end of the list, and if your no-shows are steady, keep a few slots for the door instead of putting the whole list online.',
             ],
             [
                 'q' => 'Can I keep the open mic, the feature series, and workshops on one page?',
@@ -878,6 +894,9 @@
             ['slots', 'The slots'],
             ['whos-up', "Who's up"],
             ['order', 'Running order'],
+            ['minutes', 'Slots and minutes'],
+            ['sign-up', 'Online or at the door'],
+            ['regulars', 'Features and regulars'],
             ['rest', 'The rest of it'],
             ['rooms', 'The rooms'],
             ['who', 'Perfect for'],
@@ -892,7 +911,7 @@
         $swDown = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m0 0l-6-6m6 6l6-6" /></svg>';
         // The running head of every left-hand page, and the folio each section opens on.
         $swTitle = 'Every open mic has a list';
-        $swFolios = ['tonight' => 2, 'slots' => 4, 'whos-up' => 6, 'order' => 8, 'rest' => 10, 'rooms' => 14, 'who' => 15, 'steps' => 16, 'faq' => 18, 'claim' => 20];
+        $swFolios = ['tonight' => 2, 'slots' => 4, 'whos-up' => 6, 'order' => 8, 'minutes' => 10, 'sign-up' => 12, 'regulars' => 14, 'rest' => 16, 'rooms' => 20, 'who' => 21, 'steps' => 22, 'faq' => 24, 'claim' => 26];
     @endphp
 
     <div id="sw">
@@ -930,7 +949,7 @@
                 </div>
 
                 <div class="sw-blurb">
-                    <p class="sw-blurb-kick sw-tw es-fade-up es-d-2" aria-hidden="true">A chapbook in ten leaves</p>
+                    <p class="sw-blurb-kick sw-tw es-fade-up es-d-2" aria-hidden="true">A chapbook in thirteen leaves</p>
 
                     <!-- The kinds of night, said as a litany -->
                     <ul class="sw-nights es-fade-up es-d-3" aria-label="Kinds of night">
@@ -1214,7 +1233,7 @@
                             <span class="sw-item-pil" aria-hidden="true">&para;</span>
                             <span class="sw-gloss sw-tw">Free</span>
                             <h3>The night promotes itself</h3>
-                            <p>Generate a flyer from the event and post it, instead of rebuilding the same graphic in a design tool every second Tuesday.</p>
+                            <p>Upload one flyer to the series and the Events graphic, in the schedule's Actions menu, draws it under the next date beside your other upcoming events that have a flyer, with a caption ready to paste. No rebuilding the same post in a design tool every second Tuesday.</p>
                         </div>
                         <div class="sw-item">
                             <span class="sw-item-pil" aria-hidden="true">&para;</span>
@@ -1232,13 +1251,213 @@
             </section>
 
             <!-- ============================================================ -->
-            <!-- V. The rest of it: two spreads, and the staples between them  -->
+            <!-- V. The arithmetic: how many slots a night holds              -->
+            <!-- ============================================================ -->
+            <section class="sw-spread" id="minutes">
+                <div class="sw-page sw-verso">
+                    <span class="sw-head sw-sc" aria-hidden="true">{{ $swTitle }}</span>
+                    <span class="sw-part" aria-hidden="true">V</span>
+                    <p class="sw-kick sw-sc">The arithmetic of a night</p>
+                    <h2 class="sw-verse" data-reveal="ink">
+                        <span class="sw-vl" style="--n: 0;">Count the minutes</span>
+                        <span class="sw-vl" style="--n: 1; --i: 1;">before you count</span>
+                        <span class="sw-vl sw-red" style="--n: 2;">the poets.</span>
+                    </h2>
+                    <p class="sw-lede">
+                        A list runs long when the host counts names instead of minutes. Work backwards from the time the room needs you out, and the number of slots falls out of the sum.
+                    </p>
+                    <figure class="sw-plate" style="margin-top: 2rem;">
+                        <div class="sw-print">
+                            <div class="sw-print-head">
+                                <span class="sw-sc">A two-hour mic</span>
+                                <span class="sw-tw sw-red">Worked</span>
+                            </div>
+                            <ol class="sw-order">
+                                @foreach ([['01', 'The room, booked', '120 min', false], ['02', 'Welcome and house rules', '&minus;5', false], ['03', 'The feature', '&minus;20', false], ['04', 'One break', '&minus;10', false], ['05', 'Thanks and next week', '&minus;5', false], ['06', 'Left for the open list', '80 min', true], ['07', 'Each reader: 5 + 1 to change over', '6 min', false], ['08', 'Slots on the list', '13', true]] as [$sumNum, $sumLabel, $sumValue, $sumTotal])
+                                    <li @class(['sw-order-feature' => $sumTotal])>
+                                        <span class="sw-tw">{{ $sumNum }}</span>
+                                        <span>{{ $sumLabel }}</span>
+                                        <span class="sw-dots" aria-hidden="true"></span>
+                                        <span class="sw-tw">{!! $sumValue !!}</span>
+                                    </li>
+                                @endforeach
+                            </ol>
+                            <p class="sw-print-note sw-it">Thirteen names, not twenty. The seven you did not book are the ones who would have read at 10:40 to the bar staff.</p>
+                        </div>
+                        <figcaption class="sw-tw" aria-hidden="true">Plate III</figcaption>
+                    </figure>
+                    <span class="sw-folio" aria-hidden="true">10</span>
+                </div>
+                <div class="sw-page sw-recto">
+                    <span class="sw-head sw-sc" aria-hidden="true">Slots and minutes</span>
+                    <ol class="sw-items">
+                        <li class="sw-item">
+                            <span class="sw-item-no sw-tw" aria-hidden="true">3&prime;</span>
+                            <span class="sw-gloss sw-tw">Slam</span>
+                            <h3>Three minutes, one poem</h3>
+                            <p>
+                                The limit most slams run to, with a timer someone can see. It holds an eager room to a single piece each and turns the list over fast: at four minutes a reader with the walk to the mic, eighty minutes takes twenty names.
+                            </p>
+                        </li>
+                        <li class="sw-item">
+                            <span class="sw-item-no sw-tw" aria-hidden="true">5&prime;</span>
+                            <span class="sw-gloss sw-tw">Mixed</span>
+                            <h3>Five minutes, or two short poems</h3>
+                            <p>
+                                The safe default for a mic where first-timers share the list with poets testing new work. Say "five minutes or two poems, whichever comes first", because a reader who brings two long ones will otherwise take nine. Thirteen names in the same eighty minutes.
+                            </p>
+                        </li>
+                        <li class="sw-item">
+                            <span class="sw-item-no sw-tw" aria-hidden="true">8&prime;</span>
+                            <span class="sw-gloss sw-tw">Prose</span>
+                            <h3>Eight to ten for stories and prose</h3>
+                            <p>
+                                A story stopped at minute five is not a story, so fiction, memoir and storytelling nights give each reader longer and book fewer of them: eight readers at eight minutes plus the changeover. Those nights tend to fill in advance, which is an argument for an online list.
+                            </p>
+                        </li>
+                    </ol>
+                    <p class="sw-foot">
+                        The number you land on is your <span class="sw-it">Registration Limit</span>. It counts per date, so every night of a weekly mic opens with all its slots, and the sign-up form tells poets how many spots remain. Then keep the sum honest from the stage: a timer the reader can see, and a rule for the poem that runs over, said in the welcome. Cutting one reader at five and a half minutes is kinder than cutting the last three.
+                    </p>
+                    <span class="sw-folio" aria-hidden="true">11</span>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- VI. The sign-up: online, at the door, or both; house rules   -->
+            <!-- ============================================================ -->
+            <section class="sw-spread" id="sign-up">
+                <div class="sw-page sw-verso sw-prose">
+                    <span class="sw-head sw-sc" aria-hidden="true">{{ $swTitle }}</span>
+                    <span class="sw-part" aria-hidden="true">VI</span>
+                    <p class="sw-kick sw-sc">Online, at the door, or both</p>
+                    <h2 class="sw-verse" data-reveal="ink">
+                        <span class="sw-vl" style="--n: 0;">Settle the list</span>
+                        <span class="sw-vl" style="--n: 1; --i: 1;">before the room</span>
+                        <span class="sw-vl sw-red" style="--n: 2;">settles it</span>
+                        <span class="sw-vl sw-red" style="--n: 3; --i: 1;">for you.</span>
+                    </h2>
+                    <div class="sw-items" style="margin-top: 2rem;">
+                        <div class="sw-item">
+                            <span class="sw-item-pil" aria-hidden="true">i.</span>
+                            <h3>All online, before the night</h3>
+                            <p>
+                                Pick it when the room is small, the list fills days ahead, or poets travel to read and need to know they have a slot before they get on a train. The cost is the regular who decides at six o'clock and finds the list full, and the names who signed up on Monday and forgot by Thursday.
+                            </p>
+                        </div>
+                        <div class="sw-item">
+                            <span class="sw-item-pil" aria-hidden="true">ii.</span>
+                            <h3>All at the door</h3>
+                            <p>
+                                Pick it when the list rarely fills and deciding on the night is half the point. Leave registration off and still publish the night, so the audience can find it. Say what time the sheet goes out, or the keenest poets will queue an hour early for slot one.
+                            </p>
+                        </div>
+                        <div class="sw-item">
+                            <span class="sw-item-pil" aria-hidden="true">iii.</span>
+                            <h3>Split the list</h3>
+                            <p>
+                                The answer most busy mics reach. Put part of the list online and keep the rest for the door: of thirteen slots, set the Registration Limit to eight and hold five on paper. Write the split in the description ("8 online, 5 at the door from 7:30"), so a poet who sees the online half full still knows to come.
+                            </p>
+                        </div>
+                    </div>
+                    <span class="sw-folio" aria-hidden="true">12</span>
+                </div>
+                <div class="sw-page sw-recto">
+                    <span class="sw-head sw-sc" aria-hidden="true">House rules</span>
+                    <h3 class="sw-h2s">House rules, written down once</h3>
+                    <p style="margin-top: 1rem; color: var(--sw-ink-2);">
+                        Every mic has rules. The bad nights are the ones where the rules lived in the host's head and were announced for the first time to the person breaking them.
+                    </p>
+                    <ul class="sw-list">
+                        <li><span><b class="sw-sc">The limit.</b> How long a slot is, and what happens at the end of it: a light at the back, a raised hand, then the next name.</span></li>
+                        <li><span><b class="sw-sc">One slot each.</b> No reading twice and no holding a slot for a friend. Online, the form keeps this rule for you: one email address registers once per date.</span></li>
+                        <li><span><b class="sw-sc">Late and absent.</b> A poet who arrives after their name was called goes to the end of the list if there is time; one who never arrives has given the slot back.</span></li>
+                        <li><span><b class="sw-sc">Content notes.</b> Ask readers to give one, briefly, before a piece about violence or self-harm, and model it yourself.</span></li>
+                        <li><span><b class="sw-sc">Cameras.</b> Say whether the night is filmed or photographed, and that any reader may ask not to be.</span></li>
+                        <li><span><b class="sw-sc">The room's part.</b> Quiet while someone reads, applause for every name, first-timers included.</span></li>
+                    </ul>
+                    <p class="sw-foot">
+                        Write them in the event's description, where they sit on the page for every date of the series, and again in <span class="sw-it">Registration notes</span>, which go into each poet's confirmation email and onto their registration. A rule a poet read on the way in is a rule you never have to enforce from the mic.
+                    </p>
+                    <span class="sw-folio" aria-hidden="true">13</span>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- VII. The feature, the running order, and the regulars        -->
+            <!-- ============================================================ -->
+            <section class="sw-spread" id="regulars">
+                <div class="sw-page sw-verso sw-prose">
+                    <span class="sw-head sw-sc" aria-hidden="true">{{ $swTitle }}</span>
+                    <span class="sw-part" aria-hidden="true">VII</span>
+                    <p class="sw-kick sw-sc">The feature, and the order</p>
+                    <h2 class="sw-verse" data-reveal="ink">
+                        <span class="sw-vl" style="--n: 0;">Book the feature</span>
+                        <span class="sw-vl" style="--n: 1; --i: 1;">like a guest,</span>
+                        <span class="sw-vl sw-red" style="--n: 2;">not a longer</span>
+                        <span class="sw-vl sw-red" style="--n: 3; --i: 1;">slot.</span>
+                    </h2>
+                    <div class="sw-items" style="margin-top: 2rem;">
+                        <div class="sw-item">
+                            <span class="sw-item-pil" aria-hidden="true">&para;</span>
+                            <h3>Put them in the middle</h3>
+                            <p>
+                                Most mics run open list, feature, break, open list, or end on the feature. Avoid opening with it: half the open readers arrive after the first twenty minutes, and the poet you invited reads to a room that is still finding chairs. Give them fifteen to twenty-five minutes, and tell them the number when you book them.
+                            </p>
+                        </div>
+                        <div class="sw-item">
+                            <span class="sw-item-pil" aria-hidden="true">&para;</span>
+                            <span class="sw-gloss sw-tw">Free</span>
+                            <h3>Name them on the page</h3>
+                            <p>
+                                Add the feature on the event's Participants tab and their name is on the event page, linked to their own schedule if they have one. A weekly series shares one participant list and one agenda across every date, so a feature night is best as an event of its own: <span class="sw-it">Clone Event</span> from the series, make the copy a one-time event on its night with the feature added, and put that date in the series' Exclude Dates so the night is not listed twice.
+                            </p>
+                        </div>
+                    </div>
+                    <span class="sw-folio" aria-hidden="true">14</span>
+                </div>
+                <div class="sw-page sw-recto">
+                    <span class="sw-head sw-sc" aria-hidden="true">Keeping the regulars</span>
+                    <div class="sw-items">
+                        <div class="sw-item">
+                            <span class="sw-item-pil" aria-hidden="true">&para;</span>
+                            <span class="sw-gloss sw-tw">Free</span>
+                            <h3>Post the shape of the night</h3>
+                            <p>
+                                The Agenda tab puts the parts of the night on the event page in the order you drag them into. Switch Show times off and it reads like a set list: Welcome, Open list, Feature, Break, Open list. People who only come for the feature know roughly when to arrive, and readers know which half they are in.
+                            </p>
+                        </div>
+                        <div class="sw-item">
+                            <span class="sw-item-pil" aria-hidden="true">&para;</span>
+                            <span class="sw-gloss sw-tw">Free</span>
+                            <h3>A reminder with a way out</h3>
+                            <p>
+                                Before the night, every poet registered by then gets a reminder email, one day ahead unless you choose three hours, two days or three. It carries a <span class="sw-it">Can't make it?</span> link, so the poet who cannot come gives the slot back instead of leaving a gap, and the next name on a full night's waitlist hears about it.
+                            </p>
+                        </div>
+                        <div class="sw-item">
+                            <span class="sw-item-pil" aria-hidden="true">&para;</span>
+                            <h3>Give regulars a reason to return</h3>
+                            <p>
+                                Keep the same night and the same start time, because a scene is a habit before it is anything else. Keep an early slot for a first-timer, invite a feature from your own open list now and then, and announce next month's feature from the mic and on the page the same night.
+                            </p>
+                        </div>
+                    </div>
+                    <p class="sw-foot sw-prose">
+                        Reminders are on for every schedule on every plan, and you can change when they go out in the schedule's <x-link href="{{ marketing_url('/docs/creating-schedules') }}#ticket-reminders">ticket settings</x-link>. The <x-link href="{{ marketing_url('/docs/creating-events') }}#agenda">agenda</x-link> and <x-link href="{{ marketing_url('/docs/creating-events') }}#recurring">exclude dates</x-link> are in the event form.
+                    </p>
+                    <span class="sw-folio" aria-hidden="true">15</span>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- VIII. The rest of it: two spreads, and the staples between them -->
             <!-- ============================================================ -->
             <section class="sw-pair" id="rest">
                 <div class="sw-spread sw-centre">
                     <div class="sw-page sw-verso sw-page-mid">
                         <span class="sw-head sw-sc" aria-hidden="true">{{ $swTitle }}</span>
-                        <span class="sw-part" aria-hidden="true">V</span>
+                        <span class="sw-part" aria-hidden="true">VIII</span>
                         <p class="sw-kick sw-sc">The rest of it</p>
                         <h2 class="sw-verse" data-reveal="ink">
                             <span class="sw-vl" style="--n: 0;">Everything</span>
@@ -1247,7 +1466,7 @@
                             <span class="sw-vl sw-red" style="--n: 3; --i: 1;">the writing.</span>
                         </h2>
                         <span class="sw-ast" aria-hidden="true" style="margin-top: 3rem; text-align: start;">&#8258;</span>
-                        <span class="sw-folio" aria-hidden="true">10</span>
+                        <span class="sw-folio" aria-hidden="true">16</span>
                     </div>
                     <div class="sw-page sw-recto">
                         <span class="sw-staples" aria-hidden="true"></span>
@@ -1273,7 +1492,7 @@
                                 </p>
                             </div>
                         </div>
-                        <span class="sw-folio" aria-hidden="true">11</span>
+                        <span class="sw-folio" aria-hidden="true">17</span>
                     </div>
                 </div>
 
@@ -1301,7 +1520,7 @@
                                 </p>
                             </div>
                         </div>
-                        <span class="sw-folio" aria-hidden="true">12</span>
+                        <span class="sw-folio" aria-hidden="true">18</span>
                     </div>
                     <div class="sw-page sw-recto">
                         <span class="sw-head sw-sc" aria-hidden="true">The rest of it</span>
@@ -1326,18 +1545,18 @@
                                 </p>
                             </div>
                         </div>
-                        <span class="sw-folio" aria-hidden="true">13</span>
+                        <span class="sw-folio" aria-hidden="true">19</span>
                     </div>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- VI and VII. The rooms, and who it is for                     -->
+            <!-- IX and X. The rooms, and who it is for                        -->
             <!-- ============================================================ -->
             <div class="sw-spread">
                 <section class="sw-page sw-verso" id="rooms">
                     <span class="sw-head sw-sc" aria-hidden="true">{{ $swTitle }}</span>
-                    <span class="sw-part" aria-hidden="true">VI</span>
+                    <span class="sw-part" aria-hidden="true">IX</span>
                     <h2 class="sw-verse" data-reveal="ink">
                         <span class="sw-vl" style="--n: 0;">Where the list</span>
                         <span class="sw-vl sw-red" style="--n: 1; --i: 1;">goes up</span>
@@ -1353,11 +1572,11 @@
                             </li>
                         @endforeach
                     </ol>
-                    <span class="sw-folio" aria-hidden="true">14</span>
+                    <span class="sw-folio" aria-hidden="true">20</span>
                 </section>
                 <section class="sw-page sw-recto" id="who">
                     <span class="sw-head sw-sc" aria-hidden="true">Perfect for</span>
-                    <span class="sw-part" aria-hidden="true">VII</span>
+                    <span class="sw-part" aria-hidden="true">X</span>
                     <h2 class="sw-verse" data-reveal="ink">
                         <span class="sw-vl" style="--n: 0;">Built for how poets</span>
                         <span class="sw-vl sw-red" style="--n: 1; --i: 1;">actually work</span>
@@ -1387,17 +1606,17 @@
                             </article>
                         @endforeach
                     </div>
-                    <span class="sw-folio" aria-hidden="true">15</span>
+                    <span class="sw-folio" aria-hidden="true">21</span>
                 </section>
             </div>
 
             <!-- ============================================================ -->
-            <!-- VIII. Three steps, then the further reading                  -->
+            <!-- XI. Three steps, then the further reading                    -->
             <!-- ============================================================ -->
             <div class="sw-spread">
                 <section class="sw-page sw-verso" id="steps">
                     <span class="sw-head sw-sc" aria-hidden="true">{{ $swTitle }}</span>
-                    <span class="sw-part" aria-hidden="true">VIII</span>
+                    <span class="sw-part" aria-hidden="true">XI</span>
                     <h2 class="sw-verse" data-reveal="ink">
                         <span class="sw-vl" style="--n: 0;">Three <span class="sw-red">steps</span></span>
                     </h2>
@@ -1412,7 +1631,7 @@
                             </div>
                         @endforeach
                     </div>
-                    <span class="sw-folio" aria-hidden="true">16</span>
+                    <span class="sw-folio" aria-hidden="true">22</span>
                 </section>
                 <div class="sw-page sw-recto">
                     <span class="sw-head sw-sc" aria-hidden="true">Three steps</span>
@@ -1463,7 +1682,7 @@
                             </a>
                         </p>
                     </section>
-                    <span class="sw-folio" aria-hidden="true">17</span>
+                    <span class="sw-folio" aria-hidden="true">23</span>
                 </div>
             </div>
 
@@ -1474,14 +1693,14 @@
             </div>
 
             <!-- ============================================================ -->
-            <!-- IX. Notes: the questions                                     -->
+            <!-- XII. Notes: the questions                                    -->
             <!-- ============================================================ -->
             <x-seo.faq-schema :items="$faqs" />
 
             <section class="sw-spread" id="faq">
                 <div class="sw-page sw-verso">
                     <span class="sw-head sw-sc" aria-hidden="true">{{ $swTitle }}</span>
-                    <span class="sw-part" aria-hidden="true">IX</span>
+                    <span class="sw-part" aria-hidden="true">XII</span>
                     <p class="sw-kick sw-sc" aria-hidden="true">Notes</p>
                     <h2 class="sw-verse" data-reveal="ink">
                         <span class="sw-vl" style="--n: 0;">Frequently asked</span>
@@ -1491,7 +1710,7 @@
                         Everything poets and hosts ask before they start the list.
                     </p>
                     <div class="sw-notes">
-                        @foreach (array_slice($faqs, 0, 3) as $faq)
+                        @foreach (array_slice($faqs, 0, 5) as $faq)
                             <details name="faq">
                                 <summary>
                                     <h3>{{ $faq['q'] }}</h3>
@@ -1501,12 +1720,12 @@
                             </details>
                         @endforeach
                     </div>
-                    <span class="sw-folio" aria-hidden="true">18</span>
+                    <span class="sw-folio" aria-hidden="true">24</span>
                 </div>
                 <div class="sw-page sw-recto">
                     <span class="sw-head sw-sc" aria-hidden="true">Questions</span>
-                    <div class="sw-notes" style="--from: 3;">
-                        @foreach (array_slice($faqs, 3) as $faq)
+                    <div class="sw-notes" style="--from: 5;">
+                        @foreach (array_slice($faqs, 5) as $faq)
                             <details name="faq">
                                 <summary>
                                     <h3>{{ $faq['q'] }}</h3>
@@ -1516,7 +1735,7 @@
                             </details>
                         @endforeach
                     </div>
-                    <span class="sw-folio" aria-hidden="true">19</span>
+                    <span class="sw-folio" aria-hidden="true">25</span>
                 </div>
             </section>
         </div>

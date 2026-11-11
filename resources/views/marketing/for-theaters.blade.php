@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Theater Calendars | Runs, Season Passes and Ticketing</x-slot>
-    <x-slot name="description">Set a production up once as a run - Tuesday to Sunday, dark Mondays, closing after fourteen performances - and sell every one from a single link.</x-slot>
+    <x-slot name="description">Build a theater calendar the way a season works: runs with dark days, previews, matinees, access performances and season tickets, all on one link.</x-slot>
     <x-slot name="breadcrumbTitle">For Theaters</x-slot>
 
     <x-slot name="headMeta">
@@ -600,6 +600,19 @@
             .th-season .th-col-run { display: none; }
             .th-season td { white-space: normal; }
         }
+        /* The bill of performances: the season table's type, with prose in the second column. */
+        .th-billtab td { white-space: normal; padding-block: 1.25rem 1.1rem; font-size: 1.0625rem; text-wrap: pretty; }
+        .th-billtab tbody th { width: 30%; padding-block: 1.2rem 1.1rem; }
+        .th-billtab tbody tr + tr > * { border-top: 1px solid var(--th-hair); }
+        @media (max-width: 620px) {
+            .th-billtab tbody tr { display: block; padding-block: 1rem; }
+            .th-billtab tbody tr + tr { border-top: 1px solid var(--th-hair); }
+            .th-billtab tbody tr + tr > * { border-top: 0; }
+            .th-billtab tbody th,
+            .th-billtab td { display: block; width: auto; padding: 0; }
+            .th-billtab td { margin-top: 0.5rem; }
+            .th-billtab thead { display: none; }
+        }
 
         /* ---------------------------------------------------------------
            The season pass: a book of coupons, and the prices of admission
@@ -1083,6 +1096,22 @@
                 'a' => 'Yes, two ways. Named ticket types price parts of the house by the number: create as many as the production needs, each with its own price, quantity and sales window, and a group rate that applies when somebody buys several at once (add-ons are on Pro). On Enterprise you can price the house by its actual seats instead: draw the auditorium once as a seating plan on your venue schedule and give each section a price band. Buyers get the best seats left together or pick their own off the map, and the box office console can pick several seats at once to hold back, book for a caller or release, and move a booking to another seat.',
             ],
             [
+                'q' => 'How far ahead should a theater publish its season calendar?',
+                'a' => 'As soon as the dates and the rights are settled, and all at once. Subscribers need time to commit, and each production\'s page needs time to be found in search before single tickets go on sale. Enter every production as a Draft, which only your team sees, publish the season on announcement day, and switch on the "Notify me" card so anyone who arrives before single tickets open can leave an email address and hear when they do.',
+            ],
+            [
+                'q' => 'How do I list previews and opening night?',
+                'a' => 'Give the previews a short run of their own that ends the night before opening, with lower prices on its ticket types, and start the main run on opening night. A sales window on the main run cannot do the job, because on a recurring event a sales window is a single moment for every performance, so a preview-price ticket could be bought for a later night. Opening night stays a date of the run unless it is a gala at its own price; on Enterprise, hold the critics\' seats back in the box office console with the reason house seats.',
+            ],
+            [
+                'q' => 'How should a theater list captioned, audio-described and relaxed performances?',
+                'a' => 'Give each one its own event on its date, named for what it is, and take that date out of the run under Exclude Dates, so the performance has a page that says what changes, where to sit and when a touch tour starts. On Pro, a dropdown custom field such as Access, set to Show as filter, lets visitors narrow the calendar to those performances and gives you a link to send to access groups. On a seated house, a wheelchair space can only be sold from a section set to Accessibility only, and a companion seat cannot be taken on its own while the space beside it is free. Give that section a ticket type of its own so only people who choose it get those places.',
+            ],
+            [
+                'q' => 'Can I sell a subscription with one seat at each production?',
+                'a' => 'Yes, on the Pro plan, as a festival pass: one visit to each event it covers. Sell it from an event of its own, pick the season\'s productions as its covered events, and turn on Let holders book seats in advance, so each holder chooses a date for every production from their pass page; on a seated house the pass books the best seat available. A season pass is the other kind, valid for every performance of one recurring run, once each.',
+            ],
+            [
                 'q' => 'Can I run more than one space?',
                 'a' => 'Yes, on every plan. Sub-schedules keep the mainstage, the studio and the family programme apart on one link, so somebody looking for the studio season is not reading through the whole year to find it.',
             ],
@@ -1101,8 +1130,11 @@
             ['why', 'Not a date'],
             ['run', 'Setting the run'],
             ['season', 'The season'],
+            ['performances', 'Each performance'],
+            ['planning', 'Planning'],
             ['pass', 'The season pass'],
             ['tiers', 'Ticket types'],
+            ['access', 'Access and groups'],
             ['house', 'The house'],
             ['rest', 'Everything else'],
             ['who', 'Perfect for'],
@@ -1402,6 +1434,121 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 4b. The bill of performances: each kind of night, set right  -->
+        <!-- ============================================================ -->
+        <section id="performances" class="th-section" style="scroll-margin-top: 4rem;">
+            <div class="th-wrap">
+                <div class="th-head">
+                    <p class="th-caps th-kicker" data-reveal>The bill of performances</p>
+                    <h2 class="th-d th-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Previews, matinees, <em>and the night the critics come.</em>
+                    </h2>
+                    <div class="th-orn" aria-hidden="true" data-reveal style="--reveal-delay: 0.12s;">&#10022;&#xFE0E;</div>
+                    <p class="th-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A theater calendar holds more than a row of evening shows. Each kind of performance has a shape that suits it, and choosing it before the first ticket is sold saves untangling orders later.
+                    </p>
+                </div>
+
+                <div class="th-leaf th-season th-billtab" data-reveal="panel">
+                    <table>
+                        <caption class="sr-only">Each kind of performance and how it goes on the calendar</caption>
+                        <thead>
+                            <tr class="th-caps">
+                                <th scope="col">Performance</th>
+                                <th scope="col">How it goes on the calendar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">The evening run<small>Free</small></th>
+                                <td>One recurring event: the days it plays, the curtain time, and an end after a closing date or a set number of performances. Every performance keeps its own ticket count, so a quantity of 200 is 200 a night.</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Matinees<small>Free</small></th>
+                                <td>A second recurring event on the matinee days, at the matinee time. A recurring event has one start time, so a two-show Saturday is two events, and nobody holding a 2:30 ticket arrives at 7:30.</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Previews<small>Free; prices: Pro</small></th>
+                                <td>A short run of their own that ends the night before opening, with the preview prices on its ticket types. Do not build them from a sales window on the main run: on a recurring event a sales window is one moment for the whole series, so a preview-price ticket bought on the Monday could be for closing night.</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Opening and press night<small>Seats: Enterprise</small></th>
+                                <td>A date of the run like any other, unless it is a gala at its own price, which wants an event of its own. With a seating plan, hold the critics' seats back in the box office console with the reason <span class="th-ital">house seats</span>, so they are never sold, and put any that go unclaimed back on sale.</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Access performances<small>Free</small></th>
+                                <td>The captioned, audio-described, relaxed or signed performance gets its own one-off event on its date, named for what it is, and that date comes out of the run under Exclude Dates. It then has a page of its own to say what changes and where to sit.</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">School matinees<small>Free</small></th>
+                                <td>A one-off weekday event at the time the schools asked for. A group rate and a question for the school's name both live on the ticket type, as described further down.</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">An extension<small>Free</small></th>
+                                <td>Add the extra nights to the run under Include Dates. They are added even after the run's end, so a held-over week is a few dates typed in, not a new production.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="th-season-note">An excluded date disappears from the calendar rather than showing as cancelled, so take a date out of the run before tickets for it go on sale. <a href="{{ marketing_url('/docs/creating-events') }}#recurring" class="th-a">How recurring dates work</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4c. Planning the season: the order things go public in       -->
+        <!-- ============================================================ -->
+        <section id="planning" class="th-section th-alt" style="scroll-margin-top: 4rem;">
+            <div class="th-wrap">
+                <div class="th-head">
+                    <p class="th-caps th-kicker" data-reveal>The season calendar</p>
+                    <h2 class="th-d th-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Announce, sell, open, <em>close.</em>
+                    </h2>
+                    <div class="th-orn" aria-hidden="true" data-reveal style="--reveal-delay: 0.12s;">&#10086;&#xFE0E;</div>
+                    <p class="th-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        The order a season goes public in matters as much as its dates. This is a shape most producing houses can run on, whatever size the building.
+                    </p>
+                </div>
+
+                <div class="th-notes" data-reveal-group="90">
+                    <article class="th-note" data-reveal>
+                        <div class="th-note-head">
+                            <h3 class="th-d">Fix the dates before the announcement</h3>
+                            <span class="th-caps th-tier">Free</span>
+                        </div>
+                        <p>Enter each production as soon as its dates are settled and leave it as a Draft, which your team sees and the public does not. On announcement day, publish them all, and the calendar is complete the moment people come looking instead of filling in over a fortnight.</p>
+                    </article>
+
+                    <article class="th-note" data-reveal>
+                        <div class="th-note-head">
+                            <h3 class="th-d">Open sales in waves</h3>
+                            <span class="th-caps th-tier th-tier-pro">Pro</span>
+                        </div>
+                        <p>Season ticket holders first, then everybody. Put the season ticket on sale with the announcement, and give each production's single ticket types a Ticket sales start date a few weeks later: that one moment opens every performance of the run at once.</p>
+                        <p class="th-fine">Switch on the free "Notify me" card and anyone who visits in between can leave an email address and hear when tickets go on sale.</p>
+                    </article>
+
+                    <article class="th-note" data-reveal>
+                        <div class="th-note-head">
+                            <h3 class="th-d">Sell the season as one ticket</h3>
+                            <span class="th-caps th-tier th-tier-pro">Pro</span>
+                        </div>
+                        <p>The classic subscription, one seat at each production, is a festival pass: good once at each event it covers. Sell it from an event of its own, choose the season's productions as the covered events, and turn on Let holders book seats in advance, so each holder picks a date for every show from their pass page. On a seated house the pass books them the best seat available.</p>
+                        <p class="th-fine"><a href="{{ marketing_url('/docs/subscriptions') }}" class="th-a">How passes and advance booking work</a></p>
+                    </article>
+
+                    <article class="th-note" data-reveal>
+                        <div class="th-note-head">
+                            <h3 class="th-d">Give previews room to change</h3>
+                            <span class="th-caps th-tier">Free</span>
+                        </div>
+                        <p>Previews exist because the show is not finished. Say so on the preview run's own page and leave enough performances before opening night for the company to have played to real audiences. The critics come to one named performance, which is why it pays to know which one before the season goes on sale.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 5. The season pass                                           -->
         <!-- ============================================================ -->
         <section id="pass" class="th-section" style="scroll-margin-top: 4rem;">
@@ -1514,12 +1661,12 @@
                     <article data-reveal>
                         <h3 class="th-d">Tiers that close on time</h3>
                         <span class="th-caps th-tier">Free</span>
-                        <p>Give each type a sales window so preview pricing stops when previews do, and concessions can open later without you editing anything. A group rate can kick in once somebody buys several.</p>
+                        <p>Give each type a sales window, so an early-bird price closes on the day you choose and a later release opens without you editing anything. A group rate can kick in once somebody buys several.</p>
                     </article>
                     <article data-reveal>
                         <h3 class="th-d">Ask what you need</h3>
-                        <span class="th-caps th-tier th-tier-pro">Pro</span>
-                        <p>Custom questions on the ticket collect what the night actually requires - access needs, a dinner choice, a school's contact - at the point of purchase.</p>
+                        <span class="th-caps th-tier">Free</span>
+                        <p>A question on a ticket type collects what the night requires, such as a dinner choice on the dinner ticket or a school's contact on the schools ticket, at the point of purchase. Questions set on the event itself, asked of every buyer, are Pro.</p>
                     </article>
                     <article data-reveal>
                         <h3 class="th-d">Add-ons and codes</h3>
@@ -1531,6 +1678,75 @@
                 <p class="th-pay" data-reveal>
                     Pro opens every payment method: take the money through Stripe, PayPal, Invoice Ninja, Payfast (in rand), Razorpay (in Indian rupees), a payment link or cash at the box office. Event Schedule charges zero platform fees, so past the provider's own processing the money is yours. On Pro, a big booking can be split into <a href="{{ marketing_url('/features/installments') }}" class="th-a">monthly installments</a> by card through Stripe.
                 </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6b. Access performances and group bookings                   -->
+        <!-- ============================================================ -->
+        <section id="access" class="th-section" style="scroll-margin-top: 4rem;">
+            <div class="th-wrap">
+                <div class="th-head">
+                    <p class="th-caps th-kicker" data-reveal>Access and groups</p>
+                    <h2 class="th-d th-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Captioned, described, relaxed. <em>And thirty from one school.</em>
+                    </h2>
+                    <div class="th-orn" aria-hidden="true" data-reveal style="--reveal-delay: 0.12s;">&#10086;&#xFE0E;</div>
+                    <p class="th-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        This is where a theater calendar most often fails its audience: the right performance exists, and the people who need it cannot find it, or find it after the good seats are gone.
+                    </p>
+                </div>
+
+                <div class="th-terms" data-reveal-group="100">
+                    <article data-reveal>
+                        <h3 class="th-d">Captioned and signed</h3>
+                        <p>Captions put the words on a screen beside the stage; an interpreted performance has a sign language interpreter in view. Both work from the finished script, so schedule them after press night, and say on the page which seats see the screen or the interpreter best.</p>
+                    </article>
+                    <article data-reveal>
+                        <h3 class="th-d">Audio-described</h3>
+                        <p>A describer talks listeners through the action on a headset, often after a touch tour of the set. The describer has to see the production first, so these come later in the run. Print the touch tour's time and where headsets are collected.</p>
+                    </article>
+                    <article data-reveal>
+                        <h3 class="th-d">Relaxed</h3>
+                        <p>The house lights stay low rather than dark, loud or sudden effects are softened, and nobody minds noise or a walk to the foyer. Say exactly what changes, and link a short guide with photos of the building for people who like to know what to expect.</p>
+                    </article>
+                </div>
+
+                <div class="th-notes" data-reveal-group="90">
+                    <article class="th-note" data-reveal>
+                        <div class="th-note-head">
+                            <h3 class="th-d">Make them findable</h3>
+                            <span class="th-caps th-tier th-tier-pro">Pro</span>
+                        </div>
+                        <p>Name each one for what it is, "Macbeth: captioned performance", so it reads correctly in a list and in search. Then add a dropdown custom field called Access, with your formats as its options, and set it to Show as filter: visitors can narrow the calendar to captioned performances, and the filtered view is a link you can send to a local deaf club or access group.</p>
+                        <p class="th-fine">Tick On event page as well and the answer prints on the performance's own page. <a href="{{ marketing_url('/features/custom-fields') }}" class="th-a">How custom fields work</a></p>
+                    </article>
+
+                    <article class="th-note" data-reveal>
+                        <div class="th-note-head">
+                            <h3 class="th-d">Seats kept for access</h3>
+                            <span class="th-caps th-tier th-tier-pro">Enterprise</span>
+                        </div>
+                        <p>On a venue schedule's seating plan, mark wheelchair spaces with a companion seat beside each, in a section set to Accessibility only with a ticket type of its own, so those places go only to people who choose them; a companion seat cannot be bought alone while its wheelchair space is free. For a captioned or signed night, hold back the seats with the clearest view in the box office console, with the reason <span class="th-ital">accessibility</span>, then book them for the people who need them by phone from the console, and release what is left before the night.</p>
+                    </article>
+
+                    <article class="th-note" data-reveal>
+                        <div class="th-note-head">
+                            <h3 class="th-d">Groups and schools</h3>
+                            <span class="th-caps th-tier">Free</span>
+                        </div>
+                        <p>A group rate goes on the ticket type: a minimum quantity, then a percentage or a fixed amount off, so ten or more booked together pay less without a separate "group" ticket. A question on the same ticket type asks for the school and the teacher's phone number at checkout. Both work on every plan; putting a price on the ticket is Pro.</p>
+                        <p class="th-fine">Max per order does the opposite job: it stops one buyer taking all the cheap seats at a preview.</p>
+                    </article>
+
+                    <article class="th-note" data-reveal>
+                        <div class="th-note-head">
+                            <h3 class="th-d">The box office on the night</h3>
+                            <span class="th-caps th-tier th-tier-pro">Pro</span>
+                        </div>
+                        <p>Scanning at the door works from any phone on every plan. A ticket sold over the counter for cash goes in through Import on the Sales page: pick the performance, type the buyer's name and email, and with Send Email on they get the same confirmation a checkout sends. With a seating plan, the box office console on Enterprise books seats for a caller and moves a party to another row.</p>
+                    </article>
+                </div>
             </div>
         </section>
 
@@ -1681,7 +1897,7 @@
                             <h3 class="th-d">The announcement image</h3>
                             <span class="th-caps th-tier">Free</span>
                         </div>
-                        <p>Generate a graphic from a production in a story, square, portrait or landscape crop. It is built from the event, so the title and the dates are already right.</p>
+                        <p>The Events graphic in your schedule's Actions menu lays the flyers of your upcoming productions out as one image, in a square, portrait, story or wide shape, with a caption listing the same dates. Only productions with a flyer are drawn, so upload the poster art to each.</p>
                         <p class="th-fine">
                             Streaming a performance too? Mark it as an online event and paste the link to wherever you are streaming.
                             <a href="{{ marketing_url('/features/online-events') }}" class="th-a">How online events work</a>
