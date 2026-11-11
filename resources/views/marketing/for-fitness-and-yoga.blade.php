@@ -1024,16 +1024,35 @@
                 'q' => 'Can my other teachers log in?',
                 'a' => 'The free plan is one login. Multiple team members, capped at five, are an Enterprise feature at '.plan_price($entMonthly).' a month, as is the availability tab that tracks which team members are around on which days. If you only need the timetable to say who is teaching, put the instructor in the class itself and stay on the free plan.',
             ],
+            [
+                'q' => 'How do I make a fitness class schedule?',
+                'a' => 'List the hours each room is free and the hours each teacher can teach, and place classes only where the two overlap. Put your most popular classes before work, at lunchtime, straight after work and on weekend mornings, leave ten to fifteen minutes between classes in the same room, and put the level in each class name. Then enter each class once as a recurring event with its days, start time and length, add the teacher on its Participants tab, and take holidays out with Exclude Dates. Share one link, embed the timetable on your website, and print the QR code for the door. All of that is free.',
+            ],
+            [
+                'q' => 'How many people should I let into a yoga or fitness class?',
+                'a' => 'Work it out from the floor. Give each student about 2 m by 1 m for a yoga mat, take off the teacher\'s space and the walkway, and divide: a 10 m by 6 m room holds about 22 mats. Then take off the pass holders who usually arrive without booking, because their scan is not checked against the room, and set what is left (18 here) as the per-date quantity of the drop-in ticket, or as the Registration Limit on a free class. Equipment classes are simpler: eight reformers means eight places.',
+            ],
+            [
+                'q' => 'Should a studio sell class packs or memberships?',
+                'a' => 'Usually both, plus a drop-in. The drop-in is for visitors and first-timers, a class pack suits the student who comes about once a week, and an unlimited membership suits anyone coming twice a week or more. Price the membership at roughly what five or six drop-ins would cost, so a regular can see it pays for itself. In Event Schedule these are a visit pass and a membership pass, both on Pro. Neither renews by itself: a monthly membership is a pass valid for 30 days that the student buys again each month.',
+            ],
+            [
+                'q' => 'What should I do when I have to cancel one class?',
+                'a' => 'Take that date out of the recurring class with Exclude Dates, so it disappears from your timetable. Excluding a date emails nobody, so find the people who booked it on the Sales page (each row links to the date that was bought), refund any paid drop-ins from there, and tell them yourself when the next class is. Cancel event in the Actions menu is for calling off the whole series, or a one-time event such as a workshop; it can notify everyone who booked, and on eventschedule.com that email reaches buyers once the schedule has its own email settings.',
+            ],
         ];
 
         $dotSections = [
             ['top', 'The flow'],
             ['unit', 'Not a night'],
             ['week', 'The timetable'],
+            ['plan', 'Planning'],
             ['pass', 'The card'],
             ['kinds', 'Four passes'],
             ['door', 'The deadline'],
+            ['numbers', 'The numbers'],
             ['onetoone', 'One-to-ones'],
+            ['beyond', 'Off the timetable'],
             ['rest', 'Everything else'],
             ['who', 'Perfect for'],
             ['faq', 'Questions'],
@@ -1289,6 +1308,61 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 3b. Planning the week: decisions before data entry           -->
+        <!-- ============================================================ -->
+        <section id="plan" class="fy-section fy-morning">
+            <div class="fy-wrap">
+                <div class="fy-head fy-head-c">
+                    <p class="fy-kick" data-reveal><span class="fy-clock" aria-hidden="true">09:00</span> planning the week</p>
+                    <h2 class="fy-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Draw the week <em>before</em> you type it.
+                    </h2>
+                    <p class="fy-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Most fitness class schedules go wrong on paper: a teacher booked into two rooms at 6:00 PM, a class nobody can reach after work, a bank holiday that quietly eats a beginners course. Six decisions, in the order a studio owner meets them.
+                    </p>
+                </div>
+
+                <div class="fy-three" data-reveal-group="90">
+                    @foreach ([
+                        ['1. Start from the room and the teachers', 'Write down the hours each room is free and the hours each teacher can teach, then fill only where the two overlap. A timetable that starts from a list of classes you would like to run is how one teacher ends up in two places at once.'],
+                        ['2. Put your best class where people can come', 'Before work, lunchtime, straight after work and weekend mornings are when most people with a job can train. A weekday mid-afternoon slot suits parents after the school run, shift workers and retirees, so pitch that class at them rather than leaving it to chance. Put your strongest class in your busiest slot, not your newest one.'],
+                        ['3. Leave a changeover', 'Allow ten to fifteen minutes between classes in one room, so one class can roll its mats away and wipe down before the next arrives. A 6:00 PM class that runs 60 minutes and a 7:00 PM class in the same room means a queue in the doorway every night.'],
+                        ['4. Say the level in the name', '"Vinyasa" tells a beginner nothing. "Vinyasa, all levels" or "Strength Circuit, intermediate" lets them choose from the list without opening every class. File the strands (yoga, strength, workshops) as sub-schedules, and visitors can filter the timetable to the one they came for, free on every plan.'],
+                        ['5. Name the teacher on the class', 'Add each teacher on the class\'s Participants tab. A teacher who is not on Event Schedule yet gets a page of their own, which they can claim later. A participant belongs to the whole recurring class, so changing the name changes every date: exactly right when a teacher takes a class over for good.'],
+                        ['6. Plan for one week\'s cover', 'Because the teacher is on the whole series, a substitute for one Thursday cannot be written on that Thursday alone. If nobody has booked it yet, exclude that date from the series, then clone the class, make the copy a one-time event on that day and put the cover teacher on it. A pass that covers your whole schedule covers the one-off too; a season pass belongs to the series and does not.'],
+                    ] as [$planTitle, $planBody])
+                        <div class="fy-card fy-mini" data-reveal>
+                            <h3>{{ $planTitle }}</h3>
+                            <p>{{ $planBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="fy-card fy-fit" data-reveal>
+                    <div class="fy-fit-copy">
+                        <div class="fy-side-top">
+                            <h3>Put the timetable on the studio website</h3>
+                            <span class="fy-tag">Free</span>
+                        </div>
+                        <p>Students look for your timetable on your own site first, so put the live one there rather than a picture of it that goes out of date the first time a class moves. The frame loads from your schedule on every visit, so you paste it once.</p>
+                        <p>Most of those visits come from a phone, where a list of the coming days reads better than a month grid. The grid needs a frame about 768 pixels wide; narrower than that, it falls back to a day-by-day list anyway. On the Free plan a small "Powered by Event Schedule" line sits under the frame, and Pro removes it.</p>
+                        <p>
+                            Every option is in the
+                            <x-link href="{{ marketing_url('/docs/sharing') }}#embed">embedding guide</x-link>.
+                        </p>
+                    </div>
+                    <ul class="fy-points" style="margin-top: 0;">
+                        <li><span>Open your schedule in the admin panel, then the Actions menu beside its name, and choose Embed Schedule.</span></li>
+                        <li><span>Leave Widget on Calendar, pick a Theme that suits your site, and set Layout to List if most of your visitors are on phones.</span></li>
+                        <li><span>Copy the Iframe Code and paste it into the timetable page. In WordPress, that is a Custom HTML block.</span></li>
+                        <li><span>For a page that shows only yoga, embed that sub-schedule's own address with ?embed=true on the end.</span></li>
+                        <li><span>Beside it, embed the signup form from the same dialog, so a visitor can ask to hear about new classes without leaving your site.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 4. The card: punched, on the studio floor                    -->
         <!-- ============================================================ -->
         <section id="pass" class="fy-noon" style="scroll-margin-top: 4.5rem; padding-block: clamp(1.5rem, 4vw, 3rem);">
@@ -1506,6 +1580,115 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 6b. The numbers: mats, prices, deadlines, worked through     -->
+        <!-- ============================================================ -->
+        <section id="numbers" class="fy-section fy-afternoon">
+            <div class="fy-wrap">
+                <div class="fy-head fy-head-c">
+                    <p class="fy-kick" data-reveal><span class="fy-clock" aria-hidden="true">14:45</span> the numbers</p>
+                    <h2 class="fy-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        How many mats, at what <em>price</em>, cancelled when.
+                    </h2>
+                    <p class="fy-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Three sums decide whether a class works: how many people the floor really holds, what a visit is worth on each way of paying, and how late a booking may be dropped. Here they are for one room and one price list, so you can redo them with your own.
+                    </p>
+                </div>
+
+                <div class="fy-card fy-fit" data-reveal>
+                    <div class="fy-fit-copy">
+                        <h3>Count the floor, then the walk-ins</h3>
+                        <p>A yoga mat is about 1.8 m by 0.6 m. Give each student a space of 2 m by 1 m and arms can reach sideways without meeting a neighbour's. Take the teacher's space and the path to the door off first, then divide. Laid out in rows it is usually one or two fewer, so check the number on the floor itself.</p>
+                        <p>Then allow for the pass holders who turn up without booking. Their scan at the door is checked against the pass, not against the room, so they come on top of whatever you sold. Set the drop-in ticket's Quantity, which counts each date on its own, to the room less those regulars. Holders who book ahead take their places from that same count, and Max advance seats per date keeps some back for drop-ins.</p>
+                    </div>
+                    <div class="fy-ledger">
+                        @foreach ([
+                            ['Room, 10 m by 6 m', '60 m²'],
+                            ['Teacher\'s space at the front', '- 9 m²'],
+                            ['Door and walkway', '- 6 m²'],
+                            ['Floor for students', '45 m²'],
+                            ['Space per mat, 2 m by 1 m', '2 m²'],
+                            ['Mats by area (45 / 2), about', '22'],
+                            ['Unbooked pass holders on a usual night', '- 4'],
+                            ['Quantity on the drop-in ticket', '18'],
+                        ] as $floorRowIndex => [$floorLabel, $floorValue])
+                            <div>
+                                <span>{{ $floorLabel }}</span>
+                                @if ($floorRowIndex === 7)
+                                    <span class="fy-good">{{ $floorValue }}</span>
+                                @else
+                                    <span>{{ $floorValue }}</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="fy-card fy-fit" data-reveal>
+                    <div class="fy-fit-copy">
+                        <div class="fy-side-top">
+                            <h3>Drop-in, ten-class card or monthly unlimited</h3>
+                            <span class="fy-tag fy-tag-warm">Pro</span>
+                        </div>
+                        <p>Price the drop-in for visitors and first-timers, and make the card the obvious choice for anyone who comes back. With the example prices beside this, in whatever currency you charge, a student who comes twice a week (about eight classes a month) pays 160 on drop-ins, 128 on the card and 120 on the membership, which pays for itself from the sixth class of the month.</p>
+                        <p>Two things to know before you call it a membership. A pass is paid once and never renews by itself: a monthly unlimited is a membership pass with Valid for (days) set to 30, which the student buys again each month. And a pass is one per order, not one per person, so an introductory offer (three visits within 14 days, say) can be bought twice; the Sales page's Subscriptions tab shows who bought what.</p>
+                    </div>
+                    <div class="fy-ledger">
+                        @foreach ([
+                            ['Drop-in', '20 a class'],
+                            ['Ten-class card, valid 90 days', '160 (16 a class)'],
+                            ['Monthly unlimited, valid 30 days', '120'],
+                            ['8 classes a month on drop-ins', '160'],
+                            ['8 classes a month on cards', '128'],
+                            ['8 classes a month on the membership', '120'],
+                        ] as [$priceLabel, $priceValue])
+                            <div>
+                                <span>{{ $priceLabel }}</span>
+                                <span>{{ $priceValue }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="fy-kinds" data-reveal>
+                    <div class="fy-card fy-kinds-in">
+                        <table class="fy-kt" role="table">
+                            <caption>Which cancellation deadline to set on a pass, by kind of class</caption>
+                            <thead role="rowgroup">
+                                <tr role="row">
+                                    <th scope="col" role="columnheader">kind of class</th>
+                                    <th scope="col" role="columnheader">deadline</th>
+                                    <th scope="col" role="columnheader">why</th>
+                                    <th scope="col" role="columnheader">after it</th>
+                                </tr>
+                            </thead>
+                            <tbody role="rowgroup">
+                                @foreach ([
+                                    ['Reformer', '8 machines, always full', '24 hours', 'A machine given back the day before can still go to the waitlist and be used.', 'No credit'],
+                                    ['Sunrise class', '6:30 AM', '12 hours', 'The cut-off lands at 6:30 the evening before, which is when people decide about the alarm.', 'No credit'],
+                                    ['Big open class', 'rarely fills', 'Any time', 'A strict rule costs goodwill and frees a mat nobody was waiting for.', 'Always credited'],
+                                    ['Guest teacher', 'paid per head', '48 hours', 'You have committed to the teacher on the numbers booked, so a booking should stand.', 'No cancelling'],
+                                ] as [$dlName, $dlSub, $dlWhen, $dlWhy, $dlAfter])
+                                    <tr role="row">
+                                        <th scope="row" role="rowheader">
+                                            {{ $dlName }}
+                                            <span>{{ $dlSub }}</span>
+                                        </th>
+                                        <td role="cell">{{ $dlWhen }}</td>
+                                        <td role="cell">{{ $dlWhy }}</td>
+                                        <td role="cell">{{ $dlAfter }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <p class="fy-kinds-note">
+                            The deadline choices on a pass are any time, until the class starts, or 12, 24, 48, 72 or 168 hours before it, and they apply only once you turn on advance booking. A mis-tap is never final: any booking can be undone with the visit credited back within 15 minutes of making it. The reminder goes at one time for the whole schedule, 3 hours or 1, 2 or 3 days before, and it is on by default (Edit Schedule &gt; Tickets &gt; Reminders). A studio with sunrise classes should stay on a day-based setting: at 3 hours, a 6:30 AM class's reminder would go out at 3:30 AM. A day-based reminder that would land in the night goes at 8 PM the evening before instead, so a 6:30 AM class's reminder arrives at 8 PM two evenings ahead. On a free class it carries a "Can't make it?" link that gives the place back.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 7. One-to-ones: a single mat, and a time                     -->
         <!-- ============================================================ -->
         <section id="onetoone" class="fy-section fy-afternoon">
@@ -1559,6 +1742,65 @@
                     Your classes count as busy time. The slot list already knows every recurring class on your timetable, so nobody books a one-to-one on top of Thursday's vinyasa. One appointment type is free; Pro is what lets several run side by side.
                     <a href="{{ marketing_url('/features/appointments') }}" class="fy-link">How appointments work {!! $fyArrow !!}</a>
                 </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7b. Off the timetable: workshops, retreats, the park         -->
+        <!-- ============================================================ -->
+        <section id="beyond" class="fy-section fy-afternoon">
+            <div class="fy-wrap">
+                <div class="fy-head fy-head-c">
+                    <p class="fy-kick" data-reveal><span class="fy-clock" aria-hidden="true">16:15</span> off the timetable</p>
+                    <h2 class="fy-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Workshops, retreats, and the class in the <em>park</em>.
+                    </h2>
+                    <p class="fy-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        The weekly grid pays the rent. The things around it, a Saturday workshop, a weekend away, a summer bootcamp outdoors, each need setting up a little differently.
+                    </p>
+                </div>
+
+                <div class="fy-three" data-reveal-group="110">
+                    <div class="fy-card fy-mini" data-reveal>
+                        <div class="fy-mini-top">
+                            <h3>The workshop</h3>
+                            <span class="fy-tag fy-tag-warm">Pro</span>
+                        </div>
+                        <p>A two-hour arm balance workshop is a one-time event, not a class. Sell a ticket type at full price and an early-bird type that stops selling on a date you pick with + Add Sales Dates, a window that is free on any plan.</p>
+                        <p>Mind your passes: one that covers every event in the schedule covers the workshop too, because it picks up events you add later. To keep workshops out of the monthly unlimited, file classes and workshops as two sub-schedules and point the pass at the classes alone.</p>
+                    </div>
+                    <div class="fy-card fy-mini" data-reveal>
+                        <div class="fy-mini-top">
+                            <h3>The retreat</h3>
+                            <span class="fy-tag fy-tag-warm">Pro</span>
+                        </div>
+                        <p>A weekend or a week away is one Multi-day event, with a ticket type for each room option: shared, single, or no room for someone who lives nearby. Announce it months ahead and let people split the price into as many as 12 monthly payments through Stripe, with the last one due at least a week before you leave.</p>
+                        <p>Add-ons sell the extras with their own stock, such as an airport transfer or a massage. Ask what you need to know, dietary needs or an injury, as a question on the ticket type, which is free.</p>
+                    </div>
+                    <div class="fy-card fy-mini" data-reveal>
+                        <div class="fy-mini-top">
+                            <h3>The class outdoors</h3>
+                            <span class="fy-tag">Free</span>
+                        </div>
+                        <p>Write the rain plan into the class description before the first session ("If it rains, we move to the scout hall on Mill Lane"), so a wet morning needs no announcement at all.</p>
+                        <p>The venue belongs to the whole recurring class, so changing it moves every date. Do that when the summer season ends and you go back indoors. Saving the change asks whether to notify attendees, and only people with a date still to come are told.</p>
+                    </div>
+                </div>
+
+                <div class="fy-card fy-fit" data-reveal>
+                    <div class="fy-fit-copy">
+                        <h3>Calling one class off</h3>
+                        <p>A teacher wakes up ill, the hall double-books you, the park floods. On a recurring class there is no "cancel this date" button: Cancel event in the Actions menu cancels the whole series. One date comes off by excluding it, and that sends nobody an email, so the telling is yours.</p>
+                        <p>On eventschedule.com, the change and cancellation emails reach ticket buyers and registrants only once the schedule has its own email settings, which is one more reason to set those up before a busy term.</p>
+                    </div>
+                    <ul class="fy-points" style="margin-top: 0;">
+                        <li><span>Open the class, add the date under Exclude Dates and save. It disappears from your timetable and the embed on your site; nothing is shown as cancelled.</span></li>
+                        <li><span>On the Sales page, filter by the class name. Each row's event link opens the date that was bought, and the buyer's email is under their name.</span></li>
+                        <li><span>Refund paid drop-ins with Refund Ticket, which sends the money back on Stripe, PayPal or Razorpay, or record a cash one with Mark as Refunded. Event Schedule does not email the student about a refund.</span></li>
+                        <li><span>Pass holders who booked the date show as Booked in the visit log on the Subscriptions tab, so you can write to them too.</span></li>
+                        <li><span>Post it where your students already look, and say when the next class is.</span></li>
+                    </ul>
+                </div>
             </div>
         </section>
 

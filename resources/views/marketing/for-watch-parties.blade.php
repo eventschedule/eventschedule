@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Watch Parties | Movie Nights</x-slot>
-    <x-slot name="description">Free, open-source watch party scheduling: one join link for any stream, registration with a cap per date, a running order and zero platform fees.</x-slot>
+    <x-slot name="title">Free Event Schedule for Watch Parties: Matches & Movies</x-slot>
+    <x-slot name="description">Free watch party scheduling for match days, awards nights and movie nights: table bookings, a cap per date, one join link for any stream, zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Watch Parties</x-slot>
 
     <x-slot name="headMeta">
@@ -1483,7 +1483,7 @@
             ],
             [
                 'q' => 'Can I schedule recurring watch parties?',
-                'a' => 'Yes, and it is one event rather than fifty. Pick the days of the week, add date exceptions for the weeks you are skipping, and end the series on a date or after a set number of screenings. Registration caps and ticket inventory are counted per occurrence. Two-way sync with Google Calendar, Outlook and CalDAV puts the next occurrence in your own calendar as a single entry; the subscribable iCal feed is the one that carries every date of the run.',
+                'a' => 'Yes, and it is one event rather than fifty. Pick the days of the week, add date exceptions for the weeks you are skipping, and end the series on a date or after a set number of screenings. Registration caps and ticket inventory are counted per occurrence. Two-way sync with Google Calendar, Outlook and CalDAV puts the series in your own calendar as a single entry on the date it starts; the subscribable iCal feed is the one that carries every date of the run, 90 days ahead.',
             ],
             [
                 'q' => 'Do my followers get emailed when I add a screening?',
@@ -1497,6 +1497,22 @@
                 'q' => 'Can people get a reminder without registering?',
                 'a' => 'Yes, once you switch on the free "Notify me" card. Somebody not ready to take a place can then press "Tell me if anything changes" on the event page and leave an email address, nothing else. They get a reminder shortly before the night, a notice if it is cancelled, and any change notice you choose to send, such as a new stream link, and every one of those emails unsubscribes in one click. Each Friday of a weekly series is its own list, it does not sign them up to your schedule, and it is free on every plan. Anyone who wants every date can subscribe to your schedule\'s live calendar feed instead, which updates itself and costs no email address.',
             ],
+            [
+                'q' => 'How do I host a sports watch party at a bar?',
+                'a' => 'Start with the rights: showing a live match to the public usually needs a commercial licence from the broadcaster, so check that first. Then work out the room: how many tables, how many standing, and how many places to keep for regulars who walk in. Publish the match as an event with a running order (doors, kick-off, half-time, full time, last orders), take bookings as free tickets or free registration with a limit, and put the house rules in the ticket notes. Share the link a week ahead; everyone booked gets a reminder with their QR code the day before by itself, and you scan them in at the door. All of that is free on Event Schedule; a price on a ticket needs Pro.',
+            ],
+            [
+                'q' => 'Do I need a licence to show a game or an awards show in my bar?',
+                'a' => 'Usually, yes. A home TV or streaming subscription is generally for private viewing, and broadcasters sell separate commercial licences for showing their coverage in a bar, a club or a public room, often priced by the size of the venue. Charging an entry fee can change what you need. Rules differ by country, competition and broadcaster, so ask the channel that carries the event, or your venue\'s licensing adviser, before you advertise. This is general guidance, not legal advice, and Event Schedule does not provide or check screening rights.',
+            ],
+            [
+                'q' => 'How do I take table reservations for a watch party?',
+                'a' => 'Make each table size a ticket type: "Table for 4" with a Quantity of 12 means twelve tables, and a "Standing" type covers everyone else. Leave the price at zero and it is free on every plan; set a limit of one per order, so one booking is one table. Each booking gets a confirmation with one QR code for the whole table, and the waitlist on a full night is Pro once you use tickets. Say in the ticket notes how long a table is held after kick-off. There is no deposit option, so a table you want paid for is a priced ticket on Pro.',
+            ],
+            [
+                'q' => 'How do I set up watch parties for a whole season of matches?',
+                'a' => 'If every match is at the same time on the same day, one recurring event with the weeks off excluded is enough. Most sports seasons are not like that, because broadcasters move kick-off times, so make each match its own event: set the first one up with its tables and running order, then use Clone Event for the rest. When a match moves, changing its date or time asks whether to notify the people already booked, which on eventschedule.com reaches them once the schedule has its own email settings. A fixture list published as a calendar link can be imported in one go, free, and kept up to date as a feed on Enterprise.',
+            ],
         ];
 
         $dotSections = [
@@ -1504,6 +1520,8 @@
             ['why', 'Not a link'],
             ['order', 'The running order'],
             ['house', 'The house count'],
+            ['gameday', 'Game day'],
+            ['season', 'The season'],
             ['link', 'The one socket'],
             ['reach', 'The call sheet'],
             ['tickets', 'When you charge'],
@@ -1851,13 +1869,231 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- Scene 5. The one socket: the booth, the beam, the lit page   -->
+        <!-- Scene 5. Game day: sports and award shows at a bar           -->
+        <!-- ============================================================ -->
+        @php
+            // A derby at a bar that holds 120. Tables are sold as tables, so a
+            // "Table for 4" ticket is one table and one QR code, and the people
+            // column is the arithmetic the bar does, not a field in the product.
+            $matchRoom = [
+                ['Table for 4', 12, 48],
+                ['Table for 6', 4, 24],
+                ['Standing', 32, 32],
+                ['Kept back for regulars who walk in', null, 16],
+            ];
+            $matchNight = [
+                ['6:45 PM', 'Doors, food orders in'],
+                ['7:30 PM', 'Pre-match on screen'],
+                ['8:00 PM', 'Kick-off'],
+                ['8:45 PM', 'Half-time'],
+                ['9:50 PM', 'Full time, about'],
+                ['10:30 PM', 'Last orders'],
+            ];
+        @endphp
+        <section id="gameday" class="wp-scene wp-alt">
+            <div class="wp-wrap">
+                {!! $wpSlate(5, 'Game day') !!}
+                <div class="wp-screen" data-reveal>
+                    {!! $wpBars(5) !!}
+                    <div class="wp-pic">
+                        <div class="wp-far" aria-hidden="true"><span>Kick-off 8:00 PM &middot; doors 6:45</span></div>
+                        <div class="wp-seats" aria-hidden="true"></div>
+                        <h2 class="wp-sub wp-sub-2">
+                            <span>The kick-off will not wait for you.</span> <span>Plan the room around it.</span>
+                        </h2>
+                    </div>
+                    <div class="wp-bar" aria-hidden="true"></div>
+                </div>
+
+                <div class="wp-body">
+                    <p class="wp-lede" data-reveal>
+                        A big match or an awards night at a bar is a watch party with a hard start, a full room and a kitchen to keep up. The schedule for it is less about the screen and more about who has a table, when the doors open, and what happens to the people who turn up without booking.
+                    </p>
+
+                    <div class="wp-duo" style="margin-top: 1.75rem;">
+                        <div class="wp-card wp-sheet" data-reveal>
+                            <p class="wp-kick">Saturday's derby, a room licensed for 120</p>
+                            <table class="wp-table">
+                                <caption class="sr-only">How a bar that holds 120 splits the room into table tickets, standing tickets and space kept for walk-ins</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Ticket type</th>
+                                        <th scope="col" class="wp-num">Qty</th>
+                                        <th scope="col" class="wp-num">People</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($matchRoom as [$mrName, $mrQty, $mrPeople])
+                                        <tr>
+                                            <th scope="row">{{ $mrName }}</th>
+                                            <td class="wp-num">{{ $mrQty ?? '-' }}</td>
+                                            <td class="wp-num">{{ $mrPeople }}</td>
+                                        </tr>
+                                    @endforeach
+                                    <tr>
+                                        <th scope="row">The room</th>
+                                        <td class="wp-num"></td>
+                                        <td class="wp-num wp-low">{{ collect($matchRoom)->sum(fn ($r) => $r[2]) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="wp-fine">
+                                Each table is one ticket type at no charge, so it costs nothing on any plan. Its Quantity is the number of tables, and + Add Limit set to 1 stops anyone taking three tables in one order. One QR code brings the whole table in. Put "Tables are held until kick-off" in the Ticket notes, which go into every confirmation and the reminder before the night.
+                            </p>
+                        </div>
+
+                        <div class="wp-card wp-sheet" data-reveal style="--reveal-delay: 0.1s;">
+                            <p class="wp-kick">The running order, on the event page</p>
+                            <table class="wp-table">
+                                <caption class="sr-only">The parts of a match night with their start times</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="wp-num" style="text-align: start; padding-inline-start: 0;">Time</th>
+                                        <th scope="col">Part</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($matchNight as [$mnTime, $mnPart])
+                                        <tr>
+                                            <td class="wp-num" style="text-align: start; padding-inline-start: 0;">{{ $mnTime }}</td>
+                                            <th scope="row">{{ $mnPart }}</th>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <p class="wp-fine">
+                                For an awards night the shape is a red carpet, the ceremony, and the biggest awards near the end, often well past the time printed in the listings. Say when doors open and when the kitchen closes, and people plan their evening around that rather than around the broadcast.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="wp-grid-3" data-reveal-group="90">
+                        <div class="wp-card" data-reveal>
+                            <div class="wp-card-head">
+                                <h3>Kick-off in your own time zone</h3>
+                                <span class="wp-tag">Free</span>
+                            </div>
+                            <p>A match played on another continent kicks off at an odd hour where you are. Enter the time your room starts watching, in your schedule's time zone, and the page shows exactly that. For an online watch-along with fans in several countries, the calendar invite in each confirmation email lands at the right hour in their own calendar.</p>
+                        </div>
+                        <div class="wp-card" data-reveal>
+                            <div class="wp-card-head">
+                                <h3>Free entry, counted</h3>
+                                <span class="wp-tag">Free</span>
+                            </div>
+                            <p>For a night with no tables, a free registration with a Registration Limit is enough: name, email, one place per address per date. Use free tickets instead when you want the door count recorded, because scanning a free registration confirms it and keeps no tally, while every ticket scan is recorded.</p>
+                        </div>
+                        <div class="wp-card wp-card-plain" data-reveal>
+                            <div class="wp-card-head">
+                                <h3>The rights are yours to sort</h3>
+                            </div>
+                            <p>Showing a live match or a ceremony to the public usually needs a commercial licence from the broadcaster or rights holder, and a home subscription rarely covers a bar. Charging entry can change what you need. The rules differ by country and competition, so ask your broadcaster before you advertise. Event Schedule takes the bookings; it does not license the picture.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Scene 6. The season: one event per match                     -->
+        <!-- ============================================================ -->
+        @php
+            $seasonReel = [
+                ['Sat 3:00 PM', 'Matchday 1', false],
+                ['Sat 3:00 PM', 'Matchday 2', false],
+                ['Sun 4:30 PM', 'Derby', true],
+                ['Mon 8:00 PM', 'Matchday 4', false],
+                ['Sat 12:30 PM', 'Matchday 5', false],
+            ];
+        @endphp
+        <section id="season" class="wp-scene">
+            <div class="wp-wrap">
+                {!! $wpSlate(6, 'The season') !!}
+                <div class="wp-screen" data-reveal>
+                    {!! $wpBars(6) !!}
+                    <div class="wp-pic wp-pic-order">
+                        <div class="wp-burn">
+                            <strong>Season watch</strong>
+                            <span>Five matchdays &middot; four kick-off times</span>
+                        </div>
+                        <div class="wp-reel-tilt">
+                            <ol class="wp-reel">
+                                <li class="wp-fr wp-fr-blank" aria-hidden="true"></li>
+                                @foreach ($seasonReel as [$srTime, $srName, $srMain])
+                                    <li class="wp-fr @if ($srMain) wp-fr-main @endif" style="--min: {{ $srMain ? 160 : 60 }};">
+                                        <span class="wp-fr-n">{{ $srName }}</span>
+                                        <span class="wp-fr-x"><span>{{ $srTime }}</span></span>
+                                    </li>
+                                @endforeach
+                                <li class="wp-fr wp-fr-blank" aria-hidden="true"></li>
+                            </ol>
+                        </div>
+                        <h2 class="wp-sub">
+                            Fixtures move. <span class="wp-nb">So each match is its own event.</span>
+                        </h2>
+                    </div>
+                    <div class="wp-bar" aria-hidden="true"></div>
+                </div>
+
+                <div class="wp-body">
+                    <p class="wp-lede" data-reveal>
+                        A film club's Friday is the same time every week. A football season is not: broadcasters move matches to Sunday or Monday weeks ahead, cup ties land midweek, and the time changes with them. That decides how you set the season up.
+                    </p>
+
+                    <div class="wp-duo" style="margin-top: 1.5rem;">
+                        <div data-reveal>
+                            <p class="wp-kick">One recurring event, when</p>
+                            <ul class="wp-ticks">
+                                <li><span>The slot really is fixed: a weekly race night, an awards season of Sunday ceremonies, a league that always plays on Thursday at eight.</span></li>
+                                <li><span>A week off is just a week off. Take it out with Exclude Dates and it disappears from the page.</span></li>
+                                <li><span>Every date keeps its own registration count, and the whole run is one thing to edit.</span></li>
+                            </ul>
+                        </div>
+                        <div data-reveal style="--reveal-delay: 0.1s;">
+                            <p class="wp-kick">One event per match, when</p>
+                            <ul class="wp-ticks">
+                                <li><span>Kick-off times change. A recurring event has one start time for every date, and a new time on it is not offered to anyone as a change.</span></li>
+                                <li><span>Moving a one-time event's date or time asks "Notify attendees of this change?" when you save, with room for a short note, so the people booked hear the match moved. On eventschedule.com that email reaches them once the schedule has its own email settings.</span></li>
+                                <li><span>Each match has its own title, its own page to share and its own tables. Set up the first, then Clone Event for the rest, free on every plan.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="wp-grid-3" data-reveal-group="90">
+                        <div class="wp-card" data-reveal>
+                            <div class="wp-card-head">
+                                <h3>Bring the fixture list in</h3>
+                                <span class="wp-tag">Free</span>
+                            </div>
+                            <p>If the league or your club publishes its fixtures as a calendar link, paste it into Import Events: a calendar is read directly, up to 100 events at a time, and you choose which ones to add. Whatever you add is published, so tidy titles before the season is shared.</p>
+                            <p class="wp-fine">To have that calendar read again every hour, with moved matches copied across, add it as a feed, which is Enterprise on eventschedule.com.</p>
+                        </div>
+                        <div class="wp-card" data-reveal>
+                            <div class="wp-card-head">
+                                <h3>Announce every match</h3>
+                                <span class="wp-tag">Free</span>
+                            </div>
+                            <p>Matches you add reach your confirmed subscribers by themselves, as one digest of up to 25 events, at most once every 72 hours. A quarter-final whose date is only fixed on Sunday night needs a faster word than that: send a newsletter to your followers, or to the people who came to the last round.</p>
+                        </div>
+                        <div class="wp-card" data-reveal>
+                            <div class="wp-card-head">
+                                <h3>Post the next few</h3>
+                                <span class="wp-tag">Free</span>
+                            </div>
+                            <p>The events graphic, in the schedule's Actions menu, draws your next matches as one image for a story or a post, built from the flyer on each event. Give every match a flyer, or it is left off the picture.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Scene 7. The one socket: the booth, the beam, the lit page   -->
         <!-- ============================================================ -->
         <section id="link" class="wp-scene wp-alt">
             <div class="wp-wrap">
-                {!! $wpSlate(5, 'The one socket') !!}
+                {!! $wpSlate(7, 'The one socket') !!}
                 <div class="wp-screen" data-reveal>
-                    {!! $wpBars(5) !!}
+                    {!! $wpBars(7) !!}
                     <div class="wp-pic wp-pic-link">
                         <div class="wp-beam" aria-hidden="true"></div>
                         <div class="wp-motes" aria-hidden="true">
@@ -1935,13 +2171,13 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- Scene 6. The call sheet: who came, and how you reach them    -->
+        <!-- Scene 8. The call sheet: who came, and how you reach them    -->
         <!-- ============================================================ -->
         <section id="reach" class="wp-scene">
             <div class="wp-wrap">
-                {!! $wpSlate(6, 'The call sheet') !!}
+                {!! $wpSlate(8, 'The call sheet') !!}
                 <div class="wp-screen" data-reveal>
-                    {!! $wpBars(6) !!}
+                    {!! $wpBars(8) !!}
                     <div class="wp-pic wp-pic-reach">
                         <div class="wp-roll" aria-hidden="true">
                             <div class="wp-roll-in">
@@ -2027,13 +2263,13 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- Scene 7. When you charge                                     -->
+        <!-- Scene 9. When you charge                                     -->
         <!-- ============================================================ -->
         <section id="tickets" class="wp-scene wp-alt">
             <div class="wp-wrap">
-                {!! $wpSlate(7, 'When you charge') !!}
+                {!! $wpSlate(9, 'When you charge') !!}
                 <div class="wp-screen" data-reveal>
-                    {!! $wpBars(7) !!}
+                    {!! $wpBars(9) !!}
                     <div class="wp-pic wp-pic-tix">
                         <div class="wp-stubs" aria-hidden="true">
                             <div class="wp-stub"><b>Admit one</b><i>Premiere night</i><em>No. 0241</em></div>
@@ -2114,13 +2350,13 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- Scene 8. Everything else                                     -->
+        <!-- Scene 10. Everything else                                     -->
         <!-- ============================================================ -->
         <section id="rest" class="wp-scene">
             <div class="wp-wrap">
-                {!! $wpSlate(8, 'Everything else') !!}
+                {!! $wpSlate(10, 'Everything else') !!}
                 <div class="wp-screen" data-reveal>
-                    {!! $wpBars(8) !!}
+                    {!! $wpBars(10) !!}
                     <div class="wp-pic">
                         <div class="wp-ballot" aria-hidden="true">
                             <p class="wp-ballot-q">What are we watching in December?</p>

@@ -1083,6 +1083,25 @@
         .hr-ltag-note { position: relative; z-index: 1; margin-top: 1.1rem; text-align: center; font-size: 0.92rem; color: #4d5f62; }
         .hr-ltag-return { position: relative; z-index: 1; margin-top: 0.9rem; text-align: center; font-family: var(--hr-display); font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; color: #4d5f62; }
 
+        /* ---------------------------------------------------------------
+           The desk's guides: the same programme sheet, used as a lookup
+           table. On a phone each row stacks and names its own parts,
+           because the column heads leave the layout there.
+           --------------------------------------------------------------- */
+        .hr-guide td { vertical-align: top; font-size: 0.95rem; line-height: 1.55; }
+        .hr-guide tbody th { vertical-align: top; font-size: 1.25rem; }
+        .hr-guide tbody th small { display: block; margin-top: 0.3rem; font-family: var(--hr-text); font-size: 0.8rem; line-height: 1.45; color: var(--hr-ink-3); }
+        .hr-guide .hr-time { font-size: 1.15rem; }
+        .hr-guide-k { display: none; }
+        .hr-sheet-gap { margin-top: clamp(2.5rem, 5vw, 3.75rem); }
+        .hr-sheet-head h3 { font-family: var(--hr-display); font-weight: 400; font-size: 1.5rem; line-height: 1.2; color: var(--hr-ink); }
+        @media (max-width: 759px) {
+            #hr .hr-guide tbody tr { grid-template-columns: minmax(0, 1fr); grid-template-areas: none; gap: 0.6rem; align-items: start; }
+            #hr .hr-guide tbody th,
+            #hr .hr-guide td { grid-area: auto; text-align: start; }
+            .hr-guide-k { display: block; margin-bottom: 0.15rem; font-family: var(--hr-display); font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--hr-bronze); }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .hr-lanterns { animation: none !important; }
             .hr-btn, .hr-btn svg, .hr-link, .hr-fob, .hr-fob-tag, .hr-knob, .hr-keyfob b, .hr-sticker, .hr-plate, .hr-dir-row, .hr-dir-row svg, .hr-table tbody tr, .hr-hang-list li { transition: none; }
@@ -1197,17 +1216,35 @@
             ],
             [
                 'q' => 'Can I keep the pool, the spa, the kids club and the conference programme apart?',
-                'a' => 'Yes, with sub-schedules, free on every plan. Each one has a name, a colour and its own link, so the spa can point a sign at its own strand of the same calendar. Being straight about what they are: they organise and colour-code, they are not rooms with their own capacity, and nothing is checking whether two activities overlap. A conference day can carry its own agenda inside the event as parts, and anything you are not ready to show stays a Draft, which is members-only until you publish it.',
+                'a' => 'Yes, with sub-schedules, free on every plan. Each one has a name, a colour and its own link, so the spa can point a sign at its own strand of the same calendar. Being straight about what they are: they organise and colour-code, they are not rooms with their own capacity, and nothing is checking whether two activities overlap. A conference day can carry its own agenda inside the event as parts, and anything you are not ready to show stays a Draft, which only your own team can see until you publish it.',
             ],
             [
                 'q' => 'Can more than one person keep the card up to date?',
                 'a' => 'The free plan is one team member, and multiple team members are an Enterprise feature capped at five. In between, calendar sync does a lot of the work: the schedule syncs two ways with Google, Outlook or CalDAV, so whoever runs the programme can work in the calendar they already have and the public page follows. Booking requests are free as well, so an act or a planner can ask about a date and it waits for you to accept it before it appears anywhere. On Enterprise, a viewer login is read-only and sees no sales, but can scan tickets at the door. And before whoever set the schedule up moves on, they can hand it to a colleague, on any plan.',
+            ],
+            [
+                'q' => 'What should a hotel guest activity calendar include?',
+                'a' => 'Every activity with its day, start time, place and how to join: just turn up, sign up because places are limited, or buy a ticket. A line on who it suits (ages, fitness, swimmers only) and what to bring. The rain plan for anything outdoors. The things that run every day, like the kids club and the pool, alongside the special nights worth booking ahead. And it should be readable wherever guests are: on their phone from a QR code in the room, on the hotel website and on a screen in the lobby. Run anything you want every guest to try at least twice a week, three or four days apart, or most short-stay guests will miss it.',
+            ],
+            [
+                'q' => 'How do we show the activity programme on in-room TVs or a lobby screen?',
+                'a' => 'If the screen or your TV system can show a web page, point it at your schedule\'s address with ?embed=true&layout=list on the end, adding &dark=true for a dark screen. That shows the coming activities as a list starting from today, with no header, footer or ads. The page is current each time it loads, so set the player to reload it every few minutes. There is no app to install on the screen, and the same address can carry &lang= for a second language channel.',
+            ],
+            [
+                'q' => 'Can guests book spa treatments with it?',
+                'a' => 'Yes, as appointment types: each treatment has a length and weekly hours, and guests pick a free slot on a public booking page. One type is free; Pro adds more types, buffers between bookings, approval before confirming and a price. Give the spa a schedule of its own, because events on a schedule block its appointment times, and a busy activity card would leave the spa with no slots. Without hosts a schedule is one diary, so a spa with several therapists treating at the same time needs Enterprise, where each type is booked with a named member of the team, up to five on eventschedule.com.',
+            ],
+            [
+                'q' => 'Can guests charge an activity or a dinner to their room?',
+                'a' => 'Not automatically: Event Schedule does not connect to hotel property management systems. The workable way is the Cash payment method with Payment Instructions such as "Charged to your room at check-out". The order is created unpaid, the desk posts it to the folio and presses Mark Paid on the Sales page, and the guest is then sent their confirmation with the QR code. Mark it paid before the event, because the door scanner only admits paid orders. Putting a price on a ticket, however it is paid, needs Pro.',
             ],
         ];
 
         $dotSections = [
             ['top', 'The card'],
             ['rack', 'The standing week'],
+            ['stay', 'The length of stay'],
+            ['screens', 'Screens and languages'],
             ['sleeve', 'The sleeve'],
             ['book', 'Keeping a place'],
             ['strands', 'The strands'],
@@ -1477,13 +1514,164 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 3. The sleeve (102): the QR, the link, the embed             -->
+        <!-- 2b. The length of stay (102): planning the programme         -->
+        <!-- ============================================================ -->
+        @php
+            // How many of the seven possible arrival days let a guest catch the
+            // activity at least once, for a guest on site 2, 3 or 5 days. Worked
+            // out by counting, not estimated: e.g. Monday and Thursday leave a
+            // three-day gap (Friday to Sunday), so 6 of 7 three-day stays catch it.
+            $stayCatch = [
+                ['Once a week', 'Saturday only', 2, 3, 5],
+                ['Twice a week', 'Monday and Thursday', 4, 6, 7],
+                ['Three times a week', 'Tuesday, Thursday and Saturday', 6, 7, 7],
+                ['Every day', 'the kids club, the morning swim', 7, 7, 7],
+            ];
+        @endphp
+        <section id="stay" class="hr-section hr-band">
+            <div class="hr-wrap">
+                <div class="hr-head">
+                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">102</b></span>
+                    <p class="hr-kicker" data-reveal>The length of stay</p>
+                    <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
+                        Plan the week for <span class="hr-mark">a three-day guest</span>.
+                    </h2>
+                    <p class="hr-lede" data-reveal style="--reveal-delay: 0.12s;">
+                        A guest activity calendar is read by people who are only there for part of it.
+                        The question for every activity is not "which day is it on?" but "how many of
+                        this week's guests will be here when it happens?" How often it runs answers that.
+                    </p>
+                </div>
+
+                <div class="hr-card hr-sheet" data-reveal="panel">
+                    <div class="hr-sheet-head" aria-hidden="true">
+                        <b>Who catches it</b>
+                        <span class="hr-kicker">Out of 7 arrival days</span>
+                    </div>
+
+                    <table class="hr-table hr-guide" role="table">
+                        <caption class="sr-only">For an activity that runs once, twice, three times a week or daily, how many of the seven possible arrival days let a guest staying 2, 3 or 5 days catch it at least once</caption>
+                        <thead role="rowgroup">
+                            <tr role="row">
+                                <th role="columnheader" scope="col">The activity runs</th>
+                                <th role="columnheader" scope="col">Guest on site 2 days</th>
+                                <th role="columnheader" scope="col">3 days</th>
+                                <th role="columnheader" scope="col">5 days</th>
+                            </tr>
+                        </thead>
+                        <tbody role="rowgroup">
+                            @foreach ($stayCatch as [$scHow, $scDays, $scTwo, $scThree, $scFive])
+                                <tr role="row">
+                                    <th role="rowheader" scope="row">{{ $scHow }}<small>{{ $scDays }}</small></th>
+                                    @foreach ([[2, $scTwo], [3, $scThree], [5, $scFive]] as [$scStay, $scCount])
+                                        <td role="cell">
+                                            <span class="hr-guide-k" aria-hidden="true">On site {{ $scStay }} days</span>
+                                            <span class="hr-time">{{ $scCount }} in 7</span>
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <p class="hr-fine hr-sheet-foot">
+                        Read it as: of the guests who arrive on each of the seven days and stay three days,
+                        how many are on site for the activity at least once. A once-a-week sunset sail is
+                        missed by more than half of your three-day guests, whatever day you choose for it.
+                        Twice a week, three or four days apart, reaches almost all of them. So the rule of
+                        thumb is to run anything you want every guest to try at least as often as your
+                        usual stay is short, and keep once-a-week slots for the special nights that are
+                        worth planning a stay around.
+                    </p>
+                </div>
+
+                <div class="hr-notes" data-reveal-group="100">
+                    @foreach ([
+                        ['Start on the day most guests arrive', 'Look at your arrivals. If most check in on a Friday, the welcome drink, the kids club taster and the first easy outdoor session belong on Friday evening and Saturday morning, not midweek when the people who would have come are packing.'],
+                        ['One headline per part of the day', 'Something active before breakfast, the pool and the children around midday, an outing that is back before dinner, music or a show after it. Two headline things at the same hour split the audience, and nothing on the calendar will warn you, so check each hour as you add to it.'],
+                        ['A wet-weather line for everything outdoors', 'Write it into the description before the season starts: "If it rains, yoga moves to the studio on level 2." On the morning itself, Pro adds an announcement bar across the top of the page that you can switch on for the day.'],
+                    ] as [$stTitle, $stDesc])
+                        <div class="hr-note" data-reveal>
+                            <div class="hr-note-head">
+                                <h3>{{ $stTitle }}</h3>
+                            </div>
+                            <p>{{ $stDesc }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 2c. Screens and languages (103)                              -->
+        <!-- ============================================================ -->
+        <section id="screens" class="hr-section">
+            <div class="hr-wrap">
+                <div class="hr-head">
+                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">103</b></span>
+                    <p class="hr-kicker" data-reveal>Screens and languages</p>
+                    <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
+                        The lobby screen, the room TV, <span class="hr-mark">and the guest from Lyon</span>.
+                    </h2>
+                    <p class="hr-lede" data-reveal style="--reveal-delay: 0.12s;">
+                        Guests read the programme in more places than a hotel website: on a screen by the
+                        lifts, on the TV in the room, in the email that arrives a week before they do, and
+                        often in a language other than the one you wrote it in. Each place wants a slightly
+                        different address.
+                    </p>
+                </div>
+
+                <div class="hr-card hr-sheet" data-reveal="panel">
+                    <div class="hr-sheet-head" aria-hidden="true">
+                        <b>Where it is read</b>
+                        <span class="hr-kicker">One schedule, several addresses</span>
+                    </div>
+
+                    <table class="hr-table hr-guide" role="table">
+                        <caption class="sr-only">Where guests read the activity calendar, which address to use in each place, and what to watch for</caption>
+                        <thead role="rowgroup">
+                            <tr role="row">
+                                <th role="columnheader" scope="col">Where</th>
+                                <th role="columnheader" scope="col">Use</th>
+                                <th role="columnheader" scope="col">Watch for</th>
+                            </tr>
+                        </thead>
+                        <tbody role="rowgroup">
+                            @foreach ([
+                                ['Lobby screen or a TV channel', 'Many signage players and hotel TV systems can show a web page', 'Your schedule\'s address with ?embed=true&layout=list on the end, and &dark=true for a dark screen. The list starts from today and carries no header, footer or ads.', 'The page is current each time it loads, so set the player to reload it every few minutes. Nothing on our side refreshes a screen that is left open.'],
+                                ['The "What\'s on" page of your website', 'Free on every plan', 'The Iframe Code from Actions, then Embed Schedule. A family page can show only the family strand by embedding that sub-schedule\'s own address.', 'The month grid needs a frame about 768 pixels wide; narrower, it becomes a day-by-day list. The Free plan adds a small "Powered by Event Schedule" line under the frame, which Pro removes.'],
+                                ['The pre-arrival email', 'From your booking system, not from us', 'The plain schedule link, or the strand that suits the booking: the family strand for a room with children, wellness for a spa break.', 'Send it far enough ahead for the bookable things. A guest who reads about the cellar dinner on the day it sells out reads it too late.'],
+                                ['A guest who reads French or German', 'Free on every plan', 'Under Details, Language and time, turn on Offer a second language to visitors and pick the language. Event names and descriptions are translated automatically, and the page gets a button to switch.', 'One second language per schedule, from the twelve supported. Allow up to an hour for translations to appear, and have a native speaker on the team read them before the season starts. For an embed, add &lang= with that language\'s code.'],
+                            ] as [$scWhere, $scWhereNote, $scUse, $scWatch])
+                                <tr role="row">
+                                    <th role="rowheader" scope="row">{{ $scWhere }}<small>{{ $scWhereNote }}</small></th>
+                                    <td role="cell"><span class="hr-guide-k" aria-hidden="true">Use</span>{{ $scUse }}</td>
+                                    <td role="cell"><span class="hr-guide-k" aria-hidden="true">Watch for</span>{{ $scWatch }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <p class="hr-fine hr-sheet-foot">
+                        Write the programme for translation and for a small screen at once: short names
+                        that say what the activity is ("Guided reef snorkel, ages 10 and up" rather than
+                        "Fins &amp; Friends"), the meeting point in the venue or the first line of the
+                        description, and the time only in the time field, where it is always shown in the
+                        property's own time zone. Every option is in the
+                        <x-link href="{{ marketing_url('/docs/sharing') }}#embed-parameters">embed guide</x-link>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3. The sleeve (104): the QR, the link, the embed             -->
         <!-- ============================================================ -->
         <section id="sleeve" class="hr-section hr-band">
             <div class="hr-wrap hr-split">
                 <div>
                     <div class="hr-head hr-head-start">
-                        <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">102</b></span>
+                        <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">104</b></span>
                         <p class="hr-kicker" data-reveal>The sleeve</p>
                         <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
                             Print the link. <span class="hr-mark">Never the week</span>.
@@ -1551,12 +1739,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. Keeping a place (103): sign-ups free, priced tickets Pro  -->
+        <!-- 4. Keeping a place (105): sign-ups free, priced tickets Pro  -->
         <!-- ============================================================ -->
         <section id="book" class="hr-section">
             <div class="hr-wrap">
                 <div class="hr-head">
-                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">103</b></span>
+                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">105</b></span>
                     <p class="hr-kicker" data-reveal>Keeping a place</p>
                     <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
                         Twelve mats means <span class="hr-mark">twelve names</span>.
@@ -1627,11 +1815,54 @@
                         </div>
                     @endforeach
                 </div>
+
+                <!-- Which mechanism for which thing a resort runs: a lookup, not a pitch. -->
+                <div class="hr-card hr-sheet hr-sheet-gap" data-reveal="panel">
+                    <div class="hr-sheet-head">
+                        <h3>The kids club, the dinner, the spa, the boat</h3>
+                        <span class="hr-kicker" aria-hidden="true">How to set each one up</span>
+                    </div>
+
+                    <table class="hr-table hr-guide" role="table">
+                        <caption class="sr-only">For each kind of resort activity, how to set it up, which plan it needs, and what to watch for</caption>
+                        <thead role="rowgroup">
+                            <tr role="row">
+                                <th role="columnheader" scope="col">What you run</th>
+                                <th role="columnheader" scope="col">Set it up as</th>
+                                <th role="columnheader" scope="col">Watch for</th>
+                            </tr>
+                        </thead>
+                        <tbody role="rowgroup">
+                            @foreach ([
+                                ['Kids club sessions', 'Free', 'Free tickets rather than a free registration: one ticket type per age band (4 to 7, 8 to 12), each with a Quantity per date worked out from how many children your staff can look after, and a question on the type for each child\'s name, age, allergies and the room number.', 'Ticket-type questions are asked once per order and are free, so a parent booking two children writes both into one answer. Scanning each ticket at drop-off records who is in; scanning a free registration would record nothing.'],
+                                ['A wine dinner or chef\'s table', 'Pro', 'A priced ticket with a Quantity equal to your covers, a question on the ticket type for dietary needs, and the wine pairing as an add-on with its own stock.', 'There is no link to your property system. To put it on the room bill, choose Cash as the payment method with Payment Instructions such as "Charged to your room", then press Mark Paid once it is on the folio: the scanner admits only paid orders.'],
+                                ['Spa treatments', 'Free for one type; Pro for more, buffers and a price', 'Appointment types on a separate schedule just for the spa, each with its length and weekly hours, and on Pro a buffer after each booking while the room is reset. A plan belongs to one schedule, so the spa schedule needs its own Pro to charge.', 'On one shared schedule every activity on the card would block the spa\'s slots, because events block appointment times. A schedule without hosts is one diary, so several therapists booked at once need Enterprise, where each type can have a host from the team.'],
+                                ['A boat trip or guided walk', 'Free at no charge; Pro with a price', 'An event (recurring if it leaves on set days) with a Quantity per departure equal to the seats on the boat or the most people the guide will take.', 'A full departure takes a waitlist: free on a free registration, Pro on tickets. Put the weather rule and the meeting point in the description so the desk is not asked them twenty times.'],
+                                ['A wedding party or a company retreat', 'Enterprise', 'Their programme as Unlisted events, left off the public card and opened with the link, behind a password if you set one.', 'A Draft is free but only your own team can see it, so it is for planning, not for sharing with the guests. Ask the planner which of their events your other guests may join.'],
+                            ] as [$guWhat, $guPlan, $guHow, $guWatch])
+                                <tr role="row">
+                                    <th role="rowheader" scope="row">{{ $guWhat }}<small>{{ $guPlan }}</small></th>
+                                    <td role="cell"><span class="hr-guide-k" aria-hidden="true">Set it up as</span>{{ $guHow }}</td>
+                                    <td role="cell"><span class="hr-guide-k" aria-hidden="true">Watch for</span>{{ $guWatch }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <p class="hr-fine hr-sheet-foot">
+                        Each setting named here is in the
+                        <x-link href="{{ marketing_url('/docs/tickets') }}#ticket-types">tickets guide</x-link>
+                        and the
+                        <x-link href="{{ marketing_url('/docs/appointments') }}#hosts">appointments guide</x-link>.
+                        Ticket reminders go out on their own: everyone holding a ticket or a registration gets
+                        one email before the day with their QR code, a day ahead unless you change it.
+                    </p>
+                </div>
             </div>
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. The strands (104): sub-schedules, and what they are not   -->
+        <!-- 5. The strands (106): sub-schedules, and what they are not   -->
         <!-- ============================================================ -->
         <section id="strands" class="hr-section hr-band">
             <div class="hr-wrap hr-split">
@@ -1662,7 +1893,7 @@
 
                 <div>
                     <div class="hr-head hr-head-start">
-                        <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">104</b></span>
+                        <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">106</b></span>
                         <p class="hr-kicker" data-reveal>The strands</p>
                         <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
                             The spa and the kids club, <span class="hr-mark">one card</span>.
@@ -1681,7 +1912,7 @@
                             nothing else: no capacity of its own, and nothing in it is hidden from
                             anybody. Nothing here checks whether two activities overlap either, so
                             the ballroom is still your call. Anything you are not ready to show yet
-                            stays a Draft, which stays members-only until you publish it.
+                            stays a Draft, which only your own team can see until you publish it.
                         </p>
                     </div>
 
@@ -1694,12 +1925,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Behind the desk (105): two doors, a hanger on each        -->
+        <!-- 6. Behind the desk (107): two doors, a hanger on each        -->
         <!-- ============================================================ -->
         <section id="desk" class="hr-section">
             <div class="hr-wrap">
                 <div class="hr-head">
-                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">105</b></span>
+                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">107</b></span>
                     <p class="hr-kicker" data-reveal>Behind the desk</p>
                     <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
                         What the desk keeps, <span class="hr-mark">and what the card says</span>.
@@ -1720,7 +1951,7 @@
                                 <div class="hr-hang-rule" aria-hidden="true"></div>
                                 <ul class="hr-hang-list">
                                     @foreach ([
-                                        ['A Draft nobody can see', 'Free', 'The New Year dinner exists, with its price and its date, and stays members-only until you publish it.', 'draft'],
+                                        ['A Draft only the team can see', 'Free', 'The New Year dinner exists, with its price and its date, and only your own team can see it until you publish it.', 'draft'],
                                         ['An enquiry waiting on you', 'Free', 'Booking requests arrive through the page and wait until you accept one, and the schedule can email you when a new one is sitting there. Nothing appears publicly first.', ''],
                                         ['Who is waiting for the dinner', 'Free', 'Publish the New Year dinner before tickets open, switch on the "Notify me" card, and guests can ask to be told when they do. How many asked shows on the event\'s Tickets panel, and nowhere public.', 'dinner'],
                                         ['A date taken out', 'Free', 'The exception for the Wednesday the pool is drained. It removes the date rather than annotating it.', 'date'],
@@ -1781,12 +2012,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 7. Who it is for (106): six luggage labels                   -->
+        <!-- 7. Who it is for (108): six luggage labels                   -->
         <!-- ============================================================ -->
         <section id="who" class="hr-section hr-band">
             <div class="hr-wrap">
                 <div class="hr-head">
-                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">106</b></span>
+                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">108</b></span>
                     <p class="hr-kicker" data-reveal>Who it is for</p>
                     <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
                         Any property with a <span class="hr-mark">week to publish</span>.
@@ -1847,12 +2078,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 8. How it works (107): three keys on the rack                -->
+        <!-- 8. How it works (109): three keys on the rack                -->
         <!-- ============================================================ -->
         <section id="how" class="hr-section">
             <div class="hr-wrap">
                 <div class="hr-head">
-                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">107</b></span>
+                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">109</b></span>
                     <p class="hr-kicker" data-reveal>How it works</p>
                     <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
                         An afternoon, <span class="hr-mark">then it runs</span>.
@@ -1954,12 +2185,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 11. FAQ (108): a letter, folded in three                     -->
+        <!-- 11. FAQ (110): a letter, folded in three                     -->
         <!-- ============================================================ -->
         <section id="faq" class="hr-section">
             <div class="hr-narrow">
                 <div class="hr-head">
-                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">108</b></span>
+                    <span class="hr-fob" data-reveal="swing" aria-hidden="true"><i class="hr-fob-ring"></i><b class="hr-fob-tag">110</b></span>
                     <p class="hr-kicker" data-reveal>Questions</p>
                     <h2 class="hr-h2" data-reveal style="--reveal-delay: 0.06s;">
                         Asked <span class="hr-mark">across the desk</span>.
