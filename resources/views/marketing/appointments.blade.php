@@ -253,6 +253,22 @@
                 'q' => 'Which plan includes appointment booking?',
                 'a' => 'Booking is on the free plan, with one appointment type: weekly hours, a public booking page, a private link for the guest and every confirmation and reminder email. Pro is what adds more types, lets you put a price on one, and unlocks the scheduling rules - per-date overrides, buffers, minimum notice and an approval step. Nothing you build is thrown away if a Pro plan lapses: every type is kept exactly as you left it, the rules you set stay set, the oldest free one keeps taking bookings, every booking already made is honoured, and every guest\'s private link still opens. Selfhosted deployments have no cap and no gate at all.',
             ],
+            [
+                'q' => 'How do I stop people booking at the last minute?',
+                'a' => 'Set a minimum notice on the type, in hours. With 12, a guest booking at 10:00 cannot take anything before 22:00; with 24, nothing before 10:00 tomorrow. The booking page states the rule before a guest picks, so nobody is refused after choosing. When you move a booking yourself, your own picker ignores the notice, so you can still fit someone in today. Minimum notice is one of the scheduling rules that come with Pro.',
+            ],
+            [
+                'q' => 'How do I block out holidays and days off?',
+                'a' => 'Add a date override to the type and leave it marked Unavailable, or set shorter hours for just that date. Overrides belong to one type, so for a week away add them to every active type. Overrides are part of Pro; on the Free plan, switch your type off while you are away and on again when you are back, and bookings already made keep their time. For a type with no host, a timed event on your schedule, or a timed entry synced from Google Calendar, Outlook or CalDAV, also takes its time off the page. An all-day entry with no start time does not block anything.',
+            ],
+            [
+                'q' => 'Can clients book a recurring weekly appointment?',
+                'a' => 'No. Each booking is one time. A regular client books the next session from your link, often straight after the last one, and moves it from their own private link when a week changes. If several people share a regular time, such as a weekly class, that is an event with tickets or free registration rather than an appointment, because each appointment time goes to one guest.',
+            ],
+            [
+                'q' => 'Does appointment booking work across time zones?',
+                'a' => 'Yes. You set your weekly hours in your schedule\'s timezone, and guests see every open time converted to their own, detected from their browser and changeable from a picker, with your timezone shown beside it. The confirmation and the calendar invite carry the same time, so the appointment lands correctly in their calendar. Set your schedule\'s timezone before you share the link, under Edit Schedule, Details, Language and time; until then times are worked out in the site\'s default timezone and the Appointments tab warns you.',
+            ],
         ];
 
         $dotSections = [
@@ -260,8 +276,11 @@
             ['spread', 'Two readings'],
             ['lines', 'The lines'],
             ['how-it-works', 'How it works'],
+            ['setups', 'Four setups'],
+            ['decide', 'Six decisions'],
             ['register', 'The register'],
             ['card', 'Their copy'],
+            ['no-shows', 'No-shows'],
             ['money', 'Charging'],
             ['know', 'Marginalia'],
             ['faq', 'Questions'],
@@ -1295,12 +1314,227 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. The register: the Bookings tab as a record                 -->
+    <!-- 5. Four setups, worked out                                   -->
+    <!-- ============================================================ -->
+    @php
+        // Each setting below is a real field of the type editor (docs/appointments): duration
+        // (5 minutes to 24 hours), Start times every (5, 10, 15, 20, 30 or 60), Buffer before /
+        // after, Minimum notice (hours), Booking window (days, up to 730), approval, location,
+        // price. Buffers, notice, window, overrides, approval, a price and a second type are Pro.
+        $setups = [
+            [
+                'name' => 'Consultations',
+                'who' => 'Coaches, consultants, designers, therapists',
+                'rows' => [
+                    ['Types', 'Intro call, free; Consultation, priced'],
+                    ['Duration', '20 min; 60 min'],
+                    ['Start times every', '30 min; 60 min'],
+                    ['Buffer after', 'None; 15 min for notes'],
+                    ['Minimum notice', '4 hours; 24 hours'],
+                    ['Where', 'Online, with your meeting link'],
+                ],
+                'why' => 'The short free call does the qualifying; the paid hour is the work. A 20 minute call offered every 30 minutes leaves ten minutes between calls without a buffer at all, because the interval only spaces starts.',
+                'plan' => 'Pro: a second type, a price, buffers and notice',
+            ],
+            [
+                'name' => 'Lessons',
+                'who' => 'Music, language, sport and tutoring',
+                'rows' => [
+                    ['Duration', '45 min'],
+                    ['Start times every', '60 min'],
+                    ['Weekly hours', 'Weekdays 15:00 to 19:00, Saturday 09:00 to 13:00'],
+                    ['Minimum notice', '12 hours'],
+                    ['Booking window', 'About 90 days, to the end of term'],
+                    ['Where', 'In person at your address (or online: one type per place)'],
+                ],
+                'why' => 'A 45 minute lesson on the hour gives a quarter hour to reset the room. Each booking is one lesson: a regular student books the next one from your link, and moves it with their own link when the week changes.',
+                'plan' => 'Free as your one free type; Pro for a price, notice and the window',
+            ],
+            [
+                'name' => 'Studio visits and viewings',
+                'who' => 'Photo studios, galleries, makers, showrooms',
+                'rows' => [
+                    ['Duration', '30 min'],
+                    ['Start times every', '30 min'],
+                    ['Buffer before', '15 min to set up'],
+                    ['Minimum notice', '24 hours'],
+                    ['Date overrides', 'Fair weeks and holidays closed'],
+                    ['Where', 'In person, with the address'],
+                ],
+                'why' => 'A buffer before keeps the time to set up free against everything on the schedule, a synced meeting or another type included. The address rides on the confirmation and in the calendar invite, so nobody asks where to come.',
+                'plan' => 'Pro: buffers, notice and overrides',
+            ],
+            [
+                'name' => 'Private hire',
+                'who' => 'Venues, rooms, rehearsal spaces',
+                'rows' => [
+                    ['Duration', '3 hours'],
+                    ['Start times every', '60 min'],
+                    ['Buffer after', '60 min to turn the room'],
+                    ['Minimum notice', '72 hours'],
+                    ['Booking window', '365 days'],
+                    ['Approval', 'On'],
+                ],
+                'why' => 'Approval lets you read who is asking before the room is theirs, and the slot is held while you decide. The venue\'s own events take their times off the page, so a hire cannot overlap a show.',
+                'plan' => 'Pro: approval, a price and the rules',
+            ],
+        ];
+
+        $launchChecks = [
+            ['Set the schedule\'s timezone', 'Hours are kept in it, and guests see times converted from it. Edit Schedule, Details, Language and time.'],
+            ['Make sure email goes out', 'On eventschedule.com, booking mail is sent through the schedule\'s own email settings. Until they are set, nobody gets a confirmation, a reminder or a booking notice.'],
+            ['Connect your calendar', 'Google, Outlook or CalDAV, so meetings you already have take their time off the page. An all-day entry with no start time blocks nothing; use a timed one.'],
+            ['Connect a way to be paid', 'A priced type stays off the page until the method it uses is connected. Invoice Ninja is the one method appointments do not offer.'],
+            ['Book yourself once', 'From a private window, on a phone: the page, the confirmation, the invite and the reminder, as a guest has them. Then cancel it from your own link.'],
+            ['Put the link where people ask', 'Your page is /book on your schedule, each type has its own address under it, and a Book a Time button appears on your public schedule.'],
+        ];
+    @endphp
+    <section id="setups" class="es-book-seam scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 max-w-3xl">
+                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">05</span> Four setups</p>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight md:text-[2.75rem]" data-reveal>
+                    Appointment booking, <span class="es-book-grad">set up for real work</span>
+                </h2>
+                <p class="es-book-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    A consultant, a teacher, a studio and a venue fill in the same form. What changes is the
+                    numbers. Here is each one worked out, with what it needs from your plan. Copy the closest
+                    and change what does not fit.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($setups as $setup)
+                    <div class="es-book-card es-book-hover flex h-full flex-col p-6" data-reveal>
+                        <p class="es-book-eyebrow mb-2">{{ $setup['who'] }}</p>
+                        <h3 class="es-book-ink mb-4 text-xl font-bold">{{ $setup['name'] }}</h3>
+                        <table class="es-book-table mb-4">
+                            <caption class="sr-only">Appointment type settings for {{ strtolower($setup['name']) }}</caption>
+                            <tbody>
+                                @foreach ($setup['rows'] as [$rowKey, $rowValue])
+                                    <tr>
+                                        <th scope="row" class="w-2/5">{{ $rowKey }}</th>
+                                        <td>{{ $rowValue }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <p class="es-book-muted text-sm">{{ $setup['why'] }}</p>
+                        <p class="es-book-accent mt-auto pt-4 text-xs font-bold uppercase tracking-widest">{{ $setup['plan'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-book-card mt-4 p-6 lg:p-8" data-reveal>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div>
+                        <p class="es-book-eyebrow mb-2">A team, each with their own diary</p>
+                        <h3 class="es-book-ink mb-2 text-lg font-bold">One type per person, with a host</h3>
+                        <p class="es-book-muted text-sm">
+                            On Enterprise, a type can be booked with one person on your team: the owner or an admin.
+                            Its weekly hours become that person's hours, their bookings on any schedule block it,
+                            and the days they mark away on the Availability tab close it. Guests see "with Sam" on the
+                            page, the emails and the invite, and never Sam's email address.
+                        </p>
+                    </div>
+                    <div>
+                        <p class="es-book-eyebrow mb-2">What a hosted type ignores</p>
+                        <h3 class="es-book-ink mb-2 text-lg font-bold">The schedule's events are not the host's time</h3>
+                        <p class="es-book-muted text-sm">
+                            A hosted type follows the host's own time, so the schedule's events and synced calendar entries
+                            do not block it; they still block the types with no host. Two people on one schedule can
+                            then be booked at the same moment, which is the point. With two or more hosts, the booking
+                            page groups the types under each name.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="es-book-ink mb-5 mt-14 text-2xl font-black tracking-tight" data-reveal>Before you share the link</h3>
+            <ol class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                @foreach ($launchChecks as $checkIndex => [$checkTitle, $checkBody])
+                    <li class="es-book-card es-book-hover flex h-full gap-4 p-6" data-reveal>
+                        <span class="es-book-no shrink-0" aria-hidden="true">{{ sprintf('%02d', $checkIndex + 1) }}</span>
+                        <div>
+                            <h4 class="es-book-ink mb-1 text-base font-bold">{{ $checkTitle }}</h4>
+                            <p class="es-book-muted text-sm">{{ $checkBody }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Six decisions                                             -->
+    <!-- ============================================================ -->
+    @php
+        $decisions = [
+            [
+                'Instant or approval?',
+                'Instant when anyone who finds the page is welcome and the time is the only question: intro calls, lessons, viewings. Approval when you would say no to some people, or need to read the request first: private hire, a first session, anything priced by the job. A request holds its slot while you decide, gets no reminder until you accept, and cannot be approved once its time has passed, so answer them daily.',
+                'Approval is Pro',
+            ],
+            [
+                'Free, or paid when they book?',
+                'Free when the booking is how you win the work. Paid when a no-show costs you a slot somebody else wanted. Online payment holds the slot while they pay, an hour for Stripe, PayPal and Razorpay and a day for Payfast or a payment link; cash confirms at once with the balance due when you meet. The price is the whole price: there is no deposit.',
+                'A price is Pro',
+            ],
+            [
+                'Buffer, or a longer interval?',
+                'If the gap you need is the same every time, set Start times every to the duration plus the gap: a 45 minute lesson every hour. Use a buffer when the gap has to hold against everything else on the schedule as well, an event, a synced meeting or another type, because buffers block neighbouring slots on every type and the interval only spaces this type\'s own starts.',
+                'Interval free, buffers Pro',
+            ],
+            [
+                'How much notice?',
+                'As much as you need to be ready, and no more. Nothing to prepare: leave it at zero. You check bookings each morning: overnight is enough. You prepare, travel or set up a room: a day or more. The booking page states the rule up front, so nobody picks a time and is then refused. Your own moves ignore it, so you can still fit someone in today.',
+                'Minimum notice is Pro',
+            ],
+            [
+                'How far ahead?',
+                'The default booking window is 60 days. Shorter when your hours change often, such as term-time teaching. Longer for hire and anything people plan months out, up to 730 days. Every day inside the window is a day you have promised to keep those hours.',
+                'Changing the window is Pro',
+            ],
+            [
+                'Days off: override, or switch off?',
+                'A date override replaces one day\'s hours, or closes it: holidays, a short Friday, a late evening. Overrides belong to one type, so a week away means an override on every active type. On Free, switch the type off while you are away instead; bookings already made keep their time. An all-day calendar entry with no start time closes nothing.',
+                'Overrides are Pro',
+            ],
+        ];
+    @endphp
+    <section id="decide" class="es-book-seam scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 max-w-3xl">
+                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">06</span> Six decisions</p>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight md:text-[2.75rem]" data-reveal>
+                    The settings that <span class="es-book-grad">shape your week</span>
+                </h2>
+                <p class="es-book-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    Most booking pages fail in one of two ways: so loose that the day fills with back-to-back
+                    calls nobody prepared for, or so tight that nobody can find a time. Six choices decide which.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                @foreach ($decisions as $decisionIndex => [$decisionTitle, $decisionBody, $decisionPlan])
+                    <div class="es-book-card es-book-hover flex h-full flex-col p-6" data-reveal>
+                        <p class="es-book-no mb-4">{{ sprintf('%02d', $decisionIndex + 1) }}</p>
+                        <h3 class="es-book-ink mb-2 text-lg font-bold">{{ $decisionTitle }}</h3>
+                        <p class="es-book-muted text-sm">{{ $decisionBody }}</p>
+                        <p class="es-book-accent mt-auto pt-4 text-xs font-bold uppercase tracking-widest">{{ $decisionPlan }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. The register: the Bookings tab as a record                -->
     <!-- ============================================================ -->
     <section id="register" class="es-book-seam scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 max-w-3xl">
-                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">05</span> The register</p>
+                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">07</span> The register</p>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight md:text-[2.75rem]" data-reveal>
                     Every line, <span class="es-book-grad">and what it is doing</span>
                 </h2>
@@ -1382,12 +1616,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Their copy: the appointment card                           -->
+    <!-- 8. Their copy: the appointment card                          -->
     <!-- ============================================================ -->
     <section id="card" class="es-book-seam scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 max-w-3xl">
-                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">06</span> Their copy</p>
+                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">08</span> Their copy</p>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight md:text-[2.75rem]" data-reveal>
                     The guest walks off <span class="es-book-grad">with the card</span>
                 </h2>
@@ -1487,12 +1721,73 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Charging for the line                                      -->
+    <!-- 9. No-shows and late cancellations                           -->
+    <!-- ============================================================ -->
+    @php
+        $noShowLevers = [
+            ['Their own calendar', 'The confirmation carries an invite, so one tap puts the time in the calendar they already look at, with the address, link or number on it.', 'Every plan'],
+            ['A reminder the day before', 'About 24 hours out, confirmed bookings get a reminder with the invite attached again. Requests and unpaid online bookings do not, so answer requests promptly.', 'Every plan'],
+            ['Moving beats vanishing', 'The private link lets a guest move to another time right up until it starts, and you are emailed when they do, with a note when it is less than a day before the old time.', 'Every plan'],
+            ['A number to call', 'Switch on Ask for a phone number, or Require it, on the Booking form card, and a guest who is ten minutes late is a call away.', 'Every plan'],
+            ['Notice you can prepare in', 'Minimum notice stops the booking made at 08:55 for 09:00 that nobody could prepare for, and the page tells guests the rule before they pick.', 'Pro'],
+            ['Something at stake', 'A price, paid online when they book or in cash when you meet. Online payment confirms the booking once it clears.', 'Pro'],
+        ];
+    @endphp
+    <section id="no-shows" class="es-book-seam scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 max-w-3xl">
+                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">09</span> Empty chairs</p>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight md:text-[2.75rem]" data-reveal>
+                    Fewer no-shows, <span class="es-book-grad">fewer surprises</span>
+                </h2>
+                <p class="es-book-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    A missed appointment is an hour you kept free for nobody. Many no-shows are people who
+                    forgot, or did not want to write and cancel, so the fixes are reminding them and making a
+                    change easier than silence.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                @foreach ($noShowLevers as [$leverTitle, $leverBody, $leverPlan])
+                    <div class="es-book-card es-book-hover flex h-full flex-col p-6" data-reveal>
+                        <h3 class="es-book-ink mb-2 text-base font-bold">{{ $leverTitle }}</h3>
+                        <p class="es-book-muted text-sm">{{ $leverBody }}</p>
+                        <p class="es-book-accent mt-auto pt-4 text-xs font-bold uppercase tracking-widest">{{ $leverPlan }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-book-card mt-4 p-6 lg:p-8" data-reveal>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div>
+                        <h3 class="es-book-ink mb-2 text-base font-bold">Write the cancellation policy where they book</h3>
+                        <p class="es-book-muted text-sm">
+                            Put it in the type's Description, which sits under its name on the booking page: how late
+                            a booking can be moved or cancelled, and what happens to the money. Short and specific
+                            beats a page of terms: "Move or cancel up to 24 hours before for a full refund."
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="es-book-ink mb-2 text-base font-bold">You apply it, the system does not</h3>
+                        <p class="es-book-muted text-sm">
+                            A guest can cancel from their link while the appointment is still ahead, and no money moves
+                            when they do. Whether to refund is your call: the email telling you about the cancellation
+                            carries the amount and the payment reference, so you can return it with your provider, or
+                            keep it if your policy says so.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 10. Charging for the line                                    -->
     <!-- ============================================================ -->
     <section id="money" class="es-book-seam scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 max-w-3xl">
-                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">07</span> Charging</p>
+                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">10</span> Charging</p>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight md:text-[2.75rem]" data-reveal>
                     A line can have <span class="es-book-grad">a price on it</span>
                 </h2>
@@ -1539,12 +1834,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Good to know                                               -->
+    <!-- 11. Good to know                                             -->
     <!-- ============================================================ -->
     <section id="know" class="es-book-seam scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 max-w-3xl">
-                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">08</span> Marginalia</p>
+                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">11</span> Marginalia</p>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight md:text-[2.75rem]" data-reveal>
                     Notes in <span class="es-book-grad">the margin</span>
                 </h2>
@@ -1582,7 +1877,7 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 9. Related features                                           -->
+    <!-- 12. Related features                                         -->
     <!-- ============================================================ -->
     <section class="es-book-seam py-16">
         <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
@@ -1628,12 +1923,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. FAQ                                                       -->
+    <!-- 13. FAQ                                                      -->
     <!-- ============================================================ -->
     <section id="faq" class="es-book-seam scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12">
-                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">09</span> Questions</p>
+                <p class="es-book-tab mb-5" data-reveal><span class="es-book-tab-no">12</span> Questions</p>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight md:text-[2.75rem]" data-reveal>
                     Frequently asked <span class="es-book-grad">questions</span>
                 </h2>
@@ -1656,7 +1951,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 11. Finale: close the book                                    -->
+    <!-- 14. Finale: close the book                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
@@ -1664,7 +1959,7 @@
                 <div class="es-book-close-spine" aria-hidden="true"></div>
                 <div class="es-book-close-fore" aria-hidden="true"></div>
                 <div class="relative z-10">
-                    <p class="es-book-tab-dark mb-6"><span class="es-book-tab-no">10</span> Free to start</p>
+                    <p class="es-book-tab-dark mb-6"><span class="es-book-tab-no">13</span> Free to start</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
                         Open the book, <span class="es-book-grad">write in the hours</span>.
                     </h2>

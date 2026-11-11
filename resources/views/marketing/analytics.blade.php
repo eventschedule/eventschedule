@@ -1,5 +1,5 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Privacy-First Event Analytics, Built In | Event Schedule</x-slot>
+    <x-slot name="title">Event Analytics: What to Track and How to Read It, Free</x-slot>
     {{-- "No visitor log" holds where a schedule's owner sees only daily counts. Where owners
          also have Realtime (RealtimeTracker::ownerViewEnabled(), the predicate the FAQ below
          asks), they watch a list of visitors for half an hour, without names: the claim that is
@@ -9,7 +9,7 @@
             ? ['No third-party analytics, and visitors are never named.', 'No third-party analytics service, and visitors are never named.']
             : ['No third-party analytics and no visitor log.', 'No third-party analytics service and no visitor log.'];
     @endphp
-    <x-slot name="description">Free built-in event analytics: views, devices, traffic sources, UTM tags, countries and clicks on every link. {{ $analyticsPromise[0] }}</x-slot>
+    <x-slot name="description">Free built-in event analytics: views, sources, UTM tags, conversion and no-shows, and how to read them. {{ $analyticsPromise[0] }}</x-slot>
     <x-slot name="breadcrumbTitle">Analytics</x-slot>
 
     <x-slot name="structuredData">
@@ -541,6 +541,22 @@
                 'q' => 'Can I look at one schedule, or one event, on its own?',
                 'a' => 'Yes. Pick a schedule to see just its numbers, or leave it on all of them for a combined view with a per-schedule split. With a schedule selected you can narrow further to a single event and read that event\'s views on their own. Talent and venue schedules also get appearance views: the traffic your events pulled while listed on somebody else\'s schedule.',
             ],
+            [
+                'q' => 'Which event metrics should I track?',
+                'a' => 'Five, in the order a guest moves. Page views on the event itself (is anyone looking), sources (where they came from), conversion rate (completed sales divided by event page views), sales by purchase date (when they buy, against the last event at the same distance from its date), and attendance with no-shows (did they come). Read them in that order: low views is a reach problem, plenty of views with few sales is a page or price problem, and a high no-show rate on one ticket type is a problem with that type. The first two are on the Web Analytics tab, conversion and sales on Revenue, attendance on Check-Ins.',
+            ],
+            [
+                'q' => 'What is a good conversion rate for an event page?',
+                'a' => 'There is no figure that holds for every event, because the rate depends on the price, the audience and how the visitors arrived: a link sent to people who already asked for it converts far better than a post seen by strangers. The useful comparison is your own events against each other. Note what counts here: one checkout is one sale however many tickets it holds, and a free registration is a sale too, so a free event converts higher than a paid one without the page being any better. If an event has plenty of views and few sales, look at the page on a phone, the price and the date before spending more on reach.',
+            ],
+            [
+                'q' => 'How do I track which promotion sold the tickets?',
+                'a' => 'Tag every link you post with utm_source, utm_medium and utm_campaign, and the Campaigns list on Web Analytics shows the views each brought, on every plan. To count tickets and revenue per link, use promoter links, part of Pro: each has its own ?via= code, and the Promoters tab shows the visits, tickets, revenue net of refunds and any commission it earned. A sale goes to the last promoter link the buyer followed. A link can stand for a channel rather than a person, such as one printed on every poster. Newsletters and boosts sent from Event Schedule are tagged for you and get their own funnel on the Revenue tab, from emails sent or ads shown through to sales.',
+            ],
+            [
+                'q' => 'How do I measure no-shows at an event?',
+                'a' => 'Scan tickets at the door; scanning is free on every plan and works on any phone with a camera. The Check-Ins tab then shows the attendance rate and the no-shows, meaning tickets for shows that have begun that were never scanned, with attendance split by ticket type and the hour people arrived. Two things to know when reading it. An event where nobody scanned reads as all no-shows, not as missing data. And a Free registration event has no ticket to record a scan against, so it does not appear there: count those rooms by hand.',
+            ],
         ];
 
         $dotSections = [
@@ -550,6 +566,9 @@
             ['record', 'One row'],
             ['sources', 'Where they came in'],
             ['money', 'Money and doors'],
+            ['metrics', 'What to track'],
+            ['tagging', 'Tag your links'],
+            ['when', 'When to look'],
             ['rest', 'Everything else'],
             ['faq', 'Questions'],
             ['claim', 'Switch it on'],
@@ -1035,12 +1054,285 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Everything else: bento                                    -->
+    <!-- 7. Which event metrics matter, and how to read them          -->
+    <!-- ============================================================ -->
+    @php
+        // A field guide, in the order a guest moves. Where each reading lives is the guide's own
+        // names (docs/analytics: #web-analytics, #revenue-stats, #checkins-stats).
+        $metricGuide = [
+            [
+                '01', 'Views', 'Is anyone looking?', 'Web Analytics: Page views, Top events',
+                'Read the event\'s own views, not the schedule\'s total: pick the schedule, then the event. Switch the chart to Weekly when the range is long, so one quiet Tuesday does not read as a trend, and read the change figure, which sets the range against an equal window before it.',
+                'Low views is a reach problem, not a page problem. Post earlier and in more places, and look at Sources before you do, to put the effort where it already works.',
+            ],
+            [
+                '02', 'Sources', 'Where did they come from?', 'Web Analytics: Sources (Channels, Sites, Campaigns)',
+                'A QR code scanned off a poster and a link tapped in most chat apps arrive with no referring site, so they land in Direct. A large Direct share usually means links shared where no referring site travels with them, not people typing your address.',
+                'Tag every link you post (next section): those visits still count as Direct in Channels, but Campaigns names the posters, chats and partners behind them.',
+            ],
+            [
+                '03', 'Conversion', 'Did looking turn into buying?', 'Revenue: Conversion Rate',
+                'Completed sales divided by event page views in the same range. One checkout is one sale however many tickets it holds, and a free registration is a sale too, so a free event converts higher than a paid one without being better at anything.',
+                'Plenty of views and few sales points at the page, the price, the date or the checkout. If phones lead your Devices bar, open the event on a phone and read it top to bottom as a stranger would, before changing anything else.',
+            ],
+            [
+                '04', 'Sales pace', 'When do they buy?', 'Revenue: the chart, by purchase date',
+                'Each bar is the money that came in that day, week or month, with a grey line for the window before and your one-off events\' flyers under their dates. Sales often arrive in steps after each announcement rather than as a smooth slope.',
+                'Compare this event with the last one at the same distance from its date. A line that goes flat between posts needs more announcements, not one bigger one.',
+            ],
+            [
+                '05', 'Attendance', 'Did they come?', 'Check-Ins: Attendance Rate, No-Shows, Arrival Times',
+                'Attended means a ticket scanned at the door, so a night nobody scanned reads as every ticket a no-show, not as missing data. A ticket for a show that has not begun is counted as sold and never as a no-show. Free registrations have no ticket to record a scan against, so count those rooms by hand.',
+                'Read no-shows by ticket type: when one type misses far more than the rest, that is the type to cap, price or remind. Arrival Times tells you which hour the door needs its people.',
+            ],
+        ];
+    @endphp
+    <section id="metrics" class="es-dash-hair scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-dash-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-dash-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Which event metrics matter</p>
+                <h2 class="es-balance es-dash-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Five readings decide <span class="es-dash-accent">the next event.</span>
+                </h2>
+                <p class="es-dash-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Event analytics answers five questions, in the order a guest moves: did they see it, where from, did they buy, when, and did they come. Read them in that order. A problem early in the line shows up as a bad number at every step after it, so fixing the last number first is the commonest way to waste a month.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($metricGuide as [$mNo, $mName, $mQuestion, $mWhere, $mRead, $mAct])
+                    <div class="es-dash-card flex h-full flex-col p-6" data-reveal="panel">
+                        <div class="mb-3 flex items-center gap-2">
+                            <span class="es-dash-accent es-dash-num text-xs font-bold">{{ $mNo }}</span>
+                            <p class="es-dash-tag">{{ $mName }}</p>
+                        </div>
+                        <h3 class="es-dash-ink mb-1 text-lg font-bold">{{ $mQuestion }}</h3>
+                        <p class="es-dash-muted es-dash-num mb-4 text-xs">{{ $mWhere }}</p>
+                        <p class="es-dash-muted text-sm leading-relaxed">{{ $mRead }}</p>
+                        <p class="es-dash-ink es-dash-hair mt-auto border-t pt-4 text-sm leading-relaxed"><span class="font-bold">When it is low.</span> {{ $mAct }}</p>
+                    </div>
+                @endforeach
+
+                <!-- The sixth cell: the arithmetic, read across two events. -->
+                <div class="es-dash-well relative flex h-full flex-col overflow-hidden p-6" data-reveal="panel">
+                    <p class="es-dash-dim mb-4 es-dash-label">Two events, read together</p>
+                    @foreach ([['Friday show', 1800, 27], ['Sunday matinee', 600, 24]] as [$wName, $wViews, $wSales])
+                        <div class="es-dash-hair mb-4 border-b pb-4">
+                            <p class="es-dash-fink text-sm font-bold">{{ $wName }}</p>
+                            <div class="mt-2 flex items-end justify-between gap-3">
+                                <span class="es-dash-fmuted es-dash-num text-xs">{{ number_format($wSales) }} sales &divide; {{ number_format($wViews) }} views</span>
+                                <span class="es-dash-readout text-2xl">{{ number_format($wSales / $wViews * 100, 1) }}%</span>
+                            </div>
+                        </div>
+                    @endforeach
+                    <p class="es-dash-fmuted text-sm leading-relaxed">
+                        Friday has the attention and loses it on the page: fix the page or the price before you buy it more reach. Sunday's page works and too few people see it: its next hour of promotion goes on being seen.
+                    </p>
+                    <p class="es-dash-dim mt-auto pt-4 es-dash-fine">
+                        Sample numbers. There is no rate that counts as good for every event; your own events, side by side, are the benchmark.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. Tag your links: UTM tags and promoter links               -->
+    <!-- ============================================================ -->
+    @php
+        // A naming plan for utm_source / utm_medium. PageView::recordView() stores each value as
+        // sent (trimmed), and the Campaigns list shows the top ten of each parameter on its own.
+        $utmPlan = [
+            ['Posters around town, as a QR code', 'poster', 'qr'],
+            ['Instagram bio', 'instagram', 'bio'],
+            ['Instagram story', 'instagram', 'story'],
+            ['A partner\'s mailing list', 'partner-name', 'email'],
+            ['A WhatsApp community chat', 'whatsapp', 'chat'],
+            ['Flyers handed out at another show', 'flyer', 'qr'],
+        ];
+        $utmRules = [
+            ['Lowercase, one spelling', 'ig, insta and instagram are three rows in Campaigns that should be one. Write the plan down once and copy from it.'],
+            ['Place in source, event in campaign', 'Campaigns lists the top ten values of source, medium and campaign one parameter at a time. Keep where in source and which event in campaign, and both lists stay readable.'],
+            ['Only tag links that point in', 'Visits from your own pages already read as Direct. A tag on a link between your own pages files your own visitors under that tag in Campaigns, and makes a channel look busier than it is.'],
+            ['Two values are taken', 'utm_source=newsletter is counted with your own newsletters, in the Newsletter channel, so give an outside mailing list a source of its own. utm_source=boost belongs to the ads Boost runs, which tag their own links. A link carrying promo=CODE is counted under Promo.'],
+            ['Make the QR code from the tagged link', 'A QR code made from the bare address is a Direct visit with no tag to name it in Campaigns. Use any QR generator on the full tagged link, and test it with your own phone before you print a hundred.'],
+        ];
+    @endphp
+    <section id="tagging" class="es-dash-hair scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-dash-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-dash-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Tag your links</p>
+                <h2 class="es-balance es-dash-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Tell the poster <span class="es-dash-accent">from the post.</span>
+                </h2>
+                <p class="es-dash-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Analytics can only name a channel the link tells it about. Two habits fix that: UTM tags on every link you post, which name each channel under Campaigns on every plan, and, on Pro, a promoter link for anything you need to count in tickets and money.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-5" data-reveal-group="100">
+                <div class="es-dash-card flex flex-col p-6 sm:p-7 lg:col-span-3" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-dash-ink text-xl font-bold">Build a tagged link in four parts</h3>
+                        <span class="es-dash-plan">Free</span>
+                    </div>
+                    <p class="es-dash-muted text-sm leading-relaxed">
+                        Copy the event's address from its page, add a question mark, then three tags joined by &amp;: utm_source for where it is posted, utm_medium for the kind of placement, utm_campaign for the event or the push. If the address already has a question mark in it, start with &amp; instead.
+                    </p>
+                    <div class="es-dash-well mt-5 p-4">
+                        <p class="es-dash-dim mb-2 es-dash-label">One link, ready for a poster</p>
+                        <p dir="ltr" class="es-dash-num break-all text-sm"><span class="es-dash-fmuted">yourname.eventschedule.com/summer-concert</span><span class="es-dash-lit">?utm_source=poster&amp;utm_medium=qr&amp;utm_campaign=summer-concert</span></p>
+                    </div>
+
+                    <div class="mt-6 overflow-x-auto">
+                        <table class="es-dash-table text-left">
+                            <caption class="es-dash-muted mb-4 text-start text-xs">A naming plan for one event. Swap in your own places; keep the spelling the same every time.</caption>
+                            <thead>
+                                <tr class="es-dash-tag">
+                                    <th scope="col" class="pb-3 pe-4 font-bold">Where the link goes</th>
+                                    <th scope="col" class="pb-3 pe-4 font-bold">utm_source</th>
+                                    <th scope="col" class="pb-3 font-bold">utm_medium</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($utmPlan as [$uWhere, $uSource, $uMedium])
+                                    <tr class="es-dash-hair border-t">
+                                        <th scope="row" class="es-dash-ink py-3 pe-4 text-sm font-semibold">{{ $uWhere }}</th>
+                                        <td class="es-dash-accent es-dash-num py-3 pe-4 text-sm">{{ $uSource }}</td>
+                                        <td class="es-dash-accent es-dash-num py-3 text-sm">{{ $uMedium }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="es-dash-muted es-dash-hair mt-auto border-t pt-5 text-sm leading-relaxed">
+                        A week later, Web Analytics answers in Sources, under Campaigns, and the views chart shows when each one landed. What a tag counts is views. For tickets, read on.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-6 lg:col-span-2">
+                    <div class="es-dash-card flex flex-1 flex-col p-6 sm:p-7" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-dash-ink text-xl font-bold">Promoter links count tickets</h3>
+                            <span class="es-dash-plan">Pro</span>
+                        </div>
+                        <p class="es-dash-muted text-sm leading-relaxed">
+                            The Promoters tab gives each person who sells for you a link of their own, ending in ?via= and a code. Each row shows the visits it brought, the tickets bought, the revenue with refunds taken off, and the commission earned at the percentage you set; paying it is up to you. A sale is credited to the last promoter link the buyer followed, for that visit, and for 30 days when they allowed marketing cookies.
+                        </p>
+                        <p class="es-dash-muted mt-3 text-sm leading-relaxed">
+                            A link does not have to be a person. Name one Poster QR and it counts the tickets the posters sold. Only the schedule's own events are credited, not ones it only lists.
+                        </p>
+                        <p class="es-dash-muted es-dash-hair mt-auto border-t pt-4 text-sm leading-relaxed">
+                            <x-link href="{{ route('marketing.docs.managing_schedules') }}#promoters" class="text-green-700 dark:text-green-300">Promoter links in the guide</x-link>
+                        </p>
+                    </div>
+                    <div class="es-dash-card flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-dash-ink mb-2 text-lg font-bold">Which one, when</h3>
+                        <ul class="es-dash-muted space-y-2 text-sm leading-relaxed">
+                            <li class="flex gap-2"><span class="es-dash-accent flex-none">/</span><span>Comparing where interest comes from: a UTM tag.</span></li>
+                            <li class="flex gap-2"><span class="es-dash-accent flex-none">/</span><span>Paying someone a commission on sales, or counting a channel in sales: a promoter link.</span></li>
+                            <li class="flex gap-2"><span class="es-dash-accent flex-none">/</span><span>A newsletter or a boost from Event Schedule: neither, they are tagged for you and get a funnel of their own on the Revenue tab.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                @foreach ($utmRules as $ruleIndex => [$ruleTitle, $ruleBody])
+                    <div class="es-dash-card flex gap-4 p-6 @if ($ruleIndex === 4) md:col-span-2 lg:col-span-1 @endif" data-reveal="panel">
+                        <span class="es-dash-accent es-dash-num shrink-0 text-lg font-black" aria-hidden="true">{{ str_pad($ruleIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="es-dash-ink text-base font-bold">{{ $ruleTitle }}</h3>
+                            <p class="es-dash-muted mt-1.5 text-sm leading-relaxed">{{ $ruleBody }}</p>
+                        </div>
+                    </div>
+                @endforeach
+                <div class="es-dash-well flex flex-col justify-center p-6 md:col-span-2 lg:col-span-1" data-reveal="panel">
+                    <p class="es-dash-dim mb-2 es-dash-label">The test</p>
+                    <p class="es-dash-fink text-sm leading-relaxed">Open the tagged link in a private window, signed out, then reload Web Analytics and look under Campaigns. A visit is counted at once. If yours is not there, nobody else's will be.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 9. When to look at what (fixed-dark band)                    -->
+    <!-- ============================================================ -->
+    @php
+        // The Realtime sentences follow the predicate behind an owner's own Realtime tab, as the
+        // FAQ answers above do (RealtimeTracker::ownerViewEnabled()).
+        $ownerLive = \App\Utils\RealtimeTracker::ownerViewEnabled();
+        $whenStages = [
+            ['Announcement week', 'Views and Sources', 'Is the first post landing, and from where? Set Last 7 Days, read the event\'s views, then Channels and Campaigns (these cover the whole schedule, so give each event its own utm_campaign). A tag that brought nobody in a week will not bring many in a month: move that effort to the channel that did.'],
+            ['The run-up', 'The Revenue chart', 'Read sales by purchase date against the grey line of the window before, and against your last comparable event at the same distance from its date. Plan the next post for when the line goes flat, not for a date picked in advance.'],
+            $ownerLive
+                ? ['On the night', 'The Realtime tab', 'Page views in the last five minutes, a bar for each of the last 30 minutes with a dot where a sale or registration came in, and, while an event with tickets or registrations is on, a door card: checked in of sold for a ticketed event on Pro, otherwise sold or registered. You see pages and counts. You never see who.']
+                : ['On the night', 'The check-in dashboard', 'Scanning at the door is free on every plan. On Pro the check-in dashboard watches the room fill: overall progress, each ticket type and the latest arrivals.'],
+            ['The morning after', 'Check-Ins', 'Attendance rate, no-shows by ticket type, and the hour people actually arrived. Write down the two numbers you will change next time, while you still remember why.'],
+            ['Month end', 'Last Month', 'A closed month holds still, so its comparison does not drift. Read Top events and Top Events by Revenue side by side: the events people look at are not always the ones they pay for.'],
+        ];
+    @endphp
+    <section id="when" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-dash-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.12), rgba(52, 211, 153, 0) 60%); opacity: 0.5;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-dash-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                    <p class="es-dash-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">When to look at what</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        One event, <span class="es-dash-lit">five readings.</span>
+                    </h2>
+                    <p class="es-dash-fmuted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Checking every number every day teaches you nothing. Each stage of an event has one reading that can still change the outcome; look at that one.
+                    </p>
+                </div>
+
+                <ol class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="100">
+                    @foreach ($whenStages as $stageIndex => [$stageName, $stageReading, $stageBody])
+                        <li class="es-dash-card es-dash-rail flex flex-col p-6" data-reveal="panel">
+                            <div class="mb-3 flex items-center gap-2">
+                                <span class="es-dash-lit es-dash-num text-xs">{{ str_pad($stageIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                <p class="es-dash-tag">{{ $stageName }}</p>
+                            </div>
+                            <h3 class="es-dash-fink mb-2 text-lg font-bold">{{ $stageReading }}</h3>
+                            <p class="es-dash-fmuted text-sm leading-relaxed">{{ $stageBody }}</p>
+                        </li>
+                    @endforeach
+                    <li class="es-dash-card flex flex-col p-6" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-dash-fink text-lg font-bold">What you never see</h3>
+                        </div>
+                        <p class="es-dash-fmuted text-sm leading-relaxed">
+                            @if ($ownerLive)
+                                A name, an email address, an account, a browser or a visitor's history. A visitor is a row on the Realtime tab only when they accepted cookies on a notice that said a schedule's organizer sees visits to its pages; everyone else is a page view and nothing more. Your own visits, and your team's, are not counted while signed in.
+                            @else
+                                Who visited. The counters have no visitor column, and this site gives schedule owners no live list of visitors. Your record of the night is the check-in count, and the Check-Ins tab the morning after.
+                            @endif
+                        </p>
+                        <a href="{{ route('marketing.docs.analytics') }}#{{ $ownerLive ? 'realtime' : 'checkins' }}" class="es-dash-lit mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold transition-all hover:gap-2">
+                            {{ $ownerLive ? 'Realtime in the guide' : 'Check-Ins in the guide' }}
+                            <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 10. Everything else: bento                                   -->
     <!-- ============================================================ -->
     <section id="rest" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-dash-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <div class="es-dash-corner mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <p class="es-dash-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Everything else</p>
                 <h2 class="es-balance es-dash-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     The rest of the panel.
@@ -1254,7 +1546,7 @@
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-dash-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-dash-corner mb-6" data-reveal aria-hidden="true"><span>11</span></div>
                 <h2 class="es-balance es-dash-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

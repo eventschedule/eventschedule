@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Promote Events with Facebook and Instagram Ads | Boost</x-slot>
-    <x-slot name="description">Promote a published event with Facebook and Instagram ads built from its details. Prepaid from $10, no Ads Manager needed, and unspent budget is refunded.</x-slot>
+    <x-slot name="description">How to run Facebook and Instagram ads for an event: budget, timing, targeting and the flyer. Then boost it from the event, prepaid from $10, no Ads Manager.</x-slot>
     <x-slot name="breadcrumbTitle">Boost</x-slot>
 
     <x-slot name="structuredData">
@@ -546,16 +546,31 @@
                 'q' => 'Will other schedules\' promotions appear on my pages?',
                 'a' => 'Only while your schedule is on the Free plan, and only on a site whose operator runs a promotions network. Pro and Enterprise pages carry nothing at all. If you are on Free and would rather stay clear, "Do not show other schedules\' promotions" lives in your schedule\'s Advanced settings, it is free, and turning it on does not stop you buying promotions later. The same toggle covers ads if the site runs those too.',
             ],
+            [
+                'q' => 'How much should I spend on Facebook and Instagram ads for an event?',
+                'a' => 'Work backwards from the tickets the ad has to sell. Multiply them by what you keep from each ticket, and on eventschedule.com divide by 1.2, because a 20% service fee is added on top of the ad budget: twelve $20 tickets bring in $240, which covers a $200 budget and its $40 fee. That is the most the campaign can cost and still break even, so spend less while you learn how your events respond. On eventschedule.com the first campaign is capped at $10 anyway, the cap rises to $25 once one has completed and up to $1,000 with a longer record, and whatever a campaign does not spend is refunded.',
+            ],
+            [
+                'q' => 'When should I start advertising an event on Facebook and Instagram?',
+                'a' => 'One to two weeks before suits most one-off events: close enough that people are deciding, with time for Meta to review the ad and for the campaign to deliver. Quick mode sets the window for you, from the day you pay until the event, held between 3 and 14 days, so a campaign bought a month ahead stops about two weeks before the door. For a far-off date, boost in the final fortnight or set your own start and end dates in Advanced mode. Avoid the last 24 hours, which Boost warns about, and give a weekly night its own dates in Advanced mode, since it has no single date to aim at.',
+            ],
+            [
+                'q' => 'How do I know whether my event ad worked?',
+                'a' => 'Set the cost per sale against what a ticket brings in, divided by 1.2 on eventschedule.com, because the funnel counts the ad spend without the service fee. While the campaign runs, its own page shows impressions, reach, clicks, click-through rate, cost per click and cost per thousand. Afterwards, the Boost funnel on the Revenue tab of Analytics follows it through to page views and sales, with cost per sale and a return on ad spend, because every link in the ad is tagged. If the numbers fall off between impressions and clicks, change the picture and the headline; between page views and sales, look at the page, the price or the date. Someone who saw the ad may buy later through another link, so read the cost per sale as the cautious figure.',
+            ],
         ];
 
         $dotSections = [
             ['top', 'The launch'],
             ['audience', 'Who it reaches'],
             ['pads', 'Two channels'],
+            ['plan', 'Budget and timing'],
+            ['creative', 'The ad itself'],
             ['window', 'The window'],
             ['burn', 'What it costs'],
             ['envelope', 'The ceiling'],
             ['downlink', 'What comes back'],
+            ['results', 'Reading results'],
             ['control', 'The controls'],
             ['honest', 'What it is not'],
             ['faq', 'Questions'],
@@ -657,7 +672,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. Who it reaches: the list you have vs the room you do not   -->
+    <!-- 2. Who it reaches: the list you have vs the room you do not  -->
     <!-- ============================================================ -->
     <section id="audience" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -812,12 +827,198 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. The window: proportional, clamped to 3 to 14 days         -->
+    <!-- 4. The flight plan: budget, timing, audience                 -->
+    <!-- ============================================================ -->
+    @php
+        // Advice for any Facebook and Instagram event ad, tied to what Boost really does:
+        // the 3-14 day window (MetaAdsService::calculateDuration), the 24-hour and 90-day
+        // warnings, the 25-mile venue radius, the 18-65 default ages and the one category
+        // interest (docs/boost #smart-defaults), and the $10 first ceiling.
+        $flightPlan = [
+            [
+                'Budget', 'Work backwards from the seats',
+                'Decide how many extra tickets the ad has to sell to be worth running. Multiply by what you keep from each ticket, and on eventschedule.com divide by 1.2 for the service fee. That is the most the campaign can cost and still pay for itself. Spend well under it the first time.',
+                ['On eventschedule.com, a new schedule is capped at $10 a campaign', 'One completed campaign lifts it to $25', '$10 over 14 days is about 70 cents a day: on a small budget, a shorter window puts more behind each day'],
+            ],
+            [
+                'Timing', 'Start one to two weeks out',
+                'Quick mode runs from the day you pay until the event, held between 3 and 14 days. Boost a month ahead and it runs the first fortnight, then stops sixteen days before the door, just when people decide. For a date far off, boost in the last two weeks, or set your own start and end in Advanced mode.',
+                ['Boost warns you under 24 hours out: Meta reviews every ad first', 'It warns again past 90 days out', 'A weekly night needs its own dates in Advanced mode'],
+            ],
+            [
+                'Audience', 'Let the event do the targeting',
+                'An event with a venue reaches a 25-mile radius around it, so the address is the targeting: fill it in properly. Leave the ages at 18 to 65 unless the door has a rule, and keep the one interest Boost picks from the category, adding one or two that describe who really comes.',
+                ['An over-21 night: set Min Age to 21', 'Online only: countries, not a radius', 'Every filter shrinks the pool, and a small pool spends slowly'],
+            ],
+        ];
+    @endphp
+    <section id="plan" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Planning a Facebook and Instagram ad</p>
+                <h2 class="es-balance es-launch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Three numbers to settle <span class="es-launch-grad">before you pay.</span>
+                </h2>
+                <p class="es-launch-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    How much, when, and for whom. These hold for any event ad on Facebook and Instagram, bought here or anywhere else. Get them right and the picture has a fair chance; get one wrong and no picture will save it.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-3" data-reveal-group="100">
+                @foreach ($flightPlan as [$fpTag, $fpTitle, $fpBody, $fpNotes])
+                    <div class="es-launch-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <p class="es-launch-tag mb-3">{{ $fpTag }}</p>
+                        <h3 class="es-launch-ink mb-3 text-xl font-bold">{{ $fpTitle }}</h3>
+                        <p class="es-launch-muted mb-5 text-sm leading-relaxed">{{ $fpBody }}</p>
+                        <div class="es-launch-inset mt-auto p-4">
+                            @foreach ($fpNotes as $fpNote)
+                                <div class="es-launch-row">
+                                    <span class="es-launch-check" aria-hidden="true"></span>
+                                    <p class="es-launch-muted text-sm">{{ $fpNote }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-launch-card mt-6 p-6 sm:p-8" data-reveal="panel">
+                <div class="grid items-start gap-8 lg:grid-cols-2">
+                    <div>
+                        <div class="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-launch-ink text-xl font-bold">Will it pay for itself?</h3>
+                            <span class="es-launch-muted es-launch-mono text-xs">worked example</span>
+                        </div>
+                        <p class="es-launch-muted text-sm leading-relaxed">
+                            A 120-seat room, 80 sold two weeks out, tickets at $20. An empty seat earns nothing, so a ticket the ad sells is worth nearly its whole price. You decide the ad has to sell 12 more to be worth the effort. Twelve tickets bring in $240, and $240 charged is a $200 ad budget plus its 20% service fee.
+                        </p>
+                        <p class="es-launch-muted mt-4 text-sm leading-relaxed">
+                            So the line to beat is one ticket for every $20 charged, which is $16.67 of ad spend. The Boost funnel on the Revenue tab of Analytics prints the cost per sale when the campaign ends, and it counts the ad spend only, without the service fee, so set it against $16.67, not $20. It counts only sales that followed a click on the ad; a buyer who saw the ad and came back another way is not in it.
+                        </p>
+                        <p class="es-launch-muted mt-4 text-sm leading-relaxed">
+                            The first campaign on a new schedule cannot be $200: it is capped at $10, then $25 once one has completed. Treat those as cheap tests of the picture and the words, not as the campaign that fills the room.
+                        </p>
+                    </div>
+                    <dl class="es-launch-inset es-launch-mono p-4 text-sm">
+                        <div class="flex items-baseline justify-between gap-3 py-1">
+                            <dt class="es-launch-muted">Empty seats</dt>
+                            <dd class="es-launch-ink font-bold">40</dd>
+                        </div>
+                        <div class="flex items-baseline justify-between gap-3 py-1">
+                            <dt class="es-launch-muted">Tickets the ad must sell</dt>
+                            <dd class="es-launch-ink font-bold">12</dd>
+                        </div>
+                        <div class="flex items-baseline justify-between gap-3 py-1">
+                            <dt class="es-launch-muted">12 &times; $20</dt>
+                            <dd class="es-launch-ink font-bold">$240</dd>
+                        </div>
+                        <div class="es-launch-hr mt-2 flex items-baseline justify-between gap-3 pt-2">
+                            <dt class="es-launch-muted">$240 &divide; 1.2</dt>
+                            <dd class="es-launch-ink font-bold">$200 ad budget</dd>
+                        </div>
+                        <div class="flex items-baseline justify-between gap-3 py-1">
+                            <dt class="es-launch-muted">Service fee, 20%</dt>
+                            <dd class="es-launch-ink font-bold">$40</dd>
+                        </div>
+                        <div class="es-launch-hr mt-2 flex items-baseline justify-between gap-3 pt-2">
+                            <dt class="es-launch-accent font-bold">Break-even, charged per ticket</dt>
+                            <dd class="es-launch-accent font-bold">$20</dd>
+                        </div>
+                        <div class="flex items-baseline justify-between gap-3 py-1">
+                            <dt class="es-launch-muted">Of which ad spend, the funnel's cost per sale</dt>
+                            <dd class="es-launch-ink font-bold">$16.67</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. The creative: the flyer is the ad                         -->
+    <!-- ============================================================ -->
+    @php
+        $pictureRules = [
+            ['One picture, not a collage', 'A photo of the act, the room or the poster\'s main image, readable on a phone at arm\'s length. Four small photos read as none.'],
+            ['Few words on the image', 'The name, and the date if it fits. Times, prices and line-ups belong in the ad\'s text, which Facebook and Instagram print at full size.'],
+            ['Keep the subject in the middle', 'Feeds, Stories and Reels frame the same picture differently, and the edges are the first thing cut.'],
+            ['Use a picture you may use', 'Your own photo, the artist\'s press shot with permission, or a design you paid for. An ad is a public use.'],
+        ];
+        $copyFields = [
+            ['Headline', 40, 'What it is, with the day. Quick mode writes it from the event\'s name, venue and city; rewrite it when the name alone does not say what the night is.'],
+            ['Primary text', 125, 'The one reason to come, then when and where. One sentence of each is plenty.'],
+            ['Description', 30, 'The neighbourhood, the door time or the price. Whatever a person deciding needs next.'],
+        ];
+    @endphp
+    <section id="creative" class="es-launch-edge scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Ad creative</p>
+                <h2 class="es-balance es-launch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The flyer <span class="es-launch-grad">is the ad.</span>
+                </h2>
+                <p class="es-launch-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Boost builds the ad from the event: its flyer becomes the picture, and its name, venue and city become the words. Most of the work of a good ad is the work of a good event page, done before you open Boost.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-2" data-reveal-group="100">
+                <div class="es-launch-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <p class="es-launch-tag mb-3">The picture</p>
+                    <h3 class="es-launch-ink mb-4 text-xl font-bold">Made to be seen small, and fast</h3>
+                    <div>
+                        @foreach ($pictureRules as [$prTitle, $prBody])
+                            <div class="es-launch-row">
+                                <span class="es-launch-check" aria-hidden="true"></span>
+                                <div class="min-w-0">
+                                    <p class="es-launch-ink text-sm font-bold">{{ $prTitle }}</p>
+                                    <p class="es-launch-muted text-sm">{{ $prBody }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-launch-muted es-launch-hr mt-auto pt-4 text-sm">
+                        Not sure which picture works? Run the first small campaign with one and the next with the other, and compare the click-through rate on each campaign's page.
+                    </p>
+                </div>
+
+                <div class="es-launch-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <p class="es-launch-tag mb-3">The words</p>
+                    <h3 class="es-launch-ink mb-4 text-xl font-bold">Three fields, three jobs</h3>
+                    <div>
+                        @foreach ($copyFields as [$cfName, $cfLimit, $cfBody])
+                            <div class="es-launch-row">
+                                <span class="es-launch-accent es-launch-mono w-10 flex-none text-sm font-bold">{{ $cfLimit }}</span>
+                                <div class="min-w-0">
+                                    <p class="es-launch-ink text-sm font-bold">{{ $cfName }}</p>
+                                    <p class="es-launch-muted text-sm">{{ $cfBody }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="es-launch-inset mt-5 p-4">
+                        <p class="es-launch-tag mb-2">One example</p>
+                        <p class="es-launch-ink text-sm font-bold">Jazz in the Courtyard, Friday 8pm</p>
+                        <p class="es-launch-muted mt-1 text-sm">A live quartet under the lights, with the bar open from 7. Last tickets for this Friday.</p>
+                        <p class="es-launch-muted es-launch-mono mt-1 text-xs">Old Town, doors at 7</p>
+                    </div>
+                    <p class="es-launch-muted es-launch-hr mt-auto pt-4 text-sm">
+                        The button follows the event: Get Tickets once it has tickets set up (Sign Up when it is online only), Learn More while it has none. No tickets yet? Switch on the "Notify me" card, so a visitor the ad brings to a public event can leave an email and hear when they go on sale.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. The window: proportional, clamped to 3 to 14 days         -->
     <!-- ============================================================ -->
     <section id="window" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                 <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Campaign dates</p>
                 <h2 class="es-balance es-launch-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                     A campaign has an <span class="es-launch-grad">end built into it.</span>
@@ -874,13 +1075,13 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. The burn: charged, delivered, returned                    -->
+    <!-- 7. The burn: charged, delivered, returned                    -->
     <!-- ============================================================ -->
     <section id="burn" class="es-launch-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-12 lg:grid-cols-[1fr_1.05fr]">
                 <div>
-                    <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                     <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Budget and refunds</p>
                     <h2 class="es-balance es-launch-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                         You pay once. <span class="es-launch-grad">Unburnt fuel comes back.</span>
@@ -956,12 +1157,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. The envelope: the ceiling that grows                      -->
+    <!-- 8. The envelope: the ceiling that grows                      -->
     <!-- ============================================================ -->
     <section id="envelope" class="es-launch-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                 <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Spending limits</p>
                 <h2 class="es-balance es-launch-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                     Your first campaign is <span class="es-launch-grad">capped at ten dollars.</span>
@@ -1003,7 +1204,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Downlink: what comes back (fixed-dark band)               -->
+    <!-- 9. Downlink: what comes back (fixed-dark band)               -->
     <!-- ============================================================ -->
     <section id="downlink" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-launch-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -1014,7 +1215,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                     <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Campaign analytics</p>
                     <h2 class="es-balance es-launch-onband text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Numbers, <span class="es-launch-lit">while it is still flying.</span>
@@ -1064,12 +1265,92 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. The controls: bento                                       -->
+    <!-- 10. Measuring results, and the mistakes that waste a budget  -->
+    <!-- ============================================================ -->
+    @php
+        // The chain is the Boost funnel on the Revenue tab of /analytics (docs/analytics
+        // #revenue-funnels) and the campaign page (docs/boost #analytics).
+        $chain = [
+            ['Impressions', 'Shown', 'Spending slowly against the days left usually means the audience is too small. Widen it next time, starting with the interests.'],
+            ['Clicks', 'Click-through rate', 'Shown plenty, clicked little: the picture and the headline are not stopping anyone. The page cannot fix that; the creative can.'],
+            ['Page views', 'The share that landed', 'Clicked, then gone before the page opened. Open the event page on a phone, on mobile data, and time it.'],
+            ['Sales', 'The share that bought', 'They arrived and did not buy: the page, the price or the date. The same reading as any event page\'s conversion rate.'],
+        ];
+        $boostMistakes = [
+            ['Boosting the night before', 'Meta reviews every ad before it delivers, and the window is at least three days, so most of the money lands after the door has shut.'],
+            ['Boosting a month out in Quick mode', 'The window stops after 14 days, two weeks before the event. Boost later, or set the dates yourself.'],
+            ['A flyer full of small print', 'Line-up, prices and three logos in a picture the size of a thumb. Move the words into the text.'],
+            ['Narrowing to a sliver', 'A tight age band, one platform, and an interest so specific few people share it. The campaign spends slowly, if at all, and the fortnight goes.'],
+            ['Judging it on day one', 'Delivery is uneven in the first day or two. Look at the trend after three days; stop it early only when nothing is moving at all.'],
+            ['Counting likes', 'Reactions are not ticket sales. The only number that says whether to do it again is the cost per ticket, against what a ticket brings in.'],
+        ];
+    @endphp
+    <section id="results" class="es-launch-edge scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Measuring results</p>
+                <h2 class="es-balance es-launch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Read the cost per ticket, <span class="es-launch-grad">not the likes.</span>
+                </h2>
+                <p class="es-launch-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    An event ad is a chain of four links: shown, clicked, landed, bought. When the result disappoints, the link where the numbers fall off tells you what to change, and it is rarely the budget.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-[1.1fr_1fr]" data-reveal-group="100">
+                <div class="es-launch-card p-6 sm:p-7" data-reveal="panel">
+                    <p class="es-launch-tag mb-4">Where the chain breaks</p>
+                    @foreach ($chain as $chainIndex => [$chName, $chRate, $chBody])
+                        <div class="es-launch-row">
+                            <span class="es-launch-accent es-launch-mono w-6 flex-none text-sm font-bold">{{ $chainIndex + 1 }}</span>
+                            <div class="min-w-0">
+                                <p class="es-launch-ink text-sm font-bold">{{ $chName }} <span class="es-launch-muted es-launch-mono text-xs font-normal">{{ $chRate }}</span></p>
+                                <p class="es-launch-muted text-sm">{{ $chBody }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="es-launch-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <p class="es-launch-tag mb-4">Where to read it</p>
+                    <h3 class="es-launch-ink mb-2 text-lg font-bold">While it runs: the campaign page</h3>
+                    <p class="es-launch-muted text-sm leading-relaxed">
+                        Impressions, reach, clicks, click-through rate, cost per click and cost per thousand, pulled from Meta every 15 minutes, with a daily chart once it has run more than a day.
+                    </p>
+                    <h3 class="es-launch-ink mb-2 mt-5 text-lg font-bold">After it: the Boost funnel</h3>
+                    <p class="es-launch-muted text-sm leading-relaxed">
+                        On the Revenue tab of Analytics, one step to a tile from impressions to clicks, page views and sales, with spend, cost per click, cost per view, cost per sale and a return on ad spend. It works because every link in a boosted ad carries tags, so the visits and the sales find their way back to the campaign.
+                    </p>
+                    <a href="{{ route('marketing.docs.analytics') }}#revenue-funnels" class="es-launch-link mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold">
+                        The Boost funnel in the guide
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+                </div>
+            </div>
+
+            <h3 class="es-balance es-launch-ink mb-6 mt-16 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Six ways to waste an ad budget</h3>
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                @foreach ($boostMistakes as $mIndex => [$mTitle, $mBody])
+                    <div class="es-launch-card flex gap-4 p-6" data-reveal="panel">
+                        <span class="es-launch-accent es-launch-mono shrink-0 text-lg font-black" aria-hidden="true">{{ str_pad($mIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h4 class="es-launch-ink text-base font-bold">{{ $mTitle }}</h4>
+                            <p class="es-launch-muted mt-1.5 text-sm leading-relaxed">{{ $mBody }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 11. The controls: bento                                      -->
     <!-- ============================================================ -->
     <section id="control" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>11</span></div>
                 <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Quick and advanced mode</p>
                 <h2 class="es-balance es-launch-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Two hands on it, or <span class="es-launch-grad">none.</span>
@@ -1184,12 +1465,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. What it is not                                            -->
+    <!-- 12. What it is not                                           -->
     <!-- ============================================================ -->
     <section id="honest" class="es-launch-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>12</span></div>
                 <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What it is not</p>
                 <h2 class="es-balance es-launch-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                     The things a boost <span class="es-launch-grad">cannot do for you.</span>
@@ -1235,7 +1516,7 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 10. Keep exploring                                           -->
+    <!-- 13. Keep exploring                                           -->
     <!-- ============================================================ -->
     <section class="es-launch-edge scroll-mt-24 py-16">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -1289,14 +1570,14 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 11. FAQ                                                      -->
+    <!-- 14. FAQ                                                      -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="es-launch-edge scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>13</span></div>
                 <h2 class="es-balance es-launch-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>
@@ -1321,7 +1602,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 12. Finale                                                   -->
+    <!-- 15. Finale                                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
