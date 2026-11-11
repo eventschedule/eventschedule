@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Live Concerts | Tours & Livestreams</x-slot>
-    <x-slot name="description">Put a whole tour online at once: a room, a door time and an on-sale in every city, livestream tickets beside room tickets, and zero platform fees.</x-slot>
+    <x-slot name="description">Put a whole tour online: a room, door time and on-sale per city, early bird, GA and VIP tiers with sales windows, promo codes and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
     <x-slot name="headMeta">
@@ -855,6 +855,11 @@
             .lc-date-doors::before { content: "Doors "; }
             .lc-lam-top { padding-inline: 1.1rem; }
         }
+        /* 05 Ticket tiers reuse the laminate; on a phone the third column is a price, not doors. */
+        @media (max-width: 640px) {
+            #lc .lc-tiers .lc-date-doors::before { content: "Price "; }
+        }
+        .lc-tier-sum { margin-top: 1.5rem; max-width: 52rem; font-size: 1rem; color: var(--lc-ink-2); }
         .lc-notes { display: grid; gap: 0; }
         .lc-note { padding-block: 1.3rem 1.4rem; border-top: 2px solid var(--lc-ink); }
         .lc-note:last-child { border-bottom: 2px solid var(--lc-ink); }
@@ -1449,6 +1454,22 @@
                 'a' => 'Yes, on every plan. Switch on the "Notify me" card, put a date up before its tickets are on sale, and its page offers "Tell me when tickets go on sale": a fan leaves an email address, with no account and no name, and gets one email when tickets for that date open, a reminder 48 hours before it starts, word if it is cancelled, and any change notice you choose to send. Once the date is selling, the same list sits beside the buy button as "Tell me if anything changes". Each night of a residency keeps its own list, it is not a subscription to your schedule, it never counts against your newsletter allowance, and the event editor\'s Tickets panel shows how many people are waiting.',
             ],
             [
+                'q' => 'How far ahead should concert tickets go on sale?',
+                'a' => 'Give a club show six to ten weeks of selling, and a theatre, a bigger room or a whole tour leg longer, because the middle weeks are where a slow show is rescued. Announce the date first, even before tickets are ready: with the "Notify me" card switched on, the event page collects email addresses and tells everyone the moment tickets open. Then run a short presale for your own list and open general admission a couple of days later. A ticket type\'s Ticket sales start and Ticket sales end are each one date and time, so the whole plan can be set up the day you announce and left to run.',
+            ],
+            [
+                'q' => 'How do I run a presale for my mailing list?',
+                'a' => 'Once the date is announced, put the early bird on sale and email your followers and subscribers first, then let general admission open on its own Ticket sales start a day or two later. Everyone who asked to hear on the event page is told when the early bird opens too, so the presale is for your list and for them. If you want the list to pay less as well, add a promo code (Pro) with an expiry at the general on-sale and send the link that applies it. Be aware that a code is a discount, not a lock: Event Schedule has no hidden presale ticket, so anyone who finds the page during the presale can buy without the code. The newsletter counts each recipient against your monthly allowance (10 on Free, 100 on Pro, 1,000 on Enterprise, unlimited when the schedule sends through its own email settings).',
+            ],
+            [
+                'q' => 'How do I list a different opening act on each night of a tour?',
+                'a' => 'Make each date its own event, which a tour is anyway because every night has its own room, and add that night\'s support as a participant on that event only. Clone Event, which is free, copies a finished date so you only change the room, the time and the opener. A participant shows on every date of the event it is on, so a weekly residency with a different guest each week is also one event a night rather than one repeating event.',
+            ],
+            [
+                'q' => 'Can fans buy tickets on my band\'s own website?',
+                'a' => 'Yes, two ways. The calendar of all your dates embeds on any site for free, and each date links to its own ticket page. On Pro, a single date\'s ticket form can be embedded as well, so fans pick their tickets without leaving your site; the payment step itself opens in the full window, since payment pages generally refuse to load inside another site\'s frame, and Stripe or PayPal then brings the buyer back to their ticket page. One widget sells one date. A free registration form embeds on every plan.',
+            ],
+            [
                 'q' => 'Can the room show my date on its own calendar?',
                 'a' => 'Yes, if the room runs a schedule here. Add the venue to the date and the venue name on your event page links straight to their schedule. Whether the date appears on their calendar is their call: it lands accepted if you are a member of that schedule or if they take requests without approval, and otherwise it waits on their requests tab and emails them that it arrived.',
             ],
@@ -1459,6 +1480,9 @@
             ['routing', 'The routing'],
             ['doors', 'The day sheet'],
             ['onsale', 'On sale'],
+            ['tiers', 'Ticket tiers'],
+            ['campaign', 'Week by week'],
+            ['showday', 'Show day'],
             ['frontage', 'One address'],
             ['rest', 'Everything else'],
             ['who', 'Perfect for'],
@@ -1793,7 +1817,7 @@
                             <h3 class="lc-d">Once a night is gone</h3>
                             <span class="lc-tier lc-tier-pro">Pro</span>
                         </div>
-                        <p>Turn the waitlist on and people join for that date. If a return comes back, they are notified without you doing anything.</p>
+                        <p>A sold-out date offers Join Waitlist by itself, with nothing to switch on. When a ticket comes back, the next person in line is emailed without you doing anything.</p>
                     </div>
                     <div class="lc-memo" data-reveal>
                         <div class="lc-memo-top">
@@ -1857,13 +1881,217 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. One address: front of house, lights down in both modes    -->
+    <!-- 5. Ticket tiers, worked for one room                          -->
+    <!-- ============================================================ -->
+    @php
+        // A 500-capacity room split four ways. Quantity, name, when it sells, price, state.
+        // Prices are the show's own money, not ours, so they carry no currency symbol.
+        $tierRows = [
+            [75, 'Early bird', 'Ends Fri 10:00, or when gone', 22, 'gone', 'Sold out'],
+            [325, 'General', 'Standing, on sale from Fri 10:00', 28, 'live', 'On sale'],
+            [50, 'VIP', 'Early entry and the balcony rail', 55, 'live', 'On sale'],
+            [50, 'Final release', 'Starts one week before the show', 32, 'soon', 'Opens Sep 13'],
+        ];
+        $tierGross = array_sum(array_map(fn ($t) => $t[0] * $t[3], $tierRows));
+        $tierCount = array_sum(array_map(fn ($t) => $t[0], $tierRows));
+    @endphp
+    <section id="tiers" class="lc-sec lc-alt">
+        <div class="lc-wrap">
+            <div class="lc-head">
+                <div class="lc-head-row" data-reveal>
+                    <span class="lc-num" aria-hidden="true"><span class="lc-led">05</span></span>
+                    <p class="lc-k">Ticket tiers</p>
+                </div>
+                <h2 class="lc-d lc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    Early bird, GA, VIP: <span class="lc-hot">one room, four prices.</span>
+                </h2>
+                <p class="lc-sub" data-reveal style="--reveal-delay: 0.16s; max-width: 52rem;">
+                    The mistake that costs a promoter most is not a wrong price. It is a room sold twice: tiers whose quantities add up to more than the fire limit, or a VIP allocation nobody capped. Start from the capacity and divide it. Here is one 500-capacity night, three weeks before doors.
+                </p>
+            </div>
+
+            <div class="lc-route">
+                <div data-reveal="panel">
+                    <div class="lc-lam">
+                        <div class="lc-lam-card">
+                            <div class="lc-lam-top" aria-hidden="true">
+                                <span class="lc-led">Kings Hall</span>
+                                <small>Capacity {{ number_format($tierCount) }} &middot; Four ticket types</small>
+                            </div>
+                            <table class="lc-dates lc-tiers" role="table">
+                                <caption class="lc-k">One night, divided: quantity, ticket type, price in the show's own currency and where each stands</caption>
+                                <thead role="rowgroup">
+                                    <tr role="row">
+                                        <th scope="col" role="columnheader" class="lc-k">Tickets</th>
+                                        <th scope="col" role="columnheader" class="lc-k">Type</th>
+                                        <th scope="col" role="columnheader" class="lc-k">Price</th>
+                                        <th scope="col" role="columnheader" class="lc-k">Now</th>
+                                    </tr>
+                                </thead>
+                                <tbody role="rowgroup">
+                                    @foreach ($tierRows as [$tQty, $tName, $tWhen, $tPrice, $tState, $tLabel])
+                                        <tr role="row">
+                                            <td role="cell" class="lc-d lc-date-d">{{ $tQty }}</td>
+                                            <th scope="row" role="rowheader" class="lc-date-room">
+                                                <span class="lc-date-pair">
+                                                    <span class="lc-date-hall">{{ $tWhen }}</span>
+                                                    <span class="lc-d lc-date-city">{{ $tName }}</span>
+                                                </span>
+                                            </th>
+                                            <td role="cell" class="lc-d lc-date-doors">{{ $tPrice }}</td>
+                                            <td role="cell">
+                                                <span class="lc-st @if ($tState === 'live') lc-st-live @elseif ($tState === 'gone') lc-st-gone @else lc-st-soon @endif">{{ $tLabel }}</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p class="lc-tier-sum" data-reveal>
+                        75 + 325 + 50 + 50 = {{ number_format($tierCount) }}, the room and not one more. Sold out at these prices the night grosses {{ number_format($tierGross) }} before the payment provider's own fee, and Event Schedule's share of that is zero.
+                    </p>
+                </div>
+
+                <div class="lc-notes" data-reveal-group="100">
+                    <div class="lc-note" data-reveal>
+                        <p class="lc-k">Close the early bird twice</p>
+                        <p>Give it a small quantity and a Ticket sales end, with + Add Sales Dates on the type. It stops at whichever comes first, so a slow week cannot leave the cheap tier open until the show.</p>
+                    </div>
+                    <div class="lc-note" data-reveal>
+                        <p class="lc-k">Keep the gone tier on the page</p>
+                        <p>Once the first tickets are on sale, switch on Show unavailable tickets in the Sales rules row and the early bird stays in the list, marked sold out, after its window closes. Leave it off until then: with it on, everyone who asked to hear is told tickets are on sale straight away. A fan who sees 22 sold out understands why General is 28.</p>
+                    </div>
+                    <div class="lc-note" data-reveal>
+                        <p class="lc-k">Separate counts, or one pool</p>
+                        <p>Here each type is counted on its own, which is the only way to hold VIP to fifty. When every type carries the same quantity, Combined Total makes them all draw on one pool instead: right when the tiers are only prices for the same floor, wrong when one of them is a place with its own limit.</p>
+                    </div>
+                    <div class="lc-note" data-reveal>
+                        <p class="lc-k">Cap the order</p>
+                        <p>Max Per Order, with + Add Limit, stops one buyer taking thirty early birds to sell on. Four to six suits a club show; it applies per type, so set it on each.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. The on-sale calendar: a cue stack, week by week            -->
+    <!-- ============================================================ -->
+    <section id="campaign" class="lc-sec">
+        <div class="lc-wrap">
+            <div class="lc-head">
+                <div class="lc-head-row" data-reveal>
+                    <span class="lc-num" aria-hidden="true"><span class="lc-led">06</span></span>
+                    <p class="lc-k">The on-sale, week by week</p>
+                </div>
+                <h2 class="lc-d lc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    Announce, presale, on-sale, <span class="lc-hot">then the long middle.</span>
+                </h2>
+                <p class="lc-sub" data-reveal style="--reveal-delay: 0.16s; max-width: 52rem;">
+                    A club show usually wants six to ten weeks of selling; a bigger room or a whole tour leg, more. Whatever the length, the order is the same, and most shows that struggle do so in the middle weeks, after the announcement buzz and before the last-minute buyers. This is the cue stack for one date, with where each cue lives.
+                </p>
+            </div>
+
+            <ol class="lc-cues" data-reveal-group="110">
+                @foreach ([
+                    ['8W', 'Announce', 'Publish the date with its room, door time and lineup before a ticket is on sale. With the "Notify me" card switched on, the event page asks for an email address instead, and everyone who leaves one is emailed the moment tickets open. That email is sent only when the tickets are sold here, not on another site.'],
+                    ['7W', 'Presale, then on-sale', 'Let your own list in first. Put the early bird on sale, email your followers and subscribers before you post anywhere else, and let General open two days later on its own Ticket sales start. A promo code (Pro) in that email, its Expires At set to the general on-sale, can give the list a better price as well. Be clear-eyed about it: a code is a price, not a lock, and anyone who finds the page early can buy. The head start is the email arriving first, and anyone who asked on the event page hears when the early bird opens too.'],
+                    ['6W', 'Read the first week', 'Built-in analytics show views and sales for each date. A city with plenty of views and few sales has a price or a timing problem. A city with neither has an awareness problem, and no discount fixes that.'],
+                    ['3W', 'Push the slow rooms', 'Write to the people most likely to come: a newsletter to a Ticket Buyers segment narrowed to last year\'s show in that city, an Events graphic of the coming dates for social (it draws the ones with a flyer), a promo code on that one date. Each recipient counts against the month\'s newsletter allowance, so a send to 800 people is 800 emails.'],
+                    ['1D', 'The reminder sends itself', 'Every ticket holder gets one email before the show, a day before unless you choose 3 hours or 2 or 3 days, on every plan. It carries the QR code, the place and your Ticket notes, so put doors, the age policy and the bag rule in those notes once and every buyer reads them.'],
+                    ['0', 'Doors', 'Online sales close at the start time unless Allow sales after event starts is on. Any phone scans tickets at the door on every plan; on Pro the check-in dashboard counts who is in, by ticket type, while the support act plays.'],
+                ] as [$cueAt, $cueTitle, $cueBody])
+                    <li class="lc-cue" data-reveal>
+                        <span class="lc-num"><span class="lc-led">{{ $cueAt }}</span></span>
+                        <h3 class="lc-d">{{ $cueTitle }}</h3>
+                        <p>{{ $cueBody }}</p>
+                        <span class="lc-d lc-go" aria-hidden="true">Go</span>
+                    </li>
+                @endforeach
+            </ol>
+            <p class="lc-tier-sum" data-reveal>
+                8W is eight weeks before doors, 1D the day before. Selling a ticket with a price is {{ plan_price($proMonthly) }} a month on Pro; announcing, free registration and the reminder cost nothing.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Show day: four road cases                                 -->
+    <!-- ============================================================ -->
+    <section id="showday" class="lc-sec lc-alt">
+        <div class="lc-wrap">
+            <div class="lc-head">
+                <div class="lc-head-row" data-reveal>
+                    <span class="lc-num" aria-hidden="true"><span class="lc-led">07</span></span>
+                    <p class="lc-k">Show day</p>
+                </div>
+                <h2 class="lc-d lc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    What the queue <span class="lc-hot">asks the door.</span>
+                </h2>
+                <p class="lc-sub" data-reveal style="--reveal-delay: 0.16s;">
+                    How old do I have to be? When is the headliner on? Who is opening tonight? Is there any way in? Answer each before the queue does, in the place a fan will look.
+                </p>
+            </div>
+
+            <div class="lc-cases" data-reveal-group="100">
+                <div class="lc-case" data-reveal="panel">
+                    <div class="lc-case-in">
+                        <div class="lc-case-top">
+                            <h3 class="lc-d">The age policy, said three times</h3>
+                            <span class="lc-tier">Free</span><span class="lc-tier lc-tier-pro">Pro filter</span>
+                            <span class="lc-case-no" aria-hidden="true">Case 1 of 4</span>
+                        </div>
+                        <p>Nobody reads it once. Put it in the event description, and in the Ticket notes, which print on every ticket and ride in the confirmation and the reminder, both free. On Pro, a custom field named Age (All ages, 14+, 18+, 21+) shown On event page and Show as filter lets a parent find every all-ages date on the routing in one tap.</p>
+                        <p class="lc-fine">The scanner checks the ticket, not the person holding it: ID is the door team's job. Decide before the on-sale whether a buyer turned away for age is refunded, and say so in the same notes.</p>
+                    </div>
+                </div>
+
+                <div class="lc-case" data-reveal="panel">
+                    <div class="lc-case-in">
+                        <div class="lc-case-top">
+                            <h3 class="lc-d">Set times move</h3>
+                            <span class="lc-tier">Free</span>
+                            <span class="lc-case-no" aria-hidden="true">Case 2 of 4</span>
+                        </div>
+                        <p>Change a part on the agenda and the event page shows the new time at once. Nobody is emailed for it: the change notice is offered for a new date, time, venue or stream link, not for a set time. Post the change where fans are looking that evening.</p>
+                    </div>
+                </div>
+
+                <div class="lc-case" data-reveal="panel">
+                    <div class="lc-case-in">
+                        <div class="lc-case-top">
+                            <h3 class="lc-d">A different opener every night</h3>
+                            <span class="lc-tier">Free</span>
+                            <span class="lc-case-no" aria-hidden="true">Case 3 of 4</span>
+                        </div>
+                        <p>Each date is its own event, so each has its own participants. Add the local support to that night only. An act with a schedule here is linked from your page, and the date waits on their requests tab until they accept it, unless you are on their team, or you listed them before they claimed their page. An act that is not here yet gets a page they can claim.</p>
+                    </div>
+                </div>
+
+                <div class="lc-case" data-reveal="panel">
+                    <div class="lc-case-in">
+                        <div class="lc-case-top">
+                            <h3 class="lc-d">Sold out, and still asked</h3>
+                            <span class="lc-tier lc-tier-pro">Pro</span>
+                            <span class="lc-case-no" aria-hidden="true">Case 4 of 4</span>
+                        </div>
+                        <p>On Pro, a sold-out date offers Join Waitlist by itself. A ticket comes back when a sale is cancelled, refunded in full or left unpaid until it expires, and then one person on the list is emailed with a 24-hour head start. The ticket is not held for them: it is back on sale, first come, first served, and the next person is told only if it is still there a day later.</p>
+                        <p class="lc-fine">So a full refund is what feeds the waitlist; a partial one frees nothing. "Sold out" on social should link to the date, where the waitlist is, rather than to a story that cannot take a name.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. One address: front of house, lights down in both modes    -->
     <!-- ============================================================ -->
     <section id="frontage" class="lc-sec lc-night lc-foh lc-live">
         <div class="lc-wrap">
             <div class="lc-head lc-head-mid">
                 <div class="lc-head-row" data-reveal>
-                    <span class="lc-num" aria-hidden="true"><span class="lc-led">05</span></span>
+                    <span class="lc-num" aria-hidden="true"><span class="lc-led">08</span></span>
                     <p class="lc-k">One address</p>
                 </div>
                 <h2 class="lc-d lc-h2" data-reveal style="--reveal-delay: 0.08s;">
@@ -1894,7 +2122,7 @@
                         <h3 class="lc-d">What sends itself, and what does not</h3>
                         <span class="lc-tier">Free</span>
                     </div>
-                    <p>Worth knowing before you plan around it: fans who gave you their email on your schedule page get an automatic digest when you add dates, at most one every few days, and a fan who asked about one date hears when it goes on sale and again two days before. Account followers are not auto-notified, so reaching them means writing the email and pressing send. A moved date reaches its ticket buyers only if you send the notice offered on saving, a cancelled one as part of cancelling, and on eventschedule.com either way only when your schedule sends through its own email settings.</p>
+                    <p>Worth knowing before you plan around it: fans who gave you their email on your schedule page get an automatic digest when you add dates, at most one every few days, a fan who asked about one date hears when it goes on sale and again two days before, and every ticket holder gets one reminder before the show, a day ahead unless you change it. Account followers are not auto-notified, so reaching them means writing the email and pressing send. A moved date reaches its ticket buyers only if you send the notice offered on saving, a cancelled one as part of cancelling, and on eventschedule.com either way only when your schedule sends through its own email settings.</p>
                 </div>
             </div>
 
@@ -1913,13 +2141,13 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Everything else a live concert needs: six road cases      -->
+    <!-- 9. Everything else a live concert needs: six road cases      -->
     <!-- ============================================================ -->
     <section id="rest" class="lc-sec">
         <div class="lc-wrap">
             <div class="lc-head">
                 <div class="lc-head-row" data-reveal>
-                    <span class="lc-num" aria-hidden="true"><span class="lc-led">06</span></span>
+                    <span class="lc-num" aria-hidden="true"><span class="lc-led">09</span></span>
                     <p class="lc-k">Everything else</p>
                 </div>
                 <h2 class="lc-d lc-h2" data-reveal style="--reveal-delay: 0.08s;">
@@ -2025,13 +2253,13 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Perfect for: six banners flown from one truss             -->
+    <!-- 10. Perfect for: six banners flown from one truss            -->
     <!-- ============================================================ -->
     <section id="who" class="lc-sec lc-alt">
         <div class="lc-wrap">
             <div class="lc-head lc-head-mid">
                 <div class="lc-head-row" data-reveal>
-                    <span class="lc-num" aria-hidden="true"><span class="lc-led">07</span></span>
+                    <span class="lc-num" aria-hidden="true"><span class="lc-led">10</span></span>
                 </div>
                 <h2 class="lc-d lc-h2" data-reveal style="--reveal-delay: 0.08s;">
                     Perfect for every <span class="lc-hot">genre and stage</span>
@@ -2073,7 +2301,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Three steps: the cue stack                                -->
+    <!-- 11. Three steps: the cue stack                               -->
     <!-- ============================================================ -->
     <section class="lc-sec">
         <div class="lc-wrap">
@@ -2102,7 +2330,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. Key features: the patch sheet                             -->
+    <!-- 12. Key features: the patch sheet                            -->
     <!-- ============================================================ -->
     <section class="lc-sec lc-alt">
         <div class="lc-wrap lc-two">
@@ -2145,7 +2373,7 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- 10. Related pages: stage doors                               -->
+    <!-- 13. Related pages: stage doors                              -->
     <!-- ============================================================ -->
     <section class="lc-sec lc-alt">
         <div class="lc-wrap">
@@ -2174,7 +2402,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 11. FAQ                                                      -->
+    <!-- 14. FAQ                                                     -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
@@ -2182,7 +2410,7 @@
         <div class="lc-wrap lc-faq-grid">
             <div class="lc-faq-head lc-head">
                 <div class="lc-head-row" data-reveal>
-                    <span class="lc-num" aria-hidden="true"><span class="lc-led">08</span></span>
+                    <span class="lc-num" aria-hidden="true"><span class="lc-led">11</span></span>
                 </div>
                 <h2 class="lc-d lc-h2" data-reveal style="--reveal-delay: 0.08s;">
                     Frequently asked questions
@@ -2208,7 +2436,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 12. Finale: house lights down, in both modes                 -->
+    <!-- 15. Finale: house lights down, in both modes                -->
     <!-- ============================================================ -->
     <section id="claim" class="lc-show lc-night lc-live">
         <div class="lc-wrap lc-show-in">

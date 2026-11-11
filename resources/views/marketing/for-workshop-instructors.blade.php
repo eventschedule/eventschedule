@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Workshop Registration and Class Series for Instructors</x-slot>
-    <x-slot name="description">Set a workshop up once as a weekly series, cap the seats per session, and sell spots through Stripe or PayPal with zero platform fees. Free to start.</x-slot>
+    <x-slot name="description">Workshop registration for one-off classes and courses: cap seats per session, ask the right questions, take a waitlist, sell spots with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Workshop Instructors</x-slot>
 
     <x-slot name="headMeta">
@@ -1333,7 +1333,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for workshop instructors?',
-                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever, with no limit on how many students sign up. So is scanning the QR at the door, on every plan. Putting a price on a spot is the Pro plan at '.plan_price($proMonthly).' a month, along with multi-class cards, custom questions at checkout and the live check-in screen, and Event Schedule charges zero platform fees on what you sell.',
+                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever, with no limit on how many students sign up. So is scanning the QR at the door, on every plan. Putting a price on a spot is the Pro plan at '.plan_price($proMonthly).' a month, along with multi-class cards, your own questions on a free registration form or once per order, and the live check-in screen (questions on a ticket type, even one at no charge, are free), and Event Schedule charges zero platform fees on what you sell.',
             ],
             [
                 'q' => 'Can I run different kinds of workshops on one schedule?',
@@ -1357,7 +1357,23 @@
             ],
             [
                 'q' => 'How does a multi-class card work?',
-                'a' => 'A card is one purchase valid across the series, on the Pro plan. The holder gets a private link and books the session they want, and you can set how many people the card admits at each session. Give it a cancellation cutoff in hours before a session starts: cancel earlier than that and the seat goes back to the class, cancel later and the card\'s policy decides whether the visit is forfeited or the cancellation is blocked outright. Usage is tracked per session, so you can see which weeks a card holder actually turned up.',
+                'a' => 'A card is one purchase valid across the series, on the Pro plan. The holder gets a private link, and once you switch on Let holders book seats in advance they book the session they want from it; with it off, the card is simply scanned at the door, with no check on the seat count. You can set how many people the card admits at each session. With advance booking on, give it a cancellation cutoff in hours before a session starts: cancel earlier than that and the seat goes back to the class, cancel later and the card\'s policy decides whether the visit is forfeited or the cancellation is blocked outright. Usage is tracked per session, so you can see which weeks a card holder actually turned up.',
+            ],
+            [
+                'q' => 'What should a workshop registration form ask?',
+                'a' => 'Name and email always, and a phone number when you may need to reach people the morning of the class. After that, ask only what changes what you do: experience level, allergies or dietary needs when anything is eaten or handled, whether they are bringing their own kit, and permission to photograph them. Leave the materials list, parking and what to wear out of the form and put them in the Registration or Ticket notes, which go into the confirmation email. On Event Schedule the name, email and phone are free on every plan. Your own questions are free when they sit on a ticket type, even one at no charge, and Pro on a free registration form or when asked once per order.',
+            ],
+            [
+                'q' => 'How do I take a deposit for a workshop?',
+                'a' => 'Event Schedule has no deposit-then-balance setting. What it has, on Pro and for events paid through Stripe, is monthly installments: the buyer can choose to pay in monthly payments, a number you set between 2 and 12, the first payment is taken at checkout, the rest are charged to the same card, the last falls at least a week before the workshop, and their spot is valid from the first payment. You can keep the option to orders above an amount you set. It suits a costly intensive or a retreat booked well ahead; it is not offered on a pass, or on a cart of several events.',
+            ],
+            [
+                'q' => 'How do I cut no-shows at a free workshop?',
+                'a' => 'Three things. Keep the reminder email on (it is on by default on every plan) and send it 2 days before rather than 1, because a free spot\'s reminder carries a Can\'t make it? link and a seat given back early can still be taken. Let a full date collect a waitlist, free on registration, so a returned seat goes to the first person waiting, who gets 24 hours before the next is told. And count the empty seats over a few sessions before raising the limit to cover them, which only makes sense where one more person can fit.',
+            ],
+            [
+                'q' => 'Can one person register several people for a workshop?',
+                'a' => 'Yes. By default one booking can hold several places, with one confirmation and one QR code, and on a ticket type Max Per Order caps how many one booking takes. Switch on Individual tickets and every attendee gets their own confirmation email and code, which matters when two friends arrive separately. Each guest needs their own email address. That switch is free on free registration and Pro once the event sells tickets, and asking each guest the ticket type\'s questions (Collect ticket fields per guest) is Pro.',
             ],
             [
                 'q' => 'What about a class that runs twice on the same day?',
@@ -1370,8 +1386,11 @@
             ['unit', 'The unit'],
             ['plan', 'The series'],
             ['sheet', 'Two sides'],
+            ['form', 'The form'],
             ['card', 'The class card'],
             ['money', 'Getting paid'],
+            ['course', 'How you sell it'],
+            ['week', 'The week of'],
             ['after', 'After class'],
             ['rest', 'Everything else'],
             ['who', 'Perfect for'],
@@ -1745,17 +1764,114 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. The class card                                            -->
+        <!-- 5. The registration form: what to ask                        -->
+        <!-- ============================================================ -->
+        @php
+            // What a workshop sign-up form might ask, why, and on which plan.
+            // * and ** are explained in the foot of the sheet and the swatches below.
+            $wiAsk = [
+                ['1', 'Name and email', 'Always. The confirmation, the reminder and your list all go to that address.', 'Free'],
+                ['2', 'Phone number', 'When you may have to reach them at 8am on the day, and an email could sit unread.', 'Free'],
+                ['3', 'Experience', 'When a first-timer and a returning student need a different first ten minutes.', 'Free*'],
+                ['4', 'Allergies and diet', 'When they will eat, taste or handle anything: flour, nuts, glaze, solvents.', 'Free*'],
+                ['5', 'Their own kit', 'When the answer changes what you set out: a camera, a laptop, a sewing machine, knives.', 'Free*'],
+                ['6', 'Photo permission', 'When you post pictures of the class, ask before the day, not at the door.', 'Free*'],
+                ['7', 'Each person\'s name', 'When one booking covers a parent and child, or three friends. Each guest needs their own email address.', 'Free**'],
+            ];
+        @endphp
+        <section id="form" class="wi-sec wi-kraft" style="scroll-margin-top: 5rem;">
+            <div class="wi-wrap">
+                <div class="wi-head-c">
+                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">05</b>The registration form</p>
+                    <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Ask what changes <span>the bench.</span>
+                    </h2>
+                    <p class="wi-lede" data-reveal style="--reveal-delay: 0.16s;">
+                        Every question on a workshop registration form costs you a few people who give up halfway. Keep the ones whose answer changes what you buy, set out or say in the first ten minutes, and drop the rest. These seven cover most benches.
+                    </p>
+                </div>
+
+                <div data-reveal>
+                <div class="wi-cutlist-drop">
+                    <div class="wi-cutlist wi-card wi-obj">
+                        <div class="wi-cutlist-head">
+                            <h3>The questions worth asking</h3>
+                            <span>Seven at most &middot; in this order</span>
+                        </div>
+                        <table class="wi-ledger">
+                            <caption>Seven questions a workshop registration form can ask: the question, when it is worth asking, and the plan it needs</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">No.</th>
+                                    <th scope="col">Question</th>
+                                    <th scope="col">Ask it when</th>
+                                    <th scope="col">Plan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($wiAsk as [$aNo, $aQ, $aWhen, $aPlan])
+                                    <tr>
+                                        <th scope="row">{{ $aNo }}</th>
+                                        <td>{{ $aQ }}</td>
+                                        <td>{{ $aWhen }}</td>
+                                        <td>{{ $aPlan }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <p class="wi-cutlist-foot">
+                            * Free when it is asked on a ticket type, even one at no charge; Pro when it is asked on free registration, or once for the whole order. ** Individual tickets, which gives each guest their own email and QR code, is free on free registration and Pro once the event has tickets. Phone is the Ask for phone number switch, optional or required.
+                        </p>
+                    </div>
+                </div>
+                </div>
+
+                <div class="wi-three wi-picks" data-reveal-group="120">
+                    <div class="wi-slot" data-reveal><div class="wi-swatch wi-obj wi-pick" style="--r: -0.8deg;">
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">Free registration</h3>
+                            <span class="wi-tier">Free</span>
+                        </div>
+                        <p class="wi-p">Name, email, a phone number and a seat limit per date, with nothing to connect. Your own questions on this form are the one part that needs Pro. A student can cancel from the link in their email, which gives the seat back.</p>
+                    </div>
+                    </div>
+                    <div class="wi-slot" data-reveal><div class="wi-swatch wi-obj wi-pick" style="--r: 0.7deg;">
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">A ticket type at no charge</h3>
+                            <span class="wi-tier">Free</span>
+                        </div>
+                        <p class="wi-p">Choose Sell tickets, add one type and leave its price blank. Questions added with + Add Field under that type are free on every plan, up to ten, asked once in each order that includes it. It is the way to ask about allergies on a free class without Pro.</p>
+                    </div>
+                    </div>
+                    <div class="wi-slot" data-reveal><div class="wi-swatch wi-obj wi-pick" style="--r: -0.5deg;">
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">An answer from every guest</h3>
+                            <span class="wi-tier wi-tier-paid">Pro</span>
+                        </div>
+                        <p class="wi-p">With Individual tickets and Collect ticket fields per guest, each person in a booking answers the type's questions for themselves, so a family of three gives you three allergy answers rather than one. Answers sit on the sale's row, and in the sales export.</p>
+                    </div>
+                    </div>
+                </div>
+
+                <p class="wi-note wi-note-c" data-reveal>
+                    The materials list, the parking and what to wear do not belong on the form. Put them in the Registration notes or Ticket notes, which go into every confirmation email and onto the ticket itself.
+                    <a href="{{ marketing_url('/docs/tickets') }}#checkout" class="wi-link">The form, field by field</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. The class card                                            -->
         <!-- ============================================================ -->
         <section id="card" class="wi-sec" style="scroll-margin-top: 5rem;">
             <div class="wi-wrap">
                 <div class="wi-head-c">
-                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">05</b>The class card</p>
+                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">06</b>The class card</p>
                     <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Ten classes, <span>one purchase.</span>
                     </h2>
                     <p class="wi-lede" data-reveal style="--reveal-delay: 0.16s;">
-                        Because the term is one recurring event, a card can span it. The holder gets a private link, books the week that suits them, and the card keeps its own ledger.
+                        Because the term is one recurring event, a card can span it. The holder gets a private link, books the week that suits them once you switch advance booking on, and the card keeps its own ledger.
                     </p>
                 </div>
 
@@ -1808,7 +1924,7 @@
                             <h3 class="wi-h3">A cutoff you set</h3>
                             <span class="wi-tier wi-tier-paid">Pro</span>
                         </div>
-                        <p class="wi-p">Give the card a cancellation cutoff in hours before a session starts. Cancel earlier than that and the seat goes back to the bench, and the waitlist for that date hears about it.</p>
+                        <p class="wi-p">With advance booking on, give the card a cancellation cutoff in hours before a session starts. Cancel earlier than that and the seat goes back to the bench, and the waitlist for that date hears about it.</p>
                     </div>
                     </div>
                     <div class="wi-slot" data-reveal><div class="wi-swatch wi-obj wi-pick" style="--r: -0.7deg;">
@@ -1837,12 +1953,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Getting paid                                              -->
+        <!-- 7. Getting paid                                              -->
         <!-- ============================================================ -->
         <section id="money" class="wi-sec wi-kraft" style="scroll-margin-top: 5rem;">
             <div class="wi-wrap">
                 <div>
-                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">06</b>Getting paid</p>
+                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">07</b>Getting paid</p>
                     <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
                         What the bench earns is <span>what you keep.</span>
                     </h2>
@@ -1856,10 +1972,10 @@
                         <i class="wi-string" aria-hidden="true"></i>
                         <div class="wi-tag wi-obj">
                             <div class="wi-card-top">
-                                <h3 class="wi-h3">Prices, plainly</h3>
+                                <h3 class="wi-h3">Ticket types, plainly</h3>
                                 <span class="wi-tier">Free</span>
                             </div>
-                            <p class="wi-p">Named ticket types, each with its own price, quantity and sales window: early bird, concession, materials included. A cheaper rate for booking several at once comes with them. Discount codes are Pro.</p>
+                            <p class="wi-p">Named ticket types, each with its own quantity and sales window: early bird, concession, materials included. A cheaper rate for booking several at once comes with them, free. The price on a type is Pro, and so are discount codes.</p>
                         </div>
                     </div>
                     </div>
@@ -1868,9 +1984,9 @@
                         <div class="wi-tag wi-obj">
                             <div class="wi-card-top">
                                 <h3 class="wi-h3">Ask before they arrive</h3>
-                                <span class="wi-tier wi-tier-paid">Pro</span>
+                                <span class="wi-tier">Free</span>
                             </div>
-                            <p class="wi-p">Custom questions collect what the class actually needs: apron size, dietary needs, whether they are bringing their own camera or borrowing yours.</p>
+                            <p class="wi-p">Questions on a ticket type collect what the class actually needs: apron size, dietary needs, whether they are bringing their own camera or borrowing yours. They are free on every plan; asked once per order, or on a free registration form, they are Pro.</p>
                         </div>
                     </div>
                     </div>
@@ -1894,7 +2010,184 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 7. After the class                                           -->
+        <!-- 8. Whole course or by the session, materials and deposits    -->
+        <!-- ============================================================ -->
+        @php
+            // A bench of eight sold both ways: six season passes for the term,
+            // two drop-in spots per date. [no, date, who came, taken, left]
+            $wiMixed = [
+                ['01', 'Sat 7 Feb', '6 course passes + 2 drop-in', 8, 'Full'],
+                ['02', 'Sat 14 Feb', '6 course passes + 1 drop-in', 7, '1 drop-in left'],
+                ['03', 'Sat 21 Feb', '6 course passes + 0 drop-in', 6, '2 drop-in left'],
+            ];
+        @endphp
+        <section id="course" class="wi-sec" style="scroll-margin-top: 5rem;">
+            <div class="wi-wrap">
+                <div>
+                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">08</b>How you sell it</p>
+                    <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        A one-off, a course, or <span>drop in.</span>
+                    </h2>
+                    <p class="wi-lede" data-reveal style="--reveal-delay: 0.16s; max-width: 46rem;">
+                        Before the price, decide what a student is buying: one afternoon, a whole term up front, or the week that suits them. Each is set up differently, and mixing the last two takes one sum.
+                    </p>
+                </div>
+
+                <div class="wi-three wi-picks" data-reveal-group="120">
+                    <div class="wi-slot" data-reveal><div class="wi-card wi-obj wi-pick" style="--r: -0.9deg;">
+                        <i class="wi-tape wi-strip" style="--r: 3deg; left: 40%;" aria-hidden="true"></i>
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">A one-off workshop</h3>
+                            <span class="wi-tier">Free</span>
+                        </div>
+                        <p class="wi-p">One event, one date, one limit. A Saturday intensive from ten to four is a single event with that length, and a two-day weekend can be one Multi-day event, sold as one booking.</p>
+                    </div>
+                    </div>
+                    <div class="wi-slot" data-reveal><div class="wi-card wi-obj wi-pick" style="--r: 0.8deg;">
+                        <i class="wi-tape wi-strip" style="--r: -3deg; left: 34%;" aria-hidden="true"></i>
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">A course, paid up front</h3>
+                            <span class="wi-tier wi-tier-paid">Pro</span>
+                        </div>
+                        <p class="wi-p">Set the sessions up as one recurring event that ends after six, and sell a season pass on it: one purchase, every date of that event once, one QR code scanned each week. A pass is bought on its own, never in the same order as single sessions.</p>
+                    </div>
+                    </div>
+                    <div class="wi-slot" data-reveal><div class="wi-card wi-obj wi-pick" style="--r: -0.6deg;">
+                        <i class="wi-tape wi-strip" style="--r: 2deg; left: 44%;" aria-hidden="true"></i>
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">Drop in, week by week</h3>
+                            <span class="wi-tier">Free</span>
+                        </div>
+                        <p class="wi-p">An ordinary ticket type, or free registration, on the same recurring event. Its quantity is counted per date, so a student books the Saturdays they can make. Free to run; a price on it is Pro.</p>
+                    </div>
+                    </div>
+                </div>
+
+                <div data-reveal>
+                <div class="wi-cutlist-drop">
+                    <div class="wi-cutlist wi-card wi-obj">
+                        <div class="wi-cutlist-head">
+                            <h3>A bench of eight, sold both ways</h3>
+                            <span>Course pass quantity 6 &middot; drop-in quantity 2 per date</span>
+                        </div>
+                        <ol class="wi-run">
+                            @foreach ($wiMixed as [$mNo, $mDate, $mWho, $mTaken, $mLeft])
+                                <li @class(['is-full' => $mTaken === 8])>
+                                    <span class="wi-run-no">{{ $mNo }}</span>
+                                    <span class="wi-run-when">
+                                        <strong>{{ $mDate }}</strong>
+                                        <small>{{ $mWho }}</small>
+                                    </span>
+                                    <span class="wi-run-pips" aria-hidden="true">
+                                        @for ($wiPip = 1; $wiPip <= 8; $wiPip++)<i @class(['is-taken' => $wiPip <= $mTaken])></i>@endfor
+                                    </span>
+                                    <span class="wi-run-left">{{ $mLeft }}</span>
+                                </li>
+                            @endforeach
+                        </ol>
+                        <p class="wi-cutlist-foot">
+                            Why the drop-in quantity is two and not eight: unless you switch on Let holders book seats in advance, a pass holder simply turns up and is scanned in, and that scan does not check the bench's count. So sell drop-ins up to the bench minus the passes. Switch advance booking on instead and holders reserve each date from their pass page, out of the same pool as the drop-ins, and the count is exact.
+                        </p>
+                    </div>
+                </div>
+                </div>
+
+                <div class="wi-three wi-picks" data-reveal-group="120">
+                    <div class="wi-slot" data-reveal><div class="wi-swatch wi-obj wi-pick" style="--r: 0.6deg;">
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">Materials everyone uses</h3>
+                            <span class="wi-tier">In the price</span>
+                        </div>
+                        <p class="wi-p">If every student needs the clay, the flour or the fabric, put it in the price and say so in the type's description. A separate fee they have to remember is a fee somebody forgets, and you are the one who pays for it.</p>
+                    </div>
+                    </div>
+                    <div class="wi-slot" data-reveal><div class="wi-swatch wi-obj wi-pick" style="--r: -0.7deg;">
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">Extras some want</h3>
+                            <span class="wi-tier wi-tier-paid">Pro</span>
+                        </div>
+                        <p class="wi-p">An add-on sells beside the spot with its own price and stock: a kit to take home, a second canvas, lunch. It appears once a spot is chosen, and discount codes never come off it. A camera to borrow can instead be a second ticket type whose quantity is the number of cameras you own.</p>
+                    </div>
+                    </div>
+                    <div class="wi-slot" data-reveal><div class="wi-swatch wi-obj wi-pick" style="--r: 0.9deg;">
+                        <div class="wi-card-top">
+                            <h3 class="wi-h3">Deposits and payment plans</h3>
+                            <span class="wi-tier wi-tier-paid">Pro</span>
+                        </div>
+                        <p class="wi-p">There is no deposit-then-balance setting. For a costly intensive booked months ahead, a Stripe sale can be split into monthly payments, between 2 and 12 of them, the first at checkout and the last at least a week before the start, and the spot is valid from the first. A pass cannot be paid this way.</p>
+                    </div>
+                    </div>
+                </div>
+
+                <p class="wi-note wi-note-c" data-reveal>
+                    However you sell it, write the cancellation rule into the Ticket notes before the first booking. A free spot can be given back by the student; a paid one is refunded by you from the Sales page.
+                    <a href="{{ marketing_url('/docs/subscriptions') }}#advance-booking" class="wi-link">How pass bookings work</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 9. The week of the workshop                                  -->
+        <!-- ============================================================ -->
+        <section id="week" class="wi-sec wi-kraft" style="scroll-margin-top: 5rem;">
+            <div class="wi-wrap">
+                <div>
+                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">09</b>The week of the class</p>
+                    <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Fewer empty seats, <span>fewer emails from you.</span>
+                    </h2>
+                    <p class="wi-lede" data-reveal style="--reveal-delay: 0.16s; max-width: 46rem;">
+                        A full sign-up sheet is not a full bench. The seats that go empty are mostly people who forgot, or meant to cancel and did not get round to it. Three things close most of that gap, and two of them send themselves.
+                    </p>
+                </div>
+
+                <div class="wi-tags wi-picks" data-reveal-group="120">
+                    <div class="wi-slot" data-reveal><div class="wi-tag-drop wi-pick" style="--r: 1.2deg;">
+                        <i class="wi-string" aria-hidden="true"></i>
+                        <div class="wi-tag wi-obj">
+                            <div class="wi-card-top">
+                                <h3 class="wi-h3">The reminder, two days out</h3>
+                                <span class="wi-tier">Free</span>
+                            </div>
+                            <p class="wi-p">Every student who booked a session gets one reminder email (not a course pass holder), on for every schedule and every plan: the class, the time, the place, their QR code and your notes. It goes a day before unless you pick 3 hours, 2 days or 3 days. With a waitlist, pick 2 days: a free spot's reminder carries a Can't make it? link, and a seat given back two days early leaves time for somebody else to take it.</p>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="wi-slot" data-reveal><div class="wi-tag-drop wi-pick" style="--r: -1.1deg;">
+                        <i class="wi-string" aria-hidden="true"></i>
+                        <div class="wi-tag wi-obj">
+                            <div class="wi-card-top">
+                                <h3 class="wi-h3">The waitlist takes the seat</h3>
+                                <span class="wi-tier">Free</span>
+                            </div>
+                            <p class="wi-p">A full date offers a waitlist. When a seat comes back, the first person waiting is emailed and has 24 hours before the next one is told; the seat is not held, so whoever books first gets it. Free on registration, Pro on paid spots, and a full refund frees a paid seat where a partial one does not.</p>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="wi-slot" data-reveal><div class="wi-tag-drop wi-pick" style="--r: 0.7deg;">
+                        <i class="wi-string" aria-hidden="true"></i>
+                        <div class="wi-tag wi-obj">
+                            <div class="wi-card-top">
+                                <h3 class="wi-h3">A free class still costs you</h3>
+                                <span class="wi-tier">Free</span>
+                            </div>
+                            <p class="wi-p">Nobody loses money by skipping a free workshop, so more seats sit empty. Count them over your last three sessions before you change anything. Where one more person can squeeze in, raise the limit by about that many; where the bench has eight wheels, keep eight and lean on the reminder and the waitlist instead.</p>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="wi-memo wi-card wi-obj" data-reveal>
+                    <i class="wi-tape wi-strip" style="--r: 2deg; left: 40%;" aria-hidden="true"></i>
+                    <p>
+                        One thing to know at the door: scanning a free registration shows green but records nothing. If you want the scanner to keep the count of who came, for a certificate or for your own numbers, use a ticket type at no charge instead, whose check-ins are kept. On Pro the check-in dashboard shows them live and finds anybody by name.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 10. After the class                                          -->
         <!-- ============================================================ -->
         <section id="after" class="wi-sec wi-band" style="scroll-margin-top: 5rem;">
             <div class="wi-wrap">
@@ -1906,7 +2199,7 @@
                     </div>
 
                     <div class="wi-head-c">
-                        <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">07</b>After class</p>
+                        <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">10</b>After class</p>
                         <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
                             The bit that fills <span>next term.</span>
                         </h2>
@@ -1954,7 +2247,7 @@
                                 <h3 class="wi-h3">Whether it landed</h3>
                                 <span class="wi-tier wi-tier-paid">Pro</span>
                             </div>
-                            <p class="wi-p">Collect star ratings and written comments from the people who attended, so the second run of a class is better than the first.</p>
+                            <p class="wi-p">Switch on Post-event feedback and, after each class, everyone who booked gets a request for star ratings and a comment, so the second run is better than the first. It is off until you turn it on, and on eventschedule.com it sends through your schedule's own email settings.</p>
                             <div class="wi-prop" aria-hidden="true">
                                 <div class="wi-stars">&#9733;&#9733;&#9733;&#9733;<span>&#9733;</span></div>
                                 <div class="wi-lines"><i></i><i></i></div>
@@ -1974,12 +2267,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 8. Everything else: six parts                                -->
+        <!-- 11. Everything else: six parts                               -->
         <!-- ============================================================ -->
         <section id="rest" class="wi-sec" style="scroll-margin-top: 5rem;">
             <div class="wi-wrap">
                 <div>
-                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">08</b>Everything else</p>
+                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">11</b>Everything else</p>
                     <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Between one Saturday and the next.
                     </h2>
@@ -2079,12 +2372,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 9. Perfect for: six tags on the pegboard                     -->
+        <!-- 12. Perfect for: six tags on the pegboard                    -->
         <!-- ============================================================ -->
         <section id="who" class="wi-sec wi-peg wi-on-peg" style="scroll-margin-top: 5rem;">
             <div class="wi-wrap">
                 <div class="wi-head-c">
-                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">09</b>On the pegboard</p>
+                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">12</b>On the pegboard</p>
                     <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Perfect for all <span>workshop instructors</span>
                     </h2>
@@ -2125,7 +2418,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 10. Three steps                                              -->
+        <!-- 13. Three steps                                              -->
         <!-- ============================================================ -->
         <section class="wi-sec wi-kraft">
             <div class="wi-wrap">
@@ -2153,7 +2446,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 11. Key features: drawer labels                              -->
+        <!-- 14. Key features: drawer labels                              -->
         <!-- ============================================================ -->
         <section class="wi-sec">
             <div class="wi-wrap wi-drawers-grid">
@@ -2196,7 +2489,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- 12. Related pages: four colour chips                         -->
+        <!-- 15. Related pages: four colour chips                         -->
         <!-- ============================================================ -->
         <section class="wi-sec wi-kraft">
             <div class="wi-wrap">
@@ -2227,7 +2520,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 13. FAQ                                                      -->
+        <!-- 16. FAQ                                                      -->
         <!-- ============================================================ -->
         <x-seo.faq-schema :items="$faqs" />
 
@@ -2237,7 +2530,7 @@
             </div>
             <div class="wi-wrap wi-faq-grid">
                 <div class="wi-faq-head">
-                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">10</b>Before the first cut</p>
+                    <p class="wi-kick" data-reveal><b class="wi-balloon" aria-hidden="true">13</b>Before the first cut</p>
                     <h2 class="wi-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Frequently asked questions
                     </h2>
@@ -2262,7 +2555,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 14. Finale: a blank sheet, line 01 open                      -->
+        <!-- 17. Finale: a blank sheet, line 01 open                      -->
         <!-- ============================================================ -->
         <section id="claim" class="wi-final" style="scroll-margin-top: 4rem;">
             <div class="wi-wrap">

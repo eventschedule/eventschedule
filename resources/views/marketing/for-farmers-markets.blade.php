@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Farmers Market Calendar | Vendor Applications & Fees</x-slot>
-    <x-slot name="description">Put a whole farmers market season online as one recurring market day, let traders apply for a pitch, and take pitch fees with no platform fee. Free.</x-slot>
+    <x-slot name="description">Put a farmers market season online as one recurring market day, show each week's vendors, take a rained-off Saturday out, and let traders apply for a pitch.</x-slot>
     <x-slot name="breadcrumbTitle">For Farmers Markets</x-slot>
 
     <x-slot name="headMeta">
@@ -668,6 +668,8 @@
         .fm-hours li { display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); gap: 0.9rem; align-items: baseline; padding-block: 0.7rem; border-bottom: 1px dashed rgba(251, 246, 234, 0.28); }
         .fm-hours li:last-child { border-bottom: 0; }
         .fm-hours time { font-size: 2.3rem; color: #f5d76e; }
+        /* The share board reuses the hours board with a figure where the time goes. */
+        .fm-hours .fm-hours-n { font-weight: 700; font-size: 2.3rem; line-height: 1; color: #f5d76e; }
         .fm-hours strong { display: block; font-size: 2.05rem; font-weight: 700; color: #fbf6ea; }
         .fm-hours span { display: block; margin-top: 0.15rem; font-size: 0.95rem; color: #e6d7ba; }
         .fm-hours-note { margin-top: 1.25rem; font-size: 0.95rem; color: #e6d7ba; }
@@ -1067,15 +1069,31 @@
             ],
             [
                 'q' => 'Can I charge for pitches and take the money online?',
-                'a' => 'Yes, on Pro at '.plan_price($proMonthly).' a month, which is what opens paid checkout. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free on any plan. Pro also adds the live check-in dashboard and your own questions at checkout, such as whether they need power or how long the van is. Traders pay through your own Stripe or PayPal account, or by a payment link or cash, and Event Schedule charges no platform fee on top.',
+                'a' => 'Yes, on Pro at '.plan_price($proMonthly).' a month, which is what opens paid checkout. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free on any plan. Pro also adds the live check-in dashboard. Questions on the pitch fee itself, such as whether they need power or how long the van is, are free to add on any plan; questions asked once for the whole order are Pro. Traders pay through your own Stripe or PayPal account, or by a payment link or cash, and Event Schedule charges no platform fee on top.',
             ],
             [
                 'q' => 'Can I refund a pitch fee if a trader pulls out or the day is rained off?',
-                'a' => 'Yes, on every plan, from the Sales page, in full or in part. A fee paid through Stripe, PayPal or Razorpay goes back to the trader through that provider, and only then is the sale marked refunded. A fee paid by cash, a payment link or any other way shows Mark as Refunded instead, which records the refund without moving money. A partial refund keeps the pitch booked, and a full one frees it for somebody else. Event Schedule does not email the trader about a refund, so a word from you is still worth sending.',
+                'a' => 'Yes, from the Sales page, in full or in part. Refunds come with Pro, since a pitch fee with a price is Pro, and a market that later moves back to Free can still refund what it took. A fee paid through Stripe, PayPal or Razorpay goes back to the trader through that provider, and only then is the sale marked refunded. A fee paid by cash, a payment link or any other way shows Mark as Refunded instead, which records the refund without moving money. A partial refund keeps the pitch booked, and a full one frees it for somebody else. Event Schedule does not email the trader about a refund, so a word from you is still worth sending.',
             ],
             [
                 'q' => 'How do shoppers hear about the market?',
                 'a' => 'They follow the market, and you email them. Your schedule has a QR code you can download and print on the A-board, the pitch sign or the tote bags, so somebody standing in front of you is one scan and one tap from being on the list. Once they confirm the address, new events you post reach them on their own, batched so a season posted in one sitting is one message. When there is something worth saying beyond the dates, a new trader or the first strawberries, that is a newsletter you write. You can also embed the calendar on the website you already have, and shoppers can subscribe to the market\'s calendar feed without giving an email address: the next three months of market days appear in their own Google, Outlook or Apple calendar and keep rolling forward, and a date you move or take out follows.',
+            ],
+            [
+                'q' => 'What should a farmers market calendar show?',
+                'a' => 'The days and hours, the place with a map, which traders are there that week, anything on in the morning such as a demo or music, and whether a date is off. Shoppers mostly ask two things: is it on this Saturday, and is my baker there. On Event Schedule the season is one recurring event with a closing date, the venue page carries the address and map, the agenda holds the demo and the band, and the traders you name on an event are listed on its page and linked to their own. Put the parking and the dog rule in the description once, rather than in every weekly post.',
+            ],
+            [
+                'q' => 'How do I show which vendors are at the market each week?',
+                'a' => 'Name them as participants on the event. A participant shows on every date of the event they are on, so how you set the season out decides it. If the same traders come every week, name them on one recurring season. If the stalls change week to week, make each market day its own event (Clone Event, free, copies last week\'s with its traders, so you only change who is new) and name that day\'s traders on it. Most markets are in between: a fixed core named on the season, and guest stalls announced in a weekly newsletter or on the market page.',
+            ],
+            [
+                'q' => 'How do I tell shoppers the market is cancelled for weather?',
+                'a' => 'Decide before the season what calls it off and by what time, and write it on the market page, so traders and shoppers know when to look. On a recurring season, take the date out as a date exception, under Exclude Dates: it leaves the calendar and the subscribed calendar feeds, but nobody is emailed and nothing says why, so send a short newsletter and post it where your shoppers follow you. If each market day is its own event, Cancel event instead: the page shows it was cancelled and you can notify everyone who registered, paid a pitch fee or asked to hear about it (on eventschedule.com, people who paid or registered are emailed only when the market sends through its own email settings). Do not use Cancel on a recurring season, which cancels every date at once. Neither refunds a pitch fee; that is done sale by sale from the Sales page.',
+            ],
+            [
+                'q' => 'How do I get the market into local event guides?',
+                'a' => 'Three ways. A guide that runs a Curator schedule on Event Schedule can add your market as an event source, and your market days appear on it as you publish them; or, once you follow the guide, tick it under Default curator schedules and each new event is sent to it for review. A guide elsewhere can take your iCal or RSS feed address, which you copy from Edit Schedule, Integrations, Calendar text and feeds, so its listing follows your changes. And embedding the calendar on the market\'s own website gives every guide one place to check. All three are free.',
             ],
             [
                 'q' => 'Can I run a separate winter or evening market?',
@@ -1088,9 +1106,11 @@
             ['season', 'Set it once'],
             ['rain', 'The rain call'],
             ['pitch', 'The pitch list'],
+            ['lineup', 'This week\'s stalls'],
             ['morning', 'Market morning'],
             ['stalls', 'Pitch fees'],
             ['board', 'The pitch sign'],
+            ['share', 'Where shoppers look'],
             ['who', 'Perfect for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -1341,7 +1361,7 @@
 
                     <ul class="fm-points" data-reveal-group="90">
                         @foreach ([
-                            ['One date, not the season', 'A date exception removes a single occurrence. You are not rebuilding the recurrence and you are not deleting the market.'],
+                            ['One date, not the season', 'A date exception, set under Exclude Dates, removes a single occurrence. You are not rebuilding the recurrence and you are not deleting the market.'],
                             ['Dates can go back in, too', 'Next to it is an include list that adds a one-off date that is not on the usual day, for a bank holiday Monday market or a late-night in December.'],
                             ['What shoppers actually see', 'That Saturday is simply absent. There is no cancelled banner and no strike-through, so if the reason matters, send a newsletter or say it on the market page.'],
                             ['Their calendars follow', 'A shopper who subscribed to the market\'s calendar loses that Saturday from their own the next time it checks the feed. A single date they downloaded is a copy, so that one stays.'],
@@ -1492,6 +1512,82 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 4b. This Saturday's stalls: one season, or one event a day    -->
+        <!-- ============================================================ -->
+        @php
+            // The two ways to set a season out, read across the things a market
+            // manager actually has to do with it. [label, what happens, plan]
+            $fmOneSeason = [
+                ['Stalls', 'Name your regulars on the series and they show on every market day, linked to their own pages.', 'Every date'],
+                ['Rain', 'Take the date out. It vanishes from the calendar, and nobody is emailed.', 'Silent'],
+                ['Pages', 'One event page for the whole season.', 'One'],
+                ['Setup', 'Once, before opening day. The hours change in one place.', 'Once'],
+            ];
+            $fmOneADay = [
+                ['Stalls', 'Each Saturday carries its own traders, so the guest cheesemaker shows on the 13th and nowhere else.', 'Per day'],
+                ['Rain', 'Cancel that day. Its page says so, and you can tell everyone who registered, paid or asked to hear (on eventschedule.com, people who paid or registered are emailed only when the market sends through its own email settings).', 'Notice'],
+                ['Pages', 'A page per Saturday to share: this week\'s stalls, this week\'s demo.', 'Each'],
+                ['Setup', 'Clone Event once a week, or the whole season in one sitting before opening day.', 'Weekly'],
+            ];
+        @endphp
+        <section id="lineup" class="fm-sec" style="scroll-margin-top: 4rem;">
+            <div class="fm-wrap">
+                <header class="fm-head is-mid">
+                    <span class="fm-tag" data-reveal>This Saturday's stalls</span>
+                    <h2 class="fm-d fm-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Who is at the market <span class="fm-em">this week</span>?
+                    </h2>
+                    <p class="fm-lede" data-reveal style="--reveal-delay: 0.16s;">
+                        It is the question a farmers market calendar gets asked most, after the hours. The answer decides how you set the season out, because a trader you name on an event shows on every date of that event. Same stalls every week: one recurring season. Stalls that change: one event a market day.
+                    </p>
+                </header>
+
+                <div class="fm-duo" style="align-items: start;">
+                    @foreach ([['One recurring season', 'Same stalls weekly', $fmOneSeason], ['One event a market day', 'Stalls that rotate', $fmOneADay]] as [$fmWayTitle, $fmWayFor, $fmWayRows])
+                        <div class="fm-paper fm-aug" data-reveal style="rotate: {{ $loop->first ? '-0.6deg' : '0.7deg' }};">
+                            <div class="fm-aug-top">
+                                <h3 class="fm-d">{{ $fmWayTitle }}</h3>
+                                <span>{{ $fmWayFor }}</span>
+                            </div>
+                            <div class="fm-book">
+                                @foreach ($fmWayRows as [$fmWayK, $fmWayV, $fmWayPlan])
+                                    <div>
+                                        <span>{{ $fmWayK }}</span>
+                                        <span>{{ $fmWayV }}</span>
+                                        <span>{{ $fmWayPlan }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="fm-trio" data-reveal-group="100">
+                    <div class="fm-paper fm-card" data-reveal>
+                        <h3 class="fm-s">Regulars on the season, guests on the day</h3>
+                        <span class="fm-tag fm-tier fm-tier-free">Free</span>
+                        <p>Most markets are a fixed core with a few visitors. Keep the season recurring with the core named on it, and say who is visiting in a weekly newsletter or on the market page, rather than adding a guest to the series, where they would show on every Saturday until October.</p>
+                    </div>
+                    <div class="fm-paper fm-card" data-reveal>
+                        <h3 class="fm-s">A trader's own calendar fills too</h3>
+                        <span class="fm-tag fm-tier fm-tier-free">Free</span>
+                        <p>Name a trader with a schedule of their own and your market days are linked from your page to theirs; the dates wait on their requests tab until they accept, unless you are on their team, or you listed them before they claimed their page. A trader not here yet gets a page listing the dates you gave them, which they can claim.</p>
+                    </div>
+                    <div class="fm-paper fm-card" data-reveal>
+                        <h3 class="fm-s">Special market days</h3>
+                        <span class="fm-tag fm-tier fm-tier-free">Free</span>
+                        <p>The harvest festival or the Christmas market is an event of its own, with its own stalls and hours. If it falls on a Saturday, take that date out of the season first, or shoppers see two markets on one morning.</p>
+                    </div>
+                </div>
+
+                <p class="fm-small fm-foot" data-reveal>
+                    Cancel is for one event: on a recurring season it cancels every Saturday at once, so a single rained-off date in a season is a date exception. Neither refunds a pitch fee. Cancelling can email everyone who paid or registered (on eventschedule.com, people who paid or registered are emailed only when the market sends through its own email settings); a date exception emails nobody, so a trader who paid for that Saturday hears it from you.
+                    <a href="{{ marketing_url('/docs/creating-events') }}#participants" class="fm-link">Naming traders on an event</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 5. Market morning: the hours, painted on a board              -->
         <!-- ============================================================ -->
         <section id="morning" class="fm-sec fm-wood fm-morning" style="scroll-margin-top: 4rem;">
@@ -1614,10 +1710,10 @@
                     <div class="fm-items" data-reveal-group="90" style="margin-top: 0;">
                         @foreach ([
                             ['Counted per market date', false, 'Thirty pitches means thirty on that date. Sell out on a Saturday in June and the rest of the season is unaffected.'],
-                            ['Ask while they pay', true, 'Attach your own questions to the pitch fee: power, van length, insurance number. The answers arrive with the payment instead of in a separate thread.'],
+                            ['Ask while they pay', false, 'Attach your own questions to the pitch fee ticket type: power, van length, insurance number. Questions on a ticket type are free on every plan, and the answers arrive with the payment instead of in a separate thread.'],
                             ['Scan them in', false, 'Every buyer gets a QR code, and scanning it at the entrance to the square costs nothing. The live check-in dashboard, counting who is in as the morning goes on, is the Pro half.'],
-                            ['Money back when it rains', false, 'Refund a pitch fee from the Sales page, in full or in part. On Stripe, PayPal or Razorpay the money goes back to the trader through the provider; a cash or payment-link fee is marked as refunded for your records.'],
-                            ['Sell tickets too, if you need to', false, 'A ticketed cooking class or a harvest supper works the same way, on Pro and with the same zero platform fee. Post it before tickets open, switch on the "Notify me" card, and shoppers can leave an email address to hear when they do.'],
+                            ['Money back when it rains', true, 'Refund a pitch fee from the Sales page, in full or in part. On Stripe, PayPal or Razorpay the money goes back to the trader through the provider; a cash or payment-link fee is marked as refunded for your records.'],
+                            ['Sell tickets too, if you need to', true, 'A ticketed cooking class or a harvest supper works the same way, on Pro and with the same zero platform fee. Post it before tickets open, switch on the "Notify me" card, and shoppers can leave an email address to hear when they do.'],
                         ] as [$pT, $pIsPro, $pD])
                             <div class="fm-paper fm-card" data-reveal>
                                 <h3 class="fm-s">{{ $pT }}</h3>
@@ -1723,11 +1819,73 @@
                             Being exact about it: new events you add reach the list on their own, batched into
                             one digest rather than a message each, and never more than one every few days. The
                             Saturdays of one recurring season are one event, so the season goes out once, not
-                            every week, and a trader's accepted submission belongs to the trader's schedule, so
-                            it is not in your digest. Anything you want to say in your own words is a
+                            every week. With Require Account on and the import form, a trader's submission is
+                            saved on their own schedule and stays out of your digest. One sent through the
+                            Booking Form, or without an account, is saved on the market's schedule, and the
+                            digest does not wait for your approval, so a request you have not answered can still reach your
+                            subscribers. Anything you want to say in your own words is a
                             newsletter, written when you have something to say.
                             <a href="{{ marketing_url('/features/newsletters') }}" class="fm-link">How newsletters work</a>
                         </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7b. Where shoppers look: the website, the guides, the inbox   -->
+        <!-- ============================================================ -->
+        <section id="share" class="fm-sec fm-wood fm-morning" style="scroll-margin-top: 4rem;">
+            <div class="fm-wrap">
+                <header class="fm-head is-mid">
+                    <span class="fm-tag" data-reveal>Where shoppers look</span>
+                    <h2 class="fm-d fm-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        One calendar, <span class="fm-em">in every place they check</span>.
+                    </h2>
+                    <p class="fm-lede" data-reveal style="--reveal-delay: 0.16s;">
+                        Shoppers look for a farmers market calendar on the market's own website, in the town's what's-on guides, and in their inbox on a Friday night. Keep the season in one place and send it to all three, so a rained-off Saturday is fixed once and is wrong nowhere.
+                    </p>
+                </header>
+
+                <div class="fm-duo" style="align-items: start;">
+                    <div data-reveal>
+                        <div class="fm-hours">
+                            <ol>
+                                @foreach ([
+                                    ['2', 'Free, every week', 'A weekly email can reach 2 subscribers on Free: a month holds up to five Friday sends, and 2 times 5 is the plan\'s 10.'],
+                                    ['20', 'Pro, every week', 'On Pro the same weekly email can reach 20 subscribers: 20 times 5 is the plan\'s 100.'],
+                                    ['200', 'Enterprise, every week', '200 times 5 is Enterprise\'s 1,000. A weekly repeat that could not fit a month of five sends is refused when you set it up.'],
+                                    ['Any', 'Your own email settings', 'Send through the market\'s own email settings and there is no monthly limit at all.'],
+                                    ['0', 'The new-dates digest', 'Confirmed email subscribers hear about new market events on their own, at most once every 72 hours, and none of it counts against the allowance.'],
+                                ] as [$fmN, $fmNT, $fmND])
+                                    <li>
+                                        <b class="fm-d fm-hours-n">{{ $fmN }}</b>
+                                        <div>
+                                            <strong class="fm-d">{{ $fmNT }}</strong>
+                                            <span>{{ $fmND }}</span>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ol>
+                        </div>
+                        <p class="fm-hours-note">
+                            A newsletter counts every recipient against the month's allowance: 10 on Free, 100 on Pro, 1,000 on Enterprise. On eventschedule.com a send to more than 50 also needs a verified phone number or your own email settings.
+                        </p>
+                    </div>
+
+                    <div class="fm-nailed" data-reveal-group="110">
+                        @foreach ([
+                            ['On the market\'s own website', 'Embed the calendar on the site you already have, and the sign-up form beside it, both free. The season there is the season here, so there is nothing to update twice.'],
+                            ['In a guide that runs on Event Schedule', 'A local guide with a Curator schedule can add your market as an event source, and every market day you publish appears on their calendar on its own. Or, once you follow the guide, tick it under Default curator schedules, and each new event is sent to them to review.'],
+                            ['In a guide that does not', 'Edit Schedule, then Integrations, then Calendar text and feeds, holds your iCal and RSS feed addresses with a copy button each. Send them to the tourist office or the local paper, and their listing follows your changes. Both are public on every plan.'],
+                            ['The Friday email', 'Set a newsletter to repeat every week with its Events block on The next 7 days, and each Friday it lists that Saturday from the calendar as it stands. A week with nothing to list, a rained-off Saturday taken out, is skipped by itself. On Free a weekly send fits two subscribers; the board beside this has the sums.'],
+                        ] as [$fmShT, $fmShD])
+                            <div class="fm-paper fm-note" data-reveal style="--r: {{ [-0.8, 0.6, -0.5, 0.9][$loop->index] }}deg;">
+                                <h3 class="fm-s">{{ $fmShT }}</h3>
+                                <span class="fm-tag fm-tier fm-tier-free">Free</span>
+                                <p>{{ $fmShD }}</p>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
