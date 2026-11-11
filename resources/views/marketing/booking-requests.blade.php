@@ -47,6 +47,10 @@
             ['q' => 'Does the person asking need an account?', 'a' => 'Not on a performer\'s schedule, where making one is left to them. A venue or curator schedule can require one. Where the site accepts new accounts, someone sending a request as a guest can choose to create one as they send it.'],
             ['q' => 'How do I reply to a request?', 'a' => 'Each request shows the name and email of whoever sent it, and their phone number if your form asks for one, so you can write back before you decide. Accept and Decline email your decision to anyone who sent the request while signed in; a guest hears from you directly.'],
             ['q' => 'Can I ask my own questions?', 'a' => 'Yes, on Pro. Any custom field marked for the request form appears on it: the backline an act needs as a checklist, a reference number checked against a pattern, an expected head count. The answers show on the request, and on the event once you accept it.'],
+            ['q' => 'What should a booking request form include?', 'a' => 'The event or act name, the date, the start time and the length, where it is (unless you are the venue), a description with a link to something to listen to or read, and a way to reach the sender. Those are built into the form, with the phone number as an option you switch on. Add only the questions that decide a yes or a no for you, such as an expected draw, the backline needed or the fee offered (your own questions are a Pro feature), and ask them as dropdowns or checklists where you can, so the answers are easy to compare.'],
+            ['q' => 'How do I avoid double bookings?', 'a' => 'Look at the date on your Schedule tab before you accept, because neither the form nor the Accept button checks a request against the events you already have. Answer requests in date order, put any date you agree by email onto your schedule straight away, even as a draft, and use Accept All only once you have seen that no two waiting requests share a night.'],
+            ['q' => 'What if the person asking is in another time zone?', 'a' => 'The date and time on the form are read in your schedule\'s time zone. The form says which zone that is, and warns a visitor whose device is set to a different one to enter the event\'s local start time. Confirm the time in your reply all the same.'],
+            ['q' => 'Where do I share my booking form?', 'a' => 'Your schedule page carries the button: Request to Book on a performer\'s schedule, Submit Event on a venue or curator. The form also has its own address, your schedule\'s address followed by /request. Link it from your bio, your website\'s booking page and your email signature.'],
             ['q' => 'How do I stop spam requests?', 'a' => 'The form carries a hidden field that catches the bots that fill in every box, and on eventschedule.com a schedule can only take so many new events in a day. You can also turn requests off, require an account on a venue or curator schedule, and set request terms that say what you will and will not take.'],
         ];
     @endphp
@@ -362,7 +366,7 @@
         @php
             $inboxSteps = [
                 ['It lands on the Requests tab', 'The tab appears while something is waiting and carries the count. Each request shows the event, the date and the place, and the name and email of whoever sent it, with their phone number and your custom answers when you asked for them.'],
-                ['You hear about it', 'Owners and admins get an email when new requests arrive, with who asked, when and what they answered, unless they switch it off under Settings, Notifications. Viewers can open a request but not decide it.'],
+                ['You hear about it', 'Owners and admins get an email when new requests arrive, with who asked, when and what they answered, unless they switch it off under Settings, Notifications. Deciding is for owners and admins: a viewer on your team does not see the Requests tab.'],
                 ['Accept or decline', 'Accept puts the event on your public schedule; Decline removes it, after you confirm. Anyone who sent the request signed in is emailed your decision. Accept All clears the list in one go; declining is one at a time, on purpose.'],
                 ['Or let it straight through', 'On a venue or curator schedule, switch Require Approval off and requests go straight onto the schedule. Approved schedules skip the queue when they add you to one of their own events, but a booking form request still waits. A performer\'s booking requests always wait.'],
             ];
@@ -410,6 +414,185 @@
                                 </li>
                             @endforeach
                         </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4b. A template of questions, by kind of schedule             -->
+        <!-- ============================================================ -->
+        {{-- Each line: the question, how the form asks it, and whether that is built in (free) or a
+             Pro custom field. Built in = EventController::bookingRequest() rules (event name, date,
+             start and end time, description, location or Online, phone). Custom field types are the
+             six in docs/creating-schedules #customize-custom-fields; Private keeps an answer off
+             every public page. A venue's form never asks for a location (Role::bookingFormRequires()). --}}
+        @php
+            $templates = [
+                [
+                    'Venue',
+                    'Acts asking you for a date',
+                    [
+                        ['Act name', 'Event name, ticked required', 'Built in'],
+                        ['Date, start time and set length', 'Date & Time, with the end time giving the length', 'Built in'],
+                        ['What they sound like, with a link to a recording', 'Description, ticked required', 'Built in'],
+                        ['Genre', 'Dropdown of the styles you book', 'Pro'],
+                        ['Expected draw', 'Dropdown of ranges, such as under 50, 50 to 150, over 150', 'Pro'],
+                        ['Backline they need', 'Multi-select of the gear you own', 'Pro'],
+                        ['A number to call on the day', 'Ask for phone number', 'Built in'],
+                    ],
+                    'No location question: on a venue\'s form the venue is the place.',
+                ],
+                [
+                    'Talent',
+                    'Promoters asking to book you',
+                    [
+                        ['Name of the event', 'Event name', 'Built in'],
+                        ['Date, start time and set length', 'Date & Time, with the end time', 'Built in'],
+                        ['Where it is', 'Location: a venue name, address or city, ticked required', 'Built in'],
+                        ['Kind of event', 'Dropdown: club night, festival, wedding, corporate, private party', 'Pro'],
+                        ['Fee offered', 'Text, marked Private', 'Pro'],
+                        ['Sound system on site', 'Yes/No', 'Pro'],
+                        ['Load-in or soundcheck time', 'Text', 'Pro'],
+                    ],
+                    'Switch Offer online events off if you only play rooms.',
+                ],
+                [
+                    'Curator',
+                    'The community sending you events',
+                    [
+                        ['Event name, date and time', 'Event name and Date & Time, both ticked required', 'Built in'],
+                        ['Where it is, or that it is online', 'Location, ticked required', 'Built in'],
+                        ['What it is', 'Description', 'Built in'],
+                        ['Free or paid', 'Dropdown', 'Pro'],
+                        ['Where to get tickets', 'Text with the web address pattern', 'Pro'],
+                        ['Step-free access', 'Yes/No', 'Pro'],
+                        ['Age limit', 'Dropdown: all ages, 18+, 21+', 'Pro'],
+                    ],
+                    'A listing that cannot be dated or placed is no use to your readers, so require both.',
+                ],
+            ];
+        @endphp
+        <section id="template" class="scroll-mt-24 bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <p class="es-hold-tag mb-4" data-reveal>A template you can copy</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                        What a booking request form <span class="text-gradient-hold">should ask</span>
+                    </h2>
+                    <p class="mt-5 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                        A good form asks for exactly what you need to say yes or no, and nothing you could look up yourself. Here is a starting set for each kind of schedule, with the way each question is asked on the form.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3" data-reveal-group="80">
+                    @foreach ($templates as [$tplType, $tplHead, $tplRows, $tplNote])
+                        <div class="flex flex-col rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                            <p class="es-hold-tag">{{ $tplType }}</p>
+                            <h3 class="mt-2 text-lg font-bold text-gray-900 dark:text-white">{{ $tplHead }}</h3>
+                            <ul class="mt-4 space-y-3">
+                                @foreach ($tplRows as [$rowAsk, $rowHow, $rowTier])
+                                    <li class="border-t border-gray-200 pt-3 dark:border-white/10">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $rowAsk }}</p>
+                                            <span class="es-hold-pill {{ $rowTier === 'Pro' ? 'es-hold-pill-pro' : 'es-hold-pill-free' }} flex-none">{{ $rowTier }}</span>
+                                        </div>
+                                        <p class="mt-1 text-xs leading-relaxed text-gray-600 dark:text-gray-400">{{ $rowHow }}</p>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <p class="mt-auto pt-5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $tplNote }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="70">
+                    <div class="rounded-2xl border border-gray-200 p-6 dark:border-white/10" data-reveal="panel">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Require only what decides it</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">Every required box is a reason to close the tab. A venue needs the date and something to listen to before anything else; a fee or a head count can be a question that is asked but not forced. The custom field's own Required option makes the difference.</p>
+                    </div>
+                    <div class="rounded-2xl border border-gray-200 p-6 dark:border-white/10" data-reveal="panel">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Offer choices, not blank boxes</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">"Expected draw" as a free text box gets "lots", "a good crowd" and "TBC". As a dropdown of three ranges it gets an answer you can compare across fifty requests. Keep free text for the things that really are free: a description, a link.</p>
+                    </div>
+                    <div class="rounded-2xl border border-gray-200 p-6 dark:border-white/10" data-reveal="panel">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Spend your ten fields wisely</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">A schedule has up to ten custom fields, and the same fields describe your own events too. A field you untick from the request form stays yours for the admin side, and one marked Private never reaches a public page: that is where a fee belongs.</p>
+                    </div>
+                </div>
+
+                <p class="mx-auto mt-10 max-w-3xl text-center text-gray-600 dark:text-gray-400" data-reveal>
+                    Put the rest in your request terms: the nights you book, how far ahead, what the deal usually is, and how long you take to answer. Each field is described in <x-link href="{{ marketing_url('/docs/creating-schedules') }}#customize-custom-fields">the custom fields guide</x-link>.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4c. Answering requests, and not booking a night twice        -->
+        <!-- ============================================================ -->
+        {{-- Nothing on the form or on Accept checks a request against events already on the
+             schedule (EventController::bookingRequest(), accept()), so the checks below are the
+             owner's. The form reads the date and time in the schedule's timezone and warns a visitor
+             whose device is elsewhere (booking-request.blade.php: times_are_in_timezone,
+             guest_submit_timezone_mismatch). Each request card has View, Edit, Decline and Accept
+             (show-admin-requests.blade.php), with the sender's email as a mailto link and phone as tel.
+             The Availability tab is Enterprise, a note to the team that blocks nothing
+             (docs/managing-schedules #availability). --}}
+        @php
+            $routineSteps = [
+                ['Read the email, not just the badge', 'The new-request email spells out up to five requests in full (what is asked for, who asked, how to reach them and their answers) and gives any others a line each. You can often tell a yes from a no before you open the app. Add a shared notification address under Settings, Notifications, and the whole booking team can get a copy.'],
+                ['Check the night against your diary', 'Open the Schedule tab and look at that date before you press anything. The form takes any date it is given, and Accept does not compare the request with what is already on your schedule, so that check is yours.'],
+                ['Accept, then tidy it up', 'Accept puts the request on your schedule and emails a sender who was signed in. Each request also has an Edit link, but saving an edited request puts it on your schedule at once, as Accept does, without the email Accept sends. To keep that email, accept first, then edit to correct the time, add the set length or improve the description.'],
+                ['Write back the same day', 'The sender\'s email is a link on the request, and their phone number when you asked for one. A promoter holding three acts for one Saturday books whoever answers first, and a band that hears nothing books another room.'],
+                ['Clear the ones you cannot take', 'Decline takes the request off your Requests tab. A sender who was signed in hears from the app; a guest does not, so a two-line email from you is the polite close.'],
+            ];
+            $doubleBookings = [
+                ['Two requests for the same night', 'Both look good, both get a yes by email, and only one act can play. Answer in date order, and use Accept All only when you have seen that no two requests share a night.'],
+                ['A date agreed in an email thread', 'The yes lives in your inbox and not in the diary, so the next request for that night looks free. The moment you agree a date, put it on your schedule, even as a draft.'],
+                ['A time read in the wrong time zone', 'A promoter in another city types their local time. The form says which time zone your schedule uses and warns a visitor whose device is set to another, but read the time back in your reply anyway.'],
+                ['A team member who is away', 'An act with several members can be booked on a night one of them cannot make. On Enterprise, each member marks the days they are not free on the Availability tab, and those days are tinted on the Schedule tab. It is a note, not a lock, so look before you accept.'],
+            ];
+        @endphp
+        <section id="answering" class="scroll-mt-24 bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
+                    <div>
+                        <p class="es-hold-tag mb-4" data-reveal>Answering requests</p>
+                        <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                            A routine that <span class="text-gradient-hold">keeps the diary clean</span>
+                        </h2>
+                        <p class="mt-5 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                            A request is a date somebody is holding for you, and it goes cold quickly. Five minutes a day with these steps keeps every hold answered.
+                        </p>
+                        <ol class="mt-8 space-y-6" data-reveal-group="80">
+                            @foreach ($routineSteps as $routineIndex => [$routineTitle, $routineBody])
+                                <li class="flex gap-4" data-reveal>
+                                    <span class="es-hold-num flex h-9 w-9 flex-none items-center justify-center rounded-full text-sm font-bold" aria-hidden="true">{{ $routineIndex + 1 }}</span>
+                                    <div>
+                                        <h3 class="text-base font-bold text-gray-900 dark:text-white">{{ $routineTitle }}</h3>
+                                        <p class="mt-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $routineBody }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </div>
+
+                    <div>
+                        <p class="es-hold-tag mb-4" data-reveal>Avoiding double bookings</p>
+                        <h3 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal style="--reveal-delay: 0.05s;">
+                            Four ways one night gets sold twice
+                        </h3>
+                        <div class="mt-8 space-y-4" data-reveal-group="70">
+                            @foreach ($doubleBookings as [$dbTitle, $dbBody])
+                                <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                                    <h4 class="text-base font-bold text-gray-900 dark:text-white">{{ $dbTitle }}</h4>
+                                    <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $dbBody }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="mt-6 text-sm leading-relaxed text-gray-600 dark:text-gray-400" data-reveal>
+                            Your form has its own address: your schedule's address followed by <span dir="ltr">/request</span>. Put it in your bio, your email signature and the booking page of your website, so every request reaches the same inbox.
+                        </p>
                     </div>
                 </div>
             </div>

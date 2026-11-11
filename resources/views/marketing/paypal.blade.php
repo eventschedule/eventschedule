@@ -210,7 +210,7 @@
                         // has to render identically on every request for the band-diff verifier.
                         $ppSteps = [
                             ['done', 'Buyer approves the order at PayPal'],
-                            ['now', 'The seats are checked again, before anything is taken'],
+                            ['now', 'Their held seats are confirmed before anything is taken'],
                             ['todo', 'The capture is requested'],
                             ['todo', 'The result is read back from PayPal and the sale settles'],
                         ];
@@ -237,12 +237,94 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 1b. How it works, step by step                               -->
+        <!-- ============================================================ -->
+        {{-- Setup steps: docs/account-settings #paypal (Client ID and Secret from Apps & Credentials,
+             Live vs Sandbox, checked on save, test mode warning) and docs/tickets #payment and
+             #payment-row (Settings > Payment Methods; Payment Method lists methods that settle the
+             event's currency). A priced ticket is Pro (docs/FEATURES.md, Payment gateways). The
+             currency locks once the event has taken money (FEATURES.md, Refunds row:
+             Event::hasSettledMoney()). Buyer side: docs/tickets payment table ("From a PayPal
+             balance or by card. The ticket is issued as soon as the buyer returns") and
+             PayPalGateway::handleReturn(). --}}
+        @php
+            $ppSetup = [
+                ['Get your API keys from PayPal', 'Sign in at developer.paypal.com with your PayPal business account, open Apps & Credentials, create an app on the Live tab and copy its Client ID and Secret.'],
+                ['Paste them into Event Schedule', 'In the admin panel, open Settings, then Payment Methods, and fill in the PayPal row. The keys are tried against PayPal before they are saved, and the listener for late payments is registered for you.'],
+                ['Try it in the sandbox first', 'Switch on test mode with the pair from PayPal\'s Sandbox tab, and buy a ticket as the personal test account PayPal creates for you. Before you sell, switch test mode off and paste the Live pair back in: a test ticket looks exactly like a real one.'],
+                ['Put a price on a ticket', 'On the event\'s Tickets tab, choose Sell tickets and add your ticket types with their prices. A ticket with a price is the Pro plan.'],
+                ['Choose PayPal in the Payment row', 'Set the currency to one PayPal settles, then pick PayPal as the payment method. Choose the currency carefully: once the event has taken money it can no longer be changed.'],
+                ['Make one real purchase', 'Have a friend buy the cheapest ticket, or pay with a card or PayPal account other than the one you sell through, since PayPal will not let an account pay itself. Check the email and the ticket, then refund it from the Sales page. A problem found now costs a few cents in fees; found on the day tickets go on sale, it costs sales.'],
+            ];
+            $ppBuyer = [
+                ['Picks tickets on your event page', 'and enters a name and an email address.'],
+                ['Pays on PayPal\'s own page', 'from a PayPal balance or by card.'],
+                ['Comes back to your page', 'where we check their seats are still held for them, and only then is the payment captured.'],
+                ['Gets the ticket at once', 'with its QR code, as soon as PayPal confirms the capture.'],
+            ];
+        @endphp
+        <section id="how" class="es-pp-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-pp-mark mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                    <p class="es-pp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Step by step</p>
+                    <h2 class="es-balance es-pp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        How to sell event tickets <span class="es-pp-accent">with PayPal.</span>
+                    </h2>
+                    <p class="es-pp-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        A PayPal button or a payment link takes the money. A ticket needs more: a count of places for each date, a ticket with its own code for each buyer, and something to scan at the door. Connecting PayPal to a ticketing page gives you those. Here is the whole setup, and what your buyer sees.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 lg:grid-cols-2">
+                    <div class="es-pp-panel p-6 sm:p-8" data-reveal="panel">
+                        <h3 class="es-pp-ink text-lg font-bold">Your side: six steps, once</h3>
+                        <ol class="mt-6 space-y-5">
+                            @foreach ($ppSetup as $setupIndex => [$setupTitle, $setupBody])
+                                <li class="flex gap-4">
+                                    <span class="es-pp-accent w-6 flex-none text-sm font-black" aria-hidden="true">{{ $setupIndex + 1 }}</span>
+                                    <div>
+                                        <p class="es-pp-ink text-sm font-semibold">{{ $setupTitle }}</p>
+                                        <p class="es-pp-muted mt-1 text-sm leading-relaxed">{{ $setupBody }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </div>
+
+                    <div class="flex flex-col gap-4">
+                        <div class="es-pp-panel p-6 sm:p-8" data-reveal="panel">
+                            <h3 class="es-pp-ink text-lg font-bold">Your buyer's side: one minute</h3>
+                            <ol class="mt-6 space-y-5">
+                                @foreach ($ppBuyer as $buyerIndex => [$buyerTitle, $buyerBody])
+                                    <li class="flex gap-4">
+                                        <span class="es-pp-accent w-6 flex-none text-sm font-black" aria-hidden="true">{{ $buyerIndex + 1 }}</span>
+                                        <p class="es-pp-muted text-sm leading-relaxed"><span class="es-pp-ink font-semibold">{{ $buyerTitle }}</span> {{ $buyerBody }}</p>
+                                    </li>
+                                @endforeach
+                            </ol>
+                        </div>
+                        <div class="es-pp-panel flex-1 p-6 sm:p-8" data-reveal="panel">
+                            <h3 class="es-pp-ink text-lg font-bold">Where the money goes</h3>
+                            <p class="es-pp-muted mt-2 text-sm leading-relaxed">
+                                Into your own PayPal balance, the moment the payment is captured. Event Schedule never holds it, so there is no payout to wait for from us. PayPal itself can hold funds for a while, especially on a new account, and you move the money to your bank from PayPal. A buyer taking tickets for three of your nights in one basket pays once, in one PayPal payment.
+                            </p>
+                            <p class="es-pp-muted mt-3 text-sm leading-relaxed">
+                                Every field is in <x-link href="{{ marketing_url('/docs/account-settings') }}#paypal">PayPal in Account Settings</x-link>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 2. What is checked, and when                                 -->
         <!-- ============================================================ -->
         <section id="checks" class="es-pp-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-pp-mark mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                    <div class="es-pp-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
                     <p class="es-pp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Verification</p>
                     <h2 class="es-balance es-pp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Checked <span class="es-pp-accent">three times over.</span>
@@ -276,7 +358,7 @@
         <section id="place" class="es-pp-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-pp-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <div class="es-pp-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                     <p class="es-pp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">One per event</p>
                     <h2 class="es-balance es-pp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Pick it <span class="es-pp-accent">event by event.</span>
@@ -312,6 +394,136 @@
             </div>
         </section>
 
+        <!-- ============================================================ -->
+        <!-- 3b. PayPal or Stripe                                         -->
+        <!-- ============================================================ -->
+        {{-- Every row from this repo: docs/tickets #payment (how the buyer pays, refunds, cart),
+             #stripe (Connect Stripe and onboarding; no Connect button on selfhost), the Payout
+             Schedule note in docs/tickets (Stripe rolling payouts, PayPal balance), installments
+             Stripe-only, gift cards sold through Stripe, Invoice Ninja, a payment link or cash
+             (GiftCardController::purchase switch), donations on both (Event::DONATION_GATEWAYS).
+             Stripe's US rate from TicketFees::rates()['stripe']. No PayPal rate exists in this repo,
+             so none is quoted. --}}
+        @php
+            $stripeRate = \App\Utils\TicketFees::rates()['stripe'];
+            $stripeRateLabel = rtrim(rtrim(number_format($stripeRate['percent'] * 100, 2), '0'), '.').'% + $'.number_format($stripeRate['fixed'], 2);
+            $ppVsStripe = [
+                ['Connecting', 'A Client ID and Secret from an app at developer.paypal.com', 'Connect Stripe, then Stripe\'s own onboarding. On a selfhosted install the administrator sets Stripe up once'],
+                ['How the buyer pays', 'From a PayPal balance or by card, on PayPal\'s page', 'By card'],
+                ['When you have the money', 'In your PayPal balance once the payment is captured, though PayPal can hold funds for a while on a new account', 'Paid out to your bank on a rolling basis, typically 2 business days in the US, and 7 to 14 days for a new account\'s first payout'],
+                ['Processing fee', 'PayPal\'s own rate for your country', 'In the US, '.$stripeRateLabel.' per charge'],
+                ['Refunds from the Sales page', 'Full or partial, sent back through PayPal', 'Full or partial, sent back through Stripe'],
+                ['Monthly installments', 'No', 'Yes, the only method that offers them'],
+                ['Selling gift cards', 'No', 'Yes'],
+                ['Donations at checkout and the multi-event cart', 'Yes', 'Yes'],
+                ['Platform fee from Event Schedule', 'None', 'None'],
+            ];
+        @endphp
+        <section id="vs-stripe" class="es-pp-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-pp-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-pp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">PayPal or Stripe</p>
+                    <h2 class="es-balance es-pp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Which one <span class="es-pp-accent">for your tickets?</span>
+                    </h2>
+                    <p class="es-pp-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        You do not have to choose for good. Connect both and pick one on each event. Here is how they differ when what you sell is a ticket.
+                    </p>
+                </div>
+
+                <div class="es-pp-panel overflow-x-auto p-2 sm:p-4" data-reveal="panel">
+                    <table class="w-full text-start text-sm">
+                        <caption class="sr-only">PayPal and Stripe compared for selling event tickets with Event Schedule</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="es-pp-muted px-3 py-3 text-start text-xs font-semibold uppercase tracking-widest"><span class="sr-only">Compared</span></th>
+                                <th scope="col" class="es-pp-accent px-3 py-3 text-start text-xs font-semibold uppercase tracking-widest">PayPal</th>
+                                <th scope="col" class="es-pp-ink px-3 py-3 text-start text-xs font-semibold uppercase tracking-widest">Stripe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($ppVsStripe as [$vsRow, $vsPaypal, $vsStripe])
+                                <tr class="es-pp-rule">
+                                    <th scope="row" class="es-pp-ink px-3 py-3 text-start align-top font-semibold">{{ $vsRow }}</th>
+                                    <td class="es-pp-muted px-3 py-3 align-top leading-relaxed">{{ $vsPaypal }}</td>
+                                    <td class="es-pp-muted px-3 py-3 align-top leading-relaxed">{{ $vsStripe }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-8 grid gap-4 md:grid-cols-2" data-reveal-group="80">
+                    <div class="es-pp-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-pp-ink text-base font-bold">Pick PayPal when</h3>
+                        <ul class="es-pp-muted mt-3 space-y-2 text-sm leading-relaxed">
+                            <li>Stripe is not available in your country.</li>
+                            <li>Your buyers would rather pay from a PayPal balance than type a card into a page they have never seen.</li>
+                            <li>Your money already runs through PayPal and you want ticket income beside it.</li>
+                        </ul>
+                    </div>
+                    <div class="es-pp-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-pp-ink text-base font-bold">Pick Stripe when</h3>
+                        <ul class="es-pp-muted mt-3 space-y-2 text-sm leading-relaxed">
+                            <li>You want to offer monthly installments on an expensive ticket or a course.</li>
+                            <li>You want gift cards paid for online by card.</li>
+                            <li>You want the money paid out to your bank without moving it yourself.</li>
+                        </ul>
+                        <p class="mt-auto pt-4 text-sm"><x-link href="{{ marketing_url('/stripe') }}">Selling tickets with Stripe</x-link></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3c. Fees and refunds                                         -->
+        <!-- ============================================================ -->
+        {{-- One order is one PayPal payment ("One order, one capture" above; PayPalGateway creates
+             one order per sale), so a fixed part of a rate is charged once per order. Refunds:
+             docs/tickets #refunds and #paypal (Refund Ticket, Available to refund, Refund Amount,
+             partial refunds keep tickets valid, a refund made in PayPal is not reported back). No
+             refund email goes to the buyer (FEATURES.md, Refunds row). Cancelling does not refund
+             (docs/creating-events #notify-attendees). --}}
+        <section id="fees" class="es-pp-rule scroll-mt-24 py-20 lg:py-28">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-pp-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-pp-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Fees and refunds</p>
+                    <h2 class="es-balance es-pp-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        What a ticket costs you, <span class="es-pp-accent">and how to give it back.</span>
+                    </h2>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2" data-reveal-group="80">
+                    <div class="es-pp-panel flex flex-col p-6 sm:p-8" data-reveal="panel">
+                        <h3 class="es-pp-ink text-lg font-bold">Working out PayPal's fee</h3>
+                        <p class="es-pp-muted mt-3 text-sm leading-relaxed">
+                            PayPal sets its own rates, by country and by kind of payment, and changes them from time to time, so read the current figure on PayPal's merchant fees page for your country rather than trusting a number copied onto a blog. Then do the sum on the order, not on the ticket.
+                        </p>
+                        <p class="es-pp-muted mt-3 text-sm leading-relaxed">
+                            Four tickets at 20 bought together are one PayPal payment of 80. A percentage applies to the 80, and any fixed amount per transaction is charged once, not four times. So the more tickets a buyer takes in one go, the smaller the fee's share of each.
+                        </p>
+                        <p class="es-pp-muted mt-3 text-sm leading-relaxed">
+                            Event Schedule adds nothing to that payment. What you pay us is the Pro plan that lets a ticket carry a price, whether you sell ten tickets or ten thousand.
+                        </p>
+                    </div>
+                    <div class="es-pp-panel flex flex-col p-6 sm:p-8" data-reveal="panel">
+                        <h3 class="es-pp-ink text-lg font-bold">Refunding a PayPal ticket</h3>
+                        <ol class="es-pp-muted mt-3 list-decimal space-y-2 ps-5 text-sm leading-relaxed">
+                            <li>Open the Sales page and find the sale.</li>
+                            <li>Choose Refund Ticket. The dialog shows what is available to refund.</li>
+                            <li>Enter the whole amount, or part of it for a partial refund.</li>
+                            <li>The money goes back through PayPal first, and only then does the sale change here.</li>
+                        </ol>
+                        <p class="es-pp-muted mt-4 text-sm leading-relaxed">
+                            A full refund puts the tickets back on sale. A partial one leaves the sale paid and its tickets valid. Always refund here rather than in PayPal: a refund made in PayPal is not reported back, so the ticket would keep scanning at the door. Event Schedule does not email the buyer about a refund, so tell them yourself, and remember that cancelling an event does not refund anyone.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         @include('marketing.partials.pricing-nudge')
 
         <!-- ============================================================ -->
@@ -319,6 +531,10 @@
         <!-- ============================================================ -->
         @php
             $ppFaqs = [
+                ['q' => 'How do I sell event tickets with PayPal?', 'a' => 'Create an app under Apps & Credentials at developer.paypal.com with your PayPal business account and copy its Live Client ID and Secret. Paste them into Settings, Payment Methods in Event Schedule, where they are checked against PayPal before they are saved. Then, on the event\'s Tickets tab, add ticket types with prices and choose PayPal in the Payment row. Buyers pay on PayPal\'s page and get their ticket with a QR code as soon as they return. A ticket with a price is the Pro plan.'],
+                ['q' => 'How much does PayPal charge to sell tickets?', 'a' => 'PayPal\'s own processing rate, which it sets by country and by kind of payment; check its current merchant fees page for yours. Event Schedule adds no platform fee on top. Because a buyer\'s whole order is one PayPal payment, a fixed amount per transaction is charged once per order, not once per ticket.'],
+                ['q' => 'Is PayPal or Stripe better for selling event tickets?', 'a' => 'Both take the money into your own account with no platform fee from us, and both refund in full or in part from the Sales page. PayPal suits buyers who pay from a PayPal balance and places where Stripe is not available. Stripe is the one to pick for monthly installments or selling gift cards, and it pays out to your bank on its own. You can connect both and choose per event.'],
+                ['q' => 'When do I get the money?', 'a' => 'When the payment is captured, which happens as the buyer returns from PayPal. The money lands in your PayPal balance, not with us, and is yours to move to your bank from PayPal unless PayPal places a hold on it. A payment PayPal holds for review arrives once PayPal completes it.'],
                 ['q' => 'Does Event Schedule take a cut of my ticket sales?', 'a' => 'No. There is no platform fee on any plan. The only deduction is PayPal\'s own processing fee, which is between you and PayPal, and the money goes into your own PayPal account rather than through ours.'],
                 ['q' => 'Do I need a paid plan to use PayPal?', 'a' => 'Yes. Selling a ticket that carries a price is Pro or Enterprise, and PayPal comes with it, at no extra cost and with no fee of ours on top. A free schedule has nothing to charge for, so it has nothing for a gateway to settle. Free registration stays unlimited on every plan, and those places need no payment method at all.'],
                 ['q' => 'Can one event offer both PayPal and Stripe?', 'a' => 'No. An event uses one payment method at a time, chosen on the event itself, so you pick per event rather than showing a row of buttons at checkout. You can connect several accounts and use different ones on different events.'],

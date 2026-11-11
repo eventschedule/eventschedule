@@ -57,6 +57,9 @@
             ['q' => 'Can people buy tickets on the page?', 'a' => 'Yes. Free registration works on every plan, with a cap per date and a waitlist. Putting a price on a ticket is the Pro plan, paid through your own Stripe or PayPal account, and there is no platform fee on any plan.'],
             ['q' => 'What shows up when I share the link?', 'a' => 'The event name, a description from your own text, and your flyer. With no flyer the preview uses a performer\'s, the venue\'s or your schedule\'s own picture, and with none of those it shows no picture at all, rather than an advert of ours.'],
             ['q' => 'Will the page show up on Google?', 'a' => 'It is built to be found. The page title carries the event\'s name, with its date and venue while they fit (a recurring event\'s title leaves the date out), the description comes from your own text, and every event page carries event structured data describing what the page shows. Once your schedule\'s email address or phone number is confirmed, search engines are invited to index its pages, and its public events are listed in the sitemap until 30 days after they end. A recurring event keeps one page for the whole series rather than one per week, listed while the series runs. Nobody can promise a ranking, but nothing on the page stands in the way.'],
+            ['q' => 'What should an event landing page include?', 'a' => 'Above the fold: what the event is, the weekday and date, the start time with its time zone, the place, the price, and one button to register or buy. Below it: what happens in what order, who is on, practical details such as age limit, access and parking, what happens if plans change, and a way to reach you. On Event Schedule the first six come from the event\'s own fields, and the page prints the weekday and the time zone for you.'],
+            ['q' => 'How do I make an event landing page for free?', 'a' => 'Create a free schedule, add an event with its name, date and time, the venue or online link, a flyer and a short description, and choose free registration if you want sign-ups. Save it as Public and its page is live, with its own link to share. Registration, the map, add to calendar and sharing are free on every plan; a ticket with a price is Pro.'],
+            ['q' => 'Why does my link show an old picture or no picture when I share it?', 'a' => 'Social networks keep the preview card from the first time a link is posted. If you added or changed the flyer or the short description after that, use the platform\'s own card refresh or debugging tool to make it read the page again. With no flyer at all, the preview uses a performer\'s, the venue\'s or your schedule\'s picture, and otherwise none.'],
             ['q' => 'Can I use my own domain or remove your branding?', 'a' => 'Yes. Removing Event Schedule branding is on Pro, and custom CSS for the finer details is too. A custom domain, so the page lives at your own address, is on Enterprise. Colours, fonts, backgrounds and header images are free on every plan.'],
             ['q' => 'How is this different from building a page on a website builder?', 'a' => 'A website builder is a blank page for anything, and an event page on one is yours to assemble. Here the page is built around the event: the date, the map, the ticket button and the calendar buttons are already in place, filled in from the event you entered.', 'link' => [marketing_url('/squarespace-replacement'), 'Compare with Squarespace']],
         ];
@@ -335,6 +338,138 @@
                 <p class="mx-auto mt-10 max-w-3xl text-center text-gray-600 dark:text-gray-400" data-reveal>
                     Already have a website? Put your whole calendar on it with the free <x-link href="{{ marketing_url('/features/embed-calendar') }}">calendar embed</x-link> and every event still opens its own page.
                 </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4b. The checklist: above the fold, then below it             -->
+        <!-- ============================================================ -->
+        {{-- Product notes in the right-hand column are read off event/show-guest.blade.php: the
+             weekday and the zone abbreviation beside the time (#gp-event-date, $zone), the price
+             row with a range and Few left (#gp-event-price, Event::ticketPriceSummary()), the pinned
+             phone bar (#gp-mobile-cta). Custom fields On event page and the gallery are Pro
+             (docs/FEATURES.md: Custom fields, Photo gallery). Short description is 200 characters
+             and opens the preview text (docs/sharing #social). --}}
+        @php
+            $aboveFold = [
+                ['The name', 'Say what it is, not only what it is called. "The Paper Lanterns" is a name; "The Paper Lanterns, folk with a string section" tells a stranger whether to keep reading.', 'The name leads the page and its title in search results.'],
+                ['The day and the date', 'People plan by weekday. "Saturday, October 10" is read in one glance; "10/10" is read twice and still argued over.', 'The page prints the weekday beside the date for you.'],
+                ['The time, and whose time', 'A start time means nothing to a visitor in another city without its zone. For anything online, the zone is the whole question.', 'The time carries its zone, such as EST or CET, and an end time when you set one.'],
+                ['The place', 'An address a phone can open, and a name people recognise. For an online event, say where it happens and when the link arrives.', 'The venue with a map and a Google Maps link, or the domain of the online link.'],
+                ['The price', 'Free, one price or a range, shown before the button. A price found only after a click loses the people it would have reassured.', 'A price row reads Free entry, the price or the range, and Few left as the last places go.'],
+                ['One button', 'Register or Buy, and nothing competing with it. Every other link above the fold is a way off the page.', 'On a phone the button stays pinned to the bottom of the screen.'],
+            ];
+            $belowFold = [
+                ['What happens, in order', 'Doors, support, the main set, the end. A short running order answers half the messages you would otherwise get.'],
+                ['Who is on', 'The lineup, each act linked to its own page, so fans of the support act find the night too.'],
+                ['What to know before coming', 'Age limit, step-free access, dress code, parking, what to bring. On Pro, custom fields marked On event page print these as their own rows under the venue.'],
+                ['What if', 'Can a ticket be refunded or passed on, and what happens if it rains. One sentence each, written before anyone asks.'],
+                ['Pictures of last time', 'A room full of people sells the next one. On Pro, the event\'s own photo gallery shows them on the page, below the description.'],
+                ['How to reach you', 'A name and an email for the question the page did not answer.'],
+            ];
+        @endphp
+        <section id="checklist" class="scroll-mt-24 bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <p class="es-page-tag mb-4" data-reveal>The checklist</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                        What every event landing page needs <span class="text-gradient-page">above the fold</span>
+                    </h2>
+                    <p class="mt-5 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                        A visitor decides in the first screen whether the event is for them and whether they can make it. Six things settle that. Whatever tool you build the page with, check them before you share the link.
+                    </p>
+                </div>
+
+                <ol class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                    @foreach ($aboveFold as $foldIndex => [$foldTitle, $foldWhy, $foldHere])
+                        <li class="flex flex-col rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                            <div class="mb-3 flex items-center gap-3">
+                                <span class="es-page-num flex h-8 w-8 flex-none items-center justify-center rounded-full text-sm font-bold" aria-hidden="true">{{ $foldIndex + 1 }}</span>
+                                <h3 class="text-base font-bold text-gray-900 dark:text-white">{{ $foldTitle }}</h3>
+                            </div>
+                            <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $foldWhy }}</p>
+                            <p class="mt-auto pt-4 text-sm font-semibold leading-relaxed text-gray-900 dark:text-white"><span class="es-page-accent">On Event Schedule:</span> {{ $foldHere }}</p>
+                        </li>
+                    @endforeach
+                </ol>
+
+                <div class="mx-auto mt-16 max-w-3xl text-center">
+                    <h3 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Below the fold, for the ones still deciding</h3>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400" data-reveal>Someone who scrolls is interested and has a question. Answer it before they have to send it.</p>
+                </div>
+                <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="60">
+                    @foreach ($belowFold as [$belowTitle, $belowBody])
+                        <div class="rounded-2xl border border-gray-200 p-6 dark:border-white/10" data-reveal="panel">
+                            <h4 class="text-base font-bold text-gray-900 dark:text-white">{{ $belowTitle }}</h4>
+                            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $belowBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4c. Mistakes that cost sign-ups, and the first two weeks      -->
+        <!-- ============================================================ -->
+        {{-- Preview caching and the short description's 200 characters: docs/sharing #social.
+             Announcements to confirmed subscribers: docs/FEATURES.md "Automatic new-event
+             announcements" (free, a digest, 72-hour floor by default). Notify attendees on a
+             changed date, time or venue: docs/creating-events #notify-attendees. Event graphics
+             are free on every plan (docs/FEATURES.md). Tickets elsewhere: docs/tickets #external. --}}
+        @php
+            $landingMistakes = [
+                ['The details are only in the flyer', 'A date written on a poster is a picture to a search engine, a screen reader and a link preview. Type the date, the place and the price into the event itself and let the flyer be the picture. Here the fields fill the title, the preview and the structured data, so they are what gets read.'],
+                ['The link went out before the page was ready', 'Social networks keep the preview card from the first time a link is posted. Upload the flyer and write the short description before the first share, or the post shows a bare link for weeks. If you change them later, run the platform\'s own card refresh tool.'],
+                ['The short description is empty', 'The preview text and the search snippet start from it. Without one they fall back to the first lines of the description, which are often "Hi everyone!". One sentence of up to 200 characters, saying what the night is, fixes both.'],
+                ['Paying happens somewhere else', 'Every extra page between the button and the ticket loses people, and a different look on that page loses more. Sell or register on the page itself where you can. Where the tickets really are sold elsewhere, Tickets elsewhere puts that link and its price on the page.'],
+                ['The link in your bio is your home page', 'Someone who saw the poster wants that event, not your story. Point the link at the event, or at your schedule page while you have several, where every upcoming event is one tap away.'],
+                ['A change nobody heard about', 'A moved date that only the page knows about fills the room with the wrong people on the wrong night. Change the date, time or venue of a one-time event and saving asks whether to notify the people coming, with a note of your own if you want one.'],
+            ];
+            $sharePlan = [
+                ['Before the first post', 'Flyer up, short description written, ticket or sign-up open. Send the link to yourself in a chat app to see the preview as others will.'],
+                ['The day you publish', 'Post the event page link, not the flyer alone. Your confirmed email subscribers hear about new public events you create in a digest, without a newsletter of your own.'],
+                ['The weeks before', 'Post where your audience already is, and on Instagram, where a link in a post\'s caption is not clickable, use an events graphic and point to the link in your bio. Generating the graphic is free.'],
+                ['The last week', 'Say what is left. On a page that sells, the price row shows Few left as the last places go; with free registration, a full date opens a waitlist instead of a dead end.'],
+            ];
+        @endphp
+        <section id="mistakes" class="scroll-mt-24 bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <p class="es-page-tag mb-4" data-reveal>What costs sign-ups</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                        Six mistakes, and <span class="text-gradient-page">the fix for each</span>
+                    </h2>
+                    <p class="mt-5 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                        None of these is about design. Each one is a visitor who wanted to come and did not.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="60">
+                    @foreach ($landingMistakes as [$mistakeTitle, $mistakeFix])
+                        <div class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">{{ $mistakeTitle }}</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $mistakeFix }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="mx-auto mt-16 max-w-3xl">
+                    <h3 class="es-balance text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>How to share an event page</h3>
+                    <ol class="mt-8 space-y-6" data-reveal-group="80">
+                        @foreach ($sharePlan as $shareIndex => [$shareTitle, $shareBody])
+                            <li class="flex gap-4" data-reveal>
+                                <span class="es-page-num flex h-9 w-9 flex-none items-center justify-center rounded-full text-sm font-bold" aria-hidden="true">{{ $shareIndex + 1 }}</span>
+                                <div>
+                                    <h4 class="text-base font-bold text-gray-900 dark:text-white">{{ $shareTitle }}</h4>
+                                    <p class="mt-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $shareBody }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="mt-8 text-center text-gray-600 dark:text-gray-400" data-reveal>
+                        More on previews in <x-link href="{{ marketing_url('/docs/sharing') }}#social">the sharing guide</x-link>, and on the weekly picture in <x-link href="{{ marketing_url('/features/event-graphics') }}">event graphics</x-link>.
+                    </p>
+                </div>
             </div>
         </section>
 
