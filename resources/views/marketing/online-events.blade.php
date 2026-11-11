@@ -489,6 +489,148 @@
             ['Watch Parties', 'A screening is a night, not a link. The link is just the door.', '/for-watch-parties'],
         ];
 
+        // Who sees the join link, in the order an attendee meets it. Each row is read off the
+        // product: show-guest prints Event::getEventUrlDomain() or "Online"; the confirmation
+        // (emails/ticket_purchase) carries the ticket button, the QR code and TicketInvite's
+        // calendar invitation, whose notes link the ticket and never the join link;
+        // ticket/view prints the whole event_url; emails/ticket_reminder prints it as a link
+        // (docs: creating-schedules#ticket-reminders); edit.blade's hasKeyChange() offers the
+        // change notice when the link changes; ticket notes print on ticket/view under
+        // "Important information".
+        $linkTimeline = [
+            [
+                'when' => 'Before anyone signs up',
+                'who' => 'Anyone who finds the event',
+                'sees' => 'The link\'s domain on the event page and in your schedule\'s listing, such as meet.google.com, or just Online. Enough to know which app to have ready, not enough to walk in.',
+            ],
+            [
+                'when' => 'At sign-up or checkout',
+                'who' => 'The person who registered or bought',
+                'sees' => 'A confirmation email with their QR code, a button to their ticket page and, for a ticket or a registration (not a season pass), a calendar invitation whose notes link back to that ticket. The ticket page shows the whole join link.',
+            ],
+            [
+                'when' => 'Before it starts',
+                'who' => 'Everyone holding a ticket or a registration',
+                'sees' => 'The reminder email, with the join link in it as a link they can press. It goes 1 day before unless you choose 3 hours, 2 days or 3 days, and it is on for every schedule, on every plan. Anyone who signs up after the reminder time, season pass holders and imported attendees are not sent one.',
+            ],
+            [
+                'when' => 'When you change the link',
+                'who' => 'Ticket holders, and anyone on the interest list',
+                'sees' => 'The ticket page shows the new link as soon as you save, and so does any reminder still to go. Saving also offers to send a change notice, which goes only if you confirm it; on eventschedule.com the notice reaches ticket holders once the schedule has its own email settings.',
+            ],
+            [
+                'when' => 'After it ends',
+                'who' => 'Ticket holders',
+                'sees' => 'Their ticket page stays where it was. Anything you add to the ticket notes afterwards, a recording link for instance, shows there under Important information and not on the public page.',
+            ],
+        ];
+
+        $linkLeaks = [
+            [
+                'title' => 'The link pasted into the description',
+                'body' => 'The description is public on the event page, and it travels into the notes of an Add to calendar entry. A join link written there is a published link. Keep it in the Event URL field, which only the ticket and the reminder print in full.',
+            ],
+            [
+                'title' => 'A ticket forwarded to a friend',
+                'body' => 'Whoever has a ticket page\'s address can read the link on it. For a free session that rarely matters. For a paid one, turn on your meeting tool\'s waiting room and admit the names on your Sales list. Individual tickets give each guest in a booking a ticket of their own (free with Free registration, Pro on an event with ticket types), so one buyer is not handing the link to five.',
+            ],
+            [
+                'title' => 'One meeting room, used for a year',
+                'body' => 'A standing link is the easy choice for a free weekly group, and it is fine there. For a paid course, start a fresh room each term: a recurring event has one link field, so changing it once moves every future date, every ticket and every reminder still to be sent.',
+            ],
+            [
+                'title' => 'A link posted where strangers read it',
+                'body' => 'Once a link is on a public forum, nothing on the event page can call it back. Replace it, and lock the room or set a passcode in the meeting tool. For a session meant only for members, an Unlisted event (Enterprise) stays off your schedule, reachable only by its address, with a password if you set one.',
+            ],
+        ];
+
+        // Formats, not brands: what the audience does decides the tool. Platform facts here are
+        // kept general on purpose (plans and limits change), and none of them is an integration.
+        $formats = [
+            [
+                'name' => 'A meeting room',
+                'examples' => 'Zoom meetings, Google Meet, Microsoft Teams meetings, Jitsi',
+                'pick' => 'when the audience takes part: a class, a workshop, a support group, a Q&A where people speak. Everyone can unmute and turn a camera on.',
+                'watch' => 'Free tiers of meeting tools usually cap how long a group call can run. Check the limit on your plan against the length of the session, before the call ends itself halfway through.',
+            ],
+            [
+                'name' => 'A webinar',
+                'examples' => 'Zoom Webinars, Microsoft Teams webinars and town halls',
+                'pick' => 'when a few people present and many listen: a talk, a launch, a panel. Attendees stay muted unless a host brings them in, and questions arrive through a Q&A box a moderator can work through.',
+                'watch' => 'Webinar modes are often a higher tier or a paid add-on. Run through it once with the speakers before the day, so nobody meets the panelist controls live.',
+            ],
+            [
+                'name' => 'A live stream',
+                'examples' => 'YouTube Live, Twitch',
+                'pick' => 'when the audience is large and mostly watching: a concert, a screening, a keynote. Viewers need no account to watch, a chat runs beside the picture, and YouTube can keep the stream as a video on your channel when it ends.',
+                'watch' => 'Live streaming on a new YouTube channel may need switching on in advance, so set it up a week ahead. Stream as Unlisted when only the people with the link should find it.',
+            ],
+            [
+                'name' => 'A community space',
+                'examples' => 'Discord, a members\' area on your own site',
+                'pick' => 'when the same group meets again and again and talks between sessions: a reading group, a game night, a study circle. The invite is the link.',
+                'watch' => 'First-timers will need an account and a few minutes to find their way in. Say so on the event, and open the room ten minutes early.',
+            ],
+        ];
+
+        $platformQuestions = [
+            'How long can one session run on the plan you are on?',
+            'How many people can join, and what does the next person see once it is full?',
+            'Does an attendee need an account or an app? Every extra step loses a few people at the start time.',
+            'Can you hold people in a waiting room, or require a passcode?',
+            'Is the session recorded, where is the recording kept, and who can watch it?',
+            'Can it caption, and can it tell you who attended? Event Schedule knows who signed up; only the platform knows who turned up.',
+        ];
+
+        // Times in January, when London is UTC+0, New York UTC-5, Los Angeles UTC-8,
+        // Berlin UTC+1, Delhi UTC+5:30 and Sydney UTC+11 (daylight saving there).
+        $zoneZones = ['London', 'New York', 'Los Angeles', 'Berlin', 'Delhi', 'Sydney'];
+        $zoneRows = [
+            ['5:00 PM London', ['17:00', '12:00', '09:00', '18:00', '22:30', '04:00 +1 day']],
+            ['8:00 AM London', ['08:00', '03:00', '00:00', '09:00', '13:30', '19:00']],
+            ['8:00 PM New York', ['01:00 +1 day', '20:00', '17:00', '02:00 +1 day', '06:30 +1 day', '12:00 +1 day']],
+        ];
+
+        $runSheet = [
+            [
+                'when' => 'Two weeks out',
+                'title' => 'Make the room, then publish',
+                'body' => 'Create the meeting or the stream first, so the link is final when you paste it. Set a capacity: Free registration takes a limit per date, and each ticket type takes a quantity. Leave the meeting tool\'s own registration off unless you need it, or people sign up twice and the link on their ticket leads to a second form.',
+            ],
+            [
+                'when' => 'A week out',
+                'title' => 'Test it the way a guest will',
+                'body' => 'Register for your own event with a second email address, open the ticket on a phone, and press the link in a private browser window. That is the journey every attendee takes, and it is how you find the passcode nobody wrote down.',
+            ],
+            [
+                'when' => 'Set once',
+                'title' => 'Choose when the reminder goes',
+                'body' => 'The reminder reaches every ticket holder and registrant with the join link in it. A day before suits a session people plan an evening around; 3 hours before catches the people who signed up on a whim. It is one setting per schedule, at Edit schedule, Tickets, Reminders, so pick what suits most of what you run.',
+            ],
+            [
+                'when' => '15 minutes before',
+                'title' => 'Open the room early',
+                'body' => 'Start the meeting or stream with a holding slide up. Give one person the waiting room and the chat, so the speaker never has to look away to let somebody in or answer "is it starting?".',
+            ],
+            [
+                'when' => 'At the start',
+                'title' => 'Begin on time, and forgive the late',
+                'body' => 'Online audiences trickle in over the first five minutes. Open with something worth hearing that nothing later depends on: a welcome, the plan for the hour, a question for the chat.',
+            ],
+            [
+                'when' => 'The morning after',
+                'title' => 'Close the loop',
+                'body' => 'Put the recording link in the ticket notes and it shows on every attendee\'s ticket page, not the public one. On a weekly series those notes are shared by every date, so say which session a recording is from. On Pro, switch on feedback requests and each booking is asked for a star rating and a comment.',
+            ],
+        ];
+
+        $hybridNotes = [
+            ['Two ticket types, two limits', 'Give the room a ticket type with its seat count as the quantity, and the stream a type of its own. A ticket type with no price works on every plan; a priced one is Pro. Free registration has one limit for everybody, so it suits a hybrid only when the room could hold them all.'],
+            ['Every ticket carries both', 'The ticket shows the venue and the join link to every holder, so somebody who wakes up ill can still watch, and somebody online can see where the room is.'],
+            ['Mic the room for the people who are not in it', 'Repeat each question from the floor before you answer it, and put one person on the online chat so remote questions reach the stage.'],
+            ['Count the two audiences apart', 'Scanning tickets at the door counts the room. Who joined online is in your platform\'s attendance report, because Event Schedule never sees inside the stream.'],
+        ];
+
         $faqs = [
             [
                 'q' => 'Which platforms can I use for an online event?',
@@ -496,7 +638,7 @@
             ],
             [
                 'q' => 'Who can see the join link?',
-                'a' => 'The public listing shows only the domain the event is hosted on, so a visitor can tell it is a Zoom call without being able to walk into it, or just Online when the join details are not a web link. The full link is printed on the ticket, at the top where the venue address would be, and it is clickable there when it is a web link. Free registration produces a ticket as well, so people who signed up without paying get the link the same way buyers do.',
+                'a' => 'The public listing shows only the domain the event is hosted on, so a visitor can tell it is a Zoom call without being able to walk into it, or just Online when the join details are not a web link. The full link is printed on the ticket, at the top where the venue address would be, and it is clickable there when it is a web link. Free registration produces a ticket as well, so people who signed up without paying get the link the same way buyers do. The reminder email that goes before the event, 1 day before unless you choose another time, carries the full link too.',
             ],
             [
                 'q' => 'Can one event be in person and online at the same time?',
@@ -508,11 +650,27 @@
             ],
             [
                 'q' => 'What time will people in other countries see?',
-                'a' => 'The time you enter is anchored to your schedule\'s timezone rather than to whichever device typed it, and the public page shows it in that timezone for everybody. It does not rewrite itself per visitor, so if your audience is spread out it is worth naming the timezone in the event title or description. Add to calendar is the part that converts: the calendar file is stamped in UTC, so an attendee\'s own calendar shows the hour they should turn up, and so does the live feed they can subscribe to.',
+                'a' => 'The time you enter is anchored to your schedule\'s timezone rather than to whichever device typed it. The event page and the ticket print it in that timezone, with the zone beside it (8:00 PM EST, for instance), for everybody. They do not convert it per visitor, so if your audience is spread out, add the hour in one or two of their zones to the description. Add to calendar is the part that converts: the calendar file is stamped in UTC, so an attendee\'s own calendar shows the hour they should turn up, and so does the live feed they can subscribe to.',
             ],
             [
                 'q' => 'Does the join link go into the calendar file?',
-                'a' => 'No. The .ics that Add to calendar downloads, the Google and Outlook links beside it and the live feed a visitor can subscribe to all put the venue address in the location field. An online event has no address to put there, so the entry lands without a join link, although the feed\'s entry does link back to the event page. Tell people the link is on their ticket, or paste it into the event description, which travels into the calendar entry\'s notes but is public on your event page as well.',
+                'a' => 'No. The .ics that Add to calendar downloads, the Google and Outlook links beside it and the live feed a visitor can subscribe to all put the venue address in the location field. An online event has no address to put there, so the entry lands without a join link, although the feed\'s entry does link back to the event page. The calendar invitation attached to the confirmation of a ticket or a registration (not a season pass) is the useful one: its notes link to the attendee\'s own ticket, one tap from the join link. Avoid pasting the link into the event description, which travels into calendar notes but is public on your event page as well.',
+            ],
+            [
+                'q' => 'How do I stop people sharing the link to my online event?',
+                'a' => 'You cannot stop a link being copied, so make a copied link worth less. Keep it out of the description and in the Event URL field, where only the ticket and the reminder show it in full. For a paid session, use your meeting tool\'s waiting room or passcode and admit the names on your Sales list. Start a fresh room for each paid course rather than reusing one for a year. If a link does leak, replace it on the event: every ticket and every reminder still to go shows the new one at once.',
+            ],
+            [
+                'q' => 'When should attendees get the join link?',
+                'a' => 'Twice: once when they sign up, so they know where it will be, and again shortly before it starts, when they actually need it. In Event Schedule the ticket page shows the link from the moment someone registers or buys, and the reminder email carries it again before the session, 1 day before by default, or 3 hours, 2 days or 3 days if you choose. For an evening session people sign up for on impulse, 3 hours before is the reminder that gets them there.',
+            ],
+            [
+                'q' => 'Which is best for an online event: Zoom, Google Meet, Teams or YouTube Live?',
+                'a' => 'Choose by what the audience does. If people will talk, a meeting room such as Zoom, Google Meet or a Teams meeting. If a few present and many listen, a webinar mode, which keeps attendees muted and collects questions. If the audience is large and only watching, a stream such as YouTube Live, which needs no account to watch. Then check the length limit on your plan, the attendee cap, the waiting room and where the recording goes. Event Schedule takes the link from any of them the same way.',
+            ],
+            [
+                'q' => 'How do I share the recording with the people who registered?',
+                'a' => 'Record with your platform, upload it where you keep video (an unlisted YouTube video works), and add the link to the event\'s ticket notes. Ticket notes print on every attendee\'s ticket page under Important information, and not on the public event page, so the people who signed up find it where they found the join link. To share it with everybody, put it in the event description instead, or send it to your followers in a newsletter.',
             ],
             [
                 'q' => 'What happens if a session moves or is cancelled?',
@@ -529,9 +687,12 @@
             ['boxes', 'Two boxes'],
             ['shapes', 'Three shapes'],
             ['link', 'Where the link goes'],
+            ['guard', 'Who sees the link'],
             ['any', 'Any link at all'],
+            ['pick', 'Choosing the tool'],
             ['sell', 'Charging for it'],
             ['time', 'The hour it starts'],
+            ['runsheet', 'Run sheet'],
             ['rest', 'Everything else'],
             ['who', 'Who goes live'],
             ['faq', 'Questions'],
@@ -824,21 +985,82 @@
                          scheme, and the full URL stays behind it as the href. --}}
                     <p class="es-golive-url mb-5">meet.google.com/kfr-hxbz-qde</p>
                     <p class="es-golive-muted text-xs">
-                        This is the ticket, not the listing. A paid ticket and a free registration both produce one, and both carry the link. Change the link later and the same ticket shows the new one, because it is read from the event each time the ticket opens.
+                        This is the ticket, not the listing. A paid ticket and a free registration both produce one, and both carry the link. Change the link later and the same ticket shows the new one, because it is read from the event each time the ticket opens. The reminder email before the session carries it too.
                     </p>
                 </div>
             </div>
 
             <p class="es-golive-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                One honest gap: Add to calendar, and the live feed a visitor can subscribe to, write the venue address into the calendar entry, so an online event lands there without a join link. The description travels into the entry's notes, so the link can go there, but the description is public too.
+                One honest gap: Add to calendar, and the live feed a visitor can subscribe to, write the venue address into the calendar entry, so an online event lands there without a join link. The calendar invitation attached to the confirmation email does better: its notes link to the attendee's own ticket, one tap from the link. The description travels into calendar notes as well, but the description is public, so the link does not belong there.
             </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4b. Who sees the link, and when                              -->
+    <!-- ============================================================ -->
+    <section id="guard" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-golive-mark mb-5" data-reveal>
+                    <span class="es-golive-boxes" aria-hidden="true">
+                        <span class="es-golive-box"></span>
+                        <span class="es-golive-box es-golive-box-on"></span>
+                    </span>
+                    <span class="es-golive-mark-label">The link's timeline</span>
+                </div>
+                <h2 class="es-balance es-golive-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Who sees the link, <span class="es-golive-accent">and when.</span>
+                </h2>
+                <p class="es-golive-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A join link is a key anybody can copy. The arrangement that holds up is the one where the people who signed up always have the current link, and nobody else is shown it in the first place.
+                </p>
+            </div>
+
+            <div class="es-golive-card p-4 sm:p-7" data-reveal="panel">
+                <div class="es-golive-tablewrap">
+                    <table class="es-golive-table">
+                        <caption class="sr-only">Who can see an online event's join link at each stage, from before anyone signs up to after the event</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">When</th>
+                                <th scope="col">Who</th>
+                                <th scope="col">What they see</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($linkTimeline as $stage)
+                                <tr>
+                                    <th scope="row"><span class="block text-sm">{{ $stage['when'] }}</span></th>
+                                    <td>{{ $stage['who'] }}</td>
+                                    <td>{{ $stage['sees'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="es-golive-muted mt-5 text-xs">
+                    Reminders are set at Edit schedule, Tickets, Reminders.
+                    <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-reminders" class="es-golive-link font-semibold hover:underline">How reminders work</a>
+                </p>
+            </div>
+
+            <h3 class="es-golive-ink mt-16 mb-6 text-center text-2xl font-black tracking-tight" data-reveal>How links leak, and the fix for each</h3>
+            <div class="grid gap-6 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($linkLeaks as $leak)
+                    <div class="es-golive-card flex flex-col p-7" data-reveal="panel">
+                        <h4 class="es-golive-ink mb-2 text-lg font-bold">{{ $leak['title'] }}</h4>
+                        <p class="es-golive-muted text-sm leading-relaxed">{{ $leak['body'] }}</p>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
     <!-- 5. Any link at all                                           -->
     <!-- ============================================================ -->
-    <section id="any" class="scroll-mt-24 py-20 lg:py-28">
+    <section id="any" class="es-golive-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-12 lg:grid-cols-2">
                 <div>
@@ -898,6 +1120,52 @@
                         </a>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5b. Choosing the tool                                        -->
+    <!-- ============================================================ -->
+    <section id="pick" class="es-golive-alt scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-golive-mark mb-5" data-reveal>
+                    <span class="es-golive-boxes" aria-hidden="true">
+                        <span class="es-golive-box"></span>
+                        <span class="es-golive-box es-golive-box-on"></span>
+                    </span>
+                    <span class="es-golive-mark-label">Choosing the tool</span>
+                </div>
+                <h2 class="es-balance es-golive-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Meeting, webinar or stream: <span class="es-golive-accent">pick by what the audience does.</span>
+                </h2>
+                <p class="es-golive-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The brand matters less than the format. Decide whether your audience will talk, ask, or only watch, and the shortlist writes itself. Whatever you choose, the event takes its link the same way.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($formats as $format)
+                    <div class="es-golive-card flex flex-col p-7" data-reveal="panel">
+                        <h3 class="es-golive-ink text-xl font-bold">{{ $format['name'] }}</h3>
+                        <p class="es-golive-accent mt-1 mb-4 text-sm font-semibold">{{ $format['examples'] }}</p>
+                        <p class="es-golive-muted text-sm leading-relaxed"><span class="es-golive-ink font-semibold">Pick it</span> {{ $format['pick'] }}</p>
+                        <p class="es-golive-muted es-golive-hr mt-auto pt-4 text-sm leading-relaxed"><span class="es-golive-ink font-semibold">Watch for:</span> {{ $format['watch'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-golive-card mt-8 p-7 sm:p-8" data-reveal="panel">
+                <p class="es-golive-tag mb-4">Six questions before you settle on one</p>
+                <ol class="grid gap-x-8 gap-y-3 md:grid-cols-2">
+                    @foreach ($platformQuestions as $questionIndex => $platformQuestion)
+                        <li class="flex gap-3">
+                            <span class="es-golive-accent flex-none font-mono text-sm font-bold" aria-hidden="true">{{ str_pad($questionIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-golive-muted text-sm leading-relaxed">{{ $platformQuestion }}</span>
+                        </li>
+                    @endforeach
+                </ol>
             </div>
         </div>
     </section>
@@ -997,8 +1265,126 @@
                 </div>
                 <div class="es-golive-card p-7" data-reveal="panel">
                     <h3 class="es-golive-ink mb-2 text-lg font-bold">The part that is on you</h3>
-                    <p class="es-golive-muted text-sm leading-relaxed">The public page prints your schedule's time for everybody. It does not rewrite itself per visitor, so if you sell across timezones, name the zone in the title or the description.</p>
+                    <p class="es-golive-muted text-sm leading-relaxed">The event page and the ticket print your schedule's time with its zone beside it, 8:00 PM EST say, for everybody. They do not convert it per visitor, so if you sell across timezones, add the hour in your audience's main zones to the description.</p>
                 </div>
+            </div>
+            <div class="es-golive-card mt-10 p-4 sm:p-7" data-reveal="panel">
+                <h3 class="es-golive-ink mb-2 text-xl font-bold">Picking the hour for a spread-out audience</h3>
+                <p class="es-golive-muted mb-6 text-sm leading-relaxed">No start time suits everybody, so choose which regions share it. Three candidates, worked for a date in January:</p>
+                <div class="es-golive-tablewrap">
+                    <table class="es-golive-table">
+                        <caption class="sr-only">The same start time in six cities, in January</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Start</th>
+                                @foreach ($zoneZones as $zoneCity)
+                                    <th scope="col">{{ $zoneCity }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($zoneRows as [$zoneStart, $zoneTimes])
+                                <tr>
+                                    <th scope="row"><span class="block text-sm">{{ $zoneStart }}</span></th>
+                                    @foreach ($zoneTimes as $zoneTime)
+                                        <td><span class="whitespace-nowrap">{{ $zoneTime }}</span></td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="es-golive-hr mt-6 grid gap-6 pt-6 md:grid-cols-2">
+                    <p class="es-golive-muted text-sm leading-relaxed">
+                        <span class="es-golive-ink font-semibold">Read it as overlaps.</span> Europe and the Americas meet in the European late afternoon. Europe and India meet in the European morning. The Americas and Australia meet in the American evening. When one session cannot cover the audience you have, run it twice at two hours: Clone Event copies an event in one step.
+                    </p>
+                    <p class="es-golive-muted text-sm leading-relaxed">
+                        <span class="es-golive-ink font-semibold">Watch the weeks the clocks change.</span> The US moves its clocks on the second Sunday of March and the first Sunday of November; Europe on the last Sundays of March and October. In the weeks between, New York is four hours behind London instead of five, and a weekly session set in one zone starts an hour earlier or later for the other.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7b. The run sheet                                            -->
+    <!-- ============================================================ -->
+    <section id="runsheet" class="es-golive-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-golive-mark mb-5" data-reveal>
+                    <span class="es-golive-boxes" aria-hidden="true">
+                        <span class="es-golive-box"></span>
+                        <span class="es-golive-box es-golive-box-on"></span>
+                    </span>
+                    <span class="es-golive-mark-label">Run sheet</span>
+                </div>
+                <h2 class="es-balance es-golive-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    From two weeks out <span class="es-golive-accent">to the morning after.</span>
+                </h2>
+                <p class="es-golive-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    An online session loses people in different places from a room: at the start time, at a link that asks for a passcode, and to a reminder that came too early to remember. This order catches each of them.
+                </p>
+            </div>
+
+            <ol class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                @foreach ($runSheet as $runStep)
+                    <li class="es-golive-card flex flex-col p-7" data-reveal="panel">
+                        <p class="es-golive-tag mb-3">{{ $runStep['when'] }}</p>
+                        <h3 class="es-golive-ink mb-2 text-lg font-bold">{{ $runStep['title'] }}</h3>
+                        <p class="es-golive-muted text-sm leading-relaxed">{{ $runStep['body'] }}</p>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="es-golive-card mt-10 p-7 sm:p-9" data-reveal="panel">
+                <div class="es-golive-mark mb-4">
+                    <span class="es-golive-boxes" aria-hidden="true">
+                        <span class="es-golive-box es-golive-box-on"></span>
+                        <span class="es-golive-box es-golive-box-on"></span>
+                    </span>
+                    <span class="es-golive-mark-label">If the room is happening too</span>
+                </div>
+                <h3 class="es-golive-ink mb-6 text-2xl font-black tracking-tight">Running a hybrid without shortchanging either half</h3>
+                <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
+                    @foreach ($hybridNotes as [$hybridTitle, $hybridBody])
+                        <div>
+                            <h4 class="es-golive-ink font-bold">{{ $hybridTitle }}</h4>
+                            <p class="es-golive-muted mt-1.5 text-sm leading-relaxed">{{ $hybridBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="es-golive-muted es-golive-hr mt-7 pt-5 text-sm">
+                    On a venue's own schedule, In person is always ticked, so adding a stream to a night there is ticking Online and pasting the link.
+                    <a href="{{ marketing_url('/features/check-in') }}" class="es-golive-link font-semibold hover:underline">How door check-in works</a>
+                </p>
+            </div>
+
+            <div class="mt-10 grid gap-6 md:grid-cols-3" data-reveal-group="90">
+                <a href="{{ marketing_url('/features/feedback') }}" class="es-golive-hover es-golive-card group flex flex-col p-6 transition-all duration-200" data-reveal>
+                    <div class="mb-2 flex flex-wrap items-center gap-2">
+                        <h3 class="es-golive-hover-title es-golive-ink text-lg font-bold transition-colors">Ask what they thought</h3>
+                        <span class="es-golive-plan es-golive-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-golive-muted mb-4 text-sm leading-relaxed">A feedback request after the session asks for a star rating and a comment. Off until you switch it on.</p>
+                    <span class="es-golive-hover-arrow es-golive-muted mt-auto text-xs font-semibold transition-colors">Post-event feedback</span>
+                </a>
+                <a href="{{ marketing_url('/features/fan-videos') }}" class="es-golive-hover es-golive-card group flex flex-col p-6 transition-all duration-200" data-reveal>
+                    <div class="mb-2 flex flex-wrap items-center gap-2">
+                        <h3 class="es-golive-hover-title es-golive-ink text-lg font-bold transition-colors">Let them talk back</h3>
+                        <span class="es-golive-plan">Free</span>
+                    </div>
+                    <p class="es-golive-muted mb-4 text-sm leading-relaxed">Comments, photos and YouTube links on the event page, each one waiting for your approval before it shows.</p>
+                    <span class="es-golive-hover-arrow es-golive-muted mt-auto text-xs font-semibold transition-colors">Fan content</span>
+                </a>
+                <a href="{{ marketing_url('/features/polls') }}" class="es-golive-hover es-golive-card group flex flex-col p-6 transition-all duration-200" data-reveal>
+                    <div class="mb-2 flex flex-wrap items-center gap-2">
+                        <h3 class="es-golive-hover-title es-golive-ink text-lg font-bold transition-colors">Put a question to the room</h3>
+                        <span class="es-golive-plan es-golive-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-golive-muted mb-4 text-sm leading-relaxed">Polls on the event page, voted on by visitors who sign in, for the question that should outlive the chat.</p>
+                    <span class="es-golive-hover-arrow es-golive-muted mt-auto text-xs font-semibold transition-colors">Event polls</span>
+                </a>
             </div>
         </div>
     </section>

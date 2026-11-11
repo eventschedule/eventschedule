@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Post-Event Feedback and Attendee Reviews - Event Schedule</x-slot>
-    <x-slot name="description">Post-event feedback for ticket holders: a day after the event ends, everyone who booked gets a card with a one-to-five rating and an optional comment.</x-slot>
+    <x-slot name="description">How to collect post-event feedback worth reading: when to ask, how to get replies and what to do with them. Ratings and comments from everyone who booked.</x-slot>
     <x-slot name="breadcrumbTitle">Event Feedback</x-slot>
 
     <x-slot name="structuredData">
@@ -505,10 +505,12 @@
             ['Cards per booking', 'One, enforced by the database'],
             ['Editing a card', 'Not possible once it is submitted'],
             ['Who is asked', 'Everyone who holds a paid booking, RSVP registrations included'],
+            ['Individual tickets', 'The person who booked is asked; the guests named on that order are not'],
             ['Refunded in full', 'Not asked; a card already returned leaves the public reviews and the average'],
             ['Partly refunded', 'Still a paid booking, so it is asked and its card counts'],
             ['Request delay', '1, 2, 6, 12, 24 or 48 hours after that occurrence ends'],
             ['Default delay', '24 hours'],
+            ['Where the clock starts', 'The end of the occurrence; an event with no end time counts as two hours long'],
             ['Queue', 'Checked hourly, so the times shown are approximate'],
             ['Requests stop', '30 days after the occurrence ended'],
             ['Draft events', 'The card will not open while an event is in draft'],
@@ -517,7 +519,32 @@
             ['Public display', 'Off by default; an average plus the latest 20 when on'],
             ['Per event', 'Schedule default, on, or off'],
             ['Getting it out', 'CSV export, feedback.submitted webhook, REST API'],
+            ['Switched on', 'Off for every schedule until you turn it on'],
             ['Plan', 'Pro, included on Enterprise and in selfhosted installations'],
+        ];
+
+        // End time plus delay, read as a clock. Plain arithmetic on the six delays the
+        // setting offers; "about" because the queue runs hourly.
+        $landings = [
+            ['Morning workshop', '12:30', '1h', 'about 13:30', 'Good: still on their mind at lunch', true],
+            ['Online session', '19:00', '1h', 'about 20:00', 'Good: most are still at the screen', true],
+            ['Weeknight class', '21:00', '12h', 'about 09:00 next day', 'Good: with the morning coffee', true],
+            ['Evening concert', '23:00', '12h', 'about 11:00 next day', 'Good: awake, and it was last night', true],
+            ['Evening concert', '23:00', '24h', 'about 23:00 next night', 'Poor: arrives as people go to bed', false],
+            ['Club night', '03:00', '12h', 'about 15:00', 'Good: after everyone is up', true],
+        ];
+
+        $usefulTips = [
+            ['Say it in the room', 'At the close, tell people a short email arrives and name the one thing you most want to hear about: the new start time, the sound at the back, the change of room. The comment box is open; a cue from the stage is what points it.'],
+            ['Send it from a name they know', 'People answer mail from people they recognise. The request goes out from your own address (on eventschedule.com, through the schedule\'s email settings), and the card carries your logo and colours.'],
+            ['Nudge once, by hand', 'There is no automatic second email. A day or two later, open the Sent, Awaiting Response card on the Feedback tab and press Resend for the people you most want to hear from: a first-timer, a regular who has gone quiet.'],
+            ['Ask about the night, not the season', 'Each date\'s bookings are asked about that date, so a weekly class can compare this Tuesday with last Tuesday instead of averaging a whole term into one number.'],
+        ];
+
+        $piles = [
+            ['Fix before next time', 'Things you can change and would want to: the doors, the queue at the bar, a start time. Note what you changed and when.'],
+            ['Try once, then ask again', 'Ideas that might be right: a later start, a shorter set, a different room. Change one thing at a time, so the next round of cards can tell you whether it worked.'],
+            ['Not for this event', 'Requests that would make it a different night. Thank people for them anyway, in the reply or in the next newsletter.'],
         ];
 
         $faqs = [
@@ -551,7 +578,23 @@
             ],
             [
                 'q' => 'Do I need the Pro plan?',
-                'a' => 'Yes. Post-event feedback is a Pro feature at '.plan_price($proMonthly).' a month, included on Enterprise, and selfhosted installations have it too. On the hosted platform it also needs your schedule\'s own email settings, because the request is sent from your address rather than ours. Once those are saved the toggle unlocks, and there is a button to send yourself a test card before you turn it loose on real attendees.',
+                'a' => 'Yes. Post-event feedback is a Pro feature at '.plan_price($proMonthly).' a month, included on Enterprise, and selfhosted installations have it too. On the hosted platform it also needs your schedule\'s own email settings, because the request is sent from your address rather than ours. Once those are saved the toggle unlocks. It starts switched off, so nothing is sent until you turn it on, and there is a button to send yourself a test card before you turn it loose on real attendees.',
+            ],
+            [
+                'q' => 'When is the best time to send a post-event feedback request?',
+                'a' => 'While the event is still fresh, and at an hour people read email. For a daytime workshop or an online session that is an hour or two after it ends. For an evening show it is the next morning, which is a delay of about 12 hours, not 24: a day after an 11 PM finish lands at 11 PM the following night. Work it out as the event\'s end time plus the delay, in your own timezone. In Event Schedule the delay is one setting per schedule (1, 2, 6, 12, 24 or 48 hours), so choose it for the events you run most, and give each event a real end time, because one without counts as two hours long.',
+            ],
+            [
+                'q' => 'How do I get more people to fill in post-event feedback?',
+                'a' => 'Keep it short, send it soon, and send it from a name they know. Say at the end of the event that a short email is coming and what you most want to hear about. Make the form quick: a required rating and an optional comment is about as short as a form gets. Nudge once by hand rather than on a timer: Event Schedule sends one request per booking, and the Feedback tab\'s Resend sends it again to one attendee. Above all, show people what changed because of the last round, in the next event description or a newsletter. People answer when answering has visibly done something.',
+            ],
+            [
+                'q' => 'What questions should a post-event survey ask?',
+                'a' => 'As few as will tell you what to change. One overall rating gives you a number to compare night against night; one open question gives you the reason behind it. Every extra question costs you replies. Event Schedule asks exactly those two: a rating from one to five, which is required, and a comment, which is optional. If you need something specific, such as which session someone attended or how they heard about you, ask for it at checkout with your own questions, while they are still filling in a form anyway.',
+            ],
+            [
+                'q' => 'Does every guest on a group booking get a feedback request?',
+                'a' => 'No: one request per booking, to the person who booked. That holds even with Individual tickets turned on, where each guest has a ticket of their own: the guests named on the order are not asked separately. If you want every guest\'s view, tell the person who booked that the comment box is theirs to fill in for the group.',
             ],
             [
                 'q' => 'Can I get the feedback out of Event Schedule?',
@@ -568,6 +611,8 @@
             ['drawer', 'The returned cards'],
             ['alerts', 'When one comes back'],
             ['spec', 'The small print'],
+            ['useful', 'Answers worth reading'],
+            ['act', 'Acting on it'],
             ['faq', 'Questions'],
             ['claim', 'Ask them'],
         ];
@@ -798,6 +843,41 @@
                         <a href="{{ route('marketing.docs.creating_events') }}#feedback" class="es-comment-link font-medium hover:underline">The per-event override</a>
                     </p>
                 </div>
+            </div>
+            <div class="es-comment-card mt-6 overflow-x-auto p-6 sm:p-8" data-reveal="panel">
+                <div class="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 class="es-comment-ink text-lg font-bold">Read the delay as a clock</h3>
+                    <span class="es-comment-muted font-mono text-xs">end time + delay = when it lands</span>
+                </div>
+                <p class="es-comment-muted mb-5 text-sm">
+                    The best request arrives while the night is still fresh and at an hour people read email. Twenty-four hours is a sensible default for a daytime event, and the wrong one for a late show.
+                </p>
+                <table class="w-full border-collapse text-left">
+                    <caption class="sr-only">When a feedback request arrives for six kinds of event, given the event's end time and the delay chosen</caption>
+                    <thead>
+                        <tr class="es-comment-tag">
+                            <th scope="col" class="pb-3 pe-3 font-bold">Event</th>
+                            <th scope="col" class="pb-3 pe-3 font-bold">Ends</th>
+                            <th scope="col" class="pb-3 pe-3 font-bold">Delay</th>
+                            <th scope="col" class="pb-3 pe-3 font-bold">Lands</th>
+                            <th scope="col" class="hidden pb-3 font-bold md:table-cell">Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($landings as [$landEvent, $landEnds, $landDelay, $landAt, $landVerdict, $landGood])
+                            <tr class="es-comment-rule border-t">
+                                <th scope="row" class="es-comment-ink py-3 pe-3 align-middle text-sm font-bold">{{ $landEvent }}</th>
+                                <td class="es-comment-muted py-3 pe-3 align-middle font-mono text-xs">{{ $landEnds }}</td>
+                                <td class="py-3 pe-3 align-middle font-mono text-xs @if ($landGood) es-comment-accent font-bold @else es-comment-muted @endif">{{ $landDelay }}</td>
+                                <td class="es-comment-ink py-3 pe-3 align-middle font-mono text-xs">{{ $landAt }}<span class="es-comment-muted mt-1 block font-sans md:hidden">{{ $landVerdict }}</span></td>
+                                <td class="es-comment-muted hidden py-3 align-middle text-sm md:table-cell">{{ $landVerdict }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <p class="es-comment-muted es-comment-rule mt-5 border-t pt-4 text-xs">
+                    The delay is one setting for the whole schedule, so choose it for the events you run most. The clock starts at the event's end, its start plus its length, and an event saved without an end time counts as two hours long, so give it a real one. Times are in your schedule's timezone, give or take the hourly queue.
+                </p>
             </div>
         </div>
     </section>
@@ -1170,6 +1250,127 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 8b. Answers worth reading                                    -->
+    <!-- ============================================================ -->
+    <section id="useful" class="es-comment-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-comment-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-comment-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Answers worth reading</p>
+                <h2 class="es-balance es-comment-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Two questions are enough. <span class="es-comment-accent">Make them count.</span>
+                </h2>
+                <p class="es-comment-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A long survey tells you less, because fewer people finish it. A rating and a comment box tell you plenty, if what happens before and after the email points people at the thing you need to know.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($usefulTips as $tipIndex => [$tipTitle, $tipBody])
+                    <div class="es-comment-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                        <p class="es-comment-tag mb-3">{{ str_pad($tipIndex + 1, 2, '0', STR_PAD_LEFT) }}</p>
+                        <h3 class="es-comment-ink mb-2 text-lg font-bold">{{ $tipTitle }}</h3>
+                        <p class="es-comment-muted text-sm leading-relaxed">{{ $tipBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-comment-card mt-6 p-6 sm:p-8" data-reveal="panel">
+                <div class="grid gap-8 md:grid-cols-2">
+                    <div>
+                        <h3 class="es-comment-ink mb-2 text-lg font-bold">What a response rate is for</h3>
+                        <p class="es-comment-muted text-sm leading-relaxed">
+                            The Feedback tab works it out as the cards returned over everyone asked. It is one figure across all your events, so watch how it moves after each event rather than comparing it with anybody else's: a drop usually means the request landed at a bad hour or in a spam folder, and a rise after you changed something people asked for means they noticed.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="es-comment-ink mb-2 text-lg font-bold">Who you are hearing from</h3>
+                        <p class="es-comment-muted text-sm leading-relaxed">
+                            Only people who held a booking are asked, so every card comes from somebody who booked a place, not a passer-by. One request goes per booking, to the person who booked: on a table of six, one voice speaks for the group, so ask the booker to answer for the table.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8c. Reading the cards and acting on them                     -->
+    <!-- ============================================================ -->
+    <section id="act" class="es-comment-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-comment-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <p class="es-comment-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Acting on it</p>
+                <h2 class="es-balance es-comment-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Read the low cards first. <span class="es-comment-accent">Then change one thing.</span>
+                </h2>
+                <p class="es-comment-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Feedback is only worth collecting if the next event is different because of it. A week after the event, an hour with the cards is usually enough.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2" data-reveal-group="100">
+                <div class="es-comment-card flex flex-col p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-comment-ink mb-3 text-lg font-bold">An average hides a split</h3>
+                    <p class="es-comment-muted mb-4 text-sm leading-relaxed">
+                        Eighteen fives and two ones average 4.6. So do twelve fives and eight fours. The first is a good night with two people who had a bad one, and you want to know why; the second is a room that was fine but not thrilled. Sort the Responses by rating and read from the bottom.
+                    </p>
+                    <p class="es-comment-muted text-sm leading-relaxed">
+                        Small numbers are anecdotes. With five cards, one person can move the average by up to 0.8. Look for the same complaint in two or three comments before you rebuild anything.
+                    </p>
+                    <p class="es-comment-muted es-comment-rule mt-auto border-t pt-4 text-xs">
+                        The CSV export carries each attendee's email beside their card, so a one-star card with something fixable in it can get a personal reply.
+                    </p>
+                </div>
+
+                <div class="es-comment-card flex flex-col p-6 sm:p-8" data-reveal="panel">
+                    <h3 class="es-comment-ink mb-4 text-lg font-bold">Three piles</h3>
+                    <ol class="space-y-4">
+                        @foreach ($piles as $pileIndex => [$pileTitle, $pileBody])
+                            <li class="flex gap-4">
+                                <span class="es-comment-accent flex-none font-mono text-sm font-bold" aria-hidden="true">{{ str_pad($pileIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                <div>
+                                    <p class="es-comment-ink text-sm font-semibold">{{ $pileTitle }}</p>
+                                    <p class="es-comment-muted mt-1 text-sm leading-relaxed">{{ $pileBody }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="es-comment-muted es-comment-rule mt-auto border-t pt-4 text-xs">
+                        Then say what changed, where the same people will see it: the next event's description, or a <x-link href="{{ marketing_url('/features/newsletters') }}">newsletter</x-link> to your followers. "You said the doors opened too late; from July they open at seven." It is the best reason anybody has to answer the next card.
+                    </p>
+                </div>
+            </div>
+
+            <div class="es-comment-card mt-6 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-comment-ink mb-5 text-lg font-bold">Should the cards go on the event page?</h3>
+                <div class="grid gap-8 md:grid-cols-2">
+                    <div>
+                        <p class="es-comment-tag mb-3">Switch Show feedback publicly on when</p>
+                        <ul class="es-comment-muted space-y-2 text-sm leading-relaxed">
+                            <li class="flex gap-2"><span class="es-comment-accent flex-none font-bold" aria-hidden="true">+</span><span>The event is one-off or multi-day, and later visitors decide on what the people who went say.</span></li>
+                            <li class="flex gap-2"><span class="es-comment-accent flex-none font-bold" aria-hidden="true">+</span><span>You have read a few rounds and like what you see.</span></li>
+                            <li class="flex gap-2"><span class="es-comment-accent flex-none font-bold" aria-hidden="true">+</span><span>You are content to show every card, the three-star ones included.</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="es-comment-tag mb-3">Leave it off when</p>
+                        <ul class="es-comment-muted space-y-2 text-sm leading-relaxed">
+                            <li class="flex gap-2"><span class="es-comment-accent flex-none font-bold" aria-hidden="true">&minus;</span><span>A new format is still finding its feet, and the cards are working notes.</span></li>
+                            <li class="flex gap-2"><span class="es-comment-accent flex-none font-bold" aria-hidden="true">&minus;</span><span>The audience is private: a members' evening, a staff training day.</span></li>
+                            <li class="flex gap-2"><span class="es-comment-accent flex-none font-bold" aria-hidden="true">&minus;</span><span>You need to pick and choose. There is no per-card approval: it is every card or none. It is one switch for the whole schedule; to keep one event's cards off its page, turn feedback off for that event.</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="es-comment-muted es-comment-rule mt-6 border-t pt-4 text-xs">
+                    Published cards show the attendee's first name only, and attendees are told on the form that their words may appear on the event page.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 9. Related features                                          -->
     <!-- ============================================================ -->
     <section class="py-20">
@@ -1254,7 +1455,7 @@
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-comment-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-comment-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <h2 class="es-balance es-comment-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>

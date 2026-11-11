@@ -599,9 +599,11 @@
             ['Accept or decline event requests', true, true, false],
             ['Open the settings page, and change branding', true, true, false],
             ['Scan tickets at the door', true, true, true],
+            ['Mark their own unavailable days, on a talent schedule', true, true, true],
             ['See ticket sales, the waitlist and the check-in dashboard', true, true, false],
             ['Refund a sale', true, true, false],
             ['Read the audit log', true, true, false],
+            ['Write and send newsletters to followers', true, true, false],
             ['Invite a new member', true, true, false],
             ['Change a member\'s level, or remove somebody', true, false, false],
             ['Change the plan or billing', true, false, false],
@@ -627,7 +629,7 @@
             ],
             [
                 'q' => 'What are the access levels?',
-                'a' => 'Three: owner, admin and viewer. The owner is whoever created the schedule. An admin can create and edit events, change settings, invite other members, and see the schedule\'s ticket sales, waitlist and check-in dashboard, including refunding a sale. A viewer reads the schedule, the requests, the bookings and the team, and can still scan tickets at the door, but sees none of the sales and cannot open the settings page at all. Billing, deleting the schedule, and changing or removing another member are controls the app shows to the owner only.',
+                'a' => 'Three: owner, admin and viewer. The owner is whoever created the schedule. An admin can create and edit events, change settings, invite other members, and see the schedule\'s ticket sales, waitlist and check-in dashboard, including refunding a sale. A viewer sees the Schedule tab\'s calendar, marks their own unavailable days on a talent schedule, and can scan tickets at the door, but cannot open any other tab (requests, bookings, followers, the team), sees none of the sales and cannot open the settings page at all. Billing, deleting the schedule, and changing or removing another member are controls the app shows to the owner only.',
             ],
             [
                 'q' => 'How do I invite somebody?',
@@ -643,16 +645,94 @@
             ],
             [
                 'q' => 'Does each member get their own settings?',
-                'a' => 'Yes, on the same schedule. Notification preferences are stored per member, so one person can take the event-request emails while another takes none. Each member can also sync the schedule into their own Google Calendar from their schedules list. On a talent schedule, which is the type that carries an Availability tab, each member keeps their own unavailable dates on the Enterprise plan, and the whole team sees those days marked on the Schedule tab.',
+                'a' => 'Yes, on the same schedule. Notification preferences are stored per member, so one person can take the event-request emails while another takes none. An admin can also send the schedule\'s events to a Google Calendar of their own with Sync to My Calendar, in the schedule\'s Google Calendar settings, while the schedule-wide sync stays the owner\'s. On a talent schedule, which is the type that carries an Availability tab, each member keeps their own unavailable dates on the Enterprise plan, and the whole team sees those days marked on the Schedule tab.',
             ],
             [
                 'q' => 'Can somebody leave the team?',
-                'a' => 'Yes. A member can remove themselves from a schedule at any time, and the owner can remove anybody else. The owner cannot be removed, which is deliberate: a schedule is never left without one.',
+                'a' => 'Yes. A member can remove themselves from a schedule at any time with Leave on their own row, and the owner can remove anybody else. The events they created on the schedule pass to the owner, except one that already has sales or sign-ups (a free registration counts), which stays on their account so its refunds reach the right payment account. The owner cannot be removed, which is deliberate: a schedule is never left without one.',
+            ],
+            [
+                'q' => 'Can a viewer check people in at the door?',
+                'a' => 'Yes. Beyond reading the calendar (and marking their own days on a talent schedule), scanning tickets is what a viewer is there for, and they do it signed in as themselves on their own phone, without seeing the schedule\'s sales. Every phone that scans needs somebody signed in as a member, so count your door staff when you count seats. The owner and admins can scan as well.',
+            ],
+            [
+                'q' => 'Who gets paid when a team member creates an event?',
+                'a' => 'On eventschedule.com, online payments go to the payment methods connected to the account of whoever created the event, so an event an admin creates pays the admin. To keep every sale on the owner\'s account, the owner can create the ticketed events, or switch on Team members pick from these presets (Enterprise): admins then choose from the owner\'s presets, cannot type prices, and the events they add are on the owner\'s account. A selfhosted install sets Stripe up once for the whole install.',
+            ],
+            [
+                'q' => 'How do team members mark the days they are not available?',
+                'a' => 'On a talent schedule there is an Availability tab, on the Enterprise plan. Each member, viewers included, presses the days they cannot do on a calendar. Those days are tinted amber on the shared Schedule tab, with a mark that names who is out when you point at it. It is a note to the team: it is never shown on the public schedule, and it does not stop an event being added on that day, although it does block bookings of any appointment type that member hosts. Venue and curator schedules do not have the tab.',
             ],
             [
                 'q' => 'Can I hand the whole schedule to somebody else?',
                 'a' => 'Yes, on every plan, Free included. The owner chooses Transfer ownership on the Team tab and enters an email address, and the schedule moves once that person signs in and accepts. The events the previous owner created go with it, so their ticket revenue settles into the new owner\'s account from then on. On the Enterprise plan the previous owner can stay on the card as an admin; otherwise they come off it.',
             ],
+        ];
+
+        // Three worked cards. Each slot is [name, what they do, code, code class].
+        // Counts follow the hosted cap of five, owner included (RoleController::storeMember).
+        $lineups = [
+            [
+                'title' => 'A small music venue',
+                'type' => 'Venue schedule',
+                'count' => '5 of 5',
+                'slots' => [
+                    ['You', 'owner, holds the plan', 'OW', ''],
+                    ['The booker', 'confirms and publishes dates', 'AD', 'es-line-code-ad'],
+                    ['Marketing', 'newsletters, graphics, requests', 'AD', 'es-line-code-ad'],
+                    ['Friday door', 'scans tickets', 'VW', 'es-line-code-vw'],
+                    ['Saturday door', 'scans tickets', 'VW', 'es-line-code-vw'],
+                ],
+                'note' => 'Two seats go to the door, because every phone that scans is signed in as a member of the schedule. The booker and marketing are admins because both publish; neither needs the plan.',
+            ],
+            [
+                'title' => 'A band with a manager',
+                'type' => 'Talent schedule',
+                'count' => '5 of 5',
+                'slots' => [
+                    ['The manager', 'owner, takes the bookings', 'OW', ''],
+                    ['Guitar', 'marks days off', 'VW', 'es-line-code-vw'],
+                    ['Bass', 'marks days off', 'VW', 'es-line-code-vw'],
+                    ['Drums', 'marks days off', 'VW', 'es-line-code-vw'],
+                    ['Vocals', 'marks days off', 'VW', 'es-line-code-vw'],
+                ],
+                'note' => 'The players are viewers. Each one reads the calendar and marks the dates they cannot do on the Availability tab, so the manager sees every gap before saying yes to a gig, and nobody else can move a date.',
+            ],
+            [
+                'title' => 'A community events calendar',
+                'type' => 'Curator schedule',
+                'count' => '4 of 5',
+                'slots' => [
+                    ['You', 'owner', 'OW', ''],
+                    ['Requests, weekdays', 'accepts and declines', 'AD', 'es-line-code-ad'],
+                    ['Requests, weekends', 'accepts and declines', 'AD', 'es-line-code-ad'],
+                    ['Newsletter editor', 'writes the weekly send', 'AD', 'es-line-code-ad'],
+                    ['', '', '', 'open'],
+                ],
+                'note' => 'A calendar people submit to lives on its Requests tab, which only the owner and admins open, so the work is split by day. One seat stays empty on purpose: a holiday cover is easy to write in when there is room for them.',
+            ],
+        ];
+
+        $lineupMistakes = [
+            ['Admin for everybody, "so they can help"', 'An admin can delete events, refund sales and invite more people. Give Admin to the people who publish and Viewer to everyone who only needs to look, mark their days or scan.'],
+            ['One shared login', 'The audit log then names one person for the work of five, and nobody can be taken off without changing the password for everyone. A seat each is the point of the card.'],
+            ['Remembering the door at the door', 'Scanning needs somebody signed in on that phone. Write the door staff in during the week, have each one open the scanner once, and remember that the owner and admins can scan too.'],
+            ['Letting an admin sell on their own account by accident', 'Ticket money follows whoever created the event. Settle that before an admin puts a price on anything, as the next section explains.'],
+        ];
+
+        $leaveChanges = [
+            'The events they created on this schedule pass to the owner, and their rights over those events end with their seat.',
+            'An event that already has sales or sign-ups (a free registration counts) stays on their account, so its refunds come from the payment account that was paid.',
+            'Any appointment type they host is switched off, and the owner is emailed to give it a new host.',
+            'When they leave or are removed, a feed they added is paused until somebody still on the team looks at it, and their own calendar sync for this schedule is deleted.',
+        ];
+
+        $leaveChecklist = [
+            ['Look at what they are still selling', 'Open their events that have sales or sign-ups (a free registration counts). Those stay on their account, payments included, so a long series is best left to finish there and its next run set up as a new event by somebody who is staying.'],
+            ['Move them to Viewer first, if they still work the door', 'Changing an admin to a viewer hands their events over as leaving does, and leaves them able to read the calendar and scan tickets.'],
+            ['Give their appointment types a new host', 'The types they hosted are already off. Choose who takes them, then switch them back on.'],
+            ['Read their last weeks in the audit log', 'Narrow it by date and read down the User column, so nothing they started half way surprises you a month later.'],
+            ['Then remove them', 'Remove on their row, after a confirmation. If they come back, invite them again; nothing about the old seat is needed.'],
         ];
 
         $dotSections = [
@@ -664,6 +744,9 @@
             ['kit', 'Their own settings'],
             ['log', 'The log'],
             ['who', 'Who gets a slot'],
+            ['lineups', 'Worked lineups'],
+            ['money', 'Who gets paid'],
+            ['leaving', 'When someone leaves'],
             ['faq', 'Questions'],
             ['claim', 'Start the card'],
         ];
@@ -876,14 +959,15 @@
                         <span class="es-line-code es-line-code-vw">VW</span>
                         <h3 class="es-line-ink text-lg font-bold">Viewer</h3>
                     </div>
-                    <p class="es-line-muted mb-4 text-sm">Read-only across the tabs it can reach, with one deliberate exception: a viewer can still work the door.</p>
+                    <p class="es-line-muted mb-4 text-sm">Read-only across the tabs it can reach, with two deliberate exceptions: their own days away, and the door.</p>
                     <ul class="es-line-muted space-y-2 text-sm">
-                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Sees the schedule, requests, bookings and the team</span></li>
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Sees the Schedule tab's calendar</span></li>
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Marks their own unavailable days, on a talent schedule</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Scans tickets and checks people in</span></li>
                         <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Sees none of the schedule's ticket sales</span></li>
                         <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot add or change an event</span></li>
-                        <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot open the settings page at all, or answer requests</span></li>
-                        <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot mark availability dates</span></li>
+                        <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot open requests, bookings, followers or the team</span></li>
+                        <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot open the settings page at all</span></li>
                     </ul>
                 </div>
             </div>
@@ -935,7 +1019,7 @@
                     What each position <span class="es-line-accent">actually opens</span>
                 </h2>
                 <p class="es-line-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Twelve surfaces, three columns, and the rows that say no are the useful ones.
+                    Fourteen surfaces, three columns, and the rows that say no are the useful ones.
                 </p>
             </div>
 
@@ -1090,7 +1174,7 @@
                                 <span class="es-line-plan">Free</span>
                             </div>
                             <p class="es-line-muted mb-5">
-                                Notification preferences live on the membership, not the schedule, so the person who handles bookings can take the request emails and nobody else has to. They go to the owner and to admins; a viewer is never emailed.
+                                Notification preferences live on the membership, not the schedule, so the person who handles bookings can take the request emails and nobody else has to. They go to the owner and to admins; a viewer gets none of these alerts.
                             </p>
                             <div>
                                 @foreach ([
@@ -1124,7 +1208,7 @@
                                 <span class="es-line-plan">Free</span>
                             </div>
                             <p class="es-line-muted">
-                                A member picks Sync to my calendar beside the schedule in their own list, and the events land in the Google Calendar they already look at. Outlook and CalDAV sync sit on the schedule itself, so those run from the owner's account.
+                                An admin opens the schedule's Google Calendar settings and turns on Sync to My Calendar, and the events land in the Google Calendar they already look at. The schedule-wide sync, Outlook and CalDAV included, runs from the owner's account.
                             </p>
                         </div>
                         <p class="es-line-muted relative z-10 mt-auto pt-4 text-sm">
@@ -1143,7 +1227,7 @@
                                 <span class="es-line-plan es-line-plan-ent">Enterprise</span>
                             </div>
                             <p class="es-line-muted">
-                                A talent schedule carries an Availability tab, where each member marks their own unavailable dates. Those days turn orange on the shared Schedule tab and name who is out, so nobody pencils in a date the sound engineer already blocked.
+                                A talent schedule carries an Availability tab, where each member marks their own unavailable dates. Those days are tinted amber on the shared Schedule tab, with a mark that names who is out when you point at it, so nobody pencils in a date the sound engineer already blocked.
                             </p>
                         </div>
                         <p class="es-line-muted relative z-10 mt-auto pt-4 text-sm">
@@ -1162,7 +1246,7 @@
                                 <span class="es-line-plan">Free</span>
                             </div>
                             <p class="es-line-muted mb-4">
-                                A member can remove themselves from a schedule at any time without asking, and the owner can remove anybody else. Removing somebody takes their access away; it does not take away the events they created, which stay on the schedule where they belong.
+                                A member can remove themselves from a schedule at any time without asking, and the owner can remove anybody else. Removing somebody takes their access away, not their work: the events they created stay on the schedule and pass to you, except any that already has sales or sign-ups (a free registration counts).
                             </p>
                             <p class="es-line-muted text-sm">
                                 The owner is the one name that cannot be removed. A schedule with nobody on it would be a schedule nobody can fix.
@@ -1272,7 +1356,7 @@
                     ['The other programmer', 'AD', 'es-line-code-ad', 'The person who also books the room. Give them Admin and stop being the bottleneck between a confirmed date and a published one.'],
                     ['Whoever works the door', 'VW', 'es-line-code-vw', 'A viewer can scan tickets and check people in without being able to move a date, edit a price or read the sales. It is the one thing a read-only position deliberately keeps.'],
                     ['The one who answers the requests', 'AD', 'es-line-code-ad', 'Admins can accept or decline event requests, and each member chooses their own alerts, so the request emails can go to them and only them.'],
-                    ['Your cover while you are away', 'AD', 'es-line-code-ad', 'Write them in before the trip, take them off after it. Removing a member revokes their access and leaves everything they added on the schedule.'],
+                    ['Your cover while you are away', 'AD', 'es-line-code-ad', 'Write them in before the trip, take them off after it. Removing a member revokes their access and hands you the events they made that have no sales yet.'],
                 ] as [$whoName, $whoCode, $whoCodeClass, $whoBody])
                     <div class="es-line-card flex flex-col p-7" data-reveal="panel">
                         <div class="mb-3 flex items-center gap-3">
@@ -1291,6 +1375,174 @@
                         <svg aria-hidden="true" class="es-line-hover-arrow es-line-muted h-4 w-4 transition-all group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                     </a>
                 @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8b. Worked lineups                                           -->
+    <!-- ============================================================ -->
+    <section id="lineups" class="es-line-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-line-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Worked lineups</p>
+                <h2 class="es-balance es-line-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Three real cards, <span class="es-line-accent">seat by seat</span>
+                </h2>
+                <p class="es-line-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Five seats go faster than you expect, because the door counts. The rule underneath all three: Admin for the people who publish, Viewer for the people who look, mark their days or scan.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-3" data-reveal-group="100">
+                @foreach ($lineups as $lineup)
+                    <div class="flex flex-col" data-reveal="panel">
+                        <h3 class="es-line-ink text-lg font-bold">{{ $lineup['title'] }}</h3>
+                        <p class="es-line-sub mb-4">{{ $lineup['type'] }}</p>
+                        <div class="es-line-sheet">
+                            <div class="es-line-sheet-head">
+                                <span>Team</span>
+                                <span>{{ $lineup['count'] }}</span>
+                            </div>
+                            @foreach ($lineup['slots'] as $lineupIndex => [$lineupName, $lineupSub, $lineupCode, $lineupClass])
+                                <div class="es-line-slot @if ($lineupClass === 'open') es-line-slot-open @endif">
+                                    <span class="es-line-no" aria-hidden="true">{{ str_pad($lineupIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                    @if ($lineupClass === 'open')
+                                        <span class="es-line-name">&nbsp;<span class="sr-only">Open seat</span></span>
+                                    @else
+                                        <span class="es-line-name">
+                                            {{ $lineupName }}
+                                            <span class="es-line-sub">{{ $lineupSub }}</span>
+                                        </span>
+                                        <span class="es-line-code {{ $lineupClass }}">{{ $lineupCode }}</span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="es-line-muted mt-4 text-sm leading-relaxed">{{ $lineup['note'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-line-card mt-12 p-6 sm:p-8" data-reveal="panel">
+                <p class="es-line-tag mb-5">Four ways teams fill a card badly</p>
+                <div class="grid gap-x-10 gap-y-6 md:grid-cols-2">
+                    @foreach ($lineupMistakes as $mistakeIndex => [$mistakeTitle, $mistakeBody])
+                        <div class="flex gap-4">
+                            <span class="es-line-step flex-none" aria-hidden="true">{{ str_pad($mistakeIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div>
+                                <h3 class="es-line-ink font-bold">{{ $mistakeTitle }}</h3>
+                                <p class="es-line-muted mt-1.5 text-sm leading-relaxed">{{ $mistakeBody }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8c. Who gets paid                                            -->
+    <!-- ============================================================ -->
+    <section id="money" class="es-line-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-line-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who gets paid</p>
+                <h2 class="es-balance es-line-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Whose account <span class="es-line-accent">a ticket pays into</span>
+                </h2>
+                <p class="es-line-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A shared calendar does not mean a shared bank account. Payment methods are connected per person, in Settings, Payment Methods, and that decides where the money goes.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-2" data-reveal-group="100">
+                <div class="es-line-card flex flex-col p-7 sm:p-8" data-reveal="panel">
+                    <h3 class="es-line-ink mb-3 text-xl font-bold">The rule: whoever made the event</h3>
+                    <p class="es-line-muted mb-4">
+                        On eventschedule.com, an event's online payments go to the payment method connected to the account of the person who created it. An event the owner adds pays the owner. An event an admin adds pays the admin, through whatever they connected, and the refunds for it come from the same place.
+                    </p>
+                    <p class="es-line-muted text-sm">
+                        That is right for a co-promoter selling their own night on your calendar, and wrong for a booker who is meant to be selling yours. Decide which you want before anybody but you puts a price on a ticket.
+                    </p>
+                    <p class="es-line-muted es-line-rule mt-auto pt-4 text-xs">
+                        A selfhosted install sets Stripe up once for the whole install, so there a Stripe payment does not depend on who made the event. Selling a ticket with a price is Pro; a team is Enterprise, which includes it.
+                    </p>
+                </div>
+
+                <div class="es-line-card flex flex-col p-7 sm:p-8" data-reveal="panel">
+                    <h3 class="es-line-ink mb-4 text-xl font-bold">Three ways to send it where it belongs</h3>
+                    <ol class="space-y-4">
+                        <li class="flex gap-4">
+                            <span class="es-line-step flex-none" aria-hidden="true">01</span>
+                            <p class="es-line-muted text-sm leading-relaxed"><span class="es-line-ink font-semibold">The owner creates the events that sell.</span> Admins run the free ones, the listings and the requests. Simple, and it works on any plan that has a team.</p>
+                        </li>
+                        <li class="flex gap-4">
+                            <span class="es-line-step flex-none" aria-hidden="true">02</span>
+                            <p class="es-line-muted text-sm leading-relaxed"><span class="es-line-ink font-semibold">Switch on Team members pick from these presets.</span> Under the schedule's ticket presets. Admins then choose one of the owner's presets on an event's Tickets tab and cannot type a price, and a new event they add is on the owner's account, so its online payments go to the owner.</p>
+                        </li>
+                        <li class="flex gap-4">
+                            <span class="es-line-step flex-none" aria-hidden="true">03</span>
+                            <p class="es-line-muted text-sm leading-relaxed"><span class="es-line-ink font-semibold">Hand over the whole schedule.</span> When the person who should be paid is not the owner, Transfer ownership moves the schedule, and the events its owner made, to their account.</p>
+                        </li>
+                    </ol>
+                    <p class="es-line-muted es-line-rule mt-auto pt-4 text-xs">
+                        With the presets switch on, an event a member makes on another schedule of their own and lists on yours, with tickets or sign-ups, waits on your Requests tab instead of appearing at once.
+                        <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-presets-team" class="es-line-link font-medium hover:underline">How the presets switch works</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8d. When somebody leaves                                     -->
+    <!-- ============================================================ -->
+    <section id="leaving" class="es-line-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-line-num mb-6" data-reveal aria-hidden="true"><span>11</span></div>
+                <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Handovers</p>
+                <h2 class="es-balance es-line-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    When a name comes off: <span class="es-line-accent">what moves, what stays</span>
+                </h2>
+                <p class="es-line-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Volunteers move on, bookers change jobs, a season ends. Leaving, being removed and being changed to a viewer each hand back what the person set up, without you having to chase it.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-5" data-reveal-group="100">
+                <div class="es-line-card flex flex-col p-7 sm:p-8 lg:col-span-2" data-reveal="panel">
+                    <h3 class="es-line-ink mb-4 text-xl font-bold">What happens on its own</h3>
+                    <ul class="es-line-muted space-y-3 text-sm leading-relaxed">
+                        @foreach ($leaveChanges as $leaveChange)
+                            <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>{{ $leaveChange }}</span></li>
+                        @endforeach
+                    </ul>
+                    <p class="es-line-muted es-line-rule mt-auto pt-4 text-xs">
+                        If the Enterprise plan lapses on eventschedule.com, nobody is removed: members are turned away with a message until it returns, and the owner keeps full access.
+                    </p>
+                </div>
+
+                <div class="es-line-card p-7 sm:p-8 lg:col-span-3" data-reveal="panel">
+                    <h3 class="es-line-ink mb-4 text-xl font-bold">The five-minute offboarding</h3>
+                    <ol class="space-y-4">
+                        @foreach ($leaveChecklist as $leaveIndex => [$leaveTitle, $leaveBody])
+                            <li class="flex gap-4">
+                                <span class="es-line-step flex-none" aria-hidden="true">{{ str_pad($leaveIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                <div>
+                                    <p class="es-line-ink text-sm font-semibold">{{ $leaveTitle }}</p>
+                                    <p class="es-line-muted mt-1 text-sm leading-relaxed">{{ $leaveBody }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="es-line-muted es-line-rule mt-5 pt-4 text-xs">
+                        <a href="{{ route('marketing.docs.managing_schedules') }}#team-leaving" class="es-line-link font-medium hover:underline">When someone leaves the team, in the guide</a>
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -1408,7 +1660,7 @@
     <section id="faq" class="es-line-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-line-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <div class="es-line-num mb-6" data-reveal aria-hidden="true"><span>12</span></div>
                 <h2 class="es-balance es-line-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>
