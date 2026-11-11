@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Invoice Ninja Ticketing | Post Every Sale to Your Books</x-slot>
-    <x-slot name="description">Sell tickets in Event Schedule and the entry lands in Invoice Ninja: a client, a line item per ticket type, and the QR code printed on the invoice.</x-slot>
+    <x-slot name="description">Sell event tickets through Invoice Ninja: each sale becomes an invoice with the QR ticket on it, paid online or by transfer. Setup, buyer flow and month end.</x-slot>
     <x-slot name="breadcrumbTitle">Invoice Ninja</x-slot>
 
     <x-slot name="structuredData">
@@ -569,6 +569,60 @@
             ['Rate limited', 'Invoice Ninja is throttling this server. Try again shortly.'],
         ];
 
+        // Folio 01: who this suits. Each scenario is a real shape of buyer, and
+        // each line of the two lists is a checked limit of the integration.
+        $fitScenarios = [
+            ['A training day', 'Companies send staff, and their finance team will not pay a card receipt with a personal name on it. They want an invoice they can file, and the attendee wants a ticket.'],
+            ['A group booking', 'A school, a choir or a firm books twelve seats at once. One person orders, somebody else pays by bank transfer a week later, and the seats have to be held in between.'],
+            ['A members\' event', 'A club or association already bills its members from Invoice Ninja. The ticket lands in the same client record as the membership fee, not in a second system.'],
+            ['A selfhosted install', 'Invoice Ninja connects with a token and an address, and your Invoice Ninja company takes the payment through whichever gateways it already has. The user guide calls it often the easiest route for a selfhosted deployment.'],
+        ];
+        $fitYes = [
+            'Your buyers are organizations, or people who need a proper invoice for their records.',
+            'Some of them pay by bank transfer, and you record those payments yourself.',
+            'You already use Invoice Ninja, and want every sale in the same books as the rest of your income.',
+            'You want Invoice Ninja\'s own reminders and reports to cover ticket income too.',
+        ];
+        $fitNo = [
+            'Most buyers are the public on a phone, paying by card in a minute. Stripe or PayPal is fewer steps for them.',
+            'You want a refund on the Sales page to send the money back. That works for Stripe, PayPal and Razorpay; for Invoice Ninja you record it here and return the money there.',
+            'You sell several events in one basket, or let buyers pay in monthly installments. The multi-event cart takes Stripe, PayPal, Razorpay and cash, and installments are Stripe only.',
+            'You take payment for appointment bookings. Those take cash or any connected method except Invoice Ninja.',
+        ];
+
+        // Folio 04: the buyer's side, in invoice mode.
+        $buyerSteps = [
+            ['On your event page', 'The buyer picks ticket types, enters a promo code if they have one, and gives a name and an email address, the same checkout as any other event. On eventschedule.com, outside an embedded widget, they can also create an Event Schedule account on the way.'],
+            ['On the invoice', 'A first-time buyer lands on the invoice in your Invoice Ninja client portal: a line for each ticket type, a negative line for each discount, and the QR code in the notes. A buyer already on file as a client is emailed the invoice instead and shown their order page, unless your portal asks for a password. Either way they pay with whatever your Invoice Ninja company offers online.'],
+            ['Or by bank transfer', 'If they pay offline, they use the payment details on your invoice, and you enter the payment against that invoice in Invoice Ninja when the money arrives. Event Schedule hears about it the same way as an online payment.'],
+            ['In their inbox', 'Once the payment agrees with the invoice, Event Schedule marks the sale paid and sends its confirmation email with the ticket. Until then the sale is unpaid and the code on the invoice does not admit anyone.'],
+        ];
+
+        // Folio 06: what each pairing of states means at month end. Left: the
+        // sale's status on the Sales page. Middle: the invoice in Invoice Ninja.
+        $monthEnd = [
+            ['Paid', 'Paid', 'Done. In invoice mode the sale carries Invoice Ninja\'s own id for the invoice (the one in its address, not the invoice number) as its reference, and the buyer has had their ticket.'],
+            ['Unpaid', 'Sent, not paid', 'The buyer has not paid yet. The seats stay held until they do, or until Expire unpaid tickets releases them. Invoice Ninja\'s reminders can do the chasing.'],
+            ['Unpaid', 'Paid', 'The payment never reached Event Schedule. Either the webhook was removed in Invoice Ninja (press Edit beside the company name in the Invoice Ninja row and save, which registers it again), or one payment was applied to several invoices, and only the first of them is read. Record one payment per invoice, then press Mark Paid on any sale still waiting so its ticket goes out.'],
+            ['Amount mismatch', 'Partly paid, or overpaid', 'A payment more than a cent away from the invoice, nearly always a part payment or a deposit. No ticket has been sent, and the sale waits for the install\'s administrator, who can approve it from the admin Revenue page once you and the buyer have settled the difference. On a selfhosted install, that administrator is you.'],
+            ['Expired', 'Sent, not paid', 'The hold ran out before the money came in, and a payment that arrives after that does not bring the sale back. Cancel the invoice in Invoice Ninja, or, if they still want to come, start a new order while there is stock.'],
+            ['Refunded', 'Paid', 'You marked it refunded here, which put the seats back on sale. Record the refund in Invoice Ninja as well, where the money is actually returned.'],
+        ];
+
+        // The setup, from nothing to a first paid ticket. Each step is named
+        // the way the screens name it (account-settings#invoice-ninja,
+        // tickets#payment-row, tickets#sales-rules).
+        $setupSteps = [
+            ['Give Invoice Ninja a way to be paid', 'Connect a payment gateway in your Invoice Ninja company, and put your bank details in the invoice terms if you accept transfers. Event Schedule sends buyers to that portal; it does not add a gateway of its own.'],
+            ['Create an API token', 'In Invoice Ninja, under Settings, Account Management. Event Schedule uses it to find and create clients, raise invoices and register the payment webhook on your company.'],
+            ['Connect it in Event Schedule', 'Settings, Payment Methods, the Invoice Ninja row. Paste the token, and the address of your install if you selfhost Invoice Ninja; leave the address blank for invoicing.co. Saving checks both, which can take up to 30 seconds.'],
+            ['Pick a checkout mode', 'Invoice or Payment link, in the same row, with a Save of its own. Start with Invoice: it keeps ticket selection, several promo codes and per-ticket targeting on your side.'],
+            ['Point the event at it', 'In the event\'s Tickets tab, open the Payment row and choose Invoice Ninja as the Payment Method. Set the event\'s currency first; Invoice Ninja clients are kept per currency.'],
+            ['Decide how long a seat waits', 'Expire unpaid tickets, a switch in the Sales rules row, releases an unpaid order after the number of hours you enter. It appears once a ticket type has both a price and a limited quantity. Set it longer than your payment terms, or leave it off to hold seats until you act. An order paid partly with a gift card, or carrying a donation, is released after 48 hours whatever you choose.'],
+            ['Buy a ticket yourself', 'Use a second email address. Check the client, the line items and the QR code in Invoice Ninja, then enter a payment and watch the sale turn paid and the ticket email arrive.'],
+            ['Undo the test', 'Press Mark as Refunded on that sale so the seat goes back on sale, and cancel or credit the invoice in Invoice Ninja so your books agree.'],
+        ];
+
         $notes = [
             [
                 '104 currency codes',
@@ -611,11 +665,23 @@
             ],
             [
                 'q' => 'Can one invoice cover tickets to several events?',
-                'a' => 'No. The multi-event cart takes one payment for the whole basket, so it runs on Stripe, PayPal and cash only. An Invoice Ninja event is bought on its own, one purchase at a time.',
+                'a' => 'No. The multi-event cart takes one payment for the whole basket, so it runs on Stripe, PayPal, Razorpay and cash only. An Invoice Ninja event is bought on its own, one purchase at a time.',
             ],
             [
                 'q' => 'What happens if a payment link cannot be created?',
                 'a' => 'Checkout falls back to invoice mode and the buyer gets an invoice, rather than seeing an error. The failure is logged for you instead of being handed to the customer.',
+            ],
+            [
+                'q' => 'Can a buyer pay an Invoice Ninja ticket by bank transfer?',
+                'a' => 'Yes. The buyer gets an invoice, and pays it however your invoice tells them to, including by transfer. When the money arrives, enter the payment against that invoice in Invoice Ninja. Invoice Ninja reports it to Event Schedule like an online payment, the amount is checked, the sale turns paid and the ticket is emailed. Until then the sale is unpaid and its QR code does not admit anyone.',
+            ],
+            [
+                'q' => 'How long are seats held while an invoice is unpaid?',
+                'a' => 'Until it is paid, unless you switch on Expire unpaid tickets in the event\'s Sales rules row. That setting releases an unpaid order after the number of hours you enter and puts its tickets back on sale; it appears once a ticket type has both a price and a limited quantity. Set it longer than the payment terms on your invoices, because a payment that arrives after the order has expired does not bring it back. One exception whatever you choose: an order paid partly with a gift card, or carrying a donation, is released after 48 hours if it is still unpaid.',
+            ],
+            [
+                'q' => 'Can a company get one invoice for several tickets?',
+                'a' => 'Yes, when they are bought in one order. A single purchase becomes a single invoice with a line for each ticket type and its quantity, so a firm booking ten standard seats and two VIP seats gets one invoice with two lines. Separate purchases make separate invoices, all under the same client when the email address and currency match.',
             ],
             [
                 'q' => 'My selfhosted install connected from curl but failed here. Why?',
@@ -625,9 +691,12 @@
 
         $dotSections = [
             ['top', 'The entry'],
+            ['fit', 'Who it suits'],
             ['post', 'What gets posted'],
             ['modes', 'Where the cart lives'],
+            ['buyer', 'What the buyer sees'],
             ['audit', 'Before it is paid'],
+            ['month-end', 'Month end'],
             ['connect', 'Connecting'],
             ['notes', 'Small print'],
             ['faq', 'Questions'],
@@ -688,7 +757,7 @@
                             </div>
                             <a href="#post" class="es-ledg-xref">
                                 <span class="es-ledg-xref-label">Posted to</span>
-                                <span class="es-ledg-num es-ledg-xref-ref">Folio 01</span>
+                                <span class="es-ledg-num es-ledg-xref-ref">Folio 02</span>
                             </a>
                         </div>
 
@@ -840,12 +909,81 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. What gets posted (folio 01) - the record, as a table      -->
+    <!-- 1b. Who it suits (folio 01) - the buyer who wants an invoice  -->
+    <!-- ============================================================ -->
+    <section id="fit" class="es-ledg-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <p class="es-ledg-folio mb-6" data-reveal>Folio 01</p>
+                <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it suits</p>
+                <h2 class="es-balance es-ledg-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    For the buyer who <span class="es-ledg-grad">asks for an invoice</span>.
+                </h2>
+                <p class="es-ledg-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A card checkout suits a person buying for themselves. An invoice suits an
+                    organization buying for somebody else: it has a client on it, line items a
+                    bookkeeper can read, and room to be paid next week by transfer. These are four
+                    kinds of organizer it suits.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($fitScenarios as [$fitTitle, $fitBody])
+                    <div class="es-ledg-card p-6" data-reveal>
+                        <p class="es-ledg-tag mb-2">{{ $fitTitle }}</p>
+                        <p class="es-ledg-muted text-sm">{{ $fitBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-2" data-reveal-group="100">
+                <div class="es-ledg-card flex flex-col p-6 sm:p-8" data-reveal>
+                    <h3 class="es-ledg-ink mb-4 text-xl font-bold">Pick Invoice Ninja when</h3>
+                    <ul class="space-y-3">
+                        @foreach ($fitYes as $fitLine)
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="es-ledg-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="es-ledg-muted text-sm">{{ $fitLine }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="es-ledg-card flex flex-col p-6 sm:p-8" data-reveal>
+                    <h3 class="es-ledg-ink mb-4 text-xl font-bold">Pick another method when</h3>
+                    <ul class="space-y-3">
+                        @foreach ($fitNo as $fitLine)
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="es-ledg-muted mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" /></svg>
+                                <span class="es-ledg-muted text-sm">{{ $fitLine }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <div class="es-ledg-card mt-4 p-6 sm:p-8" data-reveal>
+                <h3 class="es-ledg-ink mb-2 text-lg font-bold">One event, card buyers and invoiced companies</h3>
+                <p class="es-ledg-muted text-sm">
+                    Each event takes one payment method, so a conference that sells to the public by
+                    card and to a few companies by invoice needs a plan. The simplest: keep the event
+                    on Stripe, raise the company's invoice in Invoice Ninja yourself, and add its
+                    people with Import Attendees on the Sales page
+                    <span class="es-ledg-plan es-ledg-plan-pro">Pro</span>. Once the transfer
+                    lands, import them as paid with Send Email on, and their tickets go out. To hold
+                    their seats before then, import them as unpaid and press Mark Paid on each later,
+                    unless the event releases unpaid orders under Expire unpaid tickets.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2. What gets posted (folio 02) - the record, as a table      -->
     <!-- ============================================================ -->
     <section id="post" class="es-ledg-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <p class="es-ledg-folio mb-6" data-reveal>Folio 01</p>
+                <p class="es-ledg-folio mb-6" data-reveal>Folio 02</p>
                 <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What gets posted</p>
                 <h2 class="es-balance es-ledg-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     One purchase, <span class="es-ledg-grad">written on both sides</span>.
@@ -922,12 +1060,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Where the cart lives (folio 02) - the duplex split        -->
+    <!-- 3. Where the cart lives (folio 03) - the duplex split        -->
     <!-- ============================================================ -->
     <section id="modes" class="es-ledg-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <p class="es-ledg-folio mb-6" data-reveal>Folio 02</p>
+                <p class="es-ledg-folio mb-6" data-reveal>Folio 03</p>
                 <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Where the cart lives</p>
                 <h2 class="es-balance es-ledg-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Two places to <span class="es-ledg-grad">take the money</span>.
@@ -976,7 +1114,72 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Before it is marked paid (folio 03) - dark band           -->
+    <!-- 3b. The buyer's side (folio 04)                              -->
+    <!-- ============================================================ -->
+    <section id="buyer" class="es-ledg-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <p class="es-ledg-folio mb-6" data-reveal>Folio 04</p>
+                <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What the buyer sees</p>
+                <h2 class="es-balance es-ledg-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    From the ticket page <span class="es-ledg-grad">to the door</span>.
+                </h2>
+                <p class="es-ledg-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    In invoice mode, the default. Worth reading before you announce the event,
+                    because the buyer pays on an invoice rather than a card form, and the ticket
+                    arrives after the payment does, not before.
+                </p>
+            </div>
+
+            <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($buyerSteps as [$bTitle, $bBody])
+                    <li class="es-ledg-card flex gap-4 p-6" data-reveal>
+                        <span class="es-ledg-num es-ledg-accent shrink-0 pt-0.5 text-sm font-bold" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="es-ledg-ink mb-1 text-lg font-bold">{{ $bTitle }}</h3>
+                            <p class="es-ledg-muted text-sm">{{ $bBody }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-2" data-reveal-group="100">
+                <div class="es-ledg-card p-6" data-reveal>
+                    <h3 class="es-ledg-ink mb-2 text-lg font-bold">Say so on the event page</h3>
+                    <p class="es-ledg-muted text-sm">
+                        A buyer who expects a ticket on the spot and gets an invoice may think the
+                        purchase failed. One line in the event description does it: you will receive
+                        an invoice, and your ticket follows by email once it is paid. If you accept
+                        transfers, say how long you hold the seats.
+                    </p>
+                </div>
+                <div class="es-ledg-card p-6" data-reveal>
+                    <h3 class="es-ledg-ink mb-2 text-lg font-bold">In payment link mode</h3>
+                    <p class="es-ledg-muted text-sm">
+                        The cart moves to Invoice Ninja. The buyer goes to your purchase page for the
+                        event, picks tickets there, applies the event's single promo code, and pays.
+                        The purchase is reported back, the remaining stock is checked again, and the
+                        same confirmation email with the ticket goes out.
+                    </p>
+                </div>
+            </div>
+
+            <div class="es-ledg-card mt-4 p-6" data-reveal>
+                <h3 class="es-ledg-ink mb-2 text-lg font-bold">Companies that book often</h3>
+                <p class="es-ledg-muted text-sm">
+                    Create the company as a client in Invoice Ninja before its first order, with its
+                    name, address and tax number, and the booker's email as a contact in the event's
+                    currency. The next purchase from that email is filed under that client, not a new
+                    one with only a person's name. Because the buyer is then a client already on
+                    file, the invoice is emailed to them rather than opened on screen, unless your
+                    client portal asks for a password.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. Before it is marked paid (folio 05) - dark band           -->
     <!-- ============================================================ -->
     <section id="audit" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-ledg-band noise relative overflow-hidden rounded-[2rem] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
@@ -986,7 +1189,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <p class="es-ledg-folio mb-6" data-reveal>Folio 03</p>
+                    <p class="es-ledg-folio mb-6" data-reveal>Folio 05</p>
                     <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before it is paid</p>
                     <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Nothing is marked paid <span class="es-ledg-grad">on trust</span>.
@@ -1044,13 +1247,106 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Connecting (folio 04) - two fields, and the diagnostics   -->
+    <!-- 4b. Month end (folio 06) - the two ledgers, side by side     -->
+    <!-- ============================================================ -->
+    <section id="month-end" class="es-ledg-rule-t scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <p class="es-ledg-folio mb-6" data-reveal>Folio 06</p>
+                <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Reconciling at month end</p>
+                <h2 class="es-balance es-ledg-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Two lists that <span class="es-ledg-grad">should agree</span>.
+                </h2>
+                <p class="es-ledg-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Every Invoice Ninja sale lives twice: as a sale on your Sales page and as an
+                    invoice in your company. Most months they agree on their own. When they do not,
+                    the pair of states tells you what happened.
+                </p>
+            </div>
+
+            <div data-reveal="panel">
+                <div class="es-ledg-sheet p-5 sm:p-8">
+                    <div class="mb-5 flex flex-wrap items-baseline justify-between gap-3">
+                        <p class="es-ledg-sheet-head">Reconciliation &middot; Ticket sales</p>
+                        <p class="es-ledg-num es-ledg-sheet-muted text-xs">Sales page against Invoice Ninja</p>
+                    </div>
+
+                    <div class="es-ledg-scroll">
+                        <table class="es-ledg-table">
+                            <caption class="sr-only">What each combination of sale status in Event Schedule and invoice status in Invoice Ninja means, and what to do about it</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Sales page</th>
+                                    <th scope="col">Invoice Ninja</th>
+                                    <th scope="col">What it means</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($monthEnd as [$meSale, $meInvoice, $meMeans])
+                                    <tr>
+                                        <th scope="row">{{ $meSale }}</th>
+                                        <td class="es-ledg-sheet-ink font-semibold">{{ $meInvoice }}</td>
+                                        <td>{{ $meMeans }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                <div class="es-ledg-card flex flex-col p-6" data-reveal>
+                    <p class="es-ledg-tag mb-2">Step 1</p>
+                    <h3 class="es-ledg-ink mb-2 text-lg font-bold">Export the month</h3>
+                    <p class="es-ledg-muted text-sm">
+                        On the Sales page, filter to the events you want, turn on Include past events,
+                        and press Export. The CSV has a row per sale with the amount, currency,
+                        promo and gift card amounts, payment method, status and transaction
+                        reference, which for a sale made in invoice mode is Invoice Ninja's own id for
+                        the invoice, the one in its address rather than the invoice number.
+                    </p>
+                </div>
+                <div class="es-ledg-card flex flex-col p-6" data-reveal>
+                    <p class="es-ledg-tag mb-2">Step 2</p>
+                    <h3 class="es-ledg-ink mb-2 text-lg font-bold">Match on email and amount</h3>
+                    <p class="es-ledg-muted text-sm">
+                        Keep the export's Invoice Ninja rows, list Invoice Ninja's invoices for the same
+                        dates, then pair each sale with its invoice by the buyer's email, the date
+                        and the total. Clients are
+                        kept per email and currency, so a regular buyer's tickets sit under one
+                        client.
+                    </p>
+                </div>
+                <div class="es-ledg-card flex flex-col p-6" data-reveal>
+                    <p class="es-ledg-tag mb-2">Step 3</p>
+                    <h3 class="es-ledg-ink mb-2 text-lg font-bold">Deal with the leftovers</h3>
+                    <p class="es-ledg-muted text-sm">
+                        Anything left unpaired is one of the rows above. Fix it on the side the
+                        table names, and prefer recording a payment in Invoice Ninja to pressing Mark
+                        Paid here: the webhook keeps the invoice id on the sale, where Mark Paid
+                        writes Manual Payment instead.
+                    </p>
+                </div>
+            </div>
+
+            <p class="es-ledg-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                The one figure that never needs reconciling is a platform fee: Event Schedule takes
+                none, so the invoice total is what the sale was worth, and what your gateway in
+                Invoice Ninja charges is the only deduction.
+                <a href="{{ route('marketing.docs.tickets') }}#export" class="es-ledg-accent font-semibold hover:underline">What the export holds</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. Connecting (folio 07) - two fields, and the diagnostics   -->
     <!-- ============================================================ -->
     <section id="connect" class="es-ledg-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-14 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <p class="es-ledg-folio mb-6" data-reveal>Folio 04</p>
+                    <p class="es-ledg-folio mb-6" data-reveal>Folio 07</p>
                     <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Connecting</p>
                     <h2 class="es-balance es-ledg-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Two fields, then it is <span class="es-ledg-grad">your server's business</span>.
@@ -1118,16 +1414,41 @@
                     </div>
                 </div>
             </div>
+
+            <div class="mt-16">
+                <div class="mx-auto mb-10 max-w-3xl text-center">
+                    <p class="es-ledg-tag mb-4" data-reveal>Setup, start to finish</p>
+                    <h3 class="es-balance es-ledg-ink text-2xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                        Eight steps to the <span class="es-ledg-grad">first paid ticket</span>.
+                    </h3>
+                    <p class="es-ledg-muted mt-4" data-reveal style="--reveal-delay: 0.1s;">
+                        Most of it happens in Invoice Ninja, once. Selling a ticket with a price is
+                        part of Pro on eventschedule.com, and of every selfhosted install.
+                    </p>
+                </div>
+
+                <ol class="grid gap-4 md:grid-cols-2" data-reveal-group="70">
+                    @foreach ($setupSteps as [$sTitle, $sBody])
+                        <li class="es-ledg-card flex gap-4 p-6" data-reveal>
+                            <span class="es-ledg-num es-ledg-accent shrink-0 pt-0.5 text-sm font-bold" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div>
+                                <h4 class="es-ledg-ink mb-1 text-base font-bold">{{ $sTitle }}</h4>
+                                <p class="es-ledg-muted text-sm">{{ $sBody }}</p>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Small print (folio 05)                                    -->
+    <!-- 6. Small print (folio 08)                                    -->
     <!-- ============================================================ -->
     <section id="notes" class="es-ledg-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <p class="es-ledg-folio mb-6" data-reveal>Folio 05</p>
+                <p class="es-ledg-folio mb-6" data-reveal>Folio 08</p>
                 <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Small print</p>
                 <h2 class="es-balance es-ledg-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     The four details <span class="es-ledg-grad">that come up</span>.
@@ -1218,12 +1539,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 8. FAQ (folio 06)                                            -->
+    <!-- 8. FAQ (folio 09)                                            -->
     <!-- ============================================================ -->
     <section id="faq" class="es-ledg-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <p class="es-ledg-folio mb-6" data-reveal>Folio 06</p>
+                <p class="es-ledg-folio mb-6" data-reveal>Folio 09</p>
                 <p class="es-ledg-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-ledg-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked at the <span class="es-ledg-grad">month end</span>.

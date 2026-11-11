@@ -1,6 +1,6 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Ticket Fee Calculator: What Each Platform Takes Per Ticket</x-slot>
-    <x-slot name="description">Work out what Eventbrite, Luma, Ticket Tailor, TicketLeap, Universe, AllEvents and Hi.Events take from your ticket sales, next to 0% on Event Schedule.</x-slot>
+    <x-slot name="description">Work out what Eventbrite, Ticket Tailor, TicketLeap, Luma and others take per ticket, line by line, and the price that covers the fees. 0% platform fee here.</x-slot>
     <x-slot name="breadcrumbTitle">Ticket Fee Calculator</x-slot>
 
     {{-- Every rate on this page is App\Utils\TicketFees: the calculator's figures, the rate lines on
@@ -101,11 +101,84 @@
             ],
         ];
 
+        // ---- The field guide below the calculator. Every figure is TicketFees::costOf() or the
+        //      rate fields it reads, per ticket, one ticket per order, fees absorbed. Our own row is
+        //      Stripe alone: the Pro subscription is a monthly cost, not a per-ticket one, and the
+        //      cards above already say so.
+        $stripeRate = $feeRates['stripe'];
+        $money = fn (float $amount) => '$'.number_format($amount, 2);
+        $perTicket = fn (string $key, float $price) => \App\Utils\TicketFees::costOf(
+            $key === 'eventschedule' ? ['name' => 'Event Schedule'] : $feeRates[$key], $stripeRate, 1, $price
+        );
+        $feeShare = fn (string $key, float $price) => rtrim(rtrim(number_format($perTicket($key, $price) / $price * 100, 1), '0'), '.').'%';
+
+        // One rate as the parts a reader can see on a statement. Luma is its free plan here (the
+        // one a single ticket is charged on); Plus is a subscription, which the cards explain.
+        $parts = function (string $key, float $price) use ($feeRates, $stripeRate): array {
+            $rate = $key === 'eventschedule' ? [] : $feeRates[$key];
+            if ($key === 'luma') {
+                $rate = array_merge($rate, $rate['plans'][0]);
+            }
+            $ownsProcessing = ($rate['stripe'] ?? true) === false;
+
+            return [
+                'share' => $price * (float) ($rate['percent'] ?? 0),
+                'fixed' => (float) ($rate['fixed'] ?? 0),
+                'processing' => $ownsProcessing
+                    ? $price * (float) ($rate['processing'] ?? 0)
+                    : $price * (float) $stripeRate['percent'] + (float) $stripeRate['fixed'],
+                'processor' => $ownsProcessing ? 'its own' : 'Stripe',
+            ];
+        };
+
+        // $20, not the calculator's $25, for the line-by-line table: every percentage in
+        // TicketFees comes out at a whole cent on it, so the lines add up to the total as printed.
+        $lineExample = 20;
+        $priceColumns = [10, 25, 50, 100];
+        $keepTargets = [20, 40, 100];
+
+        // The price that leaves $keep after a platform's fees, solved against costOf() itself, so a
+        // cap or a flat fee on cheap tickets is respected exactly. Rounded up to the cent.
+        $grossUp = function (string $key, float $keep) use ($perTicket): float {
+            $lo = $keep;
+            $hi = $keep * 2 + 50;
+            for ($i = 0; $i < 80; $i++) {
+                $mid = ($lo + $hi) / 2;
+                if ($mid - $perTicket($key, $mid) >= $keep) {
+                    $hi = $mid;
+                } else {
+                    $lo = $mid;
+                }
+            }
+
+            return ceil(round($hi * 100, 6)) / 100;
+        };
+
+        // The straight-line form of the same thing, for the worked formula: total share a and total
+        // fixed amount b on one ticket, from the rates. Event Schedule's is Stripe's alone.
+        $ebLine = [
+            'a' => (float) $feeRates['eventbrite']['percent'] + (float) $feeRates['eventbrite']['processing'],
+            'b' => (float) $feeRates['eventbrite']['fixed'],
+        ];
+        $stripeLine = ['a' => (float) $stripeRate['percent'], 'b' => (float) $stripeRate['fixed']];
+        $exampleKeep = \App\Utils\TicketFees::EXAMPLE_PRICE;
+
+        // Where the per-ticket caps start to bite: the price at which percent * price + fixed reaches
+        // the cap. Only TicketLeap and Universe have one.
+        $capFrom = fn (string $key) => ((float) $feeRates[$key]['cap'] - (float) $feeRates[$key]['fixed']) / (float) $feeRates[$key]['percent'];
+
+        $anatomy = [
+            ['A share of the price', 'A percentage of the ticket\'s face value, kept by the platform. It grows with the price, so it is the part that hurts most on expensive tickets. Eventbrite\'s is '.$pct($feeRates['eventbrite']['percent']).', Luma\'s free plan '.$pct($feeRates['luma']['plans'][0]['percent']).'.'],
+            ['A fixed amount per ticket', 'The same amount whatever the ticket costs, so it is the part that hurts most on cheap tickets. In the US, Ticket Tailor and AllEvents charge only this; Eventbrite adds '.$usd($feeRates['eventbrite']['fixed']).' to its percentage.'],
+            ['Payment processing', 'What it costs to take the card. Either the platform charges its own (Eventbrite\'s '.$pct($feeRates['eventbrite']['processing']).' per order), or the money settles in your Stripe account and Stripe takes '.$feeRates['stripe']['label'].'. One way or another, every paid ticket pays it.'],
+            ['Caps, floors and subscriptions', 'Some platforms cap the per-ticket fee (TicketLeap at '.$usd($feeRates['ticketleap']['cap']).', reached at about '.$usd(round($capFrom('ticketleap'))).' a ticket), charge less on the cheapest tickets, or swap the percentage for a monthly plan, as Luma Plus does.'],
+        ];
+
         $method = [
             ['Platform fee, then processing', 'A platform fee is what the ticketing company keeps. Processing is what it costs to take a card payment. Some platforms run the payment themselves and charge a processing fee of their own, like Eventbrite\'s '.$pct($feeRates['eventbrite']['processing']).' per order; others settle into your own Stripe account, which charges '.$feeRates['stripe']['label'].'. Every total above includes both.'],
             ['Every fee absorbed', 'Most platforms can add their fee to what the buyer pays instead. That changes who pays it, not whether it is paid, and a higher price at checkout costs sales of its own. So each total is what the event costs you if you absorb the fees, which makes the platforms comparable.'],
             ['One ticket per order', 'Card processors charge a fixed amount on every payment, so an order of four tickets pays it once and four orders of one pay it four times. The calculator assumes one ticket per order, the dearest case. If your buyers usually take several, the fixed part falls for every platform that settles through Stripe.'],
-            ['US rates, in dollars', 'These are the rates each platform publishes for the United States, and the calculator works in US dollars throughout. Rates differ by country and currency, so check the platform\'s pricing page for yours. Our own plan price is shown in dollars here for the same reason.'],
+            ['US rates, in dollars', 'These are the rates each platform publishes for the United States, and the calculator works in US dollars throughout. Rates differ by country and currency, so check the platform\'s pricing page for yours. The calculator counts our own plan in dollars too, so every figure in it is in one currency.'],
         ];
 
         $faqs = [
@@ -136,6 +209,22 @@
             [
                 'q' => 'Where do these numbers come from?',
                 'a' => 'From each platform\'s own published pricing for the United States, read from its pricing page or help center, and each card above names its source. Ticket Tailor charges a range, depending on whether you prepay, so its card uses the middle of it. Platforms change their prices, so confirm the figure on the platform\'s own page before you decide.',
+            ],
+            [
+                'q' => 'What price should I charge to cover ticket fees?',
+                'a' => 'Divide what you want to keep plus every fixed fee per ticket by one minus every percentage fee. With Stripe alone, keeping '.$usd($exampleKeep).' takes ('.$usd($exampleKeep).' + '.$money($stripeLine['b']).') / (1 - '.rtrim(rtrim(number_format($stripeLine['a'], 4), '0'), '.').'), so a price of '.$money($grossUp('eventschedule', $exampleKeep)).'. On Eventbrite, with fees absorbed, the same '.$usd($exampleKeep).' takes '.$money($grossUp('eventbrite', $exampleKeep)).'. Round up to the cent. Adding the percentage to the price falls short, because the fee is charged on the higher price as well.',
+            ],
+            [
+                'q' => 'Should I pass ticket fees on to buyers or absorb them?',
+                'a' => 'Absorb them, or build them into the price, when buyers expect a round figure or are sensitive to price, and pass them on when the fee is small next to the ticket and your audience is used to seeing one. Passing a fee on does not remove it; it moves it to the last step of checkout, where some buyers leave. Some places also require the price to be shown with mandatory fees included from the start, so check the rules where you sell.',
+            ],
+            [
+                'q' => 'How much does Ticket Tailor charge per ticket?',
+                'a' => 'In the US, a flat fee on each paid ticket rather than a share of its price: $0.85 a ticket pay as you go, less with prepaid credits, which Ticket Tailor headlines as from $0.30 a ticket. Your payment processor charges its own fee on top, '.$feeRates['stripe']['label'].' with Stripe. At the middle of that range, as the calculator uses it, one '.$usd(\App\Utils\TicketFees::EXAMPLE_PRICE).' ticket costs you '.$money($perTicket('ticket-tailor', \App\Utils\TicketFees::EXAMPLE_PRICE)).' in fees.',
+            ],
+            [
+                'q' => 'How much does TicketLeap charge per ticket?',
+                'a' => 'In the US, '.$usd($feeRates['ticketleap']['fixed']).' + '.$pct($feeRates['ticketleap']['percent']).' of the price on each ticket, or a flat '.$usd($feeRates['ticketleap']['low_fixed']).' on a ticket of '.$usd($feeRates['ticketleap']['low_price']).' or less, with the per-ticket fee capped at '.$usd($feeRates['ticketleap']['cap']).'. On top of that comes a '.$pct($feeRates['ticketleap']['processing']).' online transaction fee on each order, which has no cap. With every fee absorbed, one '.$usd(\App\Utils\TicketFees::EXAMPLE_PRICE).' ticket costs you '.$money($perTicket('ticketleap', \App\Utils\TicketFees::EXAMPLE_PRICE)).'.',
             ],
         ];
     @endphp
@@ -218,6 +307,195 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- What a ticket fee is made of                                 -->
+    <!-- ============================================================ -->
+    <section id="anatomy" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    What a ticket fee <span class="text-gradient-fees">is made of</span>
+                </h2>
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
+                    Every platform's fee is built from the same few parts, mixed differently. Once you can see the parts, you can read any pricing page and work out what one ticket will cost you before you sign up.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="70">
+                @foreach ($anatomy as [$partTitle, $partBody])
+                    <div class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $partTitle }}</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $partBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Line by line on one ticket, at $lineExample: see where it is set for why. --}}
+            <div class="mt-8 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[40rem] text-sm">
+                        <caption class="px-6 pt-5 text-start text-base font-bold text-gray-900 dark:text-white">One {{ $usd($lineExample) }} ticket, line by line</caption>
+                        <thead>
+                            <tr class="border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500 dark:border-white/10 dark:text-gray-400">
+                                <th scope="col" class="px-6 py-3 text-start font-semibold">Platform</th>
+                                <th scope="col" class="px-4 py-3 text-end font-semibold">Share of price</th>
+                                <th scope="col" class="px-4 py-3 text-end font-semibold">Fixed fee</th>
+                                <th scope="col" class="px-4 py-3 text-end font-semibold">Processing</th>
+                                <th scope="col" class="px-4 py-3 text-end font-semibold">Total fees</th>
+                                <th scope="col" class="px-6 py-3 text-end font-semibold">You keep</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-white/5">
+                            @foreach (\App\Utils\TicketFees::CALCULATOR_PLATFORMS as $lineKey)
+                                @php
+                                    $lineParts = $parts($lineKey, $lineExample);
+                                    $lineTotal = $perTicket($lineKey, $lineExample);
+                                @endphp
+                                <tr>
+                                    <th scope="row" class="px-6 py-3.5 text-start font-normal">
+                                        <span class="block font-semibold text-gray-900 dark:text-white">{{ $feeRates[$lineKey]['name'] }}{{ $lineKey === 'luma' ? ', free plan' : '' }}</span>
+                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Processing by {{ $lineParts['processor'] === 'Stripe' ? 'Stripe, on your account' : 'the platform itself' }}</span>
+                                    </th>
+                                    <td class="px-4 py-3.5 text-end tabular-nums text-gray-700 dark:text-gray-300">{{ $money($lineParts['share']) }}</td>
+                                    <td class="px-4 py-3.5 text-end tabular-nums text-gray-700 dark:text-gray-300">{{ $money($lineParts['fixed']) }}</td>
+                                    <td class="px-4 py-3.5 text-end tabular-nums text-gray-700 dark:text-gray-300">{{ $money($lineParts['processing']) }}</td>
+                                    <td class="px-4 py-3.5 text-end tabular-nums font-semibold text-gray-900 dark:text-white">{{ $money($lineTotal) }}</td>
+                                    <td class="px-6 py-3.5 text-end tabular-nums font-semibold {{ $lineKey === 'eventschedule' ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-900 dark:text-white' }}">{{ $money($lineExample - $lineTotal) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="border-t border-gray-100 px-6 py-4 text-xs leading-relaxed text-gray-500 dark:border-white/5 dark:text-gray-400">
+                    Published US rates, one ticket per order, every fee absorbed. Ticket Tailor is shown at the middle of its range. Event Schedule's row is Stripe's fee alone; a priced ticket also needs the Pro plan, a monthly cost rather than a per-ticket one.
+                </p>
+            </div>
+
+            {{-- The same model at four prices: fixed fees weigh on cheap tickets, shares on dear ones. --}}
+            <div class="mt-8 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[40rem] text-sm">
+                        <caption class="px-6 pt-5 text-start text-base font-bold text-gray-900 dark:text-white">Fees on one ticket, at four prices</caption>
+                        <thead>
+                            <tr class="border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500 dark:border-white/10 dark:text-gray-400">
+                                <th scope="col" class="px-6 py-3 text-start font-semibold">Platform</th>
+                                @foreach ($priceColumns as $columnPrice)
+                                    <th scope="col" class="px-4 py-3 text-end font-semibold">{{ $usd($columnPrice) }} ticket</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-white/5">
+                            @foreach (\App\Utils\TicketFees::CALCULATOR_PLATFORMS as $rowKey)
+                                <tr>
+                                    <th scope="row" class="px-6 py-3.5 text-start font-semibold text-gray-900 dark:text-white">{{ $feeRates[$rowKey]['name'] }}</th>
+                                    @foreach ($priceColumns as $columnPrice)
+                                        <td class="px-4 py-3.5 text-end tabular-nums text-gray-800 dark:text-gray-200">
+                                            <span class="font-semibold">{{ $money($perTicket($rowKey, $columnPrice)) }}</span>
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $feeShare($rowKey, $columnPrice) }} of the price</span>
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="border-t border-gray-100 px-6 py-4 text-xs leading-relaxed text-gray-500 dark:border-white/5 dark:text-gray-400">
+                    Read down a column to compare platforms at your price, and along a row to see how one platform's take changes as the price rises. A platform with a big fixed fee looks expensive on a {{ $usd($priceColumns[0]) }} ticket and cheap on a {{ $usd(end($priceColumns)) }} one; a percentage does the opposite.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Absorb or pass on, and pricing to cover the fees             -->
+    <!-- ============================================================ -->
+    <section id="pricing-for-fees" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Absorb the fee, pass it on, <span class="text-gradient-fees">or price it in</span>
+                </h2>
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
+                    The fee is paid either way. The only choice is where it shows: in your payout, on the buyer's receipt, or inside a ticket price you set a little higher.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="80">
+                <div class="flex flex-col rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Absorb it</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">The buyer pays the price on the poster and you take the fees out of your payout. Simple to explain, and right when the ticket price is a round number people already expect. On a {{ $usd(\App\Utils\TicketFees::EXAMPLE_PRICE) }} Eventbrite ticket you would keep {{ $money(\App\Utils\TicketFees::EXAMPLE_PRICE - $exampleEventbrite) }}.</p>
+                </div>
+                <div class="flex flex-col rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Pass it on</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">The platform adds its fee at checkout, so you keep close to the face value and the buyer pays more than the poster said. Where it is allowed, a fee that appears at the last step is noticed, and some buyers leave. Several places now require ticket prices to be shown with mandatory fees included from the start (in the US, the FTC's rule on fees covers live-event tickets), so check the rules where you sell.</p>
+                </div>
+                <div class="flex flex-col rounded-2xl border border-blue-300 bg-white p-6 ring-2 ring-blue-500/25 dark:border-blue-500/40 dark:bg-white/[0.06]" data-reveal="panel">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Price it in</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">Work out the price that leaves you the amount you need after fees, and put that on the poster. The buyer sees one honest number, and you keep what you planned. This is the only way to cover the fee on Event Schedule, which adds nothing at checkout: the only fee there is your payment processor's, Stripe's {{ $feeRates['stripe']['label'] }} in the US.</p>
+                </div>
+            </div>
+
+            <div class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-5">
+                <div class="flex flex-col rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04] lg:col-span-2" data-reveal="panel">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">The formula</h3>
+                    <p class="mt-3 font-mono text-base font-semibold text-gray-900 dark:text-white">price = (keep + fixed) &divide; (1 &minus; share)</p>
+                    <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                        <span class="font-semibold text-gray-900 dark:text-white">keep</span> is what you want from each ticket, <span class="font-semibold text-gray-900 dark:text-white">fixed</span> is every fixed amount per ticket added together, and <span class="font-semibold text-gray-900 dark:text-white">share</span> is every percentage added together, as a decimal.
+                    </p>
+                    <div class="mt-auto space-y-3 pt-5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                        <p>
+                            <span class="font-semibold text-gray-900 dark:text-white">With Stripe alone:</span>
+                            ({{ $usd($exampleKeep) }} + {{ $money($stripeLine['b']) }}) &divide; (1 &minus; {{ rtrim(rtrim(number_format($stripeLine['a'], 4), '0'), '.') }}) = {{ number_format(($exampleKeep + $stripeLine['b']) / (1 - $stripeLine['a']), 3) }}, so price at {{ $money($grossUp('eventschedule', $exampleKeep)) }}.
+                        </p>
+                        <p>
+                            <span class="font-semibold text-gray-900 dark:text-white">On Eventbrite:</span>
+                            the service fee and processing make a share of {{ $pct($ebLine['a']) }} and a fixed {{ $money($ebLine['b']) }}, so ({{ $usd($exampleKeep) }} + {{ $money($ebLine['b']) }}) &divide; (1 &minus; {{ rtrim(rtrim(number_format($ebLine['a'], 4), '0'), '.') }}) = {{ number_format(($exampleKeep + $ebLine['b']) / (1 - $ebLine['a']), 3) }}, so price at {{ $money($grossUp('eventbrite', $exampleKeep)) }}.
+                        </p>
+                        <p>Always round up, never down. A cap, or a flat fee on very cheap tickets, bends the line; the table beside this works those in.</p>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04] lg:col-span-3" data-reveal="panel">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[28rem] text-sm">
+                            <caption class="px-6 pt-5 text-start text-base font-bold text-gray-900 dark:text-white">The price to charge to keep a set amount</caption>
+                            <thead>
+                                <tr class="border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500 dark:border-white/10 dark:text-gray-400">
+                                    <th scope="col" class="px-6 py-3 text-start font-semibold">Platform</th>
+                                    @foreach ($keepTargets as $keepTarget)
+                                        <th scope="col" class="px-4 py-3 text-end font-semibold">To keep {{ $usd($keepTarget) }}</th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-white/5">
+                                @foreach (\App\Utils\TicketFees::CALCULATOR_PLATFORMS as $keepKey)
+                                    <tr>
+                                        <th scope="row" class="px-6 py-3 text-start font-semibold text-gray-900 dark:text-white">{{ $feeRates[$keepKey]['name'] }}</th>
+                                        @foreach ($keepTargets as $keepTarget)
+                                            <td class="px-4 py-3 text-end tabular-nums text-gray-800 dark:text-gray-200">{{ $money($grossUp($keepKey, $keepTarget)) }}</td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="border-t border-gray-100 px-6 py-4 text-xs leading-relaxed text-gray-500 dark:border-white/5 dark:text-gray-400">
+                        Worked with the same rates as the calculator, each figure rounded up to the cent. Luma is its free plan; Event Schedule is Stripe's fee alone.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mx-auto mt-8 max-w-4xl rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Three mistakes that cost more than the fee</h3>
+                <ul class="mt-3 space-y-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                    <li><span class="font-semibold text-gray-900 dark:text-white">Adding the percentage to the price.</span> A {{ $pct($stripeLine['a']) }} fee is not covered by raising the price {{ $pct($stripeLine['a']) }}: the fee is charged on the new, higher price too, which is why the formula divides instead of multiplying.</li>
+                    <li><span class="font-semibold text-gray-900 dark:text-white">Comparing percentages and forgetting the fixed part.</span> On a {{ $usd($priceColumns[0]) }} ticket Eventbrite's {{ $usd($feeRates['eventbrite']['fixed']) }} is most of the fee; the percentage is the smaller half.</li>
+                    <li><span class="font-semibold text-gray-900 dark:text-white">Leaving out processing.</span> A platform that quotes its own fee and then settles into your Stripe account still costs you Stripe's {{ $feeRates['stripe']['label'] }} on top. Every figure on this page includes it.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- How each platform charges                                    -->
     <!-- ============================================================ -->
     <section id="models" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
@@ -237,6 +515,9 @@
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $feeRates[$model['key']]['name'] }}</h3>
                         <p class="mt-1 text-sm font-semibold {{ $model['key'] === 'eventschedule' ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400' }}">{{ $model['rate'] }}</p>
                         <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $model['how'] }}</p>
+                        <p class="mt-3 text-sm text-gray-700 dark:text-gray-300">
+                            On one {{ $usd(\App\Utils\TicketFees::EXAMPLE_PRICE) }} ticket: <span class="font-semibold tabular-nums text-gray-900 dark:text-white">{{ $money($perTicket($model['key'], \App\Utils\TicketFees::EXAMPLE_PRICE)) }}</span> in fees{{ $model['key'] === 'eventschedule' ? ', all of it Stripe\'s' : '' }}, and you keep <span class="font-semibold tabular-nums text-gray-900 dark:text-white">{{ $money(\App\Utils\TicketFees::EXAMPLE_PRICE - $perTicket($model['key'], \App\Utils\TicketFees::EXAMPLE_PRICE)) }}</span>.
+                        </p>
                         {{-- The source and the link sit together at the foot of the card, on a wrapper: the
                              target-size rule in marketing.css gives a standalone inline-flex link its own
                              block margin and padding, which outrank mt-auto and pt-4 on the link itself. --}}

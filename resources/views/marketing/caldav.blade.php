@@ -1,12 +1,12 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">CalDAV Calendar Sync for iCloud, Nextcloud & Fastmail</x-slot>
-    <x-slot name="description">Two-way CalDAV sync with iCloud, Nextcloud, Fastmail or any conformant server. Free on every plan, HTTPS only, and selfhost friendly at both ends.</x-slot>
+    <x-slot name="description">Two-way CalDAV sync with iCloud, Nextcloud, Fastmail or any CalDAV server, free on every plan. Server URLs, app passwords, CalDAV vs ICS, and error fixes.</x-slot>
     <x-slot name="breadcrumbTitle">CalDAV</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule - CalDAV Sync"
-        description="Two-way CalDAV sync with iCloud, Nextcloud, Fastmail or any conformant server. Free on every plan, HTTPS only, and selfhost friendly at both ends." />
+        description="What CalDAV is and how it differs from an ICS subscription, which apps speak it, the server URL and app password for iCloud, Fastmail and Nextcloud, and fixes for common errors." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -581,6 +581,71 @@
             ['Anything conformant', 'PROPFIND /', 'Radicale, or any other server that answers the standard requests. There is no vendor-specific code here to wait for, which is why this list is not a list of partners.', false],
         ];
 
+        // Terminology: the four ways an event reaches a calendar, because the
+        // searcher usually arrives unsure which of them they need.
+        $ways = [
+            ['A download', '.ics file', 'One event, copied once. Change the event afterwards and the copy in the calendar stays as it was. This is what an Add to Calendar button hands over.', false],
+            ['A subscription', 'iCal feed', 'An address the calendar app re-reads on its own timetable, which in some apps means every few hours. Read-only for the reader, and no password changes hands. Made for an audience.', false],
+            ['A shared calendar', 'CalDAV', 'Read and write, signed in with a username and password, on a server you or your provider runs. Every app connected to it sees the same copy. Made for your own calendar.', true],
+            ['A vendor API', 'Google, Microsoft', 'Google Calendar and Microsoft 365 have interfaces of their own, signed in through the provider. Event Schedule reaches them on separate Google Calendar and Outlook Calendar rows.', false],
+        ];
+
+        // Which apps speak CalDAV. General, well-known facts about each app, and
+        // what that means for connecting Event Schedule.
+        $speakers = [
+            ['Apple Calendar', 'Yes. iCloud calendars are CalDAV underneath, and Apple Calendar on a Mac, iPhone or iPad can also add any other CalDAV account.', 'Connect Event Schedule to the server the calendar lives on. Every Apple device signed in to that account then shows the events.'],
+            ['Thunderbird', 'Yes, built in.', 'Add the same server in Thunderbird and in Event Schedule, and both read and write one calendar.'],
+            ['Android', 'Not built in. The DAVx5 app syncs a CalDAV account into the phone\'s own calendar.', 'Point DAVx5 and Event Schedule at the same server. The events appear in whichever calendar app the phone uses.'],
+            ['Fastmail, Nextcloud, Radicale, Baïkal', 'Yes. These are servers: they hold the calendar.', 'Connect to them directly, with the address and password from the table below.'],
+            ['Google Calendar', 'It has a CalDAV interface, but it signs in through Google\'s own OAuth, not with a password.', 'Use the Google Calendar row instead. It is free on every plan as well.'],
+            ['Outlook and Microsoft 365', 'No. Microsoft\'s calendars are reached through Microsoft Graph.', 'Use the Outlook Calendar row instead. Also free on every plan.'],
+        ];
+
+        // Connecting: what each provider wants in the three fields.
+        $providers = [
+            ['iCloud', 'https://caldav.icloud.com', 'Your Apple Account email address', 'An app-specific password, made at account.apple.com under Sign-In and Security. Apple only offers these on an account with two-factor authentication turned on.'],
+            ['Fastmail', 'https://caldav.fastmail.com/dav/', 'Your full Fastmail email address', 'An app password from Fastmail\'s privacy and security settings, given access to calendars.'],
+            ['Nextcloud', 'https://your-server/remote.php/dav', 'Your Nextcloud login name', 'An app password, made in your personal settings under Security, in the devices and sessions list.'],
+            ['Radicale, Baïkal, others', 'The CalDAV address your server\'s documentation gives', 'The account name on that server', 'That account\'s password, or an app password if the server offers them.'],
+        ];
+
+        // Connecting, in the order the form asks for things.
+        $connectSteps = [
+            ['Open the row', 'In Edit Schedule, choose Integrations and open the CalDAV Calendar row. Only the schedule\'s owner can connect a calendar; other members see how it is set and cannot change it.'],
+            ['Type the address in full', 'Start it with https://. The hints under the Server URL field name the hosts without it, and the form refuses any address that does not begin that way, so caldav.icloud.com on its own is turned away.'],
+            ['Add the username and password', 'From the table above. Paste an app password exactly as your provider shows it.'],
+            ['Press Test Connection', 'A live request goes to your server. When it succeeds, the list of your calendars and the sync direction appear underneath.'],
+            ['Pick the calendar', 'Choose one that holds only what belongs on your public schedule. With a direction that reads from it, every event on that calendar comes in, apart from ones marked private, declined or cancelled.'],
+            ['Choose a direction and press Connect', 'To CalDAV, From CalDAV or Bidirectional Sync. The connection is saved at once and the page reloads, so save any other changes on the form first.'],
+        ];
+
+        // Troubleshooting: the messages the form shows, and what each one means.
+        $caldavErrors = [
+            ['CalDAV server must use HTTPS for security.', 'The address does not start with https://. A bare host name such as caldav.icloud.com counts, so type the scheme in front of it. A server that only answers plain http cannot be connected.'],
+            ['Failed to connect: 401', 'The server refused the username or the password. The usual cause is an account password where the provider wants an app password, or a username that is not the full email address. Make a fresh app password and paste it in.'],
+            ['Failed to connect: 301, 302, 307 or 308', 'The address redirects somewhere else, and redirects are not followed (see the security section above). Enter the address it points to. For Nextcloud that means including /remote.php/dav rather than the bare domain.'],
+            ['Failed to connect: 404 or 405', 'A web server answered, but not its CalDAV endpoint. This is usually the address of the web interface you sign in to in a browser, not the DAV address.'],
+            ['No calendars found on this server.', 'Signing in worked, but listing the calendars failed or came back empty. Check that the account has at least one calendar, and that the Server URL is the CalDAV address from the table above rather than a page of the provider\'s website.'],
+            ['CalDAV target is not an allowed address', 'The server\'s name leads to a private or internal address: a home network range such as 192.168.x.x, a VPN or Tailscale address, or localhost. Event Schedule only contacts calendar servers on the public internet, hosted and selfhosted alike. The same message appears when the name does not resolve at all, so check the spelling too.'],
+            ['A message about an SSL certificate', 'The server\'s certificate is self-signed or has expired. Give it one from a public certificate authority, Let\'s Encrypt included, and test again.'],
+        ];
+
+        // After it connects: the two quiet failures that show no message at all.
+        $quiet = [
+            ['My events are not in my calendar', [
+                'The direction is To CalDAV or Bidirectional Sync, not From CalDAV.',
+                'The event is published. Drafts are never written out.',
+                'The event was saved after you connected. Events already published before that are written the next time each one is saved; connecting does not copy your back catalogue in one go.',
+                'Your calendar app has fetched lately. On a phone, opening the calendar list and pulling down usually asks the server again.',
+            ]],
+            ['My calendar entries are not on my schedule', [
+                'The direction is From CalDAV or Bidirectional Sync.',
+                'Fifteen minutes have passed. Reading is polled, not pushed.',
+                'You are looking at the drafts. New entries wait there unless Publish new events automatically is on in the same row; the Schedule tab says how many are waiting and has a Review button.',
+                'The entry falls between 30 days ago and a year from now. Anything outside that window is not asked for.',
+            ]],
+        ];
+
         // The six requests the client makes, in the order it makes them.
         $trace = [
             ['PROPFIND', 'current-user-principal', 'Who am I on this server?', 'The first thing a CalDAV client asks. Your server answers with the address of your own principal, which is where everything else hangs from.', false],
@@ -691,17 +756,36 @@
                 'q' => 'Can I use CalDAV and Google Calendar at the same time?',
                 'a' => 'Yes. They are separate connections with separate directions on the same schedule, so you can push to one and read from the other, or run both ways on both. Each schedule you own is configured on its own, so two schedules can point at two entirely different calendars.',
             ],
+            [
+                'q' => 'What is the CalDAV server address for iCloud?',
+                'a' => 'Type https://caldav.icloud.com as the Server URL, with the https:// in front. The username is your Apple Account email address, and the password is an app-specific password made at account.apple.com under Sign-In and Security, not the password you sign in to Apple with. Apple only offers app-specific passwords on accounts with two-factor authentication turned on.',
+            ],
+            [
+                'q' => 'What is the difference between CalDAV and an ICS subscription?',
+                'a' => 'An ICS subscription is a read-only address that a calendar app downloads again from time to time, on its own timetable. Nobody signs in and nobody can change anything through it, which makes it the right way to give your audience your dates. CalDAV is a two-way protocol: an app signs in to a server with a username and password, and can read, add, change and delete events there. Use CalDAV for your own calendar and the iCal feed for everybody else.',
+            ],
+            [
+                'q' => 'Can I use CalDAV with Google Calendar or Outlook?',
+                'a' => 'Not usefully. Google Calendar does have a CalDAV interface, but it signs in through Google\'s OAuth rather than a password, and Outlook and Microsoft 365 calendars are not CalDAV servers at all. Event Schedule connects to both through their own APIs instead, on the Google Calendar and Outlook Calendar rows under Integrations, and both are free on every plan.',
+            ],
+            [
+                'q' => 'How do I see CalDAV events on an Android phone?',
+                'a' => 'Android has no CalDAV support of its own. The usual answer is DAVx5, an app that signs in to a CalDAV server and copies its calendars into the phone\'s calendar, where any calendar app can show them. Connect Event Schedule and DAVx5 to the same server, such as Nextcloud or Fastmail, and the events you publish reach the phone through it.',
+            ],
         ];
 
         $dotSections = [
             ['top', 'The standard'],
+            ['what-is-caldav', 'Terminology'],
             ['servers', 'Interoperability'],
+            ['connect', 'Connecting'],
             ['how-it-works', 'On the wire'],
             ['direction', 'Direction'],
             ['record', 'The record'],
             ['timing', 'Timing'],
             ['checks', 'Idempotence'],
             ['security', 'Security'],
+            ['troubleshooting', 'Troubleshooting'],
             ['open', 'Both ends open'],
             ['faq', 'Questions'],
             ['claim', 'Connect'],
@@ -790,12 +874,93 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 2a. Terminology: what CalDAV is, and what it is not          -->
+    <!-- ============================================================ -->
+    <section id="what-is-caldav" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 1</span><span>Terminology</span></div>
+                <h2 class="es-balance es-proto-ink mt-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    One calendar on a server. <span class="es-proto-accent">Every app reads the same copy.</span>
+                </h2>
+                <p class="es-proto-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    CalDAV is the standard way for a calendar app to read and write events that live on a server. It was published in 2007 as RFC 4791, and it is built on WebDAV, which is itself an extension of HTTP. The calendar belongs to the server. Your phone, your laptop and Event Schedule are all clients of it, so a change one of them makes is what the others read next.
+                </p>
+            </div>
+
+            <p class="es-proto-tag mb-4 text-center" data-reveal>Four ways an event reaches a calendar</p>
+            <div class="es-proto-strip" data-reveal="panel">
+                @foreach ($ways as [$wayName, $wayToken, $wayBody, $wayOn])
+                    <div class="es-proto-cell @if ($wayOn) es-proto-cell-on @endif">
+                        <span class="es-proto-token">{{ $wayToken }}</span>
+                        <h3 class="es-proto-ink text-lg font-bold">{{ $wayName }}</h3>
+                        <p class="es-proto-muted text-sm">{{ $wayBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-8 grid gap-6 md:grid-cols-2" data-reveal-group="90">
+                <div class="es-proto-card flex flex-col p-7" data-reveal="panel">
+                    <p class="es-proto-tag mb-3">Pick CalDAV when</p>
+                    <ul class="es-proto-list es-proto-muted space-y-2 text-sm leading-relaxed">
+                        <li>The calendar is yours, or your team's, and you already live in it on your phone.</li>
+                        <li>You want an entry you add in Apple Calendar or Thunderbird to turn up on your public schedule without retyping it.</li>
+                        <li>Your calendar is on iCloud, Fastmail, Nextcloud or another server that speaks the standard.</li>
+                        <li>You want to change a date in one place and have both sides agree.</li>
+                    </ul>
+                </div>
+                <div class="es-proto-card flex flex-col p-7" data-reveal="panel">
+                    <p class="es-proto-tag mb-3">Pick the iCal feed when</p>
+                    <ul class="es-proto-list es-proto-muted space-y-2 text-sm leading-relaxed">
+                        <li>The people reading are your audience, and they should see your dates without being able to change them.</li>
+                        <li>Nobody should have to hand a password to anything.</li>
+                        <li>They use Google Calendar or Outlook, which subscribe to an address happily and cannot add your CalDAV server as an account.</li>
+                        <li>A refresh every few hours on their side is soon enough.</li>
+                    </ul>
+                    <a href="{{ marketing_url('/docs/sharing#calendar-feeds') }}" class="es-proto-link mt-auto inline-flex items-center gap-2 pt-4 text-sm font-medium hover:underline">
+                        How the iCal feed works
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="es-proto-card mt-8 overflow-x-auto p-5 sm:p-7" data-reveal="panel">
+                <table class="es-proto-table">
+                    <caption class="es-proto-muted mb-4 text-start text-sm">Which calendar apps speak CalDAV, and what that means for connecting Event Schedule</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="es-proto-th">App</th>
+                            <th scope="col" class="es-proto-th">Speaks CalDAV?</th>
+                            <th scope="col" class="es-proto-th">With Event Schedule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($speakers as [$spApp, $spSpeaks, $spHow])
+                            <tr>
+                                <th scope="row">{{ $spApp }}</th>
+                                <td class="es-proto-muted text-sm">{{ $spSpeaks }}</td>
+                                <td class="es-proto-muted text-sm">{{ $spHow }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="es-proto-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                The point to take away: Event Schedule connects to the server, not to each device. Connect it once to the account your calendar lives in, and every phone, tablet and laptop signed in to that account sees the same events.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 2. Interoperability                                          -->
     <!-- ============================================================ -->
     <section id="servers" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 1</span><span>Interoperability</span></div>
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 2</span><span>Interoperability</span></div>
                 <h2 class="es-balance es-proto-ink mt-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
                     Not a list of partners. <span class="es-proto-accent">A list of clients.</span>
                 </h2>
@@ -822,6 +987,75 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 2b. Connecting, provider by provider                         -->
+    <!-- ============================================================ -->
+    <section id="connect" class="es-proto-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 3</span><span>Connecting</span></div>
+                <h2 class="es-balance es-proto-ink mt-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Three fields. <span class="es-proto-accent">Most failures are one of them.</span>
+                </h2>
+                <p class="es-proto-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    A CalDAV connection is a server address, a username and a password. Each provider wants each of them in a particular shape, and the password is almost never the one you sign in with.
+                </p>
+            </div>
+
+            <div class="es-proto-card overflow-x-auto p-5 sm:p-7" data-reveal="panel">
+                <table class="es-proto-table">
+                    <caption class="es-proto-muted mb-4 text-start text-sm">What to type in each field, by provider</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="es-proto-th">Provider</th>
+                            <th scope="col" class="es-proto-th">Server URL</th>
+                            <th scope="col" class="es-proto-th">Username</th>
+                            <th scope="col" class="es-proto-th">Password</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($providers as [$pvName, $pvUrl, $pvUser, $pvPass])
+                            <tr>
+                                <th scope="row">{{ $pvName }}</th>
+                                <td class="es-proto-muted text-sm"><span dir="ltr" class="break-all font-mono text-xs">{{ $pvUrl }}</span></td>
+                                <td class="es-proto-muted text-sm">{{ $pvUser }}</td>
+                                <td class="es-proto-muted text-sm">{{ $pvPass }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <ol class="mt-8 grid gap-6 md:grid-cols-2" data-reveal-group="80">
+                @foreach ($connectSteps as [$stepTitle, $stepBody])
+                    <li class="es-proto-card flex gap-4 p-7" data-reveal="panel">
+                        <span class="es-proto-accent shrink-0 font-mono text-sm font-bold" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="es-proto-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                            <p class="es-proto-muted text-sm leading-relaxed">{{ $stepBody }}</p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+
+            <div class="mt-6 grid gap-6 md:grid-cols-2" data-reveal-group="90">
+                <div class="es-proto-caution p-6" data-reveal="panel">
+                    <p class="es-proto-tag mb-3">Use a calendar of its own</p>
+                    <p class="es-proto-muted text-sm leading-relaxed">Make a new calendar on your server for this, called something like Public events, rather than connecting the one you keep your dentist in. With From CalDAV or Bidirectional Sync, every event on the chosen calendar is read in, apart from ones marked private, declined or cancelled. New entries wait as drafts until you publish them, but a calendar that only ever holds public dates is one less thing to review.</p>
+                </div>
+                <div class="es-proto-caution p-6" data-reveal="panel">
+                    <p class="es-proto-tag mb-3">What happens next</p>
+                    <p class="es-proto-muted text-sm leading-relaxed">Writing starts with your next save: a published event goes out each time it is saved, and one that was already published before you connected goes out the next time you save it. Reading starts with the next fifteen-minute run. Turn on Publish new events automatically in the same row if you would rather skip the drafts.</p>
+                </div>
+            </div>
+
+            <p class="es-proto-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                The same steps, with every field named as it is on the screen, are in the user guide.
+                <a href="{{ marketing_url('/docs/creating-schedules#integrations-caldav') }}" class="es-proto-link font-medium hover:underline">CalDAV Calendar in the guide</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 3. On the wire (fixed-dark band)                             -->
     <!-- ============================================================ -->
     <section id="how-it-works" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
@@ -832,12 +1066,12 @@
 
             <div class="relative z-10 mx-auto max-w-4xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-proto-sec mb-6" data-reveal><span>&sect; 2</span><span>On the wire</span></div>
+                    <div class="es-proto-sec mb-6" data-reveal><span>&sect; 4</span><span>On the wire</span></div>
                     <h2 class="es-balance mt-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
                         Six requests. <span class="es-proto-lit">All of them in the spec.</span>
                     </h2>
                     <p class="es-proto-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                        This is the conversation, in the order it happens. A polled read opens with one more property request, which is what &sect; 6 is about. Read both once and there is no magic left in the word integration.
+                        This is the conversation, in the order it happens. A polled read opens with one more property request, which is what &sect; 8 is about. Read both once and there is no magic left in the word integration.
                     </p>
                 </div>
 
@@ -883,7 +1117,7 @@
     <section id="direction" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 3</span><span>Direction</span></div>
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 5</span><span>Direction</span></div>
                 <h2 class="es-balance es-proto-ink mt-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
                     Four states. <span class="es-proto-accent">That is the whole enum.</span>
                 </h2>
@@ -927,7 +1161,7 @@
     <section id="record" class="es-proto-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 4</span><span>Conformance</span></div>
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 6</span><span>Conformance</span></div>
                 <h2 class="es-balance es-proto-ink mt-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Property by property, <span class="es-proto-accent">both ways.</span>
                 </h2>
@@ -983,7 +1217,7 @@
     <section id="timing" class="es-proto-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 5</span><span>Timing</span></div>
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 7</span><span>Timing</span></div>
                 <h2 class="es-balance es-proto-ink mt-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     One side is instant. <span class="es-proto-accent">The other is polled.</span>
                 </h2>
@@ -1020,7 +1254,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-proto-sec mb-6" data-reveal><span>&sect; 6</span><span>Idempotence</span></div>
+                    <div class="es-proto-sec mb-6" data-reveal><span>&sect; 8</span><span>Idempotence</span></div>
                     <h2 class="es-balance mt-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
                         The hard part of two-way sync is <span class="es-proto-lit">doing nothing.</span>
                     </h2>
@@ -1058,7 +1292,7 @@
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-12 lg:grid-cols-[1fr_1.05fr]">
                 <div>
-                    <div class="es-proto-sec mb-6" data-reveal><span>&sect; 7</span><span>Security considerations</span></div>
+                    <div class="es-proto-sec mb-6" data-reveal><span>&sect; 9</span><span>Security considerations</span></div>
                     <h2 class="es-balance es-proto-ink mb-5 mt-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                         Every specification has <span class="es-proto-accent">this section.</span>
                     </h2>
@@ -1089,12 +1323,62 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 8b. Troubleshooting: the messages, and the two silences      -->
+    <!-- ============================================================ -->
+    <section id="troubleshooting" class="es-proto-rule scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 10</span><span>Troubleshooting</span></div>
+                <h2 class="es-balance es-proto-ink mt-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    What the message means, <span class="es-proto-accent">and what to change.</span>
+                </h2>
+                <p class="es-proto-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    Test Connection says why it failed, in the words below. When it fails with a number, that number is the HTTP status your server sent back, and the number tells you which field to look at.
+                </p>
+            </div>
+
+            <div class="es-proto-card p-7" data-reveal="panel">
+                <dl>
+                    @foreach ($caldavErrors as [$errSays, $errMeans])
+                        <div class="es-proto-terms">
+                            <dt class="es-proto-ink font-mono text-sm font-semibold">{{ $errSays }}</dt>
+                            <dd class="m-0">
+                                <p class="es-proto-muted text-sm leading-relaxed">{{ $errMeans }}</p>
+                            </dd>
+                        </div>
+                    @endforeach
+                </dl>
+            </div>
+
+            <div class="mt-8 grid gap-6 md:grid-cols-2" data-reveal-group="90">
+                @foreach ($quiet as [$quietTitle, $quietChecks])
+                    <div class="es-proto-card flex flex-col p-7" data-reveal="panel">
+                        <p class="es-proto-tag mb-3">Connected, but</p>
+                        <h3 class="es-proto-ink mb-3 text-lg font-bold">{{ $quietTitle }}</h3>
+                        <p class="es-proto-muted mb-2 text-sm">Check, in this order, that:</p>
+                        <ul class="es-proto-list es-proto-muted space-y-2 text-sm leading-relaxed">
+                            @foreach ($quietChecks as $quietCheck)
+                                <li>{{ $quietCheck }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-proto-caution mt-6 p-6" data-reveal="panel">
+                <p class="es-proto-tag mb-3">Changed your password?</p>
+                <p class="es-proto-muted text-sm leading-relaxed">If you revoke the app password at your provider, or change the account password a connection was made with, the sync stops working at its next request. Disconnect in the CalDAV Calendar row, make a new app password, and connect again. Nothing already on either calendar is removed by doing that.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 9. Both ends open                                            -->
     <!-- ============================================================ -->
     <section id="open" class="es-proto-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 8</span><span>Both ends open</span></div>
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 11</span><span>Both ends open</span></div>
                 <h2 class="es-balance es-proto-ink mt-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
                     An open standard on one side. <span class="es-proto-accent">Open source on the other.</span>
                 </h2>
@@ -1107,7 +1391,7 @@
                 <div class="es-proto-card flex flex-col p-7" data-reveal="panel">
                     <p class="es-proto-tag mb-3">Your server, both times</p>
                     <h3 class="es-proto-ink mb-3 text-xl font-bold">Selfhost to selfhost</h3>
-                    <p class="es-proto-muted mb-4 text-sm leading-relaxed">Run Event Schedule on your own machine, point it at your own calendar server, and no third party is involved in your calendar at all. The usage metering that exists on the hosted service does not run on your own install, so nothing is counted and nothing is reported.</p>
+                    <p class="es-proto-muted mb-4 text-sm leading-relaxed">Run Event Schedule on your own machine, point it at your own calendar server, and no third party is involved in your calendar at all. The calendar server does need an address on the public internet: private network addresses are refused even on your own install. The usage metering that exists on the hosted service does not run on your own install, so nothing is counted and nothing is reported.</p>
                     <div class="mt-auto flex flex-wrap gap-2">
                         <span class="es-proto-chip">No cloud dependency</span>
                         <span class="es-proto-chip">Full data ownership</span>
@@ -1184,7 +1468,7 @@
     <section id="faq" class="es-proto-rule scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 9</span><span>Questions</span></div>
+                <div class="es-proto-sec mb-6" data-reveal><span>&sect; 12</span><span>Questions</span></div>
                 <h2 class="es-balance es-proto-ink mb-4 mt-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>
@@ -1219,7 +1503,7 @@
                 </div>
 
                 <div class="relative z-10">
-                    <div class="es-proto-sec mb-6"><span>&sect; 10</span><span>Conformance statement</span></div>
+                    <div class="es-proto-sec mb-6"><span>&sect; 13</span><span>Conformance statement</span></div>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
                         One standard. <span class="es-proto-lit">Two calendars.</span>
                     </h2>
