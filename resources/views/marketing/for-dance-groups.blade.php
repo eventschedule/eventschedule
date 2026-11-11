@@ -608,6 +608,24 @@
         .dg-facts p { margin-top: 0.5rem; color: var(--dg-ink-2); }
         .dg-facts li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); gap: 1.4rem; }
         .dg-facts li > i { margin-top: 0.55rem; }
+        .dg-facts .dg-facts-h { font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.5rem, 2.3vw, 1.9rem); line-height: 1.15; }
+
+        /* Field notes under a count: the how-to that goes with it, a worked
+           sum on the left set like the timetable, the rules on the right.
+           A link in them is underlined with the strip of spike tape. */
+        .dg-guide { margin-top: clamp(4rem, 8vw, 7rem); padding-top: clamp(2.5rem, 5vw, 3.5rem); border-top: 1px solid var(--dg-line); }
+        .dg-guide-head { max-width: 44rem; margin-bottom: clamp(2.25rem, 4.5vw, 3.25rem); }
+        .dg-guide-head p { margin-top: 1rem; color: var(--dg-ink-2); }
+        .dg-guide .dg-tt-left p:first-child b { font-size: 2rem; }
+        .dg-guide-foot { margin-top: 1.4rem; font-size: 0.95rem; color: var(--dg-ink-2); }
+        #dg .dg-guide a {
+            display: inline;
+            color: var(--dg-ink);
+            text-decoration: underline;
+            text-decoration-color: var(--dg-tape);
+            text-decoration-thickness: 3px;
+            text-underline-offset: 0.22em;
+        }
 
         /* 4. The show: the house list for the night */
         .dg-bill { padding: clamp(1.75rem, 3.5vw, 2.75rem); }
@@ -879,6 +897,22 @@
                 'q' => 'Can dancers add the class timetable to their own calendar?',
                 'a' => 'Yes. Your schedule page offers a live calendar feed that Google Calendar, Apple Calendar, Outlook or any other calendar app can subscribe to. It carries the next 90 days of classes and the app re-reads it, so a moved class or a closure turns up without anyone downloading a new file. It needs no account and no email address.',
             ],
+            [
+                'q' => 'How do I make a dance class schedule?',
+                'a' => 'Start with three numbers: how many rooms you have, the hours people can come, and how long a class takes with the changeover. Two rooms, five weeknights from 4pm to 9pm and 75-minute slots give forty classes a week. Fill the hours by age first, youngest straight after school and adults last, then share out the styles. Put the level and ages in each class name, make every class a recurring event that ends on the last week of term, and take the holidays out with date exceptions.',
+            ],
+            [
+                'q' => 'Should a dance studio sell terms, class cards or drop-ins?',
+                'a' => 'Usually all three, priced so each does a job: the term cheapest per class because it is paid up front, the class card a little more for adults whose weeks vary, and the drop-in the most, as the way in for somebody new. Here a term is a season pass on one class\'s recurring event, a card is a visit pass that can cover a whole sub-schedule, and a drop-in is a ticket on one date. Passes are Pro.',
+            ],
+            [
+                'q' => 'How do I list a weekly social or practica?',
+                'a' => 'Make it a recurring event like a class. If it is free, free registration with no limit tells you roughly who is coming. If you charge at the door, sell a ticket and turn on Allow sales after event starts, so people arriving partway through can still buy one. Regulars can have a membership that covers a Socials sub-schedule, which is Pro; a price on the ticket needs Pro.',
+            ],
+            [
+                'q' => 'How do I stop one family buying all the recital tickets?',
+                'a' => 'Set Max Per Order on each ticket type, for example four, so no single order can take a row. To give dancer families first choice, sell a separate ticket type for them whose sales dates open a week before the general type, and share the early window only in the parents\' newsletter, since anyone who opens the event page during that week can buy it. Both settings are free on every ticket type; charging a price for the tickets is Pro.',
+            ],
         ];
 
         $dotSections = [
@@ -1139,6 +1173,63 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Field notes: building the timetable -->
+                <div class="dg-guide" id="timetable">
+                    <div class="dg-guide-head">
+                        <p class="dg-label" data-reveal>Field notes &middot; the timetable</p>
+                        <h3 class="dg-d" style="font-size: clamp(2rem, 4vw, 3rem); margin-top: 0.8rem;" data-reveal>How to build a dance schedule that fits the building.</h3>
+                        <p data-reveal>
+                            A dance timetable is a puzzle with three fixed pieces: how many rooms you have, the hours people can come, and how long a class plus the changeover takes. Work those out first and the number of classes you can run is arithmetic, before anyone argues about who gets Tuesday.
+                        </p>
+                    </div>
+
+                    <div class="dg-two">
+                        <div>
+                            <div class="dg-tt dg-spike" data-reveal="panel">
+                                <div class="dg-tt-head">
+                                    <h4 class="dg-h3">Two studios, one week</h4>
+                                    <span class="dg-label">The sum</span>
+                                </div>
+                                @foreach ([
+                                    ['Rooms with a sprung floor', 'Both run at once', '2'],
+                                    ['Weeknight teaching hours', '4pm to 9pm, Monday to Friday', '5'],
+                                    ['Minutes per class slot', '60 of class, 15 to change over', '75'],
+                                    ['Classes a room fits a night', '300 minutes over 75', '4'],
+                                    ['Weekly classes, Monday to Friday', '2 rooms, 5 nights, 4 a night', '40'],
+                                ] as [$gName, $gWhy, $gN])
+                                    <div class="dg-tt-row">
+                                        <div>
+                                            <p class="dg-h3" style="font-size: clamp(1.3rem, 2vw, 1.6rem);">{{ $gName }}</p>
+                                            <p class="dg-tt-when">{{ $gWhy }}</p>
+                                        </div>
+                                        <div class="dg-tt-left"><p><b>{{ $gN }}</b></p></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="dg-guide-foot" data-reveal>
+                                Forty weekly classes are forty recurring events, set up once a term. Give each an end date on the last week of term, take out the half-term week with Exclude Dates, and the whole term is on the page before the first lesson. The <a href="{{ marketing_url('/features/recurring-events') }}">recurring events</a> page has every repeat pattern.
+                            </p>
+                        </div>
+
+                        <ul class="dg-facts" data-reveal-group="90">
+                            @foreach ([
+                                ['Fill the hours by age, then by style', 'The clock decides who can come before the style does. Put the youngest straight after school, juniors next, teens in the early evening and adults from half past seven, then share the styles out inside each band, so a family with two children is not driving back at nine.'],
+                                ['Name a class the way a parent searches', '"Ballet 2 (ages 9 to 11)" answers the question that "Ballet Intermediate" raises. The name is what shows on the calendar, in the calendar feed and on the ticket, so put the level and the ages in it.'],
+                                ['One sub-schedule per style', 'Ballet, Jazz, Hip-hop and Adult each get a sub-schedule with its own link and colour, and the Filters panel on your calendar lets a visitor narrow it to one. On Pro, an "Age range" or "Level" dropdown made as a custom field becomes a filter too.'],
+                                ['Change the series, never the copies', 'Moving Ballet 2 from 5pm to 5:30pm is one edit to its recurring event, and every remaining week follows. Dancers who subscribed to your calendar feed see it in their own calendar without downloading anything.'],
+                            ] as [$t, $d])
+                                <li data-reveal>
+                                    <i class="dg-x" aria-hidden="true"></i>
+                                    <div>
+                                        <h4 class="dg-facts-h">{{ $t }}</h4>
+                                        <p>{{ $d }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1312,6 +1403,61 @@
                         @endforeach
                     </ul>
                 </div>
+
+                <!-- Field notes: term, card or drop-in -->
+                <div class="dg-guide" id="pricing">
+                    <div class="dg-guide-head">
+                        <p class="dg-label" data-reveal>Field notes &middot; pricing the term</p>
+                        <h3 class="dg-d" style="font-size: clamp(2rem, 4vw, 3rem); margin-top: 0.8rem;" data-reveal>Term, class card or drop-in?</h3>
+                        <p data-reveal>
+                            Most studios sell all three, and the trick is pricing them so each one does a job. The term fills the room for twelve weeks, the card catches the adult who comes when work allows, and the drop-in is the door everyone else walks through first.
+                        </p>
+                    </div>
+
+                    <div class="dg-two">
+                        <div>
+                            <div class="dg-tt dg-spike" data-reveal="panel">
+                                <div class="dg-tt-head">
+                                    <h4 class="dg-h3">One class, three prices</h4>
+                                    <span class="dg-label">Per class, in your currency</span>
+                                </div>
+                                @foreach ([
+                                    ['Drop-in', 'A single ticket on the date', '15'],
+                                    ['Ten-class card', 'A visit pass, 130 for ten', '13'],
+                                    ['Twelve-week term', 'A season pass, 144 for the term', '12'],
+                                ] as [$gName, $gWhy, $gN])
+                                    <div class="dg-tt-row">
+                                        <div>
+                                            <p class="dg-h3" style="font-size: clamp(1.3rem, 2vw, 1.6rem);">{{ $gName }}</p>
+                                            <p class="dg-tt-when">{{ $gWhy }}</p>
+                                        </div>
+                                        <div class="dg-tt-left"><p><b>{{ $gN }}</b></p></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="dg-guide-foot" data-reveal>
+                                Each step down rewards a bigger commitment, and the term is cheapest because it is paid before the first week. A card that costs more per class than the term keeps the term worth buying. Passes are Pro; see <a href="{{ marketing_url('/features/passes') }}">passes and memberships</a>.
+                            </p>
+                        </div>
+
+                        <ul class="dg-facts" data-reveal-group="90">
+                            @foreach ([
+                                ['The term is a season pass', 'Sell it on the class\'s own recurring event and it covers every date of that series once. End the series on the last week of term and the pass is exactly the term, with nothing left over to argue about in September.'],
+                                ['The card covers a sub-schedule', 'Set a visit pass to cover all events in your Adult sub-schedule, and a card bought for adult contemporary works at adult jazz but never in the children\'s ballet. Valid for (days), counted from purchase, stops a card from lingering for three years.'],
+                                ['Keep places for drop-ins', 'Turn on advance booking for pass holders and set Max advance seats per date below the class size: with 20 places and a cap of 16, four are always there for the person trying it for the first time.'],
+                                ['Socials and practicas', 'A Friday social is a recurring event too. Free registration with no limit tells you who is coming; a door ticket with Allow sales after event starts sells to the people who arrive at ten. A membership that covers a Socials sub-schedule suits the regulars.'],
+                            ] as [$t, $d])
+                                <li data-reveal>
+                                    <i class="dg-x" aria-hidden="true"></i>
+                                    <div>
+                                        <h4 class="dg-facts-h">{{ $t }}</h4>
+                                        <p>{{ $d }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1365,7 +1511,7 @@
                         @foreach ([
                             ['Zero platform fees', 'You keep the whole ticket price minus what your payment provider charges to process it. There is no per-ticket cut on top, on any plan.', 'free'],
                             ['Live check-in view', 'Scanning tickets from a phone is free on every plan. Pro adds the running count and the per-ticket breakdown, so two people can work the queue and both see the same total.', 'pro'],
-                            ['Questions at checkout', 'Ask for the dancer\'s name, the class they are in, or a photo consent - collected with the sale instead of chased afterwards.', 'pro'],
+                            ['Questions at checkout', 'Ask for the dancer\'s name, the class they are in, or a photo consent on the ticket itself, collected with the sale instead of chased afterwards. Questions asked once for the whole order, and an answer from each guest on a paid show, are Pro.', 'free'],
                         ] as [$t, $d, $tier])
                             <li data-reveal>
                                 <i class="dg-t" aria-hidden="true"></i>
@@ -1374,6 +1520,36 @@
                                         <h3 class="dg-h3">{{ $t }}</h3>
                                         <span class="dg-tier {{ $tier === 'pro' ? 'dg-tier-pro' : '' }}">{{ $tier === 'pro' ? 'Pro' : 'Free' }}</span>
                                     </div>
+                                    <p>{{ $d }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <!-- Field notes: recital season, parents and adult students -->
+                <div class="dg-guide" id="recital">
+                    <div class="dg-guide-head">
+                        <p class="dg-label" data-reveal>Field notes &middot; recital season</p>
+                        <h3 class="dg-d" style="font-size: clamp(2rem, 4vw, 3rem); margin-top: 0.8rem;" data-reveal>Parents buy for a child. Adults buy for themselves.</h3>
+                        <p data-reveal>
+                            A studio has two audiences that want different things from the same timetable. The parent of an eight-year-old needs the costume deadline, the call time and four tickets for the grandparents. The adult in Tuesday contemporary needs the class time and nothing else. Run the recital, and the year, with that in mind.
+                        </p>
+                    </div>
+
+                    <ul class="dg-facts" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); column-gap: clamp(3rem, 7vw, 7rem);" data-reveal-group="90">
+                        @foreach ([
+                            ['Dancer families first, then everyone', 'Give a "Dancer families" ticket type sales dates that open a week before the general type, and set Max Per Order to four so one family cannot take a row. Both are free settings on each ticket type. Share the early window only in the parents\' newsletter, since anyone who opens the event page during that week can buy it.'],
+                            ['Two shows are two events', 'A matinee and an evening performance each get their own event and their own count. If the cast differs, say in each description which classes dance in which show, because that is the first thing a parent will ask.'],
+                            ['Ask who they are here for', 'A question on the ticket, "Which dancer are you coming to see?", is free and tells you which families have not bought yet. On a paid show, Pro lets each guest in a family order answer for themselves.'],
+                            ['Rehearsals stay in the wings', 'The dress rehearsal and the spacing call are Drafts: on your own calendar in the admin portal and off the page parents see. Send families the call times in a newsletter instead, where you can say why they matter.'],
+                            ['Two links, two audiences', 'Share the Kids and teens sub-schedule\'s link in the parents\' newsletter and the Adult link on your Instagram bio. Each shows only its own classes, and your main link still shows the lot.'],
+                            ['One scan per family at the door', 'One scan admits every ticket on an order, so a family of five goes in on one code. Scanning is free; the live count of who is in is Pro.'],
+                        ] as [$t, $d])
+                            <li data-reveal>
+                                <i class="dg-x" aria-hidden="true"></i>
+                                <div>
+                                    <h4 class="dg-facts-h">{{ $t }}</h4>
                                     <p>{{ $d }}</p>
                                 </div>
                             </li>

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Circus & Acrobatics | Tours, Tickets</x-slot>
-    <x-slot name="description">Every circus show, aerial class and festival stop on one link. Zero platform fees on tickets, rigging specs for bookers, and a calendar fans subscribe to.</x-slot>
+    <x-slot name="description">Put a circus run, aerial classes and festival stops on one link: tickets for each show, family and school pricing, zero platform fees, a calendar fans follow.</x-slot>
     <x-slot name="breadcrumbTitle">For Circus & Acrobatics</x-slot>
 
     <x-slot name="headMeta">
@@ -13,7 +13,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Circus & Acrobatics"
-        description="Every circus show, aerial class and festival stop on one link. Zero platform fees on tickets, rigging specs for bookers, and a calendar fans subscribe to."
+        description="Put a circus run, aerial classes and festival stops on one link: tickets for each show, family and school pricing, zero platform fees, a calendar fans follow."
         audience="Circus & Acrobatic Performers"
         keywords="circus schedule, acrobat show calendar, circus performer booking, circus event management, free circus scheduling, aerial class passes, circus troupe schedule" />
     <!-- HowTo Schema for Rich Snippets -->
@@ -954,6 +954,24 @@
         #ci .ci-admit .ci-btn { --btn: #c62828; --btn-hover: #1c2a4a; color: #f8ecd2; }
         .ci-admit-note { margin-top: 0.85rem; font-style: italic; font-size: 0.98rem; color: #4a3a2c; }
 
+        /* ---------------------------------------------------------------
+           The particulars of a run and of the training ring: longer
+           reading, so the copy is set flush left on the sheet, under a
+           sub-head in the bill's own second ink. A worked sum is a slip
+           of paper pinned to the bill, like the rider in Act II.
+           --------------------------------------------------------------- */
+        .ci-guide-h { margin-top: clamp(2.4rem, 6vw, 3.4rem); font-family: var(--ci-fatface); font-weight: 400; font-size: clamp(1.45rem, 4vw, 1.9rem); line-height: 1.15; color: var(--a2); text-wrap: balance; }
+        .ci-guide-p { max-width: 44rem; margin: 0.9rem auto 0; color: var(--ink-2); text-wrap: pretty; }
+        .ci-table.ci-flush .ci-cell,
+        .ci-boons.ci-flush .ci-boon { text-align: start; }
+        .ci-boons.ci-flush .ci-boon::before { rotate: 0deg; }
+        .ci-sums { max-width: 34rem; margin: clamp(1.9rem, 4.5vw, 2.75rem) auto 0; --r: 0.6deg; }
+        .ci-sums dl > div { flex-wrap: wrap; }
+        .ci-sums dd { white-space: normal; text-align: end; }
+        .ci-sums .ci-sum-total { margin-top: 0.45rem; padding-top: 0.6rem; border-top: 4px double #221a14; }
+        .ci-sums .ci-sum-total dt,
+        .ci-sums .ci-sum-total dd { color: #a81f1f; }
+
         @media (prefers-reduced-motion: reduce) {
             .ci-chase,
             .ci-burst::before,
@@ -1210,6 +1228,153 @@
 
                 <p class="ci-after" data-reveal>
                     <a href="{{ marketing_url('/features/sub-schedules') }}" class="ci-hand">Sub-schedules are free</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3b. Playing a run in one town: the setup, worked through     -->
+        <!-- ============================================================ -->
+        @php
+            $ciRunSteps = [
+                ['I', 'Two series, not fifteen events', 'A recurring event keeps one start time, so the 14:00 matinee and the 19:00 evening show are two series. Set the evening one to Weekly with every day but Monday ticked, the matinee to Weekly with Saturday and Sunday ticked, and end both On Date, on closing night. Fifteen performances appear, each on its own page with its own link.'],
+                ['II', 'Seats belong to the show', 'A ticket type\'s Quantity is counted per date, so 500 means 500 at every performance, not 500 for the whole stand. Give Adult, Child and Concession the same 500 and choose Combined Total, and they draw on one block of benches however a night splits.'],
+                ['III', 'Dark days and extra shows', 'Untick the day the company rests. A date you will not play goes in Exclude Dates and leaves the calendar altogether. A half-term Friday matinee the town is asking for goes in Include Dates on the matinee series, at the matinee\'s time.'],
+                ['IV', 'Point the map at the field', 'Give each town\'s ground its own venue with the address people actually drive to: the gate onto the field or the car park, not the council offices. The event page maps that address, so a family arriving at dusk finds the tent and not a locked building.'],
+                ['V', 'Print the practicals on the ticket', 'Ticket notes go into the confirmation email and onto every ticket: which gate opens, where to park, that the tent is cold after dark, where buggies wait. Ticket reminders then go to every buyer before their show, switched on unless you turn them off.'],
+                ['VI', 'Sales stop at curtain-up', 'A date stops selling at its start time unless you say otherwise. If the box office sells walk-ups into the first half, turn on Allow sales after event starts in Sales rules, and each date keeps selling until its end time.'],
+            ];
+            $ciPricing = [
+                ['Price the people, not the family', 'Sell Adult and Child as separate types and add a volume discount to the Child ticket, say 20% off once an order holds three Child tickets. Every person in the tent is then counted: against the 500, at the gate and in the door tally. Pick this when the benches are what runs out.'],
+                ['A family ticket, sized in families', 'One "Family of four" type is quicker to buy, but tickets are counted, not people: each family ticket takes one place from its quantity and admits as one ticket. So set its quantity in families (40 families is 160 seats), take those 160 out of the other types yourself, and leave Combined Total off.'],
+                ['The school matinee', 'Give the type schools buy a volume discount of its own, 15% from 20 tickets for example, and the teacher books the class in one order. One scan at the gate admits every ticket on it, so thirty children go in on one code. A school that pays on invoice can be billed through Invoice Ninja, which is a Pro feature.'],
+            ];
+        @endphp
+        <section id="the-run" class="ci-row" style="scroll-margin-top: 4.5rem;">
+            <div class="ci-bill ci-straw">
+                <p class="ci-ribbon" data-reveal>Playing a run in one town</p>
+                <h2 class="ci-stack ci-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    <span class="ci-fit ci-caps" style="--fit: 8.90; --cap: 4.5rem;">How to schedule</span>
+                    <span class="ci-fit ci-wood ci-wear ci-a1" style="--fit: 11.30; --cap: 9rem;">a circus run</span>
+                </h2>
+                <p class="ci-sub" data-reveal style="--reveal-delay: 0.16s;">
+                    A run is a dozen or more performances on one ground, bought one date at a time by families who each want a particular afternoon. Here is a twelve-day stand set up from start to finish, with the sums done.
+                </p>
+
+                <div class="ci-slip ci-rider ci-sums" data-reveal="panel">
+                    <div class="ci-slip-head" style="justify-content: center;"><span>Twelve days on the green</span></div>
+                    <dl>
+                        <div><dt>Evening shows, 19:00, every day but Monday</dt><dd>11</dd></div>
+                        <div><dt>Matinees, 14:00, both weekends</dt><dd>4</dd></div>
+                        <div><dt>Performances</dt><dd>15</dd></div>
+                        <div><dt>Seats in the tent</dt><dd>500</dd></div>
+                        <div class="ci-sum-total"><dt>Seats to sell across the run</dt><dd>7,500</dd></div>
+                    </dl>
+                    <div class="ci-slip-foot ci-pointed">Two series to set up. Fifteen dated pages.</div>
+                </div>
+
+                <p class="ci-guide-p" data-reveal>
+                    The number that matters is the last one. A run is not sold out when the opening night is full; it is sold out when 7,500 seats have gone, and the empty ones tend to sit on the Tuesday and the second Wednesday. Knowing that before the posters go up tells you where a school matinee or a two-for-one midweek offer will earn its keep.
+                </p>
+
+                <h3 class="ci-guide-h" data-reveal>Six steps before the trucks roll in</h3>
+                <div class="ci-table ci-three ci-flush" data-reveal>
+                    @foreach ($ciRunSteps as [$ciRunNo, $ciRunTitle, $ciRunBody])
+                        <article class="ci-cell">
+                            <span class="ci-cell-no" aria-hidden="true">{{ $ciRunNo }}</span>
+                            <h3>{{ $ciRunTitle }}</h3>
+                            <p>{{ $ciRunBody }}</p>
+                        </article>
+                    @endforeach
+                </div>
+                <p class="ci-guide-p" data-reveal>
+                    Every step above is free on every plan, from the repeat rule to the per-date counts. Putting a price on the tickets is the part that needs Pro. The <x-link href="{{ marketing_url('/features/recurring-events') }}">recurring events</x-link> page covers more repeat patterns, and the <x-link href="{{ marketing_url('/docs/tickets#ticket-settings') }}">ticket settings guide</x-link> has every field named here.
+                </p>
+
+                <h3 class="ci-guide-h" data-reveal>Family tickets and the school matinee</h3>
+                <p class="ci-guide-p" data-reveal>
+                    Circus audiences arrive in families and school coaches, and both want a price for the group. There are three honest ways to give them one, and they differ in what your seat count can still see.
+                </p>
+                <div class="ci-boons ci-flush" data-reveal-group="90">
+                    @foreach ($ciPricing as [$ciPriceTitle, $ciPriceBody])
+                        <div class="ci-boon" data-reveal>
+                            <h3>{{ $ciPriceTitle }}</h3>
+                            <p>{{ $ciPriceBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <h3 class="ci-guide-h" data-reveal>Age guidance and running time</h3>
+                <p class="ci-guide-p" data-reveal>
+                    A parent deciding on a circus asks the same five things every time, and a page that answers them before the buy button sells to people who would otherwise message you first. Write them down once per show:
+                </p>
+                <div class="ci-slip ci-rider ci-sums" data-reveal="panel" style="--r: -0.6deg;">
+                    <div class="ci-slip-head" style="justify-content: center;"><span>Before you buy</span></div>
+                    <dl>
+                        <div><dt>Age guidance</dt><dd>5 and up, under-12s with an adult</dd></div>
+                        <div><dt>Running time</dt><dd>2 hours, with a 20-minute interval</dd></div>
+                        <div><dt>Effects</dt><dd>Haze, strobe, fire in the ring</dd></div>
+                        <div><dt>Seating</dt><dd>Tiered benches without backs</dd></div>
+                        <div><dt>Latecomers</dt><dd>Seated at the interval</dd></div>
+                    </dl>
+                </div>
+                <p class="ci-guide-p" data-reveal>
+                    Where each answer goes matters. The short description, up to 200 characters, is the line under the show's name in your listings, so lead it with the age and the length. The description carries the rest, and the event's end time is what a guest's saved calendar entry blocks out, so set the real one. On Pro, an "Age guidance" dropdown made as a <x-link href="{{ marketing_url('/features/custom-fields') }}">custom field</x-link> and ticked On event page prints in a row under the venue on every show, and as a dropdown it also becomes a filter on your calendar, so a parent of a three-year-old can find the shows meant for them.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3c. The training ring: classes and workshops beside shows    -->
+        <!-- ============================================================ -->
+        @php
+            $ciClassRules = [
+                ['Term or drop-in', 'A student committed to Silks 1 for ten weeks buys a season pass on that class: every date of the series, once each. A student who comes when they can buys a 10-visit pass that covers your Classes sub-schedule, so it works at any class and never at a show. A single drop-in stays an ordinary ticket on that date. Passes are Pro.'],
+                ['Keep places for walk-ins', 'Turn on Let holders book seats in advance and pass bookings and drop-in tickets draw on one pool, so a class of 8 never oversells. Set Max advance seats per date to 6 and two places on every date stay for drop-ins. A 24-hour cancellation deadline that forfeits a late cancellation stops the student who books every week and comes every third.'],
+                ['Ask the health questions first', 'Put the questions on the class ticket itself: injuries, experience on the apparatus, and for a kids\' class the child\'s name and age. Ticket-type questions are free and asked once per order; to have every student in a group booking answer separately, turn on Individual tickets and Collect ticket fields per guest, which is Pro on any class that sells tickets, and not offered on a class that also sells a pass.'],
+            ];
+        @endphp
+        <section id="classes" class="ci-row" style="scroll-margin-top: 4.5rem;">
+            <div class="ci-bill">
+                <p class="ci-ribbon" data-reveal>The training ring</p>
+                <h2 class="ci-stack ci-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    <span class="ci-fit ci-caps" style="--fit: 6.40; --cap: 4.5rem;">Classes and workshops</span>
+                    <span class="ci-fit ci-fat ci-wear ci-a1" style="--fit: 9.25; --cap: 9rem;">beside the shows</span>
+                </h2>
+                <p class="ci-sub" data-reveal style="--reveal-delay: 0.16s;">
+                    Most companies teach between runs, and most aerial studios end their term in a show. The two run on different rules: a show is sold by the seat, a class by the rigging point.
+                </p>
+
+                <div class="ci-slip ci-rider ci-sums" data-reveal="panel">
+                    <div class="ci-slip-head" style="justify-content: center;"><span>One studio, one term</span></div>
+                    <dl>
+                        <div><dt>Weekly classes: Silks 1, Silks 2, Hoop, Kids acro</dt><dd>4</dd></div>
+                        <div><dt>Places in each, one per rigging point</dt><dd>8</dd></div>
+                        <div><dt>Weeks in the term</dt><dd>10</dd></div>
+                        <div class="ci-sum-total"><dt>Class places to fill</dt><dd>320</dd></div>
+                    </dl>
+                    <div class="ci-slip-foot ci-pointed">Capacity is the rig, not the room</div>
+                </div>
+
+                <p class="ci-guide-p" data-reveal>
+                    Set each class up as its own weekly series in a Classes <x-link href="{{ marketing_url('/features/sub-schedules') }}">sub-schedule</x-link> and set its quantity or registration limit to the number of points you can rig, because the eighth student on a seven-point rig is the one who stands and watches. A floor class is sized by spotters instead: decide how many students one coach can spot safely and multiply, so two coaches at four each is a class of eight. Kids and adults belong in separate series even at the same level, because the buyer, the questions and the pick-up time all differ.
+                </p>
+
+                <div class="ci-boons ci-flush" data-reveal-group="90">
+                    @foreach ($ciClassRules as [$ciRuleTitle, $ciRuleBody])
+                        <div class="ci-boon" data-reveal>
+                            <h3>{{ $ciRuleTitle }}</h3>
+                            <p>{{ $ciRuleBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <h3 class="ci-guide-h" data-reveal>The waiver, and the end-of-term show</h3>
+                <p class="ci-guide-p" data-reveal>
+                    A Terms URL puts a link to your terms on every ticket, but buyers are not asked to accept them at checkout. If you need a record that each student read the waiver, make it a required question on the class ticket: a dropdown whose only option is "I have read the waiver" cannot be skipped, and the answer is stored with the sale. Then, when the term ends in a student showcase, make that its own event with its own seats. Families want two or three tickets each, so free registration with a Registration Limit at your number of chairs, or ticket types if you charge, keeps the hall from filling with one student's whole family tree.
+                </p>
+                <p class="ci-after" data-reveal>
+                    <a href="{{ marketing_url('/features/passes') }}" class="ci-hand">How class passes work</a>
                 </p>
             </div>
         </section>
@@ -1477,6 +1642,22 @@
                         [
                             'q' => 'A festival listed my act before I joined. Is there already a page for me?',
                             'a' => 'There may be. When a festival or venue names an act that is not on Event Schedule, its event page still shows that act in the lineup by name, and the app creates a page for the act. That page says which schedule created it and that you have not claimed it, credits each date to the schedule that added it, and stays out of search engines until it is claimed. If it carries your email address, create an account or sign in with that address and press Claim this page: it becomes your schedule, and the festivals that already listed you keep listing you without asking again, while anyone new sends a request you accept. If it is not you, This is not me takes it down.',
+                        ],
+                        [
+                            'q' => 'How do I schedule a circus run with a show every day?',
+                            'a' => 'Make each show time one recurring event: a 19:00 evening series set to Weekly with the days you play ticked, and a 14:00 matinee series with Saturday and Sunday ticked, both ending on closing night. Every performance then has its own page and its own ticket count, so a sold-out Saturday does not close the Sunday. Untick your dark day, put a date you will not play in Exclude Dates, and add an extra show with Include Dates. Recurring events are free; a price on the tickets needs Pro.',
+                        ],
+                        [
+                            'q' => 'Should a circus sell family tickets, or adult and child tickets?',
+                            'a' => 'Adult and child tickets with a volume discount are the safer choice, because every person stays counted against the tent\'s seats and at the gate. A single family ticket is quicker to buy, but tickets are counted rather than people, so a family of four takes one place from that ticket\'s quantity: set its quantity in families and take its seats out of the other types yourself. Ticket types and volume discounts are free to set up; charging a price for them is Pro.',
+                        ],
+                        [
+                            'q' => 'How do I take a school group booking for a circus show?',
+                            'a' => 'Give the ticket type schools buy a volume discount, for example 15% off from 20 tickets, and the teacher books the whole class in one order. One scan at the gate admits every ticket on that order, so the group goes in on one code. If the school pays on invoice, Invoice Ninja on Pro bills the sale as an invoice with the QR code written into its notes.',
+                        ],
+                        [
+                            'q' => 'Can students buy a whole term of aerial classes at once?',
+                            'a' => 'Yes, on Pro. A season pass sold on a recurring class covers every date of that series once. A visit pass with a set number of classes can cover your Classes sub-schedule, so it works at any class and never at a show. Turn on advance booking and holders reserve their dates from their pass page, with a cap per date that keeps places free for drop-ins and a cancellation deadline you choose.',
                         ],
                     ];
                 @endphp

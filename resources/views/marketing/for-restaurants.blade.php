@@ -911,6 +911,14 @@
         .rs-claim span { flex: none; color: var(--rs-ink-2); user-select: none; }
         .rs-book-note { margin-top: 1.2rem; color: var(--rs-ink-3); font-family: var(--rs-it); font-style: italic; font-size: 0.98rem; }
 
+        /* ---------------------------------------------------------------
+           Paying and theme nights: the line under a course that says
+           when to order it, a docket ruled for money instead of covers,
+           and the chit reused as the regulars' list.
+           --------------------------------------------------------------- */
+        .rs-pick { max-width: 27rem; margin: 0.9rem auto 0; color: var(--rs-accent); font-family: var(--rs-it); font-style: italic; font-size: 1.08rem; }
+        .rs-docket-money .rs-docket-row { grid-template-columns: 3.4rem minmax(0, 1fr) auto; }
+
         @media (prefers-reduced-motion: reduce) {
             .dark .rs-hero::before,
             .dark .rs-last::before,
@@ -941,7 +949,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for restaurants?',
-                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers at a price is the one part that needs Pro, at '.plan_price($proMonthly).' a month, and the cutoff and the questions on the ticket come with it. A free evening, a quiz or a tasting on the house, can take registrations up to a capacity per date on the free plan, and there is no monthly ceiling on how many names come through. Event Schedule charges zero platform fees on sales either way.',
+                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers at a price is the one part that needs Pro, at '.plan_price($proMonthly).' a month. The cutoff and a question on the ticket are free, so a free tasting sold as a no-charge ticket is set up exactly like a priced dinner. A free evening, a quiz or a tasting on the house, can take registrations up to a capacity per date on the free plan, and there is no monthly ceiling on how many names come through. Event Schedule charges zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How do I stop selling more covers than the kitchen can cook?',
@@ -957,7 +965,7 @@
             ],
             [
                 'q' => 'Can I collect allergies and dietary requirements?',
-                'a' => 'Yes, on every plan. Put the question on the ticket and it is asked at checkout, so the answers arrive with the sale rather than in a separate email thread you have to reconcile against the list. Ask for allergies, a course choice, or a wine pairing. On the free plan the person booking answers once for their party; on Pro, each guest can answer for themselves, and the sales CSV export carries every answer.',
+                'a' => 'Yes, on every plan. Put the question on the ticket and it is asked at checkout, so the answers arrive with the sale rather than in a separate email thread you have to reconcile against the list. Ask for allergies, a course choice, or a wine pairing. By default the person booking answers once for their party. Having each guest answer for themselves (Individual tickets with Collect ticket fields per guest) is Pro, and the sales CSV export, also Pro, carries every answer.',
             ],
             [
                 'q' => 'What about private hire enquiries?',
@@ -967,6 +975,22 @@
                 'q' => 'Can I refund a booking if a guest cancels?',
                 'a' => 'Yes, from the Sales page, on Pro. A booking paid through Stripe, PayPal or Razorpay can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded. A full refund puts the cover back on sale for that date. A partial refund, if you keep a cancellation charge, leaves the booking and its cover in place. A booking paid in cash or through a payment link is recorded with Mark as Refunded, which moves no money. The guest is not emailed about a refund, so let them know yourself.',
             ],
+            [
+                'q' => 'Should a restaurant take a deposit or full payment for a ticketed dinner?',
+                'a' => 'Take full payment when the kitchen buys for the count, as at a wine dinner, a chef\'s table or a holiday set menu: a no-show is then paid for. Take a deposit when the menu is à la carte or the bill depends on the wine, by selling a ticket type priced at the deposit and saying in its description that the balance is paid at the table. Use free registration for nights where the kitchen sells from its usual menu, such as a quiz or live music. Whichever you choose, write the cancellation terms into the ticket\'s description and tie the refund window to your sales cutoff.',
+            ],
+            [
+                'q' => 'How do I sell two sittings of the same dinner?',
+                'a' => 'Make each sitting its own event, because an event has one start time: set up the 6pm sitting with its covers, cutoff and questions, clone it, and change the time for 8:30pm. Each sitting then sells from its own count and closes on its own, and a guest picks the one they want. If the sittings repeat every week, make each a recurring event, so every date keeps its own count.',
+            ],
+            [
+                'q' => 'Can guests add a wine pairing when they book?',
+                'a' => 'Yes, two ways. Sell "Dinner" and "Dinner with pairing" as two ticket types with the same quantity and choose Combined Total, so both draw on one count of covers; that works on every plan, and a price on either needs Pro. Or sell the pairing as an add-on with its own stock and a limit per order, which is Pro and suits a pairing poured from a fixed number of bottles. Either way the pairing count is in the sales export (Pro) before you open the wine.',
+            ],
+            [
+                'q' => 'Does Event Schedule add tax or a service charge to a dinner ticket?',
+                'a' => 'No. It does not calculate or collect sales tax, so set the ticket price with any tax included, and say in the ticket\'s description whether service is included or left to the table. Event Schedule takes no platform fee of its own; the only deduction is your payment provider\'s fee. On Pro, the sales CSV export gives your accountant every booking.',
+            ],
         ];
 
         $dotSections = [
@@ -974,6 +998,8 @@
             ['count', 'The count'],
             ['cutoff', 'The cutoff'],
             ['ask', 'The questions'],
+            ['paying', 'Paying'],
+            ['nights', 'Theme nights'],
             ['hire', 'Private hire'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
@@ -1329,19 +1355,197 @@
 
                     <p class="rs-note rs-note-l" data-reveal>
                         <span class="rs-sc rs-tier">Free</span>
-                        A question on the ticket works on every plan, with the person booking answering once for their party. On Pro, each guest can answer for themselves.
+                        A question on the ticket works on every plan, with the person booking answering once for their party. Having each guest answer for themselves (Individual tickets with Collect ticket fields per guest) is Pro.
                     </p>
                 </div>
             </div>
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. Private hire (IV)                                         -->
+        <!-- 4b. Paying (IV): prepaid, deposit or a name on a list        -->
+        <!-- ============================================================ -->
+        @php
+            // Three empty chairs at the hero's sitting, under each way of taking a booking.
+            // The bar is the share of the three covers' price that stays with the kitchen.
+            $rsNoShow = 3;
+            $rsDeposit = 25;
+            $rsLost = $rsNoShow * $sitting['price'];
+            $rsKeep = [
+                ['0', 'A name on a list', 0],
+                [(string) $rsDeposit, 'A deposit a head', $rsNoShow * $rsDeposit],
+                [(string) $sitting['price'], 'Paid in full', $rsLost],
+            ];
+        @endphp
+        <section id="paying" class="rs-sec rs-alt" style="scroll-margin-top: 4.5rem;">
+            <div class="rs-wrap">
+                <div class="rs-head">
+                    <span class="rs-dish" aria-hidden="true" data-reveal="zoom">IV</span>
+                    <span class="rs-kick" aria-hidden="true" data-reveal>To settle</span>
+                    <p class="rs-sc rs-tag" data-reveal style="--reveal-delay: 0.05s;">Paying</p>
+                    <h2 class="rs-h2" data-reveal style="--reveal-delay: 0.1s;">
+                        Prepaid, a deposit, or <span class="rs-em">a name on the list</span>?
+                    </h2>
+                    <p class="rs-sub" data-reveal style="--reveal-delay: 0.15s;">
+                        Every ticketed dinner starts with the same choice: how much of the bill to take when the seat is booked. The answer depends on what an empty chair costs you, and on a wine dinner it costs more than on a quiz night.
+                    </p>
+                </div>
+
+                <div class="rs-trio" data-reveal-group="100">
+                    @foreach ([
+                        ['Paid in full', 'The guest pays the whole menu at booking, so the money is in before the order goes out. The price on the ticket is the price of the evening; Event Schedule does not add tax, so set it with tax in, and say in the ticket\'s description whether service is included.', 'Order it for wine dinners, chef\'s tables and holiday menus, where the kitchen buys for the count.'],
+                        ['A deposit, the rest at the table', 'Sell a ticket type priced at the deposit and write in its description that the balance is settled on the night. The count works exactly as it does for a full price, and the guest has something at stake without paying a set menu weeks ahead.', 'Order it when the menu is à la carte, or the final price depends on what they drink.'],
+                        ['A name on the list', 'Free registration with a limit per date: no payment, a confirmation email with a QR code, and a link in it that lets a guest cancel and give the place back. It costs nothing on any plan, and it costs you the most when people do not come.', 'Order it for quiz nights, live music and anything where the kitchen sells from the usual menu.'],
+                    ] as [$t, $d, $pick])
+                        <div data-reveal>
+                            <h3 class="rs-item-name">{{ $t }}</h3>
+                            <p class="rs-item-desc">{{ $d }}</p>
+                            <p class="rs-pick">{{ $pick }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="rs-duo" style="margin-top: clamp(3.5rem, 7vw, 5rem);">
+                    <div class="rs-pass" data-reveal="panel">
+                        <div class="rs-rail" aria-hidden="true"></div>
+                        <div class="rs-docket rs-docket-money">
+                        <div class="rs-docket-in">
+                            <div class="rs-docket-top">
+                                <h3>Three empty chairs</h3>
+                                <span class="rs-sc">{{ $sitting['seats'] }} covers at {{ $sitting['price'] }}</span>
+                            </div>
+
+                            @foreach ($rsKeep as $kRow => [$kTaken, $kWhat, $kKept])
+                                <div class="rs-docket-row @if ($kRow === 2) rs-docket-cut @endif">
+                                    <span class="rs-sc">{{ $kTaken }} up front</span>
+                                    <b>{{ $kWhat }}</b>
+                                    <span class="rs-sc">{{ $kKept }} kept</span>
+                                    <i aria-hidden="true" style="--n: {{ round($kKept / $rsLost * 24, 1) }}; --r: {{ $kRow }};"></i>
+                                </div>
+                            @endforeach
+
+                            <p class="rs-docket-foot">
+                                The same three chairs stand empty and the same food was bought for them. Of the {{ $rsLost }} those covers were worth, the only thing that changes is how much of it you keep.
+                            </p>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="rs-head rs-head-l">
+                            <p class="rs-sc rs-tag" data-reveal>The policy</p>
+                            <h3 class="rs-item-name" data-reveal>Write it before the first cover sells.</h3>
+                        </div>
+                        <ul class="rs-list" data-reveal-group="90">
+                            @foreach ([
+                                ['Tie refunds to the cutoff', 'Full refund until sales close, nothing after. Before the cutoff a returned cover can be sold again; after it you have bought the food, and the policy says so in words a guest cannot argue with.'],
+                                ['Say it where they pay', 'Put the terms in the ticket type\'s description, which sits under the ticket at checkout, and your full terms behind the Terms URL, which is printed on every ticket. Nobody is asked to tick a box accepting them, so keep the description to two sentences.'],
+                                ['Refunds go back through the provider', 'On Pro, a Stripe, PayPal or Razorpay booking is refunded in full or in part from the Sales page. A full refund puts the cover back on sale; a partial one, when you keep a cancellation charge, leaves the booking standing.'],
+                                ['Let the waitlist fill the gap', 'On a sold-out paid dinner, a waitlist on Pro tells the next person in line when a cover comes free through a full refund, with a 24-hour head start before the next person on the list is told (the cover is not held).'],
+                            ] as [$t, $d])
+                                <li data-reveal>
+                                    <div><strong>{{ $t }}</strong> <span>{{ $d }}</span></div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="rs-note" data-reveal>
+                    <span class="rs-sc rs-tier rs-tier-pro">Pro</span>
+                    Taking a price or a deposit, refunds and the paid waitlist are Pro. Free registration, its limit per date and its own waitlist are free. See <x-link href="{{ marketing_url('/docs/tickets#refunds') }}">refunds</x-link> and the <x-link href="{{ marketing_url('/docs/tickets#waitlist') }}">waitlist</x-link> in the guide.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4c. Theme nights (V): seatings, repeats and the regulars     -->
+        <!-- ============================================================ -->
+        <section id="nights" class="rs-sec" style="scroll-margin-top: 4.5rem;">
+            <div class="rs-wrap">
+                <div class="rs-head">
+                    <span class="rs-dish" aria-hidden="true" data-reveal="zoom">V</span>
+                    <span class="rs-kick" aria-hidden="true" data-reveal>From the specials board</span>
+                    <p class="rs-sc rs-tag" data-reveal style="--reveal-delay: 0.05s;">Theme nights</p>
+                    <h2 class="rs-h2" data-reveal style="--reveal-delay: 0.1s;">
+                        Two sittings, every Thursday, <span class="rs-em">told to the regulars</span>.
+                    </h2>
+                    <p class="rs-sub" data-reveal style="--reveal-delay: 0.15s;">
+                        A one-off dinner is the easy case. Most restaurants that sell tickets do it again and again: a steak night with two sittings, a monthly supper club, a Sunday jazz brunch. Four things decide whether the repeat runs itself.
+                    </p>
+                </div>
+
+                <div class="rs-quad" data-reveal-group="100">
+                    @foreach ([
+                        ['One event per sitting', 'An event has one start time, so a 6pm and an 8:30pm sitting are two events, each with its own covers and its own cutoff. Set up the first, then clone it for the second and change the time. Turning the tables means the early sitting\'s end time is a promise, so print it on the ticket.'],
+                        ['A repeat counts each night', 'Make a weekly night recurring and each date keeps its own count: forty covers is forty every Thursday, and a full Thursday does not close the next one. Take out the week the kitchen is closed with Exclude Dates.'],
+                        ['A repeat closes at the start', 'A ticket\'s sales end is one fixed moment for the whole series, so a weekly dinner cannot close "the day before" each week on its own. Leave it blank and each date sells until its start time. If every date needs a shopping day, make each dinner its own event: cloning is free, and saved templates are Pro.'],
+                        ['Upsell without a second count', 'A wine pairing can be a second ticket type, "Dinner with pairing", sharing one pool with "Dinner" under Combined Total, so the covers stay one number. Or sell it as an add-on with its own stock, which is Pro and suits a pairing poured from a limited number of bottles.'],
+                    ] as [$t, $d])
+                        <div data-reveal>
+                            <h3 class="rs-item-name">{{ $t }}</h3>
+                            <p class="rs-item-desc">{{ $d }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="rs-duo" style="margin-top: clamp(3.5rem, 7vw, 5rem);">
+                    <div>
+                        <div class="rs-head rs-head-l">
+                            <p class="rs-sc rs-tag" data-reveal>Announcing it</p>
+                            <h3 class="rs-item-name" data-reveal>The regulars hear first, and nobody has to remember to tell them.</h3>
+                        </div>
+                        <ul class="rs-list" data-reveal-group="90">
+                            @foreach ([
+                                ['Collect the addresses as you go', 'Your schedule page has a sign-up panel, and checkout has an unticked box to join your list. Both build one list of email subscribers on every plan, with no limit on its size.'],
+                                ['New dinners go out on their own', 'When you publish new events, confirmed subscribers get one email listing them, no more often than every few days. It is free and does not count against your newsletter allowance.'],
+                                ['Ask for interest before bookings open', 'Switch on the "Notify me" card and a dinner can go up before bookings open. Guests leave an email address, and on a priced dinner they hear when tickets go on sale.'],
+                                ['Put the calendar where they already look', 'Embed the calendar on your own website, link it from your Instagram bio, and post the graphic made from your upcoming events, free on every plan.'],
+                            ] as [$t, $d])
+                                <li data-reveal>
+                                    <div><strong>{{ $t }}</strong> <span>{{ $d }}</span></div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <div class="rs-papers" style="padding-bottom: 0;" data-reveal="panel">
+                        <div class="rs-chit">
+                            <div class="rs-chit-top">
+                                <h3>Eighty regulars</h3>
+                                <span class="rs-sc rs-tier">Newsletters</span>
+                            </div>
+                            <p class="rs-chit-lede">A newsletter you write is counted per recipient: one send to eighty people is eighty emails.</p>
+                            @foreach ([
+                                ['Free: 10 emails a month', 'A test send, or a note to ten of them'],
+                                ['Pro: 100 emails a month', 'One letter to all eighty each month'],
+                                ['Enterprise: 1,000 emails a month', 'A letter every week, with room to grow'],
+                            ] as [$qLabel, $qKind])
+                                <div class="rs-chit-q">
+                                    <b>{{ $qLabel }}</b>
+                                    <span class="rs-sc">{{ $qKind }}</span>
+                                </div>
+                            @endforeach
+                            <p class="rs-chit-foot">
+                                The automatic email about new dinners is not counted here. A newsletter is for what an automatic list cannot say: the new chef, the menu, the night you are proudest of.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="rs-note" data-reveal>
+                    <span class="rs-sc rs-tier">Free</span>
+                    Recurring nights, cloning, Combined Total, the subscriber list and the automatic announcements are free. See <x-link href="{{ marketing_url('/features/recurring-events') }}">recurring events</x-link> and <x-link href="{{ marketing_url('/features/newsletters') }}">newsletters</x-link>.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. Private hire (VI)                                         -->
         <!-- ============================================================ -->
         <section id="hire" class="rs-sec rs-alt" style="scroll-margin-top: 4.5rem;">
             <div class="rs-wrap">
                 <div class="rs-head">
-                    <span class="rs-dish" aria-hidden="true" data-reveal="zoom">IV</span>
+                    <span class="rs-dish" aria-hidden="true" data-reveal="zoom">VI</span>
                     <span class="rs-kick" aria-hidden="true" data-reveal>In the private room</span>
                     <p class="rs-sc rs-tag" data-reveal style="--reveal-delay: 0.05s;">Private hire</p>
                     <h2 class="rs-h2" data-reveal style="--reveal-delay: 0.1s;">
@@ -1386,12 +1590,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Who it is for (V)                                         -->
+        <!-- 6. Who it is for (VII)                                       -->
         <!-- ============================================================ -->
         <section id="who" class="rs-sec" style="scroll-margin-top: 4.5rem;">
             <div class="rs-wrap">
                 <div class="rs-head">
-                    <span class="rs-dish" aria-hidden="true" data-reveal="zoom">V</span>
+                    <span class="rs-dish" aria-hidden="true" data-reveal="zoom">VII</span>
                     <span class="rs-kick" aria-hidden="true" data-reveal>For the table</span>
                     <p class="rs-sc rs-tag" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
                     <h2 class="rs-h2" data-reveal style="--reveal-delay: 0.1s;">
@@ -1543,12 +1747,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 10. FAQ (VI)                                                 -->
+        <!-- 10. FAQ (VIII)                                               -->
         <!-- ============================================================ -->
         <section id="faq" class="rs-sec rs-alt" style="scroll-margin-top: 4.5rem;">
             <div class="rs-narrow">
                 <div class="rs-head">
-                    <span class="rs-dish" aria-hidden="true" data-reveal="zoom">VI</span>
+                    <span class="rs-dish" aria-hidden="true" data-reveal="zoom">VIII</span>
                     <span class="rs-kick" aria-hidden="true" data-reveal>With the coffee</span>
                     <p class="rs-sc rs-tag" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                     <h2 class="rs-h2" data-reveal style="--reveal-delay: 0.1s;">
