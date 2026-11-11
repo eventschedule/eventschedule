@@ -1351,7 +1351,23 @@
             ],
             [
                 'q' => 'Can regulars put our whole week in their own calendar?',
-                'a' => 'Yes, on every plan. The Add to Calendar menu on any of your events, and the sign-up panel on your schedule page, offer a subscription to all your events: a live calendar feed that updates itself when a night moves or a new one goes up, and it needs no email address. A single night can still be downloaded as an .ics file, which is a one-off copy that never updates.',
+                'a' => 'Yes, on every plan. The Add to Calendar menu on an event that is not selling tickets, taking registrations or sending buyers to an outside ticket link, and the sign-up panel on your schedule page, offer a subscription to all your events: a live calendar feed that updates itself when a night moves or a new one goes up, and it needs no email address. A single night can still be downloaded as an .ics file, which is a one-off copy that never updates.',
+            ],
+            [
+                'q' => 'How do I put my bar\'s event calendar on my website?',
+                'a' => 'Open your schedule, choose Embed Schedule from the Actions menu, pick Calendar or List and a theme that matches your site, then copy the iframe code and paste it into your website\'s page builder. The frame reads live from your schedule, so a night you add or cancel shows on your site straight away with nothing to re-upload. Embedding is free on every plan; on eventschedule.com\'s free plan the code adds a small credit line under the frame, which Pro removes.',
+            ],
+            [
+                'q' => 'How can quiz teams book a table online?',
+                'a' => 'Make the quiz a recurring event and, on its Tickets tab, choose Sell tickets and add one ticket type called something like Team table, with no price, a quantity equal to your tables and a Max Per Order of 1. Add a question to that type asking for the team name. Each week keeps its own count, every team gets a QR code by email, and a team that drops out cancels from its ticket page, which frees the table. All of it is free on every plan.',
+            ],
+            [
+                'q' => 'What events bring people into a bar on a quiet night?',
+                'a' => 'The ones that give a regular a reason to come back the same night every week: a quiz, an open mic, karaoke, a board game night, a weekly residency for a local band. Pick one for the quiet night, keep it on the same day and time, and give it at least six weeks before you judge it, because a weekly night grows by word of mouth from the people who came last week. Then make it easy to find: one link, a QR code on the tables, and a weekly email or post that names it.',
+            ],
+            [
+                'q' => 'Should happy hour and drink specials go on the event calendar?',
+                'a' => 'Usually not. A calendar is for things people plan around, and a daily happy hour entered as seven events a week pushes the quiz and the gig out of view. Put standing offers in your schedule\'s description, mention the night\'s special in that night\'s short description (two-for-one pints at the quiz, say), or on Pro use the announcement bar at the top of your schedule page. Keep separate events for specials that are one-off occasions, like a tap takeover or a launch night.',
             ],
         ];
 
@@ -1361,7 +1377,9 @@
             ['week', 'The house list'],
             ['playing', "Who's playing"],
             ['regulars', 'The regulars'],
+            ['nights', 'Night by night'],
             ['rest', 'The rest of it'],
+            ['seen', 'Getting it seen'],
             ['rooms', 'Every kind of bar'],
             ['who', 'Perfect for'],
             ['steps', 'Three steps'],
@@ -1689,6 +1707,93 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 5b. The nights: which repeat, which do not, and quiz tables  -->
+        <!-- ============================================================ -->
+        <section id="nights" class="ba-section" style="scroll-margin-top: 4rem;">
+            <div class="ba-wrap">
+                <div class="ba-menu" data-reveal="panel">
+                    <div class="ba-head">
+                        <p class="ba-kicker">Night by night</p>
+                        <h2 class="ba-h2">
+                            Not every night <span class="ba-turn">belongs on repeat.</span>
+                        </h2>
+                        <p class="ba-sub">
+                            A bar's calendar goes wrong in two ways: the regular nights get typed in by hand every
+                            week, or every drinks offer becomes an event and buries the nights people plan around.
+                            Here is how each kind of night is best set up.
+                        </p>
+                    </div>
+
+                    @php
+                        $baNights = [
+                            ['Quiz and trivia', 'Weekly', 'One recurring event, the same night and the same start time all year. Teams build their week around a quiz, and a quiz that wanders loses them. To book tables rather than count heads, see the worked example below.'],
+                            ['Karaoke', 'Weekly', 'Recurring, with nothing to book. Write "from 9pm, songbook at the bar" in the short description, the line people read under the name, and let the calendar do the reminding.'],
+                            ['Live music', 'One-off', 'An event for each gig, with the band added as a participant. A recurring event carries one list of performers for every date it runs, so a weekly music night with a different act each time works better as separate events, each one cloned from last week\'s.'],
+                            ['Open mic and jams', 'Weekly', 'Recurring. When players want to know they will get a slot, add a free ticket type whose quantity is the number of slots, with a Max Per Order of 1; walk-ups fill whatever is left on the night.'],
+                            ['Board games and tournaments', 'Monthly', 'Once a month on the same weekday: the Monthly (same day of week) pattern lands it on, say, the second Tuesday of every month without anyone counting weeks.'],
+                            ['The match', 'Fixtures', 'Each screening is its own event at kick-off time. Many leagues and clubs publish their fixtures as a calendar file; paste that address into Import from a link and it lists the next 12 months for you to tick, published as soon as you add them.'],
+                            ['Happy hour and specials', 'Not an event', 'Nobody puts a daily happy hour in their diary, and seven entries a week push the quiz off the screen. Put standing offers in the schedule\'s description, or on Pro in the announcement bar across the top of your page.'],
+                        ];
+                    @endphp
+
+                    @foreach ($baNights as [$nName, $nShape, $nHow])
+                        <div class="ba-menu-item">
+                            <span class="ba-menu-no" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div class="ba-menu-line">
+                                <h3>{{ $nName }}</h3>
+                                <i aria-hidden="true"></i>
+                                <span class="ba-plaque">{{ $nShape }}</span>
+                            </div>
+                            <p>{{ $nHow }}</p>
+                        </div>
+                    @endforeach
+
+                    <p class="ba-menu-small">
+                        Weekly and monthly patterns, date exceptions, one-off events, Clone Event and
+                        <x-link href="{{ marketing_url('/docs/ai-import#link-import') }}">importing from a link</x-link>
+                        are all on the free plan.
+                    </p>
+                </div>
+
+                <div class="ba-two" style="margin-top: clamp(3.5rem, 7vw, 5.5rem);">
+                    <div>
+                        <p class="ba-kicker" data-reveal>Quiz night</p>
+                        <h2 class="ba-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            Book the tables, <span class="ba-turn">not the heads.</span>
+                        </h2>
+                        <p class="ba-two-lede" data-reveal style="--reveal-delay: 0.16s;">
+                            A quiz is played by teams, and your room is counted in tables. Free registration
+                            counts people, so a team of six takes six places. When what you are short of is
+                            tables, sell the table instead, for nothing.
+                        </p>
+                        <ul class="ba-ticks" data-reveal-group="70">
+                            <li data-reveal>On the quiz's Tickets tab, choose Sell tickets and add one type, "Team table", with the price left blank and the quantity set to the tables you have.</li>
+                            <li data-reveal>Give it a Max Per Order of 1, so one team cannot hold three tables for friends who may not show.</li>
+                            <li data-reveal>Add a question to the type asking for the team name, so the quizmaster's sheet is written before the doors open.</li>
+                            <li data-reveal>On a weekly quiz each date keeps its own count, and a team that cannot make it cancels from its ticket page, which puts the table back for someone else.</li>
+                        </ul>
+                    </div>
+
+                    <div data-reveal="panel">
+                        <div class="ba-bill">
+                            <div class="ba-bill-head">
+                                <span>Monday quiz</span>
+                                <span>Tables taken</span>
+                            </div>
+                            @foreach ([['T1', 'The Know-It-Ales', false], ['T2', 'Les Quizerables', false], ['T3', 'Table Manners', false], ['T4', 'Second Again', false], ['T5', '', true]] as [$tNo, $tTeam, $tOpen])
+                                <div class="ba-bill-row">
+                                    <span>{{ $tNo }}</span>
+                                    <span>{{ $tOpen ? 'Free for a team' : $tTeam }}</span>
+                                </div>
+                            @endforeach
+                            <p class="ba-bill-foot">12 tables a night, one per team. All free, all on the free plan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 6. The rest of it: six panes in the window                   -->
         <!-- ============================================================ -->
         <section id="rest" class="ba-section ba-alt" style="scroll-margin-top: 4rem;">
@@ -1723,7 +1828,7 @@
                                 <span class="ba-plaque">Free</span>
                             </div>
                             <p>
-                                Regulars add photos, video and comments to an event with just a name and an email. Everything waits in an approval queue, so your page stays yours. Free covers 25 photos per schedule.
+                                Regulars can add photos, videos and comments to an event with just a name and an email (on unless you switch it off). Everything waits in an approval queue, so your page stays yours. Free covers 25 photos per schedule.
                             </p>
                         </div>
 
@@ -1756,10 +1861,10 @@
                         <div class="ba-pane ba-pane-wide">
                             <div class="ba-pane-head">
                                 <h3>The poster, without opening a design tool</h3>
-                                <span class="ba-plaque ba-plaque-pro">Pro</span>
+                                <span class="ba-plaque">Free</span>
                             </div>
                             <p>
-                                Generate a shareable graphic from an event and post it, rather than rebuilding the same quiz-night square every week.
+                                Choose Events graphic from your schedule's Actions menu and it builds one image from the flyers of the nights coming up, with a caption listing them, rather than you rebuilding the same quiz-night square every week. A night with no flyer is left out of the image.
                             </p>
                             <p>
                                 Every night also syncs two ways with Google, Outlook and CalDAV, so what is on the wall and what is in your phone cannot drift apart.
@@ -1778,6 +1883,52 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6b. Getting the week seen: six etched panels on the bar back -->
+        <!-- ============================================================ -->
+        <section id="seen" class="ba-dark ba-section" style="scroll-margin-top: 4rem;">
+            <div class="ba-wrap">
+                <div class="ba-head">
+                    <p class="ba-kicker" data-reveal>Getting it seen</p>
+                    <h2 class="ba-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        A calendar nobody opens <span class="ba-gilt">is still a chalkboard.</span>
+                    </h2>
+                    <p class="ba-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Putting the week online is half the job. The other half is putting that link where
+                        drinkers already look: your website, your tables, their phones and their inboxes.
+                    </p>
+                </div>
+
+                @php
+                    $baSeen = [
+                        ['Your website', 'The week where they look you up', 'Choose Embed Schedule from the Actions menu, pick Calendar or List and a light or dark theme, and paste the code into your site. It reads live from your schedule, so a night you add tonight is on your website tonight. On eventschedule.com\'s free plan a small credit line sits under the frame.'],
+                        ['The tables', 'A QR code beside the menu', 'The QR Code button on your Followers tab downloads a code that opens your schedule with the sign-up form ready. Print it on table tents, beer mats or a card by the till, and the person at table six can sign up before their second round.'],
+                        ['Monday morning', 'One post for the whole week', 'Events graphic, in the Actions menu, lays the flyers of your next nights into one image and writes a caption listing them. Post both to Instagram and the stories, then do it again next Monday. On eventschedule.com the image carries a small credit in one corner.'],
+                        ['The inbox', 'A weekly email that writes itself', 'A newsletter set to repeat every week, with its Events block on The next 7 days, goes out with that week\'s nights each time. Each recipient counts against the monthly allowance: 150 regulars every week is about 650 emails a month, past Pro\'s 100 and inside Enterprise\'s 1,000, and unlimited once the schedule sends through its own email settings. Without them, a send to more than 50 people also needs a verified phone number.'],
+                        ['Their calendar', 'The week on their phone', 'The sign-up panel on your page offers a calendar subscription that needs no email address. A night you add or move then turns up in their own calendar by itself, because the phone reads your feed again rather than keeping a copy.'],
+                        ['Search', 'Found by people who never heard of you', 'Each event page describes the night as schema.org event data, the format search engines read for dates and places. Write what someone would search for in the name: "Pub quiz, Mondays at 8" finds more people than "Brain Drain".'],
+                    ];
+                @endphp
+                <div class="ba-etches" data-reveal-group="90">
+                    @foreach ($baSeen as [$sTag, $sTitle, $sBody])
+                        <div class="ba-etch" data-reveal="panel">
+                            <p class="ba-etch-tag">{{ $sTag }}</p>
+                            <h3>{{ $sTitle }}</h3>
+                            <p>{{ $sBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <p class="ba-dark-foot" data-reveal>
+                    The embed, the QR code, the Events graphic, repeating newsletters (within your plan's monthly allowance, or without limit through your own email settings) and the calendar feed are all on the free plan.
+                    <a href="{{ marketing_url('/docs/sharing') }}" class="ba-link">
+                        Read the sharing guide
+                        {!! $baArrow !!}
+                    </a>
+                </p>
             </div>
         </section>
 

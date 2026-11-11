@@ -342,6 +342,24 @@
         .ag-w-pano i:nth-child(1) { inset: 43% -6% 39% -6%; background: #f08a24; filter: blur(1.7cqi); }
         .ag-w-pano i:nth-child(2) { inset: 49% 22% 47% 22%; background: #ffe2a6; filter: blur(0.9cqi); }
 
+        /* 22 One circle over one line: the evening everything is worked back from. */
+        .ag-w-dot { --ar: 4 / 5; background: linear-gradient(#ede8dc, #e2dccd); }
+        .ag-w-dot i:nth-child(1) { left: 31%; top: 20%; width: 38%; aspect-ratio: 1; border-radius: 50%; background: #e0432a; }
+        .ag-w-dot i:nth-child(2) { left: 14%; right: 14%; top: 68%; height: 1.4%; background: #111111; }
+
+        /* 23 Nine squares, the last one still bare: the archive. */
+        .ag-w-nine { --ar: 1 / 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4%; padding: 10%; background: #f4f2ec; }
+        .ag-w-nine i { position: static; background: var(--c); }
+        .ag-w-nine i:last-child { background: transparent; box-shadow: inset 0 0 0 1px rgba(17, 17, 17, 0.32); }
+
+        /* Three ways onto the city's guides: labels hung in a row, no works. */
+        .ag-guides { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem 2.5rem; margin-top: 1.6rem; }
+        @media (min-width: 900px) { .ag-guides { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .ag-guides .ag-label { max-width: none; margin-top: 0; }
+        .ag-guides-head { margin-top: clamp(4rem, 8vw, 6.5rem); }
+        /* A label beside a long list stays in view while the list is read. */
+        @media (min-width: 1000px) { .ag-side-stick { position: sticky; top: 7rem; } }
+
         /* ---------------------------------------------------------------
            The label beside a work.
            --------------------------------------------------------------- */
@@ -670,7 +688,7 @@
         $openWeekdays = [3, 4, 5, 6, 7];                   // Wed..Sun (ISO-8601)
 
         $evenings = [
-            '2026-01-29' => ['Private view', '6-9pm', 'Free, 80 places'],
+            '2026-01-29' => ['Private view', '6-9pm', 'Free, 130 places'],
             '2026-02-07' => ['Artist talk', '3pm', 'Free, 40 places'],
             '2026-02-22' => ['Curator tour', '2pm', 'Free, 25 places'],
             '2026-03-08' => ['Closing party', '5-8pm', 'Free, no limit'],
@@ -713,8 +731,24 @@
                 'a' => 'Yes. Set the event as free and give it a capacity. People register rather than pay, the count is kept for each date separately, and it stops taking names when the places are gone. Nothing about a private view has to involve money for you to know how many are coming.',
             ],
             [
+                'q' => 'What should an art gallery calendar include?',
+                'a' => 'For each exhibition: the artist and the title, the opening and closing dates, the days and hours you are open, admission, and one image. For each evening on top of it (the private view, an artist talk, the closing), its own date, time and whether people need to register. Add access details and the address and a visitor has everything needed to decide. In Event Schedule the exhibition is one recurring event that ends on the closing date and each evening is an event of its own, all on the free plan.',
+            ],
+            [
+                'q' => 'How far ahead should a gallery announce an exhibition?',
+                'a' => 'Publish the dates as soon as they are fixed, often two months before the opening, because guides, calendar feeds and search engines can only list what is already out. Send print and monthly listings the event page about six weeks ahead, since their deadlines come early. The invitation to the private view usually goes about four weeks before, with a shorter note in the week of the opening, and Event Schedule emails everyone registered a reminder the day before unless you change it.',
+            ],
+            [
+                'q' => 'How many RSVPs should I accept for a gallery opening?',
+                'a' => 'More than the room holds, because a free opening always loses names between registering and arriving, and guests come and go over the evening. Divide what the room holds at its busiest by the share of registrants who came to your last opening: 80 people at 60% gives a limit of about 130. Keep that busiest moment inside the room\'s legal capacity, and let the waitlist, which is free with registration, take anyone after the limit.',
+            ],
+            [
+                'q' => 'Can a private view be invitation only?',
+                'a' => 'Yes, on Enterprise. Set the event to Unlisted and it leaves your public calendar, your calendar feeds and your newsletters: only people holding the link you send can open it, and you can add an event password as well. On other plans, a public event with free registration and a limit is the closest thing, since anyone who finds it can register, but only up to the number you set.',
+            ],
+            [
                 'q' => 'How do artists propose a show?',
-                'a' => 'Through your page rather than your inbox. The default submission form takes a pasted proposal or an uploaded flyer and reads it into a request for you to review. That is free, and it reads up to 50 a day on the free plan and Pro alike (10 while a schedule is on a trial, 100 on Enterprise), from the same daily allowance as any events you import that way yourself. If you would rather have fixed fields, switch the setting to the booking form and every proposal arrives with a date, a time and a description. On Pro you can add custom fields to either form, so nothing reaches you without a portfolio link.',
+                'a' => 'Through your page rather than your inbox. The default submission form takes a pasted proposal or an uploaded flyer and reads it into a request for you to review. That is free, and it reads up to 50 a day on the free plan and Pro alike (100 on Enterprise), from the same daily allowance as any events you import that way yourself. If you would rather have fixed fields, switch the setting to the booking form and every proposal arrives with a date, a time and a description. On Pro you can add custom fields to either form, so nothing reaches you without a portfolio link.',
             ],
             [
                 'q' => 'Will my collectors be told when a new show goes up?',
@@ -734,9 +768,12 @@
             ['top', 'The run'],
             ['run', 'One event'],
             ['evenings', 'The evenings'],
+            ['listing', 'The listing'],
             ['view', 'The private view'],
+            ['opening', 'The opening'],
             ['collectors', 'Who hears first'],
             ['proposals', 'Proposals'],
+            ['archive', 'The archive'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -965,12 +1002,111 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. The private view (03): a diptych                          -->
+        <!-- 3b. The listing (03): eight lines, and the guides            -->
         <!-- ============================================================ -->
-        <section id="view" class="ag-room" style="scroll-margin-top: 4rem;">
+        <section id="listing" class="ag-room" style="scroll-margin-top: 4rem;">
+            <div class="ag-wrap ag-pair">
+                <div class="ag-text">
+                    <p class="ag-kicker" data-reveal><span aria-hidden="true">03</span> The listing</p>
+                    <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
+                        What an exhibition listing <span class="ag-it">has to say</span>.
+                    </h2>
+                    <p class="ag-p" data-reveal style="--reveal-delay: 0.12s;">
+                        Someone reading a gallery calendar is deciding whether to come, and when. A
+                        listing that answers both at a glance gets the visit. One that sends them to
+                        three other pages does not. Eight lines cover it.
+                    </p>
+
+                    <ul class="ag-points ag-points-2" data-reveal-group="70">
+                        @foreach ([
+                            ['Artist, then title', 'Name the run the way the guides print it, "Sarah Chen: New Works", and add each artist as a participant, so their names on the show\'s page lead to pages of their own.'],
+                            ['The closing day', 'People plan around the last weekend, so say "Until 8 March" in the short description, the line under the name on the event page and in your listings.'],
+                            ['Opening hours', 'The run\'s start and end times are your hours, and the days you tick are the days you open, so nobody reads Monday as a day to come.'],
+                            ['Admission', 'Free or the price, in the same short description. Up to 200 characters is plenty for the dates and the door.'],
+                            ['The evenings', 'Private view, talk and closing each have their own event, so each sits on its own date with its own time and its own count.'],
+                            ['One image', 'A key work or an installation view as the flyer. It leads the event page, and it is what the Events graphic draws from when you post the month.'],
+                            ['Access', 'Step-free entry, a lift, seats at the talk. One sentence in the description saves a phone call.'],
+                            ['Where', 'The run takes place at your venue, so the event page carries the address without you typing it again. Add the nearest station or bus stop to the description if the street is hard to find.'],
+                        ] as [$t, $d])
+                            <li data-reveal>
+                                <b>{{ $t }}</b>
+                                <span>{{ $d }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="ag-side ag-side-stick" data-reveal>
+                    <div class="ag-label">
+                        <span class="ag-dot" aria-hidden="true"></span>
+                        <div class="ag-label-head">
+                            <h3 class="ag-label-title">The listing, filled in</h3>
+                            <span class="ag-label-meta">1 run, {{ $eveningCount }} evenings</span>
+                        </div>
+
+                        <dl class="ag-rows">
+                            @foreach ([
+                                ['Exhibition', 'Sarah Chen: New Works'],
+                                ['Dates', $runStart->format('D j M') . ' to ' . $runEnd->format('D j M')],
+                                ['Hours', 'Wed to Sun, 11am to 6pm'],
+                                ['Admission', 'Free'],
+                                ['Private view', (new DateTimeImmutable(array_key_first($evenings)))->format('D j M') . ', ' . reset($evenings)[1]],
+                                ['Access', 'Step-free, lift to floor 2'],
+                            ] as [$fLabel, $fValue])
+                                <div>
+                                    <dt>{{ $fLabel }}</dt>
+                                    <dd>{{ $fValue }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+
+                        <p class="ag-label-note">
+                            Six lines a visitor reads before deciding. Everything else can wait for the event page.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ag-wrap">
+                <div class="ag-head ag-guides-head">
+                    <p class="ag-kicker" data-reveal>Getting onto the guides</p>
+                    <p class="ag-p" data-reveal style="--reveal-delay: 0.06s;">
+                        Most visitors to a show never see the gallery's own site first: they find it in
+                        a city listing, an art newsletter or a search. Each of those takes your listing
+                        in a different way, and the run you already put up serves all three.
+                    </p>
+                </div>
+
+                <div class="ag-guides" data-reveal-group="90">
+                    @foreach ([
+                        ['A guide on Event Schedule', 'A local guide run as a curator schedule can add your gallery as an event source. From then on every public event you publish appears on their calendar within minutes, and your drafts never do. Free on every plan.'],
+                        ['A guide that reads a feed', 'Give them your iCal or RSS feed, copied from Edit schedule, Integrations, Calendar text and feeds. A moved date reaches them without an email, because the feed is read again rather than retyped.'],
+                        ['A guide that wants a link', 'Send the event page, not a PDF. Each event page carries the event\'s details as schema.org data, the structured format search engines and listing sites read, so the dates and venue arrive exactly as you wrote them.'],
+                    ] as [$t, $d])
+                        <div class="ag-label" data-reveal>
+                            <h3 class="ag-label-title">{{ $t }}</h3>
+                            <p class="ag-label-note">{{ $d }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <p class="ag-tierline" data-reveal>
+                    <span class="ag-tier">Free plan</span>
+                    <span>
+                        Participants, event sources, the <x-link href="{{ marketing_url('/docs/sharing#calendar-feeds') }}">calendar feeds</x-link>
+                        and the Events graphic are on every plan.
+                    </span>
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4. The private view (04): a diptych                          -->
+        <!-- ============================================================ -->
+        <section id="view" class="ag-room ag-room-2" style="scroll-margin-top: 4rem;">
             <div class="ag-wrap ag-pair ag-pair-wide">
                 <div class="ag-text">
-                    <p class="ag-kicker" data-reveal><span aria-hidden="true">03</span> The private view</p>
+                    <p class="ag-kicker" data-reveal><span aria-hidden="true">04</span> The private view</p>
                     <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
                         Limited does not have to mean <span class="ag-it">paid</span>.
                     </h2>
@@ -1033,12 +1169,93 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. Who hears first (04)                                      -->
+        <!-- 4b. The opening, worked backwards (05)                       -->
+        <!-- ============================================================ -->
+        <section id="opening" class="ag-room" style="scroll-margin-top: 4rem;">
+            <div class="ag-wrap ag-pair">
+                <div class="ag-text">
+                    <p class="ag-kicker" data-reveal><span aria-hidden="true">05</span> The opening</p>
+                    <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
+                        Plan the private view <span class="ag-it">backwards</span>.
+                    </h2>
+                    <p class="ag-p" data-reveal style="--reveal-delay: 0.12s;">
+                        An opening is settled weeks before the first glass is poured: by when the
+                        invitation went out, how many said yes, and whether the room could hold them
+                        all at once. Start from the night and work back.
+                    </p>
+
+                    <ul class="ag-points ag-points-2" data-reveal-group="70">
+                        @foreach ([
+                            ['Eight weeks out', 'Put the run and its evenings up the day the dates are fixed. Feeds, the guides that list you and your own page carry the show from then on, long before the press release.'],
+                            ['Six weeks out', 'Print guides and monthly art listings close early. Send them the event page now, not the week of the opening.'],
+                            ['Four weeks out', 'The invitation: a newsletter with the private view in its Events block, so every reader is one tap from its Register button, and the registration limit doing the counting. Every recipient counts against the monthly newsletter allowance, so check it against the size of your list first.'],
+                            ['One week out', 'Read the count. Short of the limit, send a brief second note. Full, and a waitlist opens on the event page by itself, free on every plan.'],
+                            ['The day before', 'Everyone registered gets a reminder email with the time and the address, a day ahead unless you change it, with a Can\'t make it? link that frees their place for someone else.'],
+                            ['On the night', 'Keep the list on a phone by the door: the Sales page has every name, so the person greeting guests can find one in a second.'],
+                        ] as [$t, $d])
+                            <li data-reveal>
+                                <b>{{ $t }}</b>
+                                <span>{{ $d }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="ag-side" data-reveal>
+                    <figure class="ag-hang" aria-hidden="true">
+                        <span class="ag-canvas ag-w-dot"><i></i><i></i></span>
+                        <figcaption class="ag-made">22 &middot; One circle, one line</figcaption>
+                    </figure>
+
+                    <div class="ag-label">
+                        <div class="ag-label-head">
+                            <h3 class="ag-label-title">How many to let register</h3>
+                            <span class="ag-label-meta">a worked example</span>
+                        </div>
+
+                        <dl class="ag-rows">
+                            @foreach ([
+                                ['Room at its busiest', '80 people'],
+                                ['Came, of those registered, last time', '60%'],
+                                ['80 &divide; 0.6', '133'],
+                                ['Registration Limit', '130'],
+                            ] as [$fLabel, $fValue])
+                                <div>
+                                    <dt>{!! $fLabel !!}</dt>
+                                    <dd>{{ $fValue }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+
+                        <p class="ag-label-note">
+                            A free opening always loses names between yes and the door, and people come
+                            and go across three hours, so the busiest moment holds fewer than the night's
+                            total. Use your own share from the last opening, and keep the busiest moment
+                            inside what the room may legally hold.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ag-wrap">
+                <p class="ag-tierline" data-reveal>
+                    <span class="ag-tier">Free plan</span>
+                    <span>Free registration with a limit, its waitlist and the reminder email are on every plan. See the <x-link href="{{ marketing_url('/docs/tickets#registration') }}">registration guide</x-link>.</span>
+                </p>
+                <p class="ag-tierline" data-reveal style="margin-top: 1rem;">
+                    <span class="ag-tier">Enterprise</span>
+                    <span>For a view by invitation only, set the event to Unlisted: it leaves your public calendar, feeds and newsletters, opens for anyone holding the link you send, and can sit behind an event password.</span>
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. Who hears first (06)                                      -->
         <!-- ============================================================ -->
         <section id="collectors" class="ag-room ag-room-2" style="scroll-margin-top: 4rem;">
             <div class="ag-wrap ag-pair ag-pair-flip">
                 <div class="ag-text">
-                    <p class="ag-kicker" data-reveal><span aria-hidden="true">04</span> Who hears first</p>
+                    <p class="ag-kicker" data-reveal><span aria-hidden="true">06</span> Who hears first</p>
                     <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
                         Nothing goes out <span class="ag-it">without you</span>.
                     </h2>
@@ -1053,7 +1270,7 @@
                             ['A list that is yours', 'Followers arrive from your own page, and you can see who they are on the followers tab.'],
                             ['Written and sent by you', 'A newsletter never sends itself. The announcement goes when you decide the hang is ready to be seen.'],
                             ['Know the unit before you plan', 'The allowance counts each recipient, so one letter to a list of two hundred uses two hundred: more than a month on Pro, a fifth of a month on Enterprise.'],
-                            ['Or no address at all', 'Collectors can subscribe to the gallery\'s live calendar feed from the sign-up panel or any event\'s Add to Calendar menu, and every new show and evening appears in their own calendar.'],
+                            ['Or no address at all', 'Collectors can subscribe to the gallery\'s live calendar feed from the sign-up panel or the Add to Calendar menu on an exhibition\'s page, and every new show and evening appears in their own calendar.'],
                         ] as [$t, $d])
                             <li data-reveal>
                                 <b>{{ $t }}</b>
@@ -1098,12 +1315,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 6. Proposals (05): two works, hung salon style               -->
+        <!-- 6. Proposals (07): two works, hung salon style               -->
         <!-- ============================================================ -->
         <section id="proposals" class="ag-room" style="scroll-margin-top: 4rem;">
             <div class="ag-wrap">
                 <div class="ag-head">
-                    <p class="ag-kicker" data-reveal><span aria-hidden="true">05</span> Proposals</p>
+                    <p class="ag-kicker" data-reveal><span aria-hidden="true">07</span> Proposals</p>
                     <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
                         Artists ask through <span class="ag-it">the page</span>.
                     </h2>
@@ -1129,7 +1346,7 @@
                                 @foreach ([
                                     'An artist pastes their proposal text or uploads a flyer.',
                                     'It is read into a request for you to review, not published.',
-                                    'Fifty read a day on the free plan and Pro alike (ten during a trial), a hundred on Enterprise.',
+                                    'Fifty read a day on the free plan and Pro alike, a hundred on Enterprise.',
                                 ] as $point)
                                     <li>{{ $point }}</li>
                                 @endforeach
@@ -1164,13 +1381,86 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 7. Who it is for (06): the long wall                         -->
+        <!-- 6b. The archive (08)                                         -->
+        <!-- ============================================================ -->
+        <section id="archive" class="ag-room" style="scroll-margin-top: 4rem;">
+            <div class="ag-wrap ag-pair ag-pair-flip">
+                <div class="ag-text">
+                    <p class="ag-kicker" data-reveal><span aria-hidden="true">08</span> The archive</p>
+                    <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
+                        Last season <span class="ag-it">stays on the wall</span>.
+                    </h2>
+                    <p class="ag-p" data-reveal style="--reveal-delay: 0.12s;">
+                        A gallery's past shows are its CV. Artists read them before they propose,
+                        collectors before they buy, writers before they call. When the work comes off
+                        the wall, the listing should stay up.
+                    </p>
+
+                    <ul class="ag-points ag-points-2" data-reveal-group="80">
+                        @foreach ([
+                            ['Past shows stay public', 'An event that has ended stays on your schedule page unless you switch on Hide Past Events, which is off until you do. Each show keeps its own page and its own link, so a review that linked to it still lands somewhere.'],
+                            ['Hang the installation shots', 'On Pro, the Gallery row of a show\'s Page content tab holds up to 50 photos, with captions and photographer credits. A few installation views turn an old listing into a record of the show.'],
+                            ['Name every show the same way', 'Artist, then title, every time. Keep exhibitions on one sub-schedule and talks on another, and visitors can filter the programme down to the shows.'],
+                            ['Keep a copy of your own', 'Backup & restore exports the whole schedule, with its images if you ask for them, on every plan.'],
+                        ] as [$t, $d])
+                            <li data-reveal>
+                                <b>{{ $t }}</b>
+                                <span>{{ $d }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    <p class="ag-tierline" data-reveal>
+                        <span class="ag-tier">Free plan</span>
+                        <span>Past events, sub-schedules and <x-link href="{{ marketing_url('/docs/account-settings#backup') }}">backups</x-link> are free. The photo gallery is Pro.</span>
+                    </p>
+                </div>
+
+                <div class="ag-side" data-reveal>
+                    <figure class="ag-hang" aria-hidden="true">
+                        <span class="ag-canvas ag-w-nine">
+                            @foreach (['#1f6f78', '#e9a72c', '#111111', '#b5532a', '#f2efe6', '#1648a8', '#e0432a', '#17834a', '#000000'] as $nineChip)
+                                <i style="--c: {{ $nineChip }};"></i>
+                            @endforeach
+                        </span>
+                        <figcaption class="ag-made">23 &middot; Nine squares, one still bare</figcaption>
+                    </figure>
+
+                    <div class="ag-label">
+                        <div class="ag-label-head">
+                            <h3 class="ag-label-title">From the archive</h3>
+                            <span class="ag-label-meta">3 of many</span>
+                        </div>
+
+                        <dl class="ag-rows ag-rows-name">
+                            @foreach ([
+                                ['Sarah Chen: New Works', 'Jan to Mar 2026'],
+                                ['Okafor and Lind: Salt', 'Oct to Dec 2025'],
+                                ['Six Artists: Paper', 'Jul to Sep 2025'],
+                            ] as [$pName, $pWhen])
+                                <div>
+                                    <dt>{{ $pName }}</dt>
+                                    <dd>{{ $pWhen }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+
+                        <p class="ag-label-note">
+                            Three shows, three pages, each still at the address its reviews linked to.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7. Who it is for (09): the long wall                         -->
         <!-- ============================================================ -->
         <section id="who" class="ag-room ag-room-2 ag-walk-room" style="scroll-margin-top: 4rem;">
             <div class="ag-walk-pin">
                 <div class="ag-walk-stick">
                     <div class="ag-wrap ag-walk-head">
-                        <p class="ag-kicker" data-reveal><span aria-hidden="true">06</span> Who it is for</p>
+                        <p class="ag-kicker" data-reveal><span aria-hidden="true">09</span> Who it is for</p>
                         <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
                             Anywhere a show <span class="ag-it">goes up and comes down</span>.
                         </h2>
@@ -1217,12 +1507,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 8. How it works (07): the project room                       -->
+        <!-- 8. How it works (10): the project room                       -->
         <!-- ============================================================ -->
         <section id="how" class="ag-room ag-box" style="scroll-margin-top: 4rem;">
             <div class="ag-wrap">
                 <div class="ag-head">
-                    <p class="ag-kicker" data-reveal><span aria-hidden="true">07</span> How it works</p>
+                    <p class="ag-kicker" data-reveal><span aria-hidden="true">10</span> How it works</p>
                     <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
                         Set at the install, <span class="ag-it">left alone after</span>.
                     </h2>
@@ -1328,12 +1618,12 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 11. FAQ (08)                                                 -->
+        <!-- 11. FAQ (11)                                                 -->
         <!-- ============================================================ -->
         <section id="faq" class="ag-room ag-room-2" style="scroll-margin-top: 4rem;">
             <div class="ag-wrap ag-list-grid">
                 <div>
-                    <p class="ag-kicker" data-reveal><span aria-hidden="true">08</span> Questions</p>
+                    <p class="ag-kicker" data-reveal><span aria-hidden="true">11</span> Questions</p>
                     <h2 class="ag-h2" data-reveal style="--reveal-delay: 0.06s;">
                         Asked at <span class="ag-it">the install</span>.
                     </h2>

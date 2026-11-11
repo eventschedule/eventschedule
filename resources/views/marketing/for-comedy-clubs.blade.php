@@ -923,7 +923,7 @@
         // the Friday row out of this SAME array, so the two cannot drift.
         // Advance is asserted to be under the door price at build time.
         $nights = [
-            ['Tuesday',  'Open mic',         'free', null, null, 'Capacity 30'],
+            ['Tuesday',  'Open mic',         'free', null, null, '56 places'],
             ['Thursday', 'Showcase',         'paid', 12,   15,   '6 comics'],
             ['Friday',   'Weekend headline', 'paid', 18,   22,   'Sells out'],
             ['Saturday', 'Weekend headline', 'paid', 18,   22,   'Sells out'],
@@ -944,7 +944,7 @@
             ],
             [
                 'q' => 'Can I put tickets on sale before I have booked the lineup?',
-                'a' => 'Yes, and that is the normal way round for a comedy room. The night is one recurring event with its own ticket types, so Friday at eight can be on sale in January. Add the participants when you book them and the show updates in place, so nobody has to be sent a new link.',
+                'a' => 'Yes, and that is the normal way round for a comedy room. Put each show up with its ticket types as soon as you have the date, and add the participants when you book them: the show updates in place, so nobody has to be sent a new link. Make each headline weekend an event of its own, or a two-night run that ends that Sunday (Clone Event copies last weekend\'s in a minute) rather than one date of a recurring series, because a recurring event carries one list of participants for every date it runs.',
             ],
             [
                 'q' => 'What happens to the comics I add to a show?',
@@ -966,14 +966,33 @@
                 'q' => 'Can I refund a ticket, or part of one?',
                 'a' => 'Yes, from the Sales page, on Pro. A ticket paid through Stripe, PayPal or Razorpay can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded. A full refund puts that ticket back on sale for its night, and on Pro the waitlist for that night is told. A partial refund leaves the ticket valid. A sale taken in cash or through a payment link is recorded with Mark as Refunded, which moves no money. The buyer is not emailed about a refund, so let them know yourself.',
             ],
+            [
+                'q' => 'How do I run an open mic sign-up list online?',
+                'a' => 'On the open mic\'s Tickets tab, choose Sell tickets and add two ticket types with the price left blank: one for comic spots, with a quantity of the spots you put online and a Max Per Order of 1, and one for the audience. Add a question to the comic spot asking for the stage name. Set the event to repeat weekly and each date keeps its own count, every sign-up gets a QR code, and a comic who drops out cancels from their ticket page, which frees the spot. All of that is free on every plan. Keep a few spots off the list for walk-ins.',
+            ],
+            [
+                'q' => 'Can a comedy club sell an early and a late show on the same night?',
+                'a' => 'Yes, as two events. An event keeps one start time, so set up the 8:00 show, clone it and change the time to 10:30. Each show keeps its own ticket count, so a sold-out early show leaves the late one untouched. Online sales stop when a show starts; switch on Allow sales after event starts in the Sales rules row and walk-ups can keep buying from their phones until the show ends.',
+            ],
+            [
+                'q' => 'Where should a comedy club put its drink minimum and age policy?',
+                'a' => 'In three places, so nobody can say they were not told: the short description, which shows on the event page and in your listings; each ticket type\'s description, which buyers read while choosing; and Ticket notes, which go into the confirmation email and are printed on the ticket. A required question on the ticket type can record that a buyer says they are of age, but it checks nothing, so keep checking ID at the door.',
+            ],
+            [
+                'q' => 'How do I cut no-shows at a free comedy night?',
+                'a' => 'Everyone with a ticket or a registration gets a reminder email before the show. Reminders are on for every schedule and go out one day before unless you change it, and switching the schedule to three hours before suits a room of weeknight shows people sign up for on a whim. On a free ticket or registration the reminder carries a Can\'t make it? link, so someone who drops out frees their place instead of leaving a seat empty. After a few weeks, count the room against the list each night, and release more places than the room holds by the share that never shows.',
+            ],
         ];
 
         $dotSections = [
             ['top', 'Friday at eight'],
             ['night', 'The night'],
             ['names', 'The names'],
+            ['lineup', 'The bill'],
             ['asks', 'Booking'],
+            ['open-mic', 'Open mic'],
             ['selling', 'Selling the room'],
+            ['house-rules', 'House rules'],
             ['who', 'Who it is for'],
             ['how', 'How it works'],
             ['faq', 'Questions'],
@@ -1095,7 +1114,7 @@
                             <div class="cc-night">
                                 <div class="cc-night-main">
                                     <p class="cc-night-day">{{ $headline[0] }}</p>
-                                    <p class="cc-night-hour">8:00pm &middot; every week</p>
+                                    <p class="cc-night-hour">8:00pm &middot; this week's show</p>
 
                                     <div class="cc-night-rule" aria-hidden="true"></div>
 
@@ -1113,14 +1132,14 @@
                                     <div class="cc-night-rule" aria-hidden="true"></div>
 
                                     <p class="cc-night-label">Participants</p>
-                                    <p class="cc-night-who">Added Wednesday, once the bill is booked.</p>
+                                    <p class="cc-night-who">Added once the weekend is booked.</p>
                                 </div>
                                 <div class="cc-night-stub" aria-hidden="true"><span>Admit one</span></div>
                             </div>
                         </div>
 
                         <p class="cc-night-note">
-                            One recurring event. On sale since January, and it has never needed a new link.
+                            On sale weeks ahead. The comics go on each Friday's own show once they are booked.
                         </p>
                     </div>
                 </div>
@@ -1144,8 +1163,8 @@
                     </h2>
                     <p class="cc-lead" data-reveal style="--reveal-delay: 0.16s;">
                         Tuesday is free and full. Thursday costs twelve. The weekend pays for the
-                        week. They are different products in one space, and each is a single
-                        recurring event you set up once.
+                        week. They are different products in one space: each standing night is a
+                        recurring event you set up once, and each headline show is an event of its own.
                     </p>
 
                     <ul class="cc-points" data-reveal style="--reveal-delay: 0.24s;">
@@ -1169,7 +1188,7 @@
                 <div class="cc-guide" data-reveal="right">
                     <div class="cc-guide-head">
                         <h3>The week</h3>
-                        <span>{{ count($nights) }} recurring nights</span>
+                        <span>{{ count($nights) }} nights a week</span>
                     </div>
 
                     <div>
@@ -1187,7 +1206,7 @@
                     </div>
 
                     <p class="cc-guide-foot">
-                        The open mic takes free registrations up to its capacity. The rest sell tickets.
+                        The open mic is free: one list by registration, or comic and audience spots as free ticket types. The rest sell tickets.
                     </p>
                 </div>
             </div>
@@ -1247,7 +1266,85 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. Comics ask you (03)                                       -->
+        <!-- 3b. The bill: headliner, feature, MC (03)                    -->
+        <!-- ============================================================ -->
+        <section id="lineup" class="cc-sec cc-alt">
+            <div class="cc-shapes" aria-hidden="true">
+                <i class="cc-star12 cc-spin cc-wide" style="right: -3rem; top: -3rem; --w: 11rem; --c: rgba(238, 108, 42, 0.18); --dur: 160s;"></i>
+            </div>
+            <div class="cc-wrap cc-two" style="position: relative;">
+                <div>
+                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">03</span>The bill</p>
+                    <h2 class="cc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Headliner, feature, MC: <span class="cc-sc">one show at a time</span>.
+                    </h2>
+                    <p class="cc-lead" data-reveal style="--reveal-delay: 0.16s;">
+                        A comedy club schedule is two calendars in one. The standing nights are the
+                        same every week; the bill on the weekend is different every week. Set each
+                        up the way it behaves, and the lineup on your page is always the one people
+                        are paying to see.
+                    </p>
+
+                    <ul class="cc-points" data-reveal style="--reveal-delay: 0.24s;">
+                        @foreach ([
+                            ['The open mic is one recurring event', 'Nobody buys a seat for a name on a Tuesday. Set it to repeat weekly, take out the dark weeks, and leave it alone.'],
+                            ['Only the regulars go on a series', 'A recurring event carries one list of participants for every date it runs. Put the host or the resident MC on it, never the guest of one week, or that comic appears on every week of the run.'],
+                            ['Each headline weekend is its own event', 'A headliner is booked for a weekend, not for the year. Start each one from last weekend\'s with Clone Event, so its bill, its page and its ticket count belong to that weekend alone.'],
+                            ['The late show is a second event', 'An event keeps one start time, so the 10:30 is a copy of the 8:00 with the time changed. Each keeps its own count on the door, and a sell-out at eight cannot oversell the late show.'],
+                        ] as [$t, $d])
+                            <li>
+                                <span><span class="cc-pt-t">{{ $t }}</span> <span>- {{ $d }}</span></span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="cc-guide" data-reveal="right">
+                    <div class="cc-guide-head">
+                        <h3>The running order</h3>
+                        <span>Friday, 8:00pm</span>
+                    </div>
+
+                    <div>
+                        @foreach ([
+                            ['8:00', 'MC', 'Opens, warms the room, says the house rules', '10'],
+                            ['8:10', 'Guest spot', 'A newer comic with a tight five', '5'],
+                            ['8:15', 'Feature', 'The middle act, building to the top', '20'],
+                            ['8:35', 'MC', 'Back up to reset the room and bring on the headliner', '5'],
+                            ['8:40', 'Headliner', 'The name the weekend was sold on', '45'],
+                        ] as [$roTime, $roWho, $roNote, $roMins])
+                            <div class="cc-guide-row">
+                                <span class="cc-guide-day" style="--bg: {{ $ccInks[$loop->index % 4][0] }}; --fg: {{ $ccInks[$loop->index % 4][1] }};">{{ $roTime }}</span>
+                                <div class="cc-guide-what">
+                                    <strong>{{ $roWho }}</strong>
+                                    <small>{{ $roNote }}</small>
+                                </div>
+                                <span class="cc-guide-dots" aria-hidden="true"></span>
+                                <span class="cc-guide-fee"><span class="sr-only">Minutes: </span>{{ $roMins }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <p class="cc-guide-foot">
+                        Minutes on stage, 85 in all. Type the order into the event's
+                        <x-link href="{{ marketing_url('/docs/creating-events#agenda') }}">Agenda</x-link>
+                        as parts with times and it shows on the event page; switch Show times off to list
+                        the bill without the clock.
+                    </p>
+                </div>
+            </div>
+            <div class="cc-wrap" style="position: relative;">
+                <div class="cc-center">
+                    <p class="cc-terms" data-reveal>
+                        <span class="cc-tag">Free</span>
+                        <span>Recurring events, Clone Event, participants and an agenda typed by hand are all on the free plan. Book the headliner, clone last weekend, swap in the new names, and the show is ready to go on sale (a priced ticket is Pro).</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4. Comics ask you (04)                                       -->
         <!-- ============================================================ -->
         <section id="asks" class="cc-sec cc-teal">
             <div class="cc-shapes" aria-hidden="true">
@@ -1256,7 +1353,7 @@
             </div>
             <div class="cc-wrap cc-two cc-two-rev" style="position: relative;">
                 <div>
-                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">03</span>Booking</p>
+                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">04</span>Booking</p>
                     <h2 class="cc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Stop booking the room <span class="cc-sc">out of your inbox</span>.
                     </h2>
@@ -1315,18 +1412,100 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 5. Selling the room (04)                                     -->
+        <!-- 4b. The open mic list (05)                                   -->
+        <!-- ============================================================ -->
+        <section id="open-mic" class="cc-sec">
+            <div class="cc-shapes" aria-hidden="true">
+                <i class="cc-atom" style="left: 5%; top: 12%; --w: 2.4rem; --c: var(--cc-teal);"></i>
+                <i class="cc-blob cc-drift cc-wide" style="left: -9rem; bottom: -6rem; --w: 22rem; --d: 26px; --c: var(--cc-mustard); opacity: 0.3;"></i>
+            </div>
+            <div class="cc-wrap" style="position: relative;">
+                <div class="cc-center">
+                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">05</span>Open mic</p>
+                    <h2 class="cc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        An open mic list <span class="cc-sc">that runs itself</span>.
+                    </h2>
+                    <p class="cc-lead" data-reveal style="--reveal-delay: 0.16s;">
+                        A clipboard on the bar is fair to whoever arrives first and to nobody else. Put
+                        the list online and comics claim a spot from their phones during the week, the
+                        audience registers beside them, and you walk in on Tuesday knowing both counts.
+                    </p>
+                </div>
+
+                <div class="cc-sell">
+                    <div class="cc-bill" data-reveal="left">
+                        <div class="cc-bill-in">
+                            <span class="cc-bill-kick" aria-hidden="true">Tuesday's list</span>
+                            <div class="cc-bill-head">
+                                <h3>Open mic, 7:30pm</h3>
+                                <span class="cc-tag">Free</span>
+                            </div>
+                            <p class="cc-bill-sub">Two free ticket types on one recurring night.</p>
+
+                            <ul class="cc-fare">
+                                @foreach ([
+                                    ['Comic spot', 'Free', '16'],
+                                    ['Audience', 'Free', '40'],
+                                ] as [$tName, $tPrice, $tQty])
+                                    <li>
+                                        <span class="cc-fare-name">{{ $tName }}</span>
+                                        <span class="cc-fare-dots" aria-hidden="true"></span>
+                                        <span class="cc-fare-qty">{{ $tQty }} a night</span>
+                                        <span class="cc-fare-fig">{{ $tPrice }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+
+                            <p class="cc-bill-note">
+                                Free registration has one list, so when comics and audience both sign up,
+                                choose Sell tickets and leave both prices blank. Give the comic spot a
+                                <x-link href="{{ marketing_url('/docs/tickets#max-per-order') }}">Max Per Order</x-link>
+                                of 1, so nobody books a friend's set, and a question of its own asking for the
+                                stage name. Each quantity is kept per date, and a comic who cannot make it
+                                cancels from their ticket page, which puts the spot back on the list.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="cc-perks" data-reveal-group="110">
+                        @foreach ([
+                            ['How many spots?', 'Divide the length of the show by a set plus the changeover. Two hours at five minutes a set, with a minute between comics, is 120 &divide; 6 = 20 spots. Put 16 online and keep 4 for walk-ins and the comic who drove two hours to be there.', 'Arithmetic'],
+                            ['List, bucket or both', 'An online list rewards the organised; a bucket, names drawn on the night, rewards whoever turns up. Plenty of rooms split it: half the spots online, half drawn at a set time before the show. Whatever you choose, write it in the ticket type\'s description, so the rule is read before anyone signs up.', 'Your call'],
+                            ['Bringer shows', 'If a comic earns a spot by bringing guests, give each one a link from the Promoters tab. It counts how many people each link brought and the tickets they took, so the bringer count is a number on a screen, not an argument at the bar.', 'Pro'],
+                        ] as [$t, $d, $tag])
+                            <div class="cc-perk" data-reveal style="--c: {{ $ccInks[$loop->index][0] }};">
+                                <div class="cc-perk-head">
+                                    <h3>{{ $t }}</h3>
+                                    <span @class(['cc-tag', 'cc-tag-pro' => $tag === 'Pro'])>{{ $tag }}</span>
+                                </div>
+                                <p>{!! $d !!}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="cc-center">
+                    <p class="cc-terms" data-reveal>
+                        <span class="cc-tag">Free</span>
+                        <span>Free ticket types, a quantity per date, Max Per Order and a question on a ticket type are on every plan. A waitlist on free ticket types is Pro; on free registration it is free. <x-link href="{{ marketing_url('/docs/managing-schedules#promoters') }}">promoter links</x-link> are Pro. One limit to plan around: a ticket type's sales start is one fixed date and time for the whole series, not one per week, so the list cannot reopen by itself at noon every Monday.</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. Selling the room (06)                                     -->
         <!-- ============================================================ -->
         <section id="selling" class="cc-sec cc-alt">
             <div class="cc-wrap">
                 <div class="cc-center">
-                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">04</span>Selling the room</p>
+                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">06</span>Selling the room</p>
                     <h2 class="cc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Sold out on Friday. <span class="cc-sc">Still open for next Friday</span>.
                     </h2>
                     <p class="cc-lead" data-reveal style="--reveal-delay: 0.16s;">
                         Every ticket type carries its own price and its own count, and the count is kept
-                        per night - so selling out one week leaves the next one untouched.
+                        per show, and each Friday is its own show with its own count, so selling out one week leaves the next one untouched.
                     </p>
                 </div>
 
@@ -1340,15 +1519,15 @@
                             <span class="cc-bill-kick" aria-hidden="true">Tonight's bill</span>
                             <div class="cc-bill-head">
                                 <h3>Friday, 8:00pm</h3>
-                                <span class="cc-tag">Free</span>
+                                <span class="cc-tag cc-tag-pro">Pro</span>
                             </div>
-                            <p class="cc-bill-sub">Three ticket types on one recurring night.</p>
+                            <p class="cc-bill-sub">Three ticket types on one night.</p>
 
                             <ul class="cc-fare">
                                 @foreach ([
                                     ['Advance', '$18', '80'],
                                     ['Door', '$22', '40'],
-                                    ['Group of six', '$90', '10'],
+                                    ['Student', '$14', '20'],
                                 ] as [$tName, $tPrice, $tQty])
                                     <li>
                                         <span class="cc-fare-name">{{ $tName }}</span>
@@ -1360,7 +1539,7 @@
                             </ul>
 
                             <p class="cc-bill-note">
-                                A ticket type can also be given a date to go on sale or come off it, once, for the whole run. With the "Notify me" card switched on, anyone who joins the <x-link href="{{ marketing_url('/docs/tickets#interest-list') }}">interest list</x-link> on the event page before sales open gets one email when they do.
+                                A ticket type can also be given its own date and time to go on sale or come off it, so the advance price can close at noon on the day. With the "Notify me" card switched on, anyone who joins the <x-link href="{{ marketing_url('/docs/tickets#interest-list') }}">interest list</x-link> on the event page before sales open gets one email when they do.
                             </p>
                         </div>
                     </div>
@@ -1369,7 +1548,7 @@
                         @foreach ([
                             ['QR check-in', 'Scan the QR on each ticket at the door from a phone, on every plan. Each ticket admits once, and a second scan warns. The live check-in dashboard, with a running count, is the Pro part.', false],
                             ['Zero platform fees', 'You keep the ticket price minus what Stripe or PayPal charges to process the payment, on every plan. Nothing is taken on top of that.', false],
-                            ['The open mic stays free', 'A free night takes registrations up to a capacity instead of tickets, so you know the count without charging anybody, and its waitlist is free as well.', false],
+                            ['The open mic stays free', 'Run the list as free registration up to a capacity, or as free ticket types when comics and audience sign up apart. Either way you know the count without charging anybody. A waitlist on a full registration is free; on ticket types it is Pro.', false],
                         ] as [$t, $d, $isPro])
                             <div class="cc-perk" data-reveal style="--c: {{ $ccInks[$loop->index][0] }};">
                                 <div class="cc-perk-head">
@@ -1385,7 +1564,59 @@
                 <div class="cc-center">
                     <p class="cc-terms" data-reveal>
                         <span class="cc-tag cc-tag-pro">Pro</span>
-                        <span>A ticket with a price on it is the Pro plan, at {{ plan_price($proMonthly) }} a month, taken through your own Stripe or <x-link href="{{ marketing_url('/paypal') }}">PayPal</x-link> account, a payment link or cash. A free open mic needs none of it: registration with a capacity is on every plan.</span>
+                        <span>A ticket with a price on it is the Pro plan, at {{ plan_price($proMonthly) }} a month, taken through your own Stripe or <x-link href="{{ marketing_url('/paypal') }}">PayPal</x-link> account, a payment link or cash. A free open mic needs none of it: registration with a capacity, and free ticket types, are on every plan.</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5b. House rules: six cue cards on the mustard (07)           -->
+        <!-- ============================================================ -->
+        <section id="house-rules" class="cc-sec cc-mustard">
+            <div class="cc-shapes" aria-hidden="true">
+                <i class="cc-boom cc-drift cc-wide" style="left: -11rem; bottom: -10rem; --w: 26rem; --t: 5rem; --r: -20deg; --c: rgba(29, 120, 116, 0.28); --d: 28px;"></i>
+            </div>
+            <div class="cc-wrap" style="position: relative;">
+                <div class="cc-center">
+                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">07</span>House rules</p>
+                    <h2 class="cc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Six things to settle <span class="cc-sc">before Friday</span>.
+                    </h2>
+                    <p class="cc-lead" data-reveal style="--reveal-delay: 0.16s;">
+                        Most arguments at a comedy club door start with something nobody settled in
+                        advance: the drink minimum, the age limit, when the doors open, whose guests are
+                        on the comp list. Say each rule where it is seen before anyone pays, and again
+                        on the ticket they bring.
+                    </p>
+                </div>
+
+                @php
+                    $ccRules = [
+                        ['The two-drink minimum', 'Write it in each ticket type\'s description, which buyers read as they choose a ticket, and in Ticket notes, which go into the confirmation email and onto the ticket. A minimum the buyer saw before paying is a house rule. One they first hear about at the table is a complaint.'],
+                        ['The age policy', 'Put 18+ or 21+ in the short description, which shows on the event page and in your listings, so nobody buys for a friend who is twenty. A required question on the ticket type records that the buyer says they are old enough; checking ID is still the door\'s job.'],
+                        ['Doors and show time', 'Make the event\'s start time the show, and put the doors time in Ticket notes. Online sales stop at the start time unless you switch on Allow sales after event starts in Sales rules, which keeps late walk-ups buying from their phones until the show ends.'],
+                        ['Seated or first come', 'A ticket type sells by the number, which is general admission: the room seats people as they arrive. To sell the tables themselves, draw the room as a seating plan, an Enterprise feature for venue schedules, and set the tables to Single seats or whole table, so a couple can take two chairs of a four-top.'],
+                        ['Comps for the comics', 'The headliner\'s plus-two go in through Import on the Sales page, a Pro feature. Upload a CSV with each guest\'s name and email, an Amount of 0 and a Status of paid, pick the date and turn on Send Email, and each gets a ticket with a QR code. A typed row with no amount is recorded at the full ticket price, and a row with no email is skipped. An import cannot push a ticket type past its quantity, so a comp never takes a seat you also sold.'],
+                        ['Announcing the week', 'Events graphic, in the schedule\'s Actions menu, builds one image from the flyers of your next shows, free, for the Monday post (a show with no flyer is left out). A newsletter set to repeat weekly, with its Events block on The next 7 days, sends the week by itself.'],
+                    ];
+                @endphp
+                <div class="cc-cues" data-reveal-group="110">
+                    @foreach ($ccRules as [$t, $d])
+                        <div data-reveal>
+                            <div class="cc-cue">
+                                <div class="cc-cue-no" style="--bg: {{ $ccInks[[0, 1, 3][$loop->index % 3]][0] }}; --fg: {{ $ccInks[[0, 1, 3][$loop->index % 3]][1] }};">{{ $loop->iteration }}</div>
+                                <h3>{{ $t }}</h3>
+                                <p>{{ $d }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="cc-center">
+                    <p class="cc-terms" data-reveal>
+                        <span class="cc-tag">Mind the count</span>
+                        <span>On eventschedule.com a newsletter counts every recipient against a monthly allowance of 10, 100 or 1,000 emails on Free, Pro and Enterprise. A weekly send to 300 followers is about 1,300 emails a month, more than any plan holds, so a club that mails its list every week connects the schedule's own <x-link href="{{ marketing_url('/docs/newsletters#allowance') }}">email settings</x-link>, which lifts the cap. Each new show you publish also goes to your email subscribers in the automatic digest, at most once every 72 hours and without touching the allowance (past 50 subscribers it needs those email settings or a verified phone number).</span>
                     </p>
                 </div>
             </div>
@@ -1401,7 +1632,7 @@
             </div>
             <div class="cc-wrap" style="position: relative;">
                 <div class="cc-center">
-                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">05</span>Who it is for</p>
+                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">08</span>Who it is for</p>
                     <h2 class="cc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Any room with <span class="cc-sc">a mic and a door</span>.
                     </h2>
@@ -1453,7 +1684,7 @@
             </div>
             <div class="cc-wrap" style="position: relative;">
                 <div class="cc-center">
-                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">06</span>How it works</p>
+                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">09</span>How it works</p>
                     <h2 class="cc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Set the week up once, <span class="cc-sc">book it forever</span>.
                     </h2>
@@ -1461,7 +1692,7 @@
 
                 <div class="cc-cues" data-reveal-group="140">
                     @foreach ([
-                        ['01', 'Put the nights up', 'One recurring event per night, with the weeks you are dark taken out. The open mic takes registrations; the rest take tickets.'],
+                        ['01', 'Put the nights up', 'A recurring event for each standing night, with the weeks you are dark taken out, and a show of its own for each headline weekend. The open mic is free; the rest take tickets.'],
                         ['02', 'Open the requests', 'Comics submit for a date instead of messaging you, and the regulars go on the approved list so they skip the queue.'],
                         ['03', 'Add the bill on Wednesday', 'Participants go on the show, and the date reaches every comic who runs a schedule of their own.'],
                     ] as [$n, $t, $d])
@@ -1566,7 +1797,7 @@
         <section id="faq" class="cc-sec cc-alt">
             <div class="cc-wrap cc-faq">
                 <div class="cc-faq-head">
-                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">07</span>Questions</p>
+                    <p class="cc-kick" data-reveal><span class="cc-no" aria-hidden="true">10</span>Questions</p>
                     <h2 class="cc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Asked <span class="cc-sc">at the box office</span>.
                     </h2>
@@ -1609,7 +1840,7 @@
                     Put <span class="cc-sc">Friday at eight</span> on sale.
                 </h2>
                 <p class="cc-fin-sub" data-reveal style="--reveal-delay: 0.16s;">
-                    The night, the tickets and the bill, on one link that has not needed
+                    The night, the tickets and the bill, on one schedule link that has not needed
                     replacing since January.
                 </p>
 
