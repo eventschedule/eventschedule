@@ -1258,11 +1258,27 @@
             ],
             [
                 'q' => 'Can fans ask to hear when tickets go on sale?',
-                'a' => 'Yes, on every plan. Switch on the "Notify me" card, announce a show before tickets are ready, and the event page offers "Tell me when tickets go on sale". Fans leave an email address, with no account, and hear when tickets go on sale, if the show is cancelled, and again shortly before it starts, plus any change notice you choose to send. You see how many are waiting on the event\'s Tickets panel before you open sales, and it never counts against your newsletter allowance.',
+                'a' => 'Yes, on every plan. Switch on the "Notify me" card, announce a show before tickets are ready, and the event page offers "Tell me when tickets go on sale". Fans leave an email address, with no account, and hear when tickets go on sale on Event Schedule (selling a priced ticket is Pro), if the show is cancelled, and again shortly before it starts, plus any change notice you choose to send. You see how many are waiting on the event\'s Tickets panel before you open sales, and it never counts against your newsletter allowance.',
             ],
             [
                 'q' => 'Can I refund tickets if a show is cancelled?',
                 'a' => 'Yes, from the Sales page, on Pro. A Stripe, PayPal or Razorpay sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A full refund puts those tickets back on sale, and a partial one leaves the ticket valid. A sale taken another way, like cash on the door or a payment link, is marked as refunded and you return the money yourself.',
+            ],
+            [
+                'q' => 'What should a music venue calendar show for each gig?',
+                'a' => 'The date, the doors time and the time the first act goes on, every act on the bill with the headliner first, the age policy, the advance and door price, whether it is sold out, and how to get tickets. Venue calendars that list only a doors time and a headliner leave fans messaging you for the rest. In Event Schedule each show is an event with its acts named on it, set times on its Agenda tab and a link to buy, and the calendar shows them all on one page that you can also embed on your own site.',
+            ],
+            [
+                'q' => 'How do I keep a hold off the public calendar?',
+                'a' => 'Save the show as a Draft. A draft is seen only by your schedule\'s team, and it is left out of the public page, the calendar feed and any Google or Outlook calendar you sync to. When the date is confirmed, press Publish. If your booker keeps holds in Google Calendar, a schedule that reads from that calendar brings new entries in as drafts unless you chose to publish them on arrival, so a hold does not go public by itself.',
+            ],
+            [
+                'q' => 'Can a promoter who hires the room list the show on my calendar?',
+                'a' => 'Yes. A promoter with a schedule of their own creates the show there and names your venue; it waits on your Requests tab until you accept it, or goes straight on if you added them to Approved Schedules. The tickets are sold under the promoter\'s plan and paid into their own account, you can edit the listing, and only their side can cancel or delete it. A promoter without a schedule can send the show through your request form instead.',
+            ],
+            [
+                'q' => 'Can a weekly night have a different act each week?',
+                'a' => 'Yes, as one event per night. The acts on an event belong to the whole event, so a guest added to a recurring night would appear on every date of it. Make the first night, then clone it from its Actions menu for each week and change the guest, which is free. A residency where the same act plays every week is the case for one recurring event.',
             ],
         ];
 
@@ -1297,7 +1313,7 @@
         $mvGigs = [
             ['Main room', '450 cap', 'The Fell', 'Thu 12', 'With Oda', 'Doors 19:00 · Show 20:00', '$22', 'low', 'main'],
             ['Back room', '80 cap', 'Oda solo', 'Fri 13', 'Seated, and early', 'Doors 19:30', '$18', 'sale', 'back'],
-            ['Main room', '450 cap', 'Residency', 'Every Tue', 'The house band and a guest', 'Doors 20:00', 'Free entry', 'weekly', 'main'],
+            ['Main room', '450 cap', 'Residency', 'Every Tue', 'The house band', 'Doors 20:00', 'Free entry', 'weekly', 'main'],
             ['Main room', '450 cap', 'Kestrel Hall', 'Fri 20', '4-piece', 'Doors 19:00 · Show 20:15', '$25', 'new', 'main'],
             ['Back room', '80 cap', 'DJ set', 'Sat 21', 'Late', 'From 22:40', '$18', 'sold', 'back'],
         ];
@@ -1582,7 +1598,7 @@
                     </div>
                     <ul class="mv-ticks" data-reveal>
                         <li>
-                            <span>A residency is one recurring event with a day-of-week pattern, plus exceptions for the weeks you are dark.</span>
+                            <span>A residency with the same act every week is one recurring event with a day-of-week pattern, plus exceptions for the weeks you are dark. A night whose guest changes is one event per night.</span>
                         </li>
                         <li>
                             <span>Embed the calendar on the site you already have, so the listings live where people look you up.</span>
@@ -1697,6 +1713,134 @@
         </section>
 
         <!-- ============================================================ -->
+        <!-- 6b. Who books the room, and where the show is listed         -->
+        <!-- ============================================================ -->
+        <section id="booking" class="mv-section mv-alt" style="scroll-margin-top: 4rem;">
+            <div class="mv-wrap">
+                <div class="mv-order">
+                    <div>
+                        <span class="mv-kick" data-reveal>Promoters, residencies, listings</span>
+                        <h2 class="mv-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            Whose show is it? <span class="mv-em">Decide before you list it.</span>
+                        </h2>
+                        <p class="mv-sub" data-reveal style="--reveal-delay: 0.16s;">
+                            A venue calendar mixes four kinds of night: your own shows, promoters who
+                            hire the room, residencies, and weekly nights with a new guest each time.
+                            Each is entered differently, and getting it wrong shows up later as the wrong
+                            act on the wrong Friday or ticket money in the wrong account.
+                        </p>
+
+                        <div class="mv-feat-top" style="margin-top: 2.25rem;" data-reveal><h3>Where fans find the listing</h3></div>
+                        <ul class="mv-ticks" style="margin-top: 1rem;" data-reveal>
+                            <li>
+                                <span>On your own website: copy the code from Embed Schedule in the schedule's Actions menu. For one room only, embed that sub-schedule's own address with ?embed=true on the end.</span>
+                            </li>
+                            <li>
+                                <span>In search: each public show page carries schema.org Event data with the date, the status, the venue, the acts and the ticket offers, which search engines can read.</span>
+                            </li>
+                            <li>
+                                <span>On listings sites and apps that take a feed: give them your iCal or RSS feed address. The RSS feed carries up to 50 shows, and a recurring night appears in it once, as its next date.</span>
+                            </li>
+                            <li>
+                                <span>In fans' own calendars: the iCal feed lists your upcoming public shows, with a residency expanded into its dates for the next 90 days, and their calendar keeps itself up to date.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mv-notes" data-reveal-group="110">
+                        <div class="mv-feat" data-reveal>
+                            <div class="mv-feat-top">
+                                <h3>A promoter with a schedule of their own</h3>
+                                <span class="mv-tier">Free</span>
+                            </div>
+                            <p>They create the show on their schedule and name your venue. It waits on your Requests tab until you accept it, or goes straight on if you added them to Approved Schedules. The tickets are sold under the promoter's plan and paid into their account. You can edit the listing, but cancelling or deleting it is theirs to do.</p>
+                        </div>
+                        <div class="mv-feat" data-reveal>
+                            <div class="mv-feat-top">
+                                <h3>A promoter or band without one</h3>
+                                <span class="mv-tier">Free</span>
+                            </div>
+                            <p>Turn on Accept requests and choose the Booking Form. Put your hire terms in Request Terms (the hold fee, the curfew, the backline) and they are read before anyone types a date. The sender's name and email arrive with the request, and nothing reaches the calendar until you accept it.</p>
+                        </div>
+                        <div class="mv-feat" data-reveal>
+                            <div class="mv-feat-top">
+                                <h3>A residency</h3>
+                                <span class="mv-tier">Free</span>
+                            </div>
+                            <p>The same act on the same night every week is one recurring event. The act named on it appears on every date, and each date keeps its own ticket count, so one sold-out Tuesday does not close the next.</p>
+                        </div>
+                        <div class="mv-feat" data-reveal>
+                            <div class="mv-feat-top">
+                                <h3>A weekly night with a new guest</h3>
+                                <span class="mv-tier">Free</span>
+                            </div>
+                            <p>Make each night its own event. The lineup belongs to the event, not to one date of it, so a guest added to a recurring night would be billed on every week. Clone last week's show from its Actions menu and change the guest; saved templates for the night are Pro.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6c. From hold to doors                                        -->
+        <!-- ============================================================ -->
+        <section id="lifecycle" class="mv-section" style="scroll-margin-top: 4rem;">
+            <div class="mv-wrap">
+                <div class="mv-head mv-head-center">
+                    <span class="mv-kick" data-reveal>From hold to doors</span>
+                    <h2 class="mv-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Six stages of a show, <span class="mv-em">and what to set at each.</span>
+                    </h2>
+                    <p class="mv-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A gig lives on your calendar for weeks before anyone walks through the door.
+                        These are the moments that decide whether it sells, in the order you meet them.
+                    </p>
+                </div>
+
+                <div class="mv-trio" data-reveal-group="90">
+                    @foreach ([
+                        ['1. The hold', 'Free', 'Pencil it in as a Draft with the promoter in the title. Only your team sees a draft, and it stays off the public page, the calendar feed and any calendar you sync to. Keep holds in Google Calendar already? A schedule reading from it brings each new entry in as a draft, unless you chose to publish on arrival.'],
+                        ['2. The announcement', 'Free', 'Publish with the full bill and the age policy before tickets are ready. Switch on the "Notify me" card and fans who are not ready to buy can leave an email address on the show page, so the announcement builds a list instead of a guess.'],
+                        ['3. On sale', 'Pro', 'Give each ticket type a Ticket sales start, so the page turns from announcement to on sale at the hour you promised. A small early tier with its own sales end, and Max per order on it, keep one buyer from taking twenty. The interest list is emailed when tickets go on sale.'],
+                        ['4. Show week', 'Free', 'Add the set times on the Agenda tab once the acts confirm them. Every ticket holder gets a reminder, a day before by default, with the QR code and your ticket notes, so put the ID rule, the curfew and the re-entry policy in Ticket notes.'],
+                        ['5. Sold out', 'Pro', 'The page says Sold out and offers Join Waitlist by itself. When a ticket comes back (a cancellation, a full refund, an unpaid order that expires) the next person is emailed and has 24 hours before the next one hears. Show unavailable tickets keeps the gone tiers visible; switch it on once sales have opened, not before.'],
+                        ['6. Doors', 'Free', 'Scan tickets on any phone. Ticket sales stop at the event\'s start time, so if that time is your doors time, turn on Allow sales after event starts to keep selling to the queue. The live count against capacity is Pro.'],
+                    ] as [$lcTitle, $lcTier, $lcBody])
+                        <div class="mv-feat" data-reveal>
+                            <div class="mv-feat-top">
+                                <h3>{{ $lcTitle }}</h3>
+                                <span @class(['mv-tier', 'mv-tier-paid' => $lcTier === 'Pro'])>{{ $lcTier }}</span>
+                            </div>
+                            <p>{{ $lcBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="mv-trio" data-reveal-group="90">
+                    <div class="mv-feat" data-reveal>
+                        <div class="mv-feat-top">
+                            <h3>Two times, not one</h3>
+                        </div>
+                        <p>Doors and the first act. A fan deciding whether to eat first needs both, and the support act needs the second one printed.</p>
+                    </div>
+                    <div class="mv-feat" data-reveal>
+                        <div class="mv-feat-top">
+                            <h3>The age policy, every time</h3>
+                            <span class="mv-tier mv-tier-paid">Pro</span>
+                        </div>
+                        <p>Write it in the description on any plan. On Pro, a Dropdown custom field (All ages, 14+ with an adult, 18+) set to show On event page and Show as filter prints it on every show and lets parents filter to all-ages nights.</p>
+                    </div>
+                    <div class="mv-feat" data-reveal>
+                        <div class="mv-feat-top">
+                            <h3>The rest of the small print</h3>
+                        </div>
+                        <p>Every act on the bill, the door price if it differs from advance, step-free access and where to ask for a seat, and the curfew. The questions you leave off the listing come back as messages.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
         <!-- 7. The door: the box office                                  -->
         <!-- ============================================================ -->
         <section id="door" class="mv-section mv-alt" style="scroll-margin-top: 4rem;">
@@ -1746,7 +1890,7 @@
                             <h3>Tiers that move on the clock</h3>
                             <span class="mv-tier">Free</span>
                         </div>
-                        <p>Give a show more than one ticket type, each with its own sales window, and a rate that kicks in when someone buys several at once. Add-ons that attach to a ticket are on Pro.</p>
+                        <p>Give a show more than one ticket type, each with its own sales window, and a rate that kicks in when someone buys several at once. These settings are on every plan; putting a price on a ticket, and add-ons that attach to one, are Pro.</p>
                     </div>
                     <div class="mv-feat" data-reveal>
                         <div class="mv-feat-top">
@@ -1801,7 +1945,7 @@
                             <h3>When it sells out</h3>
                             <span class="mv-tier mv-tier-paid">Pro</span>
                         </div>
-                        <p>Turn on the waitlist and people join once tickets are gone. If one is released they are notified automatically instead of you working back through replies.</p>
+                        <p>Once a show sells out, the page offers Join Waitlist by itself. If a ticket is released, the next person in line is emailed automatically instead of you working back through replies.</p>
                     </div>
                     <!-- 3 -->
                     <div class="mv-case mv-feat" data-reveal>
@@ -1827,9 +1971,9 @@
                         <div class="mv-case-day" aria-hidden="true">Fri <span>Graphics</span></div>
                         <div class="mv-feat-top">
                             <h3>The announcement post</h3>
-                            <span class="mv-tier mv-tier-paid">Pro</span>
+                            <span class="mv-tier">Free</span>
                         </div>
-                        <p>Generate a graphic from a show in a story, square, portrait or landscape crop. It is built from the event, so the date, the room and the bill are already right.</p>
+                        <p>The Events graphic in the schedule's Actions menu lays the flyers of your next shows into one image, fitted to a square, portrait or story shape, with a caption listing the same dates to paste beside it. Only shows with a flyer are drawn, so give every show one.</p>
                         <p>
                             Running it online as well? Mark the show as an online event and paste the link to wherever you are streaming.
                             <a href="{{ marketing_url('/features/online-events') }}">How online events work</a>
@@ -1870,7 +2014,7 @@
                         ['Jazz Clubs', 'Intimate sets, residencies and guest headliners. Two sets a night, each with its own start time on the page.', 'for-mid-size-music-venues'],
                         ['Folk & Acoustic Venues', 'Singer-songwriter nights, open mics and listening rooms. Create a space for acoustic performances.', 'for-house-concerts'],
                         ['Rock & Indie Venues', 'Touring bands, local acts and multi-band bills. Every act on the bill gets its own set time and its own photos.', 'for-multi-purpose-venues'],
-                        ['Outdoor Amphitheaters', 'Seasonal programming and festival-style bills. Set the season up once as recurring dates and skip the weeks you are closed.', 'for-outdoor-amphitheaters'],
+                        ['Outdoor Amphitheaters', 'Seasonal programming and festival-style bills. Each show is its own event with its own lineup, and a season starts by cloning the first one.', 'for-outdoor-amphitheaters'],
                     ];
                 @endphp
                 <div class="mv-minis" data-reveal-group="80">

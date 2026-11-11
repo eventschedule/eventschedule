@@ -77,7 +77,8 @@
 
            CLAIM DISCIPLINE. No rotas: Event Schedule has no volunteer rota
            or shift-assignment feature, so nothing here promises one. No
-           giving, no member database, no SMS. Team members beyond one are
+           giving platform (donations ride only on a ticket checkout, Pro), no member
+           database, no congregation login, no SMS. Team members beyond one are
            Enterprise; Internal and Unlisted events are Enterprise; Draft is
            free. A recurring event has one start time, so a 9:30 and an
            11:00 service are two entries, and the page says so.
@@ -349,7 +350,7 @@
             ],
             [
                 'q' => 'Can we keep some events off the public calendar?',
-                'a' => 'Save an event as a Draft and it stays members-only until you publish it, which is on every plan and suits a date that is not confirmed yet. Events that should never be public, such as a leaders\' meeting, or an Unlisted event that only people with the link (and an optional password) can open, are Enterprise options.',
+                'a' => 'Save an event as a Draft and only the people on the schedule\'s team can see it until you publish it, which is on every plan and suits a date that is not confirmed yet. There is no congregation login, so for an event that is for your members but not the public, such as the annual meeting, use Unlisted: it is left off the calendar and opened only by people with the link, and an optional password. Unlisted, and Internal for a leaders\' meeting that is never published, are Enterprise options.',
             ],
             [
                 'q' => 'How do people pay for the church weekend away?',
@@ -359,6 +360,22 @@
                 'q' => 'Our congregation speaks two languages. Can the calendar show both?',
                 'a' => 'Each schedule is written in one language, and you can nominate one other language to translate into. Event names and descriptions are then translated by AI, and visitors get a language switch on the public page. That is free. It is one target language at a time, so a church with services in three languages might run a second schedule for the third.',
             ],
+            [
+                'q' => 'What should a church event calendar include?',
+                'a' => 'Every regular service and group with its day, time and place. One line for a newcomer on what to expect: how long it lasts, what the children do, whether there is coffee after. The seasonal services, published as soon as the dates are fixed rather than the week before. A sign-up with a limit on anything that can fill. And a way to keep it: on the church website, as a QR code in the bulletin, and in people\'s own phone calendars. In Event Schedule the regular week is recurring events, the ministries are sub-schedules, and the website embed, the QR code and the calendar feed are free on every plan.',
+            ],
+            [
+                'q' => 'How do I put our church calendar on the church website?',
+                'a' => 'In the admin panel, open the schedule\'s Actions menu and choose Embed Schedule. Pick a theme to suit the site and a layout (calendar or list), copy the Iframe Code and paste it into the page; in WordPress that is a Custom HTML block. The frame loads live, so you never paste it again when a date moves. To show one ministry only, embed that sub-schedule\'s own address with ?embed=true on the end. Give the month calendar a column of about 768 pixels or more, or it falls back to a day-by-day list. Embedding is free; on the Free plan a small Powered by Event Schedule line sits under the frame, and Pro removes it.',
+            ],
+            [
+                'q' => 'Can people give a donation when they book a church event?',
+                'a' => 'Yes, on Pro, for an event that uses tickets. Switch on Ask for a donation at checkout in the event\'s Checkout row and people can add one of up to three suggested amounts, or an amount of their own, to their order. With a free ticket type that makes the event pay what you want; with a priced ticket the gift is added on top. Donations are paid online through Stripe, PayPal, Payfast or Razorpay. Event Schedule adds no platform fee, though the payment provider charges its own. Donations do not work on free registration, and Event Schedule is not a giving platform: there is no standalone donate page and no regular giving.',
+            ],
+            [
+                'q' => 'Can we organize volunteers and rotas with it?',
+                'a' => 'No. Event Schedule has no rota, no shift slots and no volunteer reminders. A free sign-up with a limit can collect names for one job, such as six people to stack chairs after the harvest supper, but it sits on the public calendar like any other event unless you make it Unlisted, which is Enterprise. For the weekly rota of stewards, readers and the coffee team, keep the tool you use now, and let the calendar show the services that rota serves.',
+            ],
         ];
 
         $dotSections = [
@@ -366,6 +383,8 @@
             ['pattern', 'Set once'],
             ['strands', 'Ministries'],
             ['seasons', 'The big dates'],
+            ['signups', 'Sign-ups'],
+            ['private', 'Who sees what'],
             ['reach', 'Reaching people'],
             ['requests', 'The hall'],
             ['who', 'Who it is for'],
@@ -653,9 +672,9 @@
                         @foreach ([
                             'People sign up instead of paying, and the sign-ups are unlimited on every plan.',
                             'Give it a capacity and it stops taking names when the places are gone.',
-                            'Ask for each person\'s name, so a family of five holds five places.',
+                            'Turn on Individual tickets and a family of five books five places, each with a name and its own email address.',
                             'A waiting list on a full free event lets you offer a place that frees up.',
-                            'Scan the QR on each sign-up at the door on any phone, or just count heads.',
+                            'Each sign-up carries a QR code. A scan at the door confirms the booking but keeps no tally, so count heads, or use free tickets when you want a recorded count.',
                         ] as $point)
                             <li class="flex items-start gap-3">
                                 <svg aria-hidden="true" class="es-nave-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -705,13 +724,178 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Reaching people (04)                                      -->
+    <!-- 5. Sign-ups, field guide (04)                                -->
+    <!-- ============================================================ -->
+    @php
+        // Each row: what the church is running, what to set up, what to watch for, plan tag key.
+        $signupShapes = [
+            ['A service that fills up', 'Carols by candlelight, the Easter dawn service, a visiting speaker.', 'Free registration with a Registration Limit. People give a name and an email and get a confirmation with a QR code. Each registration is one place; turn on Individual tickets (free here) to let one person book several, each with their own name and email address.', 'Scanning a registration at the door confirms it but keeps no record of who came. If you want an attendance count you can trust, use the next row instead.', 'free'],
+            ['A free event you want to count in', 'The harvest supper, a parish lunch, the youth trip where you must know who is on the coach.', 'Sell tickets with one ticket type and the price left blank. Free tickets cost nothing on any plan, and each scan at the door is recorded against the order.', 'A question on the ticket type, such as Meat or vegetarian, is free and asked once per order. The live check-in count is Pro.', 'free'],
+            ['A children\'s week', 'Holiday club, VBS, a half-term activity morning.', 'Free tickets with a Child type, and questions on that type for allergies and an emergency contact number.', 'Those questions are asked once per order, so a parent booking three children answers once. One answer per child (Individual tickets with Collect ticket fields per guest) is Pro, and each child then needs their own email address.', 'free'],
+            ['A retreat or camp with a price', 'The church weekend away, the youth camp, a marriage course with a meal.', 'Ticket types with prices (adult, child, a family rate) paid into the church\'s own account, with installments through Stripe if families need to spread it.', 'A full ticketed event takes a waiting list on Pro, and the next family in line is told when a place comes back.', 'pro'],
+            ['A concert with a retiring collection', 'The choir\'s summer concert, an organ recital, a benefit night.', 'A free ticket type with Ask for a donation at checkout switched on. The ticket reads Free, donations welcome, and each person gives what they choose.', 'Donations are taken through Stripe, PayPal, Payfast or Razorpay, not on free registration and not in cash.', 'pro'],
+            ['A volunteer rota', 'Stewards, coffee, the welcome team, the crèche.', 'Not this tool. Event Schedule has no rota, shift slots or volunteer reminders, and a sign-up on the public calendar is open to anyone who finds it.', 'Keep the rota where it lives now, a spreadsheet or a rota app, and put the services it serves on the calendar.', null],
+        ];
+    @endphp
+    <section id="signups" class="es-nave-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">04</div>
+                <p class="es-nave-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Sign-ups, set up right</p>
+                <h2 class="es-balance es-nave-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Retreats, suppers and holiday clubs: <span class="es-nave-grad">choose the sign-up first</span>.
+                </h2>
+                <p class="es-nave-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most church sign-ups go wrong before anyone signs up: a form that forgot to ask
+                    about allergies, a limit nobody worked out, or a children's week where parents
+                    have to register five times. Match the event to one of these six shapes before
+                    you build it.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                @foreach ($signupShapes as [$shapeTitle, $shapeFor, $shapeUse, $shapeWatch, $shapePlan])
+                    <div class="es-nave-card flex flex-col p-6" data-reveal>
+                        <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-nave-ink text-lg font-bold">{{ $shapeTitle }}</h3>
+                            @if ($shapePlan === 'free')
+                                <span class="es-nave-plan es-nave-plan-free">Free plan</span>
+                            @elseif ($shapePlan === 'pro')
+                                <span class="es-nave-plan es-nave-plan-pro">Pro plan</span>
+                            @endif
+                        </div>
+                        <p class="es-nave-muted text-sm italic">{{ $shapeFor }}</p>
+                        <p class="es-nave-ink mt-4 text-sm">{{ $shapeUse }}</p>
+                        <p class="es-nave-muted es-nave-rule mt-auto border-t pt-4 text-xs">{{ $shapeWatch }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-10 grid gap-4 lg:grid-cols-2">
+                <div class="es-nave-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <h3 class="es-nave-ink text-lg font-bold">Work the limit back from your leaders</h3>
+                    <p class="es-nave-muted mt-2 text-sm">
+                        A children's event is full when you run out of checked adults, not chairs.
+                        Take the ratio from your own safeguarding policy; the one below is only an
+                        example.
+                    </p>
+                    <div class="mt-5 space-y-2">
+                        @foreach ([
+                            ['Leaders who said yes', '9'],
+                            ['Kept off the ratio (welcome desk, first aid)', '- 2'],
+                            ['Leaders with a group', '7'],
+                            ['Your policy\'s ratio, ages 5 to 10', '1 : 8'],
+                            ['Limit to set (Registration Limit, or the ticket type\'s Quantity)', '7 &times; 8 = 56'],
+                        ] as [$calcLabel, $calcValue])
+                            <div class="es-nave-sub flex items-baseline justify-between gap-3 px-3.5 py-2.5">
+                                <span class="es-nave-ink min-w-0 flex-1 text-sm">{{ $calcLabel }}</span>
+                                <span class="es-nave-accent es-nave-num shrink-0 text-sm font-bold">{!! $calcValue !!}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-nave-muted mt-auto pt-5 text-xs">
+                        Not 72. A limit set on nine leaders is a limit you break the morning one of
+                        them is ill. If two more volunteers come forward, raise it then.
+                    </p>
+                </div>
+
+                <div class="es-nave-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <h3 class="es-nave-ink text-lg font-bold">One week, one sign-up</h3>
+                    <ul class="mt-4 space-y-3">
+                        @foreach ([
+                            ['Children come every day', 'Make it one Multi-day event from Monday to Friday, with the daily times in the description. A family signs up once for the week.'],
+                            ['Families pick their days', 'Make it a daily recurring event. Each morning keeps its own count against the limit, so Wednesday can be full while Thursday still has room.'],
+                            ['Somebody cannot come after all', 'The reminder sent before the date carries a Can\'t make it? link on a free place, and cancelling frees it for the next family.'],
+                            ['The place goes to the next in line', 'A full free registration date takes a waiting list on every plan (on tickets, free ones included, the waiting list is Pro). Each person on it gets a 24-hour head start on a returned place before the next is told.'],
+                        ] as [$weekTitle, $weekBody])
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="es-nave-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="text-sm"><span class="es-nave-ink font-semibold">{{ $weekTitle }}.</span> <span class="es-nave-muted">{{ $weekBody }}</span></span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="es-nave-muted mt-auto pt-5 text-xs">
+                        Write the practical details (what to bring, where to drop off, pick-up time) in
+                        the Registration notes, called Ticket notes on an event with tickets. They go into every confirmation email and onto each
+                        ticket, so you are not answering the same three questions all week.
+                    </p>
+                </div>
+            </div>
+
+            <p class="es-nave-muted mt-8 text-center text-sm" data-reveal>
+                Every setting named here is in the <x-link href="{{ marketing_url('/docs/tickets') }}#registration">tickets and registration guide</x-link>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Who sees what (05)                                        -->
+    <!-- ============================================================ -->
+    <section id="private" class="es-nave-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">05</div>
+                <p class="es-nave-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who sees what</p>
+                <h2 class="es-balance es-nave-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    "Private" means three things <span class="es-nave-grad">in a church office</span>.
+                </h2>
+                <p class="es-nave-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Not confirmed yet. For the leaders only. For the congregation but not the whole
+                    internet. Each is its own visibility setting on the event. One thing to know
+                    first: there is no congregation login. Where the settings say "members", they
+                    mean the people on the schedule's team.
+                </p>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">
+                @foreach ([
+                    ['Public', 'free', 'Services, groups that welcome newcomers, the big dates.', 'On the calendar, in the embed on your website, in the calendar feed people subscribe to and in the digest of new dates.'],
+                    ['Draft', 'free', 'The Pentecost picnic before the date is fixed.', 'Seen only by the schedule\'s team. Once saved it gets a Publish button, and nothing reaches the feed or the digest until you press it.'],
+                    ['Internal', 'ent', 'The church council, the elders\' meeting, the staff away day.', 'Team only, for good, with no Publish button. It suits a church whose leaders are all on the schedule\'s team, which beyond one member is Enterprise.'],
+                    ['Unlisted', 'ent', 'The annual members\' meeting, a confirmation class, a bereavement group.', 'Missing from the calendar and the feed, but open to anyone with the link, behind a password if you set one. Send the link in the notices email or a newsletter.'],
+                ] as [$visName, $visPlan, $visFor, $visDoes])
+                    <div class="es-nave-card flex flex-col p-6" data-reveal>
+                        <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-nave-ink text-lg font-bold">{{ $visName }}</h3>
+                            @if ($visPlan === 'free')
+                                <span class="es-nave-plan es-nave-plan-free">Free plan</span>
+                            @else
+                                <span class="es-nave-plan es-nave-plan-ent">Enterprise</span>
+                            @endif
+                        </div>
+                        <p class="es-nave-muted text-sm italic">{{ $visFor }}</p>
+                        <p class="es-nave-muted mt-3 text-sm">{{ $visDoes }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-nave-card mt-8 p-6 sm:p-8" data-reveal="panel">
+                <h3 class="es-nave-ink text-lg font-bold">What never belongs on a public church calendar</h3>
+                <ul class="mt-4 grid gap-x-8 gap-y-3 md:grid-cols-2">
+                    @foreach ([
+                        ['A home address', 'A house group that meets in someone\'s living room goes on as "Thursday house group, Northfield" with "ask the office for the address" in the description, not the street and number.'],
+                        ['Children by name', 'Write "Year 6 leavers\' service", never a list of the children taking part, and keep photos of children off youth events unless every family has agreed.'],
+                        ['A sub-schedule called Leaders', 'A sub-schedule sorts events, it does not hide them. An event filed under Leaders is still public unless its own visibility says otherwise.'],
+                        ['Pastoral detail', 'A funeral can go on the calendar so the parish can come. The family\'s circumstances, the hospital and the illness do not.'],
+                    ] as [$neverTitle, $neverBody])
+                        <li class="flex items-start gap-3">
+                            <svg aria-hidden="true" class="es-nave-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <span class="text-sm"><span class="es-nave-ink font-semibold">{{ $neverTitle }}.</span> <span class="es-nave-muted">{{ $neverBody }}</span></span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Reaching people (06)                                      -->
     <!-- ============================================================ -->
     <section id="reach" class="es-nave-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-14 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">04</div>
+                    <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">06</div>
                     <p class="es-nave-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Reaching people</p>
                     <h2 class="es-balance es-nave-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Past the people <span class="es-nave-grad">who read the notices</span>.
@@ -751,10 +935,10 @@
                 <div class="space-y-3" data-reveal-group="80">
                     @foreach ([
                         ['The church website', 'Paste the embeddable calendar into the site you already have. It updates when the calendar does, so nobody has to edit the web page again.', 'Free'],
-                        ['Their own phone calendar', 'Members subscribe to the live calendar feed once, from any event\'s Add to Calendar menu or the sign-up panel, and a moved date updates itself.', 'Free'],
+                        ['Their own phone calendar', 'Members subscribe to the live calendar feed once, from the Add to Calendar menu of an event that takes no sign-ups, or from the Stay up to date panel on the church page, and a moved date updates itself.', 'Free'],
                         ['An email when new dates go up', 'Anyone can leave an email address on the church page and confirm it. They are then sent a short digest of new dates, at most one every 72 hours.', 'Free'],
                         ['The notice board and the pew sheet', 'Download the schedule\'s QR code and print it. A phone pointed at the board opens the live calendar.', 'Free'],
-                        ['The projector slide', 'Generate a graphic of the coming week\'s events to show before the service or post on social media.', 'Free'],
+                        ['The projector slide', 'The Events graphic in the Actions menu lays the flyers of your next events into one image, with a ready-to-paste list of the same dates, to show before the service or post on social media. Only events with a flyer are drawn.', 'Free'],
                         ['A second language', 'Nominate one other language, and event names and descriptions are translated by AI with a language switch on the page.', 'Free'],
                     ] as [$t, $d, $plan])
                         <div class="es-nave-card es-nave-hover p-4" data-reveal>
@@ -771,12 +955,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. The hall and the office (05)                              -->
+    <!-- 8. The hall and the office (07)                              -->
     <!-- ============================================================ -->
     <section id="requests" class="es-nave-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">05</div>
+                <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">07</div>
                 <p class="es-nave-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The hall and the office</p>
                 <h2 class="es-balance es-nave-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Requests through the page, <span class="es-nave-grad">not the answerphone</span>.
@@ -832,12 +1016,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Who it is for (06)                                        -->
+    <!-- 9. Who it is for (08)                                        -->
     <!-- ============================================================ -->
     <section id="who" class="es-nave-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">06</div>
+                <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">08</div>
                 <p class="es-nave-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
                 <h2 class="es-balance es-nave-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Any congregation <span class="es-nave-grad">with a week to share</span>.
@@ -905,7 +1089,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. How it works (07, dark band)                              -->
+    <!-- 10. How it works (09, dark band)                              -->
     <!-- ============================================================ -->
     <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-nave-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -915,7 +1099,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">07</div>
+                    <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">09</div>
                     <p class="es-nave-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         An afternoon in September, <span class="es-nave-grad">then the whole year</span>.
@@ -1023,12 +1207,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 11. FAQ (08)                                                 -->
+    <!-- 13. FAQ (10)                                                 -->
     <!-- ============================================================ -->
     <section id="faq" class="es-nave-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">08</div>
+                <div class="es-nave-chip mb-6" data-reveal aria-hidden="true">10</div>
                 <p class="es-nave-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-nave-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked at <span class="es-nave-grad">the church council</span>.

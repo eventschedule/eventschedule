@@ -349,11 +349,11 @@
             ],
             [
                 'q' => 'Can some events stay private to staff?',
-                'a' => 'A Draft event stays members-only until you publish it, on every plan, which is how most schools hold next term\'s dates before they are confirmed. Two more options are Enterprise: Internal events are for members only and never go public, and Unlisted events are hidden from the calendar but open to anyone with the direct link, with an optional password, which suits a staff training day or a page for one class\'s families.',
+                'a' => 'A Draft event is seen only by the people on the schedule\'s team until you publish it, on every plan, which is how most schools hold next term\'s dates before they are confirmed. Two more options are Enterprise: Internal events are for the team only and never go public, and Unlisted events are hidden from the calendar but open to anyone with the direct link, with an optional password, which suits a staff training day or a page for one class\'s families.',
             ],
             [
                 'q' => 'Do families have to download an app or make an account?',
-                'a' => 'No. Anyone can open the calendar in a browser, on the school website where you embed it, or from a link in your newsletter. Families who want dates in their own calendar subscribe to its live feed from the Add to Calendar menu, which costs no email address at all. Families who want to hear about new dates leave an email address and confirm it, and from then on they get a short digest when you add events, at most one every 72 hours.',
+                'a' => 'No. Anyone can open the calendar in a browser, on the school website where you embed it, or from a link in your newsletter. Families who want dates in their own calendar subscribe to its live feed, offered in the Stay up to date panel and in the Add to Calendar menu of events that take no sign-ups, which costs no email address at all. Families who want to hear about new dates leave an email address and confirm it, and from then on they get a short digest when you add events, at most one every 72 hours.',
             ],
             [
                 'q' => 'How do we sell tickets for the school play?',
@@ -367,13 +367,31 @@
                 'q' => 'Many of our families read another language. Can the calendar help?',
                 'a' => 'Yes. A schedule is written in one language and can nominate one other language to translate into. Event names and descriptions are translated by AI, and a language switch appears on the public page. It is free, and it is one extra language per schedule rather than all of them at once.',
             ],
+            [
+                'q' => 'What should be on a school event calendar?',
+                'a' => 'The first and last day of each term, every holiday and closure day as an event in its own right, the regular clubs and practices with their days and times, fixtures with the venue for away matches, trips, performances, parent consultations and PTA events. Each entry should say who it is for, such as Year 4 or the under-11s netball team, and anything families must do: sign up, reply by a date, bring a packed lunch. Keep dates nobody has agreed yet off the public calendar until they are confirmed, because families book holidays around what they see.',
+            ],
+            [
+                'q' => 'Can parents subscribe to just their child\'s class or team?',
+                'a' => 'Not as a separate feed. The live calendar feed covers all of the schedule\'s public events, with a recurring event\'s dates listed for the next 90 days. For one class or one team, share that sub-schedule\'s own link, which a parent can bookmark or add to their home screen, and embed it on the class page of the school website. A trust with several schools, or a school whose infant and junior sites never mix, can run one schedule for each, and then every schedule has a feed of its own.',
+            ],
+            [
+                'q' => 'How do we add the calendar to the school website?',
+                'a' => 'Open the schedule in the admin panel, choose Embed Schedule from its Actions menu, pick a theme and a layout, and copy the Iframe Code into the web page. It updates itself, so the website is never behind the calendar. For a year group or club page, embed that sub-schedule\'s own address with ?embed=true added. A sidebar narrower than about 768 pixels shows the day-by-day list rather than the month grid, so give the month view a full-width column. Embedding is on every plan; the Free plan places a small Powered by Event Schedule line under the frame, which Pro removes.',
+            ],
+            [
+                'q' => 'Can we collect permission slips and medical details for a trip?',
+                'a' => 'You can collect the answers, free: give the trip a free ticket type with questions of its own, such as a Yes/No for consent and fields for allergies and an emergency contact. Those are asked once per order. Separate answers for each child in one booking, and questions on a free registration form, are Pro, and each child then needs their own email address. The answers sit on each order on the Sales page, and the CSV export is Pro. An online tick box is a record of what a parent chose, not a signature, so a school whose policy requires a signed form should keep that and use the calendar for numbers and logistics.',
+            ],
         ];
 
         $dotSections = [
             ['top', 'The term'],
             ['clubs', 'Clubs and fixtures'],
+            ['year', 'Term dates'],
             ['home', 'At home'],
             ['show', 'The show'],
+            ['fixtures', 'Fixtures and forms'],
             ['parents', 'Parent evenings'],
             ['strands', 'Every strand'],
             ['who', 'Who it is for'],
@@ -557,12 +575,77 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. The calendar at home (02)                                 -->
+    <!-- 3. The school year, entered properly (02)                    -->
+    <!-- ============================================================ -->
+    <section id="year" class="es-chalk-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Term dates, entered properly</p>
+                <h2 class="es-balance es-chalk-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Put the closures on the calendar, <span class="es-chalk-grad">not only in the clubs</span>.
+                </h2>
+                <p class="es-chalk-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Taking half term out of every club is half the job. An excluded date simply
+                    vanishes: the Tuesday club is not there that week, and nothing on the calendar
+                    says why. A family arranging childcare needs the closure itself, as an event of
+                    its own. Here is how each kind of date in a school year is best entered.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                @foreach ([
+                    ['First and last day of term', 'A one-day event each, named so it makes sense on its own in a phone: "Autumn term starts, all years".', 'It is the date every family looks up first, and the one a PDF gets wrong after a reprint.'],
+                    ['Half term and holidays', 'One Multi-day event from Monday to Friday called "Half term: school closed", then the same dates added to Exclude Dates on each club.', 'The event tells families. The exclusions stop a club appearing on a day nobody is in.'],
+                    ['Training days', 'A one-day event of its own: "School closed to pupils, staff training".', 'Excluding the date from a club does not tell anyone the whole school is shut.'],
+                    ['Weekly clubs and practices', 'Recurring, Weekly on its day, with Recurring End set On Date to the last day of term and the closures in Exclude Dates.', 'Next term, clone it, move the dates and you are done.'],
+                    ['Mocks and exam weeks', 'A Multi-day event filed under that year group\'s sub-schedule.', 'Year 11 families find it on their link, and reception parents who use their own link do not scroll past it.'],
+                    ['Dates still being agreed', 'Saved as a Draft, which only the schedule\'s team can see.', 'Pressing Publish puts it on the public calendar and into the feed families subscribe to.'],
+                ] as [$yearItem, $yearHow, $yearWhy])
+                    <div class="es-chalk-card flex flex-col p-6" data-reveal>
+                        <h3 class="es-chalk-ink text-lg font-bold">{{ $yearItem }}</h3>
+                        <p class="es-chalk-ink mt-3 text-sm">{{ $yearHow }}</p>
+                        <p class="es-chalk-muted es-chalk-rule mt-auto border-t pt-4 text-xs">{{ $yearWhy }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="es-chalk-card mt-8 p-6 sm:p-8" data-reveal="panel">
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 class="es-chalk-ink text-lg font-bold">Two things the office should know before September</h3>
+                    <span class="es-chalk-plan es-chalk-plan-free">Free plan</span>
+                </div>
+                <div class="mt-4 grid gap-6 md:grid-cols-2">
+                    <p class="es-chalk-muted text-sm">
+                        <span class="es-chalk-ink font-semibold">The office's own calendar shows a club once.</span>
+                        When the schedule syncs to the school's Google or Outlook calendar, a recurring
+                        club arrives there as a single entry on its first date, not as a weekly
+                        appointment. That is fine for the office. Families who want every date should
+                        subscribe to the live feed instead, which lists each date for the next 90 days.
+                    </p>
+                    <p class="es-chalk-muted text-sm">
+                        <span class="es-chalk-ink font-semibold">A subscribed phone is not instant.</span>
+                        The feed is cached for up to an hour, and calendar apps then fetch it when they choose,
+                        which for Google Calendar can be several hours. It is right for term dates
+                        and fixtures set a week ahead. A change made at lunchtime for that afternoon
+                        still needs a message home.
+                    </p>
+                </div>
+                <p class="es-chalk-muted mt-5 text-xs">
+                    Every frequency, end condition and exclusion is described in the
+                    <x-link href="{{ marketing_url('/docs/creating-events') }}#recurring">recurring events guide</x-link>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The calendar at home (03)                                 -->
     <!-- ============================================================ -->
     <section id="home" class="es-chalk-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                 <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The calendar at home</p>
                 <h2 class="es-balance es-chalk-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     On the fridge, <span class="es-chalk-grad">in the phone</span>.
@@ -576,7 +659,7 @@
 
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="90">
                 @foreach ([
-                    ['Subscribe once', 'Families add the school\'s live calendar feed from the Add to Calendar menu. New dates and moved dates arrive on their own, and it costs them no email address.'],
+                    ['Subscribe once', 'Families add the school\'s live calendar feed from the Stay up to date panel on its page, or from the Add to Calendar menu of any event that takes no sign-ups. New and moved dates then arrive on their own, and it costs them no email address.'],
                     ['On the school website', 'Paste one embed code into the page you already have, and the calendar there is always the current one. No web team needed for a date change.'],
                     ['In the office calendar', 'Two-way sync with Google Calendar, Outlook and CalDAV, so the calendar staff already use and the public one stay the same.'],
                     ['In the family\'s language', 'Nominate one other language and event names and descriptions are translated for you, with a switch on the public page.'],
@@ -597,12 +680,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. The show (03)                                             -->
+    <!-- 5. The show (04)                                             -->
     <!-- ============================================================ -->
     <section id="show" class="es-chalk-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                 <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The show, the trip, the fair</p>
                 <h2 class="es-balance es-chalk-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Count the seats <span class="es-chalk-grad">before the night</span>.
@@ -625,9 +708,9 @@
                         @foreach ([
                             'Families register instead of paying, and the sign-up stops when the places run out.',
                             'The capacity is counted separately for each date, so two performances are two counts.',
-                            'Ask for each guest\'s name, so a trip list names every child rather than "4 places".',
+                            'Turn on Individual tickets and each guest gives a name, so a trip list names every child rather than "4 places" (each guest needs their own email address).',
                             'A waitlist for a full free evening, offered to the next family when someone drops out.',
-                            'Every registration carries a QR code, and scanning it at the door works on any plan.',
+                            'Every registration carries a QR code the door scanner confirms on any plan. It keeps no tally of who arrived, so a trip register you need to tick off is better run as free tickets, where each scan is recorded.',
                         ] as $point)
                             <li class="flex items-start gap-3">
                                 <svg aria-hidden="true" class="es-chalk-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -668,7 +751,80 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Parent evenings (04)                                      -->
+    <!-- 6. Fixtures and forms (05)                                   -->
+    <!-- ============================================================ -->
+    <section id="fixtures" class="es-chalk-rule scroll-mt-24 border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Fixtures, trips and the forms</p>
+                <h2 class="es-balance es-chalk-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Rained off at noon. <span class="es-chalk-grad">Replies in by Friday</span>.
+                </h2>
+                <p class="es-chalk-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Sports fixtures and trips are where a school calendar earns its keep, and where
+                    it most often lets families down: a match moved on the day, or a trip that needs
+                    an answer from every child before the coach is booked.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+                <div class="es-chalk-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-chalk-ink text-lg font-bold">A season of fixtures</h3>
+                        <span class="es-chalk-plan es-chalk-plan-free">Free plan</span>
+                    </div>
+                    <p class="es-chalk-muted mb-5 text-sm">Six habits that keep the sports page right.</p>
+                    <ul class="space-y-3">
+                        @foreach ([
+                            ['One event per match', 'The opponent and the ground change every week, so a season is a run of single events, not one recurring event. Enter the first, then clone it and change the date, the opponent and the venue.'],
+                            ['Away is another address', 'Set the venue to the other school, and families see the right place and its map on the event page.'],
+                            ['A link per team', 'File each fixture under its team\'s sub-schedule, so the under-11s\' parents open a page of under-11s matches.'],
+                            ['When it is called off', 'Choose Cancel event from the Actions menu. The event page then says it is cancelled, it leaves the calendar feed, and anyone who registered for it is told (on eventschedule.com, once the school\'s own email settings are connected).'],
+                            ['When it moves', 'Change the date or time of a one-off fixture and saving asks whether to notify the people who registered, with room for a short note.'],
+                            ['When it is today', 'A phone that subscribed to the feed can take hours to notice. For a same-day change, send the message home as well.'],
+                        ] as [$fixTitle, $fixBody])
+                            <li class="es-chalk-sub p-3.5">
+                                <p class="es-chalk-ink text-sm font-semibold">{{ $fixTitle }}</p>
+                                <p class="es-chalk-muted mt-1 text-sm">{{ $fixBody }}</p>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="es-chalk-card flex flex-col p-6 sm:p-7" data-reveal="panel">
+                    <h3 class="es-chalk-ink mb-1 text-lg font-bold">Trip forms, cheapest first</h3>
+                    <p class="es-chalk-muted mb-5 text-sm">Pick the first row that asks everything the trip leader needs.</p>
+                    <div class="space-y-2.5">
+                        @foreach ([
+                            ['Places, a name for every child, a phone number', 'Free registration with a Registration Limit, Individual tickets on, and Ask for phone number. Each child gets a name and a place, but each needs a different email address, so it suits pupils who book themselves better than a parent booking siblings.', 'es-chalk-plan-free', 'Free'],
+                            ['A consent question and an emergency contact', 'A free ticket type called Pupil, with its own questions: a Yes/No for consent and a Text field for the contact number. Asked once per order.', 'es-chalk-plan-free', 'Free'],
+                            ['Separate answers for each child booked together', 'Individual tickets with Collect ticket fields per guest, so twins each get their own consent and contact. Each guest in the booking needs a different email address.', 'es-chalk-plan-pro', 'Pro'],
+                            ['Questions on the registration form itself', 'Custom Fields (Per Order) on a free registration event.', 'es-chalk-plan-pro', 'Pro'],
+                            ['The residential paid in monthly parts', 'A priced ticket with monthly installments through Stripe: 2 to 12 equal payments, the first at checkout.', 'es-chalk-plan-pro', 'Pro'],
+                        ] as [$formNeed, $formHow, $formClass, $formTier])
+                            <div class="es-chalk-sub p-3.5">
+                                <div class="flex items-baseline justify-between gap-3">
+                                    <p class="es-chalk-ink min-w-0 flex-1 text-sm font-semibold">{{ $formNeed }}</p>
+                                    <span class="es-chalk-plan {{ $formClass }} shrink-0">{{ $formTier }}</span>
+                                </div>
+                                <p class="es-chalk-muted mt-1 text-sm">{{ $formHow }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-chalk-muted mt-auto pt-5 text-xs">
+                        Answers sit on each order on the Sales page; exporting them as a CSV is Pro. A
+                        box ticked online records what a parent chose, not a signature, so if your
+                        trips policy asks for a signed form, keep it and use the calendar for the
+                        numbers and the logistics.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Parent evenings (06)                                      -->
     <!-- ============================================================ -->
     <section id="parents" class="es-chalk-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -705,7 +861,7 @@
                 </div>
 
                 <div class="order-1 lg:order-2">
-                    <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                     <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Parent evenings</p>
                     <h2 class="es-balance es-chalk-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         No more <span class="es-chalk-grad">slips in book bags</span>.
@@ -742,12 +898,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Every strand, and who hears (05)                          -->
+    <!-- 8. Every strand, and who hears (07)                          -->
     <!-- ============================================================ -->
     <section id="strands" class="es-chalk-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                 <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Every strand</p>
                 <h2 class="es-balance es-chalk-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Year 6 does not need <span class="es-chalk-grad">the under-9s fixtures</span>.
@@ -764,7 +920,7 @@
                     ['Year groups', 'Trips, assemblies and the Year 6 residential on the pages those families actually open.'],
                     ['Clubs', 'Every after-school club on one strand, so a parent choosing for next term sees them all side by side.'],
                     ['Sports teams', 'Home and away fixtures for each team, with the venue on a map for the ones at another school.'],
-                    ['The PTA', 'Fairs, discos and quiz nights on the association\'s own strand, with its tickets paid into its own account.'],
+                    ['The PTA', 'Fairs, discos and quiz nights on the association\'s own strand. If the PTA banks its takings separately, give it a schedule of its own run from its own login (priced tickets there need its own Pro plan), because ticket money goes to the payment account of whoever made the event. Its events then show on the school\'s calendar only if they are listed there too.'],
                 ] as [$t, $d])
                     <div class="es-chalk-card es-chalk-hover flex flex-col p-6" data-reveal>
                         <h3 class="es-chalk-ink text-lg font-bold">{{ $t }}</h3>
@@ -797,7 +953,7 @@
                     <p class="es-chalk-muted mb-5 text-sm">Worth knowing before the first staff meeting.</p>
                     <div class="space-y-2.5">
                         @foreach ([
-                            ['Draft events, members-only until announced', 'es-chalk-plan-free', 'Free'],
+                            ['Draft events, seen by the team only until announced', 'es-chalk-plan-free', 'Free'],
                             ['One team member on the schedule', 'es-chalk-plan-free', 'Free'],
                             ['More staff, as admins or read-only viewers', 'es-chalk-plan-ent', 'Enterprise'],
                             ['Internal events that never go public', 'es-chalk-plan-ent', 'Enterprise'],
@@ -809,19 +965,19 @@
                             </div>
                         @endforeach
                     </div>
-                    <p class="es-chalk-muted mt-auto pt-5 text-xs">A viewer sees no sales but can still scan tickets at the door, which is how a teacher on the hall doors helps without seeing the takings.</p>
+                    <p class="es-chalk-muted mt-auto pt-5 text-xs">A viewer sees no sales but can still scan tickets at the door, which is how a teacher on the hall doors helps without seeing the takings. And a sub-schedule called Staff hides nothing: privacy is set on each event, never by the strand it is filed under.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Who it is for (06)                                        -->
+    <!-- 9. Who it is for (08)                                        -->
     <!-- ============================================================ -->
     <section id="who" class="es-chalk-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>08</span></div>
                 <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
                 <h2 class="es-balance es-chalk-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     From the reception class <span class="es-chalk-grad">to the lecture hall</span>.
@@ -885,7 +1041,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. How it works (07, dark band)                              -->
+    <!-- 10. How it works (09, dark band)                              -->
     <!-- ============================================================ -->
     <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
         <div class="es-chalk-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -895,7 +1051,7 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>09</span></div>
                     <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Done in the first week, <span class="es-chalk-grad">right until the holidays</span>.
@@ -1003,12 +1159,12 @@
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 11. FAQ (08)                                                 -->
+    <!-- 13. FAQ (10)                                                 -->
     <!-- ============================================================ -->
     <section id="faq" class="es-chalk-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <div class="es-chalk-chip mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <p class="es-chalk-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
                 <h2 class="es-balance es-chalk-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Asked in <span class="es-chalk-grad">the school office</span>.
