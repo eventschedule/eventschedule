@@ -194,6 +194,11 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `visitors`, `page_views`, `docs_visitors`, `docs_page_views`, `commercial_visitors`,
     `pricing_visitors`, `pricing_views`;
   - `signup_views`, `signup_code_requests`, `signup_code_verified`, `signup_code_invalid`;
+  - `signup_google_starts` (schema 27): visitors who pressed "Continue with Google" on the sign-up
+    page (not on /login), one per day, with the code counters' bot filters. Beside the code
+    counters, not below them: Google skips the code. `signup_views` minus this and
+    `signup_code_requests` is roughly the people who left the page without trying either way
+    (roughly, because one person can do both). Null before 2026-11-12;
   - `guest_submit_views`, `guest_submit_code_requests`, `guest_submit_submissions`: the public
     "Submit your event" page (`event.guest_submit`, the request form of venue and curator
     schedules). One visitor per day each, with the sign-up counters' bot filters.
@@ -468,6 +473,7 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `event_edits_90d` | Events they created or edited in the last 90 days, bucketed; system edits (imports, syncs) excluded |
 | `setup_guide` | How far through the setup guide they got (schema 13): `started`, `live` (their schedule went live with the guide watching), `shared` (copied the schedule's address), `embedded` (copied the embed code), `finished`. The furthest one reached. Null for anyone who never had a guide: everyone who signed up before it shipped, and anyone whose first schedule was not saved through the wizard (guest-submit, a claim, the API, a restore, a transfer) |
 | `setup_guide_hidden` | They hid the guide and have not brought it back. False when `setup_guide` is null |
+| `arrival_intent` | Why they came to sign up, from the link they pressed (schema 27, from 2026-11-12): `sell` (a ticketing or selling page: /features/ticketing, /compare and the alternative pages, the payment, fee and import pages, the homepage's Tickets beat, the fee calculator), `pro` / `enterprise` (that plan's button on /pricing), `guest_page` (the "Create your own" card on a schedule's public page). Null for every other door and for everyone who signed up before it. Rides the link, so it needs no consent and is not lost to the edge cache |
 | `suggestions_off` | They turned suggestions off for the whole account (schema 13) and have not turned them back on: no setup guide, no next steps on the dashboard, no "List on the network" prompt. It says nothing about email: from 2026-10-06 the reminder emails follow "Email updates" alone (for the one day before that, this switch held them too). Independent of `setup_guide_hidden`, and possible for an account that never had a guide |
 
 ### `schedules` (one row per owned, non-deleted, non-demo schedule)
@@ -626,6 +632,11 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **27** (2026-11-12)
+  - **`signups.arrival_intent`:** why an organizer came to sign up, from the link they pressed
+    (`sell`, `pro`, `enterprise`, `guest_page`, or null). Appended as the last column.
+  - **`traffic[].signup_google_starts`:** visitors who pressed "Continue with Google" on the
+    sign-up page. Null before 2026-11-12.
 - **26** (2026-11-07)
   - **New section `signup_sources`:** signups per day by intent, referrer channel, referrer
     domain, utm source and landing path, for the last 90 days. The signup rows still carry only

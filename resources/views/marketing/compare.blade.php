@@ -384,7 +384,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </a>
-                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
+                <a href="{{ app_url('/sign_up?intent=sell') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
                     Start for free
                 </a>
             </div>
@@ -663,7 +663,7 @@
                     <div class="flex flex-col rounded-3xl border border-blue-200 bg-blue-50/60 p-6 dark:border-blue-400/20 dark:bg-blue-500/[0.06] sm:p-8">
                         <h3 class="mb-3 text-lg font-bold text-gray-900 dark:text-white">Where Event Schedule fits</h3>
                         <p class="mb-6 text-gray-700 dark:text-gray-300">{{ $m['fit'] }}</p>
-                        <a href="{{ app_url('/sign_up') }}" class="group mt-auto inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-all hover:gap-3 dark:text-blue-400">
+                        <a href="{{ app_url('/sign_up?intent=sell') }}" class="group mt-auto inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-all hover:gap-3 dark:text-blue-400">
                             Start for free
                             <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
@@ -1066,7 +1066,7 @@
                         Free forever on the free plan, and no platform fees on any of them.
                     </p>
                     <div class="flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row">
-                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                        <a href="{{ app_url('/sign_up?intent=sell') }}" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                             <span class="relative z-10 flex items-center gap-2">
                                 Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

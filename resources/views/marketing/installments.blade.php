@@ -200,7 +200,7 @@
                             A course, a retreat, a weekend announced eight months out. Let the buyer pay for it monthly: the first payment at checkout, the ticket valid straight away, and the rest charged to the same card on dates they agreed to before they agreed to anything.
                         </p>
                         <div class="mt-8 flex flex-wrap gap-3" data-reveal style="--reveal-delay: 0.15s;">
-                            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#182f70]">
+                            <a href="{{ app_url('/sign_up?intent=sell') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#182f70]">
                                 Start for free
                             </a>
                             <a href="{{ marketing_url('/docs/tickets') }}#installments" class="es-inst-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#1e3a8a] dark:border-white/15">
@@ -610,7 +610,7 @@
                                     class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                                 <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                             </div>
-                            <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg bg-white px-8 py-4 text-lg font-semibold text-[#0d1017] transition-colors hover:bg-gray-100">
+                            <a href="{{ app_url('/sign_up?intent=sell') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg bg-white px-8 py-4 text-lg font-semibold text-[#0d1017] transition-colors hover:bg-gray-100">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

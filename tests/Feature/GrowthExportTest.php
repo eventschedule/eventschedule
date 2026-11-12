@@ -2060,7 +2060,9 @@ class GrowthExportTest extends TestCase
     {
         $referrer = $this->createOwner();
         $user = $this->createOwner();
-        DB::table('users')->where('id', $user->id)->update(['hero_variant' => 'sell', 'referred_by_user_id' => $referrer->id]);
+        DB::table('users')->where('id', $user->id)->update(['hero_variant' => 'sell', 'arrival_intent' => 'pro', 'referred_by_user_id' => $referrer->id]);
+        // A value outside our own vocabulary is never exported.
+        DB::table('users')->where('id', $referrer->id)->update(['arrival_intent' => 'a@b.co']);
 
         foreach (range(1, 3) as $n) {
             DB::table('audit_logs')->insert(['user_id' => $user->id, 'action' => AuditService::AUTH_LOGIN,
@@ -2078,6 +2080,9 @@ class GrowthExportTest extends TestCase
         $row = collect($data['signups']['rows'])->firstWhere($i['uid'], $uid);
 
         $this->assertSame('sell', $row[$i['hero_variant']]);
+        $this->assertSame('pro', $row[$i['arrival_intent']]);
+        $referrerUid = 'u:'.substr(hash_hmac('sha256', (string) $referrer->id, (string) config('app.key')), 0, 12);
+        $this->assertNull(collect($data['signups']['rows'])->firstWhere($i['uid'], $referrerUid)[$i['arrival_intent']]);
         $this->assertTrue($row[$i['referred']]);
         $this->assertSame('2-5', $row[$i['logins_90d']], 'three recent sign-ins; the one 120 days ago is outside');
         $this->assertSame('0', $row[$i['event_edits_90d']], 'a system edit is not the owner doing anything');

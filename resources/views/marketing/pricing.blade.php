@@ -1170,10 +1170,10 @@
                     </div>
 
                     <div class="pr-cta">
-                        <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary">Start free trial</a>
+                        <a href="{{ app_url('/sign_up?intent=pro') }}" class="hp-btn hp-btn-primary">Start free trial</a>
                         <div class="pr-fine">
-                            <p class="bt-note-year">{{ $trialDays }} days free, then {{ plan_price($proYearly) }} a year. Cancel any time and the schedule stays live.</p>
-                            <p class="bt-note-month">{{ $trialDays }} days free, then {{ plan_price($proMonthly) }} a month. Cancel any time and the schedule stays live.</p>
+                            <p class="bt-note-year">{{ $trialDays }} days free, then {{ plan_price($proYearly) }} a year. Sign up free, start the trial from your schedule's Plan tab, and cancel any time: the schedule stays live.</p>
+                            <p class="bt-note-month">{{ $trialDays }} days free, then {{ plan_price($proMonthly) }} a month. Sign up free, start the trial from your schedule's Plan tab, and cancel any time: the schedule stays live.</p>
                         </div>
                     </div>
 
@@ -1214,8 +1214,8 @@
                     </div>
 
                     <div class="pr-cta">
-                        <a href="{{ app_url('/sign_up') }}" class="hp-btn pr-btn-ent">Start free trial</a>
-                        <p class="pr-fine">{{ $trialDays }} days free. Or selfhost, where every line below is included at no cost.</p>
+                        <a href="{{ app_url('/sign_up?intent=enterprise') }}" class="hp-btn pr-btn-ent">Start free trial</a>
+                        <p class="pr-fine">{{ $trialDays }} days free, started from your schedule's Plan tab once you sign up. Or selfhost, where every line below is included at no cost.</p>
                     </div>
 
                     <details class="plan-disc pr-holds" open>
@@ -1414,7 +1414,7 @@
                             <span data-pr-ahead-say="tie" @if (! $isTie) hidden @endif>Pro is one flat price for the month, so every ticket after this is in your favour.</span>
                             <span data-pr-ahead-say="free" @if (! $isFree) hidden @endif>Free registration, a guest list and scanning at the door are on the Free plan.</span>
                         </p>
-                        <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary">
+                        <a href="{{ app_url('/sign_up?intent=sell') }}" class="hp-btn hp-btn-primary">
                             <span data-pr-go="paid" @if ($isFree) hidden @endif>Start your free trial</span>
                             <span data-pr-go="free" @if (! $isFree) hidden @endif>Start for free</span>
                             <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

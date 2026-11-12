@@ -163,7 +163,7 @@ class PersonalDataExportService
             'profile_image_url', 'created_at', 'updated_at',
         ]);
 
-        foreach (['hero_variant', 'signup_intent', 'push_settings', 'signup_ip', 'blocked_at'] as $optional) {
+        foreach (['hero_variant', 'signup_intent', 'arrival_intent', 'push_settings', 'signup_ip', 'blocked_at'] as $optional) {
             if (\Illuminate\Support\Facades\Schema::hasColumn('users', $optional)) {
                 $row[$optional] = DB::table('users')->where('id', $user->id)->value($optional);
             }

@@ -33,10 +33,12 @@
             </div>
 
             <!-- Right side buttons -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                {{-- From sm: up only. On a phone its place goes to the sign-up button below, and
+                     Browse is the first line of the menu. --}}
                 <a
                     href="{{ marketing_url('/browse') }}"
-                    class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all {{ request()->is('*/browse') || request()->is('browse') ? 'text-blue-600 dark:text-blue-400' : '' }}"
+                    class="hidden sm:inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all {{ request()->is('*/browse') || request()->is('browse') ? 'text-blue-600 dark:text-blue-400' : '' }}"
                     aria-label="Browse events"
                 >
                     <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -111,6 +113,17 @@
                         </a>
                     @endauth
                 </div>
+
+                {{-- A phone's sign-up button. The auth block above starts at sm:, and below it the
+                     only way to sign up from about 140 marketing pages was the menu or a button
+                     the visitor had already scrolled past. Short words, because a 360px screen
+                     holds the logo, this, the theme switch and the menu button with 7px to spare.
+                     Hidden while the homepage's own bottom dock is up (hp-dock-on). --}}
+                @guest
+                <a href="{{ app_url('/sign_up') }}" class="es-auth-guest es-head-start sm:hidden inline-flex items-center whitespace-nowrap px-3 py-1.5 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-sm font-medium rounded-lg transition-all shadow-sm shadow-blue-500/25">
+                    Start free
+                </a>
+                @endguest
 
                 <!-- Mobile menu button -->
                 <button

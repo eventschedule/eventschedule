@@ -1070,6 +1070,22 @@ if (! function_exists('signup_intent_from_session')) {
     }
 }
 
+if (! function_exists('arrival_intent_from_session')) {
+    /**
+     * Why an organizer came to sign up, from the link they pressed (users.arrival_intent).
+     * RegisteredUserController::create() keeps it in the session, through Google too: `sell` from
+     * a ticketing page, `pro` / `enterprise` from a plan's button on /pricing, `guest_page` from
+     * the "Create your own" card on a schedule's public page. Re-checked here because a session
+     * value is only as good as the last thing that wrote it.
+     */
+    function arrival_intent_from_session(): ?string
+    {
+        $intent = session('signup_arrival_intent');
+
+        return in_array($intent, \App\Models\User::ARRIVAL_INTENTS, true) ? $intent : null;
+    }
+}
+
 if (! function_exists('pending_schedule_from_session')) {
     /**
      * The schedule type and name a visitor picked before signing up, as users columns.

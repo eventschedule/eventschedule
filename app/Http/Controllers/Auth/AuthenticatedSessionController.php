@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
         // register->Google path never passes through here, so its choice is preserved. The name
         // typed into a marketing page's claim box goes too, for the same reason: it would
         // otherwise name that later account's first schedule.
-        session()->forget(['signup_role_type', 'signup_schedule_name']);
+        session()->forget(['signup_role_type', 'signup_schedule_name', 'signup_arrival_intent']);
 
         restore_pending_action();
 

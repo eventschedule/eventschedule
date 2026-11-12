@@ -27,6 +27,12 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     /**
+     * Why an organizer came to sign up, from the link they pressed (users.arrival_intent,
+     * arrival_intent_from_session()). Our own fixed vocabulary, exported as signups.arrival_intent.
+     */
+    public const ARRIVAL_INTENTS = ['sell', 'pro', 'enterprise', 'guest_page'];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -81,6 +87,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'landing_page',
         'hero_variant',
         'signup_intent',
+        'arrival_intent',
         'pending_schedule_type',
         'pending_schedule_name',
         'referral_code',

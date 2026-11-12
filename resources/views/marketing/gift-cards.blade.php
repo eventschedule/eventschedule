@@ -754,7 +754,7 @@
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
-                        <a href="{{ app_url('/sign_up') }}" class="es-gift-btn inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
+                        <a href="{{ app_url('/sign_up?intent=sell') }}" class="es-gift-btn inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
                             Get started free
                             <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
@@ -1389,7 +1389,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up') }}" class="es-gift-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg px-8 py-4 text-lg font-semibold">
+                        <a href="{{ app_url('/sign_up?intent=sell') }}" class="es-gift-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg px-8 py-4 text-lg font-semibold">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

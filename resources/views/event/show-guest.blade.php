@@ -2611,7 +2611,10 @@
         <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
           {{ __('messages.create_your_own_event_schedule') }}
         </p>
-        <x-guest.button variant="secondary" size="sm" href="{{ marketing_url() }}" target="_blank" rel="noopener noreferrer">
+        {{-- Straight to sign-up, marked as from a schedule's page (users.arrival_intent =
+             guest_page): it used to open the marketing homepage, and nothing could say whether
+             the card ever brought anybody. --}}
+        <x-guest.button variant="secondary" size="sm" href="{{ app_url('/sign_up?ref=gp') }}" target="_blank" rel="noopener noreferrer">
           {{ __('messages.create_schedule') }}
         </x-guest.button>
       </div>

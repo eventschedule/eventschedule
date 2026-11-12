@@ -2587,6 +2587,7 @@
         }
         {{-- What else lives at the foot of the screen stands on the dock while it is up. --}}
         html.hp-dock-on [data-cookie-consent] { bottom: calc(var(--hp-dock-h, 4.5rem) + 0.75rem); }
+        html.hp-dock-on .es-head-start { display: none !important; }
         {{-- The calculator's footnote, folded to two lines on a phone by the script. --}}
         .hp-calc-note-open { display: none; }
         @media (max-width: 767px) {
@@ -3644,7 +3645,7 @@
                                      out of the fold: the hero names no paid plan (MarketingHeroClaimTest). --}}
                                 <p class="hp-paid-plan">Paid tickets on Pro, {{ $hpProMonthlyText }} a month. Free registration on every plan.</p>
                                 <div class="hp-actions">
-                                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Start for free">Start for free</span> {!! $hpArrow !!}</a>
+                                    <a href="{{ app_url('/sign_up?intent=sell') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Start for free">Start for free</span> {!! $hpArrow !!}</a>
                                     <a href="#fees" class="hp-more">Compare the fees {!! $hpArrow !!}</a>
                                 </div>
                             </div>

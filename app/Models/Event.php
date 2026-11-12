@@ -62,6 +62,14 @@ class Event extends Model
 
     public const LIKELY_TEST_WEAK_REGEX = '^(test|my test|sample|example|demo)([ _-]|$)';
 
+    /**
+     * A SCHEDULE named "test" or "testing" followed by a dash or an underscore ("Testing- PBWDA",
+     * "test_venue"): somebody's trial run with a label after it. Only for schedule names, beside
+     * LIKELY_TEST_NAME_REGEX, which is anchored at both ends and let "Testing- PBWDA" onto the
+     * homepage wall. A space alone is not enough: "Test Kitchen" and "Testing Grounds" are names.
+     */
+    public const LIKELY_TEST_SCHEDULE_REGEX = '^test(ing)?[[:space:]]*[_-]';
+
     public const REPEATED_CHAR_REGEX = '^(.)\\1{2,}$';
 
     public const LIKELY_TEST_NAMES = [
@@ -1538,7 +1546,10 @@ class Event extends Model
 
         // (c) no associated talent/venue/curator schedule is named like a test
         $query->whereDoesntHave('roles', function ($r) {
-            $r->whereRaw('LOWER(TRIM(roles.name)) REGEXP ?', [self::LIKELY_TEST_NAME_REGEX]);
+            $r->where(function ($n) {
+                $n->whereRaw('LOWER(TRIM(roles.name)) REGEXP ?', [self::LIKELY_TEST_NAME_REGEX])
+                    ->orWhereRaw('LOWER(TRIM(roles.name)) REGEXP ?', [self::LIKELY_TEST_SCHEDULE_REGEX]);
+            });
         });
 
         return $query;

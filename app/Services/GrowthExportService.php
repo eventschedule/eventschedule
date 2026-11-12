@@ -36,7 +36,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 26;
+    public const SCHEMA_VERSION = 27;
 
     /** How far ahead the schedule rows look for events on sale (upcoming_*). */
     public const UPCOMING_DAYS = 60;
@@ -992,6 +992,9 @@ class GrowthExportService
                 // The account-wide "Turn off suggestions" switch: no guide and no next steps in
                 // the app. The reminder emails are not part of it (they follow is_subscribed).
                 $u->suggestions_off_at !== null,
+                // Why they came to sign up, from the link they pressed (User::ARRIVAL_INTENTS, our
+                // own fixed vocabulary): a seller page, a plan's button, a schedule's public page.
+                in_array($u->arrival_intent, User::ARRIVAL_INTENTS, true) ? $u->arrival_intent : null,
             ];
         }
 
@@ -999,7 +1002,7 @@ class GrowthExportService
             'referrer_domain', 'referrer_channel', 'landing_path', 'auth', 'reached_schedule_form',
             'saved_schedule', 'saved_event', 'saved_ticket', 'saved_paid_ticket', 'schedules_count',
             'days_to_first_schedule', 'hero_variant', 'referred', 'logins_90d', 'event_edits_90d',
-            'setup_guide', 'setup_guide_hidden', 'suggestions_off'];
+            'setup_guide', 'setup_guide_hidden', 'suggestions_off', 'arrival_intent'];
 
         // In place: by value, every row it rewrote would be copied while the caller's array was
         // still alive, doubling the row table's memory on a 128MB worker.
@@ -3143,6 +3146,7 @@ class GrowthExportService
                 .'SUM(signup_code_requests) as signup_code_requests, '
                 .'SUM(signup_code_verified) as signup_code_verified, '
                 .'SUM(signup_code_invalid) as signup_code_invalid, '
+                .'SUM(signup_google_starts) as signup_google_starts, '
                 .'SUM(guest_submit_views) as guest_submit_views, '
                 .'SUM(guest_submit_code_requests) as guest_submit_code_requests, '
                 .'SUM(guest_submit_submissions) as guest_submit_submissions, '
@@ -3221,6 +3225,9 @@ class GrowthExportService
                 'signup_code_requests' => $count('signup_code_requests'),
                 'signup_code_verified' => $count('signup_code_verified'),
                 'signup_code_invalid' => $count('signup_code_invalid'),
+                // Pressed "Continue with Google" on the sign-up page: the other way off it. With
+                // signup_code_requests it splits "left the page" from "left part way".
+                'signup_google_starts' => $count('signup_google_starts'),
                 // The public "Submit your event" page, its own funnel beside the sign-up one: one
                 // visitor per day who saw the form, who asked for the emailed code, and who got an
                 // event through. The middle one is not a stage everybody passes: only a NEW
