@@ -20,7 +20,7 @@ return [
     'ticketing_description' => 'Vinde bilete din pagina evenimentului tău fără taxe de platformă. Plată prin Stripe sau PayPal, rambursări totale sau parțiale și înregistrare cu cod QR pe telefon.',
 
     'ai_title' => 'Import de evenimente cu AI: de la afiș la eveniment | Event Schedule',
-    'ai_description' => 'Lipește textul sau trage un afiș și AI completează detaliile evenimentului: dată, loc, artiști, preț. Gratuit în toate planurile, cu traducere în 12 limbi.',
+    'ai_description' => 'Lipește textul sau trage un afiș și AI completează detaliile evenimentului: dată, loc, artiști, preț. Gratuit în toate planurile, cu traducere în 13 limbi.',
 
     'calendar_sync_title' => 'Sincronizare bidirecțională a calendarului cu Google, Outlook și CalDAV',
     'calendar_sync_description' => 'Sincronizare bidirecțională cu Google Calendar, Outlook și orice server CalDAV, gratuită în toate planurile. Participanții adaugă un eveniment sau se abonează la fluxul live al calendarului tău.',

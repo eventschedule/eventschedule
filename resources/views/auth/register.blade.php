@@ -12,7 +12,10 @@
                 document.getElementById('language_code').value = '{{ session('guest_language') }}';
             @else
                 var language = navigator.language || navigator.userLanguage;
-                var twoLetterLanguageCode = language.substring(0, 2);
+                // A browser set to Portugal's Portuguese gets pt-PT (its first Portuguese, when it
+                // lists several); every other one its two letters.
+                var firstPortuguese = (navigator.languages || [language]).filter(function (l) { return /^pt\b/i.test(l); })[0] || '';
+                var twoLetterLanguageCode = /^pt/i.test(language) && /^pt-PT$/i.test(firstPortuguese) ? 'pt-PT' : language.substring(0, 2);
                 document.getElementById('language_code').value = twoLetterLanguageCode;
             @endif
 

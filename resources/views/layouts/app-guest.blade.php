@@ -144,7 +144,7 @@
         @endif
 
         @php
-            $localeMap = ['en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE', 'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_BR', 'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE', 'ru' => 'ru_RU', 'ro' => 'ro_RO'];
+            $localeMap = ['en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE', 'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_BR', 'pt-PT' => 'pt_PT', 'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE', 'ru' => 'ru_RU', 'ro' => 'ro_RO'];
             $ogLocale = $localeMap[$role->language_code] ?? 'en_US';
         @endphp
         <meta property="og:locale" content="{{ $ogLocale }}">
@@ -553,23 +553,23 @@
             <div id="gp-language-switcher" class="container mx-auto flex justify-end {{ $isRtl ? 'pl-5' : 'pr-5' }} pt-4">
                 <div class="gp-lang-switcher flex items-center rounded-full p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
                     @if(session()->has('translate') || request()->lang == $switcherTarget)
-                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium" title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">{{ strtoupper($switcherTarget) }}</span>
+                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium" title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">{{ language_badge($switcherTarget, $role->language_code) }}</span>
                         {{-- fullUrlWithQuery, not url(), so switching language keeps the rest of
                              the query string (?layout=, ?category=, ?month= ...) intact. --}}
                         <a href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}"
                            data-lang-switch="{{ $role->language_code }}"
                            class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200"
                            title="{{ $switcherAuthoredName }}" aria-label="{{ $switcherAuthoredName }}">
-                            {{ strtoupper($role->language_code) }}
+                            {{ language_badge($role->language_code, $switcherTarget) }}
                         </a>
                     @else
                         <a href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $switcherTarget])) }}"
                            data-lang-switch="{{ $switcherTarget }}"
                            class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200"
                            title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">
-                            {{ strtoupper($switcherTarget) }}
+                            {{ language_badge($switcherTarget, $role->language_code) }}
                         </a>
-                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium" title="{{ $switcherAuthoredName }}" aria-label="{{ $switcherAuthoredName }}">{{ strtoupper($role->language_code) }}</span>
+                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium" title="{{ $switcherAuthoredName }}" aria-label="{{ $switcherAuthoredName }}">{{ language_badge($role->language_code, $switcherTarget) }}</span>
                     @endif
                 </div>
             </div>

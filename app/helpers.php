@@ -396,6 +396,57 @@ if (! function_exists('is_valid_language_code')) {
     }
 }
 
+if (! function_exists('normalize_language_code')) {
+    /**
+     * A language code as somebody may type it ('pt-pt', 'pt_PT', 'PT-pt'), spelled the way
+     * config('app.supported_languages') spells it, or null when it is none of them.
+     *
+     * is_valid_language_code() stays exact on purpose: a code it accepts is used as it stands,
+     * as a lang directory name (which is case sensitive on Linux) and as a stored column value,
+     * so a loose spelling is turned into the real one here, once, at the door
+     * (App\Http\Middleware\NormalizeLanguageQuery for ?lang=), never accepted downstream.
+     */
+    function normalize_language_code(mixed $languageCode): ?string
+    {
+        if (! is_string($languageCode) || $languageCode === '') {
+            return null;
+        }
+
+        if (is_valid_language_code($languageCode)) {
+            return $languageCode;
+        }
+
+        $wanted = strtolower(str_replace('_', '-', trim($languageCode)));
+
+        foreach (array_keys(config('app.supported_languages', [])) as $supported) {
+            if (strtolower($supported) === $wanted) {
+                return $supported;
+            }
+        }
+
+        return null;
+    }
+}
+
+if (! function_exists('language_badge')) {
+    /**
+     * The short code a language switcher prints: "PT" for both 'pt' and 'pt-PT', as a visitor
+     * reads it. Only when the switcher's other language is the same language ('pt' beside
+     * 'pt-PT') are both regions spelled out, "PT-BR" and "PT-PT": "PT" alone is Portugal's own
+     * code, and a visitor from Portugal would press it and get Brazilian Portuguese.
+     */
+    function language_badge(string $code, ?string $other = null): string
+    {
+        $base = explode('-', $code)[0];
+
+        if ($other !== null && $other !== $code && explode('-', $other)[0] === $base) {
+            return ['pt' => 'PT-BR'][$code] ?? strtoupper($code);
+        }
+
+        return strtoupper($base);
+    }
+}
+
 if (! function_exists('detect_content_language')) {
     /**
      * Best-effort detection of the dominant NON-Latin script in event content, returned as a

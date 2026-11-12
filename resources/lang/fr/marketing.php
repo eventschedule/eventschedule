@@ -20,7 +20,7 @@ return [
     'ticketing_description' => 'Vendez des billets depuis la page de votre événement sans frais de plateforme. Paiement Stripe ou PayPal, remboursements totaux ou partiels, enregistrement par QR.',
 
     'ai_title' => 'Import d\'événements par IA : de l\'affiche à l\'événement | Event Schedule',
-    'ai_description' => 'Collez le texte ou déposez une affiche et l\'IA remplit la fiche de l\'événement : date, lieu, artistes, prix. Gratuit sur tous les forfaits, avec traduction en 12 langues.',
+    'ai_description' => 'Collez le texte ou déposez une affiche et l\'IA remplit la fiche de l\'événement : date, lieu, artistes, prix. Gratuit sur tous les forfaits, avec traduction en 13 langues.',
 
     'calendar_sync_title' => 'Synchronisation d\'agenda bidirectionnelle avec Google, Outlook et CalDAV',
     'calendar_sync_description' => 'Synchronisation bidirectionnelle avec Google Calendar, Outlook et tout serveur CalDAV, gratuite sur tous les forfaits. Les participants ajoutent un événement ou s\'abonnent à votre flux d\'agenda en direct.',

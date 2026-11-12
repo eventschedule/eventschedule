@@ -136,6 +136,14 @@ class TranslationQueue
      * that began months ago reads as past forever, and translation would silently stop for nearly
      * every recurring event on the platform.
      */
+    public static function liveEvents(Builder $query): Builder
+    {
+        // For anything that hands rows BACK to this queue (a glossary change re-queues the events
+        // that use a term): an event the passes below will never select must not have its
+        // translation cleared, or it stays untranslated for good.
+        return self::restrictToLiveEvents($query);
+    }
+
     private static function restrictToLiveEvents(Builder $query): Builder
     {
         // Start of yesterday rather than now(): starts_at is a naive datetime and schedules span

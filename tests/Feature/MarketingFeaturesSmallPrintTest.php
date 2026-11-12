@@ -103,6 +103,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Backup & restore' => [self::LEFT_OUT, 'named at the foot of chapter 05; it has no feature page for a plan line to link'],
         'Short links' => [self::ABOVE, '/features/analytics'],
         '10 newsletter emails per month' => [self::ABOVE, '/features/newsletters'],
+        'Automatic translation and glossary' => [self::ABOVE, '/features/ai'],
         'AI event parsing' => [self::ABOVE, '/features/ai'],
         'Import from a link' => [self::ROW, 'Import from a link'],
         'Import from Google Calendar' => [self::LEFT_OUT, 'one more source on the import page; the calendar sync banner covers the standing connection'],

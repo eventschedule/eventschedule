@@ -403,11 +403,13 @@
     .event-subrow .event-row-title {
       min-width: 7rem;
     }
-    .event-subrow .event-row-summary.is-warn {
+    .event-subrow .event-row-summary.is-warn,
+    .event-row .event-row-summary.is-warn {
       color: #b45309;
       font-weight: 500;
     }
-    .dark .event-subrow .event-row-summary.is-warn {
+    .dark .event-subrow .event-row-summary.is-warn,
+    .dark .event-row .event-row-summary.is-warn {
       color: #fcd34d;
     }
     /* What a row has chosen, as a small swatch before its words (form-row's chip). */

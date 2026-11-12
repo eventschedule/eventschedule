@@ -2164,7 +2164,7 @@
                         <div class="lb-rule" data-reveal>
                             <h3>A second language</h3>
                             <span class="lb-stamp" style="--r: 2deg;">Free</span>
-                            <p>Write the calendar in one of twelve languages, then turn on Offer a second language to visitors: your programs are translated automatically, and patrons get a button to switch. Allow up to an hour for a new program's translation. The library website's page in that language can embed it with <span class="lb-typed">lang=</span> and the language code. Translation changes the listing, not the session, which is why the language a session is held in belongs in its description.</p>
+                            <p>Write the calendar in one of thirteen languages, then turn on Offer a second language to visitors: your programs are translated automatically, and patrons get a button to switch. Allow up to an hour for a new program's translation. The library website's page in that language can embed it with <span class="lb-typed">lang=</span> and the language code. Translation changes the listing, not the session, which is why the language a session is held in belongs in its description.</p>
                         </div>
                         <div class="lb-rule" data-reveal>
                             <h3>The month on paper</h3>

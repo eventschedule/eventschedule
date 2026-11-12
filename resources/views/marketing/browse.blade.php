@@ -233,7 +233,7 @@
                         <select id="federated-language" name="lang" data-auto-submit>
                             <option value="">{{ __('messages.federation_filter_all_languages') }}</option>
                             @foreach($federatedLanguages as $code)
-                                <option value="{{ $code }}" @selected($federatedLanguage === $code)>{{ ucfirst(config('app.supported_languages')[$code] ?? $code) }}</option>
+                                <option value="{{ $code }}" @selected($federatedLanguage === $code)>{{ isset(config('app.supported_languages')[$code]) ? __('messages.'.config('app.supported_languages')[$code]) : $code }}</option>
                             @endforeach
                         </select>
 

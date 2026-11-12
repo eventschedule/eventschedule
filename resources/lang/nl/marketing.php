@@ -20,7 +20,7 @@ return [
     'ticketing_description' => 'Verkoop tickets vanaf je evenementpagina zonder platformkosten. Betalen met Stripe of PayPal, volledige of gedeeltelijke terugbetaling en QR-check-in per telefoon.',
 
     'ai_title' => 'AI-evenementimport: van flyer naar evenement | Event Schedule',
-    'ai_description' => 'Plak de tekst of sleep een flyer erin en AI vult de evenementgegevens in: datum, locatie, artiesten, prijs. Gratis in elk abonnement, met vertaling in 12 talen.',
+    'ai_description' => 'Plak de tekst of sleep een flyer erin en AI vult de evenementgegevens in: datum, locatie, artiesten, prijs. Gratis in elk abonnement, met vertaling in 13 talen.',
 
     'calendar_sync_title' => 'Tweerichtingsagendasynchronisatie met Google, Outlook en CalDAV',
     'calendar_sync_description' => 'Tweerichtingssynchronisatie met Google Calendar, Outlook en elke CalDAV-server, gratis in elk abonnement. Bezoekers voegen één evenement toe of abonneren zich op je live agendafeed.',

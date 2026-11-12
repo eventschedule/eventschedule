@@ -209,6 +209,78 @@
   $aboutSummary = trim((string) old('short_description', $event->short_description))
       ?: \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags((string) $event->description_html))), 140);
 
+  // The Translation row under About: the automatic translation of the name and the descriptions,
+  // each correctable by hand (App\Services\EventTranslationEdits). Only where the event IS
+  // translated: a saved event in a language pair that differs, or a copy that carries
+  // corrections of its own (EventRepo::buildClonePayload()). Most events never show it.
+  $translationSourceLang = $event->exists ? $event->getLanguageCode() : ($role->language_code ?: 'en');
+  $translationTargetLang = $event->exists ? $event->getTranslationLanguageCode() : ($role->translation_language_code ?: 'en');
+  $translationCarried = $event->exists ? [] : $event->translationOverrides();
+  $translationShown = $detailsShown && $translationSourceLang !== $translationTargetLang
+      && ($event->exists || $translationCarried);
+  $translationRow = null;
+  if ($translationShown) {
+      $languageName = function (string $code) {
+          $languages = config('app.supported_languages', []);
+
+          return isset($languages[$code]) ? __('messages.'.$languages[$code]) : strtoupper($code);
+      };
+      // After a refused save, the row comes back as it was left: what was being typed, and what
+      // was pressed (Keep mine, Reset to automatic).
+      $oldTranslations = old('translations');
+      $oldKeep = (array) old('translations_keep', []);
+      $translationFields = [];
+      foreach (\App\Models\Event::HAND_TRANSLATABLE_FIELDS as $field) {
+          $saved = (string) ($event->{$field.'_en'} ?? '');
+          $posted = is_array($oldTranslations) && array_key_exists($field, $oldTranslations) ? (string) $oldTranslations[$field] : null;
+          $carried = $translationCarried[$field] ?? null;
+          $translationFields[$field] = [
+              'label' => __('messages.'.($field === 'name' ? 'event_name' : $field)),
+              'original' => (string) $event->{$field},
+              // The original as it reads on the page now (readPlainFields()), for the save bar.
+              'current' => null,
+              // The whole original, as plain text with its paragraphs, for the description's
+              // editor: the preview above is cut at 280 characters.
+              'original_full' => $field === 'description'
+                  ? trim(preg_replace("/\n{3,}/", "\n\n", html_entity_decode(strip_tags(preg_replace('#</(p|li|h[1-6]|blockquote|pre)>|<br\s*/?>#i', "$0\n\n", (string) $event->description_html)), ENT_QUOTES | ENT_HTML5)))
+                  : '',
+              'original_preview' => $field === 'description'
+                  ? \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags((string) $event->description_html), ENT_QUOTES | ENT_HTML5))), 280)
+                  : (string) $event->{$field},
+              'saved' => $saved,
+              // What the folded field shows: the description as a reader sees it, without the
+              // Markdown signs, and short. Edit opens the whole text.
+              'preview' => $field === 'description'
+                  ? \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags((string) $event->description_html_en), ENT_QUOTES | ENT_HTML5))), 280)
+                  : $saved,
+              'manual' => $event->translationIsManual($field),
+              'stale' => $event->exists && $event->translationIsStale($field),
+              // One line where the original is one line (the name, the short description).
+              'multiline' => $field === 'description',
+              'max' => \App\Services\EventTranslationEdits::MAX_LENGTH[$field],
+              // A copy's correction is posted as it stands, with the original it was made against.
+              'basis' => $carried['source'] ?? null,
+              'editing' => $posted !== null && $posted !== '',
+              'text' => $posted !== null && $posted !== '' ? $posted : $saved,
+              'action' => $posted === '' ? 'auto' : (in_array($field, $oldKeep, true) ? 'keep' : ''),
+          ];
+      }
+      $translationRow = [
+          'fields' => $translationFields,
+          'dir' => in_array($translationTargetLang, ['ar', 'he'], true) ? 'rtl' : 'ltr',
+          'labels' => [
+              'language' => $languageName($translationTargetLang),
+              'automatic' => __('messages.automatic'),
+              'not_yet' => __('messages.translation_not_yet'),
+              'corrected' => __('messages.translation_corrected'),
+              'changed' => __('messages.translation_source_changed_short', ['source' => $languageName($translationSourceLang)]),
+              'resets' => __('messages.saving_resets_translation'),
+              'stays' => __('messages.translation_will_stay'),
+          ],
+      ];
+  }
+  $translationOpenOnLoad = $translationShown && collect($errors->keys())->contains(fn ($key) => str_starts_with($key, 'translation'));
+
   // The house segmented control, same strings as role/partials/appointment-editor.blade.php.
   // $segRadio keeps a real radio (keyboard, arrow keys, screen reader) and paints only
   // the sibling span, so no :class binding is needed to show the selection.
@@ -3042,6 +3114,99 @@
                             </div>
                             </div>
                         </div>
+
+                        @if ($translationRow)
+                        {{-- The automatic translation, correctable by hand (EventTranslationEdits). Folded like
+                             About: most people never open it. Everything in it is somebody's text, so all of it
+                             comes from the page's data through v-text, and none is printed here by the server. --}}
+                        <div class="ap-card rounded-xl" id="event-translation">
+                            <button type="button" class="event-row" @click="translationOpen = ! translationOpen"
+                                :aria-expanded="translationOpen ? 'true' : 'false'" aria-controls="event-translation-body">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="event-row-icon" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+                                </svg>
+                                <span class="event-row-title">{{ __('messages.event_translation_row', ['language' => $translationRow['labels']['language']]) }}</span>
+                                <span class="event-row-summary" v-cloak v-show="! translationOpen" :class="{ 'is-empty': ! translationSummary.marked, 'is-warn': translationSummary.warn }"><bdi v-text="translationSummary.text"></bdi></span>
+                                <svg class="event-row-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div id="event-translation-body" class="event-row-body" v-show="translationOpen" @if (! $translationOpenOnLoad) style="display: none" @endif>
+                            <div class="max-w-xl">
+                                <p class="event-hint">{{ __('messages.event_translation_help', ['source' => $languageName($translationSourceLang)]) }}</p>
+                                <x-input-error class="mb-3" :messages="$errors->get('translations.*')" />
+                                <div class="space-y-5">
+                                <div v-for="(f, key) in translation.fields" :key="key" v-show="f.original || f.saved" class="event-translation-field">
+                                    <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300" v-text="f.label"></span>
+                                        {{-- Neutral, not green: a correction is somebody's wording, not a success, and it
+                                             may stand beside the amber notice below. --}}
+                                        <span v-if="f.manual && f.action !== 'auto'" class="event-status" v-text="translation.labels.corrected"></span>
+                                    </div>
+
+                                    {{-- The value in the page's direction, isolated in its own: under a Hebrew page's
+                                         label a Portuguese name starts at the same edge as the label. --}}
+                                    <p v-if="! f.editing && f.action !== 'auto'" class="mt-1 text-sm break-words"
+                                        :class="f.saved ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400 italic'"><bdi :dir="f.saved ? translation.dir : null" v-text="f.saved ? (f.preview || f.saved) : translation.labels.not_yet"></bdi></p>
+                                    {{-- The field's own actions, under its value and ahead of any notice, so Edit is
+                                         never read as a third choice inside it. --}}
+                                    <div v-if="! f.editing && f.action !== 'auto' && (f.original || f.manual)" class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+                                        <button v-if="f.original" type="button" class="event-link" @click="translationEdit(key)">{{ __('messages.edit') }}</button>
+                                        <button v-if="f.manual && ! f.action && ! f.stale" type="button" class="event-link event-link-quiet" @click="translationAuto(key)">{{ __('messages.translation_reset') }}</button>
+                                    </div>
+
+                                    {{-- The original changed after the correction: said where the field is, under the
+                                         wording it concerns, with the one thing most people want (keep it) as the button. --}}
+                                    <div v-if="f.stale && ! f.action && ! f.editing" class="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+                                        <div class="flex gap-2">
+                                            <svg class="w-5 h-5 flex-none text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                            </svg>
+                                            <div class="min-w-0 text-sm text-gray-800 dark:text-gray-200">
+                                                <p>{{ __('messages.translation_source_changed', ['source' => $languageName($translationSourceLang)]) }}</p>
+                                                <p class="mt-1 text-gray-600 dark:text-gray-400 break-words line-clamp-3"><bdi v-text="f.original_preview"></bdi></p>
+                                                <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                                                    <button type="button" class="event-link" @click="translationAuto(key)">{{ __('messages.translation_translate_again') }}</button>
+                                                    <x-secondary-button class="min-w-0" @click="translationKeep(key)">{{ __('messages.translation_keep_mine') }}</x-secondary-button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="f.editing" class="mt-2">
+                                        {{-- The description's whole original, a press away: the line is cut at three. --}}
+                                        <details v-if="f.original_full" class="event-hint" style="margin: 0 0 0.25rem">
+                                            <summary class="cursor-pointer break-words">{{ $languageName($translationSourceLang) }}: <bdi v-text="f.original_preview"></bdi></summary>
+                                            <div class="mt-2 max-h-48 overflow-auto whitespace-pre-line break-words rounded-lg border border-gray-200 dark:border-gray-700 p-3"><bdi v-text="f.original_full"></bdi></div>
+                                        </details>
+                                        <p v-else class="event-hint break-words line-clamp-3" style="margin: 0 0 0.25rem">{{ $languageName($translationSourceLang) }}: <bdi v-text="f.original_preview"></bdi></p>
+                                        <input v-if="! f.multiline" type="text" v-model="f.text" :dir="translation.dir" :maxlength="f.max" :aria-label="f.label" :id="'translation_' + key"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" autocomplete="off">
+                                        <textarea v-else v-model="f.text" :dir="translation.dir" :maxlength="f.max" :aria-label="f.label" :id="'translation_' + key" rows="8"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                            autocomplete="off"></textarea>
+                                        <p v-if="key === 'description'" class="event-hint">{{ __('messages.translation_markdown_hint') }}</p>
+                                        {{-- "Discard" and "Undo", never "Cancel": the save bar's Cancel, a glance away,
+                                             throws away the whole form. --}}
+                                        <button type="button" class="event-link mt-1" @click="translationCancel(key)">{{ __('messages.discard') }}</button>
+                                    </div>
+
+                                    <p v-if="f.action" class="event-hint">
+                                        <span v-if="f.action === 'auto'">{{ __('messages.translation_will_retranslate') }}</span>
+                                        <span v-else>{{ __('messages.translation_will_keep') }}</span>
+                                        <button type="button" class="event-link ms-2" @click="translationUndo(key)">{{ __('messages.undo') }}</button>
+                                    </p>
+
+                                    {{-- What Save sends, for this field alone: nothing unless something was done. --}}
+                                    <input v-if="translationPost(key) !== null" type="hidden" :name="'translations[' + key + ']'" :value="translationPost(key)">
+                                    <input v-if="f.basis && translationPost(key) !== null" type="hidden" :name="'translation_basis[' + key + ']'" :value="f.basis">
+                                    <input v-if="f.action === 'keep'" type="hidden" name="translations_keep[]" :value="key">
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        @endif
 
                     </div>
                 </div>
@@ -6771,6 +6936,9 @@
         showMoreSections: @json(! $isFirstEventRun),
         // Folded parts of the Event tab. Each starts open only when a refused save has an error inside it.
         aboutOpen: @json($aboutOpenOnLoad),
+        // The Translation row under About: null where the event is not translated.
+        translationOpen: @json($translationOpenOnLoad),
+        translation: @json($translationRow),
         showVenueContact: @json($venueContactOpenOnLoad),
         showVenueMore: @json($venueMoreOpenOnLoad),
         // The tabs a refused save has errors on, and the tabs with changes not yet saved.
@@ -7387,10 +7555,59 @@
           }
         });
       },
+      // The Translation row (EventTranslationEdits). A press fires no input event, so each says
+      // itself that the tab changed.
+      translationEdit(key) {
+        var f = this.translation.fields[key];
+        f.text = f.saved;
+        f.action = '';
+        f.editing = true;
+        this.$nextTick(function () {
+          var input = document.getElementById('translation_' + key);
+          if (input) { input.focus(); }
+        });
+      },
+      translationCancel(key) {
+        var f = this.translation.fields[key];
+        f.editing = false;
+        f.text = f.saved;
+      },
+      translationKeep(key) {
+        this.translation.fields[key].action = 'keep';
+        this.markTabDirty('section-details');
+      },
+      translationAuto(key) {
+        var f = this.translation.fields[key];
+        f.editing = false;
+        f.action = 'auto';
+        this.markTabDirty('section-details');
+      },
+      translationUndo(key) {
+        this.translation.fields[key].action = '';
+      },
+      // What Save sends for one field: its text (a correction), '' (back to automatic), or null
+      // (nothing, which keeps whatever is stored).
+      translationPost(key) {
+        var f = this.translation.fields[key];
+        if (f.action === 'auto') {
+          return '';
+        }
+        if (f.editing) {
+          var text = (f.text || '').trim();
+          if (text === '') {
+            return f.manual || f.saved ? '' : null;
+          }
+          // Opened and left as it was: an automatic translation is not made a person's by that.
+          return text !== (f.saved || '').trim() || f.stale || f.basis ? f.text : null;
+        }
+        // A copy's corrections, carried as they stand.
+        return f.basis && f.saved ? f.saved : null;
+      },
       // A field the browser refuses the save over may be folded away; unfold what holds it.
       revealField(el) {
         if (! el || ! el.closest) { return; }
         if (el.closest('#event-about-body')) { this.aboutOpen = true; }
+        if (el.closest('#event-translation-body')) { this.translationOpen = true; }
         // A row of the Tickets tab that is closed: open it. The ticket types themselves are
         // always showing ("tickets" is the name for no row open).
         var pane = el.closest('[data-ticket-pane]');
@@ -7741,6 +7958,17 @@
         var short = document.getElementById('short_description');
         if (short && short.value.trim()) {
           this.aboutSummary = short.value.trim();
+        }
+        // The originals as they read now, for the save bar's word about corrections they move
+        // away from (translationStays). The description is a markdown editor with its own text.
+        if (this.translation) {
+          var originals = { name: 'event_name', short_description: 'short_description', description: 'description' };
+          Object.keys(originals).forEach((key) => {
+            var input = document.getElementById(originals[key]);
+            if (input && this.translation.fields[key]) {
+              this.translation.fields[key].current = input._easyMDE ? input._easyMDE.value() : input.value;
+            }
+          });
         }
       },
       // Unfold the venue's contact fields, where matching a venue by email or phone happens. The
@@ -9974,6 +10202,52 @@
 
         return { gallery: gallery, sponsors: sponsors, tab: tab };
       },
+      // The Translation row's line while it is folded: what was changed under a correction first,
+      // then what was corrected, else that it is all automatic.
+      translationSummary() {
+        if (! this.translation) {
+          return { text: '', marked: false, warn: false };
+        }
+        var L = this.translation.labels, F = this.translation.fields;
+        var stale = [], manual = [], any = false;
+        Object.keys(F).forEach(function (key) {
+          var f = F[key];
+          if (f.saved) { any = true; }
+          if (! f.manual || f.action === 'auto') { return; }
+          (f.stale && f.action !== 'keep' ? stale : manual).push(f.label);
+        });
+        if (stale.length) {
+          return { text: L.changed + ': ' + stale.join(', '), marked: true, warn: true };
+        }
+        if (manual.length) {
+          return { text: L.corrected + ': ' + manual.join(', '), marked: true, warn: false };
+        }
+        return { text: any ? L.automatic : L.not_yet, marked: false, warn: false };
+      },
+      // A correction whose original is being changed on this page: Save keeps it as written, and
+      // the bar says so, so nobody expects the translation to follow the new text.
+      translationStays() {
+        if (! this.translation) {
+          return '';
+        }
+        var F = this.translation.fields;
+        var even = function (text) { return (text || '').replace(/\r\n?/g, '\n').trim(); };
+        var names = Object.keys(F).filter(function (key) {
+          var f = F[key];
+          return f.manual && ! f.action && typeof f.current === 'string' && even(f.current) !== '' && even(f.current) !== even(f.original);
+        }).map(function (key) { return F[key].label; });
+        return names.length ? this.translation.labels.stays.replace(':fields', names.join(', ')) : '';
+      },
+      // The corrections a save gives back to the automatic translation, for the save bar.
+      translationResets() {
+        if (! this.translation) {
+          return '';
+        }
+        var F = this.translation.fields;
+        var names = Object.keys(F).filter(function (key) { return F[key].manual && F[key].action === 'auto'; })
+          .map(function (key) { return F[key].label; });
+        return names.length ? this.translation.labels.resets.replace(':fields', names.join(', ')) : '';
+      },
       // One line per tab, from what is on screen now and not from what was saved. Names mean in
       // use; an empty tab asks only where adding is the next step; a warning comes first and turns
       // the line amber; the rest in order of use, as the line is cut at its end.
@@ -10148,6 +10422,10 @@
         if (! this.agendaShowTimes && this.eventParts.some(function (part) { return part.start_time || part.end_time; })) {
           removes.push(L.saving_removes_times);
         }
+        // A translation corrected by hand that Reset gives back to the automatic one.
+        if (this.translationResets) {
+          removes.push(this.translationResets);
+        }
         // Its own sponsors go when the tiles leave them. They also go on ANY save while neither
         // schedule's plan has sponsors (EventRepo::saveEvent() clears them then, as it always has):
         // that is no change of anybody's, so it is a standing note beside whatever the bar says
@@ -10159,6 +10437,8 @@
         } else if (this.savedSponsorCount > 0 && this.event.sponsor_mode !== 'custom') {
           removes.push(L.saving_removes_sponsors);
         }
+        // Not a removal: a correction kept while its original changes (translationStays).
+        standing = [standing, this.translationStays].filter(Boolean).join(' ');
         var withStanding = function (text) { return [text, standing].filter(Boolean).join(' '); };
         if (removes.length) {
           return { kind: 'text', text: withStanding(removes.join(' ')), strong: true };

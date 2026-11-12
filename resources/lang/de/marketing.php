@@ -20,7 +20,7 @@ return [
     'ticketing_description' => 'Verkaufe Tickets über deine Veranstaltungsseite ohne Plattformgebühren. Zahlung per Stripe oder PayPal, volle oder teilweise Erstattungen und QR-Check-in per Handy.',
 
     'ai_title' => 'KI-Veranstaltungsimport: vom Flyer zur Veranstaltung | Event Schedule',
-    'ai_description' => 'Text einfügen oder Flyer ablegen, und die KI füllt die Veranstaltungsdaten aus: Datum, Ort, Künstler, Preis. In jedem Tarif kostenlos, mit Übersetzung in 12 Sprachen.',
+    'ai_description' => 'Text einfügen oder Flyer ablegen, und die KI füllt die Veranstaltungsdaten aus: Datum, Ort, Künstler, Preis. In jedem Tarif kostenlos, mit Übersetzung in 13 Sprachen.',
 
     'calendar_sync_title' => 'Zwei-Wege-Kalender-Sync mit Google, Outlook und CalDAV',
     'calendar_sync_description' => 'Zweiwege-Synchronisation mit Google Calendar, Outlook und jedem CalDAV-Server, in jedem Tarif kostenlos. Gäste fügen eine Veranstaltung hinzu oder abonnieren deinen Live-Kalender-Feed.',

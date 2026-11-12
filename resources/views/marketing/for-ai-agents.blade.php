@@ -1641,10 +1641,10 @@ HTML,
                             </div>
                             <h3>Languages, made explicit</h3>
                             <p>
-                                Set <span class="ax-k">language_code</span> on a schedule and its pages are served in that language; twelve are supported. A schedule can also nominate one translation target, and its own copy is machine-translated into it on a scheduled pass.
+                                Set <span class="ax-k">language_code</span> on a schedule and its pages are served in that language; thirteen are supported. A schedule can also nominate one translation target, and its own copy is machine-translated into it on a scheduled pass.
                             </p>
                             <div class="ax-chips" dir="ltr">
-                                @foreach (['ar', 'de', 'en', 'es', 'et', 'fr', 'he', 'it', 'nl', 'pt', 'ro', 'ru'] as $lc)
+                                @foreach (array_keys(config('app.supported_languages')) as $lc)
                                     <span class="ax-chip">{{ $lc }}</span>
                                 @endforeach
                             </div>

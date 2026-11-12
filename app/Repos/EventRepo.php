@@ -148,6 +148,10 @@ class EventRepo
         // Not fillable. Carried so a copy made by a team member the preset switch binds keeps the
         // preset (EventController::create() keeps it only if it is the copying schedule's own).
         $clonedEventData['ticket_preset_id'] = $event->ticket_preset_id;
+        // Not fillable. A copy keeps the translations a person corrected by hand (the name_en and
+        // friends ride in the fillable loop above): the create form posts them back as corrections,
+        // dated against the source's original (EventTranslationEdits, translation_basis).
+        $clonedEventData['translation_overrides'] = $event->translationOverrides() ?: null;
 
         // Reset fields that shouldn't be carried to a new event
         $clonedEventData['flyer_image_url'] = null;
@@ -1224,7 +1228,8 @@ class EventRepo
                         $translations = GeminiUtils::translateCustomFieldNames(
                             array_values($fieldsNeedingTranslation),
                             $currentRole->language_code,
-                            $currentRole->translation_language_code
+                            $currentRole->translation_language_code,
+                            \App\Services\TranslationGlossary::relevant(\App\Services\TranslationGlossary::forRole($currentRole), array_values($fieldsNeedingTranslation))
                         );
 
                         foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
@@ -1286,6 +1291,13 @@ class EventRepo
 
         // Not the columns only the server writes: see SERVER_OWNED_FIELDS.
         $event->fill($request->except(self::SERVER_OWNED_FIELDS));
+
+        // A person's corrections to the automatic translation (the Translation row under About).
+        // Only a signed-in person's: the guest forms and the imports correct nothing. Absent says
+        // nothing, so an API update or a form without the row keeps every correction.
+        if (auth()->check()) {
+            \App\Services\EventTranslationEdits::apply($event, $request);
+        }
 
         // Which preset the event's tickets came from. Not fillable: a preset applied above names
         // itself; otherwise the event form names the preset its tab still matches (or none, after a
@@ -2212,7 +2224,8 @@ class EventRepo
                             $translations = GeminiUtils::translateCustomFieldNames(
                                 array_values($fieldsNeedingTranslation),
                                 $currentRole->language_code,
-                                $currentRole->translation_language_code
+                                $currentRole->translation_language_code,
+                                \App\Services\TranslationGlossary::relevant(\App\Services\TranslationGlossary::forRole($currentRole), array_values($fieldsNeedingTranslation))
                             );
 
                             foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {

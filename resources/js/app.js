@@ -31,6 +31,7 @@ window.flatpickrLocales = {
     fr: French,
     it: Italian,
     pt: Portuguese,
+    'pt-PT': Portuguese,
     he: Hebrew,
     nl: Dutch,
     ar: Arabic,

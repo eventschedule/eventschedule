@@ -136,8 +136,10 @@ abstract class AbstractEventDesign
 
         // Language code only affects RTL layout direction, not font selection
         // Fonts are automatically selected based on text content
-        $this->lang = array_key_exists(strtolower($role->language_code), config('app.supported_languages'))
-            ? strtolower($role->language_code) : 'en';
+        // As stored first: 'pt-PT' is a supported code and its lowercase is not.
+        $this->lang = is_valid_language_code($role->language_code)
+            ? $role->language_code
+            : (is_valid_language_code(strtolower((string) $role->language_code)) ? strtolower($role->language_code) : 'en');
 
         // RTL layout is determined by role language (Hebrew/Arabic = RTL)
         $this->rtl = in_array($this->lang, ['ar', 'he'], true);

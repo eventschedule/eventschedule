@@ -12,6 +12,7 @@
             <x-doc-nav-link href="#venue">Location</x-doc-nav-link>
             <x-doc-nav-link href="#ai-details-generator">AI Details Generator</x-doc-nav-link>
             <x-doc-nav-link href="#custom-fields">Custom Fields</x-doc-nav-link>
+            <x-doc-nav-link href="#translation">Translation</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#tickets">Tickets</x-doc-nav-link>
         <x-doc-nav-group label="Participants" href="#participants">
@@ -473,6 +474,23 @@
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Typical uses are age restrictions, dress codes, support acts and door times. Each field's number is shown next to it on the schedule form as <code class="doc-inline-code">{custom_N}</code>, for use in <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="doc-link">event graphics text templates</a> and slug patterns.</p>
+    </section>
+
+    <!-- Translation -->
+    <section id="translation" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+            </svg>
+            Correcting the Translation
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When your schedule <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">offers a second language</a>, each event's name, short description and description are translated into it automatically, in the background. A saved event then has a <strong class="text-gray-900 dark:text-white">Translation</strong> row on the Event tab, under <strong class="text-gray-900 dark:text-white">About</strong>, named after the language it translates into. It is folded until you press it, and while folded it says whether everything is automatic or which fields you corrected. Available on all plans.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Correct a field.</strong> Press <strong class="text-gray-900 dark:text-white">Edit</strong> under it, change the wording and save the event. The original text is shown above the box for reference, and the description takes Markdown, as the original does. A corrected field is marked <strong class="text-gray-900 dark:text-white">Corrected by hand</strong>, and the automatic translation never writes over it.</li>
+            <li><strong class="text-gray-900 dark:text-white">When you edit the original later.</strong> Your correction stays, and is still what visitors read. The field shows a notice that the original changed since, with the new text: press <strong class="text-gray-900 dark:text-white">Keep mine</strong> when your wording still fits, <strong class="text-gray-900 dark:text-white">Translate again automatically</strong> to replace it, or <strong class="text-gray-900 dark:text-white">Edit</strong> to adjust it. Fields you did not correct are translated again on their own, as before.</li>
+            <li><strong class="text-gray-900 dark:text-white">Going back to automatic.</strong> <strong class="text-gray-900 dark:text-white">Reset to automatic</strong> under a corrected field drops your wording when you save, and a new automatic translation appears within the hour.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A copy of the event keeps your corrections. Choosing another language to translate into, or switching translation off, discards them along with every other translation, because they were written in the old language. Over the <a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API</a>, an event update can send <code class="doc-inline-code">translations</code> with <code class="doc-inline-code">name</code>, <code class="doc-inline-code">short_description</code> or <code class="doc-inline-code">description</code>: text corrects that field, and an empty value or null gives it back to the automatic translation.</p>
     </section>
 
     <!-- Tickets -->

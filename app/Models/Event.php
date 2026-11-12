@@ -214,6 +214,12 @@ class Event extends Model
         // Written only by GenerateEventImageVariants / the backfill command through
         // recordImageVariants(), so deliberately NOT in $fillable.
         'image_variants' => 'array',
+        // Which translations a person corrected by hand, and against which original text
+        // (HAND_TRANSLATABLE_FIELDS). Written only through markTranslationManual() and
+        // forgetTranslationOverride(), so deliberately NOT in $fillable: saveEvent() fills the
+        // event from the whole request, and a posted value would mark an automatic translation as
+        // a person's, which app:translate then never refreshes.
+        'translation_overrides' => 'array',
     ];
 
     /** Per-request memo of pass advance-booking seats reserved, keyed by occurrence date. */
@@ -572,6 +578,12 @@ class Event extends Model
                 $model->federated_skipped_at = null;
             }
 
+            // A translation corrected by hand is never written by anybody but the person correcting
+            // it: an import or a feed that fills name_en on an existing event leaves it as it is.
+            // Ahead of the HTML below, which is made from description_en, and of the blocks further
+            // down that decide what a changed original does to a translation.
+            $model->holdHandTranslations();
+
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
             $model->ticket_notes_html = MarkdownUtils::convertToHtml($model->ticket_notes);
@@ -650,7 +662,7 @@ class Event extends Model
             }
 
             if ($model->isDirty('name') && $model->exists) {
-                if (! $model->isDirty('name_en')) {
+                if (! $model->isDirty('name_en') && ! $model->keepsHandTranslation('name')) {
                     $model->name_en = null;
                 }
                 $model->translation_attempts = 0;
@@ -664,7 +676,7 @@ class Event extends Model
             }
 
             if ($model->isDirty('description') && $model->exists) {
-                if (! $model->isDirty('description_en')) {
+                if (! $model->isDirty('description_en') && ! $model->keepsHandTranslation('description')) {
                     $model->description_en = null;
                     $model->description_html_en = null;
                 }
@@ -699,7 +711,7 @@ class Event extends Model
             }
 
             if ($model->isDirty('short_description') && $model->exists) {
-                if (! $model->isDirty('short_description_en')) {
+                if (! $model->isDirty('short_description_en') && ! $model->keepsHandTranslation('short_description')) {
                     $model->short_description_en = null;
                 }
                 $model->translation_attempts = 0;
@@ -711,6 +723,9 @@ class Event extends Model
                     $eventRole->save();
                 }
             }
+
+            // Last, so a correction is dated against the original exactly as it is written.
+            $model->stampHandTranslations();
         });
 
         // Every flyer write path in the app ends in an Eloquent save(), so hooking the model
@@ -4170,6 +4185,192 @@ class Event extends Model
         }
 
         return $this->translationLanguageCodeCache = $lang;
+    }
+
+    /**
+     * The translated fields a person may correct by hand (the Translation row under About on the
+     * event form, EventTranslationEdits). Each one's translation is "{$field}_en", in the event's
+     * target language whatever its name says.
+     */
+    public const HAND_TRANSLATABLE_FIELDS = ['name', 'short_description', 'description'];
+
+    /**
+     * Whether a person corrected this field's translation by hand. app:translate never writes such
+     * a field, a change of the original keeps it (marked by translationIsStale()), and anything
+     * that refreshes translations in bulk must skip it too.
+     */
+    public function translationIsManual(string $field): bool
+    {
+        return isset($this->translationOverrides()[$field]);
+    }
+
+    /**
+     * A correction made against an original that has changed since: kept and still shown, and the
+     * event form says the original changed so its owner can look again.
+     */
+    public function translationIsStale(string $field): bool
+    {
+        $entry = $this->translationOverrides()[$field] ?? null;
+
+        // Not stamped yet: made in this save, and stamped from the original as it is written.
+        if (! $entry || ($entry['source'] ?? null) === null) {
+            return false;
+        }
+
+        return ! hash_equals($entry['source'], self::translationSourceHash($this->{$field}));
+    }
+
+    /**
+     * The corrections, by field: `source` is the hash of the original each was made against.
+     *
+     * @return array<string, array{source: ?string, at: ?string}>
+     */
+    public function translationOverrides(): array
+    {
+        // An event read with a narrowed select has no such attribute. Read it once rather than
+        // answer "nobody corrected anything": a save would then clear a correction.
+        if (! array_key_exists('translation_overrides', $this->attributes)) {
+            if (! $this->exists) {
+                return [];
+            }
+            $this->attributes['translation_overrides'] = static::query()->whereKey($this->getKey())->value('translation_overrides');
+            $this->syncOriginalAttribute('translation_overrides');
+        }
+
+        $stored = $this->translation_overrides;
+        if (! is_array($stored)) {
+            return [];
+        }
+
+        $overrides = [];
+        foreach (self::HAND_TRANSLATABLE_FIELDS as $field) {
+            if (isset($stored[$field]) && is_array($stored[$field])) {
+                $source = $stored[$field]['source'] ?? null;
+                $overrides[$field] = [
+                    'source' => is_string($source) && preg_match('/^[0-9a-f]{40}$/', $source) ? $source : null,
+                    'at' => is_string($stored[$field]['at'] ?? null) ? $stored[$field]['at'] : null,
+                ];
+            }
+        }
+
+        return $overrides;
+    }
+
+    /** What a correction is dated against: the original, with line endings and edges evened out. */
+    public static function translationSourceHash(?string $text): string
+    {
+        return sha1(trim(str_replace(["\r\n", "\r"], "\n", (string) $text)));
+    }
+
+    /**
+     * Record that $field's translation is a person's. $basis is the hash of the original it was
+     * made against when that is not the original being saved (a copy of an event carries its
+     * source's); null stamps the original as this save writes it.
+     */
+    public function markTranslationManual(string $field, ?string $basis = null): void
+    {
+        $overrides = $this->translationOverrides();
+        $overrides[$field] = [
+            'source' => $basis !== null && preg_match('/^[0-9a-f]{40}$/', $basis) ? $basis : null,
+            'at' => now()->toIso8601String(),
+        ];
+        $this->translation_overrides = $overrides;
+    }
+
+    /** "Keep mine": the correction still fits the changed original, so it is dated against it now. */
+    public function keepTranslationOverride(string $field): void
+    {
+        $overrides = $this->translationOverrides();
+        if (! isset($overrides[$field])) {
+            return;
+        }
+        $overrides[$field]['source'] = null;
+        $this->translation_overrides = $overrides;
+    }
+
+    /** Forget that $field was corrected, leaving its translation as it is. */
+    public function forgetTranslationOverride(string $field): void
+    {
+        $overrides = $this->translationOverrides();
+        unset($overrides[$field]);
+        $this->translation_overrides = $overrides ?: null;
+    }
+
+    /** Back to the automatic translation: the correction goes and app:translate takes the field up again. */
+    public function useAutomaticTranslation(string $field): void
+    {
+        $this->forgetTranslationOverride($field);
+        $this->{$field.'_en'} = null;
+        if ($field === 'description') {
+            $this->description_html_en = null;
+        }
+        $this->translation_attempts = 0;
+    }
+
+    /**
+     * Saving hook: a corrected translation that something other than the correction itself wrote
+     * to (an import or a feed filling name_en on an event it updates) is put back as it was.
+     */
+    protected function holdHandTranslations(): void
+    {
+        if (! $this->exists || ! $this->isDirty(array_map(fn ($field) => $field.'_en', self::HAND_TRANSLATABLE_FIELDS))) {
+            return;
+        }
+
+        $overrides = $this->translationOverrides();
+        $before = $this->getOriginal('translation_overrides');
+        $before = is_array($before) ? $before : [];
+
+        foreach ($overrides as $field => $entry) {
+            // The entry changed in this save: this IS the correction (or Keep), so it stands.
+            if (! isset($before[$field]) || ($before[$field]['at'] ?? null) !== $entry['at'] || ($before[$field]['source'] ?? null) !== $entry['source']) {
+                continue;
+            }
+            if ($this->isDirty($field.'_en')) {
+                $this->{$field.'_en'} = $this->getOriginal($field.'_en');
+            }
+        }
+    }
+
+    /**
+     * Saving hook, when $field's original changed: whether its translation stays. A correction
+     * does, and is marked as made against an older original; with the original emptied there is
+     * nothing left to translate, and the correction goes with it.
+     */
+    protected function keepsHandTranslation(string $field): bool
+    {
+        if (! $this->translationIsManual($field)) {
+            return false;
+        }
+
+        if (trim((string) $this->{$field}) === '') {
+            $this->forgetTranslationOverride($field);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Saving hook: date each correction made in this save against the original as it is written. */
+    protected function stampHandTranslations(): void
+    {
+        if (! array_key_exists('translation_overrides', $this->attributes) || $this->attributes['translation_overrides'] === null) {
+            return;
+        }
+
+        $overrides = $this->translationOverrides();
+        $stamped = false;
+        foreach ($overrides as $field => $entry) {
+            if ($entry['source'] === null) {
+                $overrides[$field]['source'] = self::translationSourceHash($this->{$field});
+                $stamped = true;
+            }
+        }
+
+        if ($stamped) {
+            $this->translation_overrides = $overrides;
+        }
     }
 
     /**

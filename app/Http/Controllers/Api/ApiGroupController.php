@@ -88,7 +88,7 @@ class ApiGroupController extends Controller
         // Auto-translate name into the schedule's target language when it differs from the authored language
         if ($role->language_code && $role->language_code !== $role->translation_language_code) {
             try {
-                $translations = GeminiUtils::translateGroupNames([$request->name], $role->language_code, $role->translation_language_code);
+                $translations = GeminiUtils::translateGroupNames([$request->name], $role->language_code, $role->translation_language_code, \App\Services\TranslationGlossary::relevant(\App\Services\TranslationGlossary::forRole($role), (string) $request->name));
                 if (isset($translations[$request->name])) {
                     $groupData['name_en'] = $translations[$request->name];
                 }
@@ -153,7 +153,7 @@ class ApiGroupController extends Controller
             // Auto-translate into the schedule's target language when it differs from the authored language
             if ($role->language_code && $role->language_code !== $role->translation_language_code) {
                 try {
-                    $translations = GeminiUtils::translateGroupNames([$request->name], $role->language_code, $role->translation_language_code);
+                    $translations = GeminiUtils::translateGroupNames([$request->name], $role->language_code, $role->translation_language_code, \App\Services\TranslationGlossary::relevant(\App\Services\TranslationGlossary::forRole($role), (string) $request->name));
                     if (isset($translations[$request->name])) {
                         $group->name_en = $translations[$request->name];
                     }

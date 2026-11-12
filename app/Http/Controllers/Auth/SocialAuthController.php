@@ -248,7 +248,10 @@ class SocialAuthController extends Controller
         $providerLocale = $provider === 'google' ? ($socialUser->user['locale'] ?? null) : null;
         $languageCode = null;
 
-        if ($providerLocale && is_valid_language_code(substr($providerLocale, 0, 2))) {
+        // The whole locale first, so Google's 'pt-PT' is European Portuguese and not 'pt'.
+        if ($providerLocale && is_valid_language_code(str_replace('_', '-', $providerLocale))) {
+            $languageCode = str_replace('_', '-', $providerLocale);
+        } elseif ($providerLocale && is_valid_language_code(substr($providerLocale, 0, 2))) {
             $languageCode = substr($providerLocale, 0, 2);
         } elseif (session()->has('guest_language') && is_valid_language_code(session('guest_language'))) {
             $languageCode = session('guest_language');

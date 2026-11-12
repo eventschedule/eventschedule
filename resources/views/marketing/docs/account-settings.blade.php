@@ -197,7 +197,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Language</span></td>
-                        <td>Sets the interface language. Twelve languages are available: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese, Romanian, Russian and Spanish.</td>
+                        <td>Sets the interface language. Thirteen languages are available: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian and Spanish.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Use 24-hour time format</span></td>

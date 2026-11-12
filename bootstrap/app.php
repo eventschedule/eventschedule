@@ -108,6 +108,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Sanitize user agent before session middleware processes it
         $middleware->prepend(SanitizeUserAgent::class);
 
+        // ?lang=pt-pt or ?lang=pt_PT is read as ?lang=pt-PT by everything after it
+        $middleware->prepend(\App\Http\Middleware\NormalizeLanguageQuery::class);
+
         // Detect trailing slash in URL before Laravel normalizes it
         $middleware->prepend(DetectTrailingSlash::class);
 

@@ -70,7 +70,9 @@ class EventCreateRequest extends FormRequest
             'venue_phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
             'members.*.phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
         ], $this->couponDiscountRules($this->input('coupon_discount_type')),
-            $this->venueFieldRules(), $this->eventCustomFieldRules());
+            $this->venueFieldRules(), $this->eventCustomFieldRules(),
+            // A correction to the automatic translation (the Translation row under About).
+            \App\Services\EventTranslationEdits::rules());
     }
 
     public function attributes(): array

@@ -114,6 +114,11 @@ return [
         'length' => ' The translation must be at most :max_length characters long.',
         'glossary_header' => " Use these exact translations for the following terms:\n",
         'glossary_line' => '- ":original" => ":translation"',
+        // The schedule's own glossary (App\Services\TranslationGlossary): names that are never
+        // translated. Wherever they appear, inside a sentence too, and with their own capitals.
+        'glossary_keep_header' => " Keep these names and terms exactly as written wherever they appear, with the same spelling, capitals and punctuation. Never translate, transliterate or adapt them:\n",
+        'glossary_keep_line' => '- ":original"',
+        'glossary_reminder' => 'Important: a previous translation of this text changed :terms. Write each of them exactly as it is written in the text.',
     ],
 
     'translate_group_names' => [
@@ -126,6 +131,17 @@ return [
 
     'translate_custom_field_options' => [
         'base' => "Translate these dropdown option values from :from to :to. CRITICAL: Return ONLY a raw JSON object. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }. Each key is the original value and the value is the translation in :to:\n:values",
+    ],
+
+    // A target language that is one variant of a language, keyed by its code in
+    // config('app.supported_languages'): its name in every translation prompt, and the rules that
+    // tell it apart, said after the name (GeminiUtils::languageVariantInstruction()). A model
+    // asked for "Portuguese" writes Brazilian Portuguese, so Portugal's is named and shown.
+    'language_variants' => [
+        'pt-PT' => [
+            'name' => 'European Portuguese (Portugal)',
+            'instruction' => ' Write European Portuguese as used in Portugal, not Brazilian Portuguese: for example "bilhete" (not "ingresso"), "ecrã" (not "tela"), "telemóvel" (not "celular"), "utilizador" (not "usuário"), "equipa" (not "equipe"), "registo" (not "registro"), and "estamos a preparar" (not "estamos preparando").',
+        ],
     ],
 
     /*

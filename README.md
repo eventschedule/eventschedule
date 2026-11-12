@@ -103,7 +103,7 @@ Event Schedule gives a venue, a performer or a community one place to publish a 
 - **Backup and restore:** Export a schedule's data, optionally with its images, and import it again.
 - **Security:** TOTP two-factor authentication with recovery codes, a searchable audit log, and optional Google and Facebook sign-in.
 - **Teams:** Several members per schedule, as admins or read-only viewers who can still scan tickets at the door, plus team availability tracking.
-- **12 interface languages:** English, Spanish, German, French, Italian, Portuguese, Dutch, Romanian, Estonian, Russian, Hebrew and Arabic, with proper RTL for the last two.
+- **13 interface languages:** English, Spanish, German, French, Italian, Portuguese (Brazil and Portugal), Dutch, Romanian, Estonian, Russian, Hebrew and Arabic, with proper RTL for the last two.
 - **Multi-tenant mode:** Optionally [run it as a service](https://eventschedule.com/docs/saas) for others, with your own plans and billing.
 - **Federation:** Optionally list your public events on eventschedule.com. Off by default, and every listing links back to the event on your own site.
 

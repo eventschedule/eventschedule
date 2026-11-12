@@ -6,7 +6,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Embed Tickets"
-        description="Embed a ticket purchase or RSVP form on any website with one iframe tag. Supports every payment method, dark mode, and 12 languages." />
+        description="Embed a ticket purchase or RSVP form on any website with one iframe tag. Supports every payment method, dark mode, and 13 languages." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
@@ -634,7 +634,7 @@
             ['embed=true', 'Required', 'Strips the schedule header, footer and banner, and is the flag that permits the page to be framed at all.'],
             ['dark=true', 'Optional', 'Forces the dark finish, and dark=false forces the light one. Left off, the widget follows the visitor\'s own system setting.'],
             ['promo=CODE', 'Optional', 'Pre-fills the promo code box, so one link can carry its own discount.'],
-            ['lang=xx', 'Optional', 'Sets the interface language. Twelve are supported, Arabic and Hebrew among them, and those lay the form out right to left.'],
+            ['lang=xx', 'Optional', 'Sets the interface language. Thirteen are supported, Arabic and Hebrew among them, and those lay the form out right to left.'],
         ];
 
         // Accent finishes. The ink is picked by the same rule the product uses:
@@ -1215,7 +1215,7 @@
                 </div>
 
                 <div class="es-widg-card flex flex-col p-6" data-reveal>
-                    <h3 class="es-widg-ink mb-2 text-base font-bold">Twelve languages</h3>
+                    <h3 class="es-widg-ink mb-2 text-base font-bold">Thirteen languages</h3>
                     <p class="es-widg-muted mb-4 text-sm leading-relaxed">
                         Set <span class="es-widg-key">lang=xx</span> and the widget speaks it. Arabic
                         and Hebrew lay the whole form out right to left, including the ticket rows and

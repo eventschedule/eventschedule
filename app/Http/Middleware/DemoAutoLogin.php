@@ -135,7 +135,8 @@ class DemoAutoLogin
         }
 
         $supportedLanguages = array_keys(config('app.supported_languages', ['en' => 'english']));
-        $browserLanguage = $request->getPreferredLanguage($supportedLanguages);
-        $request->session()->put('demo_language', $browserLanguage ?? 'en');
+        // Symfony answers in its own spelling, 'pt_PT' for the code 'pt-PT'.
+        $browserLanguage = str_replace('_', '-', (string) $request->getPreferredLanguage($supportedLanguages));
+        $request->session()->put('demo_language', is_valid_language_code($browserLanguage) ? $browserLanguage : 'en');
     }
 }

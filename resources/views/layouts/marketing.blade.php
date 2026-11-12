@@ -103,7 +103,7 @@
     @php
         $ogLocaleMap = [
             'en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE',
-            'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_PT',
+            'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_BR', 'pt-PT' => 'pt_PT',
             'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE', 'ru' => 'ru_RU', 'ro' => 'ro_RO',
         ];
         $currentOgLocale = $ogLocaleMap[app()->getLocale()] ?? 'en_US';

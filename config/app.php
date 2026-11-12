@@ -295,6 +295,7 @@ return [
         'it' => 'italian',
         'nl' => 'dutch',
         'pt' => 'portuguese',
+        'pt-PT' => 'portuguese_portugal',
         'ro' => 'romanian',
         'ru' => 'russian',
     ],

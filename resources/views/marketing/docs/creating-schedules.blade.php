@@ -13,6 +13,7 @@
             <x-doc-nav-link href="#details-general">General</x-doc-nav-link>
             <x-doc-nav-link href="#ai-details-generator">AI Details Generator</x-doc-nav-link>
             <x-doc-nav-link href="#details-localization">Language and time</x-doc-nav-link>
+            <x-doc-nav-link href="#details-glossary">Translation glossary</x-doc-nav-link>
             <x-doc-nav-link href="#contact-info">Contact Info</x-doc-nav-link>
             <x-doc-nav-link href="#announcement-bar">Announcement bar</x-doc-nav-link>
         </x-doc-nav-group>
@@ -264,11 +265,11 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The language you write your schedule and events in, which also sets the interface language on your schedule page. Twelve languages are supported: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese, Romanian, Russian, and Spanish.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The language you write your schedule and events in, which also sets the interface language on your schedule page. Thirteen languages are supported: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian, and Spanish.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Offer a second language to visitors</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Turn this on to have your schedule and events translated automatically, then pick the target under <strong class="text-gray-900 dark:text-white">Translate into</strong> (English by default; the language you write in is not offered). Visitors get a button to switch between the two. Available on all plans. Translations are generated in the background, so allow up to an hour for them to appear; changing the target re-translates everything, and editing an event refreshes its own translation. Turning the setting back off discards every stored translation for the schedule, including wording you corrected by hand, so you are asked to confirm first.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Turn this on to have your schedule and events translated automatically, then pick the target under <strong class="text-gray-900 dark:text-white">Translate into</strong> (English by default; the language you write in is not offered). Visitors get a button to switch between the two. Available on all plans. Translations are generated in the background, so allow up to an hour for them to appear; changing the target re-translates everything, and editing an event refreshes its own translation, except wording you <a href="{{ route('marketing.docs.creating_events') }}#translation" class="doc-link">corrected by hand</a>. Turning the setting back off discards every stored translation for the schedule, including wording you corrected by hand, so you are asked to confirm first.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Timezone</h4>
@@ -281,6 +282,24 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Which day your calendar week starts on. All seven days are available; Sunday unless you change it. Closed, the row names the day only when it is not Sunday.</p>
+            </div>
+        </div>
+
+        <!-- Translation glossary -->
+        <h3 id="details-glossary" class="doc-subheading">Translation glossary</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Shown under Language and time while your schedule offers a second language. It is a list of the words automatic translation should treat your way: the names of your organization, venues and programs, which it keeps exactly as you wrote them, and the odd expression that must always be translated the same way. Closed, the row lists the terms. Available on all plans.</p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Keep a name as written</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Type the name in the first box (for example <strong class="text-gray-900 dark:text-white">Drink &amp; Draw</strong>) and leave the second box empty (it reads <strong class="text-gray-900 dark:text-white">Keep as written</strong>). A link under the translation switch in Language and time opens this row too. Wherever the name appears, in an event's name, its description, an agenda item, your schedule's own text, a sub-schedule, a category or a sponsor, the translation keeps it with the same spelling and capitals. If a translation comes back without it, it is asked for once more.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">A fixed translation</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the second box to have a term always translated that way into your target language. A term matches whatever its capitals, and each term is listed once. Up to 100 terms, of up to 100 characters each.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After a change</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">When you save, the translations that use a term you added, changed or removed, and do not already read the way the list now says, are translated again in the background: your schedule's own text, its sub-schedule names and its upcoming events. Nothing else is translated again, past events are left as they are, and an event translation you <a href="{{ route('marketing.docs.creating_events') }}" class="doc-link">corrected by hand</a> is never replaced. Turning translation off keeps the list for when you turn it back on.</p>
             </div>
         </div>
 

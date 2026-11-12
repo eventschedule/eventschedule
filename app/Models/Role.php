@@ -4572,6 +4572,15 @@ class Role extends Model implements MustVerifyEmail
         return $this->hasOne(TicketReminderSetting::class)->withDefault(TicketReminderSetting::DEFAULTS);
     }
 
+    /**
+     * The schedule's translation glossary (Details > Translation glossary), in the order the owner
+     * wrote it. Read through App\Services\TranslationGlossary, which applies it.
+     */
+    public function translationGlossaryEntries()
+    {
+        return $this->hasMany(TranslationGlossaryEntry::class)->orderBy('position')->orderBy('id');
+    }
+
     /** Whether this schedule's ticket holders are reminded: the owner's choice, or the default. */
     public function ticketRemindersOn(): bool
     {

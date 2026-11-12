@@ -92,7 +92,9 @@ class EventUpdateRequest extends FormRequest
 
             'existing_event_sponsors' => ['nullable', 'string', 'json'],
         ], $this->couponDiscountRules($this->input('coupon_discount_type'), $this->storedCouponDiscountType()),
-            $this->venueFieldRules(), $this->eventCustomFieldRules());
+            $this->venueFieldRules(), $this->eventCustomFieldRules(),
+            // A correction to the automatic translation (the Translation row under About).
+            \App\Services\EventTranslationEdits::rules());
     }
 
     /**

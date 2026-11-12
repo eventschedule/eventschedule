@@ -883,11 +883,11 @@
                     ],
                     [
                         'q' => 'What languages does Event Schedule support?',
-                        'a' => 'Twelve: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese, Romanian, Russian and Spanish. The right-to-left languages are laid out right to left rather than bolted onto a left-to-right page.',
+                        'a' => 'Thirteen: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian and Spanish. The right-to-left languages are laid out right to left rather than bolted onto a left-to-right page.',
                     ],
                     [
                         'q' => 'Does Event Schedule support multiple languages?',
-                        'a' => 'Yes. Each schedule picks the language it is written in, so two schedules on one account can be in two different languages. You can also nominate one other language to translate into, and event names and descriptions are translated by AI into it with a language switch on your public page. That is free, and it is one target language at a time rather than all twelve at once.',
+                        'a' => 'Yes. Each schedule picks the language it is written in, so two schedules on one account can be in two different languages. You can also nominate one other language to translate into, and event names and descriptions are translated by AI into it with a language switch on your public page. That is free, and it is one target language at a time rather than all thirteen at once.',
                         'links' => [['AI features', marketing_url('/features/ai')]],
                     ],
                 ],

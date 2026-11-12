@@ -144,6 +144,8 @@ class RegenerateRoleTranslations implements ShouldQueue
                 'short_description_en' => null,
                 'description_en' => null,
                 'description_html_en' => null,
+                // A correction made by hand was in the OLD target language, so it goes as well.
+                'translation_overrides' => null,
                 'translation_attempts' => 0,
             ]);
 
@@ -212,7 +214,7 @@ class RegenerateRoleTranslations implements ShouldQueue
             return;
         }
 
-        $translations = GeminiUtils::translateGroupNames($names, $role->language_code, $target);
+        $translations = GeminiUtils::translateGroupNames($names, $role->language_code, $target, \App\Services\TranslationGlossary::relevant(\App\Services\TranslationGlossary::forRole($role), $names));
 
         // translateGroupNames returns [] on API failure/quota, indistinguishable from success.
         // Groups are never re-translated by the cron, so blanking name_en here would lose them

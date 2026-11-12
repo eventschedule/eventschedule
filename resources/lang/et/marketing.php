@@ -20,7 +20,7 @@ return [
     'ticketing_description' => 'Müü pileteid oma sündmuse lehelt ilma platvormitasudeta. Maksed Stripe\'i või PayPaliga, täielik või osaline tagasimakse ja registreerimine QR-koodiga.',
 
     'ai_title' => 'AI sündmuste import: plakatist saab sündmus | Event Schedule',
-    'ai_description' => 'Kleebi tekst või lohista plakat ja AI täidab sündmuse andmed: kuupäev, koht, esinejad, hind. Tasuta igas paketis, koos tõlkega 12 keelde.',
+    'ai_description' => 'Kleebi tekst või lohista plakat ja AI täidab sündmuse andmed: kuupäev, koht, esinejad, hind. Tasuta igas paketis, koos tõlkega 13 keelde.',
 
     'calendar_sync_title' => 'Kahesuunaline kalendri sünkroonimine Google\'i, Outlooki ja CalDAV-iga',
     'calendar_sync_description' => 'Kahesuunaline sünkroonimine Google Calendari, Outlooki ja mis tahes CalDAV-serveriga, tasuta igas paketis. Osalejad lisavad ühe sündmuse või tellivad sinu kalendri elava voo.',

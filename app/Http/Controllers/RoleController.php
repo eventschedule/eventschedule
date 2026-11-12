@@ -6027,7 +6027,8 @@ class RoleController extends Controller
                     $translations = GeminiUtils::translateCustomFieldNames(
                         array_values($fieldsNeedingTranslation),
                         $role->language_code,
-                        $role->translation_language_code
+                        $role->translation_language_code,
+                        \App\Services\TranslationGlossary::relevant(\App\Services\TranslationGlossary::forRole($role), array_values($fieldsNeedingTranslation))
                     );
 
                     foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
@@ -6281,6 +6282,18 @@ class RoleController extends Controller
 
         $role->save();
 
+        // Details > Translation glossary, a table of its own (roles is at its row limit). Only on a
+        // save whose form drew the list: absent is not empty. After the schedule's own save, so a
+        // save refused above (a taken subdomain) changes no glossary either, and ahead of the
+        // sub-schedule names translated below, which then use it. What a change touches is handed
+        // back to the translator (TranslationGlossary::requeue()), on the queue.
+        if (! is_demo_mode() && $request->boolean('glossary_submitted')) {
+            $glossaryChanges = \App\Services\TranslationGlossary::save($role, (array) $request->input('glossary', []));
+            if ($glossaryChanges) {
+                \App\Jobs\RetranslateGlossaryTerms::dispatch($role, $glossaryChanges);
+            }
+        }
+
         // ResolveCustomDomain keeps a custom host's row for ten minutes, subdomain included, and
         // the custom domain block below forgets it only when the host or the mode changes. After a
         // rename (the field is shown in Direct mode when the subdomain is the main address), the
@@ -6478,7 +6491,7 @@ class RoleController extends Controller
         $translations = [];
         if (! empty($newGroupNames) && $role->language_code !== $role->translation_language_code) {
             try {
-                $translations = GeminiUtils::translateGroupNames($newGroupNames, $role->language_code, $role->translation_language_code);
+                $translations = GeminiUtils::translateGroupNames($newGroupNames, $role->language_code, $role->translation_language_code, \App\Services\TranslationGlossary::relevant(\App\Services\TranslationGlossary::forRole($role), $newGroupNames));
             } catch (\Exception $e) {
                 \Log::error('Failed to translate group names: '.$e->getMessage());
                 // Continue without translations if API fails

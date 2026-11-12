@@ -11,7 +11,7 @@ Key facts:
 - **Selfhosted**: every Pro and Enterprise feature is included on your own server.
 - **Fees**: zero platform fees on ticket sales, on every plan. Only the payment processor's own fee applies.
 - **Open source**: the whole codebase is public under the Attribution Assurance License.
-- **Languages**: 12 supported languages, with automatic translation of event content.
+- **Languages**: 13 supported languages, with automatic translation of event content.
 
 ## Product
 

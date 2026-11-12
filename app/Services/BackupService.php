@@ -232,6 +232,13 @@ class BackupService
             'hours_before' => (int) $role->ticketReminderSetting->hours_before,
         ];
 
+        // The translation glossary (translation_glossary_entries), in its order. A null
+        // translation keeps the term as written.
+        $roleData['translation_glossary'] = array_map(
+            fn ($entry) => ['term' => $entry['term'], 'translation' => $entry['translation']],
+            \App\Services\TranslationGlossary::entries($role)
+        );
+
         if ($includeImages) {
             $this->collectRoleImages($role, $roleData, $imageFiles);
         }
@@ -694,6 +701,10 @@ class BackupService
         $eventData['contact_name'] = $event->contact_name;
         $eventData['contact_email'] = $event->contact_email;
         $eventData['contact_phone'] = $event->contact_phone;
+        // Also not fillable: which translations a person corrected by hand. Without it a restored
+        // event's corrections would read as automatic, and the next change of the original would
+        // throw them away.
+        $eventData['translation_overrides'] = $event->translationOverrides() ?: null;
 
         if ($includeImages) {
             $this->collectEventImages($event, $eventData, $imageFiles);
@@ -1980,6 +1991,12 @@ class BackupService
             TicketReminderSetting::store($role, $values);
         }
 
+        // save() cleans and caps the rows as the schedule form's are. Nothing to re-translate: a
+        // restored schedule has no translations of its own yet.
+        if (is_array($data['translation_glossary'] ?? null)) {
+            \App\Services\TranslationGlossary::save($role, $data['translation_glossary']);
+        }
+
         return $role;
     }
 
@@ -2087,6 +2104,19 @@ class BackupService
         $event->contact_name = TextUtils::clamp($data['contact_name'] ?? null, 255);
         $event->contact_email = TextUtils::clamp($data['contact_email'] ?? null, 255);
         $event->contact_phone = TextUtils::clamp($data['contact_phone'] ?? null, 255);
+
+        // Corrections made by hand (not fillable), read back through the model so an archive edited
+        // by hand cannot carry anything but known fields and hashes. Only where a translation came
+        // back with it.
+        $event->translation_overrides = null;
+        if (is_array($data['translation_overrides'] ?? null)) {
+            foreach (Event::HAND_TRANSLATABLE_FIELDS as $field) {
+                $source = $data['translation_overrides'][$field]['source'] ?? null;
+                if (isset($data['translation_overrides'][$field]) && is_string($source) && filled($event->{$field.'_en'})) {
+                    $event->markTranslationManual($field, $source);
+                }
+            }
+        }
 
         // Remap the appointment type (not fillable). Drop the link if the type didn't import.
         $apptRefId = $data['_appointment_type_ref_id'] ?? null;

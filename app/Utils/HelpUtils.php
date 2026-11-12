@@ -32,6 +32,7 @@ class HelpUtils
                 'section-details' => '/docs/creating-schedules#details',
                 'details-tab-general' => '/docs/creating-schedules#details-general',
                 'details-tab-localization' => '/docs/creating-schedules#details-localization',
+                'details-tab-glossary' => '/docs/creating-schedules#details-glossary',
                 'details-tab-contact' => '/docs/creating-schedules#contact-info',
                 'details-tab-announcement' => '/docs/creating-schedules#announcement-bar',
                 'section-sources' => '/docs/creating-schedules#event-sources',

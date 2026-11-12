@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\EventRole;
 use App\Models\Role;
+use App\Services\TranslationGlossary;
 use App\Services\TranslationQueue;
 use App\Services\UsageTrackingService;
 use App\Utils\GeminiUtils;
@@ -127,6 +128,9 @@ class Translate extends Command
     /** Set when a pass stopped on its time budget rather than running out of rows. */
     private bool $budgetReached = false;
 
+    /** The schedule's glossary while translateRole() runs its batch lists; empty otherwise. */
+    private array $batchGlossary = [];
+
     public function handle()
     {
         $this->debug = (bool) $this->option('debug');
@@ -184,9 +188,16 @@ class Translate extends Command
         $remaining = count($passes);
         $startedAt = microtime(true);
 
-        foreach ($passes as $pass) {
-            $this->beginPass($remaining--);
-            $this->runTranslateStep($pass);
+        // Every row of a schedule asks for the same glossary: read each once per run.
+        TranslationGlossary::memoize();
+
+        try {
+            foreach ($passes as $pass) {
+                $this->beginPass($remaining--);
+                $this->runTranslateStep($pass);
+            }
+        } finally {
+            TranslationGlossary::forget();
         }
 
         $this->recordRunSummary($startedAt, targeted: (bool) ($roleId || $eventId));
@@ -304,13 +315,17 @@ class Translate extends Command
 
         // Query-builder updates so no model events fire: Event::saving() would re-derive the `_html`
         // columns from the values being nulled.
-        Event::where('id', $event->id)->update([
-            'name_en' => null,
-            'short_description_en' => null,
-            'description_en' => null,
-            'description_html_en' => null,
-            'translation_attempts' => 0,
-        ]);
+        // Except what somebody corrected by hand: that is a person's wording, not a cached answer.
+        $reset = ['translation_attempts' => 0];
+        foreach (['name', 'short_description', 'description'] as $field) {
+            if (! $event->translationIsManual($field)) {
+                $reset[$field.'_en'] = null;
+                if ($field === 'description') {
+                    $reset['description_html_en'] = null;
+                }
+            }
+        }
+        Event::where('id', $event->id)->update($reset);
 
         EventPart::where('event_id', $event->id)->update([
             'name_en' => null,
@@ -440,9 +455,12 @@ class Translate extends Command
                 if ($fromLang == $toLang) {
                     // Source already equals the target: mark it done with empty strings so the row
                     // drops out of the query instead of being re-examined every run.
-                    $event->name_en = '';
-                    $event->description_en = '';
-                    $event->short_description_en = '';
+                    // Never over a correction somebody made by hand (Event::translationIsManual()).
+                    foreach (['name', 'description', 'short_description'] as $field) {
+                        if (! $event->translationIsManual($field)) {
+                            $event->{"{$field}_en"} = '';
+                        }
+                    }
                     $event->save();
                     $this->parkedCount++;
                     $skipped++;
@@ -450,16 +468,16 @@ class Translate extends Command
                     continue;
                 }
 
-                $glossary = [];
-                if ($event->creatorRole && $event->creatorRole->name && $event->creatorRole->name_en) {
-                    $glossary[$event->creatorRole->name] = $event->creatorRole->name_en;
-                }
+                // The schedule's name as it is translated, and the glossaries of the schedules
+                // the event belongs to (Details > Translation glossary).
+                $glossary = TranslationGlossary::forEvent($event, $fromLang, $toLang);
 
                 $calls = 0;
                 $successes = 0;
 
                 foreach (['name', 'description', 'short_description'] as $field) {
-                    if ($event->{$field} && ! $event->{"{$field}_en"}) {
+                    // A correction made by hand is a person's, never the model's to replace.
+                    if ($event->{$field} && ! $event->{"{$field}_en"} && ! $event->translationIsManual($field)) {
                         $value = $this->translateText($event->{$field}, $fromLang, $toLang, $glossary, $calls, $successes, $field);
                         if ($value !== null) {
                             $event->{"{$field}_en"} = $value;
@@ -549,7 +567,7 @@ class Translate extends Command
                 foreach (['name', 'description', 'short_description'] as $field) {
                     $target = "{$field}_translated";
                     if ($eventRole->event->{$field} && ! $eventRole->{$target}) {
-                        $value = $this->translateText($eventRole->event->{$field}, $fromLang, $toLang, [], $calls, $successes, $field);
+                        $value = $this->translateText($eventRole->event->{$field}, $fromLang, $toLang, TranslationGlossary::forCurator($eventRole->role, $eventRole->event, $fromLang, $toLang), $calls, $successes, $field);
                         if ($value !== null) {
                             $eventRole->{$target} = $value;
                             if ($field === 'description') {
@@ -629,10 +647,7 @@ class Translate extends Command
                     continue;
                 }
 
-                $glossary = [];
-                if ($part->event->creatorRole && $part->event->creatorRole->name && $part->event->creatorRole->name_en) {
-                    $glossary[$part->event->creatorRole->name] = $part->event->creatorRole->name_en;
-                }
+                $glossary = TranslationGlossary::forEvent($part->event, $fromLang, $toLang);
 
                 $calls = 0;
                 $successes = 0;
@@ -682,17 +697,22 @@ class Translate extends Command
         $calls = 0;
         $successes = 0;
 
+        // The owner's glossary (Details > Translation glossary), for every field below and for the
+        // lists translated in batches (sponsors, custom fields, labels, categories).
+        $ownGlossary = TranslationGlossary::forRole($role, $fromLang, $toLang);
+        $this->batchGlossary = $ownGlossary;
+
         // Translate the name first so every later field can reuse it as a glossary entry and stay
         // consistent with how the schedule is titled.
         if ($role->name && ! $role->name_en) {
-            $value = $this->translateText($role->name, $fromLang, $toLang, [], $calls, $successes, 'name');
+            $value = $this->translateText($role->name, $fromLang, $toLang, $ownGlossary, $calls, $successes, 'name');
             if ($value !== null) {
                 $role->name_en = $value;
             }
         }
 
-        $glossary = [];
-        if ($role->name && $role->name_en) {
+        $glossary = $ownGlossary;
+        if ($role->name && $role->name_en && ! array_key_exists($role->name, $glossary)) {
             $glossary[$role->name] = $role->name_en;
         }
 
@@ -710,10 +730,14 @@ class Translate extends Command
             }
         }
 
-        $this->translateSponsorLogos($role, $fromLang, $toLang, $calls, $successes);
-        $this->translateCustomFields($role, $fromLang, $toLang, $calls, $successes);
-        $this->translateCustomLabels($role, $fromLang, $toLang, $calls, $successes);
-        $this->translateEventCategories($role, $fromLang, $toLang, $calls, $successes);
+        try {
+            $this->translateSponsorLogos($role, $fromLang, $toLang, $calls, $successes);
+            $this->translateCustomFields($role, $fromLang, $toLang, $calls, $successes);
+            $this->translateCustomLabels($role, $fromLang, $toLang, $calls, $successes);
+            $this->translateEventCategories($role, $fromLang, $toLang, $calls, $successes);
+        } finally {
+            $this->batchGlossary = [];
+        }
 
         if ($calls === 0) {
             $this->markChecked($role);
@@ -783,7 +807,14 @@ class Translate extends Command
         if (! empty($optionValues)) {
             $calls++;
             $this->debugLine('Translating '.count($optionValues).' custom field option values');
-            $translations = GeminiUtils::translateCustomFieldOptions(array_values($optionValues), $from, $to);
+            $translations = GeminiUtils::translateCustomFieldOptions(array_values($optionValues), $from, $to, TranslationGlossary::relevant($this->batchGlossary, array_values($optionValues)));
+
+            // An option that IS a glossary term is answered by the glossary.
+            foreach ($optionValues as $option) {
+                if (($fixed = TranslationGlossary::exactMatch($this->batchGlossary, $option)) !== null) {
+                    $translations[$option] = $fixed;
+                }
+            }
 
             if (! empty($translations)) {
                 // Only write a dropdown whose options ALL came back. The old code counted any
@@ -863,7 +894,15 @@ class Translate extends Command
         $calls++;
         $this->debugLine('Translating '.count($pending).' '.$label);
 
-        $translations = GeminiUtils::translateCustomFieldNames(array_values($pending), $from, $to);
+        $translations = GeminiUtils::translateCustomFieldNames(array_values($pending), $from, $to, TranslationGlossary::relevant($this->batchGlossary, array_values($pending)));
+
+        // An entry that IS a glossary term (a sponsor called "Drinx") is answered by the glossary,
+        // whatever the model did with it.
+        foreach ($pending as $value) {
+            if (($fixed = TranslationGlossary::exactMatch($this->batchGlossary, $value)) !== null) {
+                $translations[$value] = $fixed;
+            }
+        }
 
         // Count a success only when the call actually resolved something we asked for. A non-empty
         // response is not enough: the model can return a map whose keys have been re-cased, trimmed
@@ -904,15 +943,49 @@ class Translate extends Command
             return null;
         }
 
+        // A text that IS a glossary term ("Drink & Draw" as an event's name) needs nobody to
+        // translate it. Counted as a call that succeeded, so the row is saved and stamped.
+        if (($fixed = TranslationGlossary::exactMatch($glossary, $text)) !== null) {
+            $calls++;
+            $successes++;
+
+            return $fixed;
+        }
+
+        // Only the glossary terms this text uses (Details > Translation glossary can hold a hundred).
+        $glossary = TranslationGlossary::relevant($glossary, $text);
+
         $calls++;
         $maxLength = self::TARGET_MAX_LENGTH[$field] ?? null;
-        $value = GeminiUtils::translate($text, $from, $to, $glossary, [
+        $options = [
             // Tell the model what it is looking at. A bare proper noun with no context is what
             // invited the "describe the venue" answer in the first place. Anything else with a
             // ceiling is a short field (address, city, state, a heading); the rest is prose.
             'kind' => $field === 'name' ? 'name' : ($maxLength !== null ? 'short' : 'body'),
             'max_length' => $maxLength,
-        ]);
+        ];
+        $value = GeminiUtils::translate($text, $from, $to, $glossary, $options);
+
+        // A prompt is a request, not a guarantee: a term the glossary keeps as written that the
+        // answer lost is asked for once more, naming it. A second miss is kept and logged rather
+        // than refused: refusing would leave the text untranslated and buy the same call again
+        // after every cooldown, and an otherwise good translation is worth more to a visitor.
+        if (is_string($value) && trim($value) !== '' && ($lost = TranslationGlossary::missingKept($glossary, $text, $value))) {
+            $retry = GeminiUtils::translate($text, $from, $to, $glossary, $options + ['keep_reminder' => $lost]);
+
+            if (is_string($retry) && trim($retry) !== '') {
+                $value = $retry;
+            }
+
+            if ($stillLost = TranslationGlossary::missingKept($glossary, $text, $value)) {
+                Log::warning('Translate: a glossary term was not kept as written', [
+                    'field' => $field,
+                    'terms' => $stillLost,
+                    'source' => Str::limit($text, 120),
+                    'value' => Str::limit($value, 200),
+                ]);
+            }
+        }
 
         // Strictly before the guard below: a null here still means quota/timeout/503, exactly as
         // the docblock says, and must not be conflated with a value we chose to reject.

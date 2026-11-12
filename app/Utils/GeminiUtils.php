@@ -481,8 +481,8 @@ class GeminiUtils
         }
         // Add language preservation instruction
         if ($role->language_code && $role->language_code !== 'en') {
-            $langName = config('app.supported_languages')[$role->language_code] ?? $role->language_code;
-            $prompt .= "\nIMPORTANT: The input is in ".ucfirst($langName).'. Keep event_name, short_description, event_details, event_address, event_city, event_state, venue_name, and performer_name in the original '.ucfirst($langName).". Only the _en fields should contain English translations.\n";
+            $langName = self::languageName($role->language_code);
+            $prompt .= "\nIMPORTANT: The input is in ".$langName.'. Keep event_name, short_description, event_details, event_address, event_city, event_state, venue_name, and performer_name in the original '.$langName.". Only the _en fields should contain English translations.\n";
         }
 
         $prompt .= $details;
@@ -1354,17 +1354,17 @@ class GeminiUtils
     {
         $config = config('ai_prompts.translate');
 
-        $glossaryInstruction = '';
-        if (! empty($glossary)) {
-            $glossaryLines = [];
-            foreach ($glossary as $original => $translation) {
-                $glossaryLines[] = str_replace([':original', ':translation'], [$original, $translation], $config['glossary_line']);
-            }
-            $glossaryInstruction = $config['glossary_header'].implode("\n", $glossaryLines)."\n";
+        $glossaryInstruction = self::glossaryInstruction($glossary);
+
+        // A second asking, after the first answer lost a term the glossary keeps
+        // (Translate::translateText()): the terms it lost, named once more.
+        if (! empty($options['keep_reminder'])) {
+            $glossaryInstruction .= str_replace(':terms', implode(', ', array_map(fn ($term) => '"'.$term.'"', (array) $options['keep_reminder'])), $config['glossary_reminder'])."\n";
         }
 
         $kind = $options['kind'] ?? null;
-        $kindInstruction = $kind ? ($config['kind_'.$kind] ?? '') : '';
+        // The variant's own rules lead (European Portuguese, say), then what kind of text it is.
+        $kindInstruction = self::languageVariantInstruction($to).($kind ? ($config['kind_'.$kind] ?? '') : '');
 
         $lengthInstruction = '';
         $hint = self::translationLengthHint($text, $options['max_length'] ?? null);
@@ -1386,6 +1386,48 @@ class GeminiUtils
         );
 
         return $prompt."\n".$text;
+    }
+
+    /**
+     * The glossary as an instruction: term => translation, where a null translation means the term
+     * is kept exactly as written (App\Services\TranslationGlossary). Fixed translations first, in
+     * the wording the prompt has always had, then the terms to keep under a header of their own,
+     * because "translate X as X" is read by a model as a suggestion and "keep X" as a rule.
+     */
+    public static function glossaryInstruction(array $glossary): string
+    {
+        $config = config('ai_prompts.translate');
+        $fixed = [];
+        $kept = [];
+
+        foreach ($glossary as $original => $translation) {
+            if ($translation === null || $translation === '') {
+                $kept[] = str_replace(':original', (string) $original, $config['glossary_keep_line']);
+            } else {
+                $fixed[] = str_replace([':original', ':translation'], [(string) $original, (string) $translation], $config['glossary_line']);
+            }
+        }
+
+        $instruction = '';
+        if ($fixed) {
+            $instruction .= $config['glossary_header'].implode("\n", $fixed)."\n";
+        }
+        if ($kept) {
+            // Its leading space joins the prompt's first sentence; after the fixed list it would
+            // start a line with a space.
+            $header = $fixed ? ltrim($config['glossary_keep_header']) : $config['glossary_keep_header'];
+            $instruction .= $header.implode("\n", $kept)."\n";
+        }
+
+        return $instruction;
+    }
+
+    /** The glossary ahead of a batch prompt (names, labels, options), where it is a block of its own. */
+    private static function withGlossary(string $prompt, array $glossary): string
+    {
+        $instruction = trim(self::glossaryInstruction($glossary));
+
+        return $instruction === '' ? $prompt : $instruction."\n\n".$prompt;
     }
 
     /**
@@ -1482,15 +1524,41 @@ class GeminiUtils
      */
     private static function languageName(string $code): string
     {
+        // A variant names itself: "Portuguese_portugal" is a translation key, not a language, and
+        // a model told "Portuguese" writes Brazilian Portuguese.
+        if (is_string($name = config('ai_prompts.language_variants.'.$code.'.name'))) {
+            return $name;
+        }
+
         $languages = config('app.supported_languages', []);
 
         return isset($languages[$code]) ? ucfirst($languages[$code]) : $code;
     }
 
     /**
+     * What a target that is one variant of a language needs said beyond its name (European
+     * Portuguese: a handful of the words and the grammar that tell it from Brazilian), with a
+     * leading space, or '' for every other language, whose prompts stay exactly as they were.
+     */
+    public static function languageVariantInstruction(string $to): string
+    {
+        $instruction = config('ai_prompts.language_variants.'.$to.'.instruction');
+
+        return is_string($instruction) ? $instruction : '';
+    }
+
+    /** The variant's rules ahead of a batch prompt (names, labels, options), as a block of their own. */
+    private static function withLanguageVariant(string $prompt, string $to): string
+    {
+        $instruction = trim(self::languageVariantInstruction($to));
+
+        return $instruction === '' ? $prompt : $instruction."\n\n".$prompt;
+    }
+
+    /**
      * Batch translate group names into the target language using Gemini API
      */
-    public static function translateGroupNames($groupNames, $fromLanguage = 'auto', $to = 'en')
+    public static function translateGroupNames($groupNames, $fromLanguage = 'auto', $to = 'en', array $glossary = [])
     {
         if (empty($groupNames)) {
             return [];
@@ -1498,6 +1566,8 @@ class GeminiUtils
 
         // Create a single prompt for batch translation
         $prompt = str_replace([':from', ':to', ':names'], [$fromLanguage, self::languageName($to), json_encode($groupNames)], config('ai_prompts.translate_group_names.base'));
+        $prompt = self::withLanguageVariant($prompt, (string) $to);
+        $prompt = self::withGlossary($prompt, $glossary);
 
         try {
             $response = self::sendRequest($prompt, null, 'translation');
@@ -1538,7 +1608,7 @@ class GeminiUtils
     /**
      * Batch translate custom field names into the target language using Gemini API
      */
-    public static function translateCustomFieldNames($fieldNames, $fromLanguage = 'auto', $to = 'en')
+    public static function translateCustomFieldNames($fieldNames, $fromLanguage = 'auto', $to = 'en', array $glossary = [])
     {
         if (empty($fieldNames)) {
             return [];
@@ -1546,6 +1616,8 @@ class GeminiUtils
 
         // Create a single prompt for batch translation
         $prompt = str_replace([':from', ':to', ':names'], [$fromLanguage, self::languageName($to), json_encode($fieldNames)], config('ai_prompts.translate_custom_field_names.base'));
+        $prompt = self::withLanguageVariant($prompt, (string) $to);
+        $prompt = self::withGlossary($prompt, $glossary);
 
         try {
             $response = self::sendRequest($prompt, null, 'translation');
@@ -1576,13 +1648,15 @@ class GeminiUtils
     /**
      * Batch translate custom field dropdown option values into the target language using Gemini API
      */
-    public static function translateCustomFieldOptions($optionValues, $fromLanguage = 'auto', $to = 'en')
+    public static function translateCustomFieldOptions($optionValues, $fromLanguage = 'auto', $to = 'en', array $glossary = [])
     {
         if (empty($optionValues)) {
             return [];
         }
 
         $prompt = str_replace([':from', ':to', ':values'], [$fromLanguage, self::languageName($to), json_encode($optionValues)], config('ai_prompts.translate_custom_field_options.base'));
+        $prompt = self::withLanguageVariant($prompt, (string) $to);
+        $prompt = self::withGlossary($prompt, $glossary);
 
         try {
             $response = self::sendRequest($prompt, null, 'translation');

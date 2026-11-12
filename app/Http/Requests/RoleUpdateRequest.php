@@ -297,6 +297,11 @@ class RoleUpdateRequest extends FormRequest
             'carpool_enabled' => ['nullable', 'boolean'],
             'feedback_delay_hours' => ['nullable', 'integer', 'in:1,2,6,12,24,48'],
             'gift_cards_enabled' => ['nullable', 'boolean'],
+            // Details > Translation glossary (App\Services\TranslationGlossary::save(), which drops
+            // empty rows and repeats).
+            'glossary' => ['nullable', 'array', 'max:'.\App\Services\TranslationGlossary::MAX_ENTRIES],
+            'glossary.*.term' => ['nullable', 'string', 'max:'.\App\Services\TranslationGlossary::MAX_LENGTH],
+            'glossary.*.translation' => ['nullable', 'string', 'max:'.\App\Services\TranslationGlossary::MAX_LENGTH],
             'gift_card_amounts' => ['nullable', 'array', 'max:12'],
             'gift_card_amounts.*' => ['nullable', 'numeric', 'gt:0', 'max:99999'],
             'gift_card_currency_code' => ['nullable', 'string', 'size:3'],

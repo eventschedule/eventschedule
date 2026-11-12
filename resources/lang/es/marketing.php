@@ -20,7 +20,7 @@ return [
     'ticketing_description' => 'Vende entradas desde la página de tu evento sin comisiones de plataforma. Cobra con Stripe o PayPal, reembolsa total o parcialmente y registra asistentes con QR.',
 
     'ai_title' => 'Importación de eventos con IA: de un cartel a un evento | Event Schedule',
-    'ai_description' => 'Pega el texto o suelta un cartel y la IA completa los datos del evento: fecha, lugar, artistas y precio. Gratis en todos los planes, con traducción a 12 idiomas.',
+    'ai_description' => 'Pega el texto o suelta un cartel y la IA completa los datos del evento: fecha, lugar, artistas y precio. Gratis en todos los planes, con traducción a 13 idiomas.',
 
     'calendar_sync_title' => 'Sincronización bidireccional de calendario con Google, Outlook y CalDAV',
     'calendar_sync_description' => 'Sincronización bidireccional con Google Calendar, Outlook y cualquier servidor CalDAV, gratis en todos los planes. Los asistentes añaden un evento o se suscriben a tu calendario en vivo.',

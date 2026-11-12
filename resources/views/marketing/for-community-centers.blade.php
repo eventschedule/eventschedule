@@ -926,7 +926,7 @@
             ],
             [
                 'q' => 'Can the calendar be shown in more than one language?',
-                'a' => 'Yes, in two. Write the schedule in one of the twelve languages Event Schedule supports and switch on Offer a second language to visitors under Details, Language and time. Every program is translated for you, in the background, so allow up to an hour, and visitors switch between the two languages with a button. An embed on your website can be pinned to the second language. It is free on every plan.',
+                'a' => 'Yes, in two. Write the schedule in one of the thirteen languages Event Schedule supports and switch on Offer a second language to visitors under Details, Language and time. Every program is translated for you, in the background, so allow up to an hour, and visitors switch between the two languages with a button. An embed on your website can be pinned to the second language. It is free on every plan.',
             ],
             [
                 'q' => 'How should we show accessibility information for each program?',

@@ -3303,7 +3303,7 @@
                                         <span class="hp-ico bg-blue-100 dark:bg-blue-500/20"><svg class="text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['bulb'] !!}</svg></span>
                                         <div>
                                             <h5>AI-Powered</h5>
-                                            <p>Paste a poster, a press release or a screenshot and get a filled-in event back. Generate flyers, descriptions and a whole brand style, and publish in 12 languages.</p>
+                                            <p>Paste a poster, a press release or a screenshot and get a filled-in event back. Generate flyers, descriptions and a whole brand style, and publish in 13 languages.</p>
                                             <a href="{{ marketing_url('/features/ai') }}" class="hp-more">More about AI-powered features {!! $hpArrow !!}</a>
                                         </div>
                                     </div>

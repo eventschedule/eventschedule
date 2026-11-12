@@ -945,13 +945,13 @@
             ],
             [
                 'key' => 'languages',
-                'title' => 'Twelve languages, one array',
+                'title' => 'Thirteen languages, one array',
                 'plan' => 'free',
                 'excerpt' => $src::take('config/app.php', "'supported_languages' => [", '],'),
                 'note' => null,
                 'body' => [
-                    'Arabic, German, English, Spanish, Estonian, French, Hebrew, Italian, Dutch, Portuguese, Romanian and Russian, with right-to-left handled properly.',
-                    'The language list is one array in the config, so adding a thirteenth is a translation job, not a code change.',
+                    'Arabic, German, English, Spanish, Estonian, French, Hebrew, Italian, Dutch, Brazilian and European Portuguese, Romanian and Russian, with right-to-left handled properly.',
+                    'The language list is one array in the config, so adding a fourteenth is a translation job, not a code change.',
                 ],
             ],
             [

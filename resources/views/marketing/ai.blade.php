@@ -651,7 +651,7 @@
 
         // Language names come from config so the count, the chip strip and the FAQ
         // answer cannot drift apart the way the old page's "12" and its nine chips did.
-        $langNames = collect(config('app.supported_languages'))->map(fn ($n) => ucfirst($n))->values()->sort()->values()->all();
+        $langNames = collect(config('app.supported_languages'))->map(fn ($n) => __('messages.'.$n, [], 'en'))->values()->sort()->values()->all();
         $langCount = count($langNames);
         $langList = implode(', ', array_slice($langNames, 0, -1)).' and '.$langNames[$langCount - 1];
 
@@ -1391,7 +1391,7 @@
                             @foreach (config('app.supported_languages') as $langCode => $langName)
                                 <span class="es-spark-chip">
                                     <span class="es-spark-mono es-spark-accent me-2 text-[0.7rem] uppercase">{{ $langCode }}</span>
-                                    {{ ucfirst($langName) }}
+                                    {{ __('messages.'.$langName, [], 'en') }}
                                 </span>
                             @endforeach
                         </div>

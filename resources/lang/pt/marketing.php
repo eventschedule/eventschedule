@@ -20,7 +20,7 @@ return [
     'ticketing_description' => 'Venda ingressos na página do seu evento sem taxas de plataforma. Pagamento com Stripe ou PayPal, reembolsos totais ou parciais e check-in por QR em qualquer celular.',
 
     'ai_title' => 'Importação de eventos com IA: do flyer ao evento | Event Schedule',
-    'ai_description' => 'Cole o texto ou arraste um flyer e a IA preenche os dados do evento: data, local, artistas e preço. Grátis em todos os planos, com tradução para 12 idiomas.',
+    'ai_description' => 'Cole o texto ou arraste um flyer e a IA preenche os dados do evento: data, local, artistas e preço. Grátis em todos os planos, com tradução para 13 idiomas.',
 
     'calendar_sync_title' => 'Sincronização bidirecional de calendário com Google, Outlook e CalDAV',
     'calendar_sync_description' => 'Sincronização bidirecional com Google Calendar, Outlook e qualquer servidor CalDAV, grátis em todos os planos. Participantes adicionam um evento ou assinam o feed do seu calendário ao vivo.',

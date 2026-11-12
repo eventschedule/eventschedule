@@ -162,6 +162,36 @@
                 flex-basis: 100%;
             }
         }
+        /* The two boxes' names over the glossary, from a tablet up, lined up with the boxes
+           (the remove button's 1.75rem and the row's gap at the end). */
+        .glossary-heads {
+            display: none;
+        }
+        @media (min-width: 640px) {
+            .glossary-heads {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.5rem;
+                margin-inline-end: calc(1.75rem + 0.75rem);
+                padding-bottom: 0.375rem;
+                font-size: 0.75rem;
+                font-weight: 500;
+                color: rgb(var(--ap-ink-3));
+            }
+        }
+        /* A glossary term on a phone: its two boxes one under the other, the remove button still
+           at the end of the line it removes. */
+        @media (max-width: 639px) {
+            .glossary-item .sched-label-fields {
+                order: 0;
+                flex-basis: auto;
+            }
+            /* The translation belongs to the term above it, not a second term. */
+            .glossary-item .sched-label-fields > :nth-child(2) {
+                margin-inline-start: 1rem;
+                width: calc(100% - 1rem);
+            }
+        }
         /* One Cancel at a time on the sponsor form: the edit's own, when a sponsor is being edited. */
         #cancel-edit-sponsor-btn:not(.hidden) ~ #sponsor-form-close {
             display: none;
@@ -1266,6 +1296,12 @@
                                     <x-link href="https://eventschedule.com/features/ai" target="_blank">{{ __('messages.learn_more') }}</x-link>
                                 </p>
 
+                                {{-- Where the glossary is, for whoever looks for it here. --}}
+                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ __('messages.glossary_hint') }}
+                                    <x-link href="#details-tab-glossary" data-open-glossary>{{ __('messages.translation_glossary') }}</x-link>
+                                </p>
+
                                 <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
                                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
@@ -1354,6 +1390,151 @@
                             </div>
 
                         </div>
+
+                        <!-- Tab Content: Translation glossary -->
+                        {{-- Names automatic translation keeps as written, and words with a fixed
+                             translation (App\Services\TranslationGlossary). Shown only while the
+                             schedule offers a second language; hidden, not removed, so the list is
+                             still posted and switching translation off and on loses nothing. --}}
+                        @php
+                            $glossaryTranslationOn = (bool) old('translation_enabled', $role->translation_language_code && $role->translation_language_code !== $role->language_code);
+                            $glossaryRows = old('glossary_submitted') ? array_values((array) old('glossary', [])) : \App\Services\TranslationGlossary::entries($role);
+                            // An empty list starts with one empty row, so the first term is typed
+                            // straight away. Posted empty, it is dropped (TranslationGlossary::save()).
+                            if (! $glossaryRows) {
+                                $glossaryRows = [['term' => '', 'translation' => null]];
+                            }
+                            $glossaryTarget = $role->translationLanguageName();
+                        @endphp
+                        <x-form-row group="details" tab="glossary" :title="__('messages.translation_glossary')" class="details-tab" :hidden="! $glossaryTranslationOn"
+                            :summary="collect($glossaryRows)->pluck('term')->filter()->implode(', ') ?: __('messages.none')" :muted="! collect($glossaryRows)->pluck('term')->filter()->count()" />
+                        <div id="details-tab-glossary" class="event-subrow-body details-tab-content" hidden>
+                            <input type="hidden" name="glossary_submitted" value="1">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.glossary_help') }}</p>
+
+                            {{-- Which box is which, from a tablet up; on a phone the boxes stack and
+                                 the placeholders say it. --}}
+                            <div class="glossary-heads" aria-hidden="true">
+                                <span>{{ __('messages.glossary_term') }}</span>
+                                {{-- The language alone: "Translation (Portuguese (Brazil))" doubled its brackets. --}}
+                                <span>{{ $glossaryTarget }}</span>
+                            </div>
+                            <div id="glossary-items" class="event-list sched-list" data-glossary-next="{{ count($glossaryRows) }}">
+                                @foreach ($glossaryRows as $glossaryIndex => $glossaryRow)
+                                <div class="event-list-row glossary-item" data-list-row>
+                                    <div class="sched-label-fields has-second">
+                                        <x-text-input type="text" name="glossary[{{ $glossaryIndex }}][term]" value="{{ $glossaryRow['term'] ?? '' }}"
+                                            class="block w-full" maxlength="{{ \App\Services\TranslationGlossary::MAX_LENGTH }}"
+                                            aria-label="{{ __('messages.glossary_term') }}" placeholder="{{ __('messages.glossary_term') }}" />
+                                        <x-text-input type="text" name="glossary[{{ $glossaryIndex }}][translation]" value="{{ $glossaryRow['translation'] ?? '' }}"
+                                            class="block w-full" maxlength="{{ \App\Services\TranslationGlossary::MAX_LENGTH }}"
+                                            aria-label="{{ __('messages.glossary_translation_into', ['language' => $glossaryTarget]) }}" placeholder="{{ __('messages.glossary_keep_as_written') }}" />
+                                    </div>
+                                    <button type="button" data-action="remove-glossary-term" class="event-icon-btn is-remove" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    </button>
+                                </div>
+                                @endforeach
+                            </div>
+                            <template id="glossary-row-template">
+                                <div class="event-list-row glossary-item" data-list-row>
+                                    <div class="sched-label-fields has-second">
+                                        <input type="text" data-glossary-field="term" maxlength="{{ \App\Services\TranslationGlossary::MAX_LENGTH }}"
+                                            aria-label="{{ __('messages.glossary_term') }}" placeholder="{{ __('messages.glossary_term') }}"
+                                            dir="auto" autocomplete="off" class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        <input type="text" data-glossary-field="translation" maxlength="{{ \App\Services\TranslationGlossary::MAX_LENGTH }}"
+                                            aria-label="{{ __('messages.glossary_translation_into', ['language' => $glossaryTarget]) }}" placeholder="{{ __('messages.glossary_keep_as_written') }}"
+                                            dir="auto" autocomplete="off" class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    </div>
+                                    <button type="button" data-action="remove-glossary-term" class="event-icon-btn is-remove" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    </button>
+                                </div>
+                            </template>
+                            <button type="button" id="add-glossary-term" class="mt-3 text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]"
+                                data-max="{{ \App\Services\TranslationGlossary::MAX_ENTRIES }}">
+                                + {{ __('messages.glossary_add_term') }}
+                            </button>
+                            <x-input-error class="mt-2" :messages="$errors->get('glossary')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('glossary.*')" />
+                        </div>
+                        <script {!! nonce_attr() !!}>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            var row = document.querySelector('button[data-row-group="details"][data-tab="glossary"]');
+                            var pane = document.getElementById('details-tab-glossary');
+                            var list = document.getElementById('glossary-items');
+                            var add = document.getElementById('add-glossary-term');
+                            var template = document.getElementById('glossary-row-template');
+                            var toggle = document.getElementById('translation_enabled');
+                            if (! row || ! pane || ! list || ! add || ! template) return;
+
+                            // The hint under the translation switch opens this row.
+                            var hint = document.querySelector('[data-open-glossary]');
+                            if (hint) {
+                                hint.addEventListener('click', function (event) {
+                                    event.preventDefault();
+                                    if (window.FormKit && window.FormKit.openFromHash) {
+                                        window.FormKit.openFromHash('#details-tab-glossary');
+                                    }
+                                    row.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                                });
+                            }
+
+                            // Only while the schedule offers a second language. Heard after the
+                            // switch's own listener above, which may put it back on.
+                            if (toggle) {
+                                toggle.addEventListener('change', function () {
+                                    row.hidden = ! toggle.checked;
+                                    if (! toggle.checked) {
+                                        pane.hidden = true;
+                                        row.setAttribute('aria-expanded', 'false');
+                                    }
+                                });
+                            }
+
+                            function rows() {
+                                return Array.prototype.slice.call(list.querySelectorAll('[data-list-row]'));
+                            }
+                            function state() {
+                                return JSON.stringify(rows().map(function (item) {
+                                    return Array.prototype.slice.call(item.querySelectorAll('input')).map(function (input) { return input.value.trim(); });
+                                }).filter(function (pair) { return pair[0] !== ''; }));
+                            }
+                            function syncAdd() {
+                                add.hidden = rows().length >= Number(add.dataset.max || 100);
+                            }
+
+                            // Save says what it will do: what uses a changed term is translated again.
+                            var saved = state();
+                            var says = @json(__('messages.glossary_says_retranslate'), JSON_UNESCAPED_UNICODE);
+                            function tell() {
+                                document.dispatchEvent(new CustomEvent('formkit:says', { detail: { key: 'glossary', text: state() === saved ? '' : says } }));
+                            }
+
+                            var next = Number(list.dataset.glossaryNext || 0);
+                            add.addEventListener('click', function () {
+                                var item = template.content.firstElementChild.cloneNode(true);
+                                item.querySelectorAll('[data-glossary-field]').forEach(function (input) {
+                                    input.name = 'glossary[' + next + '][' + input.dataset.glossaryField + ']';
+                                });
+                                next++;
+                                list.appendChild(item);
+                                item.querySelector('input').focus();
+                                syncAdd();
+                            });
+                            list.addEventListener('click', function (event) {
+                                var remove = event.target.closest('[data-action="remove-glossary-term"]');
+                                if (remove) {
+                                    remove.closest('[data-list-row]').remove();
+                                    syncAdd();
+                                    tell();
+                                }
+                            });
+                            list.addEventListener('input', tell);
+                            syncAdd();
+                        });
+                        </script>
+                        <!-- End Tab Content: Translation glossary -->
 
                         <!-- Tab Content: Contact Info -->
                         <x-form-row group="details" tab="contact" :title="__('messages.contact_info')" class="details-tab" />
@@ -8074,6 +8255,10 @@ document.addEventListener('DOMContentLoaded', function() {
             weekStart,
         ]);
     });
+    // The glossary's terms, by name (a count would need a plural in every language).
+    kit.summary('details:glossary', function() {
+        return list(values('#glossary-items input[name$="[term]"]'));
+    });
     // The message's first line as it reads, without its Markdown; off (or not on Pro, where the
     // page does not show it) says so.
     kit.summary('details:announcement', function() {
@@ -8679,6 +8864,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ['section-page', '#sponsors-list'],
         ['section-engagement', '#approved-subdomains-items'],
         ['section-sources', '#source-schedule-items'],
+        ['section-details', '#glossary-items'],
         ['section-tickets', '#gift-card-amounts-items'],
         ['section-tickets', '#ticket-preset-items'],
         ['section-integrations', '#import-url-items'],

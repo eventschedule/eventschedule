@@ -1,12 +1,12 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Embed an Event Calendar on Your Website - Event Schedule</x-slot>
-    <x-slot name="description">One iframe tag puts your live calendar on the site you already have. It follows the visitor's dark mode, speaks 12 languages, and never needs pasting twice.</x-slot>
+    <x-slot name="description">One iframe tag puts your live calendar on the site you already have. It follows the visitor's dark mode, speaks 13 languages, and never needs pasting twice.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Calendar</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Embed Calendar"
-        description="One iframe tag puts your live calendar on the site you already have. It follows the visitor's dark mode, speaks 12 languages, and never needs pasting twice." />
+        description="One iframe tag puts your live calendar on the site you already have. It follows the visitor's dark mode, speaks 13 languages, and never needs pasting twice." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
@@ -476,7 +476,7 @@
             ['height', '800', 'You choose the height. Nothing measures the calendar and resizes the frame for you.'],
             ['loading', 'lazy', 'Plain HTML, not a product feature: the browser waits until the frame scrolls into view before fetching it.'],
             ['?layout=', 'list', 'Opens the frame as a list or as a month calendar, whatever the schedule itself is set to. Two frames on the same page can each take their own. The calendar wants about 768px of frame width; narrower than that it shows a day-by-day agenda instead.'],
-            ['?lang=', 'de', 'Renders the calendar in one of 12 languages. Arabic and Hebrew lay the frame out right to left.'],
+            ['?lang=', 'de', 'Renders the calendar in one of 13 languages. Arabic and Hebrew lay the frame out right to left.'],
             ['?schedule=', 'jazz-nights', 'Shows a single sub-schedule instead of everything on the calendar.'],
             ['?dark=true', 'optional', 'Forces dark mode, and ?dark=false forces light. Left off, the frame follows the visitor\'s own system setting.'],
             ['?month= &year=', '3 / 2027', 'Opens the frame on a specific month instead of the current one.'],
@@ -517,7 +517,7 @@
             ],
             [
                 'q' => 'Can I customize the embedded calendar\'s appearance?',
-                'a' => 'The frame renders your schedule, so your own appearance settings come with it: background, colours, font, and whether events show as a month calendar or a list. On top of that the URL takes ?layout=calendar or ?layout=list to pin the layout for that frame, ?dark=true to force dark mode, ?schedule= to show a single sub-schedule and ?lang= to pick one of 12 languages. Custom CSS, on the Pro plan, applies inside the frame as well.',
+                'a' => 'The frame renders your schedule, so your own appearance settings come with it: background, colours, font, and whether events show as a month calendar or a list. On top of that the URL takes ?layout=calendar or ?layout=list to pin the layout for that frame, ?dark=true to force dark mode, ?schedule= to show a single sub-schedule and ?lang= to pick one of 13 languages. Custom CSS, on the Pro plan, applies inside the frame as well.',
             ],
             [
                 'q' => 'Does the embed slow down my website?',

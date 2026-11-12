@@ -24,7 +24,7 @@ Every account organizes events under one or more **schedules**. There are three 
 - **Zero platform fees**: Event Schedule charges no percentage on ticket sales. You only pay standard payment processor fees.
 - **Unlimited free registration**: RSVPs and zero-price ticket types are uncapped on every plan, with QR scanning at the door included. Selling tickets that carry a price is a Pro or Enterprise feature.
 - **Open source**: Full source code available. Selfhost on your own infrastructure.
-- **AI-powered**: Gemini-powered event parsing from text/images, auto-translation across the 12 supported languages.
+- **AI-powered**: Gemini-powered event parsing from text/images, auto-translation across the 13 supported languages.
 - **API-first**: Complete REST API with OpenAPI 3.0 spec and agents.json for AI agent integration.
 
 ---
@@ -2011,7 +2011,7 @@ Beyond the API endpoints documented above, Event Schedule includes these platfor
 - **Custom fields** (Pro): Custom data fields on events, each of which can also be asked on the public event request form, offered as a filter on the schedule, and shown on the public event page (off by default).
 - **Fan content**: YouTube videos, photos and comments on events, with an approval workflow.
 - **Embedding**: Responsive iframe calendar embed for any website, with light/dark mode support; an embeddable ticket widget on Pro.
-- **AI features**: Gemini-powered event parsing from text/images (50 a day, 100 on Enterprise, 10 while a schedule is on its trial), auto-translation across the 12 supported languages, and bulk import.
+- **AI features**: Gemini-powered event parsing from text/images (50 a day, 100 on Enterprise, 10 while a schedule is on its trial), auto-translation across the 13 supported languages, and bulk import.
 - **Recurring events**: Six frequency patterns (daily, weekly, every N weeks, monthly by date/weekday, yearly) with flexible end conditions and date exceptions.
 - **Pages for acts and venues**: Naming a performer or venue who is not on Event Schedule creates a public page for them, kept out of search engines until they claim it by signing in with the email address on it.
 - **Team collaboration**: One team member per schedule on every plan; multiple members with admin and viewer access on Enterprise.
@@ -2146,7 +2146,7 @@ Event Schedule charges no percentage-based fees on ticket sales. You only pay th
 
 ## Localization
 
-Event Schedule supports 12 languages:
+Event Schedule supports 13 languages:
 
 | Code | Language | Direction |
 |------|----------|-----------|
@@ -2159,7 +2159,8 @@ Event Schedule supports 12 languages:
 | he | Hebrew | RTL |
 | it | Italian | LTR |
 | nl | Dutch | LTR |
-| pt | Portuguese | LTR |
+| pt | Portuguese (Brazil) | LTR |
+| pt-PT | Portuguese (Portugal) | LTR |
 | ro | Romanian | LTR |
 | ru | Russian | LTR |
 
