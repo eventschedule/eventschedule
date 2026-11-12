@@ -84,7 +84,7 @@ class SendAppointmentReminders extends Command
                     new AppointmentReminder($sale, $event, $role, $event->appointmentType),
                     $sale->email,
                     $role->id,
-                    app()->getLocale()
+                    $sale->mailLocale(app()->getLocale())
                 );
                 $sent++;
             } catch (\Throwable $e) {

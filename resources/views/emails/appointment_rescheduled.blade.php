@@ -22,7 +22,7 @@
 <x-email.section :label="__('messages.event_changed_whats_changed')" />
 <x-email.details panel>
 @if ($oldStart)
-<x-email.item :label="__('messages.event_changed_previously')" wide><s class="es-ink-3" style="font-weight: 400; color: #64748b;">{{ $oldStart->translatedFormat('l, F j, Y') }} <bdi dir="ltr">{{ $oldStart->format($apptUse24 ? 'H:i' : 'g:i A') }} ({{ $oldTz }})</bdi></s></x-email.item>
+<x-email.item :label="__('messages.event_changed_previously')" wide><s class="es-ink-3" style="font-weight: 400; color: #64748b;">{{ $oldStart->localDate() }} <bdi dir="ltr">{{ $oldStart->format($apptUse24 ? 'H:i' : 'g:i A') }} ({{ $oldTz }})</bdi></s></x-email.item>
 @endif
 @include('emails.partials.appointment_datetime', ['apptLabel' => __('messages.event_changed_now')])
 {{-- Only a web link is ever an href; free text (a meeting ID, "call me") is printed as text. --}}

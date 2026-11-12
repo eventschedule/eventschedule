@@ -1305,6 +1305,7 @@
                             name: this.name.trim(),
                             email: this.email.trim(),
                             website: this.website,
+                            lang: @json($role->displayLanguageCode()),
                         }),
                     })
                     .then(response => {
@@ -1385,6 +1386,9 @@
         @if (request()->embed)
         <input type="hidden" name="embed" value="true">
         @endif
+        {{-- The language the guest is reading this page in, so their ticket mails follow it
+             (Sale::languageFromRequest() takes only this schedule's two languages). --}}
+        <input type="hidden" name="lang" value="{{ $role->displayLanguageCode() }}">
 
         @if (session('error'))
         {{-- v-pre: a refusal can name an event (TicketController::refuseCartLeg()), and this is

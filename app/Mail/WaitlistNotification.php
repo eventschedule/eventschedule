@@ -49,7 +49,7 @@ class WaitlistNotification extends Mailable
             : __('messages.waitlist_tickets_available');
 
         return new Envelope(
-            subject: $subject.' - '.$this->event->name,
+            subject: $subject.' - '.$this->readEvent()->name,
             from: new Address($fromAddress, $fromName),
         );
     }
@@ -59,13 +59,18 @@ class WaitlistNotification extends Mailable
         $isRsvp = (bool) $this->event->rsvp_enabled;
         $eventUrl = $this->event->getGuestUrl($this->entry->subdomain, $this->entry->event_date, true);
         $eventUrl .= (str_contains($eventUrl, '?') ? '&' : '?').($isRsvp ? 'rsvp=true' : 'tickets=true');
+        // Opened in the translation the person joined from, when that is what they read.
+        $locale = $this->entry->locale;
+        if (is_valid_language_code($locale) && $locale === $this->event->getTranslationLanguageCode() && $locale !== $this->event->getLanguageCode()) {
+            $eventUrl = \App\Models\Sale::withLanguage($eventUrl, $locale);
+        }
 
         return new Content(
             view: 'emails.waitlist_notification',
             text: 'emails.waitlist_notification_text',
             with: [
                 'entry' => $this->entry,
-                'event' => $this->event,
+                'event' => $this->readEvent(),
                 'role' => $this->role,
                 'eventUrl' => $eventUrl,
                 'isRsvp' => $isRsvp,
@@ -77,5 +82,11 @@ class WaitlistNotification extends Mailable
     public function attachments(): array
     {
         return [];
+    }
+
+    /** The event as the person read it: its name in the language they joined in (ticket_waitlists.locale), where it has one. */
+    private function readEvent(): Event
+    {
+        return $this->event->readIn(is_valid_language_code($this->entry->locale) ? $this->entry->locale : null);
     }
 }

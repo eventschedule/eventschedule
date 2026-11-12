@@ -103,7 +103,9 @@ class WaitlistController extends Controller
                 'email' => $request->email,
                 'subdomain' => $subdomain,
                 'status' => 'waiting',
-                'locale' => app()->getLocale(),
+                // The language the page was read in (its translation included), which the
+                // "a place is free" mail follows; the request's otherwise, as before.
+                'locale' => \App\Models\Sale::languageFromRequest($request, $role) ?? app()->getLocale(),
             ]);
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->errorInfo[1] == 1062) {

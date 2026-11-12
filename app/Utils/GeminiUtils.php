@@ -1359,7 +1359,7 @@ class GeminiUtils
         // A second asking, after the first answer lost a term the glossary keeps
         // (Translate::translateText()): the terms it lost, named once more.
         if (! empty($options['keep_reminder'])) {
-            $glossaryInstruction .= str_replace(':terms', implode(', ', array_map(fn ($term) => '"'.$term.'"', (array) $options['keep_reminder'])), $config['glossary_reminder'])."\n";
+            $glossaryInstruction .= str_replace(':terms', implode(', ', array_map(fn ($term) => '"'.self::quoted($term).'"', (array) $options['keep_reminder'])), $config['glossary_reminder'])."\n";
         }
 
         $kind = $options['kind'] ?? null;
@@ -1402,9 +1402,9 @@ class GeminiUtils
 
         foreach ($glossary as $original => $translation) {
             if ($translation === null || $translation === '') {
-                $kept[] = str_replace(':original', (string) $original, $config['glossary_keep_line']);
+                $kept[] = str_replace(':original', self::quoted($original), $config['glossary_keep_line']);
             } else {
-                $fixed[] = str_replace([':original', ':translation'], [(string) $original, (string) $translation], $config['glossary_line']);
+                $fixed[] = str_replace([':original', ':translation'], [self::quoted($original), self::quoted($translation)], $config['glossary_line']);
             }
         }
 
@@ -1420,6 +1420,15 @@ class GeminiUtils
         }
 
         return $instruction;
+    }
+
+    /**
+     * A term as it goes between the prompt's double quotes: a quote or a backslash in it is escaped,
+     * so a term cannot end its own line and start an instruction of its own.
+     */
+    private static function quoted(mixed $value): string
+    {
+        return addcslashes((string) $value, "\\\"");
     }
 
     /** The glossary ahead of a batch prompt (names, labels, options), where it is a block of its own. */

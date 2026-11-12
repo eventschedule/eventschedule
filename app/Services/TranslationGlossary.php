@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\TranslationGlossaryEntry;
 use App\Utils\GeminiUtils;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -176,7 +177,9 @@ class TranslationGlossary
     private static function schedulesOf(Event $event, string $from, string $to): array
     {
         $schedules = collect([$event->creatorRole])
-            ->merge($event->roles->reject(fn ($role) => $role->isCurator()))
+            // Only a venue or performer that is ON the event: one that declined it, or has not
+            // answered yet, has no say in how it is translated.
+            ->merge($event->roles->reject(fn ($role) => $role->isCurator() || (int) ($role->pivot->is_accepted ?? 0) !== 1))
             ->filter()
             ->unique('id');
 
@@ -196,9 +199,9 @@ class TranslationGlossary
 
     private static function has(array $map, string $term): bool
     {
-        $lower = mb_strtolower($term);
-        foreach (array_keys($map) as $key) {
-            if (mb_strtolower((string) $key) === $lower) {
+        $key = self::foldKey($term);
+        foreach (array_keys($map) as $other) {
+            if (self::foldKey((string) $other) === $key) {
                 return true;
             }
         }
@@ -207,7 +210,71 @@ class TranslationGlossary
     }
 
     /**
-     * Only the terms that appear in the text(s) being translated, compared without case: a prompt
+     * Two terms are one term when the table's collation (utf8mb4_unicode_ci) says so: without case,
+     * without accents, "ß" as "ss". Compared the same way here, or a pair PHP calls different
+     * ("Café", "Cafe") breaks the unique key on insert. ICU's root collation at primary strength
+     * answers the same question; without intl, the lower-cased form is the fallback and the
+     * insert below still survives a pair it missed.
+     */
+    public static function foldKey(string $term): string
+    {
+        static $collator = false;
+
+        if ($collator === false) {
+            $collator = class_exists(\Collator::class) ? new \Collator('root') : null;
+            $collator?->setStrength(\Collator::PRIMARY);
+        }
+
+        $key = $collator ? $collator->getSortKey($term) : false;
+
+        return is_string($key) ? $key : mb_strtolower($term);
+    }
+
+    /**
+     * Whether $text uses $term as a word of its own, without regard to case: "Art" is not in
+     * "party", nor "Bar" in "Barbecue". A term that begins or ends with a sign ("C++") is held to
+     * the letters it does have.
+     */
+    public static function uses(string $text, string $term): bool
+    {
+        if ($term === '' || $text === '') {
+            return false;
+        }
+
+        $found = preg_match('/(?<![\p{L}\p{N}])'.preg_quote($term, '/').'(?![\p{L}\p{N}])/iu', $text);
+
+        // A PCRE failure (an invalid byte, a backtrack limit) answers false, not "absent".
+        return $found === false ? mb_stripos($text, $term) !== false : $found === 1;
+    }
+
+    /**
+     * Rows whose term is one an earlier row already has (foldKey()), by their position in $rows:
+     * the schedule form refuses them with a message on the field rather than dropping one.
+     *
+     * @return array<int|string, string> row key => the earlier term it repeats
+     */
+    public static function duplicates(array $rows): array
+    {
+        $seen = [];
+        $repeats = [];
+        foreach ($rows as $index => $row) {
+            $term = is_array($row) ? self::cleanText($row['term'] ?? null) : '';
+            if ($term === '') {
+                continue;
+            }
+            $key = self::foldKey($term);
+            if (isset($seen[$key])) {
+                $repeats[$index] = $seen[$key];
+            } else {
+                $seen[$key] = $term;
+            }
+        }
+
+        return $repeats;
+    }
+
+    /**
+     * Only the terms that appear in the text(s) being translated, as words, without case: a prompt
      * carrying a hundred unrelated names asks the model to think about all of them.
      *
      * @param  array<string, ?string>  $map
@@ -218,7 +285,7 @@ class TranslationGlossary
     {
         $haystack = implode("\n", (array) $texts);
 
-        return array_filter($map, fn ($translation, $term) => mb_stripos($haystack, (string) $term) !== false, ARRAY_FILTER_USE_BOTH);
+        return array_filter($map, fn ($translation, $term) => self::uses($haystack, (string) $term), ARRAY_FILTER_USE_BOTH);
     }
 
     /**
@@ -242,7 +309,8 @@ class TranslationGlossary
     }
 
     /**
-     * Keep-as-is terms the source holds exactly as written and the translation lost. Only those:
+     * Keep-as-is terms the source uses and the translation lost (as words, without case, the same
+     * test needsRedo() makes, so the two never disagree about a translation). Only those:
      * a fixed translation may rightly be inflected (Portuguese gives a noun a gender and a plural),
      * so its absence proves nothing.
      *
@@ -253,7 +321,7 @@ class TranslationGlossary
         $missing = [];
         foreach ($map as $term => $fixed) {
             $term = (string) $term;
-            if ($fixed === null && $term !== '' && str_contains($source, $term) && ! str_contains($translation, $term)) {
+            if ($fixed === null && $term !== '' && self::uses($source, $term) && ! self::uses($translation, $term)) {
                 $missing[] = $term;
             }
         }
@@ -270,11 +338,16 @@ class TranslationGlossary
      * a row nobody filled in and is dropped; an empty translation means "keep as written"; a term
      * that repeats (without regard to case) keeps its first row; past MAX_ENTRIES rows are dropped.
      *
+     * $seen is the terms the form SHOWED when it was opened (glossary_seen[]): a stored term it did
+     * not show (added from another tab since) is kept, after the posted rows. Null replaces the
+     * whole list (a restore).
+     *
      * @param  array<int|string, mixed>  $rows  [['term' => ..., 'translation' => ...], ...]
+     * @param  array<int, string>|null  $seen
      * @return array<int, array{term: string, before: array{translation: ?string}|null, after: array{translation: ?string}|null}>
      *                                                                                                                            what changed, for requeue()
      */
-    public static function save(Role $role, array $rows): array
+    public static function save(Role $role, array $rows, ?array $seen = null): array
     {
         $clean = [];
         foreach ($rows as $row) {
@@ -287,7 +360,7 @@ class TranslationGlossary
                 continue;
             }
 
-            $key = mb_strtolower($term);
+            $key = self::foldKey($term);
             if (isset($clean[$key])) {
                 continue;
             }
@@ -302,7 +375,22 @@ class TranslationGlossary
 
         $stored = [];
         foreach (self::entries(Role::find($role->id) ?? $role) as $entry) {
-            $stored[mb_strtolower($entry['term'])] = $entry;
+            $stored[self::foldKey($entry['term'])] = $entry;
+        }
+
+        // Two tabs: what another one added since this page was opened is not this page's to remove.
+        if ($seen !== null) {
+            $shown = [];
+            foreach ($seen as $term) {
+                if (is_scalar($term) && ($term = self::cleanText($term)) !== '') {
+                    $shown[self::foldKey($term)] = true;
+                }
+            }
+            foreach ($stored as $key => $entry) {
+                if (! isset($clean[$key]) && ! isset($shown[$key]) && count($clean) < self::MAX_ENTRIES) {
+                    $clean[$key] = $entry;
+                }
+            }
         }
 
         $changes = [];
@@ -342,8 +430,27 @@ class TranslationGlossary
                     ];
                 }
 
-                if ($insert) {
+                if (! $insert) {
+                    return;
+                }
+
+                try {
                     TranslationGlossaryEntry::insert($insert);
+                } catch (QueryException $e) {
+                    if (($e->errorInfo[1] ?? null) !== 1062) {
+                        throw $e;
+                    }
+                    // A pair the collation calls one term and foldKey() did not: row by row, and
+                    // the later of the two is dropped. MySQL undoes only the failed statement.
+                    foreach ($insert as $row) {
+                        try {
+                            TranslationGlossaryEntry::insert($row);
+                        } catch (QueryException $e) {
+                            if (($e->errorInfo[1] ?? null) !== 1062) {
+                                throw $e;
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -356,14 +463,16 @@ class TranslationGlossary
         return $changes;
     }
 
-    private static function cleanText(mixed $value): string
+    public static function cleanText(mixed $value): string
     {
         if (! is_scalar($value)) {
             return '';
         }
 
-        // One line, no runs of spaces: a term is matched against the text as written.
-        $value = trim((string) preg_replace('/\s+/u', ' ', (string) $value));
+        // No invisible format characters (a zero-width space pasted with a name), one line, no runs
+        // of spaces: a term is matched against the text as written.
+        $value = (string) preg_replace('/\p{Cf}+/u', '', (string) $value);
+        $value = trim((string) preg_replace('/\s+/u', ' ', $value));
 
         return mb_substr($value, 0, self::MAX_LENGTH);
     }
@@ -409,22 +518,28 @@ class TranslationGlossary
         $events = Event::query()->where(function ($query) use ($role) {
             $query->where('creator_role_id', $role->id);
             if (! $role->isCurator()) {
-                $query->orWhereHas('roles', fn ($r) => $r->where('roles.id', $role->id));
+                // Only an event it is on: a venue that declined one has no say in its translation.
+                $query->orWhereHas('roles', fn ($r) => $r->where('roles.id', $role->id)->where('event_role.is_accepted', 1));
             }
         });
         TranslationQueue::liveEvents($events);
 
         $eventFields = ['name' => 'name_en', 'short_description' => 'short_description_en', 'description' => 'description_en'];
+        // A fixed translation applies to an event only in the event's own pair of languages (its
+        // venue's, else its first performer's), which may not be this schedule's.
+        $ownPair = [$role->language_code ?: 'en', $role->translation_language_code ?: 'en'];
+        $pairOf = fn (?Event $event) => $event && [$event->getLanguageCode(), $event->getTranslationLanguageCode()] === $ownPair;
+
         $counts['events'] = self::requeueRows(
             (clone $events)->where(fn ($q) => self::likeAny($q, array_keys($eventFields), $terms)),
-            Event::class, $eventFields, $changes, true
+            Event::class, $eventFields, $changes, $pairOf
         );
 
         $partFields = ['name' => 'name_en', 'description' => 'description_en'];
         $counts['parts'] = self::requeueRows(
             EventPart::query()->whereIn('event_id', (clone $events)->select('events.id'))
                 ->where(fn ($q) => self::likeAny($q, array_keys($partFields), $terms)),
-            EventPart::class, $partFields, $changes, true
+            EventPart::class, $partFields, $changes, fn (?Event $event) => $pairOf($event)
         );
 
         // A curator's copies of the events it lists, in its own authored language, so only its
@@ -465,7 +580,7 @@ class TranslationGlossary
 
         foreach ($changes as $change) {
             $term = (string) $change['term'];
-            if (mb_stripos($source, $term) === false) {
+            if (! self::uses($source, $term)) {
                 continue;
             }
 
@@ -473,7 +588,7 @@ class TranslationGlossary
 
             if ($applies($change['after'] ?? null)) {
                 $fixed = $change['after']['translation'];
-                $reads = $fixed === null ? str_contains($translation, $term) : mb_stripos($translation, $fixed) !== false;
+                $reads = self::uses($translation, $fixed ?? $term);
                 if (! $reads) {
                     return true;
                 }
@@ -490,9 +605,16 @@ class TranslationGlossary
      * query-builder update (no model events: Event::saving() would re-derive the `_html` columns
      * from the values being nulled).
      */
-    private static function requeueRows(Builder $query, string $model, array $fields, array $changes, bool $pairApplies): int
+    private static function requeueRows(Builder $query, string $model, array $fields, array $changes, \Closure $pairOf): int
     {
+        // Only a fixed translation depends on the pair; with none among the changes, nothing has
+        // to be loaded to ask.
+        $fixedChange = (bool) array_filter($changes, fn ($c) => ($c['before']['translation'] ?? null) !== null || ($c['after']['translation'] ?? null) !== null);
+
         $columns = ['id'];
+        if ($model === EventPart::class) {
+            $columns[] = 'event_id';
+        }
         foreach ($fields as $source => $target) {
             $columns[] = $source;
             $columns[] = $target;
@@ -503,8 +625,12 @@ class TranslationGlossary
 
         $byField = array_fill_keys(array_keys($fields), []);
 
-        $query->select($columns)->chunkById(500, function ($rows) use ($fields, $changes, $pairApplies, $model, &$byField) {
+        $query->select($columns)->chunkById(500, function ($rows) use ($fields, $changes, $pairOf, $fixedChange, $model, &$byField) {
+            if ($fixedChange) {
+                $rows->load($model === EventPart::class ? 'event.roles' : 'roles');
+            }
             foreach ($rows as $row) {
+                $pairApplies = $fixedChange && $pairOf($model === EventPart::class ? $row->event : $row);
                 foreach ($fields as $source => $target) {
                     if (! self::handEdited($model, $row, $source) && self::needsRedo($row->{$source}, $row->{$target}, $changes, $pairApplies)) {
                         $byField[$source][] = $row->id;

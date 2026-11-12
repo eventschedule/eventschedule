@@ -2,7 +2,7 @@
     $theme = \App\Utils\EmailTheme::owner($role ?? null);
 
     $start = $event->starts_at && $sale->event_date ? $event->getStartDateTime($sale->event_date, true) : null;
-    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $start->translatedFormat('l, F j, Y')) : null;
+    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $start->localDate()) : null;
     $time = $start && ! $event->is_multi_day ? $event->getStartEndTime($sale->event_date, (bool) $role?->use_24_hour_time) : null;
 
     $allSaleTickets = $sale->saleTickets->toBase();

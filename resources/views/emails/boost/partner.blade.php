@@ -19,7 +19,7 @@
 <x-email.item :label="__('messages.headline')">{{ $version->headline }}</x-email.item>
 <x-email.item :label="__('messages.ad_budget')">{{ $budget }}</x-email.item>
 @if ($campaign->scheduled_end)
-<x-email.item :label="__('messages.end_date')">{{ $campaign->scheduled_end->copy()->setTimezone($campaign->role?->timezone ?: config('app.timezone'))->translatedFormat('M j, Y') }}</x-email.item>
+<x-email.item :label="__('messages.end_date')">{{ $campaign->scheduled_end->copy()->setTimezone($campaign->role?->timezone ?: config('app.timezone'))->localDate(true, false, true) }}</x-email.item>
 @endif
 </x-email.details>
 @endif

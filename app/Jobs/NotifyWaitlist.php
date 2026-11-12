@@ -96,7 +96,7 @@ class NotifyWaitlist implements ShouldQueue
         OneSignalService::pushToGuestEmail($entry->email, $entry->locale ?: app()->getLocale(), [
             'title_key' => 'messages.push_waitlist_title',
             'body_key' => 'messages.push_waitlist_body',
-            'body_params' => ['event' => $event->name],
+            'body_params' => ['event' => $event->readIn(is_valid_language_code($entry->locale) ? $entry->locale : null)->name],
             'url' => $event->getGuestUrl(false, $entry->event_date, true),
             'options' => ['icon' => $role?->profile_image_url],
         ], $role);

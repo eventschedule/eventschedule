@@ -13,7 +13,7 @@
 <x-email.item :label="__('messages.budget')">{{ $money($campaign->user_budget) }}</x-email.item>
 <x-email.item :label="__('messages.total_charged')">{{ $money($campaign->getTotalCost()) }}</x-email.item>
 @if ($campaign->scheduled_end)
-<x-email.item :label="__('messages.ends')">{{ $campaign->scheduled_end->translatedFormat('F j, Y') }}</x-email.item>
+<x-email.item :label="__('messages.ends')">{{ $campaign->scheduled_end->localDate(true, false) }}</x-email.item>
 @endif
 </x-email.details>
 

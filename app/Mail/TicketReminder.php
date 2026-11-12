@@ -82,7 +82,9 @@ class TicketReminder extends Mailable
             text: 'emails.ticket_reminder_text',
             with: [
                 'sale' => $this->sale,
-                'event' => $this->event,
+                // In the language the guest bought in, as their confirmation was.
+                'event' => $this->sale->eventAsRead($this->event),
+                'lang' => $this->sale->linkLanguage($this->role, $this->event),
                 'role' => $this->role,
                 'ticketUrl' => $this->ticketUrl(),
                 'eyebrow' => $when['eyebrow'],
@@ -100,10 +102,10 @@ class TicketReminder extends Mailable
 
     private function ticketUrl(): string
     {
-        return canonical_url(route('ticket.view', [
+        return Sale::withLanguage(canonical_url(route('ticket.view', [
             'event_id' => UrlUtils::encodeId($this->event->id),
             'secret' => $this->sale->secret ?: 'preview',
-        ], false));
+        ], false)), $this->sale->linkLanguage($this->role, $this->event));
     }
 
     /**
@@ -136,8 +138,9 @@ class TicketReminder extends Mailable
         $days = (int) $today->diffInDays($start->copy()->startOfDay(), false);
         // The schedule's clock, as the event block in the body prints it (components/email/event).
         $time = $start->format(($this->role ?? $this->event->creatorRole)?->use_24_hour_time ? 'H:i' : 'g:i A');
-        $date = $start->translatedFormat('l, F j');
-        $name = $this->event->name;
+        // In the reader's own word order: "quinta-feira, 19 de novembro", not "quinta, novembro 19".
+        $date = $start->localDate(false);
+        $name = $this->sale->eventAsRead($this->event)->name;
 
         [$key, $eyebrow] = match (true) {
             $days <= 0 => ['ticket_reminder_today', __('messages.today')],

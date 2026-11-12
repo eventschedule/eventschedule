@@ -92,6 +92,8 @@ class HelpUtils
             'doc' => '/docs/creating-events#details',
             'anchors' => [
                 'section-details' => '/docs/creating-events#details',
+                // The Translation row under About (#event-translation).
+                'event-translation' => '/docs/creating-events#translation',
                 'section-listing' => '/docs/creating-events#listing',
                 'section-calendar-sync' => '/docs/creating-events#google-calendar',
                 'section-venue' => '/docs/creating-events#venue',
@@ -135,6 +137,8 @@ class HelpUtils
             'doc' => '/docs/creating-events#manual',
             'anchors' => [
                 'section-details' => '/docs/creating-events#details',
+                // The Translation row under About (#event-translation).
+                'event-translation' => '/docs/creating-events#translation',
                 'section-listing' => '/docs/creating-events#listing',
                 'section-calendar-sync' => '/docs/creating-events#google-calendar',
                 'section-venue' => '/docs/creating-events#venue',

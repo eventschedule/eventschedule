@@ -2849,6 +2849,10 @@ class EventRepo
             }
         }
 
+        // The schedules are settled now: a correction written for another language than the one
+        // the event is now translated into (it moved venue) is given back to app:translate.
+        $event->dropCorrectionsInAnotherLanguage();
+
         return $event;
     }
 

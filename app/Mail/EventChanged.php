@@ -28,6 +28,13 @@ class EventChanged extends Mailable
     protected ?string $attendeeEmail = null;
 
     /**
+     * The language the attendee bought in (Sale::guestLanguage()), whose name for the event this
+     * copy prints. Set through readBy(); null prints the stored name. A property with a default,
+     * for the reason $attendeeEmail gives.
+     */
+    protected ?string $readerLanguage = null;
+
+    /**
      * @param  array  $changes  ['date' => ['old_starts_at','old_duration','old_timezone'], 'location' => ['variant','old_venue','new_venue']]
      */
     public function __construct(
@@ -43,6 +50,13 @@ class EventChanged extends Mailable
     public function forAttendee(string $email): static
     {
         $this->attendeeEmail = $email;
+
+        return $this;
+    }
+
+    public function readBy(?string $language): static
+    {
+        $this->readerLanguage = $language;
 
         return $this;
     }
@@ -75,7 +89,7 @@ class EventChanged extends Mailable
         }
 
         return new Envelope(
-            subject: __('messages.event_changed_subject', ['event' => $this->event->name]),
+            subject: __('messages.event_changed_subject', ['event' => $this->event->readIn($this->readerLanguage)->name]),
             from: new Address($fromAddress, $fromName),
         );
     }
@@ -86,7 +100,7 @@ class EventChanged extends Mailable
             view: 'emails.event_changed',
             text: 'emails.event_changed_text',
             with: [
-                'event' => $this->event,
+                'event' => $this->event->readIn($this->readerLanguage),
                 'role' => $this->role,
                 'note' => $this->note,
                 'recipientName' => $this->recipientName,

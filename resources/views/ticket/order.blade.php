@@ -76,12 +76,12 @@
                 <li class="gk-tk-leg {{ $isReleased ? 'gk-tk-leg-off' : '' }}">
                   @if ($isReleased)
                     <div class="gk-tk-leg-main">
-                      <span><b>{{ $legEvent->translatedName() }}</b><small>{{ $legDate }}</small></span>
+                      <span><b>{{ ! empty($ticketLanguage) ? $legEvent->nameInLanguage($ticketLanguage) : $legEvent->translatedName() }}</b><small>{{ $legDate }}</small></span>
                       <span class="gk-tk-quiet">{{ $legEvent->is_cancelled && $sale->status === 'paid' ? __('messages.event_cancelled_heading') : __('messages.'.$sale->status) }}</span>
                     </div>
                   @else
                     <a class="gk-tk-leg-main" href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($legEvent->id), 'secret' => $sale->secret]) }}">
-                      <span><b>{{ $legEvent->translatedName() }}</b><small>{{ $legDate }}</small></span>
+                      <span><b>{{ ! empty($ticketLanguage) ? $legEvent->nameInLanguage($ticketLanguage) : $legEvent->translatedName() }}</b><small>{{ $legDate }}</small></span>
                       <span class="gk-tk-leg-go">
                         {{ __('messages.view_ticket') }}
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>

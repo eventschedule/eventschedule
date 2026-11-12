@@ -282,7 +282,7 @@ class SendTicketReminders extends Command
                     new TicketReminder($sale, $event, $mailRole),
                     $sale->email,
                     $mailRole->id,
-                    $mailRole->language_code ?: config('app.locale'),
+                    $sale->mailLocale($mailRole->language_code ?: config('app.locale')),
                 )->delay(now()->addSeconds(intdiv($this->queued, self::DISPATCH_CHUNK) * self::DISPATCH_STAGGER_SECONDS));
                 $this->queued++;
             } catch (\Throwable $e) {

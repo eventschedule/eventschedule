@@ -8,6 +8,7 @@
 // same in both is not repeated here. A key added to pt and not here reaches pt-PT as pt has it, so
 // tests/Feature/EuropeanPortugueseTest.php fails when it carries a Brazilian word: add the
 // European form below.
-return array_replace(require __DIR__.'/../pt/accessibility.php', [
+// An operator's own pt wording (/admin/translations) comes along for the keys not listed here.
+return array_replace(require __DIR__.'/../pt/accessibility.php', function_exists('operator_lang_overrides') ? operator_lang_overrides('pt', 'accessibility') : [], [
 
 ]);

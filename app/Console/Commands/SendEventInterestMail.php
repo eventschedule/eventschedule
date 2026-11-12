@@ -371,7 +371,7 @@ class SendEventInterestMail extends Command
             $event,
             $interest,
             $kind,
-            $event->getGuestUrl($role->subdomain, $interest->event_date ?: null, true),
+            $interest->linkIn($role, (string) $event->getGuestUrl($role->subdomain, $interest->event_date ?: null, true)),
             route('event.interest.show_unsubscribe', ['token' => $interest->token]),
         );
 

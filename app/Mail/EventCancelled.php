@@ -34,6 +34,13 @@ class EventCancelled extends Mailable
      */
     protected ?string $attendeeEmail = null;
 
+    /**
+     * The language the attendee bought in (Sale::guestLanguage()), whose name for the event this
+     * copy prints. Set through readBy(); null prints the stored name. A property with a default,
+     * for the reason $attendeeEmail gives.
+     */
+    protected ?string $readerLanguage = null;
+
     public function __construct(
         protected Event $event,
         protected ?Role $role,
@@ -49,6 +56,13 @@ class EventCancelled extends Mailable
     public function forAttendee(string $email): static
     {
         $this->attendeeEmail = $email;
+
+        return $this;
+    }
+
+    public function readBy(?string $language): static
+    {
+        $this->readerLanguage = $language;
 
         return $this;
     }
@@ -81,7 +95,7 @@ class EventCancelled extends Mailable
         }
 
         return new Envelope(
-            subject: __('messages.event_cancelled_subject', ['event' => $this->event->name]),
+            subject: __('messages.event_cancelled_subject', ['event' => $this->event->readIn($this->readerLanguage)->name]),
             from: new Address($fromAddress, $fromName),
         );
     }
@@ -92,7 +106,7 @@ class EventCancelled extends Mailable
             view: 'emails.event_cancelled',
             text: 'emails.event_cancelled_text',
             with: [
-                'event' => $this->event,
+                'event' => $this->event->readIn($this->readerLanguage),
                 'role' => $this->role,
                 'note' => $this->note,
                 'recipientName' => $this->recipientName,

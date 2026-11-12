@@ -812,6 +812,7 @@ class BackupService
                 'feedback_sent_at' => $sale->feedback_sent_at?->toDateTimeString(),
                 'reminder_sent_at' => $sale->reminder_sent_at?->toDateTimeString(),
                 'guest_timezone' => $sale->guest_timezone,
+                'language_code' => $sale->language_code,
                 'confirmed_at' => $sale->confirmed_at?->toDateTimeString(),
                 'paid_at' => $sale->paid_at?->toDateTimeString(),
                 'created_at' => $sale->created_at?->toDateTimeString(),
@@ -2113,7 +2114,8 @@ class BackupService
             foreach (Event::HAND_TRANSLATABLE_FIELDS as $field) {
                 $source = $data['translation_overrides'][$field]['source'] ?? null;
                 if (isset($data['translation_overrides'][$field]) && is_string($source) && filled($event->{$field.'_en'})) {
-                    $event->markTranslationManual($field, $source);
+                    $lang = $data['translation_overrides'][$field]['lang'] ?? null;
+                    $event->markTranslationManual($field, $source, is_string($lang) ? $lang : null);
                 }
             }
         }
@@ -2649,6 +2651,8 @@ class BackupService
         $sale->feedback_sent_at = $data['feedback_sent_at'] ?? null;
         $sale->reminder_sent_at = $data['reminder_sent_at'] ?? null;
         $sale->guest_timezone = $data['guest_timezone'] ?? null;
+        // Read back through Sale::guestLanguage(), which ignores anything not a supported language.
+        $sale->language_code = is_string($data['language_code'] ?? null) ? substr($data['language_code'], 0, 10) : null;
         $sale->confirmed_at = $data['confirmed_at'] ?? null;
 
         // saveQuietly() below fires no hooks, so the saving() hook that normally stamps paid_at

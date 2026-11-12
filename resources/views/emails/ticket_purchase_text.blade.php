@@ -10,7 +10,7 @@
 
 {{ $event->name }}
 
-{{ __('messages.date') }}: {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}
+{{ __('messages.date') }}: {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->localDate(true, false) }}
 {{ __('messages.time') }}: {{ $event->getStartEndTime($sale->event_date) }}
 {{ __('messages.attendee') }}: {{ $sale->name }}
 {{ __('messages.number_of_attendees') }}: {{ $sale->quantity() }}

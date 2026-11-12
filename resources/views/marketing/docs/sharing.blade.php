@@ -8,6 +8,7 @@
         <x-doc-nav-link href="#schedule-url">Your Schedule URL</x-doc-nav-link>
         <x-doc-nav-link href="#embed">Embedding on Your Website</x-doc-nav-link>
         <x-doc-nav-link href="#embed-parameters" sub>URL Parameters</x-doc-nav-link>
+        <x-doc-nav-link href="#embed-multilingual" sub>One Calendar per Language</x-doc-nav-link>
         <x-doc-nav-link href="#embed-subscribe-form" sub>Embedding a Signup Form</x-doc-nav-link>
         <x-doc-nav-link href="#social">Social Media Sharing</x-doc-nav-link>
         <x-doc-nav-link href="#followers">Building Followers</x-doc-nav-link>
@@ -60,6 +61,7 @@
             <li>Leave <strong class="text-gray-900 dark:text-white">Widget</strong> on <strong class="text-gray-900 dark:text-white">Calendar</strong>. The other option, <strong class="text-gray-900 dark:text-white">Signup form</strong>, is covered in <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a> below</li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Theme</strong>. <strong class="text-gray-900 dark:text-white">Match the visitor's device</strong> follows each visitor's light or dark setting; choose Light or Dark to match your website instead</li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Layout</strong>. Leave it on <strong class="text-gray-900 dark:text-white">Schedule default</strong> to follow your schedule's own Default Layout, or choose Calendar or List to pin this one frame</li>
+            <li>If your schedule <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">offers a second language</a>, pick the <strong class="text-gray-900 dark:text-white">Language</strong> the frame shows: your own, or the translation, which adds <code class="doc-inline-code">lang=</code> to the code. See <a href="#embed-multilingual" class="doc-link">a calendar for each language</a></li>
             <li>Check the <strong class="text-gray-900 dark:text-white">Preview</strong>, which reloads each time you change the widget, theme or layout</li>
             <li>Copy the <strong class="text-gray-900 dark:text-white">Iframe Code</strong> with the button beside the field, or copy the <strong class="text-gray-900 dark:text-white">Embed URL</strong> if you would rather write the tag yourself</li>
             <li>Paste it into your website where you want the schedule to appear</li>
@@ -117,7 +119,7 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">lang=xx</code></td>
-                        <td>Switch the frame to your schedule's second language, the one set by <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Details &rarr; Language and time</a>. Any other language code is dropped and the frame falls back to your schedule's own language</td>
+                        <td>Show the frame in one of your schedule's two languages, by its code: <code class="doc-inline-code">lang=en</code> for English, <code class="doc-inline-code">lang=pt-PT</code> for European Portuguese (<code class="doc-inline-code">lang=pt</code> is Brazilian Portuguese), and so on. The second language is the one set by <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Details &rarr; Language and time</a>. Any other language code is dropped and the frame falls back to your schedule's own language. See <a href="#embed-multilingual" class="doc-link">a calendar for each language of your website</a> and its list of codes</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">month=3</code> &amp; <code class="doc-inline-code">year=2027</code></td>
@@ -154,11 +156,58 @@
             <p><code class="doc-inline-code">?layout=</code> always wins. Without it, an embed uses your schedule's <a href="{{ route('marketing.docs.schedule_styling') }}#event-layout" class="doc-link">Default Layout</a>. A visitor who switches between calendar and list on your own schedule page only changes it for themselves there, and never affects your embeds.</p>
         </div>
 
+        <h3 class="doc-subheading" id="embed-multilingual">A Calendar for Each Language of Your Website</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A website in two languages can show the same schedule on both: each language's page gets its own frame, and <code class="doc-inline-code">lang=</code> in the frame's address says which language it shows. It is still one schedule, so you add an event once, in your own language, and it appears on both pages, translated on the other. Free on every plan.</p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Details &rarr; Language and time</strong>. Set <strong class="text-gray-900 dark:text-white">Language</strong> to the one you write in, turn on <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong>, and choose your website's other language under <strong class="text-gray-900 dark:text-white">Translate into</strong>. See <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Language and time</a></li>
+            <li>Optionally add the names of your organization, venues and programs to the <a href="{{ route('marketing.docs.creating_schedules') }}#details-glossary" class="doc-link">translation glossary</a>, so the translation keeps them as you wrote them</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Actions &rarr; Embed Schedule</strong> (<a href="#embed-code" class="doc-link">above</a>), choose your own language under <strong class="text-gray-900 dark:text-white">Language</strong>, and paste the <strong class="text-gray-900 dark:text-white">Iframe Code</strong> on your website's page in that language</li>
+            <li>Choose the other language, copy the code again, and paste it on the page in that language. Or write the address yourself: <code class="doc-inline-code">&amp;lang=</code> with the page's language code after <code class="doc-inline-code">embed=true</code></li>
+        </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">For a schedule written in European Portuguese and translated into English:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>The Portuguese page, then the English page</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true&#38;lang=pt-PT"
+        width="100%" height="800" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;
+
+&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true&#38;lang=en"
+        width="100%" height="800" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;</code></pre>
+        </div>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Name both languages.</strong> <code class="doc-inline-code">lang=</code> takes either of your schedule's two languages. The dialog leaves it off for the language you write in, which a frame shows anyway; adding it there too, as in the example, keeps each frame in its own language whatever a visitor chose on your schedule page. Any other code is ignored, and the frame shows the language you write in.</li>
+            <li><strong class="text-gray-900 dark:text-white">One snippet per page, not a site translator.</strong> The frame has no language switcher of its own, and a translator that rewrites your website's pages, such as Weglot, does not reach inside it. So each language version of your page carries its own snippet, with its own <code class="doc-inline-code">lang=</code>, and the translation inside comes from your schedule.</li>
+            <li><strong class="text-gray-900 dark:text-white">It stays in its language.</strong> The language travels in the frame's own requests, not in a cookie, so it holds as visitors move between months, filter, or load past events, including in browsers that block cookies inside a frame on another site.</li>
+            <li><strong class="text-gray-900 dark:text-white">New events catch up.</strong> An event you add is translated in the background, usually within a few minutes. Until then the translated frame shows it as you wrote it. A translation you want worded differently can be <a href="{{ route('marketing.docs.creating_events') }}#translation" class="doc-link">corrected by hand</a>.</li>
+            <li><strong class="text-gray-900 dark:text-white">It combines with the rest.</strong> Add <code class="doc-inline-code">&amp;layout=</code>, <code class="doc-inline-code">&amp;schedule=</code> or any other <a href="#embed-parameters" class="doc-link">parameter</a> beside <code class="doc-inline-code">lang=</code>, and the <a href="#embed-subscribe-form" class="doc-link">signup form</a> takes it too. Without <code class="doc-inline-code">embed=true</code>, the same <code class="doc-inline-code">?lang=</code> makes a link that opens your schedule page in that language.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The language codes, written as here (<code class="doc-inline-code">pt-pt</code> and <code class="doc-inline-code">pt_PT</code> are understood too):</p>
+        <div class="doc-table-wrap mb-6">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Language</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (config('app.supported_languages') as $languageCode => $languageKey)
+                    <tr>
+                        <td><code class="doc-inline-code">{{ $languageCode }}</code></td>
+                        <td>{{ __('messages.'.$languageKey, [], 'en') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
         <h3 class="doc-subheading">What Travels Into the Frame</h3>
         <ul class="doc-list">
             <li><strong class="text-gray-900 dark:text-white">Your events, live.</strong> The frame loads from your schedule on every page view, so a date you move this afternoon is already right on your site. You never re-paste the tag.</li>
             <li><strong class="text-gray-900 dark:text-white">Your look.</strong> Background, colour scheme and font come from your <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Style</a> settings. Custom CSS, on Pro, applies inside the frame too.</li>
-            <li><strong class="text-gray-900 dark:text-white">Nothing else.</strong> No header, no footer, no banner, no language switcher, which is why the language is set in the URL instead.</li>
+            <li><strong class="text-gray-900 dark:text-white">Nothing else.</strong> No header, no footer, no banner, no language switcher, which is why the language is <a href="#embed-multilingual" class="doc-link">set in the URL</a> instead.</li>
             <li><strong class="text-gray-900 dark:text-white">No ads, ever.</strong> A Free schedule's own public pages can carry ads. An embed never does.</li>
             <li><strong class="text-gray-900 dark:text-white">No search-engine competition.</strong> The embed URL is served <code class="doc-inline-code">noindex, nofollow</code>, so the page that ranks is yours, not the frame inside it.</li>
         </ul>
@@ -405,7 +454,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong language</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><code class="doc-inline-code">&amp;lang=</code> only accepts your schedule's second language. Any other code is dropped and the frame falls back to your schedule's own language. Turn on <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under Edit Schedule &rarr; Details &rarr; Language and time first.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><code class="doc-inline-code">&amp;lang=</code> only accepts your schedule's two languages, by their <a href="#embed-multilingual" class="doc-link">codes</a> (European Portuguese is <code class="doc-inline-code">pt-PT</code>, Brazilian Portuguese <code class="doc-inline-code">pt</code>). Any other code is dropped and the frame falls back to your schedule's own language. Turn on <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under Edit Schedule &rarr; Details &rarr; Language and time first. If the frame shows the right language but some events are still as you wrote them, they have not been translated yet: allow up to an hour after adding them.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">An event is missing from the embed</h4>

@@ -13,6 +13,6 @@
 
 {{ __('messages.schedule_transfer_invite_sign_in', ['email' => $transfer->to_email]) }}
 
-{{ __('messages.schedule_transfer_invite_expires', ['date' => $transfer->expires_at?->format('M j, Y')]) }}
+{{ __('messages.schedule_transfer_invite_expires', ['date' => $transfer->expires_at?->localDate(true, false, true)]) }}
 
 {{ __('messages.schedule_transfer_invite_ignore') }}

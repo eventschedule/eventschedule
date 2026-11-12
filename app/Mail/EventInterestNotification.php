@@ -51,7 +51,7 @@ class EventInterestNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('messages.event_interest_'.$this->kind.'_subject', ['event' => $this->event->name]),
+            subject: __('messages.event_interest_'.$this->kind.'_subject', ['event' => $this->readEvent()->name]),
             from: $this->scheduleFrom($this->role),
             replyTo: $this->scheduleReplyTo($this->role),
         );
@@ -83,9 +83,19 @@ class EventInterestNotification extends Mailable
             text: 'emails.event_interest_text',
             with: [
                 'heading' => __('messages.event_interest_'.$this->kind.'_heading'),
-                'body' => __('messages.event_interest_'.$this->kind.'_body', ['event' => $this->event->name]),
+                'body' => __('messages.event_interest_'.$this->kind.'_body', ['event' => $this->readEvent()->name]),
                 'button' => __('messages.event_interest_'.$this->kind.'_button'),
+                'readEvent' => $this->readEvent(),
             ],
         );
+    }
+
+    /**
+     * The event as this person read it: the name stored for the language they asked in
+     * (event_interests.locale, which this mail is also written in), else the stored name.
+     */
+    public function readEvent(): Event
+    {
+        return $this->event->readIn(is_valid_language_code($this->interest->locale) ? $this->interest->locale : null);
     }
 }

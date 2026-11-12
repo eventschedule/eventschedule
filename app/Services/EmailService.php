@@ -106,11 +106,14 @@ class EmailService
             $mailable = new TicketPurchase($sale, $event, $role);
 
             if ($queue) {
+                // The language the guest bought in (Sale::guestLanguage()), else the request's,
+                // as before: SetUserLanguage ignores the POST's ?lang, so without the record a
+                // guest who read the translation was mailed in the other language.
                 SendQueuedEmail::dispatch(
                     $mailable,
                     $sale->email,
                     $role?->id,
-                    app()->getLocale()
+                    $sale->mailLocale(app()->getLocale())
                 );
             } else {
                 if (config('app.hosted') && $role) {
@@ -169,7 +172,7 @@ class EmailService
             $mailable = new PassBookingConfirmation($sale, $bookedEvent, $date, $role);
 
             if ($queue) {
-                SendQueuedEmail::dispatch($mailable, $sale->email, $role?->id, app()->getLocale());
+                SendQueuedEmail::dispatch($mailable, $sale->email, $role?->id, $sale->mailLocale(app()->getLocale()));
             } elseif (config('app.hosted') && $role) {
                 app(RoleMailerService::class)->sendForRole($role, $sale->email, $mailable);
             } else {
@@ -564,7 +567,7 @@ class EmailService
                 new $mailClass($sale, $event, $role, $event->appointmentType, ...$extraArgs),
                 $sale->email,
                 $role?->id,
-                app()->getLocale()
+                $sale->mailLocale(app()->getLocale())
             );
         } catch (\Exception $e) {
             Log::error('Failed to send appointment guest mail: '.$e->getMessage(), ['sale_id' => $sale->id]);
@@ -697,11 +700,13 @@ class EmailService
             return;
         }
 
-        OneSignalService::pushToGuestEmail($sale->email, app()->getLocale(), [
+        $url = $event->getGuestUrl(false, $sale->event_date ?? null, true);
+
+        OneSignalService::pushToGuestEmail($sale->email, $sale->mailLocale(app()->getLocale()), [
             'title_key' => 'messages.push_ticket_title',
             'body_key' => 'messages.push_ticket_body',
-            'body_params' => ['event' => $event->name],
-            'url' => $event->getGuestUrl(false, $sale->event_date ?? null, true),
+            'body_params' => ['event' => $sale->eventAsRead($event)->name],
+            'url' => $url ? Sale::withLanguage($url, $sale->linkLanguage($role, $event)) : $url,
             'options' => ['icon' => $role?->profile_image_url],
         ], $role);
     }

@@ -7,6 +7,7 @@ use App\Jobs\GenerateEventImageVariants;
 use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
 use App\Jobs\SyncEventToMicrosoftCalendar;
+use App\Jobs\TranslateEventSoon;
 use App\Services\BoostBillingService;
 use App\Services\BoostPartnerService;
 use App\Services\EventLifecycleService;
@@ -747,6 +748,8 @@ class Event extends Model
         });
 
         static::saved(function ($model) {
+            self::queueTranslationSoon($model);
+
             // wasRecentlyCreated for the same reason as above: an insert never syncs changes, so
             // wasChanged() is blind to it - and a brand new event is exactly the thing most
             // likely to belong on the wall.
@@ -4148,22 +4151,45 @@ class Event extends Model
             return $this->languageCodeCache = $this->venue->language_code;
         }
 
-        $lang = 'en';
-
         foreach ($this->roles as $role) {
             if ($role->isTalent() && $role->language_code) {
-                $lang = $role->language_code;
-                break;
+                return $this->languageCodeCache = $role->language_code;
             }
         }
 
-        return $this->languageCodeCache = $lang;
+        return $this->languageCodeCache = $this->languageCreator()?->language_code ?: 'en';
+    }
+
+    /**
+     * The schedule that wrote the event, as the last word on its languages: an online event, or
+     * one on a curator, has no venue and no talent, and was read as English to English, so a
+     * schedule that translates never had its own such events translated. After the venue and
+     * the talent, so every event that has one keeps the languages it has always had.
+     *
+     * Read from the roles already loaded (the creator is attached to its own events) or a loaded
+     * creatorRole, never with a query of its own: a list of events calling this would pay one per
+     * row. creator_role_id is read from the attributes, so a narrowed select without it is 'en'.
+     */
+    protected function languageCreator(): ?Role
+    {
+        $creatorId = (int) ($this->attributes['creator_role_id'] ?? 0);
+        if (! $creatorId) {
+            return null;
+        }
+
+        $creator = $this->roles->firstWhere('id', $creatorId);
+        if (! $creator && $this->relationLoaded('creatorRole')) {
+            $creator = $this->creatorRole;
+        }
+
+        return $creator;
     }
 
     /**
      * The TARGET language this event's content is translated INTO (stored in the `_en` columns),
      * mirroring getLanguageCode()'s source resolution: the venue drives it when set, otherwise the
-     * first talent role. Defaults to 'en', which reproduces the original English-only behavior.
+     * first talent role, otherwise the schedule that created it (languageCreator()). Defaults to
+     * 'en', which reproduces the original English-only behavior.
      */
     public function getTranslationLanguageCode()
     {
@@ -4175,16 +4201,45 @@ class Event extends Model
             return $this->translationLanguageCodeCache = $this->venue->translation_language_code;
         }
 
-        $lang = 'en';
-
         foreach ($this->roles as $role) {
             if ($role->isTalent() && $role->translation_language_code) {
-                $lang = $role->translation_language_code;
-                break;
+                return $this->translationLanguageCodeCache = $role->translation_language_code;
             }
         }
 
-        return $this->translationLanguageCodeCache = $lang;
+        // The schedule that wrote it, as getLanguageCode() falls back to it.
+        return $this->translationLanguageCodeCache = $this->languageCreator()?->translation_language_code ?: 'en';
+    }
+
+    /**
+     * Whether a save's untranslated text is translated a minute or so later (TranslateEventSoon)
+     * rather than on the next fifteen-minute run: a provider key is set and the queue is a real one.
+     */
+    public static function translatesSoon(): bool
+    {
+        return (config('services.google.gemini_key') || config('services.openai.api_key'))
+            && config('queue.default') !== 'sync';
+    }
+
+    /**
+     * Saved hook: a new event, or an original that changed, with something left untranslated is
+     * handed to TranslateEventSoon. Only the originals count, so the translation command's own
+     * saves (which write the `_en` columns) never queue another round.
+     */
+    protected static function queueTranslationSoon(self $model): void
+    {
+        if (! self::translatesSoon()
+            || (! $model->wasRecentlyCreated && ! $model->wasChanged(self::HAND_TRANSLATABLE_FIELDS))) {
+            return;
+        }
+
+        foreach (self::HAND_TRANSLATABLE_FIELDS as $field) {
+            if (trim((string) $model->{$field}) !== '' && $model->{$field.'_en'} === null) {
+                TranslateEventSoon::dispatch($model->id)->afterCommit();
+
+                return;
+            }
+        }
     }
 
     /**
@@ -4233,7 +4288,9 @@ class Event extends Model
             if (! $this->exists) {
                 return [];
             }
-            $this->attributes['translation_overrides'] = static::query()->whereKey($this->getKey())->value('translation_overrides');
+            // toBase(): the raw JSON. Eloquent's value() hands back the CAST array, which the cast
+            // would then try to decode again (a TypeError, and a 500 on the save).
+            $this->attributes['translation_overrides'] = static::query()->whereKey($this->getKey())->toBase()->value('translation_overrides');
             $this->syncOriginalAttribute('translation_overrides');
         }
 
@@ -4249,11 +4306,62 @@ class Event extends Model
                 $overrides[$field] = [
                     'source' => is_string($source) && preg_match('/^[0-9a-f]{40}$/', $source) ? $source : null,
                     'at' => is_string($stored[$field]['at'] ?? null) ? $stored[$field]['at'] : null,
+                    // The language the correction is written in. Null on a correction stored before
+                    // this was recorded, which is taken to be in the event's language as it is.
+                    'lang' => is_string($stored[$field]['lang'] ?? null) ? $stored[$field]['lang'] : null,
                 ];
             }
         }
 
         return $overrides;
+    }
+
+    /**
+     * Corrections written in a language the event no longer translates into (it moved to a venue,
+     * or onto a schedule, with another target) are forgotten and their fields given back to
+     * app:translate. Called by EventRepo::saveEvent() once the event's schedules are settled. A
+     * query-builder write, so no saving hook re-derives anything from a half-loaded model.
+     */
+    public function dropCorrectionsInAnotherLanguage(): void
+    {
+        $overrides = $this->translationOverrides();
+        if (! $overrides) {
+            return;
+        }
+
+        $this->unsetRelation('roles');
+        $this->unsetRelation('venue');
+        $this->languageCodeCache = null;
+        $this->translationLanguageCodeCache = null;
+        $target = $this->getTranslationLanguageCode();
+
+        $update = [];
+        $stamped = false;
+        foreach ($overrides as $field => $entry) {
+            if ($entry['lang'] === null) {
+                // A new event's correction, saved before it had schedules: it is in this language.
+                $overrides[$field]['lang'] = $target;
+                $stamped = true;
+            } elseif ($entry['lang'] !== $target) {
+                unset($overrides[$field]);
+                $update[$field.'_en'] = null;
+                if ($field === 'description') {
+                    $update['description_html_en'] = null;
+                }
+            }
+        }
+
+        if (! $update && ! $stamped) {
+            return;
+        }
+
+        $update['translation_overrides'] = $overrides ? json_encode($overrides) : null;
+        if (count($update) > 1) {
+            $update['translation_attempts'] = 0;
+        }
+        static::query()->whereKey($this->getKey())->update($update);
+        $this->forceFill(array_merge($update, ['translation_overrides' => $overrides ?: null]));
+        $this->syncOriginal();
     }
 
     /** What a correction is dated against: the original, with line endings and edges evened out. */
@@ -4267,12 +4375,15 @@ class Event extends Model
      * made against when that is not the original being saved (a copy of an event carries its
      * source's); null stamps the original as this save writes it.
      */
-    public function markTranslationManual(string $field, ?string $basis = null): void
+    public function markTranslationManual(string $field, ?string $basis = null, ?string $lang = null): void
     {
         $overrides = $this->translationOverrides();
         $overrides[$field] = [
             'source' => $basis !== null && preg_match('/^[0-9a-f]{40}$/', $basis) ? $basis : null,
             'at' => now()->toIso8601String(),
+            // Stamped once the save has settled the event's schedules, which decide its target
+            // (dropCorrectionsInAnotherLanguage()), when not given.
+            'lang' => $lang,
         ];
         $this->translation_overrides = $overrides;
     }
@@ -5379,8 +5490,20 @@ class Event extends Model
     public function textInLanguage(string $field, string $want, ?Role $viewingRole = null): ?string
     {
         $authored = $this->{$field};
+        $translated = $this->{$field === 'description_html' ? 'description_html_en' : $field.'_en'};
 
         if ($viewingRole && $viewingRole->isCurator() && $viewingRole->language_code === $want) {
+            // A person's correction in the language wanted outranks the curator's own machine copy
+            // of the same text: the curator pass translates the ORIGINAL, so without this a curator
+            // writing in the event's target language showed its AI copy over the owner's wording.
+            // Asked only of a row that has the column loaded: a calendar's narrowed select would
+            // otherwise cost a query per event.
+            if ($translated && array_key_exists('translation_overrides', $this->attributes)
+                && $this->translationIsManual($field === 'description_html' ? 'description' : $field)
+                && $this->getTranslationLanguageCode() === $want) {
+                return $translated;
+            }
+
             $pivot = $this->roles->where('id', $viewingRole->id)->first()?->pivot;
             // description resolves to description_html_translated: the callers of the description
             // wrapper render HTML, and the pivot stores both the source and the derived HTML.
@@ -5389,8 +5512,6 @@ class Event extends Model
                 return $pivot->{$pivotField};
             }
         }
-
-        $translated = $this->{$field === 'description_html' ? 'description_html_en' : $field.'_en'};
 
         if ($translated && $this->getTranslationLanguageCode() === $want) {
             return $translated;
@@ -5402,6 +5523,37 @@ class Event extends Model
     public function nameInLanguage(string $want, ?Role $viewingRole = null): string
     {
         return str_ireplace('fuck', 'F@#%', (string) $this->textInLanguage('name', $want, $viewingRole));
+    }
+
+    /**
+     * A copy of this event whose name and descriptions are the ones stored for `$want`
+     * (textInLanguage(), so a translation corrected by hand is the one used), for a mail, an
+     * invite or a pass to a guest who read the event in that language (Sale::eventAsRead()). With
+     * no language, or none of those stored for it, the event itself.
+     *
+     * For rendering only: never saved, and never handed to a queued job, which serializes a model
+     * by its id and would read the stored row back.
+     */
+    public function readIn(?string $want): static
+    {
+        if (! $want) {
+            return $this;
+        }
+
+        $copy = null;
+        foreach (['name', 'short_description', 'description', 'description_html'] as $field) {
+            if (! array_key_exists($field, $this->attributes)) {
+                continue;
+            }
+
+            $text = $this->textInLanguage($field, $want);
+            if ($text !== null && $text !== $this->attributes[$field]) {
+                $copy ??= clone $this;
+                $copy->attributes[$field] = $text;
+            }
+        }
+
+        return $copy ?? $this;
     }
 
     public function shortDescriptionInLanguage(string $want, ?Role $viewingRole = null): ?string

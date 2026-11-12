@@ -64,7 +64,7 @@ class TicketPurchase extends Mailable
             : 'messages.ticket_purchase_confirmation';
 
         return new Envelope(
-            subject: __($subjectKey).' - '.$this->event->name,
+            subject: __($subjectKey).' - '.$this->sale->eventAsRead($this->event)->name,
             from: new Address($fromAddress, $fromName),
             replyTo: $this->eventSupportReplyTo($this->event->user?->email),
         );
@@ -117,7 +117,10 @@ class TicketPurchase extends Mailable
             text: 'emails.ticket_purchase_text',
             with: [
                 'sale' => $this->sale,
-                'event' => $this->event,
+                // In the language the guest bought in: its name, and the calendar links the
+                // event block builds from it.
+                'event' => $this->sale->eventAsRead($this->event),
+                'lang' => $this->sale->linkLanguage($this->role, $this->event),
                 'role' => $this->role,
                 'ticketUrl' => $ticketUrl,
                 'googleWalletUrl' => $googleWalletUrl,
@@ -144,7 +147,7 @@ class TicketPurchase extends Mailable
         // listed the image. Now it is deliberate, a named attachment every client shows, and the
         // body stays as that commit decided.
         $attachments = [
-            Attachment::fromData(fn () => QrCodeUtils::png($this->ticketUrl()), 'ticket-qr-code.png')->withMime('image/png'),
+            Attachment::fromData(fn () => QrCodeUtils::png($this->ticketUrl(false)), 'ticket-qr-code.png')->withMime('image/png'),
         ];
 
         // The calendar invitation: the mail app shows it with its own add button, and the change
@@ -157,11 +160,17 @@ class TicketPurchase extends Mailable
         return $attachments;
     }
 
-    private function ticketUrl(): string
+    /**
+     * $withLanguage: the link a guest presses opens in the language they bought in. The QR code
+     * keeps the bare address, which is what the door reads.
+     */
+    private function ticketUrl(bool $withLanguage = true): string
     {
-        return canonical_url(route('ticket.view', [
+        $url = canonical_url(route('ticket.view', [
             'event_id' => UrlUtils::encodeId($this->event->id),
             'secret' => $this->sale->secret,
         ], false));
+
+        return $withLanguage ? Sale::withLanguage($url, $this->sale->linkLanguage($this->role, $this->event)) : $url;
     }
 }

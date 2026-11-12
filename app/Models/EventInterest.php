@@ -78,4 +78,15 @@ class EventInterest extends Model
     {
         return Str::random(64);
     }
+
+    /**
+     * $url (the event page, in the mail this person is sent) with ?lang= when they asked in the
+     * schedule's translation, so it opens in the language the mail is written in.
+     */
+    public function linkIn(Role $role, string $url): string
+    {
+        $lang = ($role->offersTranslation() && $this->locale === $role->translation_language_code) ? $this->locale : null;
+
+        return Sale::withLanguage($url, $lang);
+    }
 }

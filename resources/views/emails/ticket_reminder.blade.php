@@ -17,7 +17,7 @@
 <x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
 <x-email.text>{{ __('messages.ticket_reminder_see_you') }}</x-email.text>
 
-<x-email.event :event="$event" :date="$occurrence" :role="$role ?? null" />
+<x-email.event :event="$event" :date="$occurrence" :role="$role ?? null" :lang="$lang ?? null" />
 
 @if ($event->event_url)
 {{-- An online event's way in, as the appointment reminder gives it: a ticket holder is who it is for. --}}

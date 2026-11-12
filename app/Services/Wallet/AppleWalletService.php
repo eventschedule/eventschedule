@@ -129,7 +129,11 @@ class AppleWalletService
     /** The pass's description (pass.json). Public for the tests. */
     public function passJson(Sale $sale, Event $event, ?Role $role): array
     {
-        $language = $role?->language_code ?: config('app.locale');
+        // The language the holder bought in (Sale::guestLanguage()), else the schedule's: its
+        // labels, and the event's name in it where the event has one. Apple's pass is one file per
+        // holder, so unlike Google's shared class it can carry exactly their language.
+        $language = $sale->guestLanguage() ?? ($role?->language_code ?: config('app.locale'));
+        $event = $sale->eventAsRead($event);
         $label = fn (string $key) => __('messages.'.$key, [], $language);
         $sale->loadMissing('saleTickets.ticket');
 
@@ -242,13 +246,15 @@ class AppleWalletService
             $pass['eventTicket']['backFields'][] = ['key' => 'notes', 'label' => $label('important_information'), 'value' => $this->clamp(trim($notes), 1000)];
         }
 
-        // A snapshot is never updated, so the back points at the live ticket.
+        // A snapshot is never updated, so the back points at the live ticket, opened in the
+        // holder's language. The barcode above keeps the bare address the door reads.
+        $backUrl = Sale::withLanguage($ticketUrl, $sale->linkLanguage($role, $event));
         $pass['eventTicket']['backFields'][] = [
             'key' => 'ticket',
             'label' => $label('view_ticket'),
-            'value' => $ticketUrl,
+            'value' => $backUrl,
             // Only <a> is allowed here; quotes in a label stay quotes (e() would print &#039;).
-            'attributedValue' => '<a href="'.htmlspecialchars($ticketUrl, ENT_QUOTES).'">'.htmlspecialchars($label('view_ticket'), ENT_NOQUOTES).'</a>',
+            'attributedValue' => '<a href="'.htmlspecialchars($backUrl, ENT_QUOTES).'">'.htmlspecialchars($label('view_ticket'), ENT_NOQUOTES).'</a>',
         ];
 
         return $pass;

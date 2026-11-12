@@ -8,7 +8,8 @@
 // same in both is not repeated here. A key added to pt and not here reaches pt-PT as pt has it, so
 // tests/Feature/EuropeanPortugueseTest.php fails when it carries a Brazilian word: add the
 // European form below.
-return array_replace(require __DIR__.'/../pt/messages.php', [
+// An operator's own pt wording (/admin/translations) comes along for the keys not listed here.
+return array_replace(require __DIR__.'/../pt/messages.php', function_exists('operator_lang_overrides') ? operator_lang_overrides('pt', 'messages') : [], [
     'event_create_daily_limit_reached' => 'Atingiu o limite diário para criar eventos. Tente novamente amanhã.',
     'custom_footer_code_help' => 'Inserido antes da tag de fecho </body> das páginas públicas.',
     'event_deleted' => 'Evento eliminado com sucesso',
@@ -18,7 +19,7 @@ return array_replace(require __DIR__.'/../pt/messages.php', [
     'venue_not_accepting_requests' => 'O local não está a aceitar solicitações',
     'followed_role' => 'Agora segue :name com sucesso',
     'member_added_different_email' => 'Membro adicionado. A notificação foi enviada para o endereço de e-mail registado (:email).',
-    'register' => 'Registar',
+    'register' => 'Inscrever-me',
     'last_name' => 'Apelido',
     'confirm_your_password' => 'Confirme a sua palavra-passe',
     'password' => 'Palavra-passe',
@@ -74,7 +75,7 @@ return array_replace(require __DIR__.'/../pt/messages.php', [
     'view' => 'Ver',
     'language_help' => 'O idioma em que escreve a sua agenda e os seus eventos.',
     'offer_translation_help' => 'Traduza automaticamente a sua agenda e os seus eventos para outro idioma. Os visitantes terão um botão para alternar entre o seu idioma e a tradução.',
-    'translation_language_notice' => 'As traduções são geradas automaticamente e podem levar até uma hora a aparecer. Alterar o idioma traduz tudo novamente; editar um evento atualiza a sua tradução, exceto o que corrigiu à mão.',
+    'translation_language_notice' => 'As traduções são geradas automaticamente e podem levar até uma hora a aparecer. Editar um evento atualiza a sua tradução, exceto o que corrigiu à mão. Alterar o idioma traduz tudo novamente e descarta as correções feitas à mão.',
     'unsaved_changes' => 'Tem alterações não guardadas',
     'unsaved_changes_warning' => 'As suas alterações não foram guardadas e serão perdidas. Tem a certeza?',
     'address_not_found' => 'Morada não encontrada',
@@ -220,10 +221,10 @@ return array_replace(require __DIR__.'/../pt/messages.php', [
     'possible_duplicate_venue' => 'Este local pode ser um duplicado de :name. Selecione-o abaixo para fundir.',
     'possible_duplicate_venues_banner' => 'Pode ter :count locais duplicados para rever',
     'merge_venues_title' => 'Fundir locais duplicados',
-    'merge_venues_intro' => 'Estes locais aparecem em eventos futuros nesta programação e parecem ser duplicados. Escolha um destino para cada grupo e funda-os.',
+    'merge_venues_intro' => 'Estes locais aparecem em eventos futuros nesta agenda e parecem ser duplicados. Escolha um destino para cada grupo e funda-os.',
     'merge_venues_will_merge_into' => 'Será fundido em:',
     'merge_venues_merge_button' => 'Fundir',
-    'merge_venues_banner' => ':count grupos de locais na sua programação parecem ser duplicados. Funda-os.',
+    'merge_venues_banner' => ':count grupos de locais na sua agenda parecem ser duplicados. Funda-os.',
     'review' => 'Rever',
     'schedule_timezone_missing' => 'Esta agenda não tem fuso horário definido, por isso os horários dos eventos são ambíguos. Defina o fuso horário nas definições da agenda.',
     'event_timezone_mismatch_hint' => 'Este evento parece ter sido introduzido em :from. O horário acima é exibido no fuso horário da agenda (:to); confirme se está correto e guarde para o corrigir.',
@@ -569,10 +570,10 @@ return array_replace(require __DIR__.'/../pt/messages.php', [
     'save_settings' => 'Guardar definições',
     'settings_saved' => 'Definições guardadas com sucesso',
     'pro_feature_required' => 'Atualize para Pro para usar esta funcionalidade.',
-    'pro_feature_email_scheduling' => 'Atualize para Enterprise para enviar automaticamente gráficos de eventos numa programação.',
+    'pro_feature_email_scheduling' => 'Atualize para Enterprise para enviar gráficos de eventos automaticamente, com periodicidade definida.',
     'email_required' => 'Por favor, introduza um endereço de e-mail',
     'enterprise_features' => 'Funcionalidades Enterprise',
-    'enterprise_feature_email_scheduling' => 'Atualize para Enterprise para enviar automaticamente gráficos de eventos numa programação.',
+    'enterprise_feature_email_scheduling' => 'Atualize para Enterprise para enviar gráficos de eventos automaticamente, com periodicidade definida.',
     'enterprise_required_for_team_access' => 'O proprietário do calendário precisa de atualizar para Enterprise para adicionar membros da equipa.',
     'team_access_blocked' => 'Não tem acesso às vendas de bilhetes nem aos check-ins de :schedules. O acesso de membros da equipa requer o plano Enterprise, que o proprietário do calendário pode repor ao mudar de plano.',
     'team_access_blocked_owner' => 'Os membros da equipa não podem ver as vendas de bilhetes nem os check-ins deste calendário. O acesso de membros da equipa requer o plano Enterprise.',
@@ -2543,4 +2544,11 @@ return array_replace(require __DIR__.'/../pt/messages.php', [
     'translation_will_keep' => 'Ao guardar, a sua correção mantém-se.',
     'saving_resets_translation' => 'Ao guardar, a sua tradução corrigida de :fields é substituída por uma automática.',
     'translation_will_stay' => 'A sua tradução corrigida de :fields mantém-se tal como a escreveu. Verifique-a depois de guardar.',
+    'translation_on_its_way' => 'A caminho: normalmente fica pronta em poucos minutos',
+    'saving_retranslates' => 'Ao guardar, :fields é traduzido novamente de forma automática.',
+    'translation_disable_warning' => 'Desativar esta opção elimina as traduções já guardadas para esta agenda. Continuar?',
+    'merge_venues_empty_state' => 'Nenhum local duplicado encontrado nesta agenda.',
+    'merge_venues_intro_all' => 'Estas agendas de locais parecem duplicadas umas das outras. Escolha qual manter em cada grupo e junte-as.',
+    'event_interest_cancelled_button' => 'Ver agenda',
+    'event_interest_why_receiving' => 'Recebe este e-mail porque pediu para acompanhar :event. Isto não é uma subscrição da agenda.',
 ]);

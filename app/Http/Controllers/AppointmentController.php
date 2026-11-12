@@ -161,6 +161,8 @@ class AppointmentController extends Controller
             'slot' => $validated['slot'],
             'guest_timezone' => $request->input('guest_timezone'),
             'custom_values' => $request->input('custom_values', []),
+            // The language the booking page was read in, which the guest's mails follow.
+            'language_code' => \App\Models\Sale::languageFromRequest($request, $role),
         ];
 
         try {

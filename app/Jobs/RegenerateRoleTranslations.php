@@ -42,9 +42,17 @@ class RegenerateRoleTranslations implements ShouldQueue
 
     protected Role $role;
 
-    public function __construct(Role $role)
+    /**
+     * True for `app:translate --reset`, which rebuilds the cache in the SAME language: what a
+     * person corrected by hand is their wording, not a cached answer, and stays. A change of
+     * target (the default) discards it, since it is written in the old language.
+     */
+    protected bool $keepCorrections;
+
+    public function __construct(Role $role, bool $keepCorrections = false)
     {
         $this->role = $role;
+        $this->keepCorrections = $keepCorrections;
     }
 
     public function middleware(): array
@@ -129,16 +137,32 @@ class RegenerateRoleTranslations implements ShouldQueue
      */
     protected function resetEventsAndParts(): void
     {
-        // A curator never drives an event's translation target - each event's `_en` is governed by
-        // its own venue/first-talent (Event::getTranslationLanguageCode()), and curators display
-        // aggregated events via the pivot `_translated` columns, not `_en`. So a curator changing
-        // its own target must not null (and force re-translation of) every event it aggregates.
-        if ($this->role->isCurator()) {
-            return;
+        // A curator drives the target only of the events it wrote that have neither a venue nor a
+        // talent (Event::languageCreator()); the events it merely lists keep theirs, and it shows
+        // them through the pivot `_translated` columns. scopeToGovernedEvents() narrows to those.
+        if ($this->keepCorrections) {
+            // Events with a correction one by one, sparing the corrected fields; the rest below.
+            Event::whereHas('roles', fn ($q) => $q->where('roles.id', $this->role->id))
+                ->where(fn ($q) => $this->scopeToGovernedEvents($q))
+                ->whereNotNull('translation_overrides')
+                ->get(['id', 'translation_overrides'])
+                ->each(function (Event $event) {
+                    $reset = ['translation_attempts' => 0];
+                    foreach (Event::HAND_TRANSLATABLE_FIELDS as $field) {
+                        if (! $event->translationIsManual($field)) {
+                            $reset[$field.'_en'] = null;
+                            if ($field === 'description') {
+                                $reset['description_html_en'] = null;
+                            }
+                        }
+                    }
+                    Event::whereKey($event->id)->update($reset);
+                });
         }
 
         Event::whereHas('roles', fn ($q) => $q->where('roles.id', $this->role->id))
             ->where(fn ($q) => $this->scopeToGovernedEvents($q))
+            ->when($this->keepCorrections, fn ($q) => $q->whereNull('translation_overrides'))
             ->update([
                 'name_en' => null,
                 'short_description_en' => null,
@@ -172,6 +196,11 @@ class RegenerateRoleTranslations implements ShouldQueue
      */
     protected function scopeToGovernedEvents($query)
     {
+        if ($this->role->isCurator()) {
+            return $query->where('events.creator_role_id', $this->role->id)
+                ->whereDoesntHave('roles', fn ($r) => $r->whereIn('roles.type', ['venue', 'talent']));
+        }
+
         if (! $this->role->isTalent()) {
             return $query; // a venue governs every event it is attached to
         }

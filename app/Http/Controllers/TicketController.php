@@ -1111,6 +1111,10 @@ class TicketController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
+        // The language the buyer read this schedule's page in, which every mail about the order
+        // follows (Sale::guestLanguage()).
+        $guestLanguage = Sale::languageFromRequest($request, $role);
+
         // One leg per event in the cart. A request without legs[] is a single leg built from the
         // flat fields, which is every request the single-event form has ever sent.
         $legs = $this->resolveCheckoutLegs($request);
@@ -1311,7 +1315,7 @@ class TicketController extends Controller
         // Use database transaction with row locking to prevent race conditions
         // that could lead to overselling tickets
         try {
-            $sale = DB::transaction(function () use ($request, $legs, $user, $subdomain, $isPaymentLink) {
+            $sale = DB::transaction(function () use ($request, $legs, $user, $subdomain, $isPaymentLink, $guestLanguage) {
                 $sales = [];
 
                 // Locked once for the whole order, then drawn down leg by leg. See the method.
@@ -1320,7 +1324,7 @@ class TicketController extends Controller
                 foreach ($legs as $leg) {
                     $this->assertLegTicketsAvailable($leg, $leg['event'], $isPaymentLink);
 
-                    $legSale = $this->newSaleForLeg($request, $leg, $leg['event'], $user, $subdomain);
+                    $legSale = $this->newSaleForLeg($request, $leg, $leg['event'], $user, $subdomain, $guestLanguage);
                     $legSale->save();
 
                     $this->priceSaleLeg($legSale, $request, $leg, $leg['event'], $subdomain, $isPaymentLink, $giftCard);
@@ -1747,9 +1751,10 @@ class TicketController extends Controller
      * The identity half of a sale row for one event: buyer details, attribution and the
      * event-level custom field answers. Unsaved; the caller saves it, then prices it.
      */
-    private function newSaleForLeg($request, array $leg, Event $event, $user, string $subdomain): Sale
+    private function newSaleForLeg($request, array $leg, Event $event, $user, string $subdomain, ?string $guestLanguage = null): Sale
     {
         $sale = new Sale;
+        $sale->language_code = $guestLanguage;
         $sale->name = $request->input('name');
         $sale->email = $request->input('email');
         $sale->phone = $request->input('phone') ? strip_tags(trim($request->input('phone'))) : null;
@@ -2190,6 +2195,7 @@ class TicketController extends Controller
                     $guestSale->status = $sale->status ?? 'unpaid';
                     $guestSale->group_id = $sale->id;
                     $guestSale->promoter_link_id = $sale->promoter_link_id;
+                    $guestSale->language_code = $sale->language_code;
                     if ($promoCodeId) {
                         $guestSale->promo_code_id = $promoCodeId;
                     }
@@ -2446,7 +2452,7 @@ class TicketController extends Controller
         }
 
         try {
-            $sale = DB::transaction(function () use ($request, $event, $user, $subdomain) {
+            $sale = DB::transaction(function () use ($request, $event, $user, $subdomain, $role) {
                 // Lock the event row to prevent race conditions
                 $event = Event::lockForUpdate()->find($event->id);
 
@@ -2505,6 +2511,8 @@ class TicketController extends Controller
                 $sale->payment_amount = 0;
                 $sale->status = 'paid';
                 $sale->ad_consent = consent_granted('marketing', $request);
+                // The language the guest read the page in, which their mails follow.
+                $sale->language_code = Sale::languageFromRequest($request, $role);
 
                 // Capture UTM attribution
                 $utmParams = $request->session()->get('utm_params', []);
@@ -2576,6 +2584,7 @@ class TicketController extends Controller
                         $guestSale->status = 'paid';
                         $guestSale->group_id = $sale->id;
                         $guestSale->promoter_link_id = $sale->promoter_link_id;
+                        $guestSale->language_code = $sale->language_code;
 
                         // Copy event-level custom values from primary sale
                         for ($cv = 1; $cv <= 10; $cv++) {
@@ -3202,6 +3211,13 @@ class TicketController extends Controller
 
         abort_unless($primary->isOrderPrimary(), 404);
 
+        // In the language the order was placed in, as each leg's ticket page is (view()).
+        $lang = request()->query('lang');
+        $ticketLanguage = is_string($lang) && is_valid_language_code($lang) ? $lang : $primary->guestLanguage();
+        if ($ticketLanguage && ! auth()->check()) {
+            app()->setLocale($ticketLanguage);
+        }
+
         // installmentPlan is eager-loaded for the wallet badge's gate: canOffer() calls
         // isInstallmentDelinquent() per row, which would otherwise be one query per leg.
         $sales = Sale::with('event.creatorRole', 'installmentPlan')
@@ -3221,7 +3237,7 @@ class TicketController extends Controller
         $event = $primary->event;
         $role = $event ? ($event->getRoleWithEmailSettings() ?? $event->roles->first()) : null;
 
-        return view('ticket.order', compact('primary', 'sales', 'role'));
+        return view('ticket.order', compact('primary', 'sales', 'role', 'ticketLanguage'));
     }
 
     public function view($eventId, $secret)
@@ -3236,6 +3252,15 @@ class TicketController extends Controller
         $sale = Sale::with(['promoCode', 'saleTickets.ticket'])->where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
         $role = $event->role();
 
+        // The language the ticket reads in: the ?lang= its mails carry, else the one the guest
+        // bought in, so a link without it (an older mail, the order page) still opens as they read
+        // the event. A signed-in visitor keeps their own interface language (SetUserLanguage).
+        $lang = request()->query('lang');
+        $ticketLanguage = is_string($lang) && is_valid_language_code($lang) ? $lang : $sale->guestLanguage();
+        if ($ticketLanguage && ! auth()->check()) {
+            app()->setLocale($ticketLanguage);
+        }
+
         // Advance booking surface (only for a paid, booking-enabled pass).
         $bookingService = app(PassBookingService::class);
         $passBookable = $bookingService->isBookable($sale);
@@ -3243,7 +3268,7 @@ class TicketController extends Controller
         $bookableOccurrences = $passBookable ? $bookingService->bookableOccurrences($sale, now()) : [];
         $passPolicyTicket = $passBookable ? $bookingService->passSaleTicket($sale)?->ticket : null;
 
-        return view('ticket.view', compact('event', 'sale', 'role', 'passBookable', 'bookedOccurrences', 'bookableOccurrences', 'passPolicyTicket'));
+        return view('ticket.view', compact('event', 'sale', 'role', 'passBookable', 'bookedOccurrences', 'bookableOccurrences', 'passPolicyTicket', 'ticketLanguage'));
     }
 
     /**
@@ -3792,7 +3817,7 @@ class TicketController extends Controller
             $originalLocale = app()->getLocale();
 
             try {
-                app()->setLocale($role->language_code ?? $originalLocale);
+                app()->setLocale($sale->mailLocale($role->language_code ?? $originalLocale));
 
                 $mailable = new FeedbackRequest($sale, $event, $role);
                 $sent = app(RoleMailerService::class)->sendForRole($role, $sale->email, $mailable);

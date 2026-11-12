@@ -582,7 +582,9 @@ return {
         monthCalendarLinks(e, date) {
             const page = this.monthPage(e, date);
             if (!page) return null;
-            return { apple: page + '/ical', google: page + '/ical?to=google', outlook: page + '/ical?to=outlook' };
+            // The page's language rides along, so the entry is named in the language it was added in.
+            const lang = this.carryLang ? 'lang=' + encodeURIComponent(this.carryLang) : '';
+            return { apple: page + '/ical' + (lang ? '?' + lang : ''), google: page + '/ical?to=google' + (lang ? '&' + lang : ''), outlook: page + '/ical?to=outlook' + (lang ? '&' + lang : '') };
         },
 
         // The event's own address, a series' with its night, and nothing else: getEventUrl()
@@ -672,7 +674,7 @@ return {
                 tall: !!(e.flyer_width && e.flyer_height && e.flyer_height > e.flyer_width * 1.12),
                 tile: { month: d.toLocaleDateString(lang, { month: 'short' }), day: d.getDate(), weekday: d.toLocaleDateString(lang, { weekday: 'long' }), clock },
                 span: f.span, word: this.dayWord(f.first), when, pills,
-                where: e.venue_name && !f.locked && !ownVenue ? { name: e.venue_name, url: e.venue_guest_url || null } : null,
+                where: e.venue_name && !f.locked && !ownVenue ? { name: e.venue_name, url: e.venue_guest_url ? this.withLang(e.venue_guest_url) : null } : null,
                 online: !!(e.is_online && !e.venue_name),
                 faces: f.locked ? [] : acts.filter((t) => t.profile_image).slice(0, 3).map((t) => t.profile_image),
                 who: f.locked || !acts.length ? '' : acts.slice(0, 3).map((t) => t.name).join(', ') + (acts.length > 3 ? ' +' + (acts.length - 3) : ''),
@@ -681,7 +683,7 @@ return {
                 go, details: go.plain ? null : url,
                 view: !CAN.guest && e.can_edit ? url : null,
                 edit: CAN.guest && e.can_edit ? this.editUrl(e) : null,
-                links, share: CAN.share && !f.draft && !f.internal && !!e.guest_url, page: this.monthPage(e, f.first), menu: false, copied: false,
+                links, share: CAN.share && !f.draft && !f.internal && !!e.guest_url, page: this.withLang(this.monthPage(e, f.first)), menu: false, copied: false,
                 step: sibs.length > 1 ? {
                     label: day(date).toLocaleDateString(lang, short) + ' · ' + say(L.n_of, { a: at + 1, b: sibs.length }),
                     prev: at > 0, next: at < sibs.length - 1,

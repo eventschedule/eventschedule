@@ -12,7 +12,7 @@
 {{ __('messages.amount') }}: {{ \App\Utils\MoneyUtils::format($giftCard->amount, $giftCard->currency_code) }}
 {{ __('messages.gift_card_code') }}: {{ $giftCard->formattedCode() }}
 @if ($giftCard->expires_at)
-{{ __('messages.gift_card_valid_until', ['date' => $giftCard->expires_at->format('M j, Y')]) }}
+{{ __('messages.gift_card_valid_until', ['date' => $giftCard->expires_at->localDate(true, false, true)]) }}
 @endif
 
 {{ __('messages.gift_card_how_to_redeem') }}

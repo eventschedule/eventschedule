@@ -8,7 +8,7 @@
 <x-email.details>
 <x-email.item :label="__('messages.amount')">{{ \App\Utils\MoneyUtils::format($giftCard->amount, $giftCard->currency_code) }}</x-email.item>
 @if ($giftCard->expires_at)
-<x-email.item :label="__('messages.expires')">{{ $giftCard->expires_at->translatedFormat('M j, Y') }}</x-email.item>
+<x-email.item :label="__('messages.expires')">{{ $giftCard->expires_at->localDate(true, false, true) }}</x-email.item>
 @endif
 <x-email.item :label="__('messages.recipient')" :caption="$giftCard->recipient_email" wide>{{ $giftCard->recipient_name }}</x-email.item>
 </x-email.details>

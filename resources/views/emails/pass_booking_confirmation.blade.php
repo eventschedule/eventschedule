@@ -1,7 +1,7 @@
 @php
     $theme = \App\Utils\EmailTheme::guest($role ?? null);
     $start = $bookedEvent->starts_at ? $bookedEvent->getStartDateTime($date, true) : null;
-    $when = $start ? ($bookedEvent->is_multi_day ? $bookedEvent->getDateRangeDisplay($date) : $start->translatedFormat('l, F j')) : null;
+    $when = $start ? ($bookedEvent->is_multi_day ? $bookedEvent->getDateRangeDisplay($date) : $start->localDate(false)) : null;
 @endphp
 <x-email.layout :theme="$theme" :title="__('messages.pass_booking_confirmation')" :preheader="$bookedEvent->name.($when ? ' · '.$when : '')">
 <x-slot:hero>

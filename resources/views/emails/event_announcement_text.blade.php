@@ -3,7 +3,7 @@
 
 @foreach ($events as $event)
 - {{ $event->name }}
-  {{ $event->is_multi_day ? $event->getDateRangeDisplay() : $event->getStartDateTime(null, true)?->translatedFormat('F j, Y') }}@if ($event->venue && $event->venue->name) - {{ $event->venue->name }}@endif
+  {{ $event->is_multi_day ? $event->getDateRangeDisplay() : $event->getStartDateTime(null, true)?->localDate(true, false) }}@if ($event->venue && $event->venue->name) - {{ $event->venue->name }}@endif
 
   {{ $event->getGuestUrl($role->subdomain, null, true) }}
 @endforeach

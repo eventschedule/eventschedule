@@ -124,6 +124,22 @@
                             </div>
                             @endif
 
+                            {{-- Language: only while the schedule offers a second one, the two it has.
+                                 Blank is the schedule's own language, which the embed shows anyway. --}}
+                            @if ($role->offersTranslation())
+                            @php $embedLanguages = config('app.supported_languages'); @endphp
+                            <div class="mb-4">
+                                <label for="embed-lang" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    {{ __('messages.language') }}
+                                </label>
+                                <select id="embed-lang"
+                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm">
+                                    <option value="">{{ __('messages.'.($embedLanguages[$role->language_code] ?? 'english')) }}</option>
+                                    <option value="{{ $role->translation_language_code }}">{{ __('messages.'.($embedLanguages[$role->translation_language_code] ?? 'english')) }}</option>
+                                </select>
+                            </div>
+                            @endif
+
                             <!-- Layout -->
                             <div class="mb-4" data-embed-for="calendar">
                                 <label for="embed-layout" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -229,6 +245,11 @@ function buildEmbedUrl(base) {
     const theme = selectedEmbedValue('embed-theme');
     if (theme) {
         params.push('dark=' + (theme === 'dark' ? 'true' : 'false'));
+    }
+
+    const lang = selectedEmbedValue('embed-lang');
+    if (lang) {
+        params.push('lang=' + encodeURIComponent(lang));
     }
 
     if (! params.length) {
@@ -431,7 +452,7 @@ document.addEventListener('click', function(event) {
 });
 
 document.addEventListener('change', function(event) {
-    if (['embed-layout', 'embed-widget', 'embed-theme'].includes(event.target.id)) {
+    if (['embed-layout', 'embed-widget', 'embed-theme', 'embed-lang'].includes(event.target.id)) {
         updateEmbedSnippets();
     }
 });

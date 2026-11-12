@@ -127,7 +127,7 @@ class ChargeInstallments extends Command
                     new InstallmentOnHold($plan->fresh(), $plan->nextDueInstallment(), $role),
                     $plan->sale->email,
                     $role->id,
-                    app()->getLocale()
+                    $plan->sale->mailLocale(app()->getLocale())
                 );
             }
         }
@@ -190,7 +190,7 @@ class ChargeInstallments extends Command
                     new InstallmentReminder($plan, $installment, $role),
                     $plan->sale->email,
                     $role->id,
-                    app()->getLocale()
+                    $plan->sale->mailLocale(app()->getLocale())
                 );
                 $sent++;
 
@@ -340,7 +340,7 @@ class ChargeInstallments extends Command
                     new InstallmentAuthenticationRequired($plan, $installment->fresh(), $role),
                     $plan->sale->email,
                     $role->id,
-                    app()->getLocale()
+                    $plan->sale->mailLocale(app()->getLocale())
                 );
             }
 
@@ -401,7 +401,7 @@ class ChargeInstallments extends Command
                     new InstallmentAuthenticationRequired($plan, $installment->fresh(), $role),
                     $plan->sale->email,
                     $role->id,
-                    app()->getLocale()
+                    $plan->sale->mailLocale(app()->getLocale())
                 );
             }
 
@@ -460,7 +460,7 @@ class ChargeInstallments extends Command
                 ? new InstallmentOnHold($plan->fresh(), $installment->fresh(), $role)
                 : new InstallmentFailed($plan, $installment->fresh(), $role);
 
-            SendQueuedEmail::dispatch($mailable, $plan->sale->email, $role->id, app()->getLocale());
+            SendQueuedEmail::dispatch($mailable, $plan->sale->email, $role->id, $plan->sale->mailLocale(app()->getLocale()));
 
             // Failures are immediate and individual for the organizer too - unlike the routine
             // reminder, this one needs acting on.
@@ -569,7 +569,7 @@ class ChargeInstallments extends Command
                     new InstallmentFinalNotice($plan, $next, $role),
                     $plan->sale->email,
                     $role->id,
-                    app()->getLocale()
+                    $plan->sale->mailLocale(app()->getLocale())
                 );
                 $sent++;
 

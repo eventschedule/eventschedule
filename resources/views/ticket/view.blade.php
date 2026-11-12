@@ -3,7 +3,8 @@
     // page. Not $role, which is the event's performer and null for a venue's or a curator's event.
     $themeRole = $sale->sellingRole() ?? $role;
     $eventDate = $sale->event_date;
-    $eventName = $event->translatedName();
+    // In the language the ticket is read in (TicketController::view()), where the event has it.
+    $eventName = ! empty($ticketLanguage) ? $event->nameInLanguage($ticketLanguage) : $event->translatedName();
 
     $isUnpaid = $sale->status === 'unpaid';
     $installmentPlan = $sale->installmentPlan;

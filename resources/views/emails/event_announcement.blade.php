@@ -34,7 +34,7 @@
 <a href="{{ $event->getGuestUrl($role->subdomain, null, true) }}" target="_blank" rel="noopener" class="es-ink" dir="auto" style="font-size: 17px; line-height: 24px; font-weight: 600; color: #0f172a; text-decoration: none;">{{ $event->name }}</a>
 <p class="es-ink-3" style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: #64748b;">
 @if ($start)
-{{ $event->is_multi_day ? $event->getDateRangeDisplay() : $start->translatedFormat('l, F j, Y') }}
+{{ $event->is_multi_day ? $event->getDateRangeDisplay() : $start->localDate() }}
 @endif
 @if ($event->venue && $event->venue->name)
 @if ($start) &middot; @endif<span dir="auto">{{ $event->venue->name }}</span>

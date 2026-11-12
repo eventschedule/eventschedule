@@ -1282,18 +1282,27 @@
 
                             <div id="translation-language-wrapper" class="mt-4 {{ old('translation_enabled', $role->translation_language_code && $role->translation_language_code !== $role->language_code) ? '' : 'hidden' }}">
                                 <x-input-label for="translation_language_code" :value="__('messages.translate_into')" />
+                                {{-- By name, as the reader's language sorts them, and starting on the
+                                     schedule's country's language (App\Utils\TranslationTargets), not
+                                     on the first code in the list. --}}
+                                @php
+                                    $suggestedTarget = \App\Utils\TranslationTargets::suggest($role);
+                                    $chosenTarget = old('translation_language_code', $suggestedTarget);
+                                @endphp
                                 <select name="translation_language_code" id="translation_language_code" {{ is_demo_mode() ? 'disabled' : '' }}
+                                    data-suggested="{{ $suggestedTarget }}"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    @foreach(config('app.supported_languages') as $key => $value)
-                                    <option value="{{ $key }}" {{ $role->translation_language_code == $key ? 'SELECTED' : '' }} {{ $key === $role->language_code ? 'hidden disabled' : '' }}>
-                                        {{ __('messages.' . $value) }}
+                                    <option value="" disabled {{ $chosenTarget ? '' : 'selected' }}>{{ __('messages.choose_a_language') }}</option>
+                                    @foreach(\App\Utils\TranslationTargets::options() as $key => $name)
+                                    <option value="{{ $key }}" {{ $chosenTarget === $key ? 'selected' : '' }} {{ $key === $role->language_code ? 'hidden disabled' : '' }}>
+                                        {{ $name }}
                                     </option>
                                     @endforeach
                                 </select>
                                 <x-input-error class="mt-2" :messages="$errors->get('translation_language_code')" />
 
                                 <p class="mt-2 text-xs">
-                                    <x-link href="https://eventschedule.com/features/ai" target="_blank">{{ __('messages.learn_more') }}</x-link>
+                                    <x-link href="{{ marketing_url('/docs/creating-schedules#details-translation') }}" target="_blank">{{ __('messages.learn_more') }}</x-link>
                                 </p>
 
                                 {{-- Where the glossary is, for whoever looks for it here. --}}
@@ -1302,12 +1311,8 @@
                                     <x-link href="#details-tab-glossary" data-open-glossary>{{ __('messages.translation_glossary') }}</x-link>
                                 </p>
 
-                                <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                    </svg>
-                                    <p class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.translation_language_notice') }}</p>
-                                </div>
+                                {{-- How translation works, not a warning: the kit's information notice. --}}
+                                <x-page-notice tone="info" class="mt-3">{{ __('messages.translation_language_notice') }}</x-page-notice>
                             </div>
                         </div>
 
@@ -1319,14 +1324,17 @@
                             var target = document.getElementById('translation_language_code');
                             if (!toggle || !wrapper || !target) return;
 
-                            function firstAvailable() {
-                                return Array.from(target.options).find(function (o) { return !o.disabled; });
-                            }
+                            // A choice that is no longer offered (the language it is written in)
+                            // goes back to the suggestion, else to "Choose a language": never to
+                            // the first language in the list.
                             function ensureValidTarget() {
                                 var sel = target.options[target.selectedIndex];
                                 if (!sel || sel.disabled) {
-                                    var f = firstAvailable();
-                                    if (f) target.value = f.value;
+                                    var suggested = target.dataset.suggested
+                                        ? Array.from(target.options).find(function (o) { return o.value === target.dataset.suggested && !o.disabled; })
+                                        : null;
+                                    target.value = suggested ? suggested.value : '';
+                                    target.dispatchEvent(new Event('change', { bubbles: true }));
                                 }
                             }
 
@@ -1399,27 +1407,38 @@
                         @php
                             $glossaryTranslationOn = (bool) old('translation_enabled', $role->translation_language_code && $role->translation_language_code !== $role->language_code);
                             $glossaryRows = old('glossary_submitted') ? array_values((array) old('glossary', [])) : \App\Services\TranslationGlossary::entries($role);
+                            // The terms this page shows, so a save removes only those: one added
+                            // from another tab meanwhile stays. Carried through a refused save.
+                            $glossarySeen = old('glossary_seen_submitted') ? array_values((array) old('glossary_seen', [])) : array_column(\App\Services\TranslationGlossary::entries($role), 'term');
                             // An empty list starts with one empty row, so the first term is typed
                             // straight away. Posted empty, it is dropped (TranslationGlossary::save()).
                             if (! $glossaryRows) {
                                 $glossaryRows = [['term' => '', 'translation' => null]];
                             }
-                            $glossaryTarget = $role->translationLanguageName();
+                            // The language the second box is in: the one "Translate into" shows.
+                            $glossaryTargetCode = old('translation_language_code', \App\Utils\TranslationTargets::suggest($role));
+                            $glossaryTarget = \App\Utils\TranslationTargets::options()[$glossaryTargetCode] ?? __('messages.translate_into');
                         @endphp
                         <x-form-row group="details" tab="glossary" :title="__('messages.translation_glossary')" class="details-tab" :hidden="! $glossaryTranslationOn"
                             :summary="collect($glossaryRows)->pluck('term')->filter()->implode(', ') ?: __('messages.none')" :muted="! collect($glossaryRows)->pluck('term')->filter()->count()" />
                         <div id="details-tab-glossary" class="event-subrow-body details-tab-content" hidden>
                             <input type="hidden" name="glossary_submitted" value="1">
+                            <input type="hidden" name="glossary_seen_submitted" value="1">
+                            @foreach ($glossarySeen as $glossarySeenTerm)
+                            <input type="hidden" name="glossary_seen[]" value="{{ $glossarySeenTerm }}">
+                            @endforeach
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.glossary_help') }}</p>
 
                             {{-- Which box is which, from a tablet up; on a phone the boxes stack and
                                  the placeholders say it. --}}
                             <div class="glossary-heads" aria-hidden="true">
                                 <span>{{ __('messages.glossary_term') }}</span>
-                                {{-- The language alone: "Translation (Portuguese (Brazil))" doubled its brackets. --}}
-                                <span>{{ $glossaryTarget }}</span>
+                                {{-- The language alone: "Translation (Portuguese (Brazil))" doubled its brackets.
+                                     Follows "Translate into" before it is saved (the script below). --}}
+                                <span data-glossary-language>{{ $glossaryTarget }}</span>
                             </div>
-                            <div id="glossary-items" class="event-list sched-list" data-glossary-next="{{ count($glossaryRows) }}">
+                            <div id="glossary-items" class="event-list sched-list" data-glossary-next="{{ count($glossaryRows) }}"
+                                data-label="{{ __('messages.glossary_translation_into', ['language' => '__LANGUAGE__']) }}">
                                 @foreach ($glossaryRows as $glossaryIndex => $glossaryRow)
                                 <div class="event-list-row glossary-item" data-list-row>
                                     <div class="sched-label-fields has-second">
@@ -1467,6 +1486,29 @@
                             var template = document.getElementById('glossary-row-template');
                             var toggle = document.getElementById('translation_enabled');
                             if (! row || ! pane || ! list || ! add || ! template) return;
+
+                            // The second box names the language "Translate into" shows, before Save too.
+                            var picker = document.getElementById('translation_language_code');
+                            function languageChanged() {
+                                var option = picker && picker.options[picker.selectedIndex];
+                                var name = option && option.value ? option.textContent.trim() : '';
+                                if (! name) {
+                                    return;
+                                }
+                                var head = document.querySelector('[data-glossary-language]');
+                                if (head) {
+                                    head.textContent = name;
+                                }
+                                var label = (list.dataset.label || '').replace('__LANGUAGE__', name);
+                                document.querySelectorAll('#glossary-items [name$="[translation]"], #glossary-row-template').forEach(function (node) {
+                                    (node.content ? node.content.querySelectorAll('[data-glossary-field="translation"]') : [node]).forEach(function (input) {
+                                        input.setAttribute('aria-label', label);
+                                    });
+                                });
+                            }
+                            if (picker) {
+                                picker.addEventListener('change', languageChanged);
+                            }
 
                             // The hint under the translation switch opens this row.
                             var hint = document.querySelector('[data-open-glossary]');
@@ -8241,7 +8283,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // "America/Argentina/Buenos_Aires" says Buenos Aires.
         var zone = kit.value('#timezone').split('/').pop().replace(/_/g, ' ');
-        return kit.join([zone, kit.chosen('#language_code')]);
+        // Both languages, as the Language and time row says them ("English + Português (Portugal)").
+        var translated = kit.on('translation_enabled') ? kit.chosen('#translation_language_code') : '';
+        return kit.join([zone, kit.chosen('#language_code') + (translated ? ' + ' + translated : '')]);
     });
     // In the words the settings page uses ("12-hour"), the zone by its city as the tab says it,
     // and the first day of the week only when it is not the usual Sunday.

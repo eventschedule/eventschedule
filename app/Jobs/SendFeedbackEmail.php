@@ -68,9 +68,13 @@ class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        OneSignalService::pushToGuestEmail($sale->email, $this->locale, [
+        // The language the guest bought in, when one was recorded; else the schedule's, as the
+        // dispatchers pass it.
+        $locale = $sale->mailLocale($this->locale);
+
+        OneSignalService::pushToGuestEmail($sale->email, $locale, [
             'title_key' => 'messages.push_feedback_request_title',
-            'title_params' => ['event' => $event->name],
+            'title_params' => ['event' => $sale->eventAsRead($event)->name],
             'body_key' => 'messages.push_feedback_request_body',
             'url' => $event->getGuestUrl(false, $sale->event_date ?? null, true),
             'options' => ['icon' => $role->profile_image_url],
@@ -79,7 +83,7 @@ class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
         $originalLocale = app()->getLocale();
 
         try {
-            app()->setLocale($this->locale);
+            app()->setLocale($locale);
 
             $mailable = new FeedbackRequest($sale, $event, $role);
 

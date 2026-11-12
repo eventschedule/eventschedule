@@ -21,11 +21,16 @@ use Illuminate\Http\Request;
  */
 class EventTranslationEdits
 {
-    /** Widths of the columns the corrections are written to (events.name_en is varchar(255)). */
+    /**
+     * Widths of the columns the corrections are written to: characters for events.name_en
+     * (varchar(255)) and the short description, BYTES for description_en, a TEXT column of 65,535
+     * bytes, which is also all an automatic translation can ever be. A cap in characters below
+     * that refused a save whose stored automatic description was longer.
+     */
     public const MAX_LENGTH = [
         'name' => 255,
         'short_description' => 500,
-        'description' => 16000,
+        'description' => 65535,
     ];
 
     /** The validation rules, for the web form's requests and the API. */
@@ -40,7 +45,13 @@ class EventTranslationEdits
         ];
 
         foreach (self::MAX_LENGTH as $field => $max) {
-            $rules['translations.'.$field] = ['nullable', 'string', 'max:'.$max];
+            $rules['translations.'.$field] = $field === 'description'
+                ? ['nullable', 'string', function ($attribute, $value, $fail) use ($max) {
+                    if (is_string($value) && strlen($value) > $max) {
+                        $fail(__('validation.max.string', ['attribute' => __('messages.description'), 'max' => $max]));
+                    }
+                }]
+                : ['nullable', 'string', 'max:'.$max];
         }
 
         return $rules;
@@ -75,7 +86,9 @@ class EventTranslationEdits
                     continue;
                 }
 
-                $text = mb_substr($text, 0, self::MAX_LENGTH[$field]);
+                $text = $field === 'description'
+                    ? mb_strcut($text, 0, self::MAX_LENGTH[$field], 'UTF-8')
+                    : mb_substr($text, 0, self::MAX_LENGTH[$field]);
 
                 // Sent back unchanged from a correction that still fits: no new date, no new mark.
                 if ($event->translationIsManual($field) && $text === $event->{$field.'_en'} && ! $event->translationIsStale($field) && ! isset($basis[$field])) {

@@ -114,6 +114,8 @@
             'turnstileEnabled' => ! $isReschedule && \App\Utils\TurnstileUtils::isActiveForRequest(),
             'turnstileSiteKey' => ! $isReschedule && \App\Utils\TurnstileUtils::isActiveForRequest() ? \App\Utils\TurnstileUtils::getSiteKey() : null,
             'csrf' => csrf_token(),
+            // The language this page is read in, for the guest's booking mails (Sale::languageFromRequest()).
+            'pageLang' => $role->displayLanguageCode(),
             'initial' => $initialSlots,
             'scheduleTz' => $initialSlots['schedule_timezone'] ?? config('app.timezone'),
             'scheduleName' => $role->name,
@@ -933,6 +935,7 @@
                         if (this.form.notes) fd.append('notes', this.form.notes);
                         fd.append('slot', this.selectedSlot); fd.append('guest_timezone', this.tz);
                         fd.append('website', this.website);
+                        if (this.pageLang) fd.append('lang', this.pageLang);
                         if (this.turnstileEnabled) fd.append('cf-turnstile-response', this.turnstileToken);
 
                         return await this.post(fd);

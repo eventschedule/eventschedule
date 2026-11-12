@@ -13,6 +13,6 @@
 <x-email.button :href="$acceptUrl">{{ __('messages.schedule_transfer_review') }}</x-email.button>
 
 <x-email.text variant="small">{{ __('messages.schedule_transfer_invite_sign_in', ['email' => $transfer->to_email]) }}</x-email.text>
-<x-email.text variant="small">{{ __('messages.schedule_transfer_invite_expires', ['date' => $transfer->expires_at?->translatedFormat('M j, Y')]) }}</x-email.text>
+<x-email.text variant="small">{{ __('messages.schedule_transfer_invite_expires', ['date' => $transfer->expires_at?->localDate(true, false, true)]) }}</x-email.text>
 <x-email.text variant="small">{{ __('messages.schedule_transfer_invite_ignore') }}</x-email.text>
 </x-email.layout>

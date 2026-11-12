@@ -81,6 +81,14 @@ class EventAnnouncement extends Mailable
 
     public function content(): Content
     {
+        // Each event under the name stored for the language this follower subscribed in (their
+        // locale, which the mail is written in too), where it has one. At render time, on the
+        // models the queue has just read back: copies (Event::readIn()), never saved.
+        $locale = is_valid_language_code($this->subscriber->locale) ? $this->subscriber->locale : null;
+        if ($locale) {
+            $this->events = $this->events->map(fn ($event) => $event->readIn($locale));
+        }
+
         return new Content(
             view: 'emails.event_announcement',
             text: 'emails.event_announcement_text',

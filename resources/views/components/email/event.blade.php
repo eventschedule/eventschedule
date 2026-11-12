@@ -8,16 +8,17 @@
     has its own (an appointment's guest-zone line). ics overrides the .ics link (appointments have
     their own route), and details the notes the calendar entry carries (default: the event page,
     which an appointment should replace with its manage link). calendar and map turn the link rows
-    off, as a cancelled event wants.
+    off, as a cancelled event wants. lang is the ?lang= the event page and its .ics are opened in
+    (Sale::linkLanguage()): the guest read the event in the schedule's translation.
 --}}
 @aware(['theme' => null])
-@props(['event', 'date' => null, 'role' => null, 'calendar' => true, 'map' => true, 'time' => true, 'timeLine' => null, 'ics' => null, 'details' => null])
+@props(['event', 'date' => null, 'role' => null, 'calendar' => true, 'map' => true, 'time' => true, 'timeLine' => null, 'ics' => null, 'details' => null, 'lang' => null])
 @php
     $theme ??= \App\Utils\EmailTheme::account();
     $start = $event->starts_at ? $event->getStartDateTime($date, true) : null;
     $use24 = (bool) ($role?->use_24_hour_time);
 
-    $dateLine = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($date) : $start->translatedFormat('l, F j, Y')) : null;
+    $dateLine = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($date) : $start->localDate()) : null;
     $timeLine ??= ($time && $start) ? $event->getStartEndTime($date, $use24) : null;
 
     $venue = $event->venue;
@@ -37,6 +38,8 @@
                 $subdomain = $role?->subdomain ?? false;
                 $guestUrl = $event->getGuestUrl($subdomain, $date, true) ?: null;
                 $appleUrl = $event->getAppleCalendarUrl($date, $subdomain, true) ?: null;
+                $guestUrl = $guestUrl ? \App\Models\Sale::withLanguage($guestUrl, $lang) : null;
+                $appleUrl = $appleUrl ? \App\Models\Sale::withLanguage($appleUrl, $lang) : null;
             } catch (\Illuminate\Routing\Exceptions\UrlGenerationException $e) {
                 report($e);
             }

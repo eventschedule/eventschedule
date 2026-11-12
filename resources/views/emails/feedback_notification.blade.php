@@ -4,7 +4,7 @@
     $stars = str_repeat('★', max(0, min(5, $rating))).str_repeat('☆', max(0, 5 - $rating));
 @endphp
 <x-email.layout :theme="$theme" :title="__('messages.feedback_notification_subject', ['event' => $event->name])" :preheader="$stars.' · '.$event->name">
-<x-email.heading :eyebrow="__('messages.new_feedback_received')" :subtitle="$feedback->event_date ? $event->getStartDateTime($feedback->event_date, true)->translatedFormat('F j, Y') : null" auto>{{ $event->name }}</x-email.heading>
+<x-email.heading :eyebrow="__('messages.new_feedback_received')" :subtitle="$feedback->event_date ? $event->getStartDateTime($feedback->event_date, true)->localDate(true, false) : null" auto>{{ $event->name }}</x-email.heading>
 
 <x-email.text>{{ __('messages.hello') }} {{ $recipient?->name }},</x-email.text>
 

@@ -141,6 +141,8 @@
                 @guest
                     <x-honeypot />
                 @endguest
+                {{-- The language the page is read in, for the buyer's ticket mails (Sale::languageFromRequest()). --}}
+                <input type="hidden" name="lang" value="{{ $role->displayLanguageCode() }}">
                 <template v-for="(leg, index) in legs">
                     <input type="hidden" :name="'legs[' + index + '][event_id]'" :value="leg.event_id">
                     <input type="hidden" :name="'legs[' + index + '][event_date]'" :value="leg.event_date">

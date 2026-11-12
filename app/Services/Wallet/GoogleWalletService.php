@@ -333,7 +333,7 @@ class GoogleWalletService
         $payload = [
             'id' => $classId,
             'issuerName' => $this->clamp($role?->translatedName() ?: config('app.name'), 40),
-            'eventName' => $this->localized($event->name, $language),
+            'eventName' => $this->localizedEventName($event, $language),
             // UNDER_REVIEW is what Google's own samples insert with, and it is what makes a class
             // usable straight away. DRAFT is documented only as a state, not as a restriction, so
             // do not write a rule here about what it blocks - it has not been confirmed.
@@ -497,7 +497,8 @@ class GoogleWalletService
 
     protected function objectPayload(Sale $sale, Event $event, string $classId, ?Role $role): array
     {
-        $language = $this->language($role);
+        // The holder's own: the language they bought in (Sale::guestLanguage()), else the schedule's.
+        $language = $sale->guestLanguage() ?? $this->language($role);
 
         $object = [
             'id' => $this->objectId($sale),
@@ -556,7 +557,7 @@ class GoogleWalletService
     protected function textModules(Sale $sale, Event $event, $saleTicket, ?Role $role): array
     {
         $rows = [];
-        $language = $this->language($role);
+        $language = $sale->guestLanguage() ?? $this->language($role);
 
         $admits = $saleTicket?->ticket?->is_pass
             ? $saleTicket->ticket->admitsPerEvent()
@@ -701,6 +702,25 @@ class GoogleWalletService
     protected function localized(?string $value, string $language): array
     {
         return ['defaultValue' => ['language' => $language, 'value' => (string) $value]];
+    }
+
+    /**
+     * The event's name, with its translation beside it when it has one (the schedule's translation
+     * language, the text in name_en, hand corrections included). The class is the EVENT's and is
+     * shared by every holder, whichever language they bought in, so the name cannot be any one
+     * holder's: Google shows each phone the value for its own language and the default otherwise.
+     */
+    protected function localizedEventName(Event $event, string $language): array
+    {
+        $value = $this->localized($event->name, $language);
+        $target = $event->getTranslationLanguageCode();
+        $translated = $target ? $event->textInLanguage('name', $target) : null;
+
+        if ($target && $target !== $language && $translated !== null && $translated !== '' && $translated !== $event->name) {
+            $value['translatedValues'] = [['language' => $target, 'value' => (string) $translated]];
+        }
+
+        return $value;
     }
 
     protected function image(string $uri): array

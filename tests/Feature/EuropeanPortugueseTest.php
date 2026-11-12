@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\Role;
 use App\Utils\GeminiUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
 use Tests\Feature\Concerns\CreatesScheduleData;
+use Tests\Feature\Concerns\ResetsTranslationOverrides;
 use Tests\TestCase;
 
 /**
@@ -19,6 +22,7 @@ class EuropeanPortugueseTest extends TestCase
 {
     use CreatesScheduleData;
     use RefreshDatabase;
+    use ResetsTranslationOverrides;
 
     /**
      * Words a reader in Portugal would take as Brazilian, as they would appear in a UI string.
@@ -284,5 +288,91 @@ class EuropeanPortugueseTest extends TestCase
 
         $this->assertSame('Tem 3 bilhetes', trans_choice('messages.you_have_tickets', 3, ['count' => 3]));
         $this->assertSame('Tem 1 bilhete', trans_choice('messages.you_have_tickets', 1, ['count' => 1]));
+    }
+
+    /**
+     * An embed opens an event in a new tab, where no session follows from a cross-site iframe:
+     * the language has to ride in the address of every link the calendar hands out.
+     */
+    public function test_links_from_a_translated_page_carry_the_language(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['language_code' => 'en', 'translation_language_code' => 'pt-PT']);
+        $event = $this->createEvent($role, ['name' => 'Jazz Night', 'starts_at' => now()->addDays(3)->format('Y-m-d').' 20:00:00']);
+        $url = route('role.view_guest', ['subdomain' => $role->subdomain]);
+
+        $html = $this->get($url.'?embed=true&lang=pt-PT')->assertOk()->getContent();
+        $this->assertStringContainsString('carryLang: "pt-PT"', $html, 'the calendar appends &lang= to event and venue links');
+        $this->assertMatchesRegularExpression('~<noscript v-pre>.*href="[^"]+\?lang=pt-PT"~s', $html, 'the no-script list too');
+
+        session()->forget('translate');
+        $this->assertStringContainsString('carryLang: ""', $this->get($url)->assertOk()->getContent(), 'the authored language keeps clean links');
+
+        // The event page: its .ics links keep the language, and the Google entry links back to it.
+        $eventUrl = $this->guestEventUrl($role, $event);
+        $page = $this->get($eventUrl.'?lang=pt-PT')->assertOk()->getContent();
+        $this->assertStringContainsString('/ical?lang=pt-PT"', $page);
+
+        $google = $this->get($eventUrl.'/ical?to=google&lang=pt-PT')->assertRedirect()->headers->get('Location');
+        $this->assertStringContainsString(urlencode('?lang=pt-PT'), $google);
+    }
+
+    public function test_the_embed_dialog_offers_the_two_languages_only_when_the_schedule_translates(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['language_code' => 'en', 'translation_language_code' => 'pt-PT']);
+
+        $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
+            ->assertOk()
+            ->assertSee('id="embed-lang"', false)
+            ->assertSeeInOrder(['id="embed-lang"', '<option value="">', 'English', '<option value="pt-PT">', 'Portuguese (Portugal)'], false);
+
+        $single = $this->createRole($owner, 'venue', ['language_code' => 'en', 'translation_language_code' => 'en']);
+
+        $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $single->subdomain, 'tab' => 'schedule']))
+            ->assertOk()
+            ->assertDontSee('id="embed-lang"', false);
+    }
+
+    public function test_guest_wording_portugal_would_use(): void
+    {
+        app()->setLocale('pt-PT');
+
+        $this->assertSame('Inscrever-me', __('messages.register'), 'the RSVP button, not account sign-up');
+        $this->assertSame('Ver agenda', __('messages.event_interest_cancelled_button'));
+        $this->assertStringContainsString('esta agenda', __('messages.translation_disable_warning'));
+
+        app()->setLocale('pt');
+        $this->assertNotSame('Inscrever-me', __('messages.register'));
+    }
+
+    /** "terça-feira, novembro 17, 2026" was English's word order in Portuguese words. */
+    public function test_an_email_date_is_written_in_the_readers_order(): void
+    {
+        $date = Carbon::parse('2026-11-17 20:00', 'Europe/Lisbon');
+
+        app()->setLocale('pt-PT');
+        $this->assertSame('terça-feira, 17 de novembro de 2026', $date->localDate());
+        $this->assertSame('terça-feira, 17 de novembro', $date->localDate(false));
+        $this->assertSame('17 de novembro de 2026', $date->localDate(true, false));
+
+        app()->setLocale('de');
+        $this->assertSame('Dienstag, 17. November 2026', $date->localDate());
+
+        app()->setLocale('en');
+        $this->assertSame($date->translatedFormat('l, F j, Y'), $date->localDate(), 'English is unchanged');
+        $this->assertSame('Nov 17, 2026', $date->localDate(true, false, true));
+    }
+
+    /** An operator who rewords a pt string at /admin/translations rewords pt-PT where Portugal says the same. */
+    public function test_an_operator_override_of_pt_reaches_pt_pt_where_pt_pt_has_no_word_of_its_own(): void
+    {
+        $dir = config('app.lang_overrides_path').'/pt';
+        File::ensureDirectoryExists($dir);
+        File::put($dir.'/messages.php', "<?php\n\nreturn ['follow' => 'Acompanhar', 'tickets' => 'Entradas'];\n");
+        app('translator')->setLoaded([]);
+
+        app()->setLocale('pt-PT');
+        $this->assertSame('Acompanhar', __('messages.follow'), 'inherited from pt, so the override comes too');
+        $this->assertSame('Bilhetes', __('messages.tickets'), 'pt-PT\'s own word still wins');
     }
 }

@@ -46,13 +46,16 @@ class TicketInvite
         $duration = $event->duration > 0 ? $event->duration : 2;
         $endAt = $startAt->copy()->addMinutes(Event::durationHoursToMinutes($duration));
 
-        $ticketUrl = canonical_url(route('ticket.view', [
+        // Named, and linked, in the language the guest bought in (Sale::guestLanguage()); its
+        // notes are in the mail's own locale already.
+        $lang = $sale->linkLanguage($role, $event);
+        $ticketUrl = Sale::withLanguage(canonical_url(route('ticket.view', [
             'event_id' => UrlUtils::encodeId($sale->event_id),
             'secret' => $sale->secret,
-        ], false));
+        ], false)), $lang);
         $eventUrl = '';
         try {
-            $eventUrl = (string) ($event->getGuestUrl($role?->subdomain ?? false, $date, true) ?: '');
+            $eventUrl = Sale::withLanguage((string) ($event->getGuestUrl($role?->subdomain ?? false, $date, true) ?: ''), $lang);
         } catch (UrlGenerationException $e) {
             report($e);
         }
@@ -80,7 +83,7 @@ class TicketInvite
             'DTSTAMP:'.now()->utc()->format('Ymd\THis\Z'),
             'DTSTART:'.$startAt->copy()->utc()->format('Ymd\THis\Z'),
             'DTEND:'.$endAt->copy()->utc()->format('Ymd\THis\Z'),
-            'SUMMARY:'.IcsUtils::escape((string) $event->name),
+            'SUMMARY:'.IcsUtils::escape((string) $sale->eventAsRead($event)->name),
             'DESCRIPTION:'.IcsUtils::escape($notes),
         ];
         if ($location !== '') {

@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Jobs\RegenerateRoleTranslations;
+use App\Jobs\TranslateEventSoon;
 use App\Models\Event;
+use App\Models\EventRole;
 use App\Models\Role;
 use App\Models\User;
 use App\Repos\EventRepo;
@@ -12,8 +14,12 @@ use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\Testing\TestResponse;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -331,5 +337,202 @@ class EventTranslationCorrectionTest extends TestCase
 
         $this->venue->forceFill(['translation_language_code' => 'en'])->saveQuietly();
         $this->assertStringNotContainsString('id="event-translation"', $this->editPage($event->fresh()));
+    }
+
+    public function test_renaming_an_event_read_with_a_narrowed_select_keeps_the_correction(): void
+    {
+        $event = $this->translatedEvent();
+        $this->update($event, ['translations' => ['name' => 'Noite de Jazz']]);
+
+        // The cast value handed back to the cast was a TypeError, and a 500 on the save.
+        $narrow = Event::select('id', 'name', 'creator_role_id')->find($event->id);
+        $narrow->name = 'Jazz Night Two';
+        $narrow->save();
+
+        $event->refresh();
+        $this->assertSame('Noite de Jazz', $event->name_en);
+        $this->assertTrue($event->translationIsStale('name'));
+    }
+
+    public function test_a_curator_reading_the_target_language_is_shown_the_correction(): void
+    {
+        config(['services.google.gemini_key' => 'test-key']);
+        $event = $this->translatedEvent();
+        $this->update($event, ['translations' => ['name' => 'Noite de Jazz']]);
+
+        $curator = $this->createRole($this->owner, 'curator', ['language_code' => 'pt', 'translation_language_code' => 'en']);
+        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        // The curator pass buys no copy of a field the owner corrected into its language.
+        $asked = [];
+        GeminiUtils::fakeResponses(function ($prompt) use (&$asked) {
+            $asked[] = $prompt;
+
+            return ['CÓPIA DA IA'];
+        });
+        Artisan::call('app:translate', ['--event_id' => $event->id]);
+        $pivot = EventRole::where('event_id', $event->id)->where('role_id', $curator->id)->first();
+        $this->assertNull($pivot->name_translated);
+        $this->assertSame('CÓPIA DA IA', $pivot->short_description_translated, 'what was not corrected is still translated');
+
+        // And a copy made before the correction does not hide it.
+        EventRole::where('id', $pivot->id)->update(['name_translated' => 'Noite de Jazz (IA)']);
+        $event = Event::with('roles')->find($event->id);
+        $this->assertSame('Noite de Jazz', $event->nameInLanguage('pt', $curator->fresh()));
+    }
+
+    public function test_a_refused_copy_keeps_its_corrections(): void
+    {
+        $basis = sha1('Jazz Night');
+        $html = $this->actingAs($this->owner)
+            ->withSession([
+                '_old_input' => ['name' => 'Jazz Night', 'translations' => ['name' => 'Noite de Jazz'], 'translation_basis' => ['name' => $basis]],
+                'errors' => (new ViewErrorBag)->put('default', new MessageBag(['starts_at' => ['x']])),
+            ])
+            ->get(route('event.create', ['subdomain' => $this->venue->subdomain]))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="event-translation"', $html);
+        $this->assertStringContainsString($basis, $html, 'the original it was made for rides again');
+    }
+
+    public function test_a_long_description_correction_is_saved(): void
+    {
+        $event = $this->translatedEvent();
+        // Longer than the 16,000 characters the first cap allowed, within the column.
+        $long = str_repeat('Portas às sete. ', 1500);
+
+        $this->update($event, ['translations' => ['description' => $long]])->assertSessionHasNoErrors();
+
+        $this->assertSame(trim($long), $event->fresh()->description_en);
+    }
+
+    public function test_a_copy_does_not_carry_corrections_in_another_language(): void
+    {
+        $event = $this->translatedEvent();
+        $this->update($event, ['translations' => ['name' => 'Noite de Jazz']]);
+        $this->assertSame('pt', $event->fresh()->translationOverrides()['name']['lang']);
+
+        // The schedule translates into French now (saved quietly: the job that clears the stored
+        // translations is not what this is about; a template keeps its copy all the same).
+        $this->venue->forceFill(['translation_language_code' => 'fr'])->saveQuietly();
+
+        $this->actingAs($this->owner)->get(route('event.clone', ['subdomain' => $this->venue->subdomain, 'hash' => UrlUtils::encodeId($event->id)]));
+        $html = $this->actingAs($this->owner)->get(route('event.create', ['subdomain' => $this->venue->subdomain]))->assertOk()->getContent();
+
+        // Nothing carried: no row, and nothing for the form to post as a correction.
+        $this->assertStringNotContainsString('id="event-translation"', $html);
+        $this->assertMatchesRegularExpression('/^\s*translation: null,$/m', $html);
+    }
+
+    public function test_a_correction_goes_when_the_event_translates_into_another_language(): void
+    {
+        $event = $this->translatedEvent();
+        $this->update($event, ['translations' => ['name' => 'Noite de Jazz']]);
+
+        $this->venue->forceFill(['translation_language_code' => 'fr'])->saveQuietly();
+        $this->update($event->fresh(), [])->assertRedirect();
+
+        $event->refresh();
+        $this->assertFalse($event->translationIsManual('name'));
+        $this->assertNull($event->name_en);
+        $this->assertContains($event->id, TranslationQueue::events($event->id)->pluck('id')->all());
+    }
+
+    public function test_a_reset_of_the_schedule_keeps_corrections_as_a_reset_of_the_event_does(): void
+    {
+        config(['services.google.gemini_key' => 'test-key']);
+        $event = $this->translatedEvent();
+        $this->update($event, ['translations' => ['name' => 'Noite de Jazz']]);
+        GeminiUtils::fakeResponses(fn () => ['NOVA']);
+
+        Artisan::call('app:translate', ['--reset' => true, '--role_id' => $this->venue->id, '--no-interaction' => true]);
+
+        $event->refresh();
+        $this->assertSame('Noite de Jazz', $event->name_en);
+        $this->assertTrue($event->translationIsManual('name'));
+        $this->assertSame('NOVA', $event->short_description_en);
+    }
+
+    public function test_a_new_events_row_follows_the_venue_that_governs_it(): void
+    {
+        $talent = $this->createRole($this->owner, 'talent', ['language_code' => 'en', 'translation_language_code' => 'pt']);
+        $venue = $this->createRole($this->owner, 'venue', ['language_code' => 'en', 'translation_language_code' => 'fr']);
+        $event = $this->createEvent($talent, ['creator_role_id' => $talent->id, 'name' => 'Jazz Night']);
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+        $event = $event->fresh();
+        $event->name_en = 'Soirée jazz';
+        $event->markTranslationManual('name', null, 'fr');
+        $event->save();
+
+        $this->actingAs($this->owner)->get(route('event.clone', ['subdomain' => $talent->subdomain, 'hash' => UrlUtils::encodeId($event->id)]));
+        $html = $this->actingAs($this->owner)->get(route('event.create', ['subdomain' => $talent->subdomain]))->assertOk()->getContent();
+
+        $this->assertStringContainsString(e(__('messages.event_translation_row', ['language' => __('messages.french')])), $html);
+    }
+
+    public function test_a_saved_event_is_translated_soon_after_through_the_crons_lock(): void
+    {
+        config(['services.google.gemini_key' => 'test-key', 'queue.default' => 'database']);
+        Queue::fake();
+
+        $event = $this->translatedEvent();
+        Queue::assertPushed(TranslateEventSoon::class, fn ($job) => $job->eventId === $event->id);
+
+        // The command's own save writes translations, never an original: nothing more is queued.
+        Queue::fake();
+        $event->name_en = 'Noite de Jazz';
+        $event->save();
+        Queue::assertNotPushed(TranslateEventSoon::class);
+
+        // The job is the cron's run for one event, under the cron's lock.
+        Event::where('id', $event->id)->update(['short_description_en' => null]);
+        GeminiUtils::fakeResponses(fn () => ['MÚSICA']);
+        $lock = Cache::lock('app_translate_lock', 600);
+        $lock->get();
+        (new TranslateEventSoon($event->id))->withFakeQueueInteractions()->handle();
+        $this->assertNull($event->fresh()->short_description_en, 'not while the cron holds the lock');
+        $lock->release();
+
+        (new TranslateEventSoon($event->id))->handle();
+        $this->assertSame('MÚSICA', $event->fresh()->short_description_en);
+    }
+
+    public function test_the_row_links_to_the_page_in_the_translation(): void
+    {
+        $this->assertStringContainsString('lang=pt', $this->editPage($this->translatedEvent()));
+    }
+
+    public function test_an_online_event_on_a_curator_follows_the_curators_languages(): void
+    {
+        config(['services.google.gemini_key' => 'test-key']);
+        $curator = $this->createRole($this->owner, 'curator', ['language_code' => 'en', 'translation_language_code' => 'pt-PT']);
+        $online = $this->createEvent($curator, ['creator_role_id' => $curator->id, 'name' => 'Online talk', 'event_url' => 'https://example.org/talk']);
+        // A venue still governs an event at a venue, as it always has.
+        $atVenue = $this->createEvent($this->venue, ['creator_role_id' => $curator->id, 'name' => 'Talk at the hall']);
+        $atVenue->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        $this->assertSame('en', Event::with('roles')->find($online->id)->getLanguageCode());
+        $this->assertSame('pt-PT', Event::with('roles')->find($online->id)->getTranslationLanguageCode());
+        $this->assertSame('pt', Event::with('roles')->find($atVenue->id)->getTranslationLanguageCode());
+
+        // And the cron's own selection picks it up and translates it.
+        GeminiUtils::fakeResponses(fn () => ['Palestra online']);
+        Artisan::call('app:translate');
+        $this->assertSame('Palestra online', $online->fresh()->name_en);
+    }
+
+    public function test_events_parked_as_english_to_english_are_taken_up_again(): void
+    {
+        $curator = $this->createRole($this->owner, 'curator', ['language_code' => 'en', 'translation_language_code' => 'pt-PT']);
+        $parked = $this->createEvent($curator, ['creator_role_id' => $curator->id, 'name' => 'Online talk']);
+        $atVenue = $this->createEvent($this->venue, ['creator_role_id' => $this->venue->id, 'name' => 'Talk at the hall']);
+        Event::whereIn('id', [$parked->id, $atVenue->id])->update(['name_en' => '', 'translation_attempts' => 3]);
+
+        (require database_path('migrations/2026_11_12_000008_translate_events_their_creator_translates.php'))->up();
+
+        $this->assertNull($parked->fresh()->name_en);
+        $this->assertSame(0, (int) $parked->fresh()->translation_attempts);
+        $this->assertSame('', $atVenue->fresh()->name_en, 'an event at a venue is left as it is');
     }
 }

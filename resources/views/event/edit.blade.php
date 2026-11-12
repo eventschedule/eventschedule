@@ -213,9 +213,30 @@
   // each correctable by hand (App\Services\EventTranslationEdits). Only where the event IS
   // translated: a saved event in a language pair that differs, or a copy that carries
   // corrections of its own (EventRepo::buildClonePayload()). Most events never show it.
-  $translationSourceLang = $event->exists ? $event->getLanguageCode() : ($role->language_code ?: 'en');
-  $translationTargetLang = $event->exists ? $event->getTranslationLanguageCode() : ($role->translation_language_code ?: 'en');
-  $translationCarried = $event->exists ? [] : $event->translationOverrides();
+  // A new event's pair comes from what will govern it, as Event::getTranslationLanguageCode()
+  // resolves it: the venue (a copy's, or this schedule when it is one), else this schedule when it
+  // is a talent; a curator decides no event's language.
+  $translationGoverning = ($selectedVenue ?? null) instanceof \App\Models\Role ? $selectedVenue : ($role->isCurator() ? null : $role);
+  $translationSourceLang = $event->exists ? $event->getLanguageCode() : ($translationGoverning?->language_code ?: 'en');
+  $translationTargetLang = $event->exists ? $event->getTranslationLanguageCode() : ($translationGoverning?->translation_language_code ?: 'en');
+  $translationCarried = [];
+  if (! $event->exists) {
+      $translationCarried = $event->translationOverrides();
+      // A copy whose save was refused: the session's copy is gone (create() forgets it), and what
+      // it carried comes back from the post, the correction with the original it was made for.
+      $oldBasis = old('translation_basis');
+      $oldCarried = old('translations');
+      if (is_array($oldBasis) && is_array($oldCarried)) {
+          foreach (\App\Models\Event::HAND_TRANSLATABLE_FIELDS as $field) {
+              if (is_string($oldBasis[$field] ?? null) && is_string($oldCarried[$field] ?? null) && trim($oldCarried[$field]) !== '') {
+                  $translationCarried[$field] = ['source' => $oldBasis[$field], 'at' => null, 'lang' => null];
+              }
+          }
+      }
+      // Corrections written in another language than this copy translates into (a template saved
+      // before the schedule changed language) are not carried.
+      $translationCarried = array_filter($translationCarried, fn ($entry) => ($entry['lang'] ?? null) === null || $entry['lang'] === $translationTargetLang);
+  }
   $translationShown = $detailsShown && $translationSourceLang !== $translationTargetLang
       && ($event->exists || $translationCarried);
   $translationRow = null;
@@ -231,7 +252,9 @@
       $oldKeep = (array) old('translations_keep', []);
       $translationFields = [];
       foreach (\App\Models\Event::HAND_TRANSLATABLE_FIELDS as $field) {
-          $saved = (string) ($event->{$field.'_en'} ?? '');
+          // A copy shows only the translations it carries as corrections: the rest are not posted,
+          // and the new event is translated afresh.
+          $saved = $event->exists || isset($translationCarried[$field]) ? (string) ($event->{$field.'_en'} ?? '') : '';
           $posted = is_array($oldTranslations) && array_key_exists($field, $oldTranslations) ? (string) $oldTranslations[$field] : null;
           $carried = $translationCarried[$field] ?? null;
           $translationFields[$field] = [
@@ -253,11 +276,12 @@
               'preview' => $field === 'description'
                   ? \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags((string) $event->description_html_en), ENT_QUOTES | ENT_HTML5))), 280)
                   : $saved,
-              'manual' => $event->translationIsManual($field),
+              'manual' => $event->exists ? $event->translationIsManual($field) : isset($translationCarried[$field]),
               'stale' => $event->exists && $event->translationIsStale($field),
               // One line where the original is one line (the name, the short description).
               'multiline' => $field === 'description',
-              'max' => \App\Services\EventTranslationEdits::MAX_LENGTH[$field],
+              // No maxlength on the description: its limit is in bytes, which the browser cannot count.
+              'max' => $field === 'description' ? null : \App\Services\EventTranslationEdits::MAX_LENGTH[$field],
               // A copy's correction is posted as it stands, with the original it was made against.
               'basis' => $carried['source'] ?? null,
               'editing' => $posted !== null && $posted !== '',
@@ -271,11 +295,13 @@
           'labels' => [
               'language' => $languageName($translationTargetLang),
               'automatic' => __('messages.automatic'),
-              'not_yet' => __('messages.translation_not_yet'),
+              // Saved with nothing translated yet: it is on its way when the quick path runs.
+              'not_yet' => $event->exists && \App\Models\Event::translatesSoon() ? __('messages.translation_on_its_way') : __('messages.translation_not_yet'),
               'corrected' => __('messages.translation_corrected'),
               'changed' => __('messages.translation_source_changed_short', ['source' => $languageName($translationSourceLang)]),
               'resets' => __('messages.saving_resets_translation'),
               'stays' => __('messages.translation_will_stay'),
+              'retranslates' => __('messages.saving_retranslates'),
           ],
       ];
   }
@@ -3133,7 +3159,16 @@
                             </button>
                             <div id="event-translation-body" class="event-row-body" v-show="translationOpen" @if (! $translationOpenOnLoad) style="display: none" @endif>
                             <div class="max-w-xl">
-                                <p class="event-hint">{{ __('messages.event_translation_help', ['source' => $languageName($translationSourceLang)]) }}</p>
+                                <p class="event-hint">{{ __('messages.event_translation_help', ['source' => $languageName($translationSourceLang)]) }}
+                                    @if ($event->exists)
+                                    @php
+                                        // The guest page as a visitor reading the translation sees it (?lang= enters it).
+                                        $translationViewUrl = $event->getGuestUrl($subdomain, null, true);
+                                        $translationViewUrl .= (str_contains($translationViewUrl, '?') ? '&' : '?').'lang='.urlencode($translationTargetLang);
+                                    @endphp
+                                    <x-link :href="$translationViewUrl" target="_blank" class="ms-1">{{ __('messages.translation_view_in', ['language' => $translationRow['labels']['language']]) }}</x-link>
+                                    @endif
+                                </p>
                                 <x-input-error class="mb-3" :messages="$errors->get('translations.*')" />
                                 <div class="space-y-5">
                                 <div v-for="(f, key) in translation.fields" :key="key" v-show="f.original || f.saved" class="event-translation-field">
@@ -10244,9 +10279,19 @@
           return '';
         }
         var F = this.translation.fields;
-        var names = Object.keys(F).filter(function (key) { return F[key].manual && F[key].action === 'auto'; })
-          .map(function (key) { return F[key].label; });
-        return names.length ? this.translation.labels.resets.replace(':fields', names.join(', ')) : '';
+        // Reset pressed, or the box emptied, which Save reads the same way (translationPost()).
+        var givenBack = function (key) {
+          var f = F[key];
+          return f.action === 'auto' || (f.editing && (f.text || '').trim() === '' && (f.manual || f.saved));
+        };
+        var label = function (key) { return F[key].label; };
+        var corrected = Object.keys(F).filter(function (key) { return givenBack(key) && F[key].manual; }).map(label);
+        var automatic = Object.keys(F).filter(function (key) { return givenBack(key) && ! F[key].manual; }).map(label);
+        var L = this.translation.labels;
+        return [
+          corrected.length ? L.resets.replace(':fields', corrected.join(', ')) : '',
+          automatic.length ? L.retranslates.replace(':fields', automatic.join(', ')) : '',
+        ].filter(Boolean).join(' ');
       },
       // One line per tab, from what is on screen now and not from what was saved. Names mean in
       // use; an empty tab asks only where adding is the next step; a warning comes first and turns

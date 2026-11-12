@@ -6,7 +6,7 @@
 
 {{ $event->name }}
 
-{{ __('messages.date') }}: {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}
+{{ __('messages.date') }}: {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->localDate(true, false) }}
 {{ __('messages.time') }}: {{ $event->getStartEndTime($sale->event_date) }}
 
 @if(empty($sale->id))

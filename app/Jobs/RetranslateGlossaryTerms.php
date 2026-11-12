@@ -20,8 +20,16 @@ class RetranslateGlossaryTerms implements ShouldQueue
 
     public $deleteWhenMissingModels = true;
 
-    // A second save waits behind the first (releaseAfter below), which counts as a try.
-    public $tries = 5;
+    // A save that waits behind another (releaseAfter below) is released, and a release counts as
+    // a try: with a fixed number, a burst of saves used them up and the last save's changes were
+    // never handed back. So no count, and a deadline instead. handle() catches everything, so the
+    // only thing that ever retries is the wait.
+    public $tries = 0;
+
+    public function retryUntil(): \DateTimeInterface
+    {
+        return now()->addHours(6);
+    }
 
     public $timeout = 120;
 

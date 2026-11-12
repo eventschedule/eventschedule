@@ -9,6 +9,7 @@ use App\Mail\EventInterestNotification;
 use App\Models\Event;
 use App\Models\EventInterest;
 use App\Models\Role;
+use App\Models\Sale;
 
 /**
  * Sends change / cancellation notifications to an event's registered attendees (paid sales, including
@@ -52,21 +53,26 @@ class EventChangeNotifier
         }
 
         self::eachRecipient($event, function ($sale) use ($event, $role, $changes, $note, $locale, &$queued) {
-            $eventUrl = $event->getGuestUrl(false, $sale->event_date, true);
-            $icalUrl = $event->getAppleCalendarUrl($sale->event_date, false, true);
+            // In the language the attendee bought in, when one was recorded (Sale::guestLanguage()).
+            $lang = $sale->linkLanguage($role, $event);
+            $eventUrl = Sale::withLanguage((string) $event->getGuestUrl(false, $sale->event_date, true), $lang);
+            $icalUrl = Sale::withLanguage((string) $event->getAppleCalendarUrl($sale->event_date, false, true), $lang);
+            $saleLocale = $sale->mailLocale($locale);
 
             SendQueuedEmail::dispatch(
-                (new EventChanged($event, $role, $changes, $eventUrl, $note, $icalUrl, $sale->name))->forAttendee((string) $sale->email),
+                (new EventChanged($event, $role, $changes, $eventUrl, $note, $icalUrl, $sale->name))
+                    ->forAttendee((string) $sale->email)
+                    ->readBy($sale->guestLanguage()),
                 $sale->email,
                 $role->id,
-                $locale
+                $saleLocale
             );
 
             // Push body is intentionally generic: never the join link or the organizer note.
-            OneSignalService::pushToGuestEmail($sale->email, $locale, [
+            OneSignalService::pushToGuestEmail($sale->email, $saleLocale, [
                 'title_key' => 'messages.push_event_changed_title',
                 'body_key' => 'messages.push_event_changed_body',
-                'body_params' => ['event' => $event->name],
+                'body_params' => ['event' => $sale->eventAsRead($event)->name],
                 'url' => $eventUrl,
                 'options' => ['icon' => $role->profile_image_url],
             ], $role);
@@ -95,21 +101,24 @@ class EventChangeNotifier
         }
 
         self::eachRecipient($event, function ($sale) use ($event, $role, $note, $locale, &$queued) {
-            $eventUrl = $event->getGuestUrl(false, $sale->event_date, true);
+            $eventUrl = Sale::withLanguage((string) $event->getGuestUrl(false, $sale->event_date, true), $sale->linkLanguage($role, $event));
+            $saleLocale = $sale->mailLocale($locale);
 
             SendQueuedEmail::dispatch(
                 // A leg of a multi-event order: say the rest of the purchase stands, or the
                 // buyer has no way to tell whether one cancellation voided everything.
-                (new EventCancelled($event, $role, $eventUrl, $note, $sale->name, (bool) $sale->order_id, $sale->event_date))->forAttendee((string) $sale->email),
+                (new EventCancelled($event, $role, $eventUrl, $note, $sale->name, (bool) $sale->order_id, $sale->event_date))
+                    ->forAttendee((string) $sale->email)
+                    ->readBy($sale->guestLanguage()),
                 $sale->email,
                 $role->id,
-                $locale
+                $saleLocale
             );
 
-            OneSignalService::pushToGuestEmail($sale->email, $locale, [
+            OneSignalService::pushToGuestEmail($sale->email, $saleLocale, [
                 'title_key' => 'messages.push_event_cancelled_title',
                 'body_key' => 'messages.push_event_cancelled_body',
-                'body_params' => ['event' => $event->name],
+                'body_params' => ['event' => $sale->eventAsRead($event)->name],
                 'url' => $eventUrl,
                 'options' => ['icon' => $role->profile_image_url],
             ], $role);
@@ -346,7 +355,7 @@ class EventChangeNotifier
                             $event,
                             $interest,
                             $kind,
-                            $event->getGuestUrl($role->subdomain, $interest->event_date ?: null, true),
+                            $interest->linkIn($role, (string) $event->getGuestUrl($role->subdomain, $interest->event_date ?: null, true)),
                             route('event.interest.show_unsubscribe', ['token' => $interest->token]),
                         ),
                         $interest->email,

@@ -1090,7 +1090,7 @@
                                         </div>
 
                                         {{-- Venue Badge --}}
-                                        <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="event.venue_guest_url" class="w-fit flex items-center gap-4 min-w-0 hover:opacity-80 transition-opacity">
+                                        <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="withLang(event.venue_guest_url)" class="w-fit flex items-center gap-4 min-w-0 hover:opacity-80 transition-opacity">
                                             <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                                 <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -1465,7 +1465,7 @@
                                     </div>
 
                                     {{-- Venue Badge --}}
-                                    <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="event.venue_guest_url" class="w-fit flex items-center gap-4 hover:opacity-80 transition-opacity">
+                                    <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="withLang(event.venue_guest_url)" class="w-fit flex items-center gap-4 hover:opacity-80 transition-opacity">
                                         <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                             <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -2574,6 +2574,11 @@ const calendarApp = createApp({
             {{-- Also the language forwarded to the guest calendar endpoints, so their payload can no
                  longer disagree with the server-rendered chrome around it. --}}
             languageCode: '{{ $ownPage && auth()->check() ? app()->getLocale() : (isset($role) ? $role->displayLanguageCode() : 'en') }}',
+            {{-- The language a link to an event (or a venue) carries as ?lang=, set while this page
+                 shows its translation. An embed opens events in a new tab, where no session from a
+                 cross-site iframe follows, so without it every event opened in the authored
+                 language. Empty on the authored language, whose links stay clean. --}}
+            carryLang: @json(! $ownPage && isset($role) && $role->langQuerySuffix($role->displayLanguageCode()) !== '' ? $role->displayLanguageCode() : ''),
             {{-- The zone the past-event filters resolve "today" in. Must be the same one $today
                  above uses: these compare against occurrenceDate, which is the SCHEDULE's calendar
                  date, so a viewer-anchored today hides an event that is still running. --}}
@@ -4312,11 +4317,26 @@ const calendarApp = createApp({
                 queryParams.push('layout=' + this.layoutFromUrl);
             }
 
+            if (this.carryLang) {
+                queryParams.push('lang=' + encodeURIComponent(this.carryLang));
+            }
+
             if (queryParams.length > 0) {
                 url += '?' + queryParams.join('&');
             }
 
             return url;
+        },
+        // A link to another guest page (a venue's) in the language this page is shown in.
+        withLang(url) {
+            if (!url || !this.carryLang) return url;
+            try {
+                const u = new URL(url, window.location.href);
+                u.searchParams.set('lang', this.carryLang);
+                return u.toString();
+            } catch (e) {
+                return url;
+            }
         },
         openFanContentOnEventPage(event) {
             if (!this.fanContentGuestRedirect) return false;
@@ -4326,7 +4346,7 @@ const calendarApp = createApp({
             // do nothing than to bounce them off a form that always fails.
             if (!event.guest_url) return true;
 
-            const url = event.guest_url + '#gp-fan-content';
+            const url = this.withLang(event.guest_url) + '#gp-fan-content';
 
             // This partial is also rendered inside the embed widget. Navigating there would
             // replace the embed with a full event page inside someone else's site, so open a
@@ -5129,7 +5149,7 @@ calendarAppInstance.$watch('activeFilterCount', updateHeroFiltersButton);
         {{-- Undated: a series is one page (its canonical), and getGuestUrl() would link it at its
              first date, which may no longer be an occurrence and then only redirects here. --}}
         <li style="margin-bottom: 1rem;">
-            <a href="{{ $noscriptEvent->getUndatedGuestUrl($role?->subdomain ?? $noscriptEvent->roles->first()?->subdomain) }}">
+            <a href="{{ $noscriptEvent->getUndatedGuestUrl($role?->subdomain ?? $noscriptEvent->roles->first()?->subdomain) }}{{ isset($role) ? $role->langQuerySuffix($noscriptLang) : '' }}">
                 <strong dir="{{ content_dir_for_language($noscriptName, $noscriptDirLang) }}">{{ $noscriptName }}</strong>
             </a>
             <br>

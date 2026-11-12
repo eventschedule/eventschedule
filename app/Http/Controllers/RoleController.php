@@ -6287,10 +6287,22 @@ class RoleController extends Controller
         // save refused above (a taken subdomain) changes no glossary either, and ahead of the
         // sub-schedule names translated below, which then use it. What a change touches is handed
         // back to the translator (TranslationGlossary::requeue()), on the queue.
+        // Only the rows the page showed are its to remove (glossary_seen[]), as with ticket presets:
+        // a term added from another tab since stays. A failure here must not stop the rest of
+        // this save, which has already begun (the schedule is saved above).
         if (! is_demo_mode() && $request->boolean('glossary_submitted')) {
-            $glossaryChanges = \App\Services\TranslationGlossary::save($role, (array) $request->input('glossary', []));
-            if ($glossaryChanges) {
-                \App\Jobs\RetranslateGlossaryTerms::dispatch($role, $glossaryChanges);
+            try {
+                $glossaryChanges = \App\Services\TranslationGlossary::save(
+                    $role,
+                    (array) $request->input('glossary', []),
+                    $request->boolean('glossary_seen_submitted') ? (array) $request->input('glossary_seen', []) : null
+                );
+                if ($glossaryChanges) {
+                    \App\Jobs\RetranslateGlossaryTerms::dispatch($role, $glossaryChanges);
+                }
+            } catch (\Throwable $e) {
+                report($e);
+                session()->flash('error', __('messages.an_error_occurred'));
             }
         }
 

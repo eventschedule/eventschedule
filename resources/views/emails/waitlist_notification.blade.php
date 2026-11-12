@@ -2,7 +2,7 @@
     $theme = \App\Utils\EmailTheme::guest($role ?? null);
     $title = ($isRsvp ?? false) ? __('messages.waitlist_spots_available') : __('messages.waitlist_tickets_available');
     $start = $event->starts_at ? $event->getStartDateTime($entry->event_date, true) : null;
-    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($entry->event_date) : $start->translatedFormat('l, F j')) : null;
+    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($entry->event_date) : $start->localDate(false)) : null;
 @endphp
 <x-email.layout :theme="$theme" :title="$title" :preheader="$event->name.($when ? ' · '.$when : '')">
 <x-email.heading :eyebrow="$title" auto>{{ $event->name }}</x-email.heading>

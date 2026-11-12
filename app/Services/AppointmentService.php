@@ -312,6 +312,7 @@ class AppointmentService
             $sale->event_date = $localDate;
             $sale->secret = strtolower(Str::random(32));
             $sale->guest_timezone = $data['guest_timezone'] ?? null;
+            $sale->language_code = $data['language_code'] ?? null;
             $sale->payment_method = $type->isFree() ? 'cash' : $type->payment_method;
             $sale->payment_amount = $type->isFree() ? 0 : $type->price;
             // Free bookings are paid immediately; cash is unpaid-with-balance-due; a type paid online

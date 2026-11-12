@@ -3,7 +3,7 @@
     $cancelled = ($kind ?? null) === \App\Mail\EventInterestNotification::KIND_CANCELLED;
 @endphp
 <x-email.layout :theme="$theme" :title="$heading" :preheader="$body">
-<x-email.heading :eyebrow="$heading" :tone="$cancelled ? 'danger' : null" auto>{{ $event->name }}</x-email.heading>
+<x-email.heading :eyebrow="$heading" :tone="$cancelled ? 'danger' : null" auto>{{ $readEvent->name }}</x-email.heading>
 
 <x-email.text>{{ $body }}</x-email.text>
 
@@ -17,7 +17,7 @@
      and EventChangeNotifier reaches them with no date check of its own. The event component keeps that
      guard: it reads the date only when starts_at is set. A cancelled event offers nothing to add
      to a calendar or travel to. --}}
-<x-email.event :event="$event" :date="$interest->event_date ?: null" :role="$role ?? null" :calendar="! $cancelled" :map="! $cancelled" />
+<x-email.event :event="$readEvent" :date="$interest->event_date ?: null" :role="$role ?? null" :calendar="! $cancelled" :map="! $cancelled" />
 
 <x-email.button :href="$eventUrl">{{ $button }}</x-email.button>
 
@@ -25,6 +25,6 @@
 {{-- The line that turns "who is this?" into an unsubscribe rather than a spam complaint. Worded
      for THIS list, not the schedule-wide one: somebody who asked about one event has not
      subscribed to the schedule, and telling them they had would be untrue. --}}
-<x-email.footer :links="[[__('messages.unsubscribe'), $unsubscribeUrl]]">{{ __('messages.event_interest_why_receiving', ['event' => $event->name]) }}</x-email.footer>
+<x-email.footer :links="[[__('messages.unsubscribe'), $unsubscribeUrl]]">{{ __('messages.event_interest_why_receiving', ['event' => $readEvent->name]) }}</x-email.footer>
 </x-slot:footer>
 </x-email.layout>

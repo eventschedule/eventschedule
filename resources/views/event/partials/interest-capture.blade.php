@@ -69,6 +69,8 @@
                  table-flood primitive on a public page. --}}
             <input type="hidden" name="event_date" value="{{ $date ?? '' }}">
             <input type="hidden" name="source" value="event_page">
+            {{-- The language the page is read in: the mails this asks for are written in it. --}}
+            <input type="hidden" name="lang" value="{{ $interestRole->displayLanguageCode() }}">
 
             <div class="flex-1 min-w-0">
                 <label for="event_interest_email" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">

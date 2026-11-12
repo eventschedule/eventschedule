@@ -428,6 +428,40 @@ if (! function_exists('normalize_language_code')) {
     }
 }
 
+if (! function_exists('operator_lang_overrides')) {
+    /**
+     * What the operator changed in $locale's $group at /admin/translations (the published files
+     * under config('app.lang_overrides_path')), or [] when nothing, or when this runs outside the
+     * app (storage/check_translations.php requires the lang files on their own).
+     *
+     * For resources/lang/pt-PT, whose files start from pt's: an operator who reworded a pt string
+     * that Portugal says the same way means it for pt-PT too, while pt-PT's own wording, and an
+     * operator's pt-PT overrides (which the translator lays on top), still win.
+     */
+    function operator_lang_overrides(string $locale, string $group): array
+    {
+        if (! function_exists('app') || ! app()->bound('config') || ! is_string($dir = config('app.lang_overrides_path')) || $dir === '') {
+            return [];
+        }
+
+        $path = rtrim($dir, '/').'/'.$locale.'/'.$group.'.php';
+
+        if (! is_file($path)) {
+            return [];
+        }
+
+        try {
+            $lines = require $path;
+        } catch (\Throwable $e) {
+            report($e);
+
+            return [];
+        }
+
+        return is_array($lines) ? $lines : [];
+    }
+}
+
 if (! function_exists('language_badge')) {
     /**
      * The short code a language switcher prints: "PT" for both 'pt' and 'pt-PT', as a visitor

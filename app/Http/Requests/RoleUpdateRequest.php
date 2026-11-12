@@ -251,7 +251,9 @@ class RoleUpdateRequest extends FormRequest
             // selects are disabled); the controller maps the "offer translation" toggle to this
             // value, so a valid non-null code is always what actually gets persisted.
             'translation_enabled' => ['nullable', 'boolean'],
-            'translation_language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages')))],
+            // Switched on, a language must be chosen: "Choose a language" posts nothing, which
+            // update() would otherwise read as no translation at all.
+            'translation_language_code' => ['nullable', 'required_if:translation_enabled,1', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages')))],
             'direct_registration' => ['nullable', 'boolean'],
             'hide_past_events' => ['nullable', 'boolean'],
             'promotions_opt_out' => ['nullable', 'boolean'],
@@ -302,6 +304,8 @@ class RoleUpdateRequest extends FormRequest
             'glossary' => ['nullable', 'array', 'max:'.\App\Services\TranslationGlossary::MAX_ENTRIES],
             'glossary.*.term' => ['nullable', 'string', 'max:'.\App\Services\TranslationGlossary::MAX_LENGTH],
             'glossary.*.translation' => ['nullable', 'string', 'max:'.\App\Services\TranslationGlossary::MAX_LENGTH],
+            'glossary_seen' => ['nullable', 'array', 'max:'.\App\Services\TranslationGlossary::MAX_ENTRIES],
+            'glossary_seen.*' => ['nullable', 'string', 'max:'.\App\Services\TranslationGlossary::MAX_LENGTH],
             'gift_card_amounts' => ['nullable', 'array', 'max:12'],
             'gift_card_amounts.*' => ['nullable', 'numeric', 'gt:0', 'max:99999'],
             'gift_card_currency_code' => ['nullable', 'string', 'size:3'],
@@ -363,6 +367,19 @@ class RoleUpdateRequest extends FormRequest
 
     public function withValidator($validator): void
     {
+        // Details > Translation glossary: two rows that are one term to the database ("Café" and
+        // "Cafe", "Straße" and "Strasse", a name pasted with a zero-width space) are said on the
+        // later row, before anything is saved.
+        $validator->after(function ($validator) {
+            if (! $this->boolean('glossary_submitted') || ! is_array($this->input('glossary'))) {
+                return;
+            }
+
+            foreach (\App\Services\TranslationGlossary::duplicates($this->input('glossary')) as $index => $earlier) {
+                $validator->errors()->add('glossary.'.$index.'.term', __('messages.glossary_duplicate', ['term' => $earlier]));
+            }
+        });
+
         // The owner's "Team members pick from these presets" needs presets to pick from, and each
         // must say how people sign up (the one copied from the old single default never did).
         // Refused here, before RoleController::update() starts saving: the calendar blocks there

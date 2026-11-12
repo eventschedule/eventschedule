@@ -488,6 +488,11 @@
                 }
             }
 
+            // The event form's Translation row under About.
+            if (e.target.closest('#event-translation') && anchorMap['event-translation']) {
+                updateHelpLinks(anchorMap['event-translation']);
+            }
+
             var integrationTab = e.target.closest('.integration-tab');
             if (integrationTab) {
                 var tabKey = 'integration-tab-' + integrationTab.getAttribute('data-tab');

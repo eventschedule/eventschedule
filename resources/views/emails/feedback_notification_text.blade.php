@@ -4,7 +4,7 @@
 
 {{ $event->name }}
 @if ($feedback->event_date)
-{{ $event->getStartDateTime($feedback->event_date, true)->translatedFormat('F j, Y') }}
+{{ $event->getStartDateTime($feedback->event_date, true)->localDate(true, false) }}
 @endif
 
 {{ __('messages.attendee') }}: {{ $sale->name }} ({{ $sale->email }})

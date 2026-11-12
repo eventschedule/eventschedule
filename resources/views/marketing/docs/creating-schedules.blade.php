@@ -13,6 +13,7 @@
             <x-doc-nav-link href="#details-general">General</x-doc-nav-link>
             <x-doc-nav-link href="#ai-details-generator">AI Details Generator</x-doc-nav-link>
             <x-doc-nav-link href="#details-localization">Language and time</x-doc-nav-link>
+            <x-doc-nav-link href="#details-translation">How translation works</x-doc-nav-link>
             <x-doc-nav-link href="#details-glossary">Translation glossary</x-doc-nav-link>
             <x-doc-nav-link href="#contact-info">Contact Info</x-doc-nav-link>
             <x-doc-nav-link href="#announcement-bar">Announcement bar</x-doc-nav-link>
@@ -265,11 +266,11 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The language you write your schedule and events in, which also sets the interface language on your schedule page. Thirteen languages are supported: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian, and Spanish.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The language you write your schedule and events in, which also sets the interface language on your schedule page. Thirteen languages are supported: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian, and Spanish. Portuguese (Portugal) is European Portuguese, a language of its own beside Portuguese (Brazil): pick it for an audience in Portugal, both for the language you write in and for the one you <a href="#details-translation" class="doc-link">translate into</a>, and the translation follows Portugal's spelling and vocabulary.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Offer a second language to visitors</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Turn this on to have your schedule and events translated automatically, then pick the target under <strong class="text-gray-900 dark:text-white">Translate into</strong> (English by default; the language you write in is not offered). Visitors get a button to switch between the two. Available on all plans. Translations are generated in the background, so allow up to an hour for them to appear; changing the target re-translates everything, and editing an event refreshes its own translation, except wording you <a href="{{ route('marketing.docs.creating_events') }}#translation" class="doc-link">corrected by hand</a>. Turning the setting back off discards every stored translation for the schedule, including wording you corrected by hand, so you are asked to confirm first.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Turn this on to have your schedule and events translated automatically, then pick the target under <strong class="text-gray-900 dark:text-white">Translate into</strong> (English by default; the language you write in is not offered). Visitors get a button to switch between the two. Available on all plans. Translations are made in the background, by a run every 15 minutes, so allow up to an hour for them to appear (see <a href="#details-translation" class="doc-link">how automatic translation works</a>); changing the target re-translates everything, and editing an event refreshes its own translation, except wording you <a href="{{ route('marketing.docs.creating_events') }}#translation" class="doc-link">corrected by hand</a>. Turning the setting back off discards every stored translation for the schedule, including wording you corrected by hand, so you are asked to confirm first.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Timezone</h4>
@@ -285,6 +286,32 @@
             </div>
         </div>
 
+        <!-- How automatic translation works -->
+        <h3 id="details-translation" class="doc-subheading">How automatic translation works</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Once <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> is on, you keep writing in your own language and everything a visitor reads is translated for you. There is nothing to press: a translation run every 15 minutes picks up whatever is new or changed. A selfhosted install needs an <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">AI key</a> for it.</p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What is translated</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's name, short description, description, address and announcement message, the names of its sub-schedules, categories, custom fields, custom labels and sponsors, and each event's name, short description, description and agenda items. The buttons, dates and month names around them switch language too. Upcoming and ongoing events are translated, a recurring one for as long as it runs; an event that is over is left as it was. Cancelled events and appointment bookings are not translated, and neither is a draft a feed or a calendar sync brought in until you publish it.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When it appears</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">An event you save is usually translated within a few minutes. Everything else is picked up by a translation run every 15 minutes. Each run translates a batch, text never translated before first and events typed by hand ahead of a feed's, so on the first day, or after changing the language you translate into, allow up to an hour for everything to catch up. Until a text is translated, visitors who chose the second language read it as you wrote it.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What translates it again</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Editing a text: only the fields you changed are translated again, at the next run. Changing <strong class="text-gray-900 dark:text-white">Translate into</strong>: everything, corrections included, because they were written in the old language. A change to the <a href="#details-glossary" class="doc-link">translation glossary</a>: only the text that uses a term you changed. Wording you <a href="{{ route('marketing.docs.creating_events') }}#translation" class="doc-link">corrected by hand</a> is never translated again on its own; editing the original only flags it for you to check.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Which languages an event uses</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">An event is translated in the languages of the schedule it takes place at: its venue's, or, with no venue, its first performer's. A curator that lists an event written in another language shows it translated into the curator's own language.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What visitors see</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A switcher on your schedule page and on each event page shows the two languages by their codes, for example <strong class="text-gray-900 dark:text-white">EN</strong> and <strong class="text-gray-900 dark:text-white">PT</strong> (when both are Portuguese, <strong class="text-gray-900 dark:text-white">PT-BR</strong> and <strong class="text-gray-900 dark:text-white">PT-PT</strong>). Choosing one adds <code class="doc-inline-code">?lang=</code> to the address, keeping the month and filters they had, and the choice is remembered for the rest of the visit. So a link that ends in <code class="doc-inline-code">?lang=en</code> opens your schedule in that language, and search engines are told the translated page exists. An embedded calendar has no switcher and takes its language from its address instead: see <a href="{{ route('marketing.docs.sharing') }}#embed-multilingual" class="doc-link">a calendar for each language of your website</a>.</p>
+            </div>
+        </div>
+
         <!-- Translation glossary -->
         <h3 id="details-glossary" class="doc-subheading">Translation glossary</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Shown under Language and time while your schedule offers a second language. It is a list of the words automatic translation should treat your way: the names of your organization, venues and programs, which it keeps exactly as you wrote them, and the odd expression that must always be translated the same way. Closed, the row lists the terms. Available on all plans.</p>
@@ -295,11 +322,15 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">A fixed translation</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the second box to have a term always translated that way into your target language. A term matches whatever its capitals, and each term is listed once. Up to 100 terms, of up to 100 characters each.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the second box to have a term always translated that way into your target language; the box is labelled with that language. The translation may still bend it to fit the sentence, such as a plural, or the masculine and feminine forms Portuguese gives a noun. A fixed translation is used between your schedule's own two languages; a name kept as written is kept whichever way a text is translated.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How a term is matched</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">As a whole word or phrase, whatever its capitals: <strong class="text-gray-900 dark:text-white">Art</strong> matches "art" and "ART", but not "party" or "Artist". Each term is listed once, and two rows that differ only in capitals or accents (<strong class="text-gray-900 dark:text-white">Café</strong> and <strong class="text-gray-900 dark:text-white">Cafe</strong>) count as the same term, so saving asks you to remove one. Up to 100 terms, of up to 100 characters each. The list covers your schedule's own text and the events it made or is the venue or a performer of; on a curator schedule, the events it made and its own translations of the events it lists.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After a change</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">When you save, the translations that use a term you added, changed or removed, and do not already read the way the list now says, are translated again in the background: your schedule's own text, its sub-schedule names and its upcoming events. Nothing else is translated again, past events are left as they are, and an event translation you <a href="{{ route('marketing.docs.creating_events') }}" class="doc-link">corrected by hand</a> is never replaced. Turning translation off keeps the list for when you turn it back on.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The save bar says that translations using a changed term will be redone. When you save, the translations that use a term you added, changed or removed, and do not already read the way the list now says, are translated again in the background: your schedule's own text, its sub-schedule names, and its upcoming events and their agenda items. They appear at the next translation runs, usually within 15 minutes. Nothing else is translated again, past events are left as they are, and an event translation you <a href="{{ route('marketing.docs.creating_events') }}#translation" class="doc-link">corrected by hand</a> is never replaced. Turning translation off keeps the list for when you turn it back on.</p>
             </div>
         </div>
 

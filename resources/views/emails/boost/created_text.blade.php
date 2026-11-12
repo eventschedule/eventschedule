@@ -8,7 +8,7 @@
 {{ __('messages.budget') }}: {{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->user_budget, 2) }}
 {{ __('messages.total_charged') }}: {{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->getTotalCost(), 2) }}
 @if ($campaign->scheduled_end)
-{{ __('messages.ends') }}: {{ $campaign->scheduled_end->format('F j, Y') }}
+{{ __('messages.ends') }}: {{ $campaign->scheduled_end->localDate(true, false) }}
 @endif
 
 {{ __('messages.view_campaign') }}: {{ $boostUrl }}

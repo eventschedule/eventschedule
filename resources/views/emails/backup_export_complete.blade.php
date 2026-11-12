@@ -7,7 +7,7 @@
 <x-email.section :label="__('messages.backup_included_schedules')" />
 <x-email.list :items="$scheduleNames" />
 
-<x-email.button :href="$downloadUrl" :note="__('messages.backup_download_expires', ['date' => $expiresAt->translatedFormat('F j, Y')])">{{ __('messages.backup_download_button') }}</x-email.button>
+<x-email.button :href="$downloadUrl" :note="__('messages.backup_download_expires', ['date' => $expiresAt->localDate(true, false)])">{{ __('messages.backup_download_button') }}</x-email.button>
 
 <x-email.callout tone="warning">{{ __('messages.backup_pii_warning') }}</x-email.callout>
 </x-email.layout>

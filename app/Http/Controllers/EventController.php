@@ -5229,7 +5229,13 @@ class EventController extends Controller
             $night = ($date && $event->days_of_week && Event::isOccurrenceDate($date) && $event->matchesDate($date, $event->scheduleTimezone())) ? $date : null;
             // No night, no dated page: handed null, getGuestUrl() names the series' first date.
             $page = $event->getGuestUrl($role->subdomain, $night ?: false, true) ?: '';
-            $entry = $to === 'google' ? $event->getGoogleCalendarUrl($night, $page) : $event->getMicrosoftCalendarUrl($night, $page);
+            // Asked from the page's translation (?lang=), the entry links to that translation.
+            $pageLang = request()->query('lang');
+            if ($page !== '' && is_string($pageLang) && $pageLang === $role->translation_language_code) {
+                $page .= $role->langQuerySuffix($pageLang);
+            }
+            $entryEvent = (is_string($pageLang) && $role->offersTranslation() && $pageLang === $role->translation_language_code) ? $event->readIn($pageLang) : $event;
+            $entry = $to === 'google' ? $entryEvent->getGoogleCalendarUrl($night, $page) : $entryEvent->getMicrosoftCalendarUrl($night, $page);
 
             return redirect()->away($entry)->withHeaders([
                 'Cache-Control' => 'no-store, private',
@@ -5237,8 +5243,14 @@ class EventController extends Controller
             ]);
         }
 
-        $title = $event->getTitle();
-        $description = $event->description_html ? strip_tags($event->description_html) : ($event->role() ? strip_tags($event->role()->description_html) : '');
+        // Asked from the page's translation (?lang=, which the guest mails carry too), the entry is
+        // named and described in it, as the page is.
+        $fileLang = request()->query('lang');
+        $read = (is_string($fileLang) && $role->offersTranslation() && $fileLang === $role->translation_language_code)
+            ? $event->readIn($fileLang)
+            : $event;
+        $title = $read->getTitle();
+        $description = $read->description_html ? strip_tags($read->description_html) : ($event->role() ? strip_tags($event->role()->description_html) : '');
         $location = $event->venue ? $event->venue->bestAddress() : '';
         $duration = $event->duration > 0 ? $event->duration : 2;
         // UTC stamp: rebuild a dated occurrence from the venue's time-of-day so this .ics agrees

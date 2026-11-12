@@ -7,7 +7,7 @@
     $eyebrow = $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation'));
 
     $start = $event->starts_at ? $event->getStartDateTime($sale->event_date, true) : null;
-    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $start->translatedFormat('l, F j')) : null;
+    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $start->localDate(false)) : null;
     $currency = $event->ticket_currency_code ?: 'USD';
 
     $passTerms = function ($ticket) {
@@ -86,7 +86,7 @@
 <x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
 <x-email.text>{{ $thanks }}@if ($donation > 0) {{ __('messages.donation_thanks', ['amount' => \App\Utils\MoneyUtils::format($donation, $currency)]) }}@endif</x-email.text>
 
-<x-email.event :event="$event" :date="$sale->event_date" :role="$role ?? null" />
+<x-email.event :event="$event" :date="$sale->event_date" :role="$role ?? null" :lang="$lang ?? null" />
 
 <x-email.details>
 <x-email.item :label="__('messages.attendee')">{{ $sale->name }}</x-email.item>

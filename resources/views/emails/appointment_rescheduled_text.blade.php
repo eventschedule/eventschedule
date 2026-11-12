@@ -21,7 +21,7 @@
 
 {{ __('messages.event_changed_whats_changed') }}
 @if ($oldStart)
-{{ __('messages.event_changed_previously') }}: {{ $oldStart->translatedFormat('l, F j, Y') }} {{ $oldStart->format($apptUse24 ? 'H:i' : 'g:i A') }} ({{ $oldTz }})
+{{ __('messages.event_changed_previously') }}: {{ $oldStart->localDate() }} {{ $oldStart->format($apptUse24 ? 'H:i' : 'g:i A') }} ({{ $oldTz }})
 @endif
 {{ __('messages.event_changed_now') }}:
 @include('emails.partials.appointment_datetime_text')

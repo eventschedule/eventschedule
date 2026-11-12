@@ -75,7 +75,7 @@ return [
     '/docs/selfhost/installation' => '2026-11-10',
     '/docs/selfhost/microsoft-calendar' => '2026-10-23',
     '/docs/selfhost/stripe' => '2026-10-23',
-    '/docs/sharing' => '2026-10-23',
+    '/docs/sharing' => '2026-11-12',
     '/docs/subscriptions' => '2026-10-23',
     '/docs/tickets' => '2026-11-11',
     '/doodle-replacement' => '2026-11-12',

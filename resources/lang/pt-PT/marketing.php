@@ -8,7 +8,8 @@
 // same in both is not repeated here. A key added to pt and not here reaches pt-PT as pt has it, so
 // tests/Feature/EuropeanPortugueseTest.php fails when it carries a Brazilian word: add the
 // European form below.
-return array_replace(require __DIR__.'/../pt/marketing.php', [
+// An operator's own pt wording (/admin/translations) comes along for the keys not listed here.
+return array_replace(require __DIR__.'/../pt/marketing.php', function_exists('operator_lang_overrides') ? operator_lang_overrides('pt', 'marketing') : [], [
     'home_title' => 'Event Schedule - Calendário de eventos, bilhetes e marcações, grátis',
     'home_description' => 'Publique os seus eventos numa página de calendário, receba inscrições gratuitas sem limite e marcações. Venda bilhetes no Pro, sem taxa de plataforma.',
     'pricing_description' => 'Comece grátis: eventos e inscrições ilimitados. O Pro adiciona a venda de bilhetes pagos e o Enterprise lugares marcados. Sem taxa de plataforma.',

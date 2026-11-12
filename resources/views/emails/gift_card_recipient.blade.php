@@ -12,7 +12,7 @@
 <x-email.quote :text="$giftCard->message" :cite="$giftCard->purchaser_name" />
 @endif
 
-<x-email.highlight :value="$amount" :caption="$giftCard->expires_at ? __('messages.gift_card_valid_until', ['date' => $giftCard->expires_at->translatedFormat('M j, Y')]) : null" />
+<x-email.highlight :value="$amount" :caption="$giftCard->expires_at ? __('messages.gift_card_valid_until', ['date' => $giftCard->expires_at->localDate(true, false, true)]) : null" />
 
 {{-- The code on a neutral panel rather than a second tinted highlight, so it reads as the thing to
      copy rather than a repeat of the amount above it. One text node, always left to right. --}}

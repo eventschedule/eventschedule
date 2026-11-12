@@ -266,6 +266,7 @@
                             name: this.name.trim(),
                             email: this.email.trim(),
                             website: this.website,
+                            lang: @json(isset($role) ? $role->displayLanguageCode() : null),
                         }),
                     })
                     .then(response => {
@@ -353,6 +354,11 @@
         @if (request()->embed)
         <input type="hidden" name="embed" value="true">
         @endif
+        {{-- The language the guest is reading this page in, so their ticket mails follow it
+             (Sale::languageFromRequest() takes only this schedule's two languages). --}}
+        @isset($role)
+        <input type="hidden" name="lang" value="{{ $role->displayLanguageCode() }}">
+        @endisset
 
         @if ($event->rsvp_limit)
         @php $remaining = $event->rsvpRemaining($date ?? $event->saleEventDateFromStartsAt()); @endphp

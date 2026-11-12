@@ -298,7 +298,9 @@ class Translate extends Command
             // handles the role's scalar and JSON `_en` values, its events and parts, the attempt
             // counters, and the sub-schedule names the cron never touches. Its curator/talent
             // scoping is the behaviour we want here too.
-            RegenerateRoleTranslations::dispatchSync($role);
+            // Keeping corrections made by hand: the language is not changing, and the event reset
+            // below keeps them too, so both targets of --reset treat them alike.
+            RegenerateRoleTranslations::dispatchSync($role, keepCorrections: true);
 
             $this->info("Reset translations for schedule #{$roleId}.");
 
@@ -567,6 +569,12 @@ class Translate extends Command
                 foreach (['name', 'description', 'short_description'] as $field) {
                     $target = "{$field}_translated";
                     if ($eventRole->event->{$field} && ! $eventRole->{$target}) {
+                        // The owner corrected this field into the curator's own language: that
+                        // wording is the translation (Event::textInLanguage() shows it first), so
+                        // no second copy is bought.
+                        if ($eventRole->event->translationIsManual($field) && $eventRole->event->getTranslationLanguageCode() === $toLang) {
+                            continue;
+                        }
                         $value = $this->translateText($eventRole->event->{$field}, $fromLang, $toLang, TranslationGlossary::forCurator($eventRole->role, $eventRole->event, $fromLang, $toLang), $calls, $successes, $field);
                         if ($value !== null) {
                             $eventRole->{$target} = $value;

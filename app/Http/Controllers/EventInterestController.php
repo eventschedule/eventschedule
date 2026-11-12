@@ -165,7 +165,9 @@ class EventInterestController extends Controller
                 'event_id' => $event->id,
                 'event_date' => $eventDate,
                 'email' => $email,
-                'locale' => app()->getLocale(),
+                // The language the page was read in (its translation included), which the mails
+                // this asks for follow; the request's otherwise, as before.
+                'locale' => \App\Models\Sale::languageFromRequest($request, $role) ?? app()->getLocale(),
                 'source' => 'event_page',
                 // Single opt-in: see the class docblock.
                 'confirmed_at' => now(),
