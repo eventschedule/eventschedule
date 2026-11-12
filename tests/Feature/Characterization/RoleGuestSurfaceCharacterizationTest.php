@@ -256,6 +256,16 @@ class RoleGuestSurfaceCharacterizationTest extends TestCase
             ->assertSee('Past Event');
     }
 
+    public function test_past_events_endpoint_survives_an_array_before_param(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $this->get('/'.$role->subdomain.'/api/past-events?before[]='.now()->format('Y-m-d'))
+            ->assertOk()
+            ->assertExactJson(['events' => [], 'has_more' => false]);
+    }
+
     /**
      * EVENTSCHEDULE-PHP-41: ?date=6348 on the guest event page was a fatal 500.
      *
