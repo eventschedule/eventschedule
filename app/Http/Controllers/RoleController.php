@@ -5231,7 +5231,11 @@ class RoleController extends Controller
         $isFirstSchedule = $user->owner()->count() === 1;
 
         if (session('pending_request') || $isFirstSchedule) {
-            $redirect = redirect(route('event.create', ['subdomain' => $role->subdomain]))
+            // Somebody who came to sell lands on the form's Tickets tab, where create() has
+            // already chosen Sell tickets for a first event (the seller fast lane). The fragment
+            // is the form's own way of opening a tab (resolveEventSectionHash()).
+            $sellerLane = $isFirstSchedule && ! session('pending_request') && $user->arrivedToSell();
+            $redirect = redirect(route('event.create', ['subdomain' => $role->subdomain]).($sellerLane ? '#section-tickets' : ''))
                 ->with('message', $message);
 
             // The flash tells EventController::create() not to stamp event_form_viewed_at for a

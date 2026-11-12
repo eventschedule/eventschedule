@@ -1116,6 +1116,7 @@
                             {!! $fyArrow !!}
                         </a>
                     </div>
+                    <x-marketing.example-link subdomain="weekendyogaretreat" ink="var(--fy-ink-2)" class="es-fade-up es-d-4">See an example: a monthly yoga retreat's schedule</x-marketing.example-link>
                     <div class="fy-breath-cap es-fade-up es-d-4" aria-hidden="true">
                         <div class="fy-breath-words"><span>Breathe in</span><span>Hold</span><span>Breathe out</span></div>
                         <span class="fy-breath-count">in 4 &middot; hold 2 &middot; out 6</span>

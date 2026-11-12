@@ -465,6 +465,8 @@ class SetupGuide
             'review_events' => __('messages.calendar_review_events'),
             'calendar_waiting_body' => __('messages.calendar_guide_waiting_body'),
             'add_to_website' => __('messages.import_panel_embed'),
+            'graphic' => __('messages.events_graphic'),
+            'qr_code' => __('messages.qr_code'),
             'skip' => __('messages.skip_for_now'),
             'draft' => __('messages.draft'),
             'done' => __('messages.done'),
@@ -687,21 +689,29 @@ class SetupGuide
         $asksTickets = ! $role->isCurator() || $page['owns'];
         $hasTickets = $live && $asksTickets && ! in_array('tickets', $skipped, true) && self::hasTickets($role);
 
-        $steps = [
-            'event' => ['done' => $live, 'skipped' => false],
-            'events' => [
-                'done' => $live && ($page['total'] >= self::EVENTS_GOAL || $page['repeating'] > 0),
-                'skipped' => in_array('events', $skipped, true),
-            ],
-            'share' => [
-                'done' => ! empty($guide['shared_at']) || ! empty($guide['embedded_at']),
-                'skipped' => in_array('share', $skipped, true),
-            ],
-        ];
+        // The ORDER of this array is the order of the steps: the component draws them in it, and
+        // the current step is the first one open. Share comes straight after the first event,
+        // ahead of "add more events": almost nobody comes back after their first session, so a
+        // page shared later is mostly a page never shared. Somebody who came to sell is asked
+        // for tickets before either (User::arrivedToSell()), and everybody else last.
+        $sells = $asksTickets && $user->arrivedToSell();
+        $tickets = $asksTickets
+            ? ['tickets' => ['done' => $hasTickets, 'skipped' => in_array('tickets', $skipped, true)]]
+            : [];
 
-        if ($asksTickets) {
-            $steps['tickets'] = ['done' => $hasTickets, 'skipped' => in_array('tickets', $skipped, true)];
-        }
+        $steps = ['event' => ['done' => $live, 'skipped' => false]]
+            + ($sells ? $tickets : [])
+            + [
+                'share' => [
+                    'done' => ! empty($guide['shared_at']) || ! empty($guide['embedded_at']),
+                    'skipped' => in_array('share', $skipped, true),
+                ],
+                'events' => [
+                    'done' => $live && ($page['total'] >= self::EVENTS_GOAL || $page['repeating'] > 0),
+                    'skipped' => in_array('events', $skipped, true),
+                ],
+            ]
+            + $tickets;
 
         $current = null;
         $remaining = 0;
@@ -743,6 +753,8 @@ class SetupGuide
             'embedded' => ! empty($guide['embedded_at']),
             'shared' => ! empty($guide['shared_at']),
             'steps' => $steps,
+            // Asks for tickets as "Put tickets on sale", second rather than last.
+            'sells' => $sells,
             'current' => $current,
             'remaining' => $remaining,
             'total' => $page['total'],
@@ -761,10 +773,16 @@ class SetupGuide
             'urls' => [
                 'endpoint' => route('home.setup_guide'),
                 'dashboard' => route('home').'#setup-guide',
-                'add' => route('event.create', ['subdomain' => $subdomain]),
+                // A seller's first event opens on its Tickets tab, as the wizard's redirect does.
+                'add' => route('event.create', ['subdomain' => $subdomain]).($sells && ! $live ? '#section-tickets' : ''),
                 'import' => route('event.show_import_ai', ['subdomain' => $subdomain]),
                 'schedule' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']),
                 'embed' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']).'#embed',
+                // The two ways to share that are not a link, both free on every plan: the events
+                // graphic (ready to post) and the QR code to print, which opens the page on its
+                // sign-up panel.
+                'graphic' => route('event.generate_graphic', ['subdomain' => $subdomain]),
+                'qr' => route('role.qr_code', ['subdomain' => $subdomain]),
                 'style' => route('role.edit', ['subdomain' => $subdomain]).'#section-style',
                 // The Events row of Style, where the animation is chosen: the tab alone opened on
                 // its rows closed.

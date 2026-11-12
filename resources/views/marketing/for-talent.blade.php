@@ -145,6 +145,8 @@
                 </a>
             </div>
 
+            <x-marketing.example-link subdomain="battleofthebands" class="es-fade-up es-d-3">See an example act: Battle of the Bands</x-marketing.example-link>
+
             {{-- Mobile wayfinding: the dot nav is lg-only, so without these there is
                  no way to skip ahead on a phone. --}}
             <nav class="es-fade-up es-d-4 mt-7 flex flex-wrap items-center justify-center gap-2 lg:hidden" aria-label="Jump to a section">

@@ -189,7 +189,20 @@
 
     <SetupGuideStrip class="mt-4" :guide="g" :t="t" layout="row" roomy :fresh="freshEvents" :announce="announce" :calm="calm" :embedded-now="embeddedNow" />
 
-    <div class="mt-4 flex flex-wrap items-center gap-3">
+    <!-- Waiting to be shared: the ways to share lead, the link last (it is the forward step), and
+         what was the button row becomes two quiet links. -->
+    <div v-if="sharing" class="sg-share mt-4">
+      <div class="sg-share-buttons">
+        <SetupGuideAction :action="{ label: t.graphic, href: g.urls.graphic }" kind="secondary" />
+        <SetupGuideAction :action="{ label: t.qr_code, href: g.urls.qr, act: 'shared' }" kind="secondary" @act="act" />
+        <SetupGuideAction :action="forward" kind="primary" :shine="shine" @act="act" />
+      </div>
+      <div class="sg-links">
+        <SetupGuideAction :action="{ label: t.view_page, href: g.url, target: '_blank' }" kind="link" />
+        <SetupGuideAction v-if="panelQuiet" :action="panelQuiet" kind="link" />
+      </div>
+    </div>
+    <div v-else class="mt-4 flex flex-wrap items-center gap-3">
       <SetupGuideAction v-if="panelQuiet" :action="panelQuiet" kind="quiet" />
       <span class="hidden flex-1 sm:block"></span>
       <SetupGuideAction :action="{ label: t.view_page, href: g.url, target: '_blank' }" kind="secondary" />
@@ -446,6 +459,10 @@ const next = computed(() => {
     return t.next_share;
   }
 
+  if (g.sells) {
+    return t.next_sell;
+  }
+
   return g.can_sell ? t.next_tickets : t.next_signup;
 });
 
@@ -515,7 +532,7 @@ const eventsRow = () => {
     row.note = t.skipped;
     row.links = undoSkip('events');
   } else if (state !== 'done') {
-    row.body = g.total >= 2 ? t.events_body_one : t.events_body_two;
+    row.body = g.total >= 2 ? t.events_more_one : t.events_more_two;
     row.primary = { label: t.add_another, href: g.urls.add };
     row.links = [{ label: t.import_events, href: g.urls.import }];
 
@@ -552,15 +569,26 @@ const shareRow = () => {
   row.primary = { label: t.add_to_website, href: g.urls.embed };
 
   if (state !== 'done') {
-    row.links = [skipLink('share')];
+    row.links = [...shareLinks(), skipLink('share')];
   }
 
   return row;
 };
 
+// The two ways to share that are not the link: the events graphic, ready to post, and the QR
+// code to print. Downloading the QR code is sharing, as copying the address is; opening the
+// graphic's page is not yet, so it does not tick the step.
+const shareLinks = () => [
+  { label: t.graphic, href: g.urls.graphic },
+  { label: t.qr_code, href: g.urls.qr, act: 'shared' },
+];
+
 const ticketsRow = () => {
   const state = stateOf('tickets');
-  const row = { key: 'tickets', state, title: g.can_sell || state === 'done' ? t.step_tickets : t.step_signup };
+  // Somebody who came to sell is not asked whether they need tickets: they are asked to put them
+  // on sale. On a plan that cannot sell yet, the form's paywall offers the trial.
+  const title = g.sells ? t.step_sell : (g.can_sell || state === 'done' ? t.step_tickets : t.step_signup);
+  const row = { key: 'tickets', state, title };
 
   if (state === 'skipped') {
     row.note = t.skipped;
@@ -568,7 +596,9 @@ const ticketsRow = () => {
   } else if (state !== 'done') {
     const one = g.ticket_event && g.total <= 1;
 
-    if (g.can_sell) {
+    if (g.sells) {
+      row.body = one ? fmt(t.sell_one, { event: g.ticket_event.name }) : t.sell_many;
+    } else if (g.can_sell) {
       row.body = one ? fmt(t.tickets_one, { event: g.ticket_event.name }) : t.tickets_many;
     } else {
       row.body = one ? fmt(t.signup_one, { event: g.ticket_event.name }) : t.signup_many;
@@ -576,9 +606,9 @@ const ticketsRow = () => {
 
     // Two equal answers, stacked: either one closes the question.
     row.stacked = true;
-    row.secondary = { label: g.can_sell ? t.no_tickets : t.no_signup, act: 'skip', step: 'tickets' };
+    row.secondary = { label: g.can_sell || g.sells ? t.no_tickets : t.no_signup, act: 'skip', step: 'tickets' };
     row.primary = {
-      label: g.can_sell ? t.add_tickets : t.add_registration,
+      label: g.can_sell || g.sells ? t.add_tickets : t.add_registration,
       href: g.ticket_event ? g.ticket_event.url : g.urls.schedule,
     };
   }
@@ -595,14 +625,12 @@ const rows = computed(() => {
     ];
   }
 
-  // The first stretch, banked: one checked row rather than three.
-  const list = [{ key: 'live', state: 'done', title: fmt(t.live_at) }, eventsRow(), shareRow()];
+  // The first stretch, banked: one checked row rather than three. Then the steps in the order
+  // the server put them (App\Utils\SetupGuide::resolve()).
+  const build = { events: eventsRow, share: shareRow, tickets: ticketsRow };
 
-  if (g.steps.tickets) {
-    list.push(ticketsRow());
-  }
-
-  return list;
+  return [{ key: 'live', state: 'done', title: fmt(t.live_at) }]
+    .concat(order.value.filter((key) => build[key]).map((key) => build[key]()));
 });
 
 /* ---- Talking to the server ---- */
@@ -880,6 +908,9 @@ const restore = () => {
 const act = (action) => {
   if (action.act === 'copy') {
     copy();
+  } else if (action.act === 'shared') {
+    // A link that goes on by itself (the QR code's download): only the step is recorded.
+    markShared();
   } else if (action.act === 'skip' && g.steps[action.step]) {
     g.steps[action.step].skipped = true;
     send('skip', action.step);
@@ -1160,17 +1191,26 @@ const panelBody = computed(() => {
   }
 
   if (current.value === 'events') {
-    return g.total >= 2 ? t.events_body_one : t.events_body_two;
+    return g.total >= 2 ? t.events_more_one : t.events_more_two;
   }
 
   return current.value === 'share' ? t.share_body : next.value;
 });
+
+// While the page is waiting to be shared, the panel leads with the ways to share it: the
+// graphic, the QR code and the link, the link last because copying it is the forward step.
+const sharing = computed(() => current.value === 'share' && !! g.steps.share && ! g.shared);
 
 // One forward button. While the page wants events it adds one; then it copies the address,
 // and having copied it becomes "Add to your website" where it stands.
 const forward = computed(() => {
   if (current.value === 'events') {
     return { label: t.add_another, href: g.urls.add };
+  }
+
+  // A seller whose page is live and has no tickets yet: putting them on sale comes first.
+  if (current.value === 'tickets' && g.sells) {
+    return { label: t.add_tickets, href: g.ticket_event ? g.ticket_event.url : g.urls.schedule };
   }
 
   if (g.steps.share && ! g.steps.share.skipped) {
@@ -2280,6 +2320,35 @@ onBeforeUnmount(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
+}
+
+/* The panel while its page waits to be shared: three ways to share, the link (forward) last. On
+   a phone they stack at full width, forward at the bottom; from a tablet they sit in a row at
+   the end, with the two quiet links on the other side. */
+.sg-share {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sg-share-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .sg-share {
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sg-share-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }
 
 .sg-finish {

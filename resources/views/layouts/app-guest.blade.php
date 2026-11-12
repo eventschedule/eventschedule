@@ -531,6 +531,10 @@
     @endif
 
     <div id="main-content" tabindex="-1" class="flex-grow relative">
+        @if ($exampleBar)
+            @include('partials.example-schedule-bar')
+        @endif
+
         {{-- The owner's announcement bar, full-bleed against the top edge so it reads as a
              page-level notice. Sitting above the language switcher also means the switcher's
              own pt-4 supplies the gap beneath the bar. Opt-in per view: see

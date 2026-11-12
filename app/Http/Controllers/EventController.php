@@ -615,6 +615,16 @@ class EventController extends Controller
                 $event->rsvp_enabled = (bool) $lastMode->rsvp_enabled;
             }
 
+            // The seller fast lane: somebody who signed up from a page about selling starts their
+            // first event on Sell tickets, the tile they would otherwise have to find. Only where
+            // nothing else has said how people sign up (no earlier event, no preset that says).
+            // A schedule that cannot sell priced tickets yet still gets the tile: typing a price
+            // then shows the paywall and its "Save and start free trial", which is the way in.
+            if ($isFirstEventRun && ! $lastMode && ! $defaultPreset?->kind && $user->arrivedToSell()) {
+                $event->tickets_enabled = true;
+                $event->rsvp_enabled = false;
+            }
+
             if ($schedule) {
                 $selectedMembers = [$schedule->toData()];
             }

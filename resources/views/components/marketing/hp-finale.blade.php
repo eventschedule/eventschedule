@@ -5,14 +5,16 @@
 
     Props:
       lead         the sentence under the heading
-      foot         the line under the box
+      foot         the line under the box; by default it names the free ways to bring events in
+                   (Google Calendar, a link, a poster: all on the Free plan, docs/FEATURES.md),
+                   because the only import most pages name is Eventbrite's, which is Pro
       label        the button's words
       placeholder  the box's placeholder
     The slot is the heading.
 --}}
 @props([
     'lead' => null,
-    'foot' => 'No credit card required. Free forever.',
+    'foot' => 'No credit card required. Already listed somewhere? Bring your events in from Google Calendar, a link or a poster, free.',
     'label' => 'Start for free',
     'placeholder' => 'your-name',
 ])

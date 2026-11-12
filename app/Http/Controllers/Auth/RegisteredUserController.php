@@ -78,10 +78,13 @@ class RegisteredUserController extends Controller
         }
 
         // Why they came (users.arrival_intent): the seller pages pass ?intent=, the guest page's
-        // "Create your own" card passes ?ref=gp. Kept like the type, through Google too.
+        // "Create your own" card passes ?ref=gp, and the bar on an example schedule's pages
+        // ?ref=example. Kept like the type, through Google too.
         $requestedIntent = request('intent');
         if (request('ref') === 'gp') {
             $requestedIntent = 'guest_page';
+        } elseif (request('ref') === 'example') {
+            $requestedIntent = 'example';
         }
         if (in_array($requestedIntent, User::ARRIVAL_INTENTS, true)) {
             session(['signup_arrival_intent' => $requestedIntent]);

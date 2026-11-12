@@ -1458,6 +1458,7 @@
                                     {!! $wiRight !!}
                                 </a>
                             </div>
+                            <x-marketing.example-link subdomain="painting" ink="var(--wi-ink-2)" class="es-fade-up es-d-3">See an example: a weekly oil painting class</x-marketing.example-link>
                             <div class="wi-ten es-fade-up es-d-4" aria-hidden="true">
                                 <div class="wi-ten-row">@for ($wiSat = 1; $wiSat <= 10; $wiSat++)<i @class(['is-done' => $wiSat === 1, 'is-now' => $wiSat === 2])></i>@endfor</div>
                                 <div class="wi-dim"><b>10 Saturdays</b></div>

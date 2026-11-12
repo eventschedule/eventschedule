@@ -29,8 +29,12 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Why an organizer came to sign up, from the link they pressed (users.arrival_intent,
      * arrival_intent_from_session()). Our own fixed vocabulary, exported as signups.arrival_intent.
+     * `example` is the bar on a demo schedule's own pages (partials/example-schedule-bar).
      */
-    public const ARRIVAL_INTENTS = ['sell', 'pro', 'enterprise', 'guest_page'];
+    public const ARRIVAL_INTENTS = ['sell', 'pro', 'enterprise', 'guest_page', 'example'];
+
+    /** The arrival intents that mean "came to sell tickets" (arrivedToSell()). */
+    public const SELLER_INTENTS = ['sell', 'pro', 'enterprise'];
 
     /**
      * The attributes that are mass assignable.
@@ -322,6 +326,17 @@ class User extends Authenticatable implements MustVerifyEmail
     public function wantsSuggestions(): bool
     {
         return empty($this->suggestions_off_at);
+    }
+
+    /**
+     * Whether this person signed up from a page about selling (a ticketing, comparison or
+     * pricing page: arrival_intent sell, pro or enterprise). They get the seller fast lane: the
+     * first event form opens on Tickets with Sell tickets chosen, and the setup guide asks for
+     * tickets straight after the first event. Nobody else's first session changes.
+     */
+    public function arrivedToSell(): bool
+    {
+        return in_array($this->arrival_intent, self::SELLER_INTENTS, true);
     }
 
     public function roles()

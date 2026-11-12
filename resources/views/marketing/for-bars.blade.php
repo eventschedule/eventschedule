@@ -1458,6 +1458,7 @@
                                 {!! $baDown !!}
                             </a>
                         </div>
+                        <x-marketing.example-link subdomain="demo-moestavern" ink="var(--ba-ink-2)" class="es-fade-up es-d-3">See an example bar: Moe's Tavern</x-marketing.example-link>
 
                         <div class="ba-licence es-fade-up es-d-4" aria-hidden="true">
                             <span class="ba-plaque">Free house</span>

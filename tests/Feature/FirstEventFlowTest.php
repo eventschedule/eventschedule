@@ -205,6 +205,19 @@ class FirstEventFlowTest extends TestCase
 
         $this->assertStringContainsString(__('messages.first_event_live_title'), $html);
         $this->assertStringContainsString('id="first-event-url"', $html);
+
+        // It leads with the three free ways to share: the events graphic, the QR code, the link,
+        // in that order and ahead of everything else the panel offers.
+        // (The schedule's Actions menu links the graphic too, above the panel: read from the panel on.)
+        $panel = substr($html, (int) strpos($html, __('messages.first_event_live_title')));
+        $graphic = strpos($panel, 'href="'.route('event.generate_graphic', ['subdomain' => $role->subdomain]).'"');
+        $qr = strpos($panel, 'href="'.route('role.qr_code', ['subdomain' => $role->subdomain]).'"');
+        $link = strpos($panel, 'id="first-event-url"');
+        $next = strpos($panel, e($flash['edit_url']).'#section-tickets');
+        $this->assertNotFalse($graphic, 'the events graphic');
+        $this->assertNotFalse($qr, 'the QR code');
+        $this->assertTrue($graphic < $qr && $qr < $link && $link < $next, 'graphic, QR code, link, then the rest');
+        $this->assertStringContainsString(e(__('messages.first_event_live_share_body')), $html);
         $this->assertStringContainsString('value="'.e($flash['url']).'"', $html);
         $this->assertStringContainsString(e($flash['edit_url']).'#section-tickets', $html);
         $this->assertStringContainsString(__('messages.add_another_event'), $html);

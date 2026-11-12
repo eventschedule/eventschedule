@@ -537,6 +537,7 @@
                                 <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             </a>
                         </div>
+                        <x-marketing.example-link subdomain="simpsons" ink="var(--esc-muted)" class="es-fade-up es-d-3">See an example curator: Springfield Events</x-marketing.example-link>
 
                         {{-- Sources, set as a ruled agate line. A scrolling ticker is
                              television; a newspaper sets its wire sources in type. --}}

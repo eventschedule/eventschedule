@@ -9,7 +9,7 @@
     :target="action.target || null"
     :rel="action.target ? 'noopener noreferrer' : null"
     :class="classes"
-    @click="emit('follow', action)"
+    @click="follow"
   >{{ action.label }}</a>
   <button v-else type="button" :class="classes" @click="emit('act', action)">
     <svg v-if="action.done" class="sg-check-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -39,6 +39,16 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['act', 'follow']);
+
+// A link that also answers something (the QR code's download is the share step) tells the guide,
+// and the browser goes on with the link.
+const follow = () => {
+  emit('follow', props.action);
+
+  if (props.action.act) {
+    emit('act', props.action);
+  }
+};
 
 const looks = {
   primary: 'sg-forward inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-base text-white no-underline shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800',

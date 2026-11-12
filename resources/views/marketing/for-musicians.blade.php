@@ -1200,6 +1200,7 @@
                             {!! $muDown !!}
                         </a>
                     </div>
+                    <x-marketing.example-link subdomain="battleofthebands" ink="var(--mu-ink-2)" class="es-fade-up es-d-3">See an example act: Battle of the Bands</x-marketing.example-link>
 
                     <ul class="mu-stickers es-fade-up es-d-4">
                         <li class="mu-sticker mu-sticker-hot" style="--r: -4deg;">Free forever</li>

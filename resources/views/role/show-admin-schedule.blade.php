@@ -85,13 +85,32 @@
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     <x-user-text class="font-medium text-gray-700 dark:text-gray-300">{{ $firstEventCreated['name'] }}</x-user-text>
                     &middot;
-                    {{ $firstEventCreated['is_draft'] ? __('messages.first_event_draft_body') : __('messages.first_event_live_body') }}
+                    {{ $firstEventCreated['is_draft'] ? __('messages.first_event_draft_body') : __('messages.first_event_live_share_body') }}
                 </p>
             </div>
         </div>
 
         @if (! empty($firstEventCreated['url']))
-        <x-copy-link id="first-event-url" :value="$firstEventCreated['url']" class="mt-4" :label="__('messages.event_link')" />
+        {{-- The three ways to share it, all free and all already there: the events graphic, ready
+             to post; the schedule's QR code, to print (it opens the page on its sign-up panel);
+             and the event's own link. They lead, because almost nobody comes back after a first
+             session to share a page later. --}}
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2" id="first-event-share">
+            <x-secondary-link href="{{ route('event.generate_graphic', ['subdomain' => $role->subdomain]) }}" class="gap-2">
+                <svg class="w-5 h-5 shrink-0 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
+                {{ __('messages.events_graphic') }}
+            </x-secondary-link>
+            <x-secondary-link href="{{ route('role.qr_code', ['subdomain' => $role->subdomain]) }}" class="gap-2">
+                <svg class="w-5 h-5 shrink-0 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                </svg>
+                {{ __('messages.qr_code') }}
+            </x-secondary-link>
+        </div>
+        <x-copy-link id="first-event-url" :value="$firstEventCreated['url']" class="mt-3" :label="__('messages.event_link')" />
         @endif
 
         <div class="mt-4 flex flex-wrap gap-3">

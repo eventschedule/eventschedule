@@ -39,9 +39,15 @@ class SetupGuideTest extends TestCase
     use SavesEventsOverHttp;
 
     /** Sign up, then save a first schedule the way a person does: through /new/{type}. */
-    private function startGuide(string $type = 'venue', array $overrides = []): array
+    private function startGuide(string $type = 'venue', array $overrides = [], ?string $intent = null): array
     {
         $user = $this->createOwner();
+
+        // What the sign-up link they pressed recorded (users.arrival_intent).
+        if ($intent) {
+            $user->forceFill(['arrival_intent' => $intent])->save();
+        }
+
         $this->actingAs($user);
         $role = $this->submitNewScheduleForm($type, $overrides);
 
@@ -263,10 +269,137 @@ class SetupGuideTest extends TestCase
 
         $this->assertTrue($state['live']);
         $this->assertTrue($state['celebrate']);
-        $this->assertSame('events', $state['current']);
+        $this->assertSame('share', $state['current'], 'sharing comes while they are still here');
         $this->assertSame(3, $state['remaining']);
-        $this->assertSame(['event', 'events', 'share', 'tickets'], array_keys($state['steps']));
+        $this->assertSame(['event', 'share', 'events', 'tickets'], array_keys($state['steps']));
+        $this->assertFalse($state['sells']);
         $this->assertSame('Friday Jazz Night', $state['events'][0]['name']);
+    }
+
+    /**
+     * The seller fast lane. Somebody who signed up from a page about selling is asked to put
+     * tickets on sale straight after the first event, ahead of sharing and more events: selling
+     * is what they came for, and almost nobody comes back after the first session. A curator
+     * that owns no events is still not asked, whatever brought them.
+     */
+    public function test_a_seller_is_asked_for_tickets_straight_after_the_first_event(): void
+    {
+        foreach (['sell', 'pro', 'enterprise'] as $intent) {
+            [$seller, $role] = $this->startGuide('talent', [], $intent);
+            $this->publishedEvent($role, ['name' => 'Opening Night']);
+
+            $state = $this->state($seller);
+
+            $this->assertSame(['event', 'tickets', 'share', 'events'], array_keys($state['steps']), $intent);
+            $this->assertSame('tickets', $state['current'], $intent);
+            $this->assertTrue($state['sells'], $intent);
+        }
+
+        // Before the first event a seller's "Add an event" opens the form on its Tickets tab.
+        [$early, $empty] = $this->startGuide('talent', [], 'sell');
+        $this->assertStringEndsWith('#section-tickets', $this->state($early)['urls']['add']);
+
+        // Everybody else: share second, tickets last, and no detour to the Tickets tab.
+        foreach ([null, 'guest_page'] as $intent) {
+            [$other, $theirs] = $this->startGuide('talent', [], $intent);
+            $this->assertStringNotContainsString('#', $this->state($other)['urls']['add']);
+            $this->publishedEvent($theirs);
+
+            $state = $this->state($other);
+
+            $this->assertSame(['event', 'share', 'events', 'tickets'], array_keys($state['steps']), (string) $intent);
+            $this->assertSame('share', $state['current']);
+            $this->assertFalse($state['sells']);
+        }
+
+        // The component draws the rows in the order the server sends and words the step for selling.
+        $vue = file_get_contents(resource_path('js/components/SetupGuide.vue'));
+        $this->assertStringContainsString('order.value.filter((key) => build[key])', $vue);
+        $this->assertStringContainsString('g.sells ? t.step_sell', $vue);
+        $this->assertNotSame(__('messages.setup_guide_step_sell'), 'messages.setup_guide_step_sell');
+    }
+
+    /**
+     * A seller's first schedule hands them to the event form ready to sell: on the Tickets tab
+     * (the form's own #section-tickets) with Sell tickets chosen. On a free schedule the paid
+     * paywall is still the way in: it is on the page, waiting for a price to be typed.
+     */
+    public function test_a_sellers_first_event_form_opens_on_tickets_with_sell_chosen(): void
+    {
+        config(['app.hosted' => true]);
+
+        [$seller, $role] = $this->startGuide('talent', [], 'sell');
+
+        $this->assertSame(
+            route('event.create', ['subdomain' => $role->subdomain]).'#section-tickets',
+            $this->scheduleStoreResponse->headers->get('Location')
+        );
+
+        $role->forceFill(['plan_type' => 'free', 'plan_expires' => now()->subYear()->format('Y-m-d'), 'trial_ends_at' => null])->save();
+
+        $form = $this->get(route('event.create', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+
+        $this->assertStringContainsString('ticketMode: "tickets"', $form);
+        $this->assertStringContainsString('tickets_enabled: true', $form);
+        $this->assertStringContainsString(e(__('messages.tickets_need_pro_title')), $form, 'the paywall is still there to lead into');
+
+        // Everybody else lands on the form as before, with nothing chosen for them.
+        [$other, $theirs] = $this->startGuide('talent');
+
+        $this->assertSame(
+            route('event.create', ['subdomain' => $theirs->subdomain]),
+            $this->scheduleStoreResponse->headers->get('Location')
+        );
+        $this->assertStringContainsString(
+            'ticketMode: "external"',
+            $this->get(route('event.create', ['subdomain' => $theirs->subdomain]))->assertOk()->getContent()
+        );
+
+        // Only the FIRST event: once the schedule has one, its own last mode decides.
+        $this->actingAs($seller);
+        $this->createEvent($role, ['creator_role_id' => $role->id, 'user_id' => $seller->id]);
+        $this->assertStringContainsString(
+            'ticketMode: "external"',
+            $this->get(route('event.create', ['subdomain' => $role->subdomain]))->assertOk()->getContent()
+        );
+    }
+
+    /**
+     * The going-live panel leads with the three free ways to share the page: the events graphic,
+     * the QR code to print, and the link (the forward step). Downloading the QR code ticks the
+     * share step as copying the link does.
+     */
+    public function test_the_going_live_panel_offers_three_ways_to_share(): void
+    {
+        [$user, $role] = $this->startGuide();
+        $this->publishedEvent($role, ['name' => 'Friday Jazz Night']);
+
+        $page = $this->withSession(['setup_guide_saved' => true])
+            ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
+            ->assertOk()
+            ->getContent();
+
+        $guide = $this->guideOn($page);
+
+        $this->assertSame('panel', $this->surfaceOf($page));
+        $this->assertSame('share', $guide['current']);
+        $this->assertSame(route('event.generate_graphic', ['subdomain' => $role->subdomain]), $guide['urls']['graphic']);
+        $this->assertSame(route('role.qr_code', ['subdomain' => $role->subdomain]), $guide['urls']['qr']);
+        $this->assertSame(__('messages.events_graphic'), $guide['t']['graphic']);
+        $this->assertSame(__('messages.qr_code'), $guide['t']['qr_code']);
+
+        $vue = file_get_contents(resource_path('js/components/SetupGuide.vue'));
+        // In that order, inside the share block, the link last because it is the forward step.
+        $block = substr($vue, strpos($vue, '<div v-if="sharing" class="sg-share mt-4">'));
+        $block = substr($block, 0, strpos($block, '</div>'));
+        $graphic = strpos($block, 'label: t.graphic, href: g.urls.graphic');
+        $qr = strpos($block, "label: t.qr_code, href: g.urls.qr, act: 'shared'");
+        $copy = strpos($block, ':action="forward" kind="primary"');
+        $this->assertNotFalse($graphic);
+        $this->assertNotFalse($qr);
+        $this->assertNotFalse($copy);
+        $this->assertTrue($graphic < $qr && $qr < $copy, 'graphic, QR code, then the link');
+        $this->assertStringContainsString("action.act === 'shared'", $vue);
     }
 
     public function test_three_events_or_one_that_repeats_make_a_page_worth_sharing(): void
@@ -322,7 +455,7 @@ class SetupGuideTest extends TestCase
         $state = $this->state($user);
 
         $this->assertTrue($state['live'], 'a listed event is on its page');
-        $this->assertSame(['event', 'events', 'share'], array_keys($state['steps']));
+        $this->assertSame(['event', 'share', 'events'], array_keys($state['steps']));
         $this->assertNull($state['ticket_event']);
     }
 
@@ -950,6 +1083,7 @@ class SetupGuideTest extends TestCase
         [$user, $role] = $this->startGuide();
         // On the page, and past: live for the guide, "no upcoming date" for the suggestions.
         $this->publishedEvent($role, ['starts_at' => now()->subDays(2)->format('Y-m-d H:i:s')]);
+        $this->post_(['action' => 'share'])->assertOk();
 
         $this->assertSame('events', $this->state($user)['current']);
         $this->assertSame([], $this->nextStepTypes($user));

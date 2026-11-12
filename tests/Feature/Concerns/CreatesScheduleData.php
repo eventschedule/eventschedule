@@ -37,6 +37,9 @@ trait CreatesScheduleData
         return $user;
     }
 
+    /** The redirect the last submitNewScheduleForm() got, for a test that asks where it went. */
+    protected $scheduleStoreResponse = null;
+
     /**
      * Save a schedule the way a person does: through /new/{type}, posting what that form posts.
      *
@@ -85,7 +88,7 @@ trait CreatesScheduleData
             $payload['address1'] = $payload['address1'] ?? '1 Test St';
         }
 
-        $this->post(route('role.store'), $payload)->assertRedirect();
+        $this->scheduleStoreResponse = $this->post(route('role.store'), $payload)->assertRedirect();
 
         return Role::where('user_id', auth()->id())->latest('id')->firstOrFail();
     }

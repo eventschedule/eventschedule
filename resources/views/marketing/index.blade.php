@@ -558,6 +558,7 @@
             font-size: 0.95rem;
             color: var(--hp-ink-3);
         }
+        .hp-hero-import { flex-basis: 100%; text-align: center; }
         .hp-demo {
             display: inline-flex;
             align-items: center;
@@ -2971,6 +2972,11 @@
                     Watch the 3-minute overview
                 </a>
                 <span>Set up in under 2 minutes. Open source, and yours to selfhost.</span>
+                {{-- The free ways in, said beside the button: the only import this page named
+                     before was Eventbrite's, on Pro (the pill further down). Google Calendar and
+                     a link are free on every plan, and a poster is read by the AI import, which
+                     Free has 50 a day of (docs/FEATURES.md). --}}
+                <span class="hp-hero-import">Already listed somewhere? Bring your events in from Google Calendar, a link or a poster, free.</span>
             </p>
 
             {{-- Below a laptop there are no walls beside the headline, so the visitor's poster

@@ -311,6 +311,8 @@
                 </a>
             </div>
 
+            <x-marketing.example-link subdomain="villageidiot" class="es-fade-up es-d-3">See an example venue: Village Idiot Blues &amp; Jazz</x-marketing.example-link>
+
             {{-- Jump row: the mobile wayfinding answer, since the dot nav is lg-only. --}}
             <nav class="es-fade-up es-d-4 mt-9 flex flex-wrap items-center justify-center gap-2 lg:hidden" aria-label="Jump to a section">
                 @foreach ($jumpChips as [$chipHref, $chipLabel])

@@ -1393,6 +1393,7 @@
                                 {!! $mvArrow !!}
                             </a>
                         </div>
+                        <x-marketing.example-link subdomain="villageidiot" ink="var(--mv-ink-2)" class="es-fade-up es-d-3">See an example venue: Village Idiot Blues &amp; Jazz</x-marketing.example-link>
                         <div class="mv-one es-fade-up es-d-4" aria-hidden="true">
                             <div class="mv-one-label"><span>On the calendar</span><span>1 line</span></div>
                             <div class="mv-one-row">
