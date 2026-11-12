@@ -87,6 +87,7 @@ class PageQueryScalingTest extends TestCase
         'admin queue' => 39, // 35
         'admin realtime data' => 23, // 20
         'admin realtime trends' => 12, // 9
+        'admin realtime so far' => 11, // 8
         'admin blocked' => 18, // 15
         'api events' => 16, // 13
         'api schedules' => 12, // 9
@@ -234,7 +235,7 @@ class PageQueryScalingTest extends TestCase
             'check-in stats',
             // The platform admin
             'admin dashboard', 'admin dashboard recent', 'admin dashboard growth', 'admin schedules', 'admin revenue', 'admin queue', 'admin realtime data',
-            'admin realtime trends', 'admin blocked',
+            'admin realtime trends', 'admin realtime so far', 'admin blocked',
             // The API
             'api events', 'api schedules', 'api categories',
         ];
@@ -319,6 +320,7 @@ class PageQueryScalingTest extends TestCase
             'admin queue' => $asAdmin()->get(route('admin.queue')),
             'admin realtime data' => $asAdmin()->getJson(route('admin.realtime.data')),
             'admin realtime trends' => $asAdmin()->getJson(route('admin.realtime.trends')),
+            'admin realtime so far' => $asAdmin()->getJson(route('admin.realtime.so_far')),
             'admin blocked' => $asAdmin()->get(route('admin.blocked')),
 
             'api events' => $api()->getJson('/api/events'),

@@ -6,6 +6,7 @@ use App\Models\RealtimeHit;
 use App\Models\Setting;
 use App\Services\AuditService;
 use App\Services\RealtimeDashboard;
+use App\Services\RealtimeSoFar;
 use App\Services\RealtimeTrends;
 use App\Utils\RealtimeTracker;
 use Illuminate\Http\JsonResponse;
@@ -43,6 +44,17 @@ class AdminRealtimeController extends Controller
         abort_unless($request->user()->isAdmin(), 403);
 
         return response()->json((new RealtimeTrends(RealtimeTrends::range($request->query('range')), null, $request->user()->timezone))->cached());
+    }
+
+    /**
+     * The "So far today, against before" card (RealtimeSoFar): today hour by hour against
+     * yesterday and a usual day of the same weekday. Its own address, asked once a minute at most.
+     */
+    public function soFar(Request $request): JsonResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+
+        return response()->json((new RealtimeSoFar(null, $request->user()->timezone))->cached());
     }
 
     /**

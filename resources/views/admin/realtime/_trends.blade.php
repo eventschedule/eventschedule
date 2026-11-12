@@ -42,8 +42,10 @@
                 <span class="mt-1.5 flex flex-wrap items-baseline gap-x-2">
                     <span class="dashboard-stat-value text-2xl font-bold leading-7 tabular-nums"
                           :class="tile.value === null ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'">@{{ tile.value === null ? '-' : fmt(tile.value) }}</span>
-                    <span v-if="tile.change !== null" class="text-xs font-semibold tabular-nums"
-                          :class="tile.change > 0 ? 'text-green-700 dark:text-green-400' : (tile.change < 0 ? 'text-red-700 dark:text-red-400' : 'text-gray-500 dark:text-gray-400')">@{{ pct(tile.change) }}</span>
+                    {{-- Said as the So far card says a gap (fairVerdict): coloured only when it is more
+                         than chance, and nothing under 5 either side, where a percentage is noise. --}}
+                    <span v-if="tile.changeText" :dir="tile.verdict === 'new' ? null : 'ltr'" class="so-far-change text-xs font-semibold tabular-nums"
+                          :class="'is-' + tile.verdict" :title="tile.verdictWords">@{{ tile.changeText }}<span class="sr-only"> (@{{ tile.verdictWords }})</span></span>
                 </span>
                 <span class="mt-0.5 text-xs leading-snug text-gray-500 dark:text-gray-400">@{{ tile.before }}</span>
             </button>

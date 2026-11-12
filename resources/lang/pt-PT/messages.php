@@ -2551,4 +2551,6 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'merge_venues_intro_all' => 'Estas agendas de locais parecem duplicadas umas das outras. Escolha qual manter em cada grupo e junte-as.',
     'event_interest_cancelled_button' => 'Ver agenda',
     'event_interest_why_receiving' => 'Recebe este e-mail porque pediu para acompanhar :event. Isto não é uma subscrição da agenda.',
+    'realtime_so_far_clock' => 'Fuso horário: :zone. Lá são agora :time.',
+    'realtime_so_far_how' => 'Comparando igual com igual: hoje até agora face a ontem, e face ao mesmo dia da semana em cada uma das quatro semanas anteriores, cada um até à mesma hora. "Mais ou menos igual" significa uma diferença que o acaso sozinho costuma produzir com estes números.',
 ]);

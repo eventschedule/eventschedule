@@ -162,10 +162,33 @@
                 'active30' => __('messages.admin_dash_active_30_days'),
                 'estimate' => __('messages.admin_dash_estimate'),
                 'exact' => __('messages.admin_dash_exact'),
+                // The "So far today, against before" card (_so-far) and the verdict every comparison
+                // on the page is said with (fairVerdict in _script).
+                'soFar' => collect([
+                    'title', 'clock', 'yesterday', 'usual', 'projected_legend', 'projected', 'at_now', 'now',
+                    'before_had', 'hidden_early', 'hidden_too_few', 'hidden_no_history', 'show_table',
+                    'show_chart', 'table_caption', 'col_by', 'col_usual', 'col_projected', 'tip_by',
+                    'tip_today', 'tip_yesterday', 'tip_usual', 'tip_projected', 'yesterday_by', 'usual_by',
+                    'usually', 'times', 'summary', 'summary_alone', 'no_count', 'how', 'range',
+                ])->mapWithKeys(fn ($key) => [$key => __('messages.realtime_so_far_'.$key)])->all() + [
+                    'today' => __('messages.today'),
+                    'collecting' => __('messages.realtime_trend_collecting'),
+                ],
+                'verdict' => [
+                    'up' => __('messages.realtime_verdict_up'),
+                    'down' => __('messages.realtime_verdict_down'),
+                    'maybeUp' => __('messages.realtime_verdict_maybe_up'),
+                    'maybeDown' => __('messages.realtime_verdict_maybe_down'),
+                    'same' => __('messages.realtime_verdict_same'),
+                    'tooFew' => __('messages.realtime_verdict_too_few'),
+                    'none' => __('messages.realtime_verdict_none'),
+                    'new' => __('messages.realtime_verdict_from_none'),
+                ],
             ];
             $realtimeConfig = [
                 'url' => route('admin.realtime.data'),
                 'trendsUrl' => route('admin.realtime.trends'),
+                'soFarUrl' => route('admin.realtime.so_far'),
                 // Hosted only, where there is billing: elsewhere the corner is the Now card's.
                 'revenueUrl' => config('app.hosted') ? route('admin.dashboard.revenue').($sample ? '?sample=1' : '') : null,
                 'pageUrl' => route('admin.dashboard'),
@@ -218,6 +241,8 @@
             </div>
 
             <template v-if="p.state === 'ok' || p.state === 'waiting'">
+                @include('admin.realtime._so-far')
+
                 @include('admin.realtime._board')
 
                 {{-- Activity first in the single column below xl; at xl Sign-ups takes two columns

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Utils\RealtimeTracker;
 use App\Utils\TimezoneUtils;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -213,7 +214,7 @@ class RealtimeTrends
     private function addActivity(array &$buckets, array &$totals, array &$previous, CarbonImmutable $start, CarbonImmutable $previousStart, CarbonImmutable $previousEnd, string $unit): void
     {
         $current = DB::query()
-            ->fromSub($this->classified($start, $this->now, true), 'classified')
+            ->fromSub(self::classified($start, $this->now, true), 'classified')
             ->whereNotNull('kind')
             ->groupBy('hour', 'kind')
             ->get(['hour', 'kind', DB::raw('COUNT(*) as total')]);
@@ -228,7 +229,7 @@ class RealtimeTrends
         }
 
         $before = DB::query()
-            ->fromSub($this->classified($previousStart, $previousEnd), 'classified')
+            ->fromSub(self::classified($previousStart, $previousEnd), 'classified')
             ->whereNotNull('kind')
             ->groupBy('kind')
             ->get(['kind', DB::raw('COUNT(*) as total')]);
@@ -242,7 +243,7 @@ class RealtimeTrends
      * Each audit row of the window with its hour (in the app's timezone, as written) and its kind,
      * or a null kind for a row the Activity rail would not count. $toNow takes in the current second.
      */
-    private function classified(CarbonImmutable $from, CarbonImmutable $to, bool $toNow = false): \Illuminate\Database\Query\Builder
+    public static function classified(CarbonImmutable $from, CarbonImmutable $to, bool $toNow = false): Builder
     {
         $blocked = new BlockedAccounts;
         $excluded = User::where('email', DemoService::DEMO_EMAIL)->orWhere('is_admin', true)->pluck('id')

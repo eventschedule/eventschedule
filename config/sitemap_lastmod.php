@@ -63,7 +63,7 @@ return [
     '/docs/schedule-styling' => '2026-11-11',
     '/docs/selfhost' => '2026-11-10',
     '/docs/selfhost/accessibility' => '2026-10-23',
-    '/docs/selfhost/admin' => '2026-10-26',
+    '/docs/selfhost/admin' => '2026-11-12',
     '/docs/selfhost/ai' => '2026-10-23',
     '/docs/selfhost/apple-wallet' => '2026-11-11',
     '/docs/selfhost/boost' => '2026-10-23',
