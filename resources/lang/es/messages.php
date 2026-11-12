@@ -8085,6 +8085,7 @@ return [
     'ticket_reminders' => 'Recordatorios',
     'ticket_reminders_toggle' => 'Enviar un correo a quienes tienen entrada antes de cada evento',
     'ticket_reminders_help' => 'Un correo para todos los que tienen entrada o registro: la fecha, el lugar, su entrada y tus notas de la entrada. Quien consigue una entrada después de que se envíe el recordatorio no lo recibe.',
+    'ticket_reminders_default_off' => 'Desactivado hasta que lo actives: en el plan gratuito este correo se enviaría desde nuestro servidor de correo. Está activado por defecto en un plan de pago, o cuando el calendario tiene su propia configuración de correo.',
     'ticket_reminders_send' => 'Enviar',
     'ticket_reminders_3_hours' => '3 horas antes',
     'ticket_reminders_1_day' => '1 día antes',

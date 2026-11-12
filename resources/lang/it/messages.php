@@ -8084,6 +8084,7 @@ return [
     'ticket_reminders' => 'Promemoria',
     'ticket_reminders_toggle' => 'Invia un\'email ai titolari dei biglietti prima di ogni evento',
     'ticket_reminders_help' => 'Un\'email a chiunque abbia un biglietto o un\'iscrizione: la data, il luogo, il biglietto e le tue note sul biglietto. Chi ottiene un biglietto dopo l\'invio del promemoria non lo riceve.',
+    'ticket_reminders_default_off' => 'Disattivato finché non lo attivi: con il piano gratuito questa email verrebbe inviata dal nostro server di posta. È attivo per impostazione predefinita con un piano a pagamento, o quando il calendario ha le proprie impostazioni email.',
     'ticket_reminders_send' => 'Invia',
     'ticket_reminders_3_hours' => '3 ore prima',
     'ticket_reminders_1_day' => '1 giorno prima',

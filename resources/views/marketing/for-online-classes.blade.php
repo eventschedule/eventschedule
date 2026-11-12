@@ -1241,7 +1241,7 @@
             ],
             [
                 'q' => 'How do students get the link to an online class?',
-                'a' => 'By signing up for a session. Your public schedule shows each class with its time and only the domain of the meeting link, such as zoom.us. A student who registers or buys a seat gets a confirmation email with a calendar invite and a button to their ticket page, and that page shows the full link. The reminder email before the session carries the link again; reminders are on by default, 1 day before, and can be moved to 3 hours or to 2 or 3 days. Someone who holds a season pass for the term finds the link on their pass page, but is not sent the reminder.',
+                'a' => 'By signing up for a session. Your public schedule shows each class with its time and only the domain of the meeting link, such as zoom.us. A student who registers or buys a seat gets a confirmation email with a calendar invite and a button to their ticket page, and that page shows the full link. The reminder email before the session carries the link again; reminders are on by default on Pro and Enterprise (on the free plan you switch them on), 1 day before, and can be moved to 3 hours or to 2 or 3 days. Someone who holds a season pass for the term finds the link on their pass page, but is not sent the reminder.',
             ],
             [
                 'q' => 'Should I sell an online course as a whole term or class by class?',
@@ -1886,7 +1886,7 @@
                                 <li>Your public schedule shows the class with its time and the link's domain, such as zoom.us, never the link itself, so a stranger browsing the page cannot walk into the room.</li>
                                 <li>The student registers or buys a seat for a date. The confirmation email carries a calendar invite for that session and a button to their ticket page.</li>
                                 <li>The ticket page shows the full class link. It is the page to bookmark, and with free registration it is also where a student cancels and frees the seat.</li>
-                                <li>Before the session, the reminder email arrives with the date, the time and the link again. Reminders are on for every schedule unless you switch them off.</li>
+                                <li>Before the session, the reminder email arrives with the date, the time and the link again. Reminders are on every plan, on by default on Pro and Enterprise; on the free plan you switch them on.</li>
                                 <li>If you change the class link, saving the course asks whether to email everyone holding a seat on an upcoming session. Say yes, or half the class waits in the old room. On eventschedule.com that email reaches registered students once your schedule sends through its own email settings, so set those up before you rely on it.</li>
                             </ul>
                         </div>

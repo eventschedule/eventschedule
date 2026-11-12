@@ -511,7 +511,7 @@
             [
                 'when' => 'Before it starts',
                 'who' => 'Everyone holding a ticket or a registration',
-                'sees' => 'The reminder email, with the join link in it as a link they can press. It goes 1 day before unless you choose 3 hours, 2 days or 3 days, and it is on for every schedule, on every plan. Anyone who signs up after the reminder time, season pass holders and imported attendees are not sent one.',
+                'sees' => 'The reminder email, with the join link in it as a link they can press. It goes 1 day before unless you choose 3 hours, 2 days or 3 days, and it is on every plan, on by default on Pro and Enterprise (on the free plan you switch it on under Tickets, Reminders). Anyone who signs up after the reminder time, season pass holders and imported attendees are not sent one.',
             ],
             [
                 'when' => 'When you change the link',
@@ -662,7 +662,7 @@
             ],
             [
                 'q' => 'When should attendees get the join link?',
-                'a' => 'Twice: once when they sign up, so they know where it will be, and again shortly before it starts, when they actually need it. In Event Schedule the ticket page shows the link from the moment someone registers or buys, and the reminder email carries it again before the session, 1 day before by default, or 3 hours, 2 days or 3 days if you choose. For an evening session people sign up for on impulse, 3 hours before is the reminder that gets them there.',
+                'a' => 'Twice: once when they sign up, so they know where it will be, and again shortly before it starts, when they actually need it. In Event Schedule the ticket page shows the link from the moment someone registers or buys, and the reminder email carries it again before the session (on by default on Pro and Enterprise, one switch on the free plan), 1 day before by default, or 3 hours, 2 days or 3 days if you choose. For an evening session people sign up for on impulse, 3 hours before is the reminder that gets them there.',
             ],
             [
                 'q' => 'Which is best for an online event: Zoom, Google Meet, Teams or YouTube Live?',

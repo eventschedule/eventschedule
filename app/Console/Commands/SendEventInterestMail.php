@@ -243,7 +243,7 @@ class SendEventInterestMail extends Command
 
         $query = EventInterest::confirmed()
             ->whereNull($column)
-            ->with(['event.creatorRole.ticketReminderSetting', 'event.venue'])
+            ->with(['event.creatorRole.ticketReminderSetting', 'event.creatorRole.subscriptions', 'event.venue'])
             // A cancelled event owes its list a cancellation notice, which EventChangeNotifier
             // sends. It will never owe them either of these, so its rows must not sit in the window
             // for ever - see the starvation note below.
@@ -336,7 +336,7 @@ class SendEventInterestMail extends Command
         $setting = $role->ticketReminderSetting;
         $event = $interest->event;
 
-        if (! config('usage.ticket_reminders_enabled') || ! $setting->enabled || ! $event->starts_at) {
+        if (! config('usage.ticket_reminders_enabled') || ! $role->ticketRemindersOn() || ! $event->starts_at) {
             return false;
         }
 

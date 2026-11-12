@@ -226,8 +226,9 @@ class BackupService
         ];
 
         // When ticket holders are reminded lives beside the schedule too (ticket_reminder_settings).
+        // `enabled` is null while the owner has not chosen, so a restore keeps following the default.
         $roleData['ticket_reminder_settings'] = [
-            'enabled' => (bool) $role->ticketReminderSetting->enabled,
+            'enabled' => is_null($role->ticketReminderSetting->enabled) ? null : (bool) $role->ticketReminderSetting->enabled,
             'hours_before' => (int) $role->ticketReminderSetting->hours_before,
         ];
 
@@ -1970,7 +1971,7 @@ class BackupService
         if (is_array($data['ticket_reminder_settings'] ?? null)) {
             $reminders = $data['ticket_reminder_settings'];
             $values = [];
-            if (array_key_exists('enabled', $reminders)) {
+            if (isset($reminders['enabled'])) {
                 $values['enabled'] = (bool) $reminders['enabled'];
             }
             if (in_array((int) ($reminders['hours_before'] ?? 0), TicketReminderSetting::HOURS_OPTIONS, true)) {

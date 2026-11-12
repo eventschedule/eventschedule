@@ -1854,7 +1854,7 @@
                         <x-link href="{{ marketing_url('/docs/tickets') }}#ticket-types">tickets guide</x-link>
                         and the
                         <x-link href="{{ marketing_url('/docs/appointments') }}#hosts">appointments guide</x-link>.
-                        Ticket reminders go out on their own: everyone holding a ticket or a registration gets
+                        Ticket reminders, on by default on Pro and Enterprise and one switch on the free plan: everyone holding a ticket or a registration gets
                         one email before the day with their QR code, a day ahead unless you change it.
                     </p>
                 </div>

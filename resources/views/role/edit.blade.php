@@ -4519,12 +4519,16 @@
                         </div>
                         <!-- End Tab Content: Gift cards -->
 
-                        {{-- Ticket reminders (ticket_reminder_settings, app:send-ticket-reminders): every plan, on a
-                             day before when the owner has chosen nothing. Inside the saved-schedule branch,
-                             because the preview draws its next event. --}}
+                        {{-- Ticket reminders (ticket_reminder_settings, app:send-ticket-reminders): every plan, a day
+                             before, and on or off as Role::optionalMailOnByDefault() says while the owner has
+                             chosen nothing. Inside the saved-schedule branch, because the preview draws its next
+                             event. ticket_reminders_shown tells the save what the switch showed, so a save that
+                             leaves it alone keeps following the default. --}}
                         @php
                             $reminderSetting = $role->ticketReminderSetting;
-                            $reminderOn = (bool) old('ticket_reminders_enabled', $reminderSetting->enabled);
+                            $reminderShown = (bool) old('ticket_reminders_shown', $role->ticketRemindersOn());
+                            $reminderOn = (bool) old('ticket_reminders_enabled', $reminderShown);
+                            $reminderDefaultOff = is_null($reminderSetting->enabled) && ! $role->optionalMailOnByDefault();
                             $reminderHours = (int) old('ticket_reminders_hours', $reminderSetting->hours_before);
                             $reminderOptions = [
                                 3 => __('messages.ticket_reminders_3_hours'),
@@ -4535,10 +4539,14 @@
                         @endphp
                         <x-form-row group="tickets" tab="reminders" :title="__('messages.ticket_reminders')" :summary="$reminderOn ? ($reminderOptions[$reminderHours] ?? __('messages.ticket_reminders')) : __('messages.summary_off')" :muted="! $reminderOn" class="tickets-tab" />
                         <div id="tickets-tab-reminders" class="event-subrow-body tickets-tab-content" hidden>
+                            <input type="hidden" name="ticket_reminders_shown" value="{{ $reminderShown ? 1 : 0 }}">
                             <x-toggle name="ticket_reminders_enabled" id="ticket_reminders_enabled"
                                 :checked="$reminderOn"
                                 label="{{ __('messages.ticket_reminders_toggle') }}"
                                 help="{{ __('messages.ticket_reminders_help') }}" />
+                            @if ($reminderDefaultOff)
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_reminders_default_off') }}</p>
+                            @endif
                             <x-input-error class="mt-2" :messages="$errors->get('ticket_reminders_enabled')" />
 
                             <div class="mt-5 max-w-xs">
@@ -8343,8 +8351,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     kit.summary('section-tickets', function() {
         var names = presetPlainNames();
-        // Reminders are left out: they are on by default, so naming them would take every tab's
-        // quiet "Not set up" away. Their row says what they do.
+        // Reminders are left out: on a paying schedule they are on by default, so naming them would
+        // take every tab's quiet "Not set up" away. Their row says what they do.
         var held = kit.join([names.join(', '), kit.on('gift_cards_enabled') ? words.gift_cards : '']);
         return held || { text: words.not_set_up, empty: true };
     });

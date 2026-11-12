@@ -868,7 +868,7 @@
             ],
             [
                 'q' => 'How do I cut down on no-shows at an open mic?',
-                'a' => 'Make it easy to give a slot back. Everyone registered by then gets a reminder email before the night, one day ahead by default, with a link to cancel that frees the spot, and when a full night has a waitlist the next person is emailed. Say in your house rules that a poet who misses their name goes to the end of the list, and if your no-shows are steady, keep a few slots for the door instead of putting the whole list online.',
+                'a' => 'Make it easy to give a slot back. Everyone registered by then gets a reminder email before the night (on by default on Pro and Enterprise; on the free plan you switch it on), one day ahead by default, with a link to cancel that frees the spot, and when a full night has a waitlist the next person is emailed. Say in your house rules that a poet who misses their name goes to the end of the list, and if your no-shows are steady, keep a few slots for the door instead of putting the whole list online.',
             ],
             [
                 'q' => 'Can I keep the open mic, the feature series, and workshops on one page?',
@@ -1444,7 +1444,7 @@
                         </div>
                     </div>
                     <p class="sw-foot sw-prose">
-                        Reminders are on for every schedule on every plan, and you can change when they go out in the schedule's <x-link href="{{ marketing_url('/docs/creating-schedules') }}#ticket-reminders">ticket settings</x-link>. The <x-link href="{{ marketing_url('/docs/creating-events') }}#agenda">agenda</x-link> and <x-link href="{{ marketing_url('/docs/creating-events') }}#recurring">exclude dates</x-link> are in the event form.
+                        Reminders are on every plan, on by default on Pro and Enterprise (on the free plan you switch them on), and you can change when they go out in the schedule's <x-link href="{{ marketing_url('/docs/creating-schedules') }}#ticket-reminders">ticket settings</x-link>. The <x-link href="{{ marketing_url('/docs/creating-events') }}#agenda">agenda</x-link> and <x-link href="{{ marketing_url('/docs/creating-events') }}#recurring">exclude dates</x-link> are in the event form.
                     </p>
                     <span class="sw-folio" aria-hidden="true">15</span>
                 </div>

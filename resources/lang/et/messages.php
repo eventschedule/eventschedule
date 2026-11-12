@@ -8086,6 +8086,7 @@ return [
     'ticket_reminders' => 'Meeldetuletused',
     'ticket_reminders_toggle' => 'Saada piletiomanikele enne iga sündmust e-kiri',
     'ticket_reminders_help' => 'Üks kiri kõigile, kellel on pilet või registreerimine: kuupäev, toimumiskoht, nende pilet ja sinu piletimärkmed. Kes saab pileti pärast meeldetuletuse saatmist, seda ei saa.',
+    'ticket_reminders_default_off' => 'Väljas, kuni selle sisse lülitad: tasuta paketis saadetaks see kiri meie meiliserverist. Tasulises paketis on see vaikimisi sees, samuti siis, kui ajakaval on oma e-posti seaded.',
     'ticket_reminders_send' => 'Saada',
     'ticket_reminders_3_hours' => '3 tundi enne',
     'ticket_reminders_1_day' => '1 päev enne',

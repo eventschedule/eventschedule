@@ -980,7 +980,7 @@
             ],
             [
                 'q' => 'How do I cut no-shows at a free comedy night?',
-                'a' => 'Everyone with a ticket or a registration gets a reminder email before the show. Reminders are on for every schedule and go out one day before unless you change it, and switching the schedule to three hours before suits a room of weeknight shows people sign up for on a whim. On a free ticket or registration the reminder carries a Can\'t make it? link, so someone who drops out frees their place instead of leaving a seat empty. After a few weeks, count the room against the list each night, and release more places than the room holds by the share that never shows.',
+                'a' => 'Everyone with a ticket or a registration gets a reminder email before the show. Reminders are on every plan, on by default on Pro and Enterprise (on the free plan you switch them on under Tickets, Reminders), and go out one day before unless you change it, and switching the schedule to three hours before suits a room of weeknight shows people sign up for on a whim. On a free ticket or registration the reminder carries a Can\'t make it? link, so someone who drops out frees their place instead of leaving a seat empty. After a few weeks, count the room against the list each night, and release more places than the room holds by the share that never shows.',
             ],
         ];
 

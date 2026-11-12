@@ -8085,6 +8085,7 @@ return [
     'ticket_reminders' => 'Erinnerungen',
     'ticket_reminders_toggle' => 'Ticketinhaber vor jeder Veranstaltung per E-Mail erinnern',
     'ticket_reminders_help' => 'Eine E-Mail an alle mit Ticket oder Anmeldung: Datum, Veranstaltungsort, ihr Ticket und Ihre Ticket-Hinweise. Wer ein Ticket erst bekommt, nachdem die Erinnerung verschickt wurde, erhält keine.',
+    'ticket_reminders_default_off' => 'Aus, bis Sie es einschalten: Im kostenlosen Tarif würde diese E-Mail über unseren Mailserver verschickt. In einem kostenpflichtigen Tarif ist sie standardmäßig an, ebenso sobald der Kalender eigene E-Mail-Einstellungen hat.',
     'ticket_reminders_send' => 'Senden',
     'ticket_reminders_3_hours' => '3 Stunden vorher',
     'ticket_reminders_1_day' => '1 Tag vorher',

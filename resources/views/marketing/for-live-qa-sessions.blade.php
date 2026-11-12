@@ -1009,7 +1009,7 @@
             ],
             [
                 'q' => 'How do attendees get the link to join?',
-                'a' => 'Mark the session online and paste the meeting or stream link. The public page names only the platform, such as zoom.us. Everyone who registers gets a confirmation email that opens their own registration page, where the link is, and the reminder email before the session, which is on by default, carries the link too. So give an online session registration or tickets if people need the link.',
+                'a' => 'Mark the session online and paste the meeting or stream link. The public page names only the platform, such as zoom.us. Everyone who registers gets a confirmation email that opens their own registration page, where the link is, and the reminder email before the session, which is on by default on Pro and Enterprise and one switch on the free plan, carries the link too. So give an online session registration or tickets if people need the link.',
             ],
             [
                 'q' => 'Can I record a live Q&A and share it afterwards?',

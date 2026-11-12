@@ -8090,6 +8090,7 @@ return [
     'ticket_reminders' => 'Rappels',
     'ticket_reminders_toggle' => 'Envoyer un e-mail aux détenteurs de billets avant chaque événement',
     'ticket_reminders_help' => 'Un e-mail à toutes les personnes ayant un billet ou une inscription : la date, le lieu, leur billet et vos notes de billet. Une personne qui obtient un billet après l\'envoi du rappel ne reçoit pas de rappel.',
+    'ticket_reminders_default_off' => 'Désactivé jusqu\'à ce que vous l\'activiez : avec l\'offre gratuite, cet e-mail serait envoyé depuis notre serveur de messagerie. Il est activé par défaut avec une offre payante, ou dès que le planning a ses propres paramètres d\'e-mail.',
     'ticket_reminders_send' => 'Envoyer',
     'ticket_reminders_3_hours' => '3 heures avant',
     'ticket_reminders_1_day' => '1 jour avant',

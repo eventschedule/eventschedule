@@ -4564,11 +4564,38 @@ class Role extends Model implements MustVerifyEmail
 
     /**
      * When the schedule's ticket holders are reminded of their event (Tickets > Reminders). No row
-     * reads as the defaults: on, a day before (app:send-ticket-reminders).
+     * reads as the defaults: a day before, and on or off as optionalMailOnByDefault() says
+     * (app:send-ticket-reminders). Whether they are on is ticketRemindersOn(), never `enabled`.
      */
     public function ticketReminderSetting()
     {
         return $this->hasOne(TicketReminderSetting::class)->withDefault(TicketReminderSetting::DEFAULTS);
+    }
+
+    /** Whether this schedule's ticket holders are reminded: the owner's choice, or the default. */
+    public function ticketRemindersOn(): bool
+    {
+        return $this->ticketReminderSetting->enabled ?? $this->optionalMailOnByDefault();
+    }
+
+    /**
+     * Whether an OPTIONAL email this schedule sends (one its owner can switch off, such as ticket
+     * reminders) is on while the owner has not chosen. The one rule for every such email, today's and
+     * any added later (decided 2026-11-12).
+     *
+     * On the hosted install a schedule with no email settings of its own sends through the platform's
+     * mail server, on the platform's sending reputation and cost, so its optional mail is OFF until
+     * the owner switches it on, unless the schedule pays for a plan (a trial is not paying). Mail
+     * through the schedule's own server, and every selfhost install (the operator's own server), is
+     * on by default. Mail somebody asked for themselves (a confirmation, a ticket) is not optional.
+     */
+    public function optionalMailOnByDefault(): bool
+    {
+        if (! config('app.hosted') || $this->hasEmailSettings()) {
+            return true;
+        }
+
+        return $this->actualPlanTier() !== 'free' && ! $this->isOnTrial();
     }
 
     /**

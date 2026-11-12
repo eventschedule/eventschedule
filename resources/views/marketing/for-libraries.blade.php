@@ -1381,7 +1381,7 @@
             ],
             [
                 'q' => 'Do patrons get a reminder before a program they registered for?',
-                'a' => 'Yes, on every plan, and it is on by default. Each registration gets one reminder email before its date: 3 hours, or 1, 2 or 3 days before, chosen under Tickets, Reminders in the schedule\'s settings. The confirmation email links to the patron\'s ticket page, where they can cancel, which frees the place and tells the next person on the waitlist.',
+                'a' => 'Yes, on every plan, and it is on by default on Pro and Enterprise (on the free plan you switch it on). Each registration gets one reminder email before its date: 3 hours, or 1, 2 or 3 days before, chosen under Tickets, Reminders in the schedule\'s settings. The confirmation email links to the patron\'s ticket page, where they can cancel, which frees the place and tells the next person on the waitlist.',
             ],
             [
                 'q' => 'Can the whole staff have logins?',
@@ -1930,7 +1930,7 @@
                                 <h3>Make giving a place back easy</h3>
                                 <span class="lb-stamp" style="--r: 3deg;">Free</span>
                             </div>
-                            <p>A family that cannot come will usually say so if it takes one tap. Every confirmation email links to the patron's ticket page, where they can cancel and the place goes straight back. A reminder email goes out before each date on every plan, and it is on by default: choose 3 hours, or 1, 2 or 3 days before, under Tickets, Reminders in the schedule's settings. A day before suits a weekly session: it lands while there is still time to give the place to someone else.</p>
+                            <p>A family that cannot come will usually say so if it takes one tap. Every confirmation email links to the patron's ticket page, where they can cancel and the place goes straight back. A reminder email goes out before each date on every plan, on by default on Pro and Enterprise (on the free plan you switch it on): choose 3 hours, or 1, 2 or 3 days before, under Tickets, Reminders in the schedule's settings. A day before suits a weekly session: it lands while there is still time to give the place to someone else.</p>
                         </div>
                     </article>
 

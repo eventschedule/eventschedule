@@ -8157,6 +8157,7 @@ return [
     'ticket_reminders' => 'Reminders',
     'ticket_reminders_toggle' => 'Email ticket holders before each event',
     'ticket_reminders_help' => 'One email to everyone with a ticket or registration: the date, the venue, their ticket and your ticket notes. Anyone who gets a ticket after the reminder has gone out is not sent one.',
+    'ticket_reminders_default_off' => 'Off until you turn it on: on the free plan this email would be sent from our mail server. It is on by default on a paid plan, or once the schedule has its own email settings.',
     'ticket_reminders_send' => 'Send',
     'ticket_reminders_3_hours' => '3 hours before',
     'ticket_reminders_1_day' => '1 day before',

@@ -1034,7 +1034,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting webinars?',
-                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, with no monthly ceiling, and so is scanning a ticket in at the door. Charging for a seat is Pro at '.plan_price($proMonthly).' a month, which also adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, confirmations and reminders go out either way, while change and cancellation notices reach registrants through your own SMTP details, which you add once in the integrations tab on any plan.',
+                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, with no monthly ceiling, and so is scanning a ticket in at the door. Charging for a seat is Pro at '.plan_price($proMonthly).' a month, which also adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, confirmations go out either way and reminders are on by default on Pro and Enterprise or with your own SMTP details (otherwise one switch under Tickets, Reminders), while change and cancellation notices reach registrants through your own SMTP details, which you add once in the integrations tab on any plan.',
             ],
         ];
 
@@ -1687,7 +1687,7 @@
                         </tbody>
                     </table>
                 </div>
-                <p class="wb-foot" data-reveal>The reminder is set once for the schedule, under Edit Schedule, Tickets, Reminders, and is on unless you switch it off. Feedback is set under Engagement. <x-link href="{{ marketing_url('/docs/creating-schedules') }}#ticket-reminders">How reminders work</x-link></p>
+                <p class="wb-foot" data-reveal>The reminder is set once for the schedule, under Edit Schedule, Tickets, Reminders, and is on by default on Pro and Enterprise; on the free plan you switch it on there. Feedback is set under Engagement. <x-link href="{{ marketing_url('/docs/creating-schedules') }}#ticket-reminders">How reminders work</x-link></p>
 
                 <div class="wb-cards" data-reveal-group="100">
                     <div class="wb-card" data-reveal>

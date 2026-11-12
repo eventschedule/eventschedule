@@ -8086,6 +8086,7 @@ return [
     'ticket_reminders' => 'Lembretes',
     'ticket_reminders_toggle' => 'Enviar um e-mail a quem tem ingresso antes de cada evento',
     'ticket_reminders_help' => 'Um e-mail para todos que têm ingresso ou inscrição: a data, o local, o ingresso e as suas observações do ingresso. Quem consegue um ingresso depois do envio do lembrete não o recebe.',
+    'ticket_reminders_default_off' => 'Desativado até você ativar: no plano gratuito este e-mail seria enviado pelo nosso servidor de e-mail. Fica ativado por padrão em um plano pago, ou quando o calendário tem as próprias configurações de e-mail.',
     'ticket_reminders_send' => 'Enviar',
     'ticket_reminders_3_hours' => '3 horas antes',
     'ticket_reminders_1_day' => '1 dia antes',

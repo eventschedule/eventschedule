@@ -34,7 +34,7 @@
             {
                 "feature": "Reminder before the event",
                 "competitor": false,
-                "es": "Automatic, on every plan"
+                "es": "On every plan; on by default on paid plans"
             },
             {
                 "feature": "Guest cancels and frees the place",
@@ -136,7 +136,7 @@
             },
             {
                 "title": "A confirmation that is a ticket",
-                "description": "Each sign-up gets an email with a QR code and a ticket page of their own, carrying any notes you wrote: directions, parking, what to bring. A reminder follows before the event, a day ahead unless you pick another time. There is no mail merge to run.",
+                "description": "Each sign-up gets an email with a QR code and a ticket page of their own, carrying any notes you wrote: directions, parking, what to bring. A reminder follows before the event once reminders are on (the default on paid plans, one switch on Free), a day ahead unless you pick another time. There is no mail merge to run.",
                 "icon": "mail",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -1195,7 +1195,7 @@
             },
             {
                 "title": "Confirmation and reminder, sent",
-                "description": "A guest who registers gets a confirmation carrying a QR code. Everyone holding a ticket or a registration also gets a reminder email before the event, a day ahead unless you choose 3 hours, 2 days or 3 days, or switch it off. No merge tags involved.",
+                "description": "A guest who registers gets a confirmation carrying a QR code. Everyone holding a ticket or a registration also gets a reminder email before the event once reminders are on (the default on paid plans, one switch on Free), a day ahead unless you choose 3 hours, 2 days or 3 days. No merge tags involved.",
                 "icon": "mail",
                 "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
                 "border": "border-amber-200 dark:border-amber-500/20",
@@ -1966,7 +1966,7 @@
             },
             {
                 "title": "RSVPs with a headcount",
-                "description": "Free registration puts a Register button on the event page, with a limit per date and a waitlist when it fills. Each person gets a confirmation with a QR code and a reminder before the event. That is all on the free plan. A ticket with a price needs Pro and is paid into your own payment account, with no platform fee.",
+                "description": "Free registration puts a Register button on the event page, with a limit per date and a waitlist when it fills. Each person gets a confirmation with a QR code and, once you switch reminders on, a reminder before the event. That is all on the free plan. A ticket with a price needs Pro and is paid into your own payment account, with no platform fee.",
                 "icon": "ticket",
                 "gradient": "from-blue-50 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",

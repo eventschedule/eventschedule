@@ -10,10 +10,13 @@ use Illuminate\Database\QueryException;
  * When a schedule's ticket holders are reminded (Schedule settings > Tickets > Reminders). One row
  * per schedule whose owner has saved the row; no row reads as the defaults (Role::ticketReminderSetting()).
  * See the migration (2026_11_11_000000) for why this is not on `roles`.
+ *
+ * `enabled` NULL means the owner has not chosen, and the schedule follows
+ * Role::optionalMailOnByDefault(): never read the column as the answer, ask Role::ticketRemindersOn().
  */
 class TicketReminderSetting extends Model
 {
-    public const DEFAULTS = ['enabled' => true, 'hours_before' => 24];
+    public const DEFAULTS = ['enabled' => null, 'hours_before' => 24];
 
     /** The choices the schedule form offers, in hours. Anything else posted is refused. */
     public const HOURS_OPTIONS = [3, 24, 48, 72];

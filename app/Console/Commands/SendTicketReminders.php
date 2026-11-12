@@ -115,7 +115,7 @@ class SendTicketReminders extends Command
             return self::SUCCESS;
         }
 
-        $events = Event::with(['creatorRole.ticketReminderSetting', 'roles.ticketReminderSetting'])
+        $events = Event::with(['creatorRole.ticketReminderSetting', 'creatorRole.subscriptions', 'roles.ticketReminderSetting', 'roles.subscriptions'])
             ->whereIn('id', $occurrences->pluck('event_id')->unique()->all())
             ->get()
             ->keyBy('id');
@@ -186,11 +186,11 @@ class SendTicketReminders extends Command
             return null;
         }
 
-        $setting = $owner->ticketReminderSetting;
-
-        if (! $setting->enabled) {
+        if (! $owner->ticketRemindersOn()) {
             return null;
         }
+
+        $setting = $owner->ticketReminderSetting;
 
         // A sale keeps the date it was bought for; the owner may since have skipped that date,
         // ended the series, or turned the series into a one-off on another day. Asked of every

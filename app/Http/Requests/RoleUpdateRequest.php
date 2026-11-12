@@ -274,6 +274,7 @@ class RoleUpdateRequest extends FormRequest
             'show_venues_map' => ['sometimes', 'boolean'],
             'show_next_event' => ['sometimes', 'boolean'],
             'ticket_reminders_enabled' => ['sometimes', 'boolean'],
+            'ticket_reminders_shown' => ['sometimes', 'boolean'],
             'ticket_reminders_hours' => ['sometimes', 'integer', 'in:'.implode(',', \App\Models\TicketReminderSetting::HOURS_OPTIONS)],
             'venues_map_open' => ['sometimes', 'boolean'],
             'show_event_interest' => ['sometimes', 'boolean'],

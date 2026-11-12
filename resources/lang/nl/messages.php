@@ -8087,6 +8087,7 @@ return [
     'ticket_reminders' => 'Herinneringen',
     'ticket_reminders_toggle' => 'Ticketbezitters vóór elk evenement een e-mail sturen',
     'ticket_reminders_help' => 'Eén e-mail aan iedereen met een ticket of inschrijving: de datum, de locatie, hun ticket en jouw ticketnotities. Wie pas een ticket krijgt nadat de herinnering is verstuurd, ontvangt hem niet.',
+    'ticket_reminders_default_off' => 'Uit tot je het aanzet: op het gratis abonnement zou deze e-mail via onze mailserver worden verstuurd. Op een betaald abonnement staat het standaard aan, net als zodra de agenda eigen e-mailinstellingen heeft.',
     'ticket_reminders_send' => 'Versturen',
     'ticket_reminders_3_hours' => '3 uur van tevoren',
     'ticket_reminders_1_day' => '1 dag van tevoren',

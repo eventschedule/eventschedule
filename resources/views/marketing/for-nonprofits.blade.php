@@ -617,7 +617,7 @@
             ['6 weeks', 'Put the sponsors on the page', 'Logos in Gold, Silver and Bronze tiers on the schedule page, and the gala can show sponsors of its own on its event page (Pro).'],
             ['3 weeks', 'Collect what the caterer needs', 'A question on the ticket type asks each order for a meal choice or a dietary need, free on every plan. With Individual tickets on (Pro), every guest at a table gives their own name and gets their own QR code.'],
             ['10 days', 'Give the caterer a number', 'The Sales list shows every order. Send one last-call newsletter to your followers and subscribers (or a manual segment of last year\'s guests), remembering that each recipient counts against the month\'s allowance.'],
-            ['The day before', 'Let the reminders go', 'A reminder email reaches every ticket holder before the event, on by default, from 3 hours to 3 days ahead as you set it. Charge the phones that will scan at the door.'],
+            ['The day before', 'Let the reminders go', 'A reminder email reaches every ticket holder before the event, on by default on Pro and Enterprise and one switch on the free plan, from 3 hours to 3 days ahead as you set it. Charge the phones that will scan at the door.'],
             ['The morning after', 'Thank people, then count', 'Once feedback is switched on, requests go out on their own, 1 to 48 hours after the end (Pro, sent from your own email settings on eventschedule.com). Then write the board report.'],
         ];
         $boardReport = [
@@ -729,7 +729,7 @@
             ['One shift, one headcount', 'Free registration with a Registration Limit. The limit is per date, so a Saturday shift set as one recurring event keeps a separate count for every Saturday, and a full date offers a waiting list on every plan.'],
             ['Several jobs on one shift', 'Choose Sell tickets and add a ticket type priced at zero for each job: Sorting with 8 places, Driver with 3, First aid with 1. Each has its own quantity and description, and up to 10 questions of its own, such as a T-shirt size or whether the driver has a licence. Zero-priced tickets are free on every plan.'],
             ['Directions in the confirmation', 'Registration notes, or Ticket notes for zero-priced tickets, go into the confirmation email: where to park, which door, what to wear, who to ask for.'],
-            ['A reminder before the shift', 'Reminder emails reach registrations and free tickets as well as paid ones. They are on by default, and you choose 3 hours or 1, 2 or 3 days ahead under Tickets in the schedule\'s settings.'],
+            ['A reminder before the shift', 'Reminder emails reach registrations and free tickets as well as paid ones. They are on by default on Pro and Enterprise, on the free plan you switch them on, and you choose 3 hours or 1, 2 or 3 days ahead under Tickets in the schedule\'s settings.'],
             ['Cancelling frees the place', 'A volunteer who cannot come cancels from the ticket page linked in their email, and the place opens for somebody else. Nobody has to ring the office.'],
             ['Knowing who turned up', 'Only a ticket records a check-in. When attendance matters, for a funder or an insurer, use zero-priced ticket types rather than free registration and scan them as people arrive.'],
         ];

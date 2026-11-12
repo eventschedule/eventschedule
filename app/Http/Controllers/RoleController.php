@@ -6808,10 +6808,19 @@ class RoleController extends Controller
         }
 
         // When ticket holders are reminded (ticket_reminder_settings), beside the schedule for the
-        // same reason. Only fields the save carried: absent is not off.
+        // same reason. Only fields the save carried: absent is not off. A switch left as the page
+        // showed it, on a schedule whose owner has never chosen, is not stored: the schedule keeps
+        // following Role::optionalMailOnByDefault(), which moves with its plan. Compared with what
+        // the page SHOWED (ticket_reminders_shown), not with the default now, because this same save
+        // may have added the schedule's own email settings and moved the default under it.
         $reminders = [];
         if ($request->has('ticket_reminders_enabled')) {
-            $reminders['enabled'] = $request->boolean('ticket_reminders_enabled');
+            $on = $request->boolean('ticket_reminders_enabled');
+            $untouched = $request->has('ticket_reminders_shown') && $on === $request->boolean('ticket_reminders_shown');
+
+            if (! $untouched || ! is_null($role->ticketReminderSetting->enabled)) {
+                $reminders['enabled'] = $on;
+            }
         }
         if ($request->filled('ticket_reminders_hours')) {
             $reminders['hours_before'] = (int) $request->input('ticket_reminders_hours');

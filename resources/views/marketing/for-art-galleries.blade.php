@@ -736,7 +736,7 @@
             ],
             [
                 'q' => 'How far ahead should a gallery announce an exhibition?',
-                'a' => 'Publish the dates as soon as they are fixed, often two months before the opening, because guides, calendar feeds and search engines can only list what is already out. Send print and monthly listings the event page about six weeks ahead, since their deadlines come early. The invitation to the private view usually goes about four weeks before, with a shorter note in the week of the opening, and Event Schedule emails everyone registered a reminder the day before unless you change it.',
+                'a' => 'Publish the dates as soon as they are fixed, often two months before the opening, because guides, calendar feeds and search engines can only list what is already out. Send print and monthly listings the event page about six weeks ahead, since their deadlines come early. The invitation to the private view usually goes about four weeks before, with a shorter note in the week of the opening, and Event Schedule emails everyone registered a reminder the day before unless you change it (on by default on Pro and Enterprise; on the free plan you switch it on).',
             ],
             [
                 'q' => 'How many RSVPs should I accept for a gallery opening?',
@@ -1190,7 +1190,7 @@
                             ['Six weeks out', 'Print guides and monthly art listings close early. Send them the event page now, not the week of the opening.'],
                             ['Four weeks out', 'The invitation: a newsletter with the private view in its Events block, so every reader is one tap from its Register button, and the registration limit doing the counting. Every recipient counts against the monthly newsletter allowance, so check it against the size of your list first.'],
                             ['One week out', 'Read the count. Short of the limit, send a brief second note. Full, and a waitlist opens on the event page by itself, free on every plan.'],
-                            ['The day before', 'Everyone registered gets a reminder email with the time and the address, a day ahead unless you change it, with a Can\'t make it? link that frees their place for someone else.'],
+                            ['The day before', 'With reminders on (the default on Pro and Enterprise, one switch on the free plan), everyone registered gets a reminder email with the time and the address, a day ahead unless you change it, with a Can\'t make it? link that frees their place for someone else.'],
                             ['On the night', 'Keep the list on a phone by the door: the Sales page has every name, so the person greeting guests can find one in a second.'],
                         ] as [$t, $d])
                             <li data-reveal>

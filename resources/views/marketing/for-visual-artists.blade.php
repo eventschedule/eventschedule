@@ -2020,7 +2020,7 @@
                     @foreach ([
                         ['exhibitions', 'Free', 'Five weeks out: the listing goes up', 'Enter the run and the opening as soon as the gallery has announced the show, or as Drafts until it has. The people on your email list hear about events you created yourself in one automatic digest, at most one every 72 hours. If the gallery made the event and you accepted it, the digest leaves it out, so that show is the one to write a newsletter about.'],
                         ['exhibitions', 'Free', 'Three weeks out: the invitation', 'Keep two lists as manual segments in your newsletters: collectors, and press. Import each from the spreadsheet you already have, people who agreed to hear from you only. Send the invitation with an Events block set to Events I choose and the opening picked, so the email\'s button opens the event page with Register on it. Offer press a separate hour before the doors open, in a line of its own.'],
-                        ['exhibitions', 'Free', 'The week of: the reminder', 'Everyone who registered gets a reminder email before the night without you doing anything: it is on by default, and you choose 3 hours or 1, 2 or 3 days before. Use your own week for the people a reminder email will not move, the two or three collectors you would phone.'],
+                        ['exhibitions', 'Free', 'The week of: the reminder', 'Everyone who registered gets a reminder email before the night once reminders are on: they are on every plan, on by default on Pro and Enterprise and one switch on the free plan, and you choose 3 hours or 1, 2 or 3 days before. Use your own week for the people a reminder email will not move, the two or three collectors you would phone.'],
                         ['studio', 'Free', 'The morning after: the thank-you', 'A Ticket Buyers segment narrowed to the opening reaches everyone who registered for it, free registration included. Thank them, say how long the show is up, and link the event, where visitors\' photographs of the night wait for your approval before anyone else sees them.'],
                     ] as $iv => [$ivStrand, $ivPlan, $ivTitle, $ivBody])
                         @php [$sName, $sPig] = $strands[$ivStrand]; @endphp
@@ -2043,7 +2043,7 @@
                         <span class="va-tag">The arithmetic</span>
                         <h3>An invitation counts every inbox it reaches</h3>
                         <p>
-                            The newsletter allowance is counted in emails, one per recipient, not per send. Sixty collectors and twenty-five press is 85 emails each time you write. Write to both lists three times in a month (an invitation, a last call and a follow-up) and it is 255, plus a copy to each team member. The reminder to people who registered is automatic and is not counted.
+                            The newsletter allowance is counted in emails, one per recipient, not per send. Sixty collectors and twenty-five press is 85 emails each time you write. Write to both lists three times in a month (an invitation, a last call and a follow-up) and it is 255, plus a copy to each team member. The reminder to people who registered is not a newsletter and is not counted.
                         </p>
                         <ul>
                             @foreach ([

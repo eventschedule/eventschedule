@@ -1369,7 +1369,7 @@
             ],
             [
                 'q' => 'How do I cut no-shows at a free workshop?',
-                'a' => 'Three things. Keep the reminder email on (it is on by default on every plan) and send it 2 days before rather than 1, because a free spot\'s reminder carries a Can\'t make it? link and a seat given back early can still be taken. Let a full date collect a waitlist, free on registration, so a returned seat goes to the first person waiting, who gets 24 hours before the next is told. And count the empty seats over a few sessions before raising the limit to cover them, which only makes sense where one more person can fit.',
+                'a' => 'Three things. Keep the reminder email on (it is on every plan, and on by default on Pro and Enterprise) and send it 2 days before rather than 1, because a free spot\'s reminder carries a Can\'t make it? link and a seat given back early can still be taken. Let a full date collect a waitlist, free on registration, so a returned seat goes to the first person waiting, who gets 24 hours before the next is told. And count the empty seats over a few sessions before raising the limit to cover them, which only makes sense where one more person can fit.',
             ],
             [
                 'q' => 'Can one person register several people for a workshop?',
@@ -2149,7 +2149,7 @@
                                 <h3 class="wi-h3">The reminder, two days out</h3>
                                 <span class="wi-tier">Free</span>
                             </div>
-                            <p class="wi-p">Every student who booked a session gets one reminder email (not a course pass holder), on for every schedule and every plan: the class, the time, the place, their QR code and your notes. It goes a day before unless you pick 3 hours, 2 days or 3 days. With a waitlist, pick 2 days: a free spot's reminder carries a Can't make it? link, and a seat given back two days early leaves time for somebody else to take it.</p>
+                            <p class="wi-p">Every student who booked a session gets one reminder email (not a course pass holder), on every plan and on by default on Pro and Enterprise (on the free plan you switch it on): the class, the time, the place, their QR code and your notes. It goes a day before unless you pick 3 hours, 2 days or 3 days. With a waitlist, pick 2 days: a free spot's reminder carries a Can't make it? link, and a seat given back two days early leaves time for somebody else to take it.</p>
                         </div>
                     </div>
                     </div>

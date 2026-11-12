@@ -127,7 +127,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (48 hours before)",
                     false
                 ],
@@ -630,7 +630,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (email, SMS and push)",
                     false
                 ],
@@ -1117,7 +1117,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Scheduled broadcasts you set up (SMS paid)",
                     true
                 ],
@@ -1966,7 +1966,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (email and push)",
                     false
                 ],
@@ -2399,7 +2399,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "On-sale alerts, no documented pre-show reminder",
                     true
                 ],
@@ -2640,7 +2640,7 @@
                 "Ticket money settles into your own Stripe or PayPal account on Pro",
                 "No service fee from us on top of your price, so the figure you set is the one fans see",
                 "Free registration for guest-list nights and free-entry shows, with no app needed to get in",
-                "Promo codes and a waitlist for sold-out shows on Pro, and a reminder email to every ticket holder before the night, free",
+                "Promo codes and a waitlist for sold-out shows on Pro, and a reminder email to every ticket holder before the night, on every plan",
                 "A weekly club night set up once, on chosen days, as one recurring event on every plan"
             ]
         },
@@ -2838,7 +2838,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "No (updates sent by hand)",
                     true
                 ],
@@ -3271,7 +3271,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (you build and schedule them)",
                     false
                 ],
@@ -3710,7 +3710,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (Launch plan and up)",
                     true
                 ]
@@ -4131,7 +4131,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes",
                     false
                 ],
@@ -4570,7 +4570,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (you schedule up to 5)",
                     false
                 ],
@@ -5015,7 +5015,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "No (messages you schedule)",
                     true
                 ],
@@ -5215,7 +5215,7 @@
             },
             {
                 "title": "Automatic Reminders",
-                "description": "Every ticket holder gets a reminder email before the event, on every plan, with no message to write. Tito sends reminders only when you schedule them.",
+                "description": "Every ticket holder gets a reminder email before the event, with no message to write: on every plan, and on by default on Pro and Enterprise. Tito sends reminders only when you schedule them.",
                 "icon": "mail",
                 "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",
@@ -5442,7 +5442,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (every plan)",
                     false
                 ]
@@ -5863,7 +5863,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (email rules you set up)",
                     false
                 ],
@@ -6308,7 +6308,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "No (emails you schedule)",
                     true
                 ],
@@ -6753,7 +6753,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (2 days before; 7 days on Pro and up)",
                     false
                 ],
@@ -7150,7 +7150,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (with the ticketing add-on)",
                     false
                 ],
@@ -7493,7 +7493,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Elite tier only ($599/yr)",
                     true
                 ],
@@ -7788,7 +7788,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (to RSVPs)",
                     false
                 ]
@@ -8059,7 +8059,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "No (abandoned-cart reminders only)",
                     true
                 ],
@@ -8330,7 +8330,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (SMS and push)",
                     false
                 ],
@@ -8504,7 +8504,7 @@
             {
                 "tag": "No text blasts",
                 "title": "Guests hear from you by email",
-                "text": "Partiful texts guests and sends them reminders, and Event Schedule sends guests no text messages. A registration arrives as an email with its QR ticket, and every registered guest and ticket holder gets an email reminder before the event."
+                "text": "Partiful texts guests and sends them reminders, and Event Schedule sends guests no text messages. A registration arrives as an email with its QR ticket, and every registered guest and ticket holder gets an email reminder before the event once reminders are on (the default on paid plans)."
             },
             {
                 "tag": "Private events are Enterprise",
@@ -8595,7 +8595,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Facebook notifications, not email",
                     false
                 ]
@@ -8883,7 +8883,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (7 days before)",
                     false
                 ],
@@ -9178,7 +9178,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Opt-in on RSVP forms (Premium)",
                     true
                 ]
@@ -9479,7 +9479,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "No (messages you schedule)",
                     true
                 ],
@@ -9775,7 +9775,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Opt-in by each participant",
                     true
                 ]
@@ -10056,7 +10056,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (24 hours before)",
                     false
                 ],
@@ -10654,7 +10654,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (Essential plan and up)",
                     true
                 ],
@@ -11019,7 +11019,7 @@
                 ],
                 [
                     "Reminder emails before the event",
-                    "Yes (Free, sent for you)",
+                    "Yes (every plan; on by default on paid plans)",
                     "Yes (24 hours before)",
                     false
                 ],

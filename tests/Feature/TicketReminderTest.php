@@ -394,7 +394,8 @@ class TicketReminderTest extends TestCase
         $owner = $this->role->users()->first();
         $this->actingAs($owner);
 
-        $this->assertTrue($this->role->ticketReminderSetting->enabled, 'on with no row');
+        $this->assertNull($this->role->ticketReminderSetting->enabled, 'not chosen with no row');
+        $this->assertTrue($this->role->ticketRemindersOn(), 'a paying schedule is on with no row');
         $this->assertSame(24, $this->role->ticketReminderSetting->hours_before);
 
         $base = ['name' => $this->role->name, 'email' => $this->role->email, 'new_subdomain' => $this->role->subdomain, 'timezone' => 'UTC', 'language_code' => 'en'];
@@ -415,6 +416,94 @@ class TicketReminderTest extends TestCase
         $this->put(route('role.update', ['subdomain' => $this->role->subdomain]), $base + ['ticket_reminders_hours' => '5'])
             ->assertSessionHasErrors('ticket_reminders_hours');
         $this->assertSame(48, $this->role->fresh()->ticketReminderSetting->hours_before);
+    }
+
+    /** Make $this->role a free schedule on the hosted install, with no email settings of its own. */
+    private function makeHostedFree(): void
+    {
+        config(['app.hosted' => true]);
+        $this->role->plan_type = 'free';
+        $this->role->plan_expires = now()->subYear()->format('Y-m-d');
+        $this->role->trial_ends_at = null;
+        $this->role->save();
+        $this->role = $this->role->fresh();
+        $this->assertFalse($this->role->isPro(), 'the fixture is free');
+    }
+
+    public function test_optional_mail_is_off_by_default_only_where_our_server_would_send_it_for_free(): void
+    {
+        // Selfhost: the operator's own mail server.
+        config(['app.hosted' => false]);
+        $this->assertTrue($this->role->fresh()->optionalMailOnByDefault());
+
+        // Hosted and paying (the fixture's plan): on.
+        config(['app.hosted' => true]);
+        $this->assertTrue($this->role->fresh()->optionalMailOnByDefault());
+
+        // Hosted and free: through the platform's mail server, so off.
+        $this->makeHostedFree();
+        $this->assertFalse($this->role->optionalMailOnByDefault());
+        $this->assertFalse($this->role->ticketRemindersOn());
+
+        // A trial is not paying, though it unlocks Pro.
+        $this->role->trial_ends_at = now()->addDays(10);
+        $this->role->save();
+        $this->assertTrue($this->role->fresh()->isPro());
+        $this->assertFalse($this->role->fresh()->optionalMailOnByDefault());
+
+        // Free, but sending through its own mail server: on.
+        $this->role->trial_ends_at = null;
+        $this->role->email_settings = [
+            'host' => 'smtp.test.dev', 'port' => 587, 'encryption' => 'tls',
+            'username' => 'mailer', 'password' => 'secret',
+            'from_address' => 'events@test.dev', 'from_name' => 'Test',
+        ];
+        $this->role->save();
+        $this->assertTrue($this->role->fresh()->optionalMailOnByDefault());
+    }
+
+    public function test_a_free_hosted_schedule_reminds_nobody_until_its_owner_turns_reminders_on(): void
+    {
+        $this->makeHostedFree();
+        $sale = $this->sale($this->eventStartingIn(20));
+
+        $this->sendReminders();
+        $this->assertSame([], $this->remindedEmails());
+        $this->assertNull($sale->fresh()->reminder_sent_at);
+
+        // The owner's own choice wins over the default.
+        TicketReminderSetting::store($this->role, ['enabled' => true]);
+        $this->sendReminders();
+        $this->assertSame([$sale->email], $this->remindedEmails());
+    }
+
+    public function test_a_save_that_leaves_the_switch_alone_keeps_following_the_default(): void
+    {
+        $this->makeHostedFree();
+        $this->actingAs($this->role->users()->first());
+        $base = ['name' => $this->role->name, 'email' => $this->role->email, 'new_subdomain' => $this->role->subdomain, 'timezone' => 'UTC', 'language_code' => 'en'];
+
+        // The form showed it off and posted it off: not a choice, so nothing is stored.
+        $this->put(route('role.update', ['subdomain' => $this->role->subdomain]), $base + [
+            'ticket_reminders_shown' => '0',
+            'ticket_reminders_enabled' => '0',
+            'ticket_reminders_hours' => '24',
+        ])->assertSessionHasNoErrors();
+        $this->assertNull($this->role->fresh()->ticketReminderSetting->enabled);
+
+        // So when the schedule starts paying, its reminders come on.
+        $this->role->plan_type = 'pro';
+        $this->role->plan_expires = now()->addYear()->format('Y-m-d');
+        $this->role->save();
+        $this->assertTrue($this->role->fresh()->ticketRemindersOn());
+
+        // Switched off on purpose while paying: stored, and kept whatever the plan does next.
+        $this->put(route('role.update', ['subdomain' => $this->role->subdomain]), $base + [
+            'ticket_reminders_shown' => '1',
+            'ticket_reminders_enabled' => '0',
+        ])->assertSessionHasNoErrors();
+        $this->assertFalse($this->role->fresh()->ticketReminderSetting->enabled);
+        $this->assertFalse($this->role->fresh()->ticketRemindersOn());
     }
 
     public function test_the_preview_is_for_the_schedules_editors(): void

@@ -279,7 +279,7 @@
             ],
             [
                 'q' => 'How do I reduce no-shows at a free meetup?',
-                'a' => 'Make cancelling easier than not coming, and remind people. On Event Schedule a member cancels from the ticket page linked in their confirmation, which hands the place to the waitlist; a reminder email goes out before the night, on by default, between 3 hours and 3 days ahead as you choose; and the confirmation carries a calendar invite. Add a line to the registration notes asking people to cancel if they cannot come, so someone waiting gets the seat.',
+                'a' => 'Make cancelling easier than not coming, and remind people. On Event Schedule a member cancels from the ticket page linked in their confirmation, which hands the place to the waitlist; a reminder email goes out before the night, on by default on Pro and Enterprise and one switch on the free plan, between 3 hours and 3 days ahead as you choose; and the confirmation carries a calendar invite. Add a line to the registration notes asking people to cancel if they cannot come, so someone waiting gets the seat.',
             ],
             [
                 'q' => 'How far ahead should we post meetup dates?',
@@ -551,7 +551,7 @@
             ['Night 4', 40, 30],
         ];
         $turnoutLevers = [
-            ['A reminder the day before', 'Reminder emails reach free registrations as well as tickets. They are on by default, and the schedule\'s settings choose 3 hours or 1, 2 or 3 days ahead. A day-ahead reminder that would land overnight is sent at 8pm the evening before instead.'],
+            ['A reminder the day before', 'Reminder emails reach free registrations as well as tickets. They are on every plan, on by default on Pro and Enterprise (on the free plan you switch them on), and the schedule\'s settings choose 3 hours or 1, 2 or 3 days ahead. A day-ahead reminder that would land overnight is sent at 8pm the evening before instead.'],
             ['A calendar entry from the start', 'The confirmation email carries a calendar invite, so the night sits in the member\'s own calendar from the moment they say yes.'],
             ['Cancelling in one tap', 'A member can cancel from the ticket page linked in their confirmation, and the place goes straight back on offer. Most no-shows are people who would have cancelled if it took less effort.'],
             ['Asking for it plainly', 'Registration notes go into every confirmation email. One line, "Can\'t make it? Cancel so someone on the waitlist gets your seat", does more than any reminder.'],

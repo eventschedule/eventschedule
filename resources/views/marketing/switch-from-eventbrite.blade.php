@@ -421,7 +421,7 @@
                             Say a show has 200 general admission tickets and 120 have sold on Eventbrite. The import copies each ticket type's total quantity, so the event arrives here with 200. Import the 120 buyers from your order export, marked paid, and they count against that 200, which leaves 80 on sale on your own page. The imported rows are recorded as a manual import, so nothing is charged on the way in, and their refunds still happen on Eventbrite.
                         </p>
                         <p class="es-move-muted mt-3 text-sm leading-relaxed">
-                            Turn on Send Email in the import and each paid row gets the same confirmation a checkout sends, with a QR code the door scanner reads. The automatic ticket reminder before the event is not sent to imported attendees, so send those buyers a short note yourself in the week of the show.
+                            Turn on Send Email in the import and each paid row gets the same confirmation a checkout sends, with a QR code the door scanner reads. The ticket reminder before the event is not sent to imported attendees, so send those buyers a short note yourself in the week of the show.
                         </p>
                     </div>
                     <div class="es-move-panel p-6" data-reveal="panel">

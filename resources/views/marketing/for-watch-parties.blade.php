@@ -1499,7 +1499,7 @@
             ],
             [
                 'q' => 'How do I host a sports watch party at a bar?',
-                'a' => 'Start with the rights: showing a live match to the public usually needs a commercial licence from the broadcaster, so check that first. Then work out the room: how many tables, how many standing, and how many places to keep for regulars who walk in. Publish the match as an event with a running order (doors, kick-off, half-time, full time, last orders), take bookings as free tickets or free registration with a limit, and put the house rules in the ticket notes. Share the link a week ahead; everyone booked gets a reminder with their QR code the day before by itself, and you scan them in at the door. All of that is free on Event Schedule; a price on a ticket needs Pro.',
+                'a' => 'Start with the rights: showing a live match to the public usually needs a commercial licence from the broadcaster, so check that first. Then work out the room: how many tables, how many standing, and how many places to keep for regulars who walk in. Publish the match as an event with a running order (doors, kick-off, half-time, full time, last orders), take bookings as free tickets or free registration with a limit, and put the house rules in the ticket notes. Share the link a week ahead; everyone booked gets a reminder with their QR code the day before once you switch reminders on under Tickets, Reminders, and you scan them in at the door. All of that is free on Event Schedule; a price on a ticket needs Pro.',
             ],
             [
                 'q' => 'Do I need a licence to show a game or an awards show in my bar?',

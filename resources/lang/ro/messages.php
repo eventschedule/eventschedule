@@ -8105,6 +8105,7 @@ return [
     'ticket_reminders' => 'Mementouri',
     'ticket_reminders_toggle' => 'Trimite un e-mail deținătorilor de bilete înainte de fiecare eveniment',
     'ticket_reminders_help' => 'Un e-mail pentru toți cei cu bilet sau înscriere: data, locul, biletul lor și notele tale despre bilet. Cine primește un bilet după trimiterea mementoului nu îl mai primește.',
+    'ticket_reminders_default_off' => 'Dezactivat până îl activezi: în planul gratuit, acest e-mail ar fi trimis de pe serverul nostru de e-mail. Este activat implicit într-un plan plătit sau când programul are propriile setări de e-mail.',
     'ticket_reminders_send' => 'Trimite',
     'ticket_reminders_3_hours' => 'Cu 3 ore înainte',
     'ticket_reminders_1_day' => 'Cu o zi înainte',
