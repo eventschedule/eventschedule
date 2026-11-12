@@ -8257,4 +8257,5 @@ return [
     'realtime_so_far_tip_before' => 'varem :n',
     'realtime_so_far_today_so_far' => 'Täna seni',
     'realtime_so_far_summary_period' => ':what: seni :n selles perioodis.',
+    'realtime_so_far_hidden_too_few_month' => 'Seni on kuu prognoosimiseks liiga vähe.',
 ];

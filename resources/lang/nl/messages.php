@@ -8258,4 +8258,5 @@ return [
     'realtime_so_far_tip_before' => 'ervoor :n',
     'realtime_so_far_today_so_far' => 'Vandaag tot nu toe',
     'realtime_so_far_summary_period' => ':what: tot nu toe :n in deze periode.',
+    'realtime_so_far_hidden_too_few_month' => 'Tot nu toe te weinig voor een verwachting van de maand.',
 ];

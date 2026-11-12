@@ -8256,4 +8256,5 @@ return [
     'realtime_so_far_tip_before' => 'davor :n',
     'realtime_so_far_today_so_far' => 'Heute bisher',
     'realtime_so_far_summary_period' => ':what: bisher :n in diesem Zeitraum.',
+    'realtime_so_far_hidden_too_few_month' => 'Bisher zu wenige für eine Hochrechnung des Monats.',
 ];

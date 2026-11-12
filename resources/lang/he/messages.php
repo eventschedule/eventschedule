@@ -8255,4 +8255,5 @@ return [
     'realtime_so_far_tip_before' => 'לפני :n',
     'realtime_so_far_today_so_far' => 'היום עד עכשיו',
     'realtime_so_far_summary_period' => ':what: :n עד עכשיו בתקופה הזו.',
+    'realtime_so_far_hidden_too_few_month' => 'עדיין מעט מדי כדי לחזות את החודש.',
 ];

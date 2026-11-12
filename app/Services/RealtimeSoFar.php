@@ -77,9 +77,9 @@ class RealtimeSoFar
         // realtime_hourly keeps.
         $first = $this->period === 'today' ? $today->subDays(7 * self::USUAL_WEEKS)
             : $today->subDays(55)->min($today->startOfMonth()->subMonthNoOverflow());
-        $series = fn (array $days, ?CarbonImmutable $since, CarbonImmutable $cut, int $past) => $this->period === 'today'
+        $series = fn (array $days, ?CarbonImmutable $since, CarbonImmutable $cut, int $past, bool $stale = false) => $this->period === 'today'
             ? $this->series($days, $since, $cut, $past, $use24)
-            : $this->periodSeries($days, $since, $cut, $past, $use24);
+            : $this->periodSeries($days, $since, $cut, $past, $use24, $stale);
 
         $since = RealtimeRollup::since();
         $sinceAt = $since ? CarbonImmutable::parse($since, 'UTC')->setTimezone($this->zone) : null;
@@ -92,6 +92,9 @@ class RealtimeSoFar
         // Never before today's midnight: just after it, or with the rollup stopped, the card says
         // "0 at 12:00 AM", not a time from another day.
         $visitsCut = $through ? CarbonImmutable::parse($through, 'UTC')->setTimezone($this->zone)->min($this->now)->max($this->now->startOfDay()) : $this->now;
+        // Counted only to some time before today (the cron has stopped): yesterday is part of the
+        // longer periods and is short, so they are not compared, or they would read as a drop.
+        $stale = $through !== null && CarbonImmutable::parse($through, 'UTC')->lt($this->now->startOfDay());
 
         // A source's hours begin where its own clock's hours begin: realtime_hourly's are UTC
         // hours and audit_logs' the app's. In a zone half or three quarters of an hour off them, a
@@ -106,7 +109,7 @@ class RealtimeSoFar
             'cut' => $this->clock($this->now, $use24),
             'weekday' => $this->now->translatedFormat('l'),
             'metrics' => [
-                'visits' => $sinceAt ? $series($this->visitsByDay($first, $sinceAt), $sinceAt, $visitsCut, self::minutesPast($offset)) : null,
+                'visits' => $sinceAt ? $series($this->visitsByDay($first, $sinceAt), $sinceAt, $visitsCut, self::minutesPast($offset), $stale) : null,
                 'signups' => $series($this->signupsByDay($first), null, $this->now, self::minutesPast($offset - $appOffset)),
             ],
         ];
@@ -237,7 +240,7 @@ class RealtimeSoFar
      *
      * @param  array<string, list<int>>  $days  'Y-m-d' => 24 hourly counts
      */
-    private function periodSeries(array $days, ?CarbonImmutable $since, CarbonImmutable $cut, int $past, bool $use24): array
+    private function periodSeries(array $days, ?CarbonImmutable $since, CarbonImmutable $cut, int $past, bool $use24, bool $stale = false): array
     {
         $today = $this->now->startOfDay();
         $minutes = $cut->lt($today) ? 0 : max(0, $cut->hour * 60 + $cut->minute - $past);
@@ -299,7 +302,8 @@ class RealtimeSoFar
                 'label' => $this->period === '7d' ? $day->translatedFormat('D') : $day->translatedFormat('M j'),
                 'title' => $day->translatedFormat('D, M j'),
             ];
-            $now[] = $day->lte($today) ? $total($day) : null;
+            // A day before counting began is unknown, not a quiet day; today is shown as it stands.
+            $now[] = $day->lte($today) && ($whole($day) || $day->eq($today)) ? $total($day) : null;
             $before = $previousOf($day);
             $previous[] = $before && $whole($before) ? $total($before) : null;
         }
@@ -357,13 +361,20 @@ class RealtimeSoFar
         // Today projected to midnight, and the period with it; the month by its daily rate.
         $history = $counted >= 7;
         $day = DayPace::project($todayCount, $share, $history);
-        if ($this->period === 'month') {
+        if (! $whole($first)) {
+            // Counting began inside the period: its total so far is short, so is not projected.
+            $projection = ['shown' => false, 'hidden' => 'noHistory', 'value' => null, 'low' => null, 'high' => null];
+        } elseif ($this->period === 'month') {
             $projection = DayPace::projectMonth($soFar, ($today->day - 1) + $share, $today->daysInMonth, $history);
         } else {
             $before = $soFar - $todayCount;
             $projection = $day['shown']
                 ? ['shown' => true, 'hidden' => null, 'value' => $before + $day['value'], 'low' => $before + $day['low'], 'high' => $before + $day['high']]
                 : $day;
+        }
+
+        if ($stale) {
+            $compare = ['previous' => null, 'usual' => null];
         }
 
         return [

@@ -8261,4 +8261,5 @@ return [
     'realtime_so_far_tip_before' => 'avant :n',
     'realtime_so_far_today_so_far' => 'Aujourd’hui jusqu’ici',
     'realtime_so_far_summary_period' => ':what : :n jusqu’ici sur cette période.',
+    'realtime_so_far_hidden_too_few_month' => 'Trop peu pour l’instant pour projeter le mois.',
 ];

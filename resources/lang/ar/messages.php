@@ -8256,4 +8256,5 @@ return [
     'realtime_so_far_tip_before' => 'سابقًا :n',
     'realtime_so_far_today_so_far' => 'اليوم حتى الآن',
     'realtime_so_far_summary_period' => ':what: :n حتى الآن في هذه الفترة.',
+    'realtime_so_far_hidden_too_few_month' => 'العدد حتى الآن قليل جدًا لتوقع الشهر.',
 ];

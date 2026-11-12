@@ -99,6 +99,11 @@ class RealtimeSoFarTest extends TestCase
         $this->assertSame(0, $stopped['cut']['slot']);
         $this->assertStringContainsString('12:00 AM', $stopped['cut']['label']);
         $this->assertEquals(0.0, $stopped['previousByNow']);
+        // The longer periods hold yesterday, which is short: they are not compared.
+        $week = (new RealtimeSoFar(null, 'Asia/Jerusalem', '7d'))->build()['metrics']['visits'];
+        $this->assertNull($week['compare']['previous']);
+        $this->assertNull($week['compare']['usual']);
+        $this->assertNotNull((new RealtimeSoFar(null, 'Asia/Jerusalem', '7d'))->build()['metrics']['signups']['compare']['previous'], 'sign-ups do not lag');
     }
 
     /** Mutation: drop the minutes-past offset, so a half-hour zone compares half an hour more of yesterday. */
@@ -170,6 +175,47 @@ class RealtimeSoFarTest extends TestCase
         $this->assertEqualsWithDelta(30 * 240, $month['projection']['value'], 30 * 240 * 0.02);
     }
 
+    /** Mutation: start a window a day early or late. Each day has its own count, so only the right days add up. */
+    public function test_the_period_before_is_exactly_the_days_it_names(): void
+    {
+        // Each hour of a day holds the day of the month: November 5 has 5 an hour.
+        $this->visits(60, 0);
+        DB::table('realtime_hourly')->get(['id', 'hour'])->each(function ($row) {
+            DB::table('realtime_hourly')->where('id', $row->id)->update(['visits' => CarbonImmutable::parse($row->hour, 'UTC')->setTimezone('Asia/Jerusalem')->day]);
+        });
+
+        $visits = (new RealtimeSoFar(null, 'Asia/Jerusalem', '7d'))->build()['metrics']['visits'];
+
+        // November 6 to 11 whole, and today (the 12th) to 14:30, against October 30 to November 4
+        // whole and November 5 to 14:30.
+        $this->assertSame(24 * (6 + 7 + 8 + 9 + 10 + 11) + 15 * 12, $visits['soFar']);
+        $this->assertEquals(24 * (30 + 31 + 1 + 2 + 3 + 4) + 14.5 * 5, $visits['compare']['previous']['expected']);
+        $this->assertSame([24 * 30, 24 * 31, 24 * 1, 24 * 2, 24 * 3, 24 * 4, 24 * 5], $visits['previous']);
+    }
+
+    public function test_the_month_edges(): void
+    {
+        // March 30, 2027, 15:30 in Jerusalem: past February's 28 days, so all of February at its
+        // daily rate for 29 days and today's share.
+        $this->travelTo(CarbonImmutable::parse('2027-03-30 12:30:00', 'UTC'));
+        $this->visits(60, 10);
+        $march = (new RealtimeSoFar(null, 'Asia/Jerusalem', 'month'))->build()['metrics']['visits'];
+        $this->assertTrue($march['compare']['previous']['scaled']);
+        $this->assertSame(28 * 240, $march['previousTotal']);
+        $this->assertEqualsWithDelta(240 * (29 + 15.5 / 24), $march['compare']['previous']['expected'], 240 * 0.05);
+        $this->assertNull($march['previous'][29], 'February has no 30th');
+
+        // January 15 against December 1 to 15.
+        DB::table('realtime_hourly')->delete();
+        Cache::flush();
+        $this->travelTo(CarbonImmutable::parse('2027-01-15 12:30:00', 'UTC'));
+        $this->visits(60, 10);
+        $january = (new RealtimeSoFar(null, 'Asia/Jerusalem', 'month'))->build()['metrics']['visits'];
+        $this->assertFalse($january['compare']['previous']['scaled']);
+        $this->assertEquals(14 * 240 + 145, $january['compare']['previous']['expected']);
+        $this->assertSame(31 * 240, $january['previousTotal']);
+    }
+
     /** Mutation: compare a period with one counting had not reached. */
     public function test_a_period_before_counting_began_is_not_compared(): void
     {
@@ -180,6 +226,9 @@ class RealtimeSoFarTest extends TestCase
         $this->assertNull($four['compare']['previous']);
         $this->assertNull($four['previousTotal']);
         $this->assertNull($four['previous'][0], 'a day before counting began is not a zero');
+        $this->assertNull($four['now'][0], 'on this side either');
+        $this->assertSame(10 * 240 + 150, $four['soFar'], 'only the days counted');
+        $this->assertSame('noHistory', $four['projection']['hidden'], 'a period counted from its middle is not projected');
     }
 
     public function test_the_address_takes_a_period_and_reads_an_unknown_one_as_today(): void

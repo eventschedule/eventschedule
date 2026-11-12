@@ -8276,4 +8276,5 @@ return [
     'realtime_so_far_tip_before' => 'înainte :n',
     'realtime_so_far_today_so_far' => 'Azi până acum',
     'realtime_so_far_summary_period' => ':what: :n până acum în această perioadă.',
+    'realtime_so_far_hidden_too_few_month' => 'Deocamdată prea puține pentru a proiecta luna.',
 ];

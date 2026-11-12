@@ -8258,4 +8258,5 @@ return [
     'realtime_so_far_tip_before' => 'ранее :n',
     'realtime_so_far_today_so_far' => 'Сегодня на данный момент',
     'realtime_so_far_summary_period' => ':what: :n за этот период на данный момент.',
+    'realtime_so_far_hidden_too_few_month' => 'Пока слишком мало, чтобы спрогнозировать месяц.',
 ];

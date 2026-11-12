@@ -8328,4 +8328,5 @@ return [
     'realtime_so_far_tip_before' => 'before :n',
     'realtime_so_far_today_so_far' => 'Today so far',
     'realtime_so_far_summary_period' => ':what: :n so far this period.',
+    'realtime_so_far_hidden_too_few_month' => 'Too few so far to project the month.',
 ];

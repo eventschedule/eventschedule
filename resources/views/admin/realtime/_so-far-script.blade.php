@@ -501,7 +501,7 @@
                         return words.replace(':n', this.fmt(soFarRound(p.value))).replace(':low', this.fmt(soFarRound(p.low))).replace(':high', this.fmt(soFarRound(p.high)));
                     }
                     if (p.hidden === 'early') return this.chart.period === 'month' ? t.hidden_month_early : '';
-                    return p.hidden === 'tooFew' ? t.hidden_too_few : t.hidden_no_history;
+                    return p.hidden === 'tooFew' ? (this.chart.period === 'month' ? t.hidden_too_few_month : t.hidden_too_few) : t.hidden_no_history;
                 },
                 summary: function () {
                     return this.m ? this.t.summary_period.replace(':what', this.label).replace(':n', this.fmt(this.m.soFar)) : this.label;
@@ -541,11 +541,9 @@
                     var top = this.yTicks[this.yTicks.length - 1] || 1;
                     return this.M.top + (1 - v / top) * (this.H - this.M.top - this.M.bottom);
                 },
-                // Every day for a week; a week apart, and the last day, for a longer period.
+                // Every day for a week; a week apart for a longer period.
                 showLabel: function (i) {
-                    if (this.count <= 7) return true;
-                    var step = this.band < 14 ? 7 : (this.band < 30 ? 7 : 2);
-                    return i % step === 0;
+                    return this.count <= 7 || i % 7 === 0;
                 },
                 point: function (event) {
                     var box = event.currentTarget.getBoundingClientRect();

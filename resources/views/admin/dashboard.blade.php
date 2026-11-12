@@ -173,7 +173,7 @@
                     'periods', 'this_period', 'period_had', 'last_month_had', 'so_far', 'projected_period',
                     'projected_month', 'hidden_month_early', 'col_day', 'tip_before', 'today_so_far',
                     'summary_period', 'previous_7d', 'previous_28d', 'previous_month', 'previous_month_scaled',
-                    'usual_week', 'before_7d', 'before_28d', 'before_month',
+                    'usual_week', 'before_7d', 'before_28d', 'before_month', 'hidden_too_few_month',
                 ])->mapWithKeys(fn ($key) => [$key => __('messages.realtime_so_far_'.$key)])->all() + [
                     'today' => __('messages.today'),
                     'collecting' => __('messages.realtime_trend_collecting'),

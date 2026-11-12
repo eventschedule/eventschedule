@@ -8255,4 +8255,5 @@ return [
     'realtime_so_far_tip_before' => 'prima :n',
     'realtime_so_far_today_so_far' => 'Oggi finora',
     'realtime_so_far_summary_period' => ':what: :n finora in questo periodo.',
+    'realtime_so_far_hidden_too_few_month' => 'Finora troppo pochi per una proiezione del mese.',
 ];

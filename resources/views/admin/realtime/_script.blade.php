@@ -968,7 +968,9 @@
                     this.fetchSoFar(true);
                 },
                 fetchSoFar: function (loud) {
-                    var self = this, period = this.soFarPeriod;
+                    // Only the latest request is drawn: a slow answer from before a switch (or
+                    // a refresh that overtook it) never replaces a newer one.
+                    var self = this, period = this.soFarPeriod, seq = (this.soFarSeq = (this.soFarSeq || 0) + 1);
                     if (!CONFIG.soFarUrl) return;
                     this.soFarAsked = true;
                     if (loud) this.soFarLoading = true;
@@ -980,9 +982,9 @@
                         return r.json();
                     }).then(function (data) {
                         // An answer for a period no longer chosen is dropped.
-                        if (data && data.metrics && data.period === self.soFarPeriod) self.soFar = data;
+                        if (seq === self.soFarSeq && data && data.metrics && data.period === self.soFarPeriod) self.soFar = data;
                     }).catch(function () {}).finally(function () {
-                        if (period === self.soFarPeriod) self.soFarLoading = false;
+                        if (seq === self.soFarSeq) self.soFarLoading = false;
                     });
                 },
                 // Its own address and its own pace: the figures move by the hour, so a range change
