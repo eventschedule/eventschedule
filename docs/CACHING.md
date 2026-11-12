@@ -380,6 +380,14 @@ the `/admin/users` onboarding funnel reads.
   UA blocklist, the `Accept-Language` check and the per-IP+UA daily dedup all apply
   unchanged.
 - Known limit: a visitor with JavaScript disabled is not counted.
+- Beside it, `partials/marketing-page-stats` (marketing pages and the blog's public pages) posts
+  `{"page": "<route name>", "kind": "view" | "reached_end" | "signup_click", "w": <viewport
+  width>}` to `POST /api/marketing-page` (`MarketingPageStatController`, limiter
+  `marketing_page`) for the per-page counters in `marketing_page_daily`: a view, the page's last
+  section (`#claim` or the footer) coming into view, a click on a sign-up link. In `routes/api.php`
+  for the Realtime beacon's reasons: no session, cookie or CSRF, and it answers same-origin on
+  every host, the blog's included, so nothing here needs a place in `STATELESS_ROUTES`. Same
+  filters as this beacon, one visitor per page per kind per day. Counts only.
 
 ### 2. First-touch attribution
 

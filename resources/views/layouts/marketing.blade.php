@@ -401,6 +401,10 @@
             </script>
         @endif
 
+        @unless ($errorPage ?? false)
+            @include('partials.marketing-page-stats', ['statsPage' => \Illuminate\Support\Facades\Route::currentRouteName()])
+        @endunless
+
         {{-- First-touch attribution: the landing page, off-site referrer, ?utm_* and ?ref= for
              the marketing-to-signup hop, which the server session used to hold before this HTML
              became edge-cacheable. Attribution is not strictly necessary for anything the visitor

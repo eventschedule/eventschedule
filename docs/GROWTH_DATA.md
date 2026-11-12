@@ -362,6 +362,35 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     fetch counted, so an older post's total is mostly crawls. Compare posts by views gained since,
     not by the total.
   - Join a post to the sign-ups it brought through `signups.landing_path` = `path`.
+- `marketing_pages` (schema 28): which marketing pages lose visitors, and whether they leave before
+  the end or after reading, from the per-page beacon (`MarketingPageDaily`,
+  `partials/marketing-page-stats`). Nexus only (empty elsewhere). Counted from `tracked_from`
+  (2026-11-12); nothing before it was measured.
+  - `since`: the first day of the 90-day window `rows` covers (today included, UTC days).
+  - `columns`/`rows`: one row per page and device over those 90 days, most visitors first.
+    - `page` is the marketing ROUTE NAME (`marketing.index`, `marketing.pricing`,
+      `marketing.for_venues`, `marketing.docs.tickets`, ...), never a path. The blog is three
+      rows at most: `blog.index`, `blog.category` and `blog.show`, which is every post together
+      (per post, see `blog`).
+    - `group` is the page's family, read from its path: `home`, `pricing`, `features`, `for` (the
+      for-* pages), `compare` (alternatives, replacements, `/compare`, switch-from), `examples`,
+      `docs` (the user guide), `docs_selfhost` (selfhost, SaaS-operator and developer docs),
+      `selfhost` (`/selfhost`, `/open-source`, `/saas`), `blog`, `other`.
+    - `device`: `phone` when the viewport was under 640 CSS pixels wide when the page opened,
+      `desktop` otherwise (tablets in landscape and laptops alike).
+    - `visitors`: visitors who opened the page; `reached_end`: visitors whose screen reached the
+      page's last section (the `#claim` finale where the page has one, the footer otherwise; on a
+      page shorter than the screen that is on arrival); `signup_clicks`: visitors who clicked any
+      link to `/sign_up` on the page (header, hero, finale, anywhere).
+    - Each is one per visitor (daily IP+UA hash) per page per UTC day, with the visit beacon's
+      filters (bots, signed-in users, requests that do not look like a browser), so
+      `reached_end / visitors` and `signup_clicks / visitors` are per-visitor rates. A visitor who
+      returns another day counts again. Someone who reads three pages counts on each, so summing
+      `visitors` over pages is NOT the site's visitor count (that is `traffic[].visitors`).
+    - The three are sent separately, so a blocked or lost beacon can leave a click without a
+      view; read a rate over enough visitors, not a single row.
+  - `monthly`: the same counts per `month` (UTC `YYYY-MM`, the `meta.recent_months`), `group` and
+    `device`, as `{columns, rows}`. The month in progress is month-to-date.
 - `geography[]`: `{country, schedules, with_event, with_paid_sale, billing}`, over the
   k-anonymised `schedules.country`.
 - `boost`:
@@ -473,7 +502,7 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `event_edits_90d` | Events they created or edited in the last 90 days, bucketed; system edits (imports, syncs) excluded |
 | `setup_guide` | How far through the setup guide they got (schema 13): `started`, `live` (their schedule went live with the guide watching), `shared` (copied the schedule's address), `embedded` (copied the embed code), `finished`. The furthest one reached. Null for anyone who never had a guide: everyone who signed up before it shipped, and anyone whose first schedule was not saved through the wizard (guest-submit, a claim, the API, a restore, a transfer) |
 | `setup_guide_hidden` | They hid the guide and have not brought it back. False when `setup_guide` is null |
-| `arrival_intent` | Why they came to sign up, from the link they pressed (schema 27, from 2026-11-12): `sell` (a ticketing or selling page: /features/ticketing, /compare and the alternative pages, the payment, fee and import pages, the homepage's Tickets beat, the fee calculator), `pro` / `enterprise` (that plan's button on /pricing), `guest_page` (the "Create your own" card on a schedule's public page). Null for every other door and for everyone who signed up before it. Rides the link, so it needs no consent and is not lost to the edge cache |
+| `arrival_intent` | Why they came to sign up, from the link they pressed (schema 27, from 2026-11-12): `sell` (a ticketing or selling page: /features/ticketing, /compare and the alternative pages, the payment, fee and import pages, the homepage's Tickets beat, the fee calculator), `pro` / `enterprise` (that plan's button on /pricing), `guest_page` (the "Create your own" card on a schedule's public page), `example` (the "This is an example schedule" bar on a demo schedule's own pages, `?ref=example`, from 2026-11-12). Null for every other door and for everyone who signed up before it. Rides the link, so it needs no consent and is not lost to the edge cache |
 | `suggestions_off` | They turned suggestions off for the whole account (schema 13) and have not turned them back on: no setup guide, no next steps on the dashboard, no "List on the network" prompt. It says nothing about email: from 2026-10-06 the reminder emails follow "Email updates" alone (for the one day before that, this switch held them too). Independent of `setup_guide_hidden`, and possible for an account that never had a guide |
 
 ### `schedules` (one row per owned, non-deleted, non-demo schedule)
@@ -632,6 +661,12 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **28** (2026-11-12)
+  - **New section `marketing_pages`:** per marketing page and device (phone or desktop), the
+    visitors who opened it, reached its end and clicked a sign-up link, over the last 90 days,
+    and per page family by month. Counted from 2026-11-12.
+  - **`signups.arrival_intent` gains `example`:** the "This is an example schedule" bar on a demo
+    schedule's own pages (`?ref=example`). Same column, one more value.
 - **27** (2026-11-12)
   - **`signups.arrival_intent`:** why an organizer came to sign up, from the link they pressed
     (`sell`, `pro`, `enterprise`, `guest_page`, or null). Appended as the last column.

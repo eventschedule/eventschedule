@@ -6,6 +6,7 @@ use App\Models\AnalyticsDaily;
 use App\Models\BlogPost;
 use App\Models\Event;
 use App\Models\MarketingDailyStat;
+use App\Models\MarketingPageDaily;
 use App\Models\Role;
 use App\Models\SubscriptionCancellation;
 use App\Models\User;
@@ -36,7 +37,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 27;
+    public const SCHEMA_VERSION = 28;
 
     /** How far ahead the schedule rows look for events on sale (upcoming_*). */
     public const UPCOMING_DAYS = 60;
@@ -796,6 +797,7 @@ class GrowthExportService
                 'reach' => $this->reach(),
                 'usage' => $this->usage($months),
                 'blog' => $this->blog(),
+                'marketing_pages' => $this->marketingPages(),
                 'geography' => $this->geographyFrom($schedules),
                 'boost' => $this->boost(),
                 'referrals' => $this->referrals(),
@@ -3657,6 +3659,64 @@ class GrowthExportService
             ->all();
 
         return ['columns' => $columns, 'rows' => $rows];
+    }
+
+    /**
+     * Per-page marketing counters (MarketingPageDaily): visitors, reached the end, sign-up clicks,
+     * by page and device over the last 90 days, and by page family and device per month for the
+     * recent months. Each count is visitors per page per day, so rates within a row are per
+     * visitor and a sum over pages is not the site's visitor count. Nexus only.
+     */
+    private function marketingPages(): array
+    {
+        $columns = ['page', 'group', 'device', 'visitors', 'reached_end', 'signup_clicks'];
+        $monthlyColumns = ['month', 'group', 'device', 'visitors', 'reached_end', 'signup_clicks'];
+        $since = now()->subDays(89)->toDateString();
+        $empty = [
+            'tracked_from' => MarketingPageDaily::TRACKED_FROM,
+            'since' => $since,
+            'columns' => $columns,
+            'rows' => [],
+            'monthly' => ['columns' => $monthlyColumns, 'rows' => []],
+        ];
+
+        if (! config('app.is_nexus') || ! Schema::hasTable('marketing_page_daily')) {
+            return $empty;
+        }
+
+        $sums = 'SUM(visitors) as visitors, SUM(reached_end) as reached_end, SUM(signup_clicks) as signup_clicks';
+        $groups = [];
+        $groupOf = function (string $page) use (&$groups): string {
+            return $groups[$page] ??= MarketingPageDaily::groupOf($page);
+        };
+
+        $rows = MarketingPageDaily::query()
+            ->where('date', '>=', $since)
+            ->groupBy('page', 'device')
+            ->selectRaw('page, device, '.$sums)
+            ->orderByDesc('visitors')->orderBy('page')->orderBy('device')
+            ->get()
+            ->map(fn ($r) => [$r->page, $groupOf($r->page), $r->device, (int) $r->visitors, (int) $r->reached_end, (int) $r->signup_clicks])
+            ->all();
+
+        // Grouped by page in SQL and folded into families here: the family is read from the
+        // route's path, which SQL cannot see.
+        $monthly = [];
+        MarketingPageDaily::query()
+            ->where('date', '>=', $this->recentMonths()[0].'-01')
+            ->groupBy(DB::raw("DATE_FORMAT(date, '%Y-%m')"), 'page', 'device')
+            ->selectRaw("DATE_FORMAT(date, '%Y-%m') as ym, page, device, ".$sums)
+            ->get()
+            ->each(function ($r) use (&$monthly, $groupOf) {
+                $key = $r->ym.'|'.$groupOf($r->page).'|'.$r->device;
+                $monthly[$key] ??= [$r->ym, $groupOf($r->page), $r->device, 0, 0, 0];
+                $monthly[$key][3] += (int) $r->visitors;
+                $monthly[$key][4] += (int) $r->reached_end;
+                $monthly[$key][5] += (int) $r->signup_clicks;
+            });
+        ksort($monthly);
+
+        return [...$empty, 'rows' => $rows, 'monthly' => ['columns' => $monthlyColumns, 'rows' => array_values($monthly)]];
     }
 
     /** Activation and selling by country, from the (k-anonymised) schedule rows. */

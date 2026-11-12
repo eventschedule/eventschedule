@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ApiScheduleController;
 use App\Http\Controllers\Api\ApiTranslationSuggestionController;
 use App\Http\Controllers\GrowthDataController;
 use App\Http\Controllers\GuestFunnelBeaconController;
+use App\Http\Controllers\MarketingPageStatController;
 use App\Http\Controllers\RealtimeBeaconController;
 use App\Http\Middleware\ApiAuthentication;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,14 @@ Route::post('/realtime', [RealtimeBeaconController::class, 'store'])
 Route::post('/guest-count', [GuestFunnelBeaconController::class, 'store'])
     ->name('guest_funnel.beacon')
     ->middleware('throttle:guest_count');
+
+// The marketing site's per-page counters (App\Models\MarketingPageDaily), sent by
+// partials/marketing-page-stats: a view, reaching the end, a sign-up click. Here for the reasons
+// above, and because the blog is on its own host and posts here same-origin. Not part of the
+// public API.
+Route::post('/marketing-page', MarketingPageStatController::class)
+    ->name('marketing_page.beacon')
+    ->middleware('throttle:marketing_page');
 
 // The growth payload, for `php artisan app:pull-growth` on the operator's machine. Bearer-token
 // auth, hosted only; see GrowthDataController. Here for the same reasons as the beacon: no session,

@@ -298,6 +298,15 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by('guest-count|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
         });
 
+        // POST /api/marketing-page, the marketing site's per-page counters (MarketingPageDaily).
+        // Its own budget per real visitor address, for the same reasons. A page sends three posts
+        // at most, and a visitor reading fast opens a few pages a minute.
+        RateLimiter::for('marketing_page', function ($request) {
+            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+
+            return Limit::perMinute(60)->by('marketing-page|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
+        });
+
         // GET /ticket/status (a ticket waiting on its payment confirmation asks about eight times
         // in a minute and a half). Per visitor AND per ticket, for the same reasons as above.
         RateLimiter::for('ticket_status', function ($request) {
