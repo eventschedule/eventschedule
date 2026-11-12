@@ -510,12 +510,12 @@ return [
 
     'activation_nudge_subject_no_ticket_type' => 'Selling tickets for your ":schedule" schedule?',
     'activation_nudge_heading_no_ticket_type' => 'You can sell from this page',
-    'activation_nudge_body_no_ticket_type' => 'Your ":schedule" schedule has events published but no ticket types, so the page can be read but not bought from. Adding one takes a name, a price and a quantity. You scan the QR code on every ticket at the door, and Event Schedule takes no platform fee on any plan.',
+    'activation_nudge_body_no_ticket_type' => 'Your ":schedule" schedule has events published but no ticket types, so the page can be read but not bought from. Adding one takes a name, a price and a quantity. You scan the QR code on every ticket at the door, and Event Schedule takes no platform fee on any plan. Selling tickets on another site instead? Open an event, go to its Tickets tab, choose "Tickets elsewhere" and paste the link. If that does not apply, there is nothing you need to do.',
     'activation_nudge_cta_no_ticket_type' => 'Set up tickets',
     'activation_nudge_subject_no_ticket_type_free' => 'Let people sign up on your ":schedule" schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'Take sign-ups from this page',
-    'activation_nudge_body_no_ticket_type_free' => 'Your ":schedule" schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door. If you want to charge, Pro comes with a :days-day free trial.',
-    'activation_nudge_body_no_ticket_type_free_no_trial' => 'Your ":schedule" schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door.',
+    'activation_nudge_body_no_ticket_type_free' => 'Your ":schedule" schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door. To set it up, open an event, go to its Tickets tab and choose "Free registration". Selling tickets on another site instead? Choose "Tickets elsewhere" and paste the link. If neither applies, there is nothing you need to do. If you want to charge, Pro comes with a :days-day free trial.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => 'Your ":schedule" schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door. To set it up, open an event, go to its Tickets tab and choose "Free registration". Selling tickets on another site instead? Choose "Tickets elsewhere" and paste the link. If neither applies, there is nothing you need to do.',
     'activation_nudge_cta_no_ticket_type_free' => 'Set up registration',
 
     'activation_nudge_subject_no_gateway' => 'One step left before your ":schedule" schedule can take payment',

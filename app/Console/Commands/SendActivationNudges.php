@@ -570,6 +570,7 @@ class SendActivationNudges extends Command
             // Any ticket type on any event this schedule owns counts as "they know how".
             ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)))
+            ->whereDoesntHave('events', fn ($q) => $this->sellsElsewhere($this->ownedEvents($q)))
             ->limit($limit)->get();
     }
 
@@ -595,7 +596,19 @@ class SendActivationNudges extends Command
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)))
             // Registration is the free way to sign up, so a schedule taking it has done this.
             ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)->where('events.rsvp_enabled', true))
+            ->whereDoesntHave('events', fn ($q) => $this->sellsElsewhere($this->ownedEvents($q)))
             ->limit($limit)->get();
+    }
+
+    /**
+     * Events that send people to another site for tickets ("Tickets elsewhere", registration_url).
+     * A schedule with one already has its way to sign up: the two ticket nudges told a theatre that
+     * sells on its own website that its page had "no way to sign up", and it wrote back asking what
+     * it was meant to do.
+     */
+    private function sellsElsewhere($query)
+    {
+        return $query->whereNotNull('events.registration_url')->where('events.registration_url', '!=', '');
     }
 
     /**

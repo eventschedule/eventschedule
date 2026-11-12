@@ -507,12 +507,12 @@ return [
 
     'activation_nudge_subject_no_ticket_type' => 'Kas müüte ajakava ":schedule" pileteid?',
     'activation_nudge_heading_no_ticket_type' => 'Sellelt lehelt saab müüa',
-    'activation_nudge_body_no_ticket_type' => 'Ajakavas ":schedule" on avaldatud sündmused, kuid piletitüüpe pole, nii et lehte saab lugeda, aga sealt osta ei saa. Ühe loomiseks on vaja nime, hinda ja kogust. Iga pileti QR-koodi skaneerid uksel ning Event Schedule ei võta üheski paketis platvormitasu.',
+    'activation_nudge_body_no_ticket_type' => 'Ajakavas ":schedule" on avaldatud sündmused, kuid piletitüüpe pole, nii et lehte saab lugeda, aga sealt osta ei saa. Ühe loomiseks on vaja nime, hinda ja kogust. Iga pileti QR-koodi skaneerid uksel ning Event Schedule ei võta üheski paketis platvormitasu. Müüd pileteid juba mõnel teisel saidil? Ava üritus, mine vahekaardile "Piletid", vali "Piletid mujal" ja kleebi link. Kui see ei sobi, ei pea sa midagi tegema.',
     'activation_nudge_cta_no_ticket_type' => 'Seadista piletid',
     'activation_nudge_subject_no_ticket_type_free' => 'Lase inimestel ajakava ":schedule" üritustele registreeruda',
     'activation_nudge_heading_no_ticket_type_free' => 'Võta sellelt lehelt registreerumisi vastu',
-    'activation_nudge_body_no_ticket_type_free' => 'Ajakavas ":schedule" on avaldatud üritusi, kuid neile ei saa registreeruda. Tasuta registreerimine ja tasuta piletid on sinu paketis piiramatud, iga külalise jaoks on QR-kood, mida uksel skannida. Kui soovid tasu võtta, on Pro-l :days-päevane tasuta prooviperiood.',
-    'activation_nudge_body_no_ticket_type_free_no_trial' => 'Ajakavas ":schedule" on avaldatud üritusi, kuid neile ei saa registreeruda. Tasuta registreerimine ja tasuta piletid on sinu paketis piiramatud, iga külalise jaoks on QR-kood, mida uksel skannida.',
+    'activation_nudge_body_no_ticket_type_free' => 'Ajakavas ":schedule" on avaldatud üritusi, kuid neile ei saa registreeruda. Tasuta registreerimine ja tasuta piletid on sinu paketis piiramatud, iga külalise jaoks on QR-kood, mida uksel skannida. Seadistamiseks ava üritus, mine vahekaardile "Piletid" ja vali "Tasuta registreerimine". Müüd pileteid juba mõnel teisel saidil? Vali "Piletid mujal" ja kleebi link. Kui kumbki ei sobi, ei pea sa midagi tegema. Kui soovid tasu võtta, on Pro-l :days-päevane tasuta prooviperiood.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => 'Ajakavas ":schedule" on avaldatud üritusi, kuid neile ei saa registreeruda. Tasuta registreerimine ja tasuta piletid on sinu paketis piiramatud, iga külalise jaoks on QR-kood, mida uksel skannida. Seadistamiseks ava üritus, mine vahekaardile "Piletid" ja vali "Tasuta registreerimine". Müüd pileteid juba mõnel teisel saidil? Vali "Piletid mujal" ja kleebi link. Kui kumbki ei sobi, ei pea sa midagi tegema.',
     'activation_nudge_cta_no_ticket_type_free' => 'Seadista registreerimine',
 
     'activation_nudge_subject_no_gateway' => 'Üks samm on jäänud, enne kui ajakava ":schedule" saab makseid vastu võtta',

@@ -227,6 +227,25 @@ class ActivationNudgeTest extends TestCase
         $this->assertNothingSent();
     }
 
+    /**
+     * "Tickets elsewhere" is a way to sign up too. A theatre that sells on its own website was
+     * told its page had "no way to sign up" and wrote back asking what it was meant to do.
+     */
+    public function test_a_schedule_selling_on_another_site_is_left_alone(): void
+    {
+        $free = $this->createFreeRole($this->owner());
+        $this->createEvent($free, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'registration_url' => 'https://theatre.example.org/tickets']);
+
+        $this->nudge('no_ticket_type_free');
+        $this->assertNothingSent();
+
+        $pro = $this->createRole($this->owner());
+        $this->createEvent($pro, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'registration_url' => 'https://theatre.example.org/tickets']);
+
+        $this->nudge('no_ticket_type');
+        $this->assertNothingSent();
+    }
+
     /** A schedule on the selling trial can sell, so it gets the selling copy. */
     public function test_a_schedule_on_the_selling_trial_gets_the_selling_copy(): void
     {
