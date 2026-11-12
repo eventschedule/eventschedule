@@ -192,12 +192,15 @@ class GoogleWalletPassTest extends TestCase
     {
         // A supported language with no badge silently falls back to English mid-page, next to
         // fully translated copy.
+        // A regional code (pt-PT) is served its language's badge.
         foreach (config('app.supported_languages') as $language => $label) {
             $this->assertContains(
-                $language,
+                GoogleWalletService::badgeLocale($language),
                 GoogleWalletService::BADGE_LOCALES,
                 "The app supports '{$language}' but ships no Google Wallet badge for it."
             );
+            $this->assertTrue($language === 'en' || GoogleWalletService::badgeLocale($language) !== 'en',
+                "The app supports '{$language}' but its Google Wallet badge falls back to English.");
         }
     }
 

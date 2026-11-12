@@ -273,4 +273,16 @@ class EuropeanPortugueseTest extends TestCase
         $this->assertSame('PT-PT', language_badge('pt-PT', 'pt'));
         $this->assertSame('PT-BR', language_badge('pt', 'pt-PT'), 'PT alone reads as Portugal');
     }
+
+    /**
+     * Laravel's plural rules know 'pt_PT', not 'pt-PT': a plural with bare segments took its first
+     * form under pt-PT ("Tem 3 bilhete") until RegionalMessageSelector read the hyphen.
+     */
+    public function test_a_plural_takes_its_plural_form_under_pt_pt(): void
+    {
+        app()->setLocale('pt-PT');
+
+        $this->assertSame('Tem 3 bilhetes', trans_choice('messages.you_have_tickets', 3, ['count' => 3]));
+        $this->assertSame('Tem 1 bilhete', trans_choice('messages.you_have_tickets', 1, ['count' => 1]));
+    }
 }

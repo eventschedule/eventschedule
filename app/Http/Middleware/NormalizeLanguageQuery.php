@@ -16,7 +16,9 @@ class NormalizeLanguageQuery
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $lang = $request->query->get('lang');
+        // all(), not get(): InputBag::get() throws (a 400) when ?lang[]= arrives as an array, and
+        // the pages that read ?lang= are meant to shrug that off themselves.
+        $lang = $request->query->all()['lang'] ?? null;
 
         if (is_string($lang) && $lang !== '' && ! is_valid_language_code($lang) && ($canonical = normalize_language_code($lang)) !== null) {
             $request->query->set('lang', $canonical);

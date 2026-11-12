@@ -91,6 +91,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // $date->localDate(): a date in the reader's own word order (App\Support\LocalDate).
+        \Carbon\Carbon::macro('localDate', function (bool $withYear = true, bool $withWeekday = true, bool $shortMonth = false) {
+            return \App\Support\LocalDate::format($this, $withYear, $withWeekday, $shortMonth);
+        });
+
+        // Plural rules for a hyphenated regional locale (pt-PT); see RegionalMessageSelector.
+        $this->app->afterResolving('translator', fn ($translator) => $translator->setSelector(new \App\Support\RegionalMessageSelector));
+        if ($this->app->resolved('translator')) {
+            $this->app['translator']->setSelector(new \App\Support\RegionalMessageSelector);
+        }
+
         if (! config('app.hosted') && empty(config('app.key'))) {
             Artisan::call('key:generate', ['--force' => true]);
         }
