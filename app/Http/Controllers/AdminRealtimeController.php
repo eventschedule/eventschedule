@@ -54,7 +54,7 @@ class AdminRealtimeController extends Controller
     {
         abort_unless($request->user()->isAdmin(), 403);
 
-        return response()->json((new RealtimeSoFar(null, $request->user()->timezone))->cached());
+        return response()->json((new RealtimeSoFar(null, $request->user()->timezone, RealtimeSoFar::period($request->query('period'))))->cached());
     }
 
     /**

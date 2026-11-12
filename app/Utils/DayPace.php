@@ -95,6 +95,33 @@ class DayPace
     }
 
     /**
+     * The month's total from `n` so far, `elapsed` days into a month of `length` (the days before
+     * today and today's usual share). Hidden before three days are in or under 30 so far: a
+     * month read from its first two days is mostly the weekday it began on.
+     *
+     * @return array{shown: bool, hidden: string|null, value: int|null, low: int|null, high: int|null}
+     */
+    public static function projectMonth(int $n, float $elapsed, int $length, bool $history): array
+    {
+        $hidden = match (true) {
+            ! $history => 'noHistory',
+            $elapsed < 3 => 'early',
+            $n < 30 => 'tooFew',
+            default => null,
+        };
+
+        if ($hidden !== null || $length <= 0) {
+            return ['shown' => false, 'hidden' => $hidden ?? 'early', 'value' => null, 'low' => null, 'high' => null];
+        }
+
+        $share = $elapsed / $length;
+        $value = $n / $share;
+        $range = 2 * sqrt($n * self::PROJECTION_WIDEN) / $share;
+
+        return ['shown' => true, 'hidden' => null, 'value' => (int) round($value), 'low' => (int) max($n, round($value - $range)), 'high' => (int) round($value + $range)];
+    }
+
+    /**
      * The first whole hour by which a usual day has `share` of its count in: when a projection
      * that is hidden for being early will show. Null if it never does.
      *

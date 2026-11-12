@@ -157,6 +157,9 @@
     .so-far-skeleton { height: 18rem; }
     .so-far-how { max-width: 110ch; }
     .so-far-svg { overflow: visible; }
+    .so-far-col { fill: rgb(var(--ap-ink)); opacity: 0.82; }
+    .so-far-col.is-today { opacity: 0.4; }
+    .so-far-hover { fill: rgb(var(--ap-ink)); opacity: 0.05; }
     .so-far-axis { font-size: 11px; font-variant-numeric: tabular-nums; }
     .so-far-label { font-size: 11px; paint-order: stroke; stroke: rgb(var(--ap-card-mid)); stroke-width: 3px; stroke-linejoin: round; }
     .so-far-strong { font-weight: 600; }
@@ -236,7 +239,7 @@
         @include('admin.realtime._so-far-script')
 
         Vue.createApp({
-            components: { 'so-far-chart': SoFarChart },
+            components: { 'so-far-chart': SoFarChart, 'so-far-columns': SoFarColumns },
             data: function () {
                 return {
                     msg: MSG,
@@ -291,6 +294,10 @@
                     // So far today (RealtimeSoFar): null until it arrives, then once a minute.
                     soFar: null,
                     soFarAsked: false,
+                    // The period the card reads, remembered in this browser (a convenience, so
+                    // read and written in try/catch); asked from the server with ?period=.
+                    soFarPeriod: (function () { try { var v = localStorage.getItem('admin-so-far-period'); return ['today', '7d', '28d', 'month'].indexOf(v) >= 0 ? v : 'today'; } catch (e) { return 'today'; } })(),
+                    soFarLoading: false,
                     trendTries: 0,
                 };
             },
@@ -954,19 +961,29 @@
                 },
                 // So far today: asked once the live part is drawn, then once a minute (its cut moves
                 // with the clock). A failure keeps what the card has.
-                fetchSoFar: function () {
-                    var self = this;
+                setSoFarPeriod: function (period) {
+                    if (period === this.soFarPeriod) return;
+                    this.soFarPeriod = period;
+                    try { localStorage.setItem('admin-so-far-period', period); } catch (e) {}
+                    this.fetchSoFar(true);
+                },
+                fetchSoFar: function (loud) {
+                    var self = this, period = this.soFarPeriod;
                     if (!CONFIG.soFarUrl) return;
                     this.soFarAsked = true;
-                    fetch(CONFIG.soFarUrl, {
+                    if (loud) this.soFarLoading = true;
+                    fetch(CONFIG.soFarUrl + '?period=' + encodeURIComponent(period), {
                         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
                         credentials: 'same-origin',
                     }).then(function (r) {
                         if (!r.ok) throw r;
                         return r.json();
                     }).then(function (data) {
-                        if (data && data.metrics) self.soFar = data;
-                    }).catch(function () {});
+                        // An answer for a period no longer chosen is dropped.
+                        if (data && data.metrics && data.period === self.soFarPeriod) self.soFar = data;
+                    }).catch(function () {}).finally(function () {
+                        if (period === self.soFarPeriod) self.soFarLoading = false;
+                    });
                 },
                 // Its own address and its own pace: the figures move by the hour, so a range change
                 // asks at once and otherwise the card is refreshed every five minutes.

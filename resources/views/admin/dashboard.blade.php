@@ -170,9 +170,14 @@
                     'show_chart', 'table_caption', 'col_by', 'col_usual', 'col_projected', 'tip_by',
                     'tip_today', 'tip_yesterday', 'tip_usual', 'tip_projected', 'yesterday_by', 'usual_by',
                     'usually', 'times', 'summary', 'summary_alone', 'no_count', 'how', 'range',
+                    'periods', 'this_period', 'period_had', 'last_month_had', 'so_far', 'projected_period',
+                    'projected_month', 'hidden_month_early', 'col_day', 'tip_before', 'today_so_far',
+                    'summary_period', 'previous_7d', 'previous_28d', 'previous_month', 'previous_month_scaled',
+                    'usual_week', 'before_7d', 'before_28d', 'before_month',
                 ])->mapWithKeys(fn ($key) => [$key => __('messages.realtime_so_far_'.$key)])->all() + [
                     'today' => __('messages.today'),
                     'collecting' => __('messages.realtime_trend_collecting'),
+                    'period' => collect(\App\Services\RealtimeSoFar::PERIODS)->mapWithKeys(fn ($period) => [$period => __('messages.realtime_so_far_period_'.$period)])->all(),
                 ],
                 'verdict' => [
                     'up' => __('messages.realtime_verdict_up'),

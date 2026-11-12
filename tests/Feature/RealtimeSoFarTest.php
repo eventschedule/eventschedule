@@ -132,6 +132,65 @@ class RealtimeSoFarTest extends TestCase
         $this->assertStringContainsString('8 PM', $projection['showsFrom']);
     }
 
+    /** Mutation: cut the period before at another time, or set it a period off. */
+    public function test_the_longer_periods_are_set_against_the_period_before_cut_at_the_same_time(): void
+    {
+        // Ten visits an hour for sixty days: every whole day 240, and 14.5 hours by 14:30. October
+        // 25 is Israel's clock change, a 25-hour day of 250, inside some of the windows below.
+        $this->visits(60, 10);
+
+        $week = (new RealtimeSoFar(null, 'Asia/Jerusalem', '7d'))->build();
+        $visits = $week['metrics']['visits'];
+        $this->assertSame('7d', $week['period']);
+        $this->assertCount(7, $visits['slots']);
+        $this->assertSame(6, $visits['todayIndex']);
+        $this->assertSame('2026-11-12', $visits['slots'][6]['date']);
+        $this->assertSame(6 * 240 + 150, $visits['soFar']);
+        $this->assertSame([240, 240, 240, 240, 240, 240, 240], $visits['previous']);
+        $this->assertEquals(6 * 240 + 145, $visits['compare']['previous']['expected'], 'six whole days and the seventh by 14:30');
+        $this->assertSame(4, $visits['compare']['usual']['available']);
+        $this->assertEquals(6 * 240 + 145 + 10 / 4, $visits['compare']['usual']['expected'], 'one of the four weeks holds the 25-hour day');
+        $this->assertTrue($visits['projection']['shown']);
+        $this->assertSame(6 * 240 + $visits['projection']['day']['value'], $visits['projection']['value'], 'the whole days and today projected');
+
+        $four = (new RealtimeSoFar(null, 'Asia/Jerusalem', '28d'))->build()['metrics']['visits'];
+        $this->assertCount(28, $four['slots']);
+        $this->assertEquals(27 * 240 + 145, $four['compare']['previous']['expected'], 'September 18 to October 15: no clock change');
+        $this->assertNull($four['compare']['usual']);
+
+        // November 1 to 12 at 14:30, against October 1 to 12 at 14:30; the days to come are empty.
+        $month = (new RealtimeSoFar(null, 'Asia/Jerusalem', 'month'))->build()['metrics']['visits'];
+        $this->assertCount(30, $month['slots']);
+        $this->assertSame(11, $month['todayIndex']);
+        $this->assertNull($month['now'][12]);
+        $this->assertEquals(11 * 240 + 145, $month['compare']['previous']['expected']);
+        $this->assertFalse($month['compare']['previous']['scaled']);
+        $this->assertSame(31 * 240 + 10, $month['previousTotal']);
+        $this->assertTrue($month['projection']['shown']);
+        $this->assertEqualsWithDelta(30 * 240, $month['projection']['value'], 30 * 240 * 0.02);
+    }
+
+    /** Mutation: compare a period with one counting had not reached. */
+    public function test_a_period_before_counting_began_is_not_compared(): void
+    {
+        $this->visits(10, 10);
+
+        $four = (new RealtimeSoFar(null, 'Asia/Jerusalem', '28d'))->build()['metrics']['visits'];
+
+        $this->assertNull($four['compare']['previous']);
+        $this->assertNull($four['previousTotal']);
+        $this->assertNull($four['previous'][0], 'a day before counting began is not a zero');
+    }
+
+    public function test_the_address_takes_a_period_and_reads_an_unknown_one_as_today(): void
+    {
+        $admin = $this->createOwner(true);
+        $as = fn () => $this->withSession(['admin_password_confirmed_at' => now()->timestamp])->actingAs($admin);
+
+        $as()->getJson('/admin/realtime/so-far?period=month')->assertOk()->assertJsonPath('period', 'month')->assertJsonPath('metrics.signups.kind', 'days');
+        $as()->getJson('/admin/realtime/so-far?period=12w')->assertOk()->assertJsonPath('period', 'today');
+    }
+
     /** Mutation: drop the whole-day test in series(), so a day before counting reads as a quiet one. */
     public function test_a_day_counting_had_not_reached_is_left_out(): void
     {
@@ -190,6 +249,9 @@ class RealtimeSoFarTest extends TestCase
         // A share reached only at midnight never shows today.
         $this->assertNull(DayPace::reaches(array_merge(array_fill(0, 23, 0), [100000]), 0, 0.9));
         $this->assertSame('noHistory', DayPace::project(100, 0.5, false)['hidden']);
+        $this->assertSame('early', DayPace::projectMonth(100, 2.5, 30, true)['hidden']);
+        $this->assertSame('tooFew', DayPace::projectMonth(20, 10, 30, true)['hidden']);
+        $this->assertSame(300, DayPace::projectMonth(100, 10, 30, true)['value']);
         $this->assertSame(200, DayPace::project(100, 0.5, true)['value']);
     }
 

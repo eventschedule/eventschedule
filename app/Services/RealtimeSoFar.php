@@ -29,6 +29,13 @@ class RealtimeSoFar
 {
     public const METRICS = ['visits', 'signups'];
 
+    /**
+     * Today hour by hour, or the last 7 days, the last 4 weeks or this month day by day. No 12
+     * weeks as Stackapella has: its comparison needs 24 weeks of visits, and realtime_hourly keeps
+     * 62 days (RealtimeRollup::KEEP_DAYS).
+     */
+    public const PERIODS = ['today', '7d', '28d', 'month'];
+
     /** The same weekday this many weeks back makes a usual day. */
     private const USUAL_WEEKS = 4;
 
@@ -41,10 +48,15 @@ class RealtimeSoFar
 
     private string $zone;
 
-    public function __construct(?CarbonImmutable $now = null, ?string $timezone = null)
+    public function __construct(?CarbonImmutable $now = null, ?string $timezone = null, public readonly string $period = 'today')
     {
         $this->zone = RealtimeTrends::viewerZone($timezone);
         $this->now = ($now ?? now()->toImmutable())->setTimezone($this->zone);
+    }
+
+    public static function period(?string $period): string
+    {
+        return in_array($period, self::PERIODS, true) ? $period : 'today';
     }
 
     public function cached(): array
@@ -53,14 +65,21 @@ class RealtimeSoFar
         $blocked = md5(implode(',', (new BlockedAccounts)->userIds()));
 
         // By the minute: the card's clock and its cut move with it.
-        return Cache::remember('realtime_so_far:'.$this->now->format('Y-m-d H:i').':'.app()->getLocale().':'.(int) $use24.':'.$this->zone.':'.$blocked, self::CACHE_SECONDS, fn () => $this->build());
+        return Cache::remember('realtime_so_far:'.$this->period.':'.$this->now->format('Y-m-d H:i').':'.app()->getLocale().':'.(int) $use24.':'.$this->zone.':'.$blocked, self::CACHE_SECONDS, fn () => $this->build());
     }
 
     public function build(): array
     {
         $use24 = (bool) auth()->user()?->use_24_hour_time;
         $today = $this->now->startOfDay();
-        $first = $today->subDays(7 * self::USUAL_WEEKS);
+        // Today reads the four weeks before it; the longer periods as far back as the period
+        // before them goes (8 weeks for 4 weeks, the start of last month), inside the 62 days
+        // realtime_hourly keeps.
+        $first = $this->period === 'today' ? $today->subDays(7 * self::USUAL_WEEKS)
+            : $today->subDays(55)->min($today->startOfMonth()->subMonthNoOverflow());
+        $series = fn (array $days, ?CarbonImmutable $since, CarbonImmutable $cut, int $past) => $this->period === 'today'
+            ? $this->series($days, $since, $cut, $past, $use24)
+            : $this->periodSeries($days, $since, $cut, $past, $use24);
 
         $since = RealtimeRollup::since();
         $sinceAt = $since ? CarbonImmutable::parse($since, 'UTC')->setTimezone($this->zone) : null;
@@ -83,11 +102,12 @@ class RealtimeSoFar
         return [
             'date' => $today->format('Y-m-d'),
             'zone' => $this->zone,
+            'period' => $this->period,
             'cut' => $this->clock($this->now, $use24),
             'weekday' => $this->now->translatedFormat('l'),
             'metrics' => [
-                'visits' => $sinceAt ? $this->series($this->visitsByDay($first, $sinceAt), $sinceAt, $visitsCut, self::minutesPast($offset), $use24) : null,
-                'signups' => $this->series($this->signupsByDay($first), null, $this->now, self::minutesPast($offset - $appOffset), $use24),
+                'visits' => $sinceAt ? $series($this->visitsByDay($first, $sinceAt), $sinceAt, $visitsCut, self::minutesPast($offset)) : null,
+                'signups' => $series($this->signupsByDay($first), null, $this->now, self::minutesPast($offset - $appOffset)),
             ],
         ];
     }
@@ -206,6 +226,159 @@ class RealtimeSoFar
             'projection' => $projection + [
                 'path' => $path,
                 'showsFrom' => $showsFrom === null ? null : $hours[$showsFrom],
+            ],
+        ];
+    }
+
+    /**
+     * One metric day by day over the last 7 days, the last 4 weeks or this month, against the
+     * period before it cut at the same clock time: whole days and one day cut at the cut on each
+     * side. The 7 days are also set against a usual week, the mean of the four windows before.
+     *
+     * @param  array<string, list<int>>  $days  'Y-m-d' => 24 hourly counts
+     */
+    private function periodSeries(array $days, ?CarbonImmutable $since, CarbonImmutable $cut, int $past, bool $use24): array
+    {
+        $today = $this->now->startOfDay();
+        $minutes = $cut->lt($today) ? 0 : max(0, $cut->hour * 60 + $cut->minute - $past);
+        $hour = min(23, intdiv($minutes, 60));
+        $minute = $minutes - $hour * 60;
+        $whole = fn (CarbonImmutable $day) => $since === null || $since->lte($day);
+        $hours = fn (CarbonImmutable $day) => $days[$day->format('Y-m-d')] ?? array_fill(0, 24, 0);
+        $total = fn (CarbonImmutable $day) => (int) array_sum($hours($day));
+        // Whole days from $from up to the cut on $cutDay, or null when counting had not begun.
+        $window = function (CarbonImmutable $from, CarbonImmutable $cutDay) use ($whole, $total, $hours, $hour, $minute) {
+            if (! $whole($from)) {
+                return null;
+            }
+            $sum = 0.0;
+            for ($day = $from; $day->lt($cutDay); $day = $day->addDay()) {
+                $sum += $total($day);
+            }
+
+            return $sum + DayPace::byTime($hours($cutDay), $hour, $minute);
+        };
+
+        // The usual day's shape, for today's share and the projections.
+        $weights = array_fill(0, 24, 0);
+        $counted = 0;
+        for ($d = 1; $d <= 28; $d++) {
+            $day = $today->subDays($d);
+            if ($whole($day)) {
+                $counted++;
+                foreach ($hours($day) as $h => $n) {
+                    $weights[$h] += $n;
+                }
+            }
+        }
+        $share = DayPace::shape($weights, intdiv($counted, 7), $minutes);
+
+        $lastMonth = $today->startOfMonth()->subMonthNoOverflow();
+        if ($this->period === 'month') {
+            $first = $today->startOfMonth();
+            $count = $today->daysInMonth;
+            $previousOf = fn (CarbonImmutable $day) => $day->day <= $lastMonth->daysInMonth ? $lastMonth->addDays($day->day - 1) : null;
+        } else {
+            $span = $this->period === '28d' ? 28 : 7;
+            $first = $today->subDays($span - 1);
+            $count = $span;
+            $previousOf = fn (CarbonImmutable $day) => $day->subDays($span);
+        }
+
+        $slots = [];
+        $now = [];
+        $previous = [];
+        $todayIndex = 0;
+        for ($i = 0; $i < $count; $i++) {
+            $day = $first->addDays($i);
+            if ($day->eq($today)) {
+                $todayIndex = $i;
+            }
+            $slots[] = [
+                'date' => $day->format('Y-m-d'),
+                'label' => $this->period === '7d' ? $day->translatedFormat('D') : $day->translatedFormat('M j'),
+                'title' => $day->translatedFormat('D, M j'),
+            ];
+            $now[] = $day->lte($today) ? $total($day) : null;
+            $before = $previousOf($day);
+            $previous[] = $before && $whole($before) ? $total($before) : null;
+        }
+
+        $soFar = (int) array_sum(array_filter($now, fn ($n) => $n !== null));
+        $todayCount = $total($today);
+
+        // The period before, cut at the same time, and for 7 days a usual week as well.
+        $compare = ['previous' => null, 'usual' => null];
+        if ($this->period === 'month') {
+            $n = $today->day;
+            $length = $lastMonth->daysInMonth;
+            if ($n <= $length) {
+                $expected = $window($lastMonth, $lastMonth->addDays($n - 1));
+                $compare['previous'] = $expected === null ? null : ['expected' => round($expected, 1), 'scaled' => false];
+            } elseif ($whole($lastMonth)) {
+                // Past last month's last day: all of it, at its daily rate, for as many days.
+                $all = 0;
+                for ($day = $lastMonth; $day->lt($today->startOfMonth()); $day = $day->addDay()) {
+                    $all += $total($day);
+                }
+                $compare['previous'] = ['expected' => round($all * (($n - 1) + $share) / $length, 1), 'scaled' => true];
+            }
+            $previousTotal = null;
+            if ($whole($lastMonth)) {
+                $previousTotal = 0;
+                for ($day = $lastMonth; $day->lt($today->startOfMonth()); $day = $day->addDay()) {
+                    $previousTotal += $total($day);
+                }
+            }
+        } else {
+            $expected = $window($first->subDays($count), $today->subDays($count));
+            $compare['previous'] = $expected === null ? null : ['expected' => round($expected, 1), 'scaled' => false];
+            $previousTotal = in_array(null, $previous, true) ? null : (int) array_sum($previous);
+
+            if ($this->period === '7d') {
+                $windows = [];
+                for ($j = 1; $j <= self::USUAL_WEEKS; $j++) {
+                    $value = $window($first->subWeeks($j), $today->subWeeks($j));
+                    if ($value !== null) {
+                        $windows[] = $value;
+                    }
+                }
+                if (count($windows) >= self::USUAL_MIN) {
+                    $compare['usual'] = [
+                        'expected' => round(array_sum($windows) / count($windows), 1),
+                        'low' => (int) round(min($windows)),
+                        'high' => (int) round(max($windows)),
+                        'available' => count($windows),
+                    ];
+                }
+            }
+        }
+
+        // Today projected to midnight, and the period with it; the month by its daily rate.
+        $history = $counted >= 7;
+        $day = DayPace::project($todayCount, $share, $history);
+        if ($this->period === 'month') {
+            $projection = DayPace::projectMonth($soFar, ($today->day - 1) + $share, $today->daysInMonth, $history);
+        } else {
+            $before = $soFar - $todayCount;
+            $projection = $day['shown']
+                ? ['shown' => true, 'hidden' => null, 'value' => $before + $day['value'], 'low' => $before + $day['low'], 'high' => $before + $day['high']]
+                : $day;
+        }
+
+        return [
+            'kind' => 'days',
+            'cut' => ['label' => $this->clock($cut, $use24)],
+            'slots' => $slots,
+            'todayIndex' => $todayIndex,
+            'now' => $now,
+            'previous' => $previous,
+            'previousTotal' => $previousTotal,
+            'soFar' => $soFar,
+            'todayCount' => $todayCount,
+            'compare' => $compare,
+            'projection' => $projection + [
+                'day' => $day['shown'] ? ['value' => $day['value'], 'low' => $day['low'], 'high' => $day['high']] : null,
             ],
         ];
     }

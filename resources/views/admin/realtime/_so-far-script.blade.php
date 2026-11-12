@@ -354,3 +354,203 @@
                 },
             },
         };
+
+        // The longer periods (7 days, 4 weeks, this month; RealtimeSoFar::periodSeries()), day by
+        // day as columns: this period in ink, the same day of the period before as a grey tick
+        // across its column, today lighter, and the rest of today as a dashed outline up to its
+        // projection, with a whisker for the range. Brought over from Stackapella's column charts.
+        var SO_FAR_COL_M = { top: 20, right: 10, bottom: 26, left: 40 };
+
+        var SoFarColumns = {
+            props: {
+                chart: { type: Object, required: true },
+                metric: { type: String, required: true },
+                label: { type: String, required: true },
+            },
+            data: function () {
+                return { width: 560, hover: null, table: false, H: 200, M: SO_FAR_COL_M, t: MSG.soFar, verdicts: MSG.verdict, pageDir: CONFIG.rtl ? 'rtl' : 'ltr' };
+            },
+            template: `
+<figure class="min-w-0 space-y-2" :data-chart="metric" data-chart-kind="days">
+    <figcaption class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <span class="text-sm font-semibold text-gray-900 dark:text-white" v-text="label"></span>
+        <span v-if="m && m.previousTotal !== null" class="text-xs text-gray-500 dark:text-gray-400" v-text="header"></span>
+    </figcaption>
+    <p v-if="!m" class="py-10 text-sm text-gray-500 dark:text-gray-400" v-text="t.collecting"></p>
+    <template v-else>
+        <ul class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-gray-400">
+            <li class="inline-flex items-center gap-1.5"><svg width="10" height="10" aria-hidden="true"><rect x="0" y="0" width="10" height="10" rx="2" class="so-far-col"></rect></svg><span v-text="t.this_period"></span></li>
+            <li class="inline-flex items-center gap-1.5"><svg width="14" height="6" aria-hidden="true"><line x1="0" y1="3" x2="14" y2="3" class="so-far-muted" stroke-width="2"></line></svg><span v-text="t['before_' + chart.period]"></span></li>
+            <li v-if="dayProjection" class="inline-flex items-center gap-1.5"><svg width="12" height="12" aria-hidden="true"><rect x="0.5" y="0.5" width="11" height="11" fill="none" class="so-far-ink" stroke-dasharray="2 2"></rect></svg><span v-text="t.projected_legend"></span></li>
+        </ul>
+        <div v-show="!table" ref="box" class="relative" dir="ltr" @pointerleave="hover = null">
+            <svg :width="width" :height="H" class="so-far-svg block max-w-full touch-pan-y select-none" role="img" :aria-label="summary" @pointermove="point">
+                <g class="so-far-axis">
+                    <g v-for="v in yTicks" :key="'y' + v">
+                        <line :x1="M.left" :x2="width - M.right" :y1="sy(v)" :y2="sy(v)" class="so-far-grid" stroke-width="1" :opacity="v === 0 ? 1 : 0.6"></line>
+                        <text :x="M.left - 6" :y="sy(v) + 3.5" text-anchor="end" class="so-far-muted-fill" v-text="fmt(v)"></text>
+                    </g>
+                    <template v-for="(slot, i) in m.slots" :key="'x' + i">
+                        <text v-if="showLabel(i)" :x="cx(i)" :y="H - 6" text-anchor="middle" class="so-far-muted-fill" v-text="slot.label"></text>
+                    </template>
+                </g>
+                <rect v-if="hover !== null" :x="cx(hover) - band / 2" :y="M.top" :width="band" :height="H - M.top - M.bottom" class="so-far-hover"></rect>
+                <g v-for="(n, i) in m.now" :key="'c' + i">
+                    <rect v-if="n !== null && n > 0" :x="cx(i) - colW / 2" :y="sy(n)" :width="colW" :height="Math.max(0, sy(0) - sy(n))" rx="2" class="so-far-col" :class="i === m.todayIndex ? 'is-today' : ''"></rect>
+                </g>
+                <g v-if="dayProjection" data-projection>
+                    <rect :x="cx(m.todayIndex) - colW / 2" :y="sy(dayProjection.value)" :width="colW" :height="Math.max(0, sy(m.now[m.todayIndex] || 0) - sy(dayProjection.value))" fill="none" class="so-far-ink" stroke-width="1" stroke-dasharray="3 2"></rect>
+                    <line :x1="cx(m.todayIndex)" :x2="cx(m.todayIndex)" :y1="sy(dayProjection.low)" :y2="sy(dayProjection.high)" class="so-far-ink" stroke-width="1"></line>
+                    <line :x1="cx(m.todayIndex) - 3" :x2="cx(m.todayIndex) + 3" :y1="sy(dayProjection.high)" :y2="sy(dayProjection.high)" class="so-far-ink" stroke-width="1"></line>
+                </g>
+                <g v-for="(n, i) in m.previous" :key="'p' + i">
+                    <line v-if="n !== null" :x1="cx(i) - band * 0.42" :x2="cx(i) + band * 0.42" :y1="sy(n)" :y2="sy(n)" class="so-far-muted" stroke-width="2" stroke-linecap="round"></line>
+                </g>
+            </svg>
+            <div v-if="hover !== null" class="so-far-tip pointer-events-none absolute top-1 rounded-lg px-2.5 py-1.5 text-xs shadow" :style="tipStyle" :dir="pageDir" v-text="tip"></div>
+        </div>
+        <dl v-if="rows.length" class="space-y-1.5 border-t so-far-rule pt-3">
+            <div v-for="row in rows" :key="row.key" class="text-sm" :data-row="row.key" :data-verdict="row.v.verdict">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                    <dt class="min-w-0 text-gray-600 dark:text-gray-400" v-text="row.name"></dt>
+                    <dd class="flex shrink-0 items-baseline gap-2 tabular-nums">
+                        <span class="text-gray-500 dark:text-gray-400" v-text="fmt(Math.round(row.v.expected))"></span>
+                        <b v-if="row.v.change" class="font-semibold text-gray-900 dark:text-white" dir="ltr" v-text="changeText(row.v.change)"></b>
+                        <span class="so-far-chip" :class="'is-' + row.v.verdict"><span v-if="arrow(row.v.verdict)" class="so-far-arrow" aria-hidden="true" v-text="arrow(row.v.verdict)"></span><span v-text="verdicts[row.v.verdict]"></span></span>
+                    </dd>
+                </div>
+                <p v-if="row.range" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" v-text="row.range"></p>
+            </div>
+        </dl>
+        <p v-if="!rows.length" class="text-sm text-gray-500 dark:text-gray-400" v-text="t.no_count"></p>
+        <p v-if="projectionLine" class="text-xs text-gray-500 dark:text-gray-400" v-text="projectionLine"></p>
+        <button type="button" class="event-link text-xs" :aria-expanded="table ? 'true' : 'false'" @click="table = !table" v-text="table ? t.show_chart : t.show_table"></button>
+        <div v-if="table" class="max-h-96 overflow-auto">
+            <table class="w-full text-sm">
+                <caption class="pb-1 text-start text-xs text-gray-500 dark:text-gray-400" v-text="label"></caption>
+                <thead class="text-xs text-gray-500 dark:text-gray-400"><tr>
+                    <th scope="col" class="py-1 pe-2 text-start font-semibold" v-text="t.col_day"></th>
+                    <th scope="col" class="px-2 py-1 text-end font-semibold" v-text="t.this_period"></th>
+                    <th scope="col" class="ps-2 py-1 text-end font-semibold" v-text="t['before_' + chart.period]"></th>
+                </tr></thead>
+                <tbody class="tabular-nums">
+                    <tr v-for="(slot, i) in m.slots" :key="slot.date">
+                        <th scope="row" class="py-1 pe-2 text-start font-normal text-gray-500 dark:text-gray-400" v-text="slot.title"></th>
+                        <td class="px-2 py-1 text-end text-gray-900 dark:text-white" v-text="m.now[i] === null ? '' : (i === m.todayIndex ? t.so_far.replace(':n', fmt(m.now[i])) : fmt(m.now[i]))"></td>
+                        <td class="ps-2 py-1 text-end text-gray-900 dark:text-white" v-text="m.previous[i] === null ? '' : fmt(m.previous[i])"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+</figure>`,
+            computed: {
+                m: function () {
+                    return (this.chart.metrics || {})[this.metric] || null;
+                },
+                count: function () {
+                    return this.m ? this.m.slots.length : 1;
+                },
+                band: function () {
+                    return (this.width - this.M.left - this.M.right) / this.count;
+                },
+                colW: function () {
+                    return Math.max(2, Math.min(28, this.band * 0.6));
+                },
+                dayProjection: function () {
+                    var p = this.m && this.m.projection;
+                    return p && p.day ? p.day : null;
+                },
+                yMax: function () {
+                    var m = this.m, values = [1];
+                    if (!m) return 1;
+                    m.now.concat(m.previous).forEach(function (n) { if (n !== null) values.push(n); });
+                    if (this.dayProjection) values.push(this.dayProjection.high);
+                    return Math.max.apply(null, values);
+                },
+                yTicks: function () {
+                    return soFarTicks(this.yMax);
+                },
+                header: function () {
+                    var m = this.m;
+                    var words = this.chart.period === 'month' ? this.t.last_month_had : this.t.period_had;
+                    return this.t.so_far.replace(':n', this.fmt(m.soFar)) + ' · ' + words.replace(':n', this.fmt(m.previousTotal));
+                },
+                // Against the period before, cut at the same time; 7 days against a usual week too.
+                rows: function () {
+                    var m = this.m, t = this.t, out = [], time = this.m ? this.m.cut.label : '';
+                    if (!m) return out;
+                    var prev = m.compare.previous;
+                    if (prev) {
+                        var name = prev.scaled ? t.previous_month_scaled : t['previous_' + this.chart.period].replace(':time', time);
+                        out.push({ key: 'previous', name: name, v: fairVerdict(m.soFar, prev.expected, 1), range: '' });
+                    }
+                    var usual = m.compare.usual;
+                    if (usual) {
+                        var v = fairVerdict(m.soFar, usual.expected, 1 / usual.available);
+                        var said = v.verdict !== 'none' && v.verdict !== 'tooFew';
+                        out.push({ key: 'usual', name: t.usual_week.replace(':time', time), v: v, range: said ? t.usually.replace(':low', this.fmt(usual.low)).replace(':high', this.fmt(usual.high)) : '' });
+                    }
+                    return out;
+                },
+                projectionLine: function () {
+                    var p = this.m && this.m.projection, t = this.t;
+                    if (!p) return '';
+                    if (p.shown) {
+                        var words = this.chart.period === 'month' ? t.projected_month : t.projected_period;
+                        return words.replace(':n', this.fmt(soFarRound(p.value))).replace(':low', this.fmt(soFarRound(p.low))).replace(':high', this.fmt(soFarRound(p.high)));
+                    }
+                    if (p.hidden === 'early') return this.chart.period === 'month' ? t.hidden_month_early : '';
+                    return p.hidden === 'tooFew' ? t.hidden_too_few : t.hidden_no_history;
+                },
+                summary: function () {
+                    return this.m ? this.t.summary_period.replace(':what', this.label).replace(':n', this.fmt(this.m.soFar)) : this.label;
+                },
+                tip: function () {
+                    var i = this.hover, m = this.m, t = this.t;
+                    if (i === null || !m) return '';
+                    var parts = [m.slots[i].title];
+                    if (m.now[i] !== null) parts.push(i === m.todayIndex ? t.so_far.replace(':n', this.fmt(m.now[i])) : this.fmt(m.now[i]));
+                    if (m.previous[i] !== null) parts.push(t.tip_before.replace(':n', this.fmt(m.previous[i])));
+                    return parts.join(', ');
+                },
+                tipStyle: function () {
+                    var x = this.cx(this.hover || 0);
+                    return x > this.width / 2 ? { right: (this.width - x + 8) + 'px' } : { left: (x + 8) + 'px' };
+                },
+            },
+            mounted: function () {
+                this.watchBox();
+            },
+            updated: function () {
+                this.watchBox();
+            },
+            beforeUnmount: function () {
+                if (this.observer) this.observer.disconnect();
+            },
+            methods: {
+                fmt: function (n) { return numberFormat.format(n || 0); },
+                changeText: changeText,
+                arrow: verdictArrow,
+                watchBox: SoFarChart.methods.watchBox,
+                fit: SoFarChart.methods.fit,
+                cx: function (i) {
+                    return this.M.left + (i + 0.5) * this.band;
+                },
+                sy: function (v) {
+                    var top = this.yTicks[this.yTicks.length - 1] || 1;
+                    return this.M.top + (1 - v / top) * (this.H - this.M.top - this.M.bottom);
+                },
+                // Every day for a week; a week apart, and the last day, for a longer period.
+                showLabel: function (i) {
+                    if (this.count <= 7) return true;
+                    var step = this.band < 14 ? 7 : (this.band < 30 ? 7 : 2);
+                    return i % step === 0;
+                },
+                point: function (event) {
+                    var box = event.currentTarget.getBoundingClientRect();
+                    var i = Math.floor((event.clientX - box.left - this.M.left) / this.band);
+                    this.hover = i >= 0 && i < this.count ? i : null;
+                },
+            },
+        };
