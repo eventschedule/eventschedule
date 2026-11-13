@@ -224,6 +224,25 @@
     .gk-pills { display: flex; gap: .5rem; overflow-x: auto; max-width: 46rem; margin: 0 auto .75rem; padding: .125rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     .gk-pills::-webkit-scrollbar { display: none; }
     .gk-pills[v-cloak] { display: none; }
+    {{-- The month's own copy, in the header beside the month's name: from a tablet up only, where
+         it takes the room between the name and the month's buttons and wraps rather than
+         scrolling (a sideways scroll with no scrollbar is out of reach of a mouse). The copy
+         above the list steps aside there while the month is shown. --}}
+    .gk-pills-head { display: none; }
+    @media (min-width: 768px) {
+        .gk-pills-head { display: flex; flex: 1 1 0; min-width: 0; flex-wrap: wrap; overflow: visible; max-width: none; margin: 0; padding-top: .25rem; }
+        {{-- The header row is aligned to its top on the guest page, so pills that wrap leave the
+             month's name and buttons on their first line instead of centring them against the
+             block. The name takes the buttons' 44px line, and a width that fits the longest
+             month, so changing month does not move the pills sideways. --}}
+        .gk-month-name { line-height: 2.75rem; min-width: 9.5em; }
+        .gk-pills-desk-off { display: none; }
+    }
+    {{-- A tablet has no room beside the name for more than a pill or two, and a block of four
+         lines there pushed the month down: the pills take a full row under the name instead. --}}
+    @media (min-width: 768px) and (max-width: 63.99rem) {
+        .gk-pills-head { order: 3; flex: 1 0 100%; padding-top: 0; }
+    }
     .gk-pill { display: inline-flex; flex: none; align-items: center; min-height: 2.25rem; padding: 0 .875rem; border: 1px solid var(--gk-line); border-radius: 999px; background: var(--gk-solid); color: var(--gk-ink); font: inherit; font-size: .875rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color var(--gk-swap, 120ms) ease, color var(--gk-swap, 120ms) ease; }
     .gk-pill:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
     .gk-pill-on { border-color: var(--es-accent-edge, transparent); background: var(--es-accent); color: var(--es-accent-text); }

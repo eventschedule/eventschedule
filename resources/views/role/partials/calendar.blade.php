@@ -381,7 +381,7 @@
     @endif
 >
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
-    <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
+    <div class="flex flex-col md:flex-row md:flex-wrap {{ $guestRows && ! $guestEmbed ? 'md:items-start' : 'md:items-center' }} md:justify-between gap-4">
 
         {{-- Month and Year Title: Always visible and positioned first (hidden in list view).
 
@@ -395,7 +395,7 @@
              The #month-year-title id is unchanged; it is a documented custom-CSS hook
              (marketing/custom-css.blade.php) and show-guest.blade.php targets it by id. --}}
         @php $calendarHeadingTag = ($calendarHeadingTag ?? 'h2') === 'h1' ? 'h1' : 'h2'; @endphp
-        <{{ $calendarHeadingTag }} id="month-year-title" v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
+        <{{ $calendarHeadingTag }} id="month-year-title" v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ $guestRows && ! $guestEmbed ? 'gk-month-name' : '' }} {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
             @if ($route === 'guest' && !request()->graphic)
             <time :datetime="monthYearDatetime" v-text="monthYearLabel"></time>
             @else
@@ -403,6 +403,12 @@
             @endif
         </{{ $calendarHeadingTag }}>
 
+        @if ($guestRows && ! $guestEmbed)
+        {{-- The quick filters beside the month's name, from a tablet up and in the month only.
+             Above the active-filter row below the header, so what can be picked comes before
+             what is picked. --}}
+        @include('role.partials.quick-pills', ['pillsInHeader' => true])
+        @endif
 
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}
         <div class="flex {{ ($tab ?? '') == 'availability' ? 'flex-row flex-wrap items-center' : 'flex-col' }} md:flex-row md:flex-nowrap md:items-center md:ms-auto gap-3">
@@ -596,6 +602,13 @@
 </header>
 @endif
 
+@if ($guestRows && ! $guestEmbed)
+{{-- The quick filters for a phone and for the list, above the active-filter row: what can be
+     picked comes before what is picked. The month on a wider screen has its own copy in the
+     header, beside the month's name (gk-pills-desk-off hides this one there). --}}
+@include('role.partials.quick-pills', ['pillsInHeader' => false])
+@endif
+
 @if (! request()->graphic && ! (isset($embed) && $embed))
 {{-- Active filters: what is narrowing the view, each with its own remove button. Without it a
      visitor who opens a shared "Room A" link (or scans one on a door) sees a partial schedule
@@ -640,18 +653,6 @@
         </button>
     </div>
 
-    @if ($guestRows && ! $guestEmbed)
-    {{-- The one filter most visitors want, one press away: the schedule's sub-schedules where
-         it has them, its categories otherwise. Everything else stays behind Filters. The names
-         are the owner's text, drawn by Vue from data (v-text), never compiled. --}}
-    <div v-if="quickChips.length > 1" v-cloak class="gk-pills {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}" role="group" aria-label="{{ $label('filters') }}">
-        <button type="button" class="gk-pill" :class="{ 'gk-pill-on': !quickChipValue }" :aria-pressed="!quickChipValue ? 'true' : 'false'" @click="pickQuickChip('', $event)">{{ $label('show_all') }}</button>
-        <button v-for="chip in quickChips" :key="chip.value" type="button" class="gk-pill" :class="{ 'gk-pill-on': quickChipValue === chip.value }"
-                :aria-pressed="quickChipValue === chip.value ? 'true' : 'false'" @click="pickQuickChip(chip.value, $event)">
-            <i v-if="chip.color" class="gk-row-dot" :style="{ backgroundColor: chip.color }"></i><span v-text="chip.name"></span>
-        </button>
-    </div>
-    @endif
 
     <div v-show="currentView === 'calendar'" class="{{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
 
