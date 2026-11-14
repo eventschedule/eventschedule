@@ -8297,4 +8297,9 @@ return [
     'copies_checked_unreachable' => ':host gaf geen antwoord.',
     'copies_saved' => 'Opgeslagen voor :host.',
     'admin_alert_marketing_copies' => '{1} :count site kopieert mogelijk de marketingpagina’s|[0,*] :count sites kopiëren mogelijk de marketingpagina’s',
+    'webhook_url_is_ours' => 'Dit is een adres van deze app zelf, waar Stripe of een andere betaalprovider zijn gebeurtenissen naartoe stuurt. Dat stel je in op het dashboard van de provider. Een webhook hier stuurt de gebeurtenissen van Event Schedule naar een ander systeem van jou.',
+    'webhook_test_failed_at' => 'De test bereikte :host, dat antwoordde met HTTP :status. Controleer of dit adres POST-verzoeken accepteert.',
+    'webhook_test_redirected' => ':host antwoordde met een doorverwijzing (HTTP :status). Webhooks volgen geen doorverwijzingen, dus vul het adres in waarnaar wordt doorverwezen.',
+    'newsletter_events_sub_schedule' => 'Sub-agenda',
+    'newsletter_events_all_sub_schedules' => 'Alle sub-agenda\'s',
 ];

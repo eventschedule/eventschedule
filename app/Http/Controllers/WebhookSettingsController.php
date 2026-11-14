@@ -27,6 +27,13 @@ class WebhookSettingsController extends Controller
 
         $url = $request->url;
 
+        // Before the DNS check: what it says is the more useful answer.
+        if (self::isOwnIncomingWebhook($url)) {
+            return redirect()->to(route('profile.edit').'#section-webhooks')
+                ->withInput()
+                ->withErrors(['url' => __('messages.webhook_url_is_ours')]);
+        }
+
         if (UrlUtils::validatedTarget($url) === null) {
             // On the field, with what was typed: it was a toast over an emptied form.
             return redirect()->to(route('profile.edit').'#section-webhooks')
@@ -77,6 +84,13 @@ class WebhookSettingsController extends Controller
         ]);
 
         $url = $request->url;
+
+        // Before the DNS check: what it says is the more useful answer.
+        if (self::isOwnIncomingWebhook($url)) {
+            return redirect()->to(route('profile.edit').'#section-webhooks')
+                ->withInput()
+                ->withErrors(['url' => __('messages.webhook_url_is_ours')]);
+        }
 
         if (UrlUtils::validatedTarget($url) === null) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
@@ -183,6 +197,13 @@ class WebhookSettingsController extends Controller
             abort(403);
         }
 
+        // A webhook saved before this check: say what it is rather than reporting the 400 the
+        // app's own Stripe endpoint gives anything Stripe did not sign.
+        if (self::isOwnIncomingWebhook($webhook->url)) {
+            return redirect()->to(route('profile.edit').'#section-webhooks')
+                ->with('error', __('messages.webhook_url_is_ours'));
+        }
+
         // Validate + pin the target right before sending (TOCTOU-safe against DNS
         // rebinding); the same vetted IP is used for the request below.
         $curl = UrlUtils::safePinnedCurlOptions($webhook->url);
@@ -245,8 +266,44 @@ class WebhookSettingsController extends Controller
                 ->with('message', __('messages.webhook_test_success', ['status' => $status]));
         }
 
-        return redirect()->to(route('profile.edit').'#section-webhooks')
-            ->with('error', __('messages.webhook_test_failed', ['status' => $status ?? 'timeout']));
+        // Name who answered: "Test webhook failed (HTTP 405)" read as the app failing, when it
+        // was the receiving server saying no.
+        $host = (string) parse_url((string) $webhook->url, PHP_URL_HOST);
+        $failure = match (true) {
+            $status === null => __('messages.webhook_test_failed', ['status' => 'timeout']),
+            $status >= 300 && $status < 400 => __('messages.webhook_test_redirected', ['host' => $host, 'status' => $status]),
+            default => __('messages.webhook_test_failed_at', ['host' => $host, 'status' => $status]),
+        };
+
+        return redirect()->to(route('profile.edit').'#section-webhooks')->with('error', $failure);
+    }
+
+    /**
+     * Whether $url is one of this app's own incoming webhooks: where Stripe, a payment gateway or
+     * WhatsApp sends ITS events here. A webhook on this page sends Event Schedule's events out to
+     * another system, so one pointed at those can never work: the Stripe endpoint answers 400 to
+     * anything Stripe did not sign, while Stripe's own calls go through, which reads as "the Test
+     * button is broken" (support, 2026-11).
+     */
+    public static function isOwnIncomingWebhook(string $url): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $ours = array_filter([
+            strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST)),
+            strtolower((string) request()->getHost()),
+        ]);
+
+        if ($host === '' || ! in_array(preg_replace('/^www\./', '', $host), array_map(fn ($h) => preg_replace('/^www\./', '', $h), $ours), true)) {
+            return false;
+        }
+
+        try {
+            $route = app('router')->getRoutes()->match(Request::create($url, 'POST'));
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return str_contains((string) $route->getName(), 'webhook');
     }
 
     public function deliveries(string $webhookHash)

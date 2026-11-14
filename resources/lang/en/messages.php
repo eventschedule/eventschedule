@@ -8367,4 +8367,9 @@ return [
     'copies_checked_unreachable' => ':host did not answer.',
     'copies_saved' => 'Saved for :host.',
     'admin_alert_marketing_copies' => '{1} :count site may be copying the marketing pages|[0,*] :count sites may be copying the marketing pages',
+    'webhook_url_is_ours' => 'This is one of this app\'s own addresses, where Stripe or another payment provider sends its events. That is set up in the provider\'s dashboard. A webhook here sends Event Schedule\'s events to another system of yours.',
+    'webhook_test_failed_at' => 'The test reached :host, which answered HTTP :status. Check that this address accepts a POST request.',
+    'webhook_test_redirected' => ':host answered with a redirect (HTTP :status). Webhooks do not follow redirects, so enter the address it redirects to.',
+    'newsletter_events_sub_schedule' => 'Sub-schedule',
+    'newsletter_events_all_sub_schedules' => 'All sub-schedules',
 ];

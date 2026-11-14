@@ -8295,4 +8295,9 @@ return [
     'copies_checked_unreachable' => ':host hat nicht geantwortet.',
     'copies_saved' => 'Für :host gespeichert.',
     'admin_alert_marketing_copies' => '{1} :count Website kopiert vielleicht die Marketingseiten|[0,*] :count Websites kopieren vielleicht die Marketingseiten',
+    'webhook_url_is_ours' => 'Das ist eine Adresse dieser App, an die Stripe oder ein anderer Zahlungsanbieter seine Ereignisse sendet. Das wird im Dashboard des Anbieters eingerichtet. Ein Webhook hier sendet die Ereignisse von Event Schedule an ein anderes System von dir.',
+    'webhook_test_failed_at' => 'Der Test hat :host erreicht, das mit HTTP :status geantwortet hat. Prüfe, ob diese Adresse POST-Anfragen annimmt.',
+    'webhook_test_redirected' => ':host hat mit einer Weiterleitung geantwortet (HTTP :status). Webhooks folgen keinen Weiterleitungen, also gib die Adresse ein, auf die weitergeleitet wird.',
+    'newsletter_events_sub_schedule' => 'Unterzeitplan',
+    'newsletter_events_all_sub_schedules' => 'Alle Unterzeitpläne',
 ];

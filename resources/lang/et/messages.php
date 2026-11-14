@@ -8296,4 +8296,9 @@ return [
     'copies_checked_unreachable' => ':host ei vastanud.',
     'copies_saved' => 'Salvestatud saidile :host.',
     'admin_alert_marketing_copies' => '{1} :count sait võib kopeerida turunduslehti|[0,*] :count saiti võivad kopeerida turunduslehti',
+    'webhook_url_is_ours' => 'See on selle rakenduse enda aadress, kuhu Stripe või mõni muu makseteenuse pakkuja oma sündmused saadab. See seadistatakse pakkuja töölaual. Siinne veebihaak saadab Event Schedule’i sündmused sinu teise süsteemi.',
+    'webhook_test_failed_at' => 'Test jõudis saidile :host, mis vastas HTTP :status. Kontrolli, kas see aadress võtab vastu POST-päringuid.',
+    'webhook_test_redirected' => ':host vastas ümbersuunamisega (HTTP :status). Veebihaagid ümbersuunamisi ei järgi, seega sisesta aadress, kuhu suunatakse.',
+    'newsletter_events_sub_schedule' => 'Alamajakava',
+    'newsletter_events_all_sub_schedules' => 'Kõik alamajakavad',
 ];

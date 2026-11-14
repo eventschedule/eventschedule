@@ -8294,4 +8294,9 @@ return [
     'copies_checked_unreachable' => ':host לא ענה.',
     'copies_saved' => 'נשמר עבור :host.',
     'admin_alert_marketing_copies' => '{1} אתר אחד אולי מעתיק את דפי השיווק|[0,*] :count אתרים אולי מעתיקים את דפי השיווק',
+    'webhook_url_is_ours' => 'זו אחת הכתובות של האפליקציה הזו, שאליה Stripe או ספק תשלומים אחר שולח את האירועים שלו. זה מוגדר בלוח הבקרה של הספק. Webhook כאן שולח את האירועים של Event Schedule למערכת אחרת שלך.',
+    'webhook_test_failed_at' => 'הבדיקה הגיעה אל :host, שענה HTTP :status. בדוק שהכתובת הזו מקבלת בקשות POST.',
+    'webhook_test_redirected' => ':host ענה בהפניה (HTTP :status). Webhooks לא עוקבים אחרי הפניות, לכן הזן את הכתובת שאליה הוא מפנה.',
+    'newsletter_events_sub_schedule' => 'תת-לוח זמנים',
+    'newsletter_events_all_sub_schedules' => 'כל תת-לוחות הזמנים',
 ];

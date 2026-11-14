@@ -8296,4 +8296,9 @@ return [
     'copies_checked_unreachable' => ':host não respondeu.',
     'copies_saved' => 'Guardado para :host.',
     'admin_alert_marketing_copies' => '{1} :count site pode estar copiando as páginas de marketing|[0,*] :count sites podem estar copiando as páginas de marketing',
+    'webhook_url_is_ours' => 'Este é um dos endereços deste app, para onde o Stripe ou outro provedor de pagamentos envia os eventos dele. Isso é configurado no painel do provedor. Um webhook aqui envia os eventos do Event Schedule para outro sistema seu.',
+    'webhook_test_failed_at' => 'O teste chegou a :host, que respondeu HTTP :status. Verifique se este endereço aceita pedidos POST.',
+    'webhook_test_redirected' => ':host respondeu com um redirecionamento (HTTP :status). Webhooks não seguem redirecionamentos, então informe o endereço para onde ele redireciona.',
+    'newsletter_events_sub_schedule' => 'Sub-agenda',
+    'newsletter_events_all_sub_schedules' => 'Todas as sub-agendas',
 ];

@@ -8295,4 +8295,9 @@ return [
     'copies_checked_unreachable' => 'لم يستجب :host.',
     'copies_saved' => 'حُفظ لـ :host.',
     'admin_alert_marketing_copies' => '{1} موقع قد ينسخ صفحات التسويق: :count|[0,*] مواقع قد تنسخ صفحات التسويق: :count',
+    'webhook_url_is_ours' => 'هذا أحد عناوين هذا التطبيق نفسه، حيث يرسل Stripe أو مزود دفع آخر أحداثه. يُضبط ذلك في لوحة تحكم المزود. يرسل الـ webhook هنا أحداث Event Schedule إلى نظام آخر لديك.',
+    'webhook_test_failed_at' => 'وصل الاختبار إلى :host، الذي أجاب HTTP :status. تحقق من أن هذا العنوان يقبل طلبات POST.',
+    'webhook_test_redirected' => 'أجاب :host بإعادة توجيه (HTTP :status). لا تتبع الـ webhooks عمليات إعادة التوجيه، لذا أدخل العنوان الذي يعيد التوجيه إليه.',
+    'newsletter_events_sub_schedule' => 'جدول فرعي',
+    'newsletter_events_all_sub_schedules' => 'كل الجداول الفرعية',
 ];

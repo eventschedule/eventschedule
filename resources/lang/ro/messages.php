@@ -8315,4 +8315,9 @@ return [
     'copies_checked_unreachable' => ':host nu a răspuns.',
     'copies_saved' => 'Salvat pentru :host.',
     'admin_alert_marketing_copies' => '{1} Site care ar putea copia paginile de marketing: :count|[0,*] Site-uri care ar putea copia paginile de marketing: :count',
+    'webhook_url_is_ours' => 'Aceasta este una dintre adresele acestei aplicații, la care Stripe sau alt furnizor de plăți își trimite evenimentele. Asta se configurează în panoul furnizorului. Un webhook de aici trimite evenimentele Event Schedule către un alt sistem al tău.',
+    'webhook_test_failed_at' => 'Testul a ajuns la :host, care a răspuns HTTP :status. Verifică dacă această adresă acceptă cereri POST.',
+    'webhook_test_redirected' => ':host a răspuns cu o redirecționare (HTTP :status). Webhook-urile nu urmează redirecționările, așa că introdu adresa către care redirecționează.',
+    'newsletter_events_sub_schedule' => 'Sub-program',
+    'newsletter_events_all_sub_schedules' => 'Toate sub-programele',
 ];
