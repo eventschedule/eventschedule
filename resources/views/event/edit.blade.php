@@ -5353,7 +5353,7 @@
                                 <div class="event-agenda-sub">
                                     <button type="button" class="event-link" v-if="! partDescOpen[part.uid]" @click="openPartDescription(part)">+ {{ __('messages.add_description') }}</button>
                                     <div v-show="partDescOpen[part.uid]">
-                                        <textarea :ref="'partDescription_' + part.uid" :name="'event_parts[' + index + '][description]'" rows="1"
+                                        <textarea :ref="'partDescription_' + part.uid" :name="'event_parts[' + index + '][description]'" rows="3"
                                                   data-content-dir="{{ content_dir($role) }}" aria-label="{{ __('messages.description') }}"
                                                   class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">@{{ part.description }}</textarea>
                                     </div>
@@ -8596,8 +8596,18 @@
             this.partDescOpen[part.uid] = true;
           }
         });
-        if (this.agendaShowDescription) {
+        if (! this.agendaShowDescription) return;
+        // This runs from mounted(), and the form mounts from an inline script, which runs BEFORE
+        // the deferred app.js module that defines window.initTinyMDE. So every saved part's
+        // description used to be skipped and left as a one-row textarea, while a part added later
+        // got the editor: "the agenda is compressed into tiny windows" once it had been saved
+        // (support, 2026-11). Wait for the module when it has not run yet.
+        if (window.initTinyMDE) {
           this.eventParts.forEach(part => this.initPartEditor(part));
+        } else if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            if (this.agendaShowDescription) this.eventParts.forEach(part => this.initPartEditor(part));
+          }, { once: true });
         }
       },
       destroyAllPartEditors() {
