@@ -51,7 +51,7 @@ return [
     '/docs/getting-started' => '2026-11-12',
     '/docs/gift-cards' => '2026-10-23',
     '/docs/managing-schedules' => '2026-11-11',
-    '/docs/newsletters' => '2026-11-01',
+    '/docs/newsletters' => '2026-11-14',
     '/docs/referral-program' => '2026-10-23',
     '/docs/saas' => '2026-11-14',
     '/docs/saas/custom-domains' => '2026-11-11',

@@ -4,14 +4,20 @@ namespace App\Services;
 
 use App\Jobs\SendNewsletterBatch;
 use App\Mail\NewsletterEmail;
+use App\Mail\NewsletterRepeatSkippedMail;
 use App\Models\Event;
+use App\Models\Group;
 use App\Models\Newsletter;
+use App\Models\NewsletterAbTest;
 use App\Models\NewsletterRecipient;
 use App\Models\NewsletterSegment;
 use App\Models\NewsletterUnsubscribe;
 use App\Models\Role;
+use App\Models\RoleSubscriber;
+use App\Models\User;
 use App\Repos\EventRepo;
 use App\Utils\MarkdownUtils;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -315,7 +321,7 @@ class NewsletterService
      * @return bool|array as send(), plus ['no_events', 0] / ['picked_passed', 0] for a copy with
      *                    nothing to list
      */
-    public function sendCopyNow(Newsletter $parent, \App\Models\User $by): bool|array
+    public function sendCopyNow(Newsletter $parent, User $by): bool|array
     {
         if (! $parent->isRepeating() || ! $parent->role) {
             return false;
@@ -447,7 +453,7 @@ class NewsletterService
         return $role->user_id ?: $parent->user_id;
     }
 
-    private function stillRuns(\App\Models\User $user, Role $role): bool
+    private function stillRuns(User $user, Role $role): bool
     {
         return (int) $user->id === (int) $role->user_id
             || ($role->members()->where('users.id', $user->id)->wherePivotIn('level', ['owner', 'admin'])->exists()
@@ -468,7 +474,7 @@ class NewsletterService
 
         foreach ($people as $user) {
             try {
-                $mail = new \App\Mail\NewsletterRepeatSkippedMail($parent, $user, $reason, $due, $next);
+                $mail = new NewsletterRepeatSkippedMail($parent, $user, $reason, $due, $next);
                 $mail->locale(is_valid_language_code($user->language_code) ? $user->language_code : 'en');
                 Mail::to($user->email)->send($mail);
             } catch (\Throwable $e) {
@@ -607,7 +613,7 @@ class NewsletterService
                 // objects do not have.
                 ->toBase()
             )->merge(
-                \App\Models\RoleSubscriber::where('role_id', $role->id)
+                RoleSubscriber::where('role_id', $role->id)
                     ->confirmed()
                     ->get(['email', 'name'])
                     ->map(fn ($subscriber) => (object) [
@@ -642,7 +648,7 @@ class NewsletterService
             ->toArray();
 
         // Exclude users with is_subscribed = false
-        $unsubscribedUserEmails = \App\Models\User::where('is_subscribed', false)
+        $unsubscribedUserEmails = User::where('is_subscribed', false)
             ->pluck('email')
             ->map(fn ($email) => strtolower($email))
             ->toArray();
@@ -661,7 +667,7 @@ class NewsletterService
     {
         if (empty($segmentIds)) {
             // Default to all subscribed, verified users
-            $allRecipients = \App\Models\User::whereNotNull('email_verified_at')
+            $allRecipients = User::whereNotNull('email_verified_at')
                 ->where('is_subscribed', true)
                 ->whereNull('admin_newsletter_unsubscribed_at')
                 ->select('id', 'email', 'name')
@@ -683,7 +689,7 @@ class NewsletterService
 
             // Safety net: filter unsubscribed users regardless of segment implementation
             $unsubscribedEmails = array_flip(
-                \App\Models\User::whereNotNull('admin_newsletter_unsubscribed_at')
+                User::whereNotNull('admin_newsletter_unsubscribed_at')
                     ->orWhere('is_subscribed', false)
                     ->pluck('email')
                     ->map(fn ($e) => strtolower($e))
@@ -724,6 +730,7 @@ class NewsletterService
         $asOf = $this->eventsAsOf($newsletter);
         $month = $this->monthFor($newsletter, $asOf);
         $ranged = [];
+        $grouped = [];
 
         foreach ($blocks as &$block) {
             $type = $block['type'] ?? '';
@@ -752,8 +759,11 @@ class NewsletterService
                 $pairs = collect();
                 if ($role) {
                     $range = self::eventRange($block['data'] ?? []);
+                    $picked = ! ($block['data']['useAllEvents'] ?? true);
+                    $groupKey = $picked ? '' : self::blockGroupKey($block['data'] ?? []);
                     $pairs = match (true) {
-                        ! ($block['data']['useAllEvents'] ?? true) => $this->pickedEvents($role, $block['data']['eventIds'] ?? []),
+                        $picked => $this->pickedEvents($role, $block['data']['eventIds'] ?? []),
+                        $groupKey !== '' => $grouped[$range.'|'.$groupKey] ??= $this->groupEvents($role, $range, $groupKey, $asOf),
                         $range === 'all' => $upcoming ??= $this->upcomingEvents($role),
                         default => $ranged[$range] ??= $this->eventsInRange($role, $range, $asOf),
                     };
@@ -1017,9 +1027,9 @@ class NewsletterService
      *
      * @return Collection<int, array{event: Event, date: ?string}>
      */
-    private function upcomingEvents(Role $role, int $limit = 10): Collection
+    private function upcomingEvents(Role $role, int $limit = 10, ?Group $group = null): Collection
     {
-        $pairs = app(EventRepo::class)->upcomingForGuest($role, null, $limit * 2, self::SERIES_HORIZON_DAYS)
+        $pairs = app(EventRepo::class)->upcomingForGuest($role, $group, $limit * 2, self::SERIES_HORIZON_DAYS)
             ->map(fn (array $pair) => $this->aheadOfNow($pair['event'], $pair['date']))
             ->filter()
             ->sortBy(fn (array $pair) => $pair['date'].' '.$pair['event']->localTimeOfDay())
@@ -1029,6 +1039,37 @@ class NewsletterService
         $this->loadForRows($pairs->pluck('event'));
 
         return $pairs;
+    }
+
+    /**
+     * The sub-schedule an Events block is narrowed to, as stored (an encoded id), or '' for all
+     * of them. Picked events ignore it: the picker already lists what the owner chose.
+     */
+    public static function blockGroupKey(array $data): string
+    {
+        $key = $data['groupId'] ?? '';
+
+        return is_string($key) && preg_match('/^[A-Za-z0-9_-]{1,64}$/', $key) === 1 ? $key : '';
+    }
+
+    /**
+     * What a block narrowed to one sub-schedule lists: the same list as without it, of that
+     * sub-schedule's events only. A sub-schedule that is gone, or another schedule's, lists
+     * nothing: a block meant for the music nights must not go out full of everything else.
+     *
+     * @return Collection<int, array{event: Event, date: ?string}>
+     */
+    private function groupEvents(Role $role, string $range, string $groupKey, Carbon $asOf): Collection
+    {
+        $group = Group::where('role_id', $role->id)->find(UrlUtils::decodeId($groupKey));
+
+        if (! $group) {
+            return collect();
+        }
+
+        return $range === 'all'
+            ? $this->upcomingEvents($role, 10, $group)
+            : $this->eventsInRange($role, $range, $asOf, $group);
     }
 
     /** The date ranges an Events block can list, besides every upcoming event. */
@@ -1084,12 +1125,12 @@ class NewsletterService
      *
      * @return Collection<int, array{event: Event, date: ?string}>
      */
-    private function eventsInRange(Role $role, string $range, Carbon $asOf): Collection
+    private function eventsInRange(Role $role, string $range, Carbon $asOf, ?Group $group = null): Collection
     {
         $zone = Newsletter::zoneOf($role);
         $window = self::rangeWindow($range, $asOf, $zone);
         if (! $window) {
-            return $this->upcomingEvents($role);
+            return $this->upcomingEvents($role, 10, $group);
         }
 
         [$from, $to] = $window;
@@ -1103,7 +1144,7 @@ class NewsletterService
 
         $pairs = app(EventRepo::class)->upcomingForGuest(
             $role,
-            null,
+            $group,
             self::RANGE_EVENT_LIMIT * 4,
             self::SERIES_HORIZON_DAYS,
             null,
@@ -1404,7 +1445,7 @@ class NewsletterService
             : $start->translatedFormat('M j').' - '.$end->translatedFormat('M j').$year;
     }
 
-    public function selectAbTestWinner(\App\Models\NewsletterAbTest $abTest): void
+    public function selectAbTestWinner(NewsletterAbTest $abTest): void
     {
         $abTest->load('newsletters.recipients');
 
@@ -1448,7 +1489,7 @@ class NewsletterService
         };
     }
 
-    protected function sendToRemainingRecipients(\App\Models\NewsletterAbTest $abTest, Newsletter $winnerNewsletter): void
+    protected function sendToRemainingRecipients(NewsletterAbTest $abTest, Newsletter $winnerNewsletter): void
     {
         // Check for existing remainder newsletter from a prior attempt
         $remainderNewsletter = Newsletter::where('ab_test_id', $abTest->id)

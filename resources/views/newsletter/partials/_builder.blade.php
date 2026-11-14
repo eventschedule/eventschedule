@@ -111,6 +111,10 @@ $builderProps = [
     'initialSegmentIds' => $newsletter->segment_ids ?? [],
     'templateDefaults' => $templateDefaults,
     'events' => $eventsData,
+    // What an Events block can be narrowed to. A newsletter of the platform's has none.
+    'subSchedules' => ! $isAdmin && ($role ?? null) instanceof \App\Models\Role
+        ? $role->groups->map(fn ($group) => ['value' => \App\Utils\UrlUtils::encodeId($group->id), 'label' => $group->name])->values()->all()
+        : [],
     'segments' => $segmentsData,
     'csrfToken' => csrf_token(),
     'newsletter' => $newsletterData,
@@ -170,6 +174,8 @@ $builderProps = [
         'events_range_this_month' => __('messages.newsletter_events_range_this_month'),
         'events_range_next_month' => __('messages.newsletter_events_range_next_month'),
         'events_range_picked' => __('messages.newsletter_events_range_picked'),
+        'events_sub_schedule' => __('messages.newsletter_events_sub_schedule'),
+        'events_all_sub_schedules' => __('messages.newsletter_events_all_sub_schedules'),
         'events_range_example' => __('messages.newsletter_events_range_example', ['sent' => ':sent', 'from' => ':from', 'to' => ':to', 'limit' => ':limit', 'timezone' => ':timezone']),
         'events' => __('messages.events'),
         'no_upcoming_events' => __('messages.no_upcoming_events'),
