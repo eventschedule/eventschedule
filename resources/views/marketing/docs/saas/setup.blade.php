@@ -84,13 +84,9 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Your platform does not serve the Event Schedule marketing site</div>
-            <p>The marketing pages (home, features, pricing, this user guide) are registered only when
-            <code class="doc-inline-code">IS_NEXUS=true</code>, which identifies the one upstream install that
-            receives federated events and shared translations, and it counts only when the install's
-            <code class="doc-inline-code">APP_URL</code> is eventschedule.com: on any other address the app
-            ignores it. The marketing pages are Event Schedule's own and are not licensed for use on another
-            site. Leave it unset on your own platform. Your root domain redirects visitors to the sign-in
-            page, and you point
+            <p>The marketing pages (home, features, pricing, this user guide) are Event Schedule's own: they are
+            served only on eventschedule.com and are not licensed for use on another site. Your root domain
+            redirects visitors to the sign-in page, and you point
             <code class="doc-inline-code">APP_MARKETING_URL</code> at whatever marketing site you run yourself.</p>
         </div>
 
@@ -195,11 +191,6 @@
                         <td><code class="doc-inline-code">APP_MARKETING_URL</code></td>
                         <td><code class="doc-inline-code">https://eventschedule.com</code></td>
                         <td>Your own marketing site, and the base of every link the app builds to a page it does not serve itself: the <strong>Create your own</strong> card on your free tier's event pages, the logo in the admin portal's sidebar and on the sign-in pages, the <strong>Help</strong> button (<code class="doc-inline-code">/docs/...</code>), the <strong>Learn more</strong> and <strong>Compare plans</strong> links on upgrade prompts (<code class="doc-inline-code">/features/...</code>, <code class="doc-inline-code">/pricing</code>), and the privacy policy and terms (<code class="doc-inline-code">/privacy</code>, <code class="doc-inline-code">/terms-of-service</code>) until you <a href="#legal-pages" class="doc-link">publish your own</a>. Point it at your site rather than leaving the default, and have your site answer or redirect those paths.</td>
-                    </tr>
-                    <tr>
-                        <td><code class="doc-inline-code">IS_NEXUS</code></td>
-                        <td><code class="doc-inline-code">false</code></td>
-                        <td>Leave this off. It marks the single upstream install that hosts the Event Schedule marketing site and receives federated events and shared translation suggestions, and it counts only when <code class="doc-inline-code">APP_URL</code> is eventschedule.com. On your platform's address it serves no marketing page; the only thing it still changes is the default proxy trust (set <code class="doc-inline-code">TRUSTED_PROXIES</code> instead).</td>
                     </tr>
                 </tbody>
             </table>
@@ -1087,7 +1078,7 @@ return [
             <div class="doc-field">
                 <h4>The root domain shows the sign-in page instead of a landing page</h4>
                 <ul class="doc-list text-sm">
-                    <li>This is expected. Marketing pages are only served when <code class="doc-inline-code">IS_NEXUS=true</code>, on eventschedule.com, which is not a setting for your platform. The pages are not licensed for use on another site</li>
+                    <li>This is expected. The marketing pages are served only on eventschedule.com and are not licensed for use on another site</li>
                     <li>Host your own marketing site and point <code class="doc-inline-code">APP_MARKETING_URL</code> at it</li>
                 </ul>
             </div>
