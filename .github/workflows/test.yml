@@ -141,6 +141,9 @@ jobs:
           sed -i 's/IS_HOSTED=.*/IS_HOSTED=true/' .env
           echo "APP_TESTING=true" >> .env
           echo "IS_NEXUS=true" >> .env
+          # IS_NEXUS counts only on eventschedule.com or a development host (App\Support\Nexus),
+          # and .env.example ships APP_URL empty, so sitemap:lastmod below needs one.
+          sed -i 's|^APP_URL=.*|APP_URL=https://eventschedule.test|' .env
 
       - name: Generate application key
         run: php artisan key:generate

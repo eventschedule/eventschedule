@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\Nexus;
+
 return [
 
     /*
@@ -101,7 +103,7 @@ return [
     // opted in with REPORT_ERRORS. Any other install, a selfhosted SaaS running IS_HOSTED among
     // them, reports nowhere unless it names its own SENTRY_BROWSER_DSN: its visitors' errors are
     // not ours to receive (self-hosting terms, "what crosses the line").
-    'sentry_browser_dsn' => env('SENTRY_BROWSER_DSN') ?: ((env('IS_NEXUS', false) || env('REPORT_ERRORS', false))
+    'sentry_browser_dsn' => env('SENTRY_BROWSER_DSN') ?: ((Nexus::claimed(env('IS_NEXUS', false), env('APP_URL')) || env('REPORT_ERRORS', false))
         ? 'https://e40010dda2802390fc7a031a3db09b63@o4509513336291328.ingest.us.sentry.io/4509513340289024'
         : null),
     'sentry_js_dsn' => env('SENTRY_JS_DSN'),
@@ -133,7 +135,9 @@ return [
     // for that, so a default argument would never fire and the symbol would come out blank.
     'platform_currency' => env('PLATFORM_CURRENCY') ?: 'USD',
 
-    'is_nexus' => (bool) env('IS_NEXUS', false),
+    // IS_NEXUS counts only on eventschedule.com itself (or a development host): a selfhosted SaaS
+    // that sets it does not get the marketing site. See App\Support\Nexus.
+    'is_nexus' => Nexus::claimed(env('IS_NEXUS', false), env('APP_URL')),
     // The git commit this deploy was built from. The hosted app spec sets APP_COMMIT to
     // ${_self.COMMIT_HASH}; unset elsewhere. Read only through ReleaseHistory::commit(), which
     // accepts a hex hash and nothing else, so the growth payload can date a deploy to its commit.
