@@ -56,6 +56,7 @@ class SchedulerHealth
         'boost-charge-statements' => 'hosted',
         'app-generate-sub-audience-blog' => 'nexus',
         'app-generate-daily-blog-post' => 'nexus',
+        'app-check-marketing-copies' => 'nexus',
         'app-import-curator-events' => 'not_hosted',
         // Gated inside the command.
         'app-check-github-stars' => 'nexus',
