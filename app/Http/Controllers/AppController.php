@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessScheduledNewsletters;
 use App\Models\Role;
+use App\Models\User;
+use App\Services\AdsService;
 use App\Services\AppUpdateService;
+use App\Services\MetaAdsService;
+use App\Utils\ReleaseHistory;
 use App\Utils\UrlUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
@@ -64,7 +69,7 @@ class AppController extends Controller
         // every signed-in person after that, it had the server open a connection to any host and
         // port they named, on a route that is outside the CSRF check.
         try {
-            $hasUsers = \App\Models\User::exists();
+            $hasUsers = User::exists();
         } catch (\Throwable $e) {
             // Table may not exist yet during initial setup
             $hasUsers = false;
@@ -144,7 +149,7 @@ class AppController extends Controller
             // An update whose migrations did not run in the process that copied it is finished
             // before any tier runs, so they meet the new schema (AppUpdateService::finishUpdate(),
             // once per installed state; it never raises).
-            \App\Services\AppUpdateService::finishUpdate();
+            AppUpdateService::finishUpdate();
 
             // Every catch below is \Throwable, not \Exception.
             //
@@ -160,7 +165,7 @@ class AppController extends Controller
             // Process scheduled newsletters BEFORE queue:work so newly dispatched
             // SendNewsletterBatch jobs get processed by the queue:work below
             try {
-                (new \App\Jobs\ProcessScheduledNewsletters)();
+                (new ProcessScheduledNewsletters)();
             } catch (\Throwable $e) {
                 \Log::error('Scheduled command ProcessScheduledNewsletters failed: '.$e->getMessage());
                 report($e);
@@ -270,7 +275,7 @@ class AppController extends Controller
                     report($e);
                 }
 
-                if (\App\Services\MetaAdsService::shouldSync()) {
+                if (MetaAdsService::shouldSync()) {
                     try {
                         \Artisan::call('boost:sync');
                     } catch (\Throwable $e) {
@@ -293,7 +298,7 @@ class AppController extends Controller
                 // network serving" would let switching the network off strand advertisers'
                 // money. SyncPromotions::handle() reads isEnabled() itself to decide which
                 // steps still apply.
-                if (\App\Services\AdsService::isEnabled()) {
+                if (AdsService::isEnabled()) {
                     try {
                         \Artisan::call('promo:sync');
                     } catch (\Throwable $e) {
@@ -636,6 +641,17 @@ class AppController extends Controller
                     }
                 }
 
+                // Sites that may be serving a copy of the marketing pages. Keep in sync with
+                // routes/console.php.
+                if (config('app.is_nexus')) {
+                    try {
+                        \Artisan::call('app:check-marketing-copies');
+                    } catch (\Throwable $e) {
+                        \Log::error('Scheduled command app:check-marketing-copies failed: '.$e->getMessage());
+                        report($e);
+                    }
+                }
+
                 if (config('app.hosted')) {
                     try {
                         \Artisan::call('app:send-subscription-reminders');
@@ -711,11 +727,11 @@ class AppController extends Controller
             Cache::put('scheduler.last_run_at.http', now()->timestamp, now()->addDays(7));
 
             // Which PHP this rail runs on, for the self-updater (AppUpdateService::PHP_SEEN_KEY).
-            \App\Services\AppUpdateService::recordPhp('http_cron');
+            AppUpdateService::recordPhp('http_cron');
 
             // Dates the release, as the scheduler rail's heartbeat does (growth meta.releases).
             try {
-                \App\Utils\ReleaseHistory::touch();
+                ReleaseHistory::touch();
             } catch (\Throwable $e) {
                 report($e);
             }

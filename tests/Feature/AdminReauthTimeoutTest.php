@@ -258,6 +258,9 @@ class AdminReauthTimeoutTest extends TestCase
      */
     public function test_confirming_the_password_resets_both_clocks(): void
     {
+        // Frozen: the request can cross a second boundary, and the stamps then differ from now()
+        // by one (CI, 2026-11-14).
+        $this->freezeTime();
         $admin = $this->admin();
         $this->actingAs($admin);
 

@@ -1,6 +1,8 @@
 <?php
 
 use App\Jobs\ProcessScheduledNewsletters;
+use App\Services\AdsService;
+use App\Services\MetaAdsService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
@@ -297,7 +299,7 @@ Schedule::call(function () {
 })->daily()->name('boost-charge-statements')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
-    if (\App\Services\MetaAdsService::shouldSync()) {
+    if (MetaAdsService::shouldSync()) {
         Artisan::call('boost:sync');
     }
 })->everyFifteenMinutes()->name('boost-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
@@ -315,7 +317,7 @@ Schedule::call(function () {
 // which is exactly what SyncPromotions::handle() was written to prevent. handle() reads
 // isEnabled() itself to decide which steps still apply.
 Schedule::call(function () {
-    if (\App\Services\AdsService::isEnabled()) {
+    if (AdsService::isEnabled()) {
         Artisan::call('promo:sync');
     }
 })->everyFifteenMinutes()->name('promo-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
@@ -394,6 +396,14 @@ Schedule::call(function () {
         Artisan::call('app:generate-daily-blog-post');
     }
 })->daily()->name('app-generate-daily-blog-post')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));
+
+// Nexus only: sites that may be serving a copy of the marketing pages (MarketingCopyWatch). At
+// most ten hosts, two pages each, 15 seconds a fetch. Keep in sync with AppController::translateData().
+Schedule::call(function () {
+    if (config('app.is_nexus')) {
+        Artisan::call('app:check-marketing-copies');
+    }
+})->daily()->name('app-check-marketing-copies')->withoutOverlapping(15)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (config('app.hosted')) {

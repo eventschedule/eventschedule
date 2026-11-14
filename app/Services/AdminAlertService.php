@@ -2,8 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\BlogPost;
 use App\Models\BoostCampaign;
+use App\Models\BoostPartner;
+use App\Models\BoostStatement;
+use App\Models\EventFeed;
 use App\Models\FederatedInstance;
+use App\Models\LegalDocument;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleRefund;
@@ -11,7 +16,10 @@ use App\Models\SupportMessage;
 use App\Models\TranslationOverride;
 use App\Models\TranslationSuggestion;
 use App\Utils\PlanPriceUtils;
+use App\Utils\RealtimeTracker;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -102,6 +110,9 @@ class AdminAlertService
         // own details in public until someone looks, which is the more urgent of the two.
         'calendar_exposures',
         'spam_suspects',
+        // Amber: a site serving a copy of the marketing pages (MarketingCopyWatch). Drains when
+        // the operator marks it contacted or not a copy.
+        'marketing_copies',
         'federation_flagged',
         'federation',
         'translation_suggestions',
@@ -245,7 +256,7 @@ class AdminAlertService
                     return 0;
                 }
 
-                $privacy = \App\Models\LegalDocument::index()['privacy'] ?? null;
+                $privacy = LegalDocument::index()['privacy'] ?? null;
 
                 if ($privacy && ($privacy['url'] || $privacy['has_content'])) {
                     return 0;
@@ -259,7 +270,7 @@ class AdminAlertService
             'realtime_prune_stalled' => function () {
                 try {
                     return DB::table('realtime_hits')
-                        ->where('last_seen_at', '<', \App\Utils\RealtimeTracker::ts(\App\Utils\RealtimeTracker::now()->subHours(2)))
+                        ->where('last_seen_at', '<', RealtimeTracker::ts(RealtimeTracker::now()->subHours(2)))
                         ->exists() ? 1 : 0;
                 } catch (\Throwable) {
                     return 0;
@@ -270,11 +281,11 @@ class AdminAlertService
             // for an hour. The mark is set by the first failure in transit and cleared by the next
             // answer, so a single timeout never shows here.
             'venue_map_lookups_failing' => function () {
-                if (! \App\Services\PlaceLookupService::enabled()) {
+                if (! PlaceLookupService::enabled()) {
                     return 0;
                 }
 
-                $since = \Illuminate\Support\Facades\Cache::get(\App\Services\PlaceLookupService::FAILING_SINCE_KEY);
+                $since = Cache::get(PlaceLookupService::FAILING_SINCE_KEY);
 
                 return is_numeric($since) && $since <= now()->subHour()->timestamp ? 1 : 0;
             },
@@ -282,11 +293,11 @@ class AdminAlertService
             // How many feeds are failing, when that is many at once (EventFeed::manyFailing()):
             // one feed that cannot be read is its schedule's news, not ours.
             'feeds_failing' => function () {
-                if (! \App\Models\EventFeed::tablesReady() || ! \App\Models\EventFeed::manyFailing()) {
+                if (! EventFeed::tablesReady() || ! EventFeed::manyFailing()) {
                     return 0;
                 }
 
-                return \App\Models\EventFeed::whereNull('paused_at')->where('failure_count', '>', 0)->count();
+                return EventFeed::whereNull('paused_at')->where('failure_count', '>', 0)->count();
             },
 
             // A live subscription whose stripe_price is none of the four configured IDs.
@@ -351,7 +362,7 @@ class AdminAlertService
             // been charged and is waiting, so it is queued as actionable rather than
             // informational. Gated on the operator switch so an instance that never enabled
             // the network cannot accrue a queue it has no screen for.
-            'promos_pending' => fn () => \App\Services\PromotionService::isEnabled()
+            'promos_pending' => fn () => PromotionService::isEnabled()
                 ? BoostCampaign::awaitingReview()->count()
                 : 0,
 
@@ -374,7 +385,7 @@ class AdminAlertService
 
             'translation_suggestions' => fn () => $isNexus ? TranslationSuggestion::pending()->count() : 0,
 
-            'blog_posts_held' => fn () => $isNexus ? \App\Models\BlogPost::heldForReview()->count() : 0,
+            'blog_posts_held' => fn () => $isNexus ? BlogPost::heldForReview()->count() : 0,
 
             // Guarded because spam_clearances is new and a selfhost install may not have
             // migrated yet: the nav must not 500 in the middle of an update. Only a missing
@@ -383,8 +394,8 @@ class AdminAlertService
             // not have migrated yet.
             'calendar_exposures' => function () {
                 try {
-                    return \App\Services\CalendarExposureWatch::count();
-                } catch (\Illuminate\Database\QueryException $e) {
+                    return CalendarExposureWatch::count();
+                } catch (QueryException $e) {
                     if ($e->getCode() !== '42S02') {
                         report($e);
                     }
@@ -396,7 +407,19 @@ class AdminAlertService
             'spam_suspects' => function () {
                 try {
                     return SpamWatch::count();
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
+                    if ($e->getCode() !== '42S02') {
+                        report($e);
+                    }
+
+                    return 0;
+                }
+            },
+
+            'marketing_copies' => function () {
+                try {
+                    return MarketingCopyWatch::count();
+                } catch (QueryException $e) {
                     if ($e->getCode() !== '42S02') {
                         report($e);
                     }
@@ -406,12 +429,12 @@ class AdminAlertService
             },
 
             'boost_partners_waiting' => fn () => $isHosted
-                ? \App\Models\BoostPartner::whereNotNull('enabled_at')->where('connection_method', 'partner_share')
+                ? BoostPartner::whereNotNull('enabled_at')->where('connection_method', 'partner_share')
                     ->whereNotNull('ad_account_id')->whereNull('confirmed_at')->whereNull('connection_error')->count()
                 : 0,
             'boost_partner_launches_stuck' => fn () => BoostCampaign::whereNotNull('boost_partner_id')->where('status', 'in_review')
                 ->whereNull('meta_campaign_id')->where('updated_at', '<=', now()->subMinutes(30))->count(),
-            'boost_statements_failed' => fn () => \App\Models\BoostStatement::whereIn('status', ['failed', 'action_required'])->count(),
+            'boost_statements_failed' => fn () => BoostStatement::whereIn('status', ['failed', 'action_required'])->count(),
 
             'support_unread' => fn () => $isHosted
                 ? SupportMessage::where('is_from_admin', false)->whereNull('read_at')->count()
@@ -641,6 +664,7 @@ class AdminAlertService
             'boost_statements_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-partners', 'red', 'Boost'],
             'calendar_exposures' => ['manage', 'private-calendars', 'admin.private_calendars', [], '', 'amber', __('messages.private_calendars')],
             'spam_suspects' => ['manage', 'blocked', 'admin.blocked', [], '#suspects', 'amber', __('messages.blocked')],
+            'marketing_copies' => ['manage', 'copies', 'admin.copies', [], '#copies', 'amber', __('messages.copies')],
             // ?status=flagged, not approved: the filter behind it repeats this row's own
             // count query, so the link lands on exactly the instances it counted rather
             // than on every approved install with those merely sorted to the top.

@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\CustomDomainSetting;
 use App\Models\Event;
+use App\Models\MarketingCopyHost;
 use App\Models\Newsletter;
+use App\Models\PromoterLink;
 use App\Models\Role;
 use App\Models\User;
+use App\Utils\RealtimeTracker;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -89,6 +93,7 @@ class PageQueryScalingTest extends TestCase
         'admin realtime trends' => 12, // 9
         'admin realtime so far' => 11, // 8
         'admin blocked' => 18, // 15
+        'admin copies' => 14,
         'api events' => 16, // 13
         'api schedules' => 12, // 9
         'api categories' => 6, // 3
@@ -139,7 +144,7 @@ class PageQueryScalingTest extends TestCase
             'custom_domain_mode' => 'direct',
             'custom_domain_status' => 'active',
         ]);
-        \App\Models\CustomDomainSetting::store($this->talent, \App\Models\CustomDomainSetting::SUBDOMAIN);
+        CustomDomainSetting::store($this->talent, CustomDomainSetting::SUBDOMAIN);
         $this->curator = $this->createCurator($this->owner, ['name' => 'Harbor Guide']);
 
         $raw = 'testapikey_'.Str::random(24);
@@ -166,9 +171,15 @@ class PageQueryScalingTest extends TestCase
             $event->roles()->attach($this->curator->id, ['is_accepted' => true]);
             $ticket = $this->createTicket($event, ['price' => 10 + $i, 'quantity' => 100]);
             // A promoter link per round, credited with the round's sale (the Promoters tab).
-            $promoter = \App\Models\PromoterLink::create(['role_id' => $this->venue->id, 'name' => 'Promoter '.$i, 'code' => 'promoter-'.$i, 'commission_percent' => 10]);
+            $promoter = PromoterLink::create(['role_id' => $this->venue->id, 'name' => 'Promoter '.$i, 'code' => 'promoter-'.$i, 'commission_percent' => 10]);
             $this->createSale($event, $this->venue, ['name' => 'Buyer '.$i, 'email' => "buyer{$i}@gmail.com", 'payment_amount' => 10 + $i, 'promoter_link_id' => $promoter->id], $ticket);
             $this->events[] = $event;
+
+            // A likely copy and a watched site per round (/admin/copies).
+            foreach (['copy' => 'copy', 'clear' => 'watched'] as $status => $name) {
+                MarketingCopyHost::create(['host' => "{$name}{$i}.example.net", 'source' => 'referrer', 'visits' => $i,
+                    'first_seen_at' => now(), 'last_seen_at' => now(), 'status' => $status, 'markers' => ['layout', 'phrases'], 'copy_found_at' => now()]);
+            }
 
             $this->createRecurringEvent($this->venue, ['name' => 'Weekly '.$i, 'creator_role_id' => $this->venue->id, 'days_of_week' => '0000100']);
 
@@ -212,9 +223,9 @@ class PageQueryScalingTest extends TestCase
                 'os' => 'macOS',
                 'country' => 'US',
                 'hb' => 60,
-                'started_at' => \App\Utils\RealtimeTracker::ts(now()),
-                'last_seen_at' => \App\Utils\RealtimeTracker::ts(now()),
-                'engaged_at' => \App\Utils\RealtimeTracker::ts(now()),
+                'started_at' => RealtimeTracker::ts(now()),
+                'last_seen_at' => RealtimeTracker::ts(now()),
+                'engaged_at' => RealtimeTracker::ts(now()),
             ]);
         }
 
@@ -235,7 +246,7 @@ class PageQueryScalingTest extends TestCase
             'check-in stats',
             // The platform admin
             'admin dashboard', 'admin dashboard recent', 'admin dashboard growth', 'admin schedules', 'admin revenue', 'admin queue', 'admin realtime data',
-            'admin realtime trends', 'admin realtime so far', 'admin blocked',
+            'admin realtime trends', 'admin realtime so far', 'admin blocked', 'admin copies',
             // The API
             'api events', 'api schedules', 'api categories',
         ];
@@ -322,6 +333,7 @@ class PageQueryScalingTest extends TestCase
             'admin realtime trends' => $asAdmin()->getJson(route('admin.realtime.trends')),
             'admin realtime so far' => $asAdmin()->getJson(route('admin.realtime.so_far')),
             'admin blocked' => $asAdmin()->get(route('admin.blocked')),
+            'admin copies' => $asAdmin()->get(route('admin.copies')),
 
             'api events' => $api()->getJson('/api/events'),
             'api schedules' => $api()->getJson('/api/schedules'),

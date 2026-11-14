@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminBlockController;
 use App\Http\Controllers\AdminCalendarPrivacyController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminCopyController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminFederationController;
 use App\Http\Controllers\AdminFeedController;
@@ -30,7 +31,6 @@ use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventbriteController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventFeedController;
-use App\Http\Controllers\PromoterLinkController;
 use App\Http\Controllers\EventInterestController;
 use App\Http\Controllers\EventTemplateController;
 use App\Http\Controllers\FeedbackController;
@@ -55,6 +55,7 @@ use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
+use App\Http\Controllers\PromoterLinkController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\PushController;
 use App\Http\Controllers\RealtimeController;
@@ -71,9 +72,12 @@ use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\SupportChatGuestController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\VenueMapController;
 use App\Http\Controllers\WaitlistController;
 use App\Http\Controllers\WebhookSettingsController;
 use App\Http\Controllers\WhatsAppWebhookController;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Outside 'web' for the reason the sitemap routes are: crawler traffic never needs a session, and
@@ -120,7 +124,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         // The venue map's venues (App\Services\VenueMap). Its own named bucket: an unnamed throttle
         // shares one with every other throttled route on the host.
-        Route::get('/api/venue-map', [\App\Http\Controllers\VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
+        Route::get('/api/venue-map', [VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::post('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/follow', [RoleController::class, 'followLanding']);
@@ -653,7 +657,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     // The view had a page of its own at /realtime when it first landed on main (2026-10-06),
     // before it became a tab. Kept as a way in for a bookmark or a dashboard left open since, so the name stays
     // in Role::RESERVED_SUBDOMAINS. The old `?schedule=` is the Analytics page's `role_id`.
-    Route::get('/realtime', fn (\Illuminate\Http\Request $request) => redirect()->route('analytics', array_filter([
+    Route::get('/realtime', fn (Request $request) => redirect()->route('analytics', array_filter([
         'tab' => 'realtime',
         'role_id' => is_string($request->query('schedule')) ? $request->query('schedule') : null,
     ])));
@@ -844,9 +848,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     // The ticket reminder as the schedule's guests will get it (Tickets > Reminders), for its editors.
     Route::get('/{subdomain}/ticket-reminder-preview', [RoleController::class, 'ticketReminderPreview'])->name('role.ticket_reminder_preview')->middleware('throttle:30,1');
     // How a schedule's venues are placed on its venue map, for its editors.
-    Route::get('/{subdomain}/venue-map/status', [\App\Http\Controllers\VenueMapController::class, 'status'])->name('role.venue_map.status');
-    Route::put('/{subdomain}/venue-map/marks/{venue}', [\App\Http\Controllers\VenueMapController::class, 'mark'])->name('role.venue_map.mark');
-    Route::delete('/{subdomain}/venue-map/marks/{venue}', [\App\Http\Controllers\VenueMapController::class, 'unmark'])->name('role.venue_map.unmark');
+    Route::get('/{subdomain}/venue-map/status', [VenueMapController::class, 'status'])->name('role.venue_map.status');
+    Route::put('/{subdomain}/venue-map/marks/{venue}', [VenueMapController::class, 'mark'])->name('role.venue_map.mark');
+    Route::delete('/{subdomain}/venue-map/marks/{venue}', [VenueMapController::class, 'unmark'])->name('role.venue_map.unmark');
     Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email')->middleware('throttle:10,1');
     Route::post('/{subdomain}/notification-email/resend', [NotificationEmailController::class, 'resend'])->name('role.notification_email.resend')->middleware('throttle:5,1');
     Route::post('/{subdomain}/test-feedback-email', [RoleController::class, 'testFeedbackEmail'])->name('role.test_feedback_email');
@@ -1121,7 +1125,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::redirect('/admin', '/admin/dashboard');
         // Realtime was a page of its own until 2026-10. Its filters and ?trend= are bookmarked,
         // which Route::redirect() would drop.
-        Route::get('/admin/realtime', fn (\Illuminate\Http\Request $request) => redirect()->to(route('admin.dashboard').($request->getQueryString() ? '?'.$request->getQueryString() : '')))->name('admin.realtime');
+        Route::get('/admin/realtime', fn (Request $request) => redirect()->to(route('admin.dashboard').($request->getQueryString() ? '?'.$request->getQueryString() : '')))->name('admin.realtime');
         Route::get('/admin/realtime/data', [AdminRealtimeController::class, 'data'])->name('admin.realtime.data');
         Route::get('/admin/realtime/trends', [AdminRealtimeController::class, 'trends'])->name('admin.realtime.trends');
         Route::get('/admin/realtime/so-far', [AdminRealtimeController::class, 'soFar'])->name('admin.realtime.so_far');
@@ -1212,6 +1216,13 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::post('/admin/feeds/{hash}/resume', [AdminFeedController::class, 'resume'])->name('admin.feeds.resume');
         // Shutting an account out, and the list of what new accounts are refused for. On every
         // install: a selfhost that opens registration has the same spam.
+        // Sites that may be serving a copy of the marketing pages. Nexus only, 404'd at runtime
+        // inside the controller as the federation pages are.
+        Route::get('/admin/copies', [AdminCopyController::class, 'index'])->name('admin.copies');
+        Route::post('/admin/copies/{hash}/decide', [AdminCopyController::class, 'decide'])->name('admin.copies.decide');
+        Route::post('/admin/copies/{hash}/check', [AdminCopyController::class, 'check'])
+            ->name('admin.copies.check')
+            ->middleware('throttle:10,1');
         Route::get('/admin/blocked', [AdminBlockController::class, 'index'])->name('admin.blocked');
         Route::post('/admin/blocked/list', [AdminBlockController::class, 'storeEntry'])->name('admin.blocked.entry.store');
         Route::post('/admin/blocked/list/{hash}/remove', [AdminBlockController::class, 'removeEntry'])->name('admin.blocked.entry.remove');
@@ -1397,13 +1408,13 @@ if (config('app.is_nexus')) {
         Route::post('/marketing/visit', [MarketingController::class, 'recordVisit'])
             ->name('marketing.visit')
             ->middleware('throttle:120,1,marketing_visit')
-            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+            ->withoutMiddleware(ValidateCsrfToken::class);
         // The homepage headline test's beacon (App\Utils\HeroExperiment): a `view` on a visitor's
         // first assignment, a `click` on their first sign-up link click. Same reasoning as above.
         Route::post('/marketing/hero', [MarketingController::class, 'recordHeroEvent'])
             ->name('marketing.hero_event')
             ->middleware('throttle:120,1,marketing_hero')
-            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+            ->withoutMiddleware(ValidateCsrfToken::class);
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -1685,13 +1696,13 @@ if (config('app.is_nexus')) {
             Route::post('/marketing/visit', [MarketingController::class, 'recordVisit'])
                 ->name('marketing.visit')
                 ->middleware('throttle:120,1,marketing_visit')
-                ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+                ->withoutMiddleware(ValidateCsrfToken::class);
             // The homepage headline test's beacon (App\Utils\HeroExperiment): a `view` on a visitor's
             // first assignment, a `click` on their first sign-up link click. Same reasoning as above.
             Route::post('/marketing/hero', [MarketingController::class, 'recordHeroEvent'])
                 ->name('marketing.hero_event')
                 ->middleware('throttle:120,1,marketing_hero')
-                ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+                ->withoutMiddleware(ValidateCsrfToken::class);
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -2349,15 +2360,15 @@ if (config('app.hosted') && config('app.is_nexus')) {
         Route::post('/support-chat/guest/messages', [SupportChatGuestController::class, 'send'])
             ->name('support-chat.guest.send')
             ->middleware('throttle:20,1,support_guest_send')
-            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+            ->withoutMiddleware(ValidateCsrfToken::class);
         Route::post('/support-chat/guest/contact', [SupportChatGuestController::class, 'contact'])
             ->name('support-chat.guest.contact')
             ->middleware('throttle:10,1,support_guest_contact')
-            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+            ->withoutMiddleware(ValidateCsrfToken::class);
         Route::post('/support-chat/guest/read', [SupportChatGuestController::class, 'read'])
             ->name('support-chat.guest.read')
             ->middleware('throttle:60,1,support_guest_read')
-            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+            ->withoutMiddleware(ValidateCsrfToken::class);
     };
 
     if (config('app.is_testing')) {
@@ -2391,7 +2402,7 @@ if (! config('app.hosted') || config('app.is_testing')) {
         ->withoutMiddleware('web');
     Route::get('/{subdomain}/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
-    Route::get('/{subdomain}/api/venue-map', [\App\Http\Controllers\VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
+    Route::get('/{subdomain}/api/venue-map', [VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::post('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/follow', [RoleController::class, 'followLanding']);

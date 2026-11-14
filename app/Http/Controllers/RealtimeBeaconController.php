@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PageView;
+use App\Services\MarketingCopyWatch;
 use App\Utils\RealtimeTracker;
 use App\Utils\UserAgentUtils;
 use Illuminate\Http\Request;
@@ -246,6 +247,13 @@ class RealtimeBeaconController extends Controller
         $source = $continuation
             ? ['inherit' => true]
             : RealtimeTracker::classifySource($referrerHost, $utm, $navigation, $context['surface'], $request);
+
+        // A visit that begins on a marketing or sign-in page and came from a site nobody knows:
+        // that site may be serving a copy of the marketing pages (MarketingCopyWatch). The host
+        // alone is kept, never anything about this visitor.
+        if (! $source['inherit'] && ($source['channel'] ?? null) === 'other' && in_array($context['surface'], ['wp', 'auth'], true)) {
+            MarketingCopyWatch::sawReferrer($source['name'] ?? null);
+        }
 
         $row = [
             'hit_key' => $key,
