@@ -4,6 +4,7 @@ namespace App\View\Components;
 
 use App\Utils\DocsUtils;
 use App\Utils\SeoUtils;
+use Carbon\Carbon;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
@@ -94,7 +95,7 @@ class DocsPage extends Component
 
         return str_starts_with($this->canonical, 'http')
             ? $this->canonical
-            : rtrim(config('app.url'), '/').'/'.ltrim($this->canonical, '/');
+            : SeoUtils::siteUrl().'/'.ltrim($this->canonical, '/');
     }
 
     /**
@@ -209,7 +210,7 @@ class DocsPage extends Component
         }
 
         try {
-            return \Carbon\Carbon::createFromFormat('Y-m-d', substr($stamp, 0, 10))->format('j F Y');
+            return Carbon::createFromFormat('Y-m-d', substr($stamp, 0, 10))->format('j F Y');
         } catch (\Throwable) {
             return null;
         }

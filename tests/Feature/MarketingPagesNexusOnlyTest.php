@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Utils\SeoUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Tests\Feature\Concerns\ForcesEnvironment;
@@ -46,6 +47,37 @@ class MarketingPagesNexusOnlyTest extends TestCase
 
         $route = app('router')->getRoutes()->match(Request::create('https://eventschedule.com/pricing'));
         $this->assertSame('marketing.pricing', $route->getName());
+    }
+
+    /**
+     * The second half of the goal: a copy that is served anyway (code edited, or the pages saved
+     * and put up) must not tell Google that it is the original. Every canonical, og:url and @id
+     * on a marketing page is built from SeoUtils::siteUrl().
+     */
+    public function test_a_copy_names_eventschedule_com_as_the_original(): void
+    {
+        config(['app.url' => 'https://tickets.example.co.za']);
+
+        $this->assertSame('https://eventschedule.com', SeoUtils::siteUrl());
+        $this->assertSame('https://eventschedule.com/pricing', SeoUtils::canonicalUrl('pricing'));
+        $this->assertSame('https://eventschedule.com/#organization', SeoUtils::organization()['@id']);
+
+        config(['app.url' => 'https://eventschedule.com/']);
+        $this->assertSame('https://eventschedule.com/pricing', SeoUtils::canonicalUrl('/pricing'));
+
+        // A development install keeps its own address, so local pages link to themselves.
+        config(['app.url' => 'https://eventschedule.test']);
+        $this->assertSame('https://eventschedule.test/pricing', SeoUtils::canonicalUrl('pricing'));
+    }
+
+    public function test_the_page_itself_carries_the_canonical(): void
+    {
+        $this->bootAs('https://tickets.example.co.za');
+        // The layout renders off the nexus for the bundled legal pages; render it as a copy would.
+        $html = view('marketing.privacy')->render();
+
+        $this->assertStringContainsString('<link rel="canonical" href="https://eventschedule.com', $html);
+        $this->assertStringNotContainsString('tickets.example.co.za/#', $html);
     }
 
     private function bootAs(string $appUrl): void

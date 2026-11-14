@@ -2,6 +2,9 @@
 
 namespace App\Utils;
 
+use App\Models\GalleryImage;
+use App\Support\Nexus;
+
 /**
  * The bits of the marketing head that have exactly one right answer, kept in one place so a page
  * cannot quietly get them wrong.
@@ -53,10 +56,17 @@ class SeoUtils
     /**
      * The marketing site's root, with no trailing slash: the base every structured-data @id hangs
      * off, so a node on a docs page, the blog host and the homepage all name the same entity.
+     *
+     * It is eventschedule.com on every install but a development one, never the install's own
+     * APP_URL: a selfhosted SaaS that served these pages (GitHub #136) had each of them name ITS
+     * copy as the canonical, og:url and structured-data @id, so Google saw two originals of every
+     * page. Wherever they are rendered, they now point Google at the one on eventschedule.com.
      */
     public static function siteUrl(): string
     {
-        return rtrim((string) config('app.url'), '/');
+        $url = rtrim((string) config('app.url'), '/');
+
+        return Nexus::hostAllowed($url) ? $url : 'https://'.Nexus::DOMAIN;
     }
 
     /**
@@ -498,7 +508,7 @@ class SeoUtils
      * credit. A gallery photo that already IS the share image is not listed twice.
      *
      * @param  array<string, mixed>|null  $existing
-     * @param  iterable<\App\Models\GalleryImage>  $gallery
+     * @param  iterable<GalleryImage>  $gallery
      * @return array<int, array<string, mixed>>|array<string, mixed>|null
      */
     public static function galleryImageList(?array $existing, iterable $gallery, int $limit = 10): ?array
