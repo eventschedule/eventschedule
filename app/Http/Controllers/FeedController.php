@@ -8,6 +8,8 @@ use Carbon\Carbon;
 
 class FeedController extends Controller
 {
+    private const ICAL_PAGE_SIZE = 200;
+
     public function icalFeed($subdomain)
     {
         $role = Role::subdomain($subdomain)->first();
@@ -21,14 +23,10 @@ class FeedController extends Controller
 
         $now = Carbon::now('UTC');
 
-        $events = Event::where(function ($query) use ($now) {
-            $query->where('starts_at', '>=', $now)
-                ->orWhereNotNull('days_of_week')
-                ->orWhere(function ($q) use ($now) {
-                    $q->where('duration', '>=', 24)
-                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$now]);
-                });
-        })
+        // hasUpcomingOccurrence(), as the RSS feed has it: "any series" loaded every series the
+        // schedule ever ran, finished ones included, each with every schedule on it (a whole
+        // roles row apiece), and a long-running calendar ran out of memory before writing a line.
+        $events = Event::hasUpcomingOccurrence($now)
             ->whereIn('id', function ($query) use ($role) {
                 $query->select('event_id')
                     ->from('event_role')
@@ -41,7 +39,10 @@ class FeedController extends Controller
             ->whereNull('event_password')
             ->with(['roles', 'venue', 'creatorRole'])
             ->orderBy('starts_at')
-            ->get();
+            ->orderBy('id')
+            // In pages, so what is held at once is one page of events and the text written so far,
+            // however many events the schedule has.
+            ->lazy(self::ICAL_PAGE_SIZE);
 
         $domain = parse_url(config('app.url'), PHP_URL_HOST) ?: 'eventschedule.com';
         $timezone = $role->timezone ?: 'UTC';

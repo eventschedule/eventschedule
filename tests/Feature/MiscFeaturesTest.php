@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Event;
 use App\Models\User;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -63,6 +64,42 @@ class MiscFeaturesTest extends TestCase
         $response->assertOk();
         $this->assertStringContainsString('BEGIN:VCALENDAR', $response->getContent());
         $this->assertStringContainsString('Feed Event', $response->getContent());
+    }
+
+    public function test_ical_feed_leaves_out_a_series_that_has_ended(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, [
+            'name' => 'Finished Weekly',
+            'starts_at' => now()->subYear()->setTime(12, 0)->format('Y-m-d H:i:s'),
+            'days_of_week' => '1111111',
+            'recurring_end_type' => 'on_date',
+            'recurring_end_value' => now()->subMonths(6)->format('Y-m-d'),
+        ]);
+        $this->createEvent($role, [
+            'name' => 'Running Weekly',
+            'starts_at' => now()->subYear()->setTime(12, 0)->format('Y-m-d H:i:s'),
+            'days_of_week' => '1111111',
+        ]);
+        $this->createEvent($role, ['name' => 'One Night']);
+
+        // What is LOADED, not only what is written: matchesDate() writes no date for an ended
+        // series either, but loading every one a schedule ever ran is what ran a feed out of memory.
+        $loaded = [];
+        Event::retrieved(function (Event $event) use (&$loaded) {
+            $loaded[] = $event->name;
+        });
+
+        $content = $this->get(route('feed.ical', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertNotContains('Finished Weekly', $loaded);
+        $this->assertStringNotContainsString('Finished Weekly', $content);
+        $this->assertStringContainsString('Running Weekly', $content);
+        $this->assertStringContainsString('One Night', $content);
+        $this->assertStringEndsWith('END:VCALENDAR', $content);
     }
 
     public function test_rss_feed(): void
