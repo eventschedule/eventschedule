@@ -53,7 +53,7 @@ return [
     '/docs/managing-schedules' => '2026-11-11',
     '/docs/newsletters' => '2026-11-14',
     '/docs/referral-program' => '2026-10-23',
-    '/docs/saas' => '2026-11-14',
+    '/docs/saas' => '2026-11-15',
     '/docs/saas/custom-domains' => '2026-11-11',
     '/docs/saas/facebook-login' => '2026-10-23',
     '/docs/saas/federation' => '2026-10-23',

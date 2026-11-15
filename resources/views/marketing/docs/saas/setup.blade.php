@@ -2,10 +2,18 @@
     key="saas/setup"
     title="White-Label SaaS Setup: Your Own Platform - Event Schedule"
     description="Run Event Schedule as a white-label SaaS: wildcard subdomains, your branding, Stripe plan billing, and tenants selling through their own Stripe or PayPal."
-    lede="Configure Event Schedule for SaaS (Software as a Service) deployment, where you host the platform for multiple customers using subdomains."
+    lede="Configure Event Schedule for SaaS (Software as a Service) deployment, where you host the platform for multiple customers on subdomains, beside a marketing site of your own on the root domain."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
+        <x-doc-nav-group label="Domains and Your Marketing Site" href="#domain-layout">
+            <x-doc-nav-link href="#domain-map">Which Host Serves What</x-doc-nav-link>
+            <x-doc-nav-link href="#marketing-setup">Setting It Up</x-doc-nav-link>
+            <x-doc-nav-link href="#marketing-options">Building the Site</x-doc-nav-link>
+            <x-doc-nav-link href="#marketing-paths">Addresses the App Links To</x-doc-nav-link>
+            <x-doc-nav-link href="#marketing-sitemap">Search Engines</x-doc-nav-link>
+            <x-doc-nav-link href="#marketing-cookie">The Sign-In Cookie</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-link href="#prerequisites">Prerequisites</x-doc-nav-link>
         <x-doc-nav-group label="Environment Configuration" href="#environment">
             <x-doc-nav-link href="#core-settings">Core SaaS Settings</x-doc-nav-link>
@@ -82,12 +90,15 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The <code class="doc-inline-code">app</code> and <code class="doc-inline-code">www</code> hosts never resolve to a schedule, and a list of names the app needs for itself (among them <code class="doc-inline-code">admin</code>, <code class="doc-inline-code">api</code>, <code class="doc-inline-code">blog</code>, <code class="doc-inline-code">docs</code>, <code class="doc-inline-code">demo</code> and anything starting with <code class="doc-inline-code">demo-</code>) cannot be taken as a subdomain. A customer who asks for a reserved name, when creating a schedule or renaming it on its edit page, is given a random eight-letter subdomain instead. A new name starting with <code class="doc-inline-code">demo-</code> is refused there with "That subdomain is reserved", and so is renaming a schedule to any reserved name from the platform admin panel.</p>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Your platform does not serve the Event Schedule marketing site</div>
-            <p>The marketing pages (home, features, pricing, this user guide) are Event Schedule's own: they are
-            served only on eventschedule.com and are not licensed for use on another site. Your root domain
-            redirects visitors to the sign-in page, and you point
-            <code class="doc-inline-code">APP_MARKETING_URL</code> at whatever marketing site you run yourself.</p>
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">You need a marketing site of your own</div>
+            <p>The app does not include a marketing site for your platform. Event Schedule's home page,
+            feature pages, pricing and this user guide are served only on eventschedule.com and are not
+            licensed for use on another site, so they are not available on your install. Every SaaS
+            platform is set up the same way: the app on <code class="doc-inline-code">app.yourdomain.com</code>
+            and your customers' subdomains, and a site you build yourself (WordPress or anything else) on
+            <code class="doc-inline-code">yourdomain.com</code>. See
+            <a href="#domain-layout" class="doc-link">Domains and Your Marketing Site</a>.</p>
         </div>
 
         <h3 id="go-live-checklist" class="doc-subheading">The minimum to go live</h3>
@@ -99,6 +110,10 @@
             <li class="doc-step">
                 <h4 class="doc-step-title">Point DNS and the certificate at every subdomain</h4>
                 <p>A wildcard record, a wildcard certificate and a web server that answers for both. See <a href="#dns" class="doc-link">DNS Configuration</a> and <a href="#webserver" class="doc-link">Web Server Configuration</a>.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Put your own marketing site on the root domain</h4>
+                <p>Point <code class="doc-inline-code">yourdomain.com</code> and <code class="doc-inline-code">www</code> at a site you build, and have it answer the addresses the app links to. See <a href="#domain-layout" class="doc-link">Domains and Your Marketing Site</a>.</p>
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Make it yours</h4>
@@ -115,6 +130,211 @@
         </ol>
     </section>
 
+    {{-- Domains and Your Marketing Site --}}
+    <section id="domain-layout" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
+            Domains and Your Marketing Site
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule is the product your customers sign in to. It is not a website about your product: the home page, feature pages, pricing, comparison pages and this user guide that you see on eventschedule.com belong to Event Schedule, are served only there, and are not licensed for use on another site. None of them is available on your install, whatever you configure.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">So every SaaS platform is set up in two parts: the app on subdomains of your domain, and a marketing site you build and run yourself on the root domain. Your marketing site is where you describe your product, publish your prices and send people to sign up; the app takes over from the moment they do.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">This is the expected setup, not a workaround</div>
+            <p>A visitor who reaches the app on your root domain is sent to the sign-in page, and the app's
+            addresses for features, pricing and docs go to the admin portal. That is by design. Plan for your
+            own marketing site from the start, put it on <code class="doc-inline-code">yourdomain.com</code>,
+            and the app on <code class="doc-inline-code">app.yourdomain.com</code> never needs to show one.</p>
+        </div>
+
+        <h3 id="domain-map" class="doc-subheading">Which Host Serves What</h3>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Host</th>
+                        <th>Served by</th>
+                        <th>What is there</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">yourdomain.com</code></td>
+                        <td>Your marketing site</td>
+                        <td>Your home page, features, pricing, help pages and legal pages</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">www.yourdomain.com</code></td>
+                        <td>Your marketing site</td>
+                        <td>A redirect to <code class="doc-inline-code">yourdomain.com</code> (or the other way round, as your site prefers)</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">app.yourdomain.com</code></td>
+                        <td>Event Schedule</td>
+                        <td>Sign in, sign up, the admin portal, plan billing and every webhook. This is <code class="doc-inline-code">APP_URL</code></td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">demo.yourdomain.com</code></td>
+                        <td>Event Schedule</td>
+                        <td>The demo schedule, if you turn on <a href="#demo" class="doc-link">Demo Mode</a></td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">*.yourdomain.com</code></td>
+                        <td>Event Schedule</td>
+                        <td>Each customer's public schedule, for example <code class="doc-inline-code">jazz-club.yourdomain.com</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The app reserves names it or a marketing site is likely to need, among them <code class="doc-inline-code">www</code>, <code class="doc-inline-code">blog</code>, <code class="doc-inline-code">docs</code>, <code class="doc-inline-code">marketing</code>, <code class="doc-inline-code">about</code> and <code class="doc-inline-code">pricing</code>, so no customer can take one as a schedule's subdomain. To serve your own blog or help center on one of them, give it its own DNS record pointing at the host that runs it.</p>
+
+        <h3 id="marketing-setup" class="doc-subheading">Setting It Up</h3>
+        <ol class="doc-steps">
+            <li class="doc-step">
+                <h4 class="doc-step-title">Put the app on the app subdomain</h4>
+                <p>Install Event Schedule on its own server and set <code class="doc-inline-code">APP_URL</code> to the <code class="doc-inline-code">app</code> subdomain and <code class="doc-inline-code">APP_MARKETING_URL</code> to your marketing site. The base domain the schedules live under is worked out from <code class="doc-inline-code">APP_URL</code> by dropping the <code class="doc-inline-code">app.</code>.</p>
+                <div class="doc-code-block">
+                    <div class="doc-code-header">
+                        <span>.env</span>
+                        <button class="doc-copy-btn">Copy</button>
+                    </div>
+                    <pre><code><span class="code-variable">IS_HOSTED</span>=<span class="code-value">true</span>
+<span class="code-variable">APP_URL</span>=<span class="code-string">https://app.yourdomain.com</span>
+<span class="code-variable">APP_MARKETING_URL</span>=<span class="code-string">https://yourdomain.com</span></code></pre>
+                </div>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Split DNS between the two</h4>
+                <p>Give the root domain and <code class="doc-inline-code">www</code> their own records pointing at your marketing host, and a wildcard pointing at the app server. A name with a record of its own always wins over the wildcard, so the two never clash. The full records are under <a href="#dns" class="doc-link">DNS Configuration</a>.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Get a certificate for each side</h4>
+                <p>The app server needs a wildcard certificate for <code class="doc-inline-code">*.yourdomain.com</code>, which covers <code class="doc-inline-code">app</code>, <code class="doc-inline-code">demo</code> and every schedule. The marketing host needs one for <code class="doc-inline-code">yourdomain.com</code> and <code class="doc-inline-code">www.yourdomain.com</code>, which most WordPress and static hosts issue for you. A wildcard does not cover the bare root domain, so neither certificate does the other's job.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Build the marketing site</h4>
+                <p>With WordPress or any other tool; see <a href="#marketing-options" class="doc-link">Building the Site</a>. Write your own copy, your own feature list and your own screenshots: Event Schedule's pages are not yours to copy.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Answer the addresses the app links to</h4>
+                <p>The Help button, the upgrade prompts and the logo all link to paths on <code class="doc-inline-code">APP_MARKETING_URL</code>. Create those pages or redirect them; see <a href="#marketing-paths" class="doc-link">Addresses the App Links To</a>.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Link the site to the app</h4>
+                <p>Your site's <strong>Sign in</strong> button goes to <code class="doc-inline-code">https://app.yourdomain.com/login</code> and its <strong>Sign up</strong> button to <code class="doc-inline-code">https://app.yourdomain.com/sign_up</code>. Keep the prices on your pricing page in step with the plan amounts in <strong>System &rarr; Settings</strong> (see <a href="#stripe-variables" class="doc-link">Stripe Subscription Setup</a>), since the app quotes those figures on its own upgrade prompts.</p>
+            </li>
+        </ol>
+
+        <h3 id="marketing-options" class="doc-subheading">Building the Site</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The app does not care what your marketing site is built with, as long as it answers on your root domain. Common choices:</p>
+        <ul class="doc-list mb-6">
+            <li><strong>WordPress</strong>, on a server of its own or with a managed WordPress host. Point the root domain at it, and handle the redirects below with a redirect plugin (Redirection is a common one) or in the server configuration.</li>
+            <li><strong>A static site</strong> built with a generator such as Hugo, Astro, Eleventy or Jekyll and hosted on Netlify, Cloudflare Pages, GitHub Pages or Vercel. Each of those takes a redirect list in a file (for example Netlify's and Cloudflare's <code class="doc-inline-code">_redirects</code>).</li>
+            <li><strong>A site builder</strong> such as Webflow, Squarespace, Wix or Framer, most of which accept a list of redirects in their settings.</li>
+            <li><strong>The same server as the app</strong>, as a separate virtual host for <code class="doc-inline-code">yourdomain.com</code> and <code class="doc-inline-code">www.yourdomain.com</code> with its own document root. Never point it at the app's <code class="doc-inline-code">public</code> directory, and take <code class="doc-inline-code">yourdomain.com</code> out of the app's own virtual host, which keeps <code class="doc-inline-code">*.yourdomain.com</code>.</li>
+        </ul>
+
+        <h3 id="marketing-paths" class="doc-subheading">Addresses the App Links To</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Wherever the app links to a page it does not serve itself, it builds the address on <code class="doc-inline-code">APP_MARKETING_URL</code>. Your site should answer each of these, with a page of its own or a redirect to the closest one, or your customers will land on your site's not-found page:</p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Path</th>
+                        <th>Where the app links it</th>
+                        <th>What to put there</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">/</code></td>
+                        <td>The logo in the admin portal's sidebar and on the sign-in pages, and the <strong>Create your own</strong> card on your free tier's event pages</td>
+                        <td>Your home page</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">/pricing</code></td>
+                        <td><strong>Compare plans</strong> on upgrade prompts</td>
+                        <td>Your pricing page</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">/features/...</code></td>
+                        <td><strong>Learn more</strong> on upgrade prompts and some settings, one path per feature (<code class="doc-inline-code">/features/ticketing</code>, <code class="doc-inline-code">/features/ai</code> ...)</td>
+                        <td>A page per feature, or one redirect for all of them to your features page</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">/docs/...</code></td>
+                        <td>The <strong>Help</strong> button on every admin portal page, and help links beside some settings, with the section's anchor (<code class="doc-inline-code">/docs/creating-events#details</code>)</td>
+                        <td>Your own help pages, or one redirect to your help center or support page</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">/privacy</code>, <code class="doc-inline-code">/terms-of-service</code>, <code class="doc-inline-code">/cookie-policy</code></td>
+                        <td>Sign-up, ticket checkout and the cookie banner</td>
+                        <td>Nothing, once you publish your own documents at <code class="doc-inline-code">/admin/legal</code> (see <a href="#legal-pages" class="doc-link">Legal Pages</a>): the links then go wherever you set them</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">/accessibility</code></td>
+                        <td>The accessibility menu on public pages, and error pages</td>
+                        <td>Your accessibility statement</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">/why-create-account</code></td>
+                        <td>The event submission form, beside the account it asks a guest to create</td>
+                        <td>A short page on why an account is asked for, or a redirect to your home page</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">/blog</code>, <code class="doc-inline-code">/use-cases</code></td>
+                        <td>The app's not-found page</td>
+                        <td>Your blog and an overview page, or redirects to your home page</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A few more paths appear in rarer places (an email sent to a platform that joins <a href="{{ route('marketing.docs.saas.federation') }}" class="doc-link">Federation</a>, for one), so a catch-all that sends any unknown path to your home page is a sensible last line. The part after <code class="doc-inline-code">#</code> never reaches your server, so a redirect cannot act on it. Rules that cover the two families:</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>nginx (marketing site)</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-comment"># Every feature page to one features page, every help link to your help center</span>
+<span class="code-keyword">location</span> ^~ /features/ { <span class="code-keyword">return</span> <span class="code-value">301</span> /features; }
+<span class="code-keyword">location</span> ^~ /docs { <span class="code-keyword">return</span> <span class="code-value">301</span> /help; }</code></pre>
+        </div>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.htaccess (WordPress on Apache, above the WordPress block)</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-keyword">RedirectMatch</span> <span class="code-value">301</span> ^/features/.+$ /features
+<span class="code-keyword">RedirectMatch</span> <span class="code-value">301</span> ^/docs(/.*)?$ /help</code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">With a redirect plugin in WordPress, add the same two rules as regular expressions: source <code class="doc-inline-code">^/features/.+</code> to <code class="doc-inline-code">/features</code>, and <code class="doc-inline-code">^/docs(/.*)?</code> to <code class="doc-inline-code">/help</code>. Replace <code class="doc-inline-code">/features</code> and <code class="doc-inline-code">/help</code> with whatever your own pages are called.</p>
+
+        <h3 id="marketing-sitemap" class="doc-subheading">Search Engines and Your Customers' Schedules</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The app publishes a sitemap of your customers' public schedules and events at <code class="doc-inline-code">/sitemap.xml</code> on the root domain, and only there. With your marketing site on the root domain, pass the app's sitemap addresses through to the app, so that search engines still find every schedule:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>nginx (marketing site)</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-comment"># The app's sitemap index and its parts, served by the app under the root domain's name</span>
+<span class="code-keyword">location</span> ~ ^/sitemap(-[a-z0-9-]+)?\.xml(\.gz)?$ {
+<span class="code-keyword">proxy_pass</span> https://app.yourdomain.com;
+<span class="code-keyword">proxy_set_header</span> Host yourdomain.com;
+<span class="code-keyword">proxy_ssl_server_name</span> on;
+}</code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The app's virtual host must then answer for <code class="doc-inline-code">yourdomain.com</code> as well as <code class="doc-inline-code">*.yourdomain.com</code>, as in the <a href="#webserver" class="doc-link">Web Server Configuration</a> examples, which is why this pass-through needs the marketing site on a different server from the app. It does not collide with WordPress's own sitemap, which is <code class="doc-inline-code">/wp-sitemap.xml</code> (or <code class="doc-inline-code">/sitemap_index.xml</code> with an SEO plugin): submit both to your search console. If your marketing host cannot pass requests through, skip this step; your customers' pages can still be found through the links to them.</p>
+
+        <h3 id="marketing-cookie" class="doc-subheading">The Sign-In Cookie</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The app's sign-in cookie is set for <code class="doc-inline-code">.yourdomain.com</code>, so that a customer stays signed in between <code class="doc-inline-code">app.yourdomain.com</code> and their schedule's subdomain. Browsers send it to your marketing site too. Its value is encrypted, but anyone who could read it on the marketing site's server could replay it, so treat that site as part of your platform: keep WordPress, its theme and its plugins up to date, install only plugins you trust, and do not log request cookies.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">To keep the two fully apart instead, run the platform on a domain of its own, for example <code class="doc-inline-code">APP_URL=https://app.yourbrand.events</code> with schedules at <code class="doc-inline-code">*.yourbrand.events</code>, and the marketing site on <code class="doc-inline-code">yourbrand.com</code>. <code class="doc-inline-code">APP_MARKETING_URL</code> takes any address, and the same DNS, certificate and redirect steps apply to each domain separately.</p>
+    </section>
+
     {{-- Prerequisites --}}
     <section id="prerequisites" class="doc-section">
         <h2 class="doc-heading">
@@ -126,6 +346,7 @@
         <ol class="doc-list doc-list-numbered">
             <li>A completed base installation of Event Schedule, including MySQL and the <code class="doc-inline-code">schedule:run</code> cron entry (see <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-link">Installation</a>)</li>
             <li>A domain name with DNS access</li>
+            <li>A marketing site of your own for the root domain, on WordPress or any other host (see <a href="#domain-layout" class="doc-link">Domains and Your Marketing Site</a>). It can follow after the app is running, but the app never provides one</li>
             <li>Ability to configure wildcard SSL certificates</li>
             <li>Web server configured to handle wildcard subdomains (Apache or Nginx)</li>
             <li>A working mail transport: tenant invitations, ticket confirmations, subscription receipts and support notifications all send from this install. In hosted mode, sale notifications, appointment and gift card emails and buyer change notices go only through a tenant schedule's own email settings, so a tenant without them gets none of those</li>
@@ -190,7 +411,7 @@
                     <tr>
                         <td><code class="doc-inline-code">APP_MARKETING_URL</code></td>
                         <td><code class="doc-inline-code">https://eventschedule.com</code></td>
-                        <td>Your own marketing site, and the base of every link the app builds to a page it does not serve itself: the <strong>Create your own</strong> card on your free tier's event pages, the logo in the admin portal's sidebar and on the sign-in pages, the <strong>Help</strong> button (<code class="doc-inline-code">/docs/...</code>), the <strong>Learn more</strong> and <strong>Compare plans</strong> links on upgrade prompts (<code class="doc-inline-code">/features/...</code>, <code class="doc-inline-code">/pricing</code>), and the privacy policy and terms (<code class="doc-inline-code">/privacy</code>, <code class="doc-inline-code">/terms-of-service</code>) until you <a href="#legal-pages" class="doc-link">publish your own</a>. Point it at your site rather than leaving the default, and have your site answer or redirect those paths.</td>
+                        <td>Your own marketing site, and the base of every link the app builds to a page it does not serve itself: the <strong>Create your own</strong> card on your free tier's event pages, the logo in the admin portal's sidebar and on the sign-in pages, the <strong>Help</strong> button (<code class="doc-inline-code">/docs/...</code>), the <strong>Learn more</strong> and <strong>Compare plans</strong> links on upgrade prompts (<code class="doc-inline-code">/features/...</code>, <code class="doc-inline-code">/pricing</code>), and the privacy policy and terms (<code class="doc-inline-code">/privacy</code>, <code class="doc-inline-code">/terms-of-service</code>) until you <a href="#legal-pages" class="doc-link">publish your own</a>. Point it at your site rather than leaving the default, and have your site answer or redirect those paths (see <a href="#marketing-paths" class="doc-link">Addresses the App Links To</a>).</td>
                     </tr>
                 </tbody>
             </table>
@@ -377,7 +598,7 @@
             </svg>
             DNS Configuration
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">For SaaS mode to work, you need to configure wildcard DNS records.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The root domain and <code class="doc-inline-code">www</code> go to your marketing site, and everything else goes to the app through a wildcard record (see <a href="#domain-layout" class="doc-link">Domains and Your Marketing Site</a>).</p>
 
         <h3 class="doc-subheading">DNS Records</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following DNS records to your domain:</p>
@@ -387,33 +608,33 @@
                 <span>DNS (A Records)</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code><span class="code-comment"># A record for main domain</span>
-yourdomain.com.    A    YOUR_SERVER_IP
+            <pre><code><span class="code-comment"># Your marketing site: the root domain and www</span>
+yourdomain.com.      A        MARKETING_SERVER_IP
+www.yourdomain.com.  CNAME    yourdomain.com.
 
-<span class="code-comment"># Wildcard A record for subdomains</span>
-*.yourdomain.com.  A    YOUR_SERVER_IP</code></pre>
+<span class="code-comment"># Event Schedule: app, demo and every customer schedule</span>
+*.yourdomain.com.    A        APP_SERVER_IP</code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Or if using a CNAME:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A name with a record of its own, such as <code class="doc-inline-code">www</code>, is never answered by the wildcard, so the app never sees it. The <code class="doc-inline-code">app</code> subdomain is covered by the wildcard, and you may add an explicit record for it too. Use whatever record your marketing host asks for on the root domain: many give an IP address for an A record, and some ask for an ALIAS or ANAME record, since most DNS providers do not allow a CNAME on the bare root domain.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If the app runs on a platform that gives you a hostname rather than an IP address, point the wildcard at it with a CNAME:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>DNS (CNAME Records)</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code><span class="code-comment"># CNAME for main domain</span>
-yourdomain.com.    CNAME    your-server.hosting.com.
-
-<span class="code-comment"># Wildcard CNAME for subdomains</span>
-*.yourdomain.com.  CNAME    your-server.hosting.com.</code></pre>
+            <pre><code><span class="code-comment"># Wildcard CNAME for the app and every schedule</span>
+*.yourdomain.com.  CNAME    your-app.hosting.com.</code></pre>
         </div>
 
         <h3 class="doc-subheading">SSL Certificate</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">You'll need a wildcard SSL certificate that covers both the main domain and all subdomains:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each side needs its own certificate:</p>
         <ul class="doc-list">
-            <li>Certificate should cover: <code class="doc-inline-code">yourdomain.com</code> and <code class="doc-inline-code">*.yourdomain.com</code></li>
-            <li>Let's Encrypt supports wildcard certificates via DNS-01 challenge</li>
-            <li>Many hosting providers offer wildcard certificates</li>
+            <li>The app server: a wildcard certificate for <code class="doc-inline-code">*.yourdomain.com</code>, which covers <code class="doc-inline-code">app</code>, <code class="doc-inline-code">demo</code> and every schedule. Add <code class="doc-inline-code">yourdomain.com</code> to it only if the app answers the root domain itself (no marketing site yet)</li>
+            <li>Your marketing host: <code class="doc-inline-code">yourdomain.com</code> and <code class="doc-inline-code">www.yourdomain.com</code>, which most hosts issue automatically</li>
+            <li>Let's Encrypt issues wildcard certificates through the DNS-01 challenge, and many hosting providers offer them</li>
         </ul>
     </section>
 
@@ -425,6 +646,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </svg>
             Web Server Configuration
         </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">These are for the app server. Your marketing site is configured by its own host.</p>
 
         <h3 class="doc-subheading">Nginx Example</h3>
         <div class="doc-code-block">
@@ -434,7 +656,8 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </div>
             <pre><code><span class="code-keyword">server</span> {
 <span class="code-keyword">listen</span> <span class="code-value">443</span> ssl http2;
-<span class="code-keyword">server_name</span> yourdomain.com *.yourdomain.com;
+<span class="code-comment"># yourdomain.com only for the sitemap your marketing site passes through</span>
+<span class="code-keyword">server_name</span> *.yourdomain.com yourdomain.com;
 
 <span class="code-keyword">ssl_certificate</span> /path/to/wildcard.crt;
 <span class="code-keyword">ssl_certificate_key</span> /path/to/wildcard.key;
@@ -461,8 +684,9 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                 <button class="doc-copy-btn">Copy</button>
             </div>
             <pre><code><span class="code-keyword">&lt;VirtualHost</span> *:443<span class="code-keyword">&gt;</span>
-<span class="code-keyword">ServerName</span> yourdomain.com
-<span class="code-keyword">ServerAlias</span> *.yourdomain.com
+<span class="code-keyword">ServerName</span> app.yourdomain.com
+<span class="code-comment"># yourdomain.com only for the sitemap your marketing site passes through</span>
+<span class="code-keyword">ServerAlias</span> *.yourdomain.com yourdomain.com
 
 <span class="code-keyword">DocumentRoot</span> /var/www/eventschedule/public
 
@@ -656,7 +880,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 
         <h3 class="doc-subheading">1. Test the App Subdomain</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Visit <code class="doc-inline-code">https://app.yourdomain.com</code>. You should reach the sign-in page, and be able to register an account.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The bare root domain redirects to that same sign-in page. That is the expected result: your platform does not serve the Event Schedule marketing pages, so put your own site on the root domain (or on a separate host) and point <code class="doc-inline-code">APP_MARKETING_URL</code> at it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Then visit <code class="doc-inline-code">https://yourdomain.com</code>. It should show your own marketing site. If it shows the app's sign-in page instead, the root domain's DNS record still points at the app server: the app never serves a landing page, because the Event Schedule marketing pages are not available on your platform (see <a href="#domain-layout" class="doc-link">Domains and Your Marketing Site</a>).</p>
 
         <h3 class="doc-subheading">2. Test Subdomain Routing</h3>
         <ol class="doc-list doc-list-numbered mb-6">
@@ -670,11 +894,14 @@ yourdomain.com.    CNAME    your-server.hosting.com.
         <h3 class="doc-subheading">3. Test SSL Certificate</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-2">Verify SSL works for both:</p>
         <ul class="doc-list mb-6">
-            <li>Main domain: <code class="doc-inline-code">https://yourdomain.com</code></li>
-            <li>Any subdomain: <code class="doc-inline-code">https://test.yourdomain.com</code></li>
+            <li>Your marketing site: <code class="doc-inline-code">https://yourdomain.com</code> and <code class="doc-inline-code">https://www.yourdomain.com</code></li>
+            <li>Any subdomain on the app: <code class="doc-inline-code">https://test.yourdomain.com</code></li>
         </ul>
 
-        <h3 class="doc-subheading">4. Test Subscription Flow (if configured)</h3>
+        <h3 class="doc-subheading">4. Test the Links to Your Marketing Site</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Signed in on the app, press the logo in the sidebar, the <strong>Help</strong> button, and a <strong>Learn more</strong> or <strong>Compare plans</strong> link on an upgrade prompt. Each should open a page of your own site rather than a not-found page (see <a href="#marketing-paths" class="doc-link">Addresses the App Links To</a>). If you pass the sitemap through, <code class="doc-inline-code">https://yourdomain.com/sitemap.xml</code> should list the app's sitemaps.</p>
+
+        <h3 class="doc-subheading">5. Test Subscription Flow (if configured)</h3>
         <ol class="doc-list doc-list-numbered">
             <li>Signed in as the schedule's owner, open the schedule and select its <strong>Plan</strong> tab</li>
             <li>Click <strong>Upgrade to Pro</strong>. If the button is missing, <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> is not set</li>
@@ -1078,8 +1305,8 @@ return [
             <div class="doc-field">
                 <h4>The root domain shows the sign-in page instead of a landing page</h4>
                 <ul class="doc-list text-sm">
-                    <li>This is expected. The marketing pages are served only on eventschedule.com and are not licensed for use on another site</li>
-                    <li>Host your own marketing site and point <code class="doc-inline-code">APP_MARKETING_URL</code> at it</li>
+                    <li>The root domain is still pointing at the app. The app never serves a landing page: the Event Schedule marketing pages are served only on eventschedule.com and are not licensed for use on another site</li>
+                    <li>Build your own marketing site, point the root domain and <code class="doc-inline-code">www</code> at it, and set <code class="doc-inline-code">APP_MARKETING_URL</code> to it (see <a href="#domain-layout" class="doc-link">Domains and Your Marketing Site</a>)</li>
                 </ul>
             </div>
 
@@ -1104,7 +1331,7 @@ return [
             <div class="doc-field">
                 <h4>The Help button or a Learn more link opens a page that does not exist</h4>
                 <ul class="doc-list text-sm">
-                    <li>Those links are built on <code class="doc-inline-code">APP_MARKETING_URL</code>, so your marketing site has to answer or redirect <code class="doc-inline-code">/docs/...</code>, <code class="doc-inline-code">/features/...</code> and <code class="doc-inline-code">/pricing</code> (see <a href="#core-settings" class="doc-link">Core SaaS Settings</a>)</li>
+                    <li>Those links are built on <code class="doc-inline-code">APP_MARKETING_URL</code>, so your marketing site has to answer or redirect <code class="doc-inline-code">/docs/...</code>, <code class="doc-inline-code">/features/...</code> and <code class="doc-inline-code">/pricing</code> (see <a href="#marketing-paths" class="doc-link">Addresses the App Links To</a>, which has redirect rules for WordPress and nginx)</li>
                 </ul>
             </div>
         </div>
