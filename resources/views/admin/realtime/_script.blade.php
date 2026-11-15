@@ -448,6 +448,14 @@
                     return this.msg.acceptedCookies + ': ' + this.fmt(this.p.overview.win_views) + ', '
                         + this.msg.notAccepted + ': ' + this.fmt(this.p.overview.unidentified_views);
                 },
+                // Seconds since the newest sign-up: the first row (newest first), or what the server
+                // found further back when the day has none.
+                lastSignupAgo: function () {
+                    var rows = this.signups.rows || [];
+                    if (rows.length) return rows[0].ago;
+                    var ago = this.signups.last_ago;
+                    return ago === null || ago === undefined ? null : ago;
+                },
                 // One bar per rolling hour, oldest first. A lone sign-up is half height, so a busier
                 // hour still has somewhere to go.
                 hourBars: function () {
