@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Console\Commands\Translate;
 use App\Models\EventPart;
 use App\Models\EventRole;
 use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -55,10 +57,10 @@ class TranslateCommandTest extends TestCase
      */
     private function invokePrivate(string $method, array $args)
     {
-        $reflection = new \ReflectionMethod(\App\Console\Commands\Translate::class, $method);
+        $reflection = new \ReflectionMethod(Translate::class, $method);
         $reflection->setAccessible(true);
 
-        return $reflection->invokeArgs(new \App\Console\Commands\Translate, $args);
+        return $reflection->invokeArgs(new Translate, $args);
     }
 
     /** The value from the production incident: a 19-character venue name, described rather than translated. */
@@ -201,7 +203,7 @@ class TranslateCommandTest extends TestCase
         // and paid for, nothing persisted yet.
         $role->name_en = 'Mezcal Bar';
 
-        $command = new \App\Console\Commands\Translate;
+        $command = new Translate;
         $method = new \ReflectionMethod($command, 'recordFailure');
         $method->setAccessible(true);
         $method->invoke($command, $role, $role->id);
@@ -229,7 +231,7 @@ class TranslateCommandTest extends TestCase
 
         $this->assertSame([$role->id], $this->selectedIds($this->dryRun(), 'roles'), 'precondition: it is selectable now');
 
-        $command = new \App\Console\Commands\Translate;
+        $command = new Translate;
         $method = new \ReflectionMethod($command, 'recordFailure');
         $method->setAccessible(true);
         $method->invoke($command, $role, $role->id);
@@ -347,7 +349,7 @@ class TranslateCommandTest extends TestCase
      */
     public function test_every_varchar_translation_target_declares_a_ceiling(): void
     {
-        $declared = (new \ReflectionClass(\App\Console\Commands\Translate::class))->getConstant('TARGET_MAX_LENGTH');
+        $declared = (new \ReflectionClass(Translate::class))->getConstant('TARGET_MAX_LENGTH');
 
         // Every (table, source field, target column) triple the four passes write.
         $targets = [
@@ -372,7 +374,7 @@ class TranslateCommandTest extends TestCase
         ];
 
         foreach ($targets as [$table, $field, $column]) {
-            $schema = collect(\Illuminate\Support\Facades\Schema::getColumns($table))->firstWhere('name', $column);
+            $schema = collect(Schema::getColumns($table))->firstWhere('name', $column);
 
             $this->assertNotNull($schema, "{$table}.{$column} is missing from the schema");
 
@@ -596,7 +598,10 @@ class TranslateCommandTest extends TestCase
             'translation_language_code' => 'en',
         ]);
 
-        foreach ([['--role_id' => 'garbage'], ['--event_id' => 'garbage']] as $options) {
+        // Not a word: CI makes a new APP_KEY for every run and the id alphabet is shuffled from it,
+        // so now and then a word of plain letters ('garbage') IS a valid encoded id, the command
+        // finds nothing to do and exits 0. A character outside the alphabet never decodes.
+        foreach ([['--role_id' => 'not-an-id!'], ['--event_id' => 'not-an-id!']] as $options) {
             $exitCode = Artisan::call('app:translate', array_merge(['--dry-run' => true], $options));
             $output = Artisan::output();
 
