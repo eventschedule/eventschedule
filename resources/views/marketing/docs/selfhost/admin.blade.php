@@ -689,8 +689,8 @@
                 <p>The first page each sign-up landed on, with how many sign-ups it brought and what share of them saved a schedule, saved an event, added a ticket type and added a paid ticket.</p>
             </div>
             <div class="doc-field">
-                <h4>Homepage headline test</h4>
-                <p>eventschedule.com only. The headlines the marketing homepage is trying, with each one's visitors, click rate and sign-ups. <strong class="text-gray-900 dark:text-white">Reset stats</strong> starts a new round from zero.</p>
+                <h4>Homepage test</h4>
+                <p>eventschedule.com only. The headlines, or the two versions of the page, that the marketing homepage is trying, with each one's visitors, click rate and sign-ups. A test of two pages also shows how many of those sign-ups saved a schedule and an event, and is ended by hand on the page to keep. <strong class="text-gray-900 dark:text-white">Reset stats</strong> starts a new round from zero.</p>
             </div>
         </div>
 

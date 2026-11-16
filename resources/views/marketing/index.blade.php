@@ -106,6 +106,14 @@
         $hpFontDir = 'vendor/fonts/Red_Hat_Display/';
         $hpFontCss = (string) @file_get_contents(public_path($hpFontDir . 'font.css'));
         $hpFontFile = preg_match('~/\* latin \*/.*?url\(([^)]+\.woff2)\)~s', $hpFontCss, $hpFontMatch) ? $hpFontMatch[1] : null;
+
+        // Which of the two homepages this document holds (App\Utils\HeroExperiment, a page round).
+        // While the round runs it holds both middles, today's on show and the light one hidden,
+        // and the picker in the hero says which a visitor sees. Once a person has ended it, only
+        // the page it was ended on is printed. With no round, or off the nexus: today's alone.
+        $hpLightPage = $hero['page'] === \App\Utils\HeroExperiment::PAGE_LIGHT;
+        $hpShowFull = $hero['both'] || ! $hpLightPage;
+        $hpShowLight = $hero['both'] || $hpLightPage;
     @endphp
 
     {{-- The search result is its own pair of strings and does NOT follow the headline test below.
@@ -2588,6 +2596,14 @@
         }
         {{-- What else lives at the foot of the screen stands on the dock while it is up. --}}
         html.hp-dock-on [data-cookie-consent] { bottom: calc(var(--hp-dock-h, 4.5rem) + 0.75rem); }
+
+        {{-- The light homepage (a page round of App\Utils\HeroExperiment): which of the two
+           middles is on show, and the light one's own look. Here, in the head, so the rules are
+           in force before either middle is parsed; and above "Motion off", which stays the
+           sheet's last block. --}}
+        @if ($hpShowLight)
+            @include('marketing.partials.home-light-styles')
+        @endif
         html.hp-dock-on .es-head-start { display: none !important; }
         {{-- The calculator's footnote, folded to two lines on a phone by the script. --}}
         .hp-calc-note-open { display: none; }
@@ -2765,7 +2781,10 @@
         $claimSuffix = '.' . (str_contains($claimHost, '.') && ! filter_var($claimHost, FILTER_VALIDATE_IP) ? $claimHost : 'eventschedule.com');
     @endphp
 
-    <div id="hp">
+    {{-- data-home="light" puts the light homepage on show (partials/home-light-styles). The server
+         prints it only once a page round has been ended on the light page; while one runs, the
+         picker below sets it for the visitors given that page. --}}
+    <div id="hp" @if ($hpLightPage) data-home="light" @endif>
 
     <!-- ============================================================ -->
     <!-- 1. Hero: the headline between two walls of real posters      -->
@@ -2835,12 +2854,23 @@
                            keyboard can commit its text between the two.
                          - In its own listeners: the click-beacon listener stops acting after
                            the first click.
+                         A PAGE round (a variant with a page, see HeroExperiment): show() puts
+                         data-home on #hp for the pick's page. It runs here, in the hero, before
+                         the film's screen and both middles are parsed, and the rules that read it
+                         are in the head, so neither page is ever drawn and then taken away. A
+                         throw puts #hp back as the server printed it, which is today's page while
+                         a round runs.
+                         ?home=light or ?home=full shows that page to whoever asks, for looking at
+                         it: nothing is picked, stored, beaconed or put on a link, so window.esHero
+                         stays unset and the attribution script credits nothing.
+
                          These notes are up here so they are not sent to every visitor. --}}
                     <script {!! nonce_attr() !!}>
                         (function () {
                             try {
                                 var variants = @json($hero['variants']);
                                 var weights = @json($hero['weights']);
+                                var pages = @json($hero['pages']);
                                 var endpoint = @json(url('/marketing/hero'));
                                 var targets = [@json(app_url('/sign_up')), @json(app_url('/login'))];
                                 var param = @json(\App\Utils\HeroExperiment::LINK_PARAMETER);
@@ -2848,6 +2878,25 @@
                                 var fresh = false;
                                 var remember = !!(window.esConsent && window.esConsent.has('analytics'));
                                 var clicked = false;
+                                var root = document.getElementById('hp');
+                                var show = function (page) {
+                                    if (page === 'light') {
+                                        root.setAttribute('data-home', 'light');
+                                    } else {
+                                        root.removeAttribute('data-home');
+                                    }
+                                };
+
+                                var forced = (location.search.match(/[?&]home=(light|full)(?:&|$)/) || [])[1];
+                                if (forced) {
+                                    for (var k in pages) {
+                                        if (pages[k] === forced) {
+                                            show(forced);
+                                            break;
+                                        }
+                                    }
+                                    return;
+                                }
 
                                 var match = document.cookie.match(/(?:^|;\s*)es_attribution=([^;]*)/);
                                 if (match) {
@@ -2880,6 +2929,8 @@
                                 }
 
                                 window.esHero = { key: key, fresh: fresh };
+
+                                show(pages[key]);
 
                                 var copy = variants[key];
                                 document.querySelector('[data-hero="l1"]').textContent = copy.line1;
@@ -2938,7 +2989,16 @@
                                     clicked = true;
                                     send('click');
                                 }, true);
-                            } catch (e) {}
+                            } catch (e) {
+                                try {
+                                    var hp = document.getElementById('hp');
+                                    if (@json($hpLightPage)) {
+                                        hp.setAttribute('data-home', 'light');
+                                    } else {
+                                        hp.removeAttribute('data-home');
+                                    }
+                                } catch (e2) {}
+                            }
                         })();
                     </script>
                 @endif
@@ -2967,10 +3027,21 @@
                  who has already decided and is scrolling. Both are still on this page, in the
                  ticketing feature and the "everything else" grid. --}}
             <p class="es-fade-up es-d-4 hp-hero-foot">
-                <a href="#showcase" class="hp-demo" data-video-open>
+                {{-- The film's screen is not on the light page, so there the same words open the
+                     film itself, in a new tab. One of the two is on show (hp-full-only,
+                     hp-lite-only), and once a page round has ended only one is printed. --}}
+                @if ($hpShowFull)
+                <a href="#showcase" class="hp-demo hp-full-only" data-video-open>
                     <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></i>
                     Watch the 3-minute overview
                 </a>
+                @endif
+                @if ($hpShowLight)
+                <a href="https://www.youtube-nocookie.com/embed/w1JLIvGmIjQ?autoplay=1" target="_blank" rel="noopener" class="hp-demo hp-lite-only">
+                    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></i>
+                    Watch the 3-minute overview
+                </a>
+                @endif
                 <span>Set up in under 2 minutes. Open source, and yours to selfhost.</span>
                 {{-- The free ways in, said beside the button: the only import this page named
                      before was Eventbrite's, on Pro (the pill further down). Google Calendar and
@@ -3018,7 +3089,15 @@
         </div>
 
         {{-- The screen. It stands inside the hero so the two walls run on beside it, and it comes
-             before the wall in the document. --}}
+             before the wall in the document. It belongs to today's page: the light page hides it
+             (and its script then leaves the film alone, see initShowreel()), and a page round
+             ended on the light page does not print it. The page's script reads the address the
+             posters print from the screen's address bar, so without the screen that address
+             stands here, unseen. --}}
+        @unless ($hpShowFull)
+            <span data-claim-echo hidden>{{ ltrim($claimSuffix, '.') }}</span>
+        @endunless
+        @if ($hpShowFull)
         <div id="showcase" class="hp-stage">
             <div class="es-persp relative" data-scene="showcase">
                     <div class="es-frame relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/15 dark:border-white/10 dark:bg-[#101016] dark:shadow-black/50">
@@ -3110,6 +3189,7 @@
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.1s;">From first event to sold-out show, in one short tour.</p>
             </div>
         </div>
+        @endif
 
         {{-- The wall (desktop): two wings of drifting poster columns, hinged beside the headline.
              A pointer can open any poster. A keyboard does not stop at them: up to twenty-five
@@ -3194,6 +3274,10 @@
             ],
         ];
     @endphp
+    {{-- Today's middle, from the line-up to the questions. The hero above and the closing panel
+         below are both homepages'; .hp-full is what the light page hides. --}}
+    @if ($hpShowFull)
+    <div class="hp-full">
     <section class="hp-lineup" aria-label="Who uses Event Schedule">
         <h2 class="sr-only">Who uses Event Schedule</h2>
         <div class="es-marquee-mask">
@@ -4297,6 +4381,14 @@
             </div>
         </div>
     </section>
+
+    </div>
+    @endif
+
+    {{-- The light homepage's middle (a page round of App\Utils\HeroExperiment). --}}
+    @if ($hpShowLight)
+        @include('marketing.partials.home-light')
+    @endif
 
     <!-- ============================================================ -->
     <!-- 10. Finale: claim your name                                  -->

@@ -105,7 +105,7 @@ class GrowthSummary
      * pull has no test in it - an older schema, or an install off the nexus - so the caller prints
      * nothing instead of an empty table.
      *
-     * @return ?array{status: string, rows: list<array{0: string, 1: string, 2: string, 3: string, 4: string, 5: string}>}
+     * @return ?array{status: string, pages: bool, rows: list<list<string>>}
      */
     public static function heroTest(array $data): ?array
     {
@@ -114,8 +114,14 @@ class GrowthSummary
             return null;
         }
 
-        // The same five states the /admin/growth card shows, in the pull's own English.
+        // The same states the /admin/growth card shows, in the pull's own English.
         $status = match ($test['phase'] ?? null) {
+            'fixed' => sprintf(
+                'Page test, split evenly. Chance the light page brings more signups: %s. Next look: %s.',
+                self::percent($test['p_light_better'] ?? null),
+                $test['next_look'] ?? '?',
+            ),
+            'ended' => sprintf('Page test ended on %s, which every visitor now gets.', $test['ended'] ?? '?'),
             'baseline' => 'One headline, nothing being tested: its numbers are the baseline for the next round.',
             'winner' => sprintf('Winner: %s, since %s.', $test['winner']['key'] ?? '?', $test['winner']['date'] ?? '?'),
             'candidate' => sprintf('%s is leading, and becomes the winner on %s if it keeps the lead.', $test['candidate']['key'] ?? '?', $test['lock_date'] ?? '?'),
@@ -127,17 +133,25 @@ class GrowthSummary
             $status .= " Counting since {$test['reset_at']}.";
         }
 
+        // A page round's rows end in what the signups went on to save; a headline round's do not.
+        $pages = ($test['split'] ?? null) === 'even';
+
         return [
             'status' => $status,
-            'rows' => array_map(fn (array $row) => [
+            'pages' => $pages,
+            'rows' => array_map(fn (array $row) => array_slice([
                 ($row['key'] ?? '?').(($row['is_default'] ?? false) ? ' (default)' : ''),
                 self::percent($row['share'] ?? null),
                 self::show($row['visitors'] ?? null),
                 self::show($row['clicks'] ?? null),
                 self::show($row['signups'] ?? null),
-                // One headline races nobody: its "chance best" is 100% by definition, so it is not shown.
-                ($test['phase'] ?? null) === 'baseline' ? '-' : self::percent($row['p_best'] ?? null),
-            ], $test['rows']),
+                // One headline races nobody: its "chance best" is 100% by definition, so it is not
+                // shown; nor is the arm a page round was ended on.
+                in_array($test['phase'] ?? null, ['baseline', 'ended'], true) ? '-' : self::percent($row['p_best'] ?? null),
+                // What the signups went on to save (schema 29).
+                self::show($row['saved_schedule'] ?? null),
+                self::show($row['saved_event'] ?? null),
+            ], 0, $pages ? 8 : 6), $test['rows']),
         ];
     }
 

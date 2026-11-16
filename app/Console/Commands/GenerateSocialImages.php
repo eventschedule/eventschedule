@@ -355,8 +355,10 @@ class GenerateSocialImages extends Command
                 // The temporary server runs with IS_NEXUS=true, so the homepage's headline test is
                 // live and its picker swaps in a random variant. The card is what every shared link
                 // previews, so it shows the default copy, whichever variant this visit drew.
-                $heroCopy = json_encode(HeroExperiment::VARIANTS[HeroExperiment::DEFAULT]);
+                $heroCopy = json_encode(HeroExperiment::copyOf(HeroExperiment::DEFAULT));
                 $browser->script("(function (copy) { var set = function (name, text) { var el = document.querySelector('[data-hero=\"' + name + '\"]'); if (el) { el.textContent = text; } }; set('l1', copy.line1); set('l2', copy.line2); set('sub', copy.subtitle); })({$heroCopy})");
+                // And today's page, whichever page a page round's picker drew for this visit.
+                $browser->script("(function () { var hp = document.getElementById('hp'); if (hp) { hp.removeAttribute('data-home'); } })()");
 
                 // Force dark mode
                 $browser->script("document.documentElement.classList.add('dark')");

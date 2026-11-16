@@ -148,10 +148,11 @@ class GrowthExportTest extends TestCase
         // headline test can be one arm (phase baseline), 23 since gateways can include payment_url, 24
         // since blocked accounts are left out, 25 since nudge_outcomes carries acted_subscribed, 26
         // since signup_sources dates signups by source, 27 since signups carry arrival_intent and
-        // traffic signup_google_starts, 28 since marketing_pages counts each page's readers.
+        // traffic signup_google_starts, 28 since marketing_pages counts each page's readers, 29
+        // since hero_test can hold a page round (two homepages, an even split, ended by hand).
         // Bumping this is deliberate: a reader diffing two pulls needs to know the shape (or the
         // meaning) moved.
-        $this->assertSame(28, $data['meta']['schema_version']);
+        $this->assertSame(29, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);

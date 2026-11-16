@@ -37,7 +37,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 28;
+    public const SCHEMA_VERSION = 29;
 
     /** How far ahead the schedule rows look for events on sale (upcoming_*). */
     public const UPCOMING_DAYS = 60;
@@ -719,6 +719,13 @@ class GrowthExportService
                 .'feeds and calendar syncs. Every *_in and last_event_created is a bucket of days, never a date. meta.app_commit and a commit on '
                 .'each meta.releases entry date a deploy to its commit where the host sets APP_COMMIT; '
                 .'hero_test.daily splits the headline test by day.',
+            'Since schema_version 29, hero_test can hold a page round: two homepages under one headline '
+                .'(rows[].page full or light), split evenly (split even) and ended by a person, never by '
+                .'the code. Its rows carry saved_schedule and saved_event over the same accounts as '
+                .'signups. Decide on signups per visitor at the dates in looks, not on any day between: '
+                .'a visitor is a browser-day, and a visitor without analytics consent is given a page '
+                .'afresh on each view, so some people count in both arms. marketing_pages is not split '
+                .'by arm, so its figures for the homepage move while a page round runs.',
             'Since schema_version 24, blocked accounts (AccountBlockService, nearly always spam) are left '
                 .'out of every count of people and of what they made: the funnel, the signup and schedule '
                 .'rows, traffic[].verified_signups, daily and every schedule-based section. A block applies '

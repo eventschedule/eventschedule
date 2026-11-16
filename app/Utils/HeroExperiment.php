@@ -45,6 +45,17 @@ use Throwable;
  * lang/<locale>/marketing.php). From 2026-10-04 to 2026-10-08 they were built from this copy, and
  * search clicks fell, so a search result no longer follows the default or the winner.
  *
+ * A WHOLE-PAGE ROUND (from 2026-11): a variant may name a `page` ('light'; none means 'full',
+ * today's homepage). The homepage then prints both middles in one document, the light one hidden,
+ * and the same picker puts data-home on #hp before either is parsed, so the pick is still the
+ * browser's and the edge still stores one page. A set that names a page is FIXED (isFixed()): the
+ * traffic is split evenly and nothing is locked by the code, because clicks do not mean the same
+ * thing on two pages with different numbers of buttons, and what the round is judged on (a signup
+ * that goes on to save a schedule and an event) arrives days after the visit. A person ends it,
+ * with end(), on the card's own look dates (LOOK_WEEKS). ENDED_SETTING holds a bare key, not a
+ * fingerprint of the set: a copy edit must never start an ended test again. The arm that was kept
+ * goes on being picked, beaconed and credited as a baseline, and the homepage prints it alone.
+ *
  * STARTING OVER: reset() (the button on /admin/growth) restarts the counts for every key without
  * deleting history: stats() only reads what came after RESET_SETTING. A visitor assigned before a
  * reset keeps their pick (in es_attribution if they allowed marketing cookies, in the session if
@@ -61,7 +72,12 @@ final class HeroExperiment
     public const EXPERIMENT = 'home_hero';
 
     /** Rendered by the server while the test runs, and to visitors without JS. */
-    public const DEFAULT = 'promote_sell';
+    public const DEFAULT = 'home_full';
+
+    /** The homepage a variant shows: today's, or the light one (marketing/partials/home-light). */
+    public const PAGE_FULL = 'full';
+
+    public const PAGE_LIGHT = 'light';
 
     /**
      * line1/line2 must each fit the 24-character .es-mask budget (see the h1 in
@@ -69,21 +85,33 @@ final class HeroExperiment
      * say "event calendar", say it takes bookings, name no paid plan. HeroExperimentTest
      * checks each one.
      *
-     * ONE ARM (from 2026-10-22): 'promote_sell' is the only headline. With a single variant there
-     * is nothing to test, so evaluate() never names a candidate or a winner and report() calls the
-     * phase 'baseline'; the picker, the beacons and the ?hero= sign-up credit keep running, so its
-     * numbers carry on as the baseline the next round is measured against. A round with two or
-     * more variants starts the test again by itself.
+     * ONE ARM: with a single variant there is nothing to test, so evaluate() never names a
+     * candidate or a winner and report() calls the phase 'baseline'; the picker, the beacons and
+     * the ?hero= sign-up credit keep running, so its numbers carry on as the baseline the next
+     * round is measured against. A round with two or more variants starts the test again by itself.
+     *
+     * A variant may also carry 'page' => PAGE_LIGHT (see the class docblock).
      */
     public const VARIANTS = [
-        // Headline only: "Promote and sell" rather than the round-three control's "Plan, promote,
-        // and sell", so the money verb is one of two, not lost in a list of three. Picked by hand
-        // on 2026-10-22, before the test's own lock rules were met.
-        'promote_sell' => [
+        // The page round of 2026-11: one headline on two homepages, split evenly. Both keys are
+        // new, so that a visitor still holding 'promote_sell' from before it (in es_attribution or
+        // in a session) is picked again rather than carried into one arm.
+        'home_full' => [
             'line1' => 'Promote and sell',
             'line2' => 'from your event calendar',
             'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
         ],
+        'home_light' => [
+            'line1' => 'Promote and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
+            'page' => self::PAGE_LIGHT,
+        ],
+        // Retired 2026-11 when the page round began: 'promote_sell', the same headline and
+        // subtitle on today's page, the only arm (a baseline) from 2026-10-22. "Promote and sell"
+        // rather than the round-three control's "Plan, promote, and sell", so the money verb is
+        // one of two, not lost in a list of three. Picked by hand on 2026-10-22, before the test's
+        // own lock rules were met.
         // Retired 2026-10-22, when 'promote_sell' was made the only headline, after round three
         // (from 2026-10-04) had it ahead on signups per visitor from 2026-10-08 on, and with most
         // of its signups going on to save a schedule: 'plan_sell' ("Plan, promote, and sell / from
@@ -101,6 +129,20 @@ final class HeroExperiment
         // the keys listed here, so re-adding one under the SAME key would resume its history
         // (from the last reset, if there has been one).
     ];
+
+    /** Weeks after the round began at which a fixed round is looked at, the last one ending it. */
+    public const LOOK_WEEKS = [4, 7, 10];
+
+    /** What ends a fixed round at a look before the last, either way; and what counts at the last. */
+    public const LOOK_EARLY_PROBABILITY = 0.97;
+
+    public const LOOK_FINAL_PROBABILITY = 0.95;
+
+    /** Visitors each arm needs before an early look can end the round. */
+    public const LOOK_MIN_VISITORS = 400;
+
+    /** The key a person ended a fixed round on (end()). A bare key: see the class docblock. */
+    public const ENDED_SETTING = 'hero_experiment_ended';
 
     /** A variant with fewer visitors than this gets at least an even share of traffic. */
     public const BURN_IN_VISITORS = 300;
@@ -193,6 +235,66 @@ final class HeroExperiment
         return is_string($key) && array_key_exists($key, self::variants());
     }
 
+    /** The homepage a variant shows. A variant that names none shows today's. */
+    public static function pageOf(string $key): string
+    {
+        return (self::variants()[$key]['page'] ?? self::PAGE_FULL) === self::PAGE_LIGHT ? self::PAGE_LIGHT : self::PAGE_FULL;
+    }
+
+    /**
+     * Whether this set tests pages: an even split that the code never moves and never locks.
+     * A set of headlines alone (no variant names a page) keeps the moving split and its lock.
+     */
+    public static function isFixed(): bool
+    {
+        foreach (self::variants() as $variant) {
+            if (isset($variant['page'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** The variant a person ended a fixed round on, or null while it runs. */
+    public static function ended(): ?string
+    {
+        if (! self::isFixed()) {
+            return null;
+        }
+
+        $key = Setting::get(self::ENDED_SETTING);
+
+        return self::isVariant($key) ? $key : null;
+    }
+
+    /**
+     * End a fixed round on one of its variants: from the next evaluation the homepage prints that
+     * page alone and every visitor is given it. Its counts carry on. reset() starts the round over.
+     */
+    public static function end(string $key): bool
+    {
+        if (! self::isFixed() || ! self::isVariant($key)) {
+            return false;
+        }
+
+        Setting::set(self::ENDED_SETTING, $key);
+
+        return true;
+    }
+
+    /**
+     * A variant's words, without its page: the page is not copy, and travels in forPage()['pages'].
+     *
+     * @return array{line1: string, line2: string, subtitle: string}
+     */
+    public static function copyOf(string $key): array
+    {
+        $variant = self::variants()[$key];
+
+        return ['line1' => $variant['line1'], 'line2' => $variant['line2'], 'subtitle' => $variant['subtitle']];
+    }
+
     /**
      * Fingerprint of the variant set. A stored candidate or winner is only honoured while it
      * matches, so any edit to VARIANTS restarts the decision.
@@ -212,9 +314,14 @@ final class HeroExperiment
     {
         $idle = [
             'running' => false,
-            'default' => self::variants()[self::defaultKey()],
+            'default' => self::copyOf(self::defaultKey()),
             'variants' => [],
             'weights' => [],
+            // The homepage the server prints as the one on show, each variant's page for the
+            // picker, and whether the other page is in the document too (a page round in progress).
+            'page' => self::PAGE_FULL,
+            'pages' => [],
+            'both' => false,
         ];
 
         if (! config('app.is_nexus')) {
@@ -228,14 +335,39 @@ final class HeroExperiment
         }
 
         if ($state['winner'] !== null) {
-            return array_merge($idle, ['default' => self::variants()[$state['winner']['key']]]);
+            return array_merge($idle, ['default' => self::copyOf($state['winner']['key'])]);
+        }
+
+        $ended = $state['ended'] ?? null;
+
+        if ($ended !== null) {
+            // One arm, as a baseline: still picked, beaconed and credited, and printed alone.
+            return [
+                'running' => true,
+                'default' => self::copyOf($ended),
+                'variants' => [$ended => self::copyOf($ended)],
+                'weights' => [$ended => 1.0],
+                'page' => self::pageOf($ended),
+                'pages' => [$ended => self::pageOf($ended)],
+                'both' => false,
+            ];
+        }
+
+        $copy = [];
+        $pages = [];
+        foreach (array_keys(self::variants()) as $key) {
+            $copy[$key] = self::copyOf($key);
+            $pages[$key] = self::pageOf($key);
         }
 
         return [
             'running' => true,
-            'default' => self::variants()[self::defaultKey()],
-            'variants' => self::variants(),
+            'default' => self::copyOf(self::defaultKey()),
+            'variants' => $copy,
             'weights' => $state['weights'],
+            'page' => self::PAGE_FULL,
+            'pages' => $pages,
+            'both' => count(array_unique($pages)) > 1,
         ];
     }
 
@@ -282,7 +414,9 @@ final class HeroExperiment
      */
     private static function cacheKey(): string
     {
-        return 'hero_experiment:'.self::setHash().':'.(self::resetAt()?->timestamp ?? 0);
+        // The variant a fixed round was ended on is part of the key, so an End is in force at the
+        // next request rather than up to ten minutes later.
+        return 'hero_experiment:'.self::setHash().':'.(self::resetAt()?->timestamp ?? 0).':'.(self::ended() ?? '');
     }
 
     /**
@@ -399,6 +533,62 @@ final class HeroExperiment
         Setting::set(self::RESET_SETTING, now()->toDateTimeString());
         Setting::set(self::CANDIDATE_SETTING, null);
         Setting::set(self::WINNER_SETTING, null);
+        Setting::set(self::ENDED_SETTING, null);
+    }
+
+    /**
+     * What each variant's signups went on to do: how many saved a schedule and how many an event.
+     * Counted over exactly the accounts stats() counts as signups (every account created carrying
+     * the variant since the last reset), so each figure sits inside its signup count. "Saved" is
+     * as the growth payload's signup rows define it: a schedule the account owns, deleted ones
+     * included, and an event it made.
+     *
+     * @return array<string, array{saved_schedule: int, saved_event: int}>
+     */
+    public static function outcomes(): array
+    {
+        $keys = array_keys(self::variants());
+        $since = self::resetAt();
+
+        $rows = User::query()
+            ->whereIn('hero_variant', $keys)
+            ->when($since, fn ($query) => $query->where('users.created_at', '>=', $since))
+            ->groupBy('hero_variant')
+            ->select(
+                'hero_variant',
+                DB::raw('SUM(EXISTS (SELECT 1 FROM roles WHERE roles.user_id = users.id)) AS saved_schedule'),
+                DB::raw('SUM(EXISTS (SELECT 1 FROM events WHERE events.user_id = users.id)) AS saved_event'),
+            )
+            ->get()
+            ->keyBy('hero_variant');
+
+        $outcomes = [];
+        foreach ($keys as $key) {
+            $outcomes[$key] = [
+                'saved_schedule' => (int) ($rows[$key]->saved_schedule ?? 0),
+                'saved_event' => (int) ($rows[$key]->saved_event ?? 0),
+            ];
+        }
+
+        return $outcomes;
+    }
+
+    /**
+     * The day the current counts began: the first day any current variant was beaconed since the
+     * last reset, or the reset itself while nothing has been. A fixed round's look dates are
+     * counted from it.
+     */
+    public static function startedAt(): ?Carbon
+    {
+        $since = self::resetAt();
+
+        $first = MarketingExperimentStat::query()
+            ->where('experiment', self::EXPERIMENT)
+            ->whereIn('variant', array_keys(self::variants()))
+            ->when($since, fn ($query) => $query->where('date', '>=', $since->toDateString()))
+            ->min('date');
+
+        return $first === null ? $since?->copy()->startOfDay() : Carbon::parse($first)->startOfDay();
     }
 
     /** When the stats were last reset, or null if they never have been. */
@@ -442,6 +632,10 @@ final class HeroExperiment
             ];
         }
 
+        if (self::isFixed()) {
+            return self::evaluateFixed($stats);
+        }
+
         $hash = self::setHash();
         $winner = self::readSetting(self::WINNER_SETTING, $hash);
 
@@ -472,6 +666,42 @@ final class HeroExperiment
             'click_share' => $clickShare,
             'candidate' => $candidate === null ? null : ['key' => $candidate['key'], 'date' => $candidate['date']],
             'winner' => $winner,
+        ];
+    }
+
+    /**
+     * A page round: an even split until a person ends it, then everything to the variant it was
+     * ended on. No candidate and no winner, ever: those are the moving test's, and a winner turns
+     * the picker off. The two probabilities are drawn from a seed made of the counts, so the same
+     * counts always read the same figure: a person decides on this number at fixed look dates,
+     * and one that moved between two loads of the card would be read at its luckiest.
+     *
+     * @param  array<string, array{visitors: int, clicks: int, signups: int}>  $stats
+     */
+    private static function evaluateFixed(array $stats): array
+    {
+        $ended = self::ended();
+        $even = 1 / count($stats);
+
+        mt_srand(crc32((string) json_encode($stats)));
+        $pClicks = self::probabilityBest($stats, 'clicks');
+        $pSignups = self::probabilityBest($stats, 'signups');
+        mt_srand();
+
+        $weights = [];
+        foreach (array_keys($stats) as $key) {
+            $weights[$key] = $ended === null ? $even : ($key === $ended ? 1.0 : 0.0);
+        }
+
+        return [
+            'stats' => $stats,
+            'weights' => $weights,
+            'p_clicks' => $pClicks,
+            'p_signups' => $pSignups,
+            'click_share' => 0.0,
+            'candidate' => null,
+            'winner' => null,
+            'ended' => $ended,
         ];
     }
 
@@ -690,28 +920,67 @@ final class HeroExperiment
             return null;
         }
 
+        // Not cached with the state: two small grouped reads, made where the card or the payload is
+        // built and never for a homepage view.
+        $outcomes = self::outcomes();
+        $fixed = self::isFixed();
+        $ended = $state['ended'] ?? null;
+
         $rows = [];
         foreach ($state['stats'] as $key => $row) {
             $rows[] = [
                 'key' => $key,
                 'headline' => self::variants()[$key]['line1'].' '.self::variants()[$key]['line2'],
                 'subtitle' => self::variants()[$key]['subtitle'],
+                'page' => self::pageOf($key),
                 'is_default' => $key === self::defaultKey(),
                 'share' => $state['weights'][$key],
                 'visitors' => $row['visitors'],
                 'clicks' => $row['clicks'],
                 'signups' => $row['signups'],
+                'saved_schedule' => $outcomes[$key]['saved_schedule'],
+                'saved_event' => $outcomes[$key]['saved_event'],
                 'click_rate' => $row['visitors'] > 0 ? $row['clicks'] / $row['visitors'] : null,
                 'signup_rate' => $row['visitors'] > 0 ? $row['signups'] / $row['visitors'] : null,
+                'schedule_rate' => $row['visitors'] > 0 ? $outcomes[$key]['saved_schedule'] / $row['visitors'] : null,
                 'p_best' => $state['p_signups'][$key],
                 'p_best_clicks' => $state['p_clicks'][$key],
             ];
         }
 
-        usort($rows, fn ($a, $b) => $b['share'] <=> $a['share']);
+        // A fixed round keeps the order the variants are written in (the control first): its
+        // shares are equal, and a sort on them would shuffle the rows between two loads.
+        if (! $fixed) {
+            usort($rows, fn ($a, $b) => $b['share'] <=> $a['share']);
+        }
+
+        // The chance the light page is the better one on signups, where exactly one variant is it.
+        $light = array_values(array_filter(array_keys($state['stats']), fn ($key) => self::pageOf($key) === self::PAGE_LIGHT));
+        $pLight = $fixed && count($light) === 1 && count($state['stats']) > 1 ? $state['p_signups'][$light[0]] : null;
+
+        $started = $fixed ? self::startedAt() : null;
+        $looks = [];
+        $nextLook = null;
+        if ($started !== null && $ended === null && count($state['stats']) > 1) {
+            foreach (self::LOOK_WEEKS as $weeks) {
+                $looks[] = $started->copy()->addWeeks($weeks)->toDateString();
+            }
+            foreach ($looks as $look) {
+                if ($look >= now()->toDateString()) {
+                    $nextLook = $look;
+                    break;
+                }
+            }
+            // Past the last look and still running: the last look is the one that is due.
+            $nextLook ??= end($looks) ?: null;
+        }
 
         if (count($state['stats']) < 2) {
             $phase = 'baseline';
+        } elseif ($ended !== null) {
+            $phase = 'ended';
+        } elseif ($fixed) {
+            $phase = 'fixed';
         } elseif ($state['winner'] !== null) {
             $phase = 'winner';
         } elseif ($state['candidate'] !== null) {
@@ -730,6 +999,14 @@ final class HeroExperiment
                 ? Carbon::parse($state['candidate']['date'])->addDays(self::WIN_HOLD_DAYS)->toDateString()
                 : null,
             'reset_at' => self::resetAt()?->toDateString(),
+            // The page round's own fields. `split` is how new visitors are shared out; the rest
+            // are null or empty for a round of headlines alone.
+            'split' => $fixed ? 'even' : 'adaptive',
+            'ended' => $ended,
+            'p_light_better' => $pLight,
+            'started_at' => $started?->toDateString(),
+            'looks' => $looks,
+            'next_look' => $nextLook,
         ];
     }
 }

@@ -417,8 +417,8 @@
              a page uncacheable. Session-scoped (no expiry) and first-touch (never overwritten
              while it exists). Read back at sign-up by CaptureUtmParameters::clientAttribution().
 
-             The one exception to first-touch is `hero`, the homepage headline variant
-             (App\Utils\HeroExperiment), which the homepage's hero script leaves in window.esHero.
+             The one exception to first-touch is `hero`, the homepage test's variant (a headline,
+             or one of two pages: App\Utils\HeroExperiment), which the homepage's hero script leaves in window.esHero.
              A visitor who landed on another page first already has the cookie, so the variant is
              merged into it rather than skipped; every other field is left as it was. --}}
         <script {!! nonce_attr() !!}>

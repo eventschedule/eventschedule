@@ -412,9 +412,23 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     - `clicks`: learning, the traffic split still follows sign-up clicks;
     - `signups`: enough signups have come in to decide on them alone;
     - `candidate`: one variant is leading and waiting out its hold;
-    - `winner`: locked, and every visitor now sees it.
-  - `rows` has one entry per CURRENT variant, largest `share` first:
+    - `winner`: locked, and every visitor now sees it;
+    - `fixed` (schema 29): a page round is running. Two homepages under one headline, split
+      evenly, and nothing in the code ends it;
+    - `ended` (schema 29): a person ended a page round on one page. Every visitor gets that page,
+      the other is no longer printed, and the page kept is still counted.
+  - `split` (schema 29): `even` for a page round, `adaptive` for a round of headlines, whose
+    split moves toward the leader.
+  - `rows` has one entry per CURRENT variant, largest `share` first (a page round keeps the order
+    the variants are written in, the control first):
     - `key`, `headline`, `subtitle`, and `is_default` for the control;
+    - `page` (schema 29): `full` for today's homepage, `light` for the light one. A round of
+      headlines is `full` throughout;
+    - `saved_schedule`, `saved_event` (schema 29): of the accounts counted in `signups`, how many
+      own a schedule (deleted ones included) and how many made an event. Counted over exactly
+      the accounts `signups` counts, so each sits inside it; these are not the verified,
+      non-demo users of the `signups` rows;
+    - `schedule_rate` (schema 29): `saved_schedule` per visitor, null with no visitors;
     - `share`: the fraction of new visitors being given it now. Every variant keeps at least 0.05
       until a winner is locked, and one with under 300 visitors gets at least an even share;
     - `visitors`: people given that headline, counted once per visitor per day per variant, bots
@@ -433,6 +447,29 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     lead.
   - `winner` (`{key, date}`): the locked variant and the day it locked.
   - `reset_at`: the day the counts were last started over from `/admin/growth`, or null.
+  - A page round's own fields (schema 29), null or empty for a round of headlines:
+    - `p_light_better`: the chance the light page brings more signups per visitor than today's.
+      Drawn from a seed made of the counts, so the same counts always read the same figure;
+    - `started_at`: the first day a current variant was counted since `reset_at`;
+    - `looks`: the three dates, 4, 7 and 10 weeks after `started_at`, on which the round is meant
+      to be read, and `next_look`, the first of them not yet past. At the first two, 97% either
+      way with 400 visitors a page ends it; the last ends it whatever it says, and under 95% the
+      answer is "no difference large enough to see". Empty once the round has ended;
+    - `ended`: the key of the variant a person ended the round on, or null while it runs.
+  - Reading a page round:
+    - **Decide on `signups` per visitor at a look date, not on a day between.** Read every day,
+      a 95% line is crossed by chance far more often than one time in twenty.
+    - **`clicks` are not comparable between the two pages:** they have different numbers of
+      sign-up buttons.
+    - **A visitor is one browser on one day,** and a visitor without analytics consent is given
+      a page afresh on each view and in each new tab, so some people count in both arms. That
+      pulls the two arms toward each other.
+    - **The light page sends more visitors on to other pages,** and a signup made from another
+      page is credited only with marketing consent, so its `signups` are understated somewhat
+      more than the other arm's.
+    - **`marketing_pages` is not split by arm.** Its `reached_end` and `signup_clicks` for the
+      homepage move while a page round runs, because half the visitors get a page a quarter the
+      length.
   - `daily` (schema 21): `[{date, variant, visitors, clicks, signups}]` since `reset_at`, one entry
     per day and current variant that had anything. The same rows and cut as `rows`, so a variant's
     days sum to its totals, give or take what arrived in the up to 10 minutes `rows` may be cached.
@@ -660,6 +697,15 @@ created over the API or WhatsApp cannot carry a price.
   changelog below first.
 
 ## Changelog (`meta.schema_version`)
+
+- **29** (2026-11-16)
+  - **`hero_test` can hold a page round:** two homepages under one headline. New on the section:
+    `split`, `ended`, `p_light_better`, `started_at`, `looks`, `next_look`, and the phases
+    `fixed` and `ended`. New on each row: `page`, `saved_schedule`, `saved_event`,
+    `schedule_rate`. A page round's rows are not sorted by share.
+  - **The variant keys changed.** `promote_sell`, the one headline since 2026-10-22, is retired;
+    the same headline now runs as `home_full` (today's page) and `home_light`. `promote_sell`
+    stays in `signups.hero_variant` for the accounts that carry it.
 
 - **28** (2026-11-12)
   - **New section `marketing_pages`:** per marketing page and device (phone or desktop), the

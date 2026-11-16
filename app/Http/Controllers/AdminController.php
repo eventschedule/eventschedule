@@ -1115,6 +1115,39 @@ class AdminController extends Controller
     }
 
     /**
+     * End the homepage's page round on one of its two pages (HeroExperiment::end()): from then on
+     * every visitor is given that page and the other is no longer printed. Ending it on today's
+     * page is also the switch that takes the light page off at once. Reset starts the round over.
+     */
+    public function growthEndHeroTest(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+        abort_unless(config('app.hosted') && config('app.is_nexus'), 404);
+
+        $key = $request->input('variant');
+        $range = $request->input('range');
+        $back = route('admin.growth', is_string($range) && $range !== '' ? ['range' => $range] : []).'#hero-test';
+
+        if (! is_string($key) || ! HeroExperiment::end($key)) {
+            return redirect($back)->with('error', __('messages.invalid_request'));
+        }
+
+        AuditService::log(
+            AuditService::ADMIN_UPDATE,
+            auth()->id(),
+            null,
+            null,
+            null,
+            null,
+            'Ended the homepage test on '.$key,
+        );
+
+        return redirect($back)->with('message', __('messages.hero_test_ended_done'));
+    }
+
+    /**
      * Get date range based on selection. See AdminDateRange, which the growth endpoint and
      * app:export-growth share so a range means the same window everywhere.
      */

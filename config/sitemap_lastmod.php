@@ -20,7 +20,7 @@
  */
 
 return [
-    '/' => '2026-11-12',
+    '/' => '2026-11-18',
     '/about' => '2026-11-11',
     '/accelevents-alternative' => '2026-11-12',
     '/accessibility' => '2026-10-08',
@@ -183,7 +183,7 @@ return [
     '/posh-alternative' => '2026-11-12',
     '/pretix-alternative' => '2026-11-12',
     '/pricing' => '2026-11-12',
-    '/privacy' => '2026-11-11',
+    '/privacy' => '2026-11-18',
     '/qr-code-generator-replacement' => '2026-11-11',
     '/replace' => '2026-11-11',
     '/saas' => '2026-11-18',

@@ -8,7 +8,7 @@
  * import/export so it stays valid in both places.
  *
  * Two categories, each a separate choice:
- *   analytics  Google Analytics, identified realtime page views, the homepage headline test.
+ *   analytics  Google Analytics, identified realtime page views, the homepage test (headline or page).
  *   marketing  Advertising and attribution (GA ad signals, utm_* and es_attribution cookies, the
  *              Meta Pixel and Conversions API, AdSense) and third-party content that sets its own
  *              cookies (Stay22, the Google Maps embed, YouTube).

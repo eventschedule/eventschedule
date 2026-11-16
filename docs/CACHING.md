@@ -471,6 +471,30 @@ has to stay that way:
 - The weights baked into a cached page are up to ~20 minutes old (the app caches the
   evaluation for 10 minutes, the edge the page for 10 more). That is fine: they move slowly.
 
+**A page round** (from 2026-11-16) tests two homepages the same way, and for the same reason
+nothing about it is decided by the server:
+
+- A variant may name a `page`. While such a round runs the homepage prints BOTH middles in one
+  document: today's sections in `.hp-full`, the light page's in `.hp-lite`
+  (`marketing/partials/home-light`), between a hero and a closing panel that are the same
+  elements for both. The same picker sets `data-home="light"` on `#hp` for a visitor given the
+  light page. It runs in the hero, before either middle is parsed, and the rules that read the
+  attribute are in the page's head stylesheet, so neither page is drawn and then taken away.
+  Never move those rules into the body, and never let the server print the attribute while a
+  round runs: the stored copy would show one page to everyone.
+- There is one URL, one title and one description, and today's whole text is in the HTML for
+  both. A second address, a redirect or a swap after load would each cost a flash, a second URL
+  to keep out of the index, or a request the edge cannot store.
+- `/?home=light` and `/?home=full` show a page to whoever asks. A query string is never stored
+  at the edge, and the picker leaves `window.esHero` unset for them, so nothing is beaconed,
+  stored or put on a sign-up link.
+- A person ends the round (`HeroExperiment::end()`, the card on `/admin/growth`). From the next
+  request the server prints the page it was ended on alone, which reaches visitors as the stored
+  copy of `/` turns over; purge `/` to make it immediate.
+- A script that works on today's middle must stand down when that middle is not drawn:
+  `initShowreel()` measures the film's frame before fetching, and a frame that is not drawn
+  measures as a box at the top of the window.
+
 ## The CSP nonce
 
 Everyone served the same cached copy shares one nonce for up to 10 minutes. Marketing pages

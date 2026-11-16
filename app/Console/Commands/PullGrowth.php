@@ -187,7 +187,13 @@ class PullGrowth extends Command
 
         if ($hero = GrowthSummary::heroTest($current)) {
             $this->line('Headline test. '.$hero['status']);
-            $this->table(['Variant', 'Share now', 'Visitors', 'Clicks', 'Signups', 'Chance best (signups)'], $hero['rows']);
+            $this->table(
+                array_merge(
+                    ['Variant', 'Share now', 'Visitors', 'Clicks', 'Signups', 'Chance best (signups)'],
+                    $hero['pages'] ? ['Saved a schedule', 'Saved an event'] : [],
+                ),
+                $hero['rows'],
+            );
         }
 
         // Every note is "new" against nothing, and twenty of them would bury the table.

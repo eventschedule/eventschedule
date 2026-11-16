@@ -799,7 +799,10 @@ function initShowreel() {
             relabel();
             sync();
         }
-        if (frame.getBoundingClientRect().top < window.innerHeight * 1.25) {
+        // A frame that is not drawn (the light homepage hides the whole screen) measures as a box
+        // of nothing at the top of the window, which read as "near": the reel would be fetched
+        // for a visitor who can never see it.
+        if (frame.getClientRects().length && frame.getBoundingClientRect().top < window.innerHeight * 1.25) {
             window.removeEventListener('scroll', warm);
             if (!paused && active.isConnected) {
                 active.preload = 'auto';

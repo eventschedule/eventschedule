@@ -249,15 +249,37 @@
         {{-- The homepage headline A/B test (App\Utils\HeroExperiment). It allocates traffic and
              picks its winner by itself; the only control is the reset, which starts it over. --}}
         @if (config('app.is_nexus'))
-            <x-page-card flush id="hero-test" class="scroll-mt-4" :title="__('messages.hero_test')" :lead="__('messages.hero_test_help')">
+            @php
+                // A page round (two homepages, split evenly, ended by hand) is told apart from a
+                // round of headlines by its split; once ended it still says which page it was.
+                $homeTest = $heroTest !== null && ($heroTest['split'] ?? null) === 'even';
+                $homePageName = fn ($page) => $page === 'light' ? __('messages.home_test_page_light') : __('messages.home_test_page_full');
+            @endphp
+            <x-page-card flush id="hero-test" class="scroll-mt-4" :title="$homeTest ? __('messages.home_test') : __('messages.hero_test')" :lead="$homeTest ? __('messages.home_test_help') : __('messages.hero_test_help')">
                 @if ($heroTest !== null)
                 <x-slot name="aside">
+                    <div class="page-actions">
+                    {{-- Ending is offered while a page round runs, one button a page, the page that
+                         is the change (the light one) last. Reset, which starts over, is the
+                         destroying one. --}}
+                    @if ($homeTest && $heroTest['phase'] === 'fixed')
+                        @foreach ($heroTest['rows'] as $row)
+                            <form method="POST" action="{{ route('admin.growth.hero_test_end') }}"
+                                  data-confirm="{{ __('messages.home_test_end_confirm') }}">
+                                @csrf
+                                <input type="hidden" name="range" value="{{ $range }}">
+                                <input type="hidden" name="variant" value="{{ $row['key'] }}">
+                                <x-secondary-button class="!py-2" type="submit">{{ $row['page'] === 'light' ? __('messages.home_test_end_light') : __('messages.home_test_end_full') }}</x-secondary-button>
+                            </form>
+                        @endforeach
+                    @endif
                     <form method="POST" action="{{ route('admin.growth.hero_test_reset') }}"
                           data-confirm="{{ __('messages.hero_test_reset_confirm') }}">
                         @csrf
                         <input type="hidden" name="range" value="{{ $range }}">
                         <x-danger-button class="!py-2">@lang('messages.hero_test_reset')</x-danger-button>
                     </form>
+                    </div>
                 </x-slot>
                 @endif
 
@@ -269,11 +291,19 @@
                         $heroHeadline = fn ($key) => (collect($heroTest['rows'])->firstWhere('key', $key)['headline'] ?? $key).' ('.$key.')';
                         $heroPct = fn ($value) => $value === null ? __('messages.funnel_na') : $ltr(round($value * 100, 1).'%');
                         // One headline races nobody, so its "chance best" would only ever read 100%.
-                        $heroRace = $heroTest['phase'] !== 'baseline';
+                        // A page round says its one chance in a sentence, not in two columns.
+                        $heroRace = ! in_array($heroTest['phase'], ['baseline', 'fixed', 'ended'], true);
+                        $homeEndedPage = $homeTest && $heroTest['ended'] !== null
+                            ? (collect($heroTest['rows'])->firstWhere('key', $heroTest['ended'])['page'] ?? 'full')
+                            : null;
                     @endphp
                     <div class="insight-pad">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">
-                            @if ($heroTest['phase'] === 'baseline')
+                            @if ($heroTest['phase'] === 'ended')
+                                {{ __('messages.home_test_phase_ended', ['page' => $homePageName($homeEndedPage)]) }}
+                            @elseif ($heroTest['phase'] === 'fixed')
+                                {{ __('messages.home_test_phase_running', ['date' => $heroTest['next_look'] ?? __('messages.funnel_na')]) }}
+                            @elseif ($heroTest['phase'] === 'baseline')
                                 @lang('messages.hero_test_phase_baseline')
                             @elseif ($heroTest['phase'] === 'winner')
                                 {{ __('messages.hero_test_phase_winner', ['variant' => $heroHeadline($heroTest['winner']['key']), 'date' => $heroTest['winner']['date']]) }}
@@ -285,8 +315,23 @@
                                 @lang('messages.hero_test_phase_signups')
                             @endif
                         </p>
-                        @if ($heroTest['reset_at'])
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.hero_test_since', ['date' => $heroTest['reset_at']]) }}</p>
+                        @if ($homeTest && $heroTest['phase'] === 'fixed')
+                            @if ($heroTest['p_light_better'] !== null)
+                                <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.home_test_chance_light', ['percent' => round($heroTest['p_light_better'] * 100, 1).'%']) }}</p>
+                            @endif
+                            @if (! empty($heroTest['looks']))
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.home_test_looks', [
+                                    'dates' => implode(', ', $heroTest['looks']),
+                                    'early' => round(\App\Utils\HeroExperiment::LOOK_EARLY_PROBABILITY * 100).'%',
+                                    'visitors' => number_format(\App\Utils\HeroExperiment::LOOK_MIN_VISITORS),
+                                ]) }}</p>
+                            @endif
+                        @endif
+                        @if ($homeTest)
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.home_test_note')</p>
+                        @endif
+                        @if ($heroTest['started_at'] ?? $heroTest['reset_at'])
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.hero_test_since', ['date' => $heroTest['started_at'] ?? $heroTest['reset_at']]) }}</p>
                         @endif
                     </div>
 
@@ -300,6 +345,10 @@
                                     <th scope="col" class="c-num">@lang('messages.click_rate')</th>
                                     <th scope="col" class="c-num">@lang('messages.growth_signups')</th>
                                     <th scope="col" class="c-num">@lang('messages.hero_test_signup_rate')</th>
+                                    @if ($homeTest)
+                                        <th scope="col" class="c-num">@lang('messages.home_test_schedules')</th>
+                                        <th scope="col" class="c-num">@lang('messages.home_test_events')</th>
+                                    @endif
                                     @if ($heroRace)
                                         <th scope="col" class="c-num">@lang('messages.hero_test_chance_best_clicks')</th>
                                         <th scope="col" class="c-num">@lang('messages.hero_test_chance_best')</th>
@@ -315,6 +364,9 @@
                                             <span class="c-strong block" dir="ltr">{{ $row['headline'] }}</span>
                                             <span class="c-sub" dir="ltr">{{ $row['subtitle'] }}</span>
                                             <span class="c-sub">
+                                                @if ($homeTest)
+                                                    <span class="event-chip">{{ $homePageName($row['page']) }}</span>
+                                                @endif
                                                 <span class="event-chip c-mono" dir="ltr">{{ $row['key'] }}</span>
                                                 @if ($row['is_default'])
                                                     <span class="event-chip">@lang('messages.hero_test_default')</span>
@@ -326,6 +378,10 @@
                                         <td class="c-num" data-label="{{ __('messages.click_rate') }}">{{ $heroPct($row['click_rate']) }}</td>
                                         <td class="c-num" data-label="{{ __('messages.growth_signups') }}">{{ number_format($row['signups']) }}</td>
                                         <td class="c-num" data-label="{{ __('messages.hero_test_signup_rate') }}">{{ $heroPct($row['signup_rate']) }}</td>
+                                        @if ($homeTest)
+                                            <td class="c-num" data-label="{{ __('messages.home_test_schedules') }}">{{ number_format($row['saved_schedule']) }}</td>
+                                            <td class="c-num" data-label="{{ __('messages.home_test_events') }}">{{ number_format($row['saved_event']) }}</td>
+                                        @endif
                                         @if ($heroRace)
                                             <td class="c-num" data-label="{{ __('messages.hero_test_chance_best_clicks') }}">{{ $heroPct($row['p_best_clicks']) }}</td>
                                             <td class="c-num" data-label="{{ __('messages.hero_test_chance_best') }}">{{ $heroPct($row['p_best']) }}</td>

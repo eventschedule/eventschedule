@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -132,8 +133,9 @@ class GrowthDataEndpointTest extends TestCase
     {
         Cache::flush();
 
-        // The site runs one headline since 2026-10-22 (a baseline, see HeroExperiment::VARIANTS),
-        // so the counts belong to it; per-variant splitting is HeroExperimentTest's.
+        // The site runs a page round since 2026-11 (one headline on two homepages, see
+        // HeroExperiment::VARIANTS); the counts here go to its control, today's page. Splitting
+        // between variants is HeroExperimentTest's.
         $variant = HeroExperiment::DEFAULT;
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'view');
@@ -154,7 +156,12 @@ class GrowthDataEndpointTest extends TestCase
         $this->assertSame(1, $rows[$variant]['clicks']);
         $this->assertSame(1, $rows[$variant]['signups']);
         $this->assertTrue($rows[$variant]['is_default']);
-        $this->assertSame('baseline', $payload['hero_test']['phase']);
+        $this->assertSame('fixed', $payload['hero_test']['phase']);
+        $this->assertSame('even', $payload['hero_test']['split']);
+        // What the round is read on, per page (schema 29).
+        $this->assertSame(['full', 'light'], [$rows['home_full']['page'], $rows['home_light']['page']]);
+        $this->assertSame([0, 0], [$rows[$variant]['saved_schedule'], $rows[$variant]['saved_event']]);
+        $this->assertCount(3, $payload['hero_test']['looks']);
 
         // By day too (schema 21), and the days add up to the totals.
         $days = collect($payload['hero_test']['daily'])->where('variant', $variant);
@@ -278,7 +285,7 @@ class GrowthDataEndpointTest extends TestCase
 
         // Schema 9 reads more tables, each with people in it: none of them may surface.
         DB::table('federated_instances')->insert([
-            'instance_id' => (string) \Illuminate\Support\Str::uuid(), 'site_url' => 'https://events.hiddeninstall.org',
+            'instance_id' => (string) Str::uuid(), 'site_url' => 'https://events.hiddeninstall.org',
             'name' => 'Hidden Install Collective', 'contact_email' => 'admin@hiddeninstall.org', 'secret' => 'x',
             'app_version' => 'v1.0.130', 'status' => 'approved', 'last_seen_at' => now(), 'created_at' => now(), 'updated_at' => now(),
         ]);
