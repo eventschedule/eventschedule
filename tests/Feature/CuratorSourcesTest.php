@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\Group;
 use App\Models\Role;
 use App\Models\RoleSource;
 use App\Services\CuratorSourceService;
@@ -10,6 +11,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\Feature\Characterization\Concerns\SavesEventsOverHttp;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -40,7 +42,7 @@ class CuratorSourcesTest extends TestCase
     protected function stubVenue(string $name, array $attrs = []): Role
     {
         $venue = new Role;
-        $venue->subdomain = 'stub'.strtolower(\Illuminate\Support\Str::random(10));
+        $venue->subdomain = 'stub'.strtolower(Str::random(10));
         $venue->type = 'venue';
         $venue->name = $name;
         $venue->email = null;
@@ -730,7 +732,7 @@ class CuratorSourcesTest extends TestCase
         $this->service()->reconcile($curator);
 
         // role_id is not fillable on Group.
-        $group = new \App\Models\Group;
+        $group = new Group;
         $group->role_id = $curator->id;
         $group->name = 'Jazz Nights';
         $group->slug = 'jazz-nights';
@@ -806,5 +808,30 @@ class CuratorSourcesTest extends TestCase
             ->all();
 
         $this->assertSame([$upcoming->id], $found);
+    }
+
+    /**
+     * Issue #137: MySQL 5.7 and MariaDB, both promised to selfhost installs, resolve a join's ON
+     * clause against the subquery's own tables only. The unlink query named the outer row there
+     * and every event save answered 500 with "Unknown column 'er.event_id' in 'on clause'".
+     * MySQL 8 accepts it, so only the SQL's shape can hold this here.
+     */
+    public function test_the_unlink_query_names_the_outer_row_only_in_where(): void
+    {
+        $queries = [];
+        DB::listen(function ($query) use (&$queries) {
+            $queries[] = $query->sql;
+        });
+
+        $this->service()->reconcile();
+
+        $unlink = collect($queries)->first(fn ($sql) => str_contains($sql, 'not exists (') && str_contains($sql, '`event_role` as `er`'));
+        $this->assertNotNull($unlink, 'The unlink query was not run.');
+
+        $subquery = substr($unlink, strpos($unlink, 'not exists (') + 12);
+        $joins = substr($subquery, 0, strpos($subquery, ' where '));
+
+        $this->assertStringContainsString('inner join', $joins);
+        $this->assertStringNotContainsString('`er`.', $joins, 'A join inside the subquery names the outer row in its ON clause.');
     }
 }

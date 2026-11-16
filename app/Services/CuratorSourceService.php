@@ -166,10 +166,14 @@ class CuratorSourceService
                     ->from('role_sources as rs')
                     ->join('event_role as src', function ($join) {
                         $join->on('src.role_id', '=', 'rs.source_role_id')
-                            ->on('src.event_id', '=', 'er.event_id')
                             ->where('src.is_accepted', '=', true);
                     })
                     ->join('events as e', 'e.id', '=', 'src.event_id')
+                    // The outer row is named in WHERE, never in a join's ON: MySQL 5.7 and
+                    // MariaDB resolve an ON clause against the subquery's own tables only, and
+                    // answer "Unknown column 'er.event_id' in 'on clause'" (issue #137, a 500 on
+                    // every event save). For an inner join the two spellings select the same rows.
+                    ->whereColumn('src.event_id', 'er.event_id')
                     ->whereColumn('rs.role_id', 'er.role_id');
 
                 $this->applyEligibility($q, 'e');
