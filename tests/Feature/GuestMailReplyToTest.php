@@ -7,6 +7,9 @@ use App\Mail\InstallmentReminder;
 use App\Mail\TicketPurchase;
 use App\Services\InstallmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -60,5 +63,29 @@ class GuestMailReplyToTest extends TestCase
         $mail = new InstallmentReminder($plan->fresh('installments'), $plan->installments->last(), $role);
 
         $this->assertTrue($mail->hasReplyTo($owner->email));
+    }
+
+    public function test_guest_mail_asks_out_of_office_responders_not_to_answer(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'ticket_currency_code' => 'USD']);
+        $ticket = $this->createTicket($event, ['price' => 0]);
+        $sale = $this->createSale($event, $role, ['payment_amount' => 0], $ticket);
+
+        $sent = [];
+        Event::listen(MessageSending::class, function ($e) use (&$sent) {
+            $sent[] = $e->message;
+        });
+
+        config(['mail.default' => 'array']);
+        Mail::to('guest@example.com')
+            ->send(new TicketPurchase($sale->fresh()->load('saleTickets.ticket'), $event->fresh(), $role));
+
+        $this->assertCount(1, $sent);
+        $headers = $sent[0]->getHeaders();
+        $this->assertSame('auto-generated', $headers->get('Auto-Submitted')?->getBodyAsString());
+        $this->assertSame('OOF, AutoReply', $headers->get('X-Auto-Response-Suppress')?->getBodyAsString());
+        $this->assertSame($owner->email, $sent[0]->getReplyTo()[0]->getAddress());
     }
 }
