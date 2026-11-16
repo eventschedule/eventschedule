@@ -900,10 +900,10 @@ example.com/summer-concert</code></pre>
             Keep the current graphic at an address that does not change, so a screen at your venue, a page on your website or anything else that shows a picture from an address always has your upcoming events. Switch on <strong>Keep the image at a public address</strong>, save, and the row shows the address with a <strong>Copy</strong> button.
         </p>
         <ul class="doc-list mb-4">
-            <li>The image at the address is drawn from the settings you last saved. It is redrawn every hour, so an event that has passed leaves it and a new one joins it, and again each time you save.</li>
+            <li>The image at the address is drawn from the settings you last saved. It is redrawn every hour, so an event that has passed leaves it and a new one joins it, and again each time you save or change the header image.</li>
             <li>Anyone who has the address can see the image. The address is a long random one that does not name your schedule, and the image shows only what the graphic on this page shows.</li>
-            <li>Switching the link off and saving removes the image from its address. Switching it on again gives a new address, so the old one stays closed.</li>
-            <li>If no upcoming event has a flyer image, the last image stays in place until there is one.</li>
+            <li>Switching the link off and saving removes the image from its address; a screen that already has a copy may show it for up to five more minutes. Switching it on again gives a new address, so the old one stays closed. The bar at the foot of the page says so before you save.</li>
+            <li>The image needs at least one upcoming event with a flyer. Until there is one, a new address has no image and the row says so; once there has been one, the last image stays in place while there is nothing new to draw.</li>
         </ul>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Showing it on a screen</div>

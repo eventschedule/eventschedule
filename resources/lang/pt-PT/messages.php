@@ -2570,8 +2570,12 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'graphic_row_link' => 'Ligação pública',
     'graphic_sum_link_locked' => 'Num endereço próprio',
     'graphic_link_toggle' => 'Manter a imagem num endereço público',
-    'graphic_link_help' => 'Para um ecrã no seu espaço, um site ou qualquer outra coisa que mostre uma imagem a partir de um endereço. Qualquer pessoa que tenha o endereço pode ver a imagem. É refeita a cada hora e sempre que guarda.',
+    'graphic_link_help' => 'Para um ecrã no seu espaço, um site ou qualquer outra coisa que mostre uma imagem a partir de um endereço. Qualquer pessoa que tenha o endereço pode ver a imagem. É refeita a cada hora e sempre que guardar as alterações.',
     'graphic_link_save_first' => 'Guarde para obter o endereço.',
     'graphic_link_off_help' => 'Ao guardar, a imagem é retirada do seu endereço. Ativar de novo gera um endereço novo.',
     'graphic_link_locked' => 'Mantenha a imagem num endereço público, refeita a cada hora, para um ecrã no seu espaço ou um site.',
+    'graphic_link_empty' => 'Ainda não há imagem no endereço. Aparece quando um evento futuro tiver flyer.',
+    'graphic_link_paused' => 'A sua ligação pública está em pausa. O endereço volta a responder quando a agenda voltar ao Enterprise.',
+    'graphic_unsaved_help_link_on' => 'Ao guardar, a imagem é colocada num endereço público.',
+    'graphic_unsaved_help_link_off' => 'Ao guardar, a imagem é retirada de vez do seu endereço público.',
 ]);

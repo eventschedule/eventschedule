@@ -102,7 +102,7 @@ return [
     '/features/custom-labels' => '2026-11-11',
     '/features/embed-calendar' => '2026-11-12',
     '/features/embed-tickets' => '2026-11-12',
-    '/features/event-graphics' => '2026-11-11',
+    '/features/event-graphics' => '2026-11-16',
     '/features/fan-videos' => '2026-11-11',
     '/features/feedback' => '2026-11-11',
     '/features/gift-cards' => '2026-11-12',

@@ -173,14 +173,34 @@ class GraphicController extends Controller
     {
         $image = GraphicLink::image($key);
 
-        abort_if($image === null, 404);
+        // Not to be kept by anything in between: the picture may arrive with the next hour.
+        if ($image === null) {
+            return response('', 404, ['Cache-Control' => 'no-store']);
+        }
 
         return response($image, 200, [
             'Content-Type' => 'image/png',
-            // Short, so a screen that asks again gets the next hour's picture.
+            // Short, so a screen that asks again gets the next hour's picture. Expires is said
+            // outright because Apache's mod_expires (public/.htaccess gives image/png a month)
+            // adds its own to any image response, this one included, unless one is already there.
             'Cache-Control' => 'public, max-age=300',
+            'Expires' => gmdate('D, d M Y H:i:s', time() + 300).' GMT',
             'X-Robots-Tag' => 'noindex',
         ]);
+    }
+
+    /**
+     * The picture at the public link is the saved graphic, so whatever changes the saved graphic
+     * draws it again. A failure there leaves the last picture and must not fail the save that
+     * did go through.
+     */
+    private function redrawLink(Role $role): void
+    {
+        try {
+            GraphicLink::refresh($role);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     public function getSettings($subdomain)
@@ -290,19 +310,20 @@ class GraphicController extends Controller
         $role->graphic_settings = $newSettings;
         $role->save();
 
-        // The picture at the public link is the saved graphic, so a save draws it again. A
-        // failure there leaves the last picture and must not fail the save that did go through.
-        try {
-            GraphicLink::refresh($role);
-        } catch (\Throwable $e) {
-            report($e);
+        // Only now that the save is in: a refused save above must leave the picture where it is.
+        $oldKey = $currentSettings['link_key'] ?? null;
+        if ($oldKey !== ($newSettings['link_key'] ?? null)) {
+            GraphicLink::close($oldKey);
         }
+
+        $this->redrawLink($role);
 
         return response()->json([
             'success' => true,
             'message' => __('messages.settings_saved'),
             'settings' => $role->graphic_settings,
             'link_url' => GraphicLink::url($role),
+            'link_ready' => GraphicLink::ready($role),
         ]);
     }
 
@@ -964,6 +985,7 @@ class GraphicController extends Controller
         $settings['header_image_url'] = $filename;
         $role->graphic_settings = $settings;
         $role->save();
+        $this->redrawLink($role);
 
         // Build URL for preview
         if (config('filesystems.default') == 'local') {
@@ -1002,6 +1024,7 @@ class GraphicController extends Controller
             unset($settings['header_image_url']);
             $role->graphic_settings = $settings;
             $role->save();
+            $this->redrawLink($role);
         }
 
         return response()->json([

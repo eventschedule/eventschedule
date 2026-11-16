@@ -8302,7 +8302,6 @@ return [
     'newsletter_events_sub_schedule' => 'Alamajakava',
     'newsletter_events_all_sub_schedules' => 'Kõik alamajakavad',
     'graphic_row_link' => 'Avalik link',
-    'graphic_sum_link_on' => 'Sees',
     'graphic_sum_link_locked' => 'Oma aadressil',
     'graphic_link_toggle' => 'Hoia pilti avalikul aadressil',
     'graphic_link_help' => 'Ekraanile sinu toimumiskohas, veebilehele või millelegi muule, mis näitab pilti aadressilt. Pilti näeb igaüks, kellel on aadress. See tehakse uuesti iga tund ja iga kord, kui salvestad.',
@@ -8310,4 +8309,8 @@ return [
     'graphic_link_save_first' => 'Aadressi saamiseks salvesta.',
     'graphic_link_off_help' => 'Salvestamisel eemaldatakse pilt oma aadressilt. Uuesti sisse lülitades tuleb uus aadress.',
     'graphic_link_locked' => 'Hoia pilti avalikul aadressil, kus see tehakse iga tund uuesti, ekraanile sinu toimumiskohas või veebilehele.',
+    'graphic_link_empty' => 'Aadressil pole veel pilti. See ilmub, kui mõnel eelseisval sündmusel on flaier.',
+    'graphic_link_paused' => 'Sinu avalik link on peatatud. Aadress vastab taas, kui ajakava on taas Enterprise plaanis.',
+    'graphic_unsaved_help_link_on' => 'Salvestamisel pannakse pilt avalikule aadressile.',
+    'graphic_unsaved_help_link_off' => 'Salvestamisel eemaldatakse pilt oma avalikult aadressilt jäädavalt.',
 ];

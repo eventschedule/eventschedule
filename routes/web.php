@@ -391,9 +391,10 @@ Route::post('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])->na
 Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequest'])->name('event.clear_pending_request');
 
 // The Events graphic at its public address, for a screen or a website (GraphicLink). Outside the
-// web group: a screen keeps no cookie, so every request would otherwise start a session. The key's
-// pattern is what keeps this from answering for a selfhost schedule's own /{subdomain}/{slug}.
-Route::get('/events-graphic/{key}.png', [GraphicController::class, 'publicImage'])->name('graphic.link')->where('key', GraphicLink::KEY_PATTERN)->withoutMiddleware('web')->middleware('throttle:60,1');
+// web group: a screen keeps no cookie, so every request would otherwise start a session. Under
+// /events, which no schedule can be named (Role::RESERVED_SUBDOMAINS), so on a selfhost install it
+// cannot answer for a schedule's own /{subdomain}/... pages.
+Route::get('/events/graphic/{key}.png', [GraphicController::class, 'publicImage'])->name('graphic.link')->where('key', GraphicLink::KEY_PATTERN)->withoutMiddleware('web')->middleware('throttle:60,1,graphic_link');
 
 // Newsletter tracking routes (public, no auth)
 Route::get('/nl/o/{token}', [NewsletterTrackingController::class, 'trackOpen'])->name('newsletter.track_open')->middleware('throttle:60,1');

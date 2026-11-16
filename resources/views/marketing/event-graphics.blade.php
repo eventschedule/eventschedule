@@ -142,7 +142,7 @@
             ],
             [
                 'q' => 'Is the event graphics feature free?',
-                'a' => 'Yes, on every plan. Composing the graphic and its text, the header image and the header and footer text, every format and custom fields in the template are all free, and so is uploading a flyer to an event. The AI rewrite of the generated text and the scheduled graphic emails are Enterprise.',
+                'a' => 'Yes, on every plan. Composing the graphic and its text, the header image and the header and footer text, every format and custom fields in the template are all free, and so is uploading a flyer to an event. The AI rewrite of the generated text, the scheduled graphic emails and the public link that keeps the graphic at a fixed address are Enterprise.',
             ],
         ];
 
@@ -1637,7 +1637,7 @@
                     Every plan hangs the show. <span class="es-gal-accent">Enterprise writes the captions.</span>
                 </h2>
                 <p class="es-gal-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Composing a graphic, its text and every format is free on every plan. Enterprise, at {{ plan_price($entMonthly) }} a month, adds the AI rewrite of the text and the emails that send a graphic on a schedule. Nothing on this page is charged per graphic.
+                    Composing a graphic, its text and every format is free on every plan. Enterprise, at {{ plan_price($entMonthly) }} a month, adds the AI rewrite of the text, the emails that send a graphic on a schedule and a public link that keeps the graphic at a fixed address for a screen or a website. Nothing on this page is charged per graphic.
                 </p>
             </div>
 
@@ -1661,6 +1661,7 @@
                                 ['Custom fields in the template', 'Free', 'plan'],
                                 ['AI rewrite of the generated text', 'Enterprise', 'plan-enterprise'],
                                 ['Scheduled graphic emails', 'Enterprise', 'plan-enterprise'],
+                                ['Public link to the graphic, redrawn every hour', 'Enterprise', 'plan-enterprise'],
                             ] as [$pLabel, $pPlan, $pClass])
                                 <tr>
                                     <th scope="row" class="es-gal-ink font-semibold">{{ $pLabel }}</th>

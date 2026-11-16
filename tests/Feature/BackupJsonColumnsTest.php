@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\BackupService;
+use App\Services\GraphicLink;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -65,6 +66,26 @@ class BackupJsonColumnsTest extends TestCase
             $raw = ltrim((string) DB::table($table)->where('id', $id)->value($column));
             $this->assertContains($raw[0] ?? '', ['{', '['], "$table.$column was stored double-encoded: $raw");
         }
+    }
+
+    /**
+     * A restore is a new schedule beside the one it was copied from. Carrying the public link of
+     * the Events graphic over would put two schedules on one address, each drawing over the
+     * other's picture every hour.
+     */
+    public function test_a_restore_does_not_take_over_the_graphics_public_link(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->schedule($owner);
+        $role->graphic_settings = ['layout' => 'row', 'link_enabled' => true, 'link_key' => str_repeat('k', 40)];
+        $role->save();
+
+        $restored = $this->import($owner, $this->export($owner, $role), $role);
+
+        $this->assertSame('row', $restored->graphic_settings['layout']);
+        $this->assertArrayNotHasKey('link_key', $restored->graphic_settings);
+        $this->assertArrayNotHasKey('link_enabled', $restored->graphic_settings);
+        $this->assertFalse(GraphicLink::on($restored));
     }
 
     public function test_json_settings_survive_a_backup_round_trip(): void

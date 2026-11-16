@@ -627,6 +627,7 @@
             'aiReady' => (bool) $aiReady,
             'hosted' => $hosted,
             'linkUrl' => \App\Services\GraphicLink::url($role),
+            'linkReady' => \App\Services\GraphicLink::ready($role),
             'userEmail' => auth()->user()->email,
             'file' => $role->subdomain.'-upcoming-events.png',
             // The schedule's list, read in the language its wording is written in: the one in
@@ -671,7 +672,8 @@
                 'per_row_list' => __('messages.graphic_per_row_list'),
                 'locked_email' => __('messages.graphic_sum_email_locked'),
                 'locked_link' => __('messages.graphic_sum_link_locked'),
-                'link_on' => __('messages.graphic_sum_link_on'),
+                'link_on' => __('messages.summary_on'),
+                'link_off' => __('messages.summary_off'),
                 'next' => __('messages.graphic_sum_next'),
                 'each' => __('messages.graphic_sum_per_schedule'),
                 'no_recurring' => __('messages.graphic_sum_no_recurring'),
@@ -690,6 +692,8 @@
                 'unsaved_plain' => __('messages.graphic_unsaved_help'),
                 'unsaved_email' => __('messages.graphic_unsaved_help_email'),
                 'unsaved_list' => __('messages.graphic_unsaved_help_list'),
+                'unsaved_link_on' => __('messages.graphic_unsaved_help_link_on'),
+                'unsaved_link_off' => __('messages.graphic_unsaved_help_link_off'),
                 'own' => __('messages.graphic_sum_own'),
                 'all_events' => __('messages.graphic_sum_all_events'),
                 'english' => __('messages.graphic_sum_english'),
@@ -1106,14 +1110,18 @@
                             <label class="gfx-label" for="graphic_link_url">{{ __('messages.graphic_link_address') }}</label>
                             <div class="gfx-link">
                                 <input type="text" id="graphic_link_url" ref="link" readonly dir="ltr" :value="linkUrl" @focus="$event.target.select()">
-                                <button type="button" class="page-tool" @click="copyLink" v-text="linkCopied ? @js(__('messages.copied')) : @js(__('messages.copy'))"></button>
+                                <button type="button" class="page-tool" aria-live="polite" @click="copyLink" v-text="linkCopied ? @js(__('messages.copied')) : @js(__('messages.copy'))"></button>
                             </div>
+                            {{-- An address with nothing behind it yet answers "not found": said here, not left for the screen to show. --}}
+                            <p class="gfx-hint is-plain" v-if="! linkReady">{{ __('messages.graphic_link_empty') }}</p>
                         </div>
                         <p class="gfx-hint is-plain" v-else-if="s.link_enabled" role="status">{{ __('messages.graphic_link_save_first') }}</p>
                         <p class="gfx-hint is-plain" v-else-if="saved.link_enabled" role="status">{{ __('messages.graphic_link_off_help') }}</p>
                         @else
                         <div class="gfx-locked">
-                            <p>{{ __('messages.graphic_link_locked') }}</p>
+                            {{-- A plan that lapsed left a link stored: said as that, not as something never had. --}}
+                            <p v-if="s.link_enabled">{{ __('messages.graphic_link_paused') }}</p>
+                            <p v-else>{{ __('messages.graphic_link_locked') }}</p>
                             <button type="button" class="page-tool" data-modal-open="upgrade-graphic-link">{{ __('messages.upgrade_to_enterprise') }}</button>
                         </div>
                         @endif
@@ -1383,6 +1391,7 @@
                     canEdit: boot.canEdit,
                     enterprise: boot.enterprise,
                     linkUrl: boot.linkUrl || '',
+                    linkReady: !! boot.linkReady,
                     linkCopied: false,
                     days: boot.days,
                     open: '',
@@ -1462,8 +1471,11 @@
                 },
                 barHelp: function () {
                     var email = this.s.enabled && this.enterprise;
-                    if (this.listChanged) { return (email ? words.unsaved_email + ' ' : '') + words.unsaved_list; }
-                    return email ? words.unsaved_email : words.unsaved_plain;
+                    // A save that puts the image in public, or takes it out for good, says so first:
+                    // the row that explains it is closed whenever another one is open.
+                    var link = this.enterprise && this.s.link_enabled !== this.saved.link_enabled ? (this.s.link_enabled ? words.unsaved_link_on : words.unsaved_link_off) + ' ' : '';
+                    if (this.listChanged) { return link + (email ? words.unsaved_email + ' ' : '') + words.unsaved_list; }
+                    return link + (email ? words.unsaved_email : words.unsaved_plain);
                 },
                 listUrl: function () {
                     return boot.listUrl + (boot.listUrl.indexOf('?') === -1 ? '?' : '&') + 'lang=' + boot.lang;
@@ -1515,7 +1527,7 @@
                         headerSet: header.length > 0,
                         caption: caption.join(' · '),
                         email: email,
-                        link: this.enterprise ? (s.link_enabled ? words.link_on : words.off) : (s.link_enabled ? words.paused : words.locked_link),
+                        link: this.enterprise ? (s.link_enabled ? words.link_on : words.link_off) : (s.link_enabled ? words.paused : words.locked_link),
                     };
                 },
             },
@@ -1829,6 +1841,7 @@
                         if (result.ok && result.body.success) {
                             self.saved = sent;
                             self.linkUrl = result.body.link_url || '';
+                            self.linkReady = !! result.body.link_ready;
                             self.saveState.done = true;
                             // "Your list uses this wording now", with the way to see it, stays long enough to be pressed.
                             self.saveState.list = list;

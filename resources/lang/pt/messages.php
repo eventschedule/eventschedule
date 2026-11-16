@@ -8302,7 +8302,6 @@ return [
     'newsletter_events_sub_schedule' => 'Sub-agenda',
     'newsletter_events_all_sub_schedules' => 'Todas as sub-agendas',
     'graphic_row_link' => 'Link público',
-    'graphic_sum_link_on' => 'Ativado',
     'graphic_sum_link_locked' => 'Em um endereço próprio',
     'graphic_link_toggle' => 'Manter a imagem em um endereço público',
     'graphic_link_help' => 'Para uma tela no seu espaço, um site ou qualquer outra coisa que mostre uma imagem a partir de um endereço. Qualquer pessoa que tenha o endereço pode ver a imagem. Ela é refeita a cada hora e sempre que as alterações são salvas.',
@@ -8310,4 +8309,8 @@ return [
     'graphic_link_save_first' => 'Salve para obter o endereço.',
     'graphic_link_off_help' => 'Ao salvar, a imagem é retirada do seu endereço. Ativar de novo gera um endereço novo.',
     'graphic_link_locked' => 'Mantenha a imagem em um endereço público, refeita a cada hora, para uma tela no seu espaço ou um site.',
+    'graphic_link_empty' => 'Ainda não há imagem no endereço. Ela aparece quando um evento futuro tiver flyer.',
+    'graphic_link_paused' => 'Seu link público está pausado. O endereço volta a responder quando a agenda voltar ao Enterprise.',
+    'graphic_unsaved_help_link_on' => 'Ao salvar, a imagem é colocada em um endereço público.',
+    'graphic_unsaved_help_link_off' => 'Ao salvar, a imagem é retirada de vez do seu endereço público.',
 ];

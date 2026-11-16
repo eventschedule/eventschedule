@@ -66,10 +66,16 @@ class SendGraphicEmails extends Command
                     continue;
                 }
 
-                $service = new GraphicEmailService;
+                $service = app(GraphicEmailService::class);
                 $result = $service->sendGraphicEmail($role, $recipientEmails);
 
                 if ($result) {
+                    // Stamped on the settings as they are NOW, not as this run loaded them: a
+                    // run draws and sends for many schedules, and writing the copy from its start
+                    // would put back whatever the owner changed meanwhile (a public link switched
+                    // off would be switched on again, under its old key).
+                    $role->refresh();
+                    $settings = $role->graphic_settings ?? [];
                     $settings['last_sent_at'] = now()->toIso8601String();
                     $role->graphic_settings = $settings;
                     $role->save();

@@ -55,28 +55,35 @@ class GraphicLink
     }
 
     /**
-     * Bring the stored key in line with the switch, on the settings about to be saved: a key for a
-     * link that is on, none (and no picture) for one that is off. Off and on again is a new address.
+     * Bring the stored key in line with the switch, on settings about to be saved: a key for a
+     * link that is on, none for one that is off. Off and on again is a new address. Nothing is
+     * touched here: the save may still be refused, and the picture of a link that stays on must
+     * outlive a refused save. The caller closes the old address with close() once the save is in.
      */
     public static function settle(array $settings): array
     {
-        $key = $settings['link_key'] ?? null;
-
-        if (! empty($settings['link_enabled'])) {
-            if (! self::validKey($key)) {
-                $settings['link_key'] = strtolower(Str::random(40));
-            }
-
-            return $settings;
+        if (empty($settings['link_enabled'])) {
+            unset($settings['link_key']);
+        } elseif (! self::validKey($settings['link_key'] ?? null)) {
+            $settings['link_key'] = strtolower(Str::random(40));
         }
 
+        return $settings;
+    }
+
+    /** Take the picture off an address that a save has just retired. */
+    public static function close(mixed $key): void
+    {
         if (self::validKey($key)) {
             Storage::delete(self::path($key));
             Cache::forget(self::cacheKey($key));
         }
-        unset($settings['link_key']);
+    }
 
-        return $settings;
+    /** Whether the address has a picture to hand out yet (none until an upcoming event has a flyer). */
+    public static function ready(Role $role): bool
+    {
+        return self::on($role) && Storage::exists(self::path($role->graphic_settings['link_key']));
     }
 
     /**
@@ -95,7 +102,20 @@ class GraphicLink
             return false;
         }
 
-        Storage::put(self::path($role->graphic_settings['link_key']), $image);
+        // Private, and never to be kept: on the hosted install the default disk is a public
+        // bucket behind a CDN that serves any object by its key for a year (config/filesystems.php,
+        // where every other object is immutable). Left at the disk's defaults this picture would
+        // be handed out there past the plan, the switch and a deleted schedule, and the hourly
+        // redraw would never show. Only publicImage() hands it out.
+        $stored = Storage::put(self::path($role->graphic_settings['link_key']), $image, [
+            'visibility' => 'private',
+            'CacheControl' => 'private, no-store',
+        ]);
+
+        // put() answers false on a disk that does not throw; a save must not say "published" over it.
+        if (! $stored) {
+            throw new \RuntimeException('The events graphic could not be stored for its public link (schedule '.$role->id.').');
+        }
 
         return true;
     }
@@ -110,9 +130,15 @@ class GraphicLink
         // Asked of the schedule and not only of the file, so a deleted or blocked schedule's
         // picture stops being handed out; remembered, because a screen asks again all day.
         $live = Cache::remember(self::cacheKey($key), self::LIVE_SECONDS, function () use ($key) {
-            $role = Role::where('is_deleted', false)->where('graphic_settings->link_key', $key)->first();
-
-            return $role && self::on($role);
+            // By text and not by JSON path: graphic_settings is a TEXT column, and on MySQL one
+            // row that is not JSON (an empty string from a hand-edited backup) makes json_extract()
+            // raise an error for the whole query, which would be every public link on the install.
+            // The key is forty letters and digits (validKey() above), so it is safe in a LIKE; the
+            // row is then read through the model, which is what decides.
+            return Role::where('is_deleted', false)
+                ->where('graphic_settings', 'like', '%'.$key.'%')
+                ->get()
+                ->contains(fn (Role $role) => ($role->graphic_settings['link_key'] ?? null) === $key && self::on($role));
         });
 
         return $live ? Storage::get(self::path($key)) : null;

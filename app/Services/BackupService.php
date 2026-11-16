@@ -1881,9 +1881,15 @@ class BackupService
             }
         }
         // A restore is a new schedule: it must not take over the public address of the graphic it
-        // was copied from (GraphicLink), where both would draw over one picture.
-        if (! empty($role->getAttributes()['graphic_settings'])) {
-            $role->graphic_settings = array_diff_key($role->graphic_settings, ['link_enabled' => 1, 'link_key' => 1]);
+        // was copied from (GraphicLink), where both would draw over one picture. Read from the raw
+        // value: a hand-edited file may hold anything there, and the accessor expects an array.
+        $graphicSettings = $role->getAttributes()['graphic_settings'] ?? null;
+        $graphicSettings = is_string($graphicSettings) ? json_decode($graphicSettings, true) : $graphicSettings;
+        if (is_array($graphicSettings)) {
+            unset($graphicSettings['link_enabled'], $graphicSettings['link_key']);
+            $role->graphic_settings = $graphicSettings;
+        } else {
+            $role->graphic_settings = null;
         }
         // Pre-feature backups have no header_style key; force null (resolves to the
         // "banner" style) so the model's "compact" default doesn't change a restored
