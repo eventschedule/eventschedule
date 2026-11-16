@@ -159,6 +159,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Save parsed event parts' => [self::ROW, 'Agenda scanning'],
         'AI text processing on graphics' => [self::LEFT_OUT, 'a field of the graphic page, described beside the scheduled email it rides in'],
         'Email scheduling (graphic emails)' => [self::ROW, 'Scheduled graphic emails'],
+        'Public link to the events graphic' => [self::LEFT_OUT, 'a switch of the graphic page, for the same image the scheduled email beside it sends'],
         'Allocated (reserved) seating' => [self::ABOVE, '/features/allocated-seating'],
         'Custom domains' => [self::ABOVE, '/features/custom-domain'],
         'Internal & unlisted events' => [self::ABOVE, '/features/private-events'],

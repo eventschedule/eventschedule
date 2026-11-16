@@ -76,6 +76,7 @@ use App\Http\Controllers\VenueMapController;
 use App\Http\Controllers\WaitlistController;
 use App\Http\Controllers\WebhookSettingsController;
 use App\Http\Controllers\WhatsAppWebhookController;
+use App\Services\GraphicLink;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -388,6 +389,11 @@ Route::get('/unsubscribe/one-click', [RoleController::class, 'showUnsubscribeOne
 Route::get('/user/unsubscribe', [RoleController::class, 'showUnsubscribeUser'])->name('user.unsubscribe')->middleware('throttle:user_unsubscribe');
 Route::post('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])->name('user.unsubscribe.confirm')->middleware('throttle:user_unsubscribe');
 Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequest'])->name('event.clear_pending_request');
+
+// The Events graphic at its public address, for a screen or a website (GraphicLink). Outside the
+// web group: a screen keeps no cookie, so every request would otherwise start a session. The key's
+// pattern is what keeps this from answering for a selfhost schedule's own /{subdomain}/{slug}.
+Route::get('/events-graphic/{key}.png', [GraphicController::class, 'publicImage'])->name('graphic.link')->where('key', GraphicLink::KEY_PATTERN)->withoutMiddleware('web')->middleware('throttle:60,1');
 
 // Newsletter tracking routes (public, no auth)
 Route::get('/nl/o/{token}', [NewsletterTrackingController::class, 'trackOpen'])->name('newsletter.track_open')->middleware('throttle:60,1');

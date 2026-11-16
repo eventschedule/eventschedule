@@ -2567,4 +2567,11 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'admin_alert_marketing_copies' => '{1} :count site pode estar a copiar as páginas de marketing|[0,*] :count sites podem estar a copiar as páginas de marketing',
     'webhook_url_is_ours' => 'Este é um dos endereços desta aplicação, para onde o Stripe ou outro fornecedor de pagamentos envia os seus eventos. Isso configura-se no painel do fornecedor. Um webhook aqui envia os eventos do Event Schedule para outro sistema seu.',
     'webhook_test_redirected' => ':host respondeu com um redirecionamento (HTTP :status). Os webhooks não seguem redirecionamentos, por isso indique o endereço para onde ele redireciona.',
+    'graphic_row_link' => 'Ligação pública',
+    'graphic_sum_link_locked' => 'Num endereço próprio',
+    'graphic_link_toggle' => 'Manter a imagem num endereço público',
+    'graphic_link_help' => 'Para um ecrã no seu espaço, um site ou qualquer outra coisa que mostre uma imagem a partir de um endereço. Qualquer pessoa que tenha o endereço pode ver a imagem. É refeita a cada hora e sempre que guarda.',
+    'graphic_link_save_first' => 'Guarde para obter o endereço.',
+    'graphic_link_off_help' => 'Ao guardar, a imagem é retirada do seu endereço. Ativar de novo gera um endereço novo.',
+    'graphic_link_locked' => 'Mantenha a imagem num endereço público, refeita a cada hora, para um ecrã no seu espaço ou um site.',
 ]);

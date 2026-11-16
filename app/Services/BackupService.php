@@ -17,6 +17,7 @@ use App\Models\EventVideo;
 use App\Models\GalleryImage;
 use App\Models\GiftCard;
 use App\Models\Group;
+use App\Models\GuestPageSetting;
 use App\Models\Newsletter;
 use App\Models\NewsletterAbTest;
 use App\Models\NewsletterRecipient;
@@ -24,8 +25,13 @@ use App\Models\NewsletterSegment;
 use App\Models\NewsletterSegmentUser;
 use App\Models\NewsletterUnsubscribe;
 use App\Models\PromoCode;
+use App\Models\PromoterLink;
 use App\Models\Role;
+use App\Models\RoleSubscriber;
 use App\Models\Sale;
+use App\Models\SaleInstallment;
+use App\Models\SaleInstallmentPlan;
+use App\Models\SaleRefund;
 use App\Models\SaleTicket;
 use App\Models\SeatingDecoration;
 use App\Models\SeatingLevel;
@@ -36,6 +42,7 @@ use App\Models\SeatingTable;
 use App\Models\Ticket;
 use App\Models\TicketReminderSetting;
 use App\Models\TicketWaitlist;
+use App\Models\User;
 use App\Utils\Aurora;
 use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
@@ -45,6 +52,7 @@ use App\Utils\MarkdownUtils;
 use App\Utils\TextUtils;
 use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -236,7 +244,7 @@ class BackupService
         // translation keeps the term as written.
         $roleData['translation_glossary'] = array_map(
             fn ($entry) => ['term' => $entry['term'], 'translation' => $entry['translation']],
-            \App\Services\TranslationGlossary::entries($role)
+            TranslationGlossary::entries($role)
         );
 
         if ($includeImages) {
@@ -324,7 +332,7 @@ class BackupService
         if ($stripNewsletterPii) {
             $subscribersData = [];
         } else {
-            $subscribersData = \App\Models\RoleSubscriber::where('role_id', $role->id)
+            $subscribersData = RoleSubscriber::where('role_id', $role->id)
                 ->get()
                 ->map(function ($subscriber) {
                     return [
@@ -602,7 +610,7 @@ class BackupService
     /** The schedule's promoter links: the sales that cite one carry `_promoter_link_ref_id`. */
     private function exportPromoterLinks(Role $role): array
     {
-        return \App\Models\PromoterLink::where('role_id', $role->id)->get()->map(fn ($link) => [
+        return PromoterLink::where('role_id', $role->id)->get()->map(fn ($link) => [
             '_ref_id' => $link->id,
             'name' => $link->name,
             'code' => $link->code,
@@ -1239,8 +1247,8 @@ class BackupService
             sort($dates);
             $dateRange = '';
             if (! empty($dates)) {
-                $first = \Carbon\Carbon::parse($dates[0])->format('M Y');
-                $last = \Carbon\Carbon::parse(end($dates))->format('M Y');
+                $first = Carbon::parse($dates[0])->format('M Y');
+                $last = Carbon::parse(end($dates))->format('M Y');
                 $dateRange = $first === $last ? $first : $first.' - '.$last;
             }
 
@@ -1365,20 +1373,20 @@ class BackupService
             // that does not fit is left out rather than failing the restore.
             foreach ($scheduleData['promoter_links'] ?? [] as $linkData) {
                 try {
-                    $code = \App\Services\PromoterLinks::cleanCode($linkData['code'] ?? null);
+                    $code = PromoterLinks::cleanCode($linkData['code'] ?? null);
                     $name = trim((string) ($linkData['name'] ?? ''));
-                    if ($code === null || $name === '' || \App\Services\PromoterLinks::codeTaken($role, $code)) {
+                    if ($code === null || $name === '' || PromoterLinks::codeTaken($role, $code)) {
                         continue;
                     }
-                    $link = new \App\Models\PromoterLink([
+                    $link = new PromoterLink([
                         'role_id' => $role->id,
                         'name' => mb_substr($name, 0, 100),
                         'code' => $code,
                         'commission_percent' => is_numeric($linkData['commission_percent'] ?? null) ? max(0, min(100, (float) $linkData['commission_percent'])) : null,
                     ]);
                     $link->clicks = max(0, (int) ($linkData['clicks'] ?? 0));
-                    $link->first_click_at = ! empty($linkData['first_click_at']) ? \Carbon\Carbon::parse($linkData['first_click_at']) : null;
-                    $link->archived_at = ! empty($linkData['archived_at']) ? \Carbon\Carbon::parse($linkData['archived_at']) : null;
+                    $link->first_click_at = ! empty($linkData['first_click_at']) ? Carbon::parse($linkData['first_click_at']) : null;
+                    $link->archived_at = ! empty($linkData['archived_at']) ? Carbon::parse($linkData['archived_at']) : null;
                     $link->save();
                     if (isset($linkData['_ref_id'])) {
                         $idMap['promoter_links'][$linkData['_ref_id']] = $link->id;
@@ -1761,7 +1769,7 @@ class BackupService
             // be live in somebody's inbox pointing at the original schedule.
             foreach ($scheduleData['role_subscribers'] ?? [] as $subData) {
                 try {
-                    \App\Models\RoleSubscriber::withoutEvents(function () use ($role, $subData) {
+                    RoleSubscriber::withoutEvents(function () use ($role, $subData) {
                         // forceFill, not create(): created_at is not in $fillable, so create()
                         // dropped it silently and every restored subscriber came back dated the
                         // restore - while exportRole() has always written it, and the followers
@@ -1769,14 +1777,14 @@ class BackupService
                         // created_at survives updateTimestamps(), which only stamps when the
                         // column is not already dirty. The mutator on email still runs, because
                         // forceFill() goes through fill() and so through setAttribute().
-                        (new \App\Models\RoleSubscriber)->forceFill([
+                        (new RoleSubscriber)->forceFill([
                             'role_id' => $role->id,
                             'email' => $subData['email'],
                             'name' => $subData['name'] ?? null,
                             'locale' => $subData['locale'] ?? null,
                             'source' => $subData['source'] ?? 'import',
                             'confirmed_at' => $subData['confirmed_at'] ?? null,
-                            'token' => \App\Models\RoleSubscriber::newToken(),
+                            'token' => RoleSubscriber::newToken(),
                             // ?? then ?:, not either alone: ?? misses an empty string (which a
                             // hand-edited backup can carry, and which Carbon would choke on),
                             // and a bare ?: warns on the absent key.
@@ -1860,7 +1868,7 @@ class BackupService
         }
 
         if (config('app.hosted')) {
-            $user = \App\Models\User::find($userId);
+            $user = User::find($userId);
             if ($user && $user->owner()->count() >= 50) {
                 throw new \Exception(__('messages.schedule_limit'));
             }
@@ -1871,6 +1879,11 @@ class BackupService
             if (array_key_exists($field, $data)) {
                 $role->$field = $this->restorableValue($role, $field, $data[$field]);
             }
+        }
+        // A restore is a new schedule: it must not take over the public address of the graphic it
+        // was copied from (GraphicLink), where both would draw over one picture.
+        if (! empty($role->getAttributes()['graphic_settings'])) {
+            $role->graphic_settings = array_diff_key($role->graphic_settings, ['link_enabled' => 1, 'link_key' => 1]);
         }
         // Pre-feature backups have no header_style key; force null (resolves to the
         // "banner" style) so the model's "compact" default doesn't change a restored
@@ -1954,7 +1967,7 @@ class BackupService
         }
 
         // Auto-confirm email if it matches the importing user's verified email
-        $user = \App\Models\User::find($userId);
+        $user = User::find($userId);
         if ($role->email && $user && $user->email === $role->email && $user->email_verified_at) {
             $role->email_verified_at = now();
             $role->saveQuietly();
@@ -1977,7 +1990,7 @@ class BackupService
         }
 
         if (is_array($data['guest_page_settings'] ?? null) && array_key_exists('show_next_event', $data['guest_page_settings'])) {
-            \App\Models\GuestPageSetting::store($role, ['show_next_event' => (bool) $data['guest_page_settings']['show_next_event']]);
+            GuestPageSetting::store($role, ['show_next_event' => (bool) $data['guest_page_settings']['show_next_event']]);
         }
 
         if (is_array($data['ticket_reminder_settings'] ?? null)) {
@@ -1995,7 +2008,7 @@ class BackupService
         // save() cleans and caps the rows as the schedule form's are. Nothing to re-translate: a
         // restored schedule has no translations of its own yet.
         if (is_array($data['translation_glossary'] ?? null)) {
-            \App\Services\TranslationGlossary::save($role, $data['translation_glossary']);
+            TranslationGlossary::save($role, $data['translation_glossary']);
         }
 
         return $role;
@@ -2727,7 +2740,7 @@ class BackupService
                 continue;
             }
 
-            $refund = new \App\Models\SaleRefund;
+            $refund = new SaleRefund;
             $refund->sale_id = $sale->id;
             $refund->amount = $refundData['amount'] ?? 0;
             $refund->currency_code = $refundData['currency_code'] ?? null;
@@ -2739,7 +2752,7 @@ class BackupService
             $refund->saveQuietly();
 
             if (! empty($refundData['created_at'])) {
-                \App\Models\SaleRefund::where('id', $refund->id)
+                SaleRefund::where('id', $refund->id)
                     ->update(['created_at' => $refundData['created_at']]);
             }
         }
@@ -2763,7 +2776,7 @@ class BackupService
             return;
         }
 
-        $plan = new \App\Models\SaleInstallmentPlan;
+        $plan = new SaleInstallmentPlan;
         $plan->sale_id = $sale->id;
         $plan->currency = $planData['currency'] ?? 'USD';
         $plan->total_amount = $planData['total_amount'] ?? 0;
@@ -2777,7 +2790,7 @@ class BackupService
         $plan->saveQuietly();
 
         if (! empty($planData['created_at'])) {
-            \App\Models\SaleInstallmentPlan::where('id', $plan->id)
+            SaleInstallmentPlan::where('id', $plan->id)
                 ->update(['created_at' => $planData['created_at']]);
         }
 
@@ -2786,7 +2799,7 @@ class BackupService
                 continue;
             }
 
-            $installment = new \App\Models\SaleInstallment;
+            $installment = new SaleInstallment;
             $installment->sale_installment_plan_id = $plan->id;
             $installment->sequence = (int) $row['sequence'];
             $installment->amount = $row['amount'] ?? 0;

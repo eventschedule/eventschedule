@@ -277,6 +277,7 @@ class HelpUtils
                 'graphic-pane-header' => '/docs/event-graphics#header-footer-text',
                 'graphic-pane-caption' => '/docs/event-graphics#text-template',
                 'graphic-pane-email' => '/docs/event-graphics#email-scheduling',
+                'graphic-pane-link' => '/docs/event-graphics#public-link',
             ],
         ],
         // Explicit rather than load-bearing: '{subdomain}/merge-venues*' above already matches

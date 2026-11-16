@@ -47,7 +47,7 @@ return [
     '/docs/creating-schedules' => '2026-11-12',
     '/docs/developer/api' => '2026-11-12',
     '/docs/developer/webhooks' => '2026-10-23',
-    '/docs/event-graphics' => '2026-10-23',
+    '/docs/event-graphics' => '2026-11-16',
     '/docs/getting-started' => '2026-11-12',
     '/docs/gift-cards' => '2026-10-23',
     '/docs/managing-schedules' => '2026-11-11',

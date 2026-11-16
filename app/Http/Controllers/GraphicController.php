@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Repos\EventRepo;
 use App\Services\EventGraphicGenerator;
 use App\Services\GraphicEmailService;
+use App\Services\GraphicLink;
 use App\Services\UsageTrackingService;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
@@ -138,6 +139,7 @@ class GraphicController extends Controller
             'send_day' => min(28, max(1, (int) ($saved['send_day'] ?? 1))),
             'send_hour' => min(23, max(0, (int) ($saved['send_hour'] ?? 9))),
             'recipient_emails' => (string) ($saved['recipient_emails'] ?? ''),
+            'link_enabled' => (bool) ($saved['link_enabled'] ?? false),
         ];
     }
 
@@ -155,12 +157,30 @@ class GraphicController extends Controller
         }
 
         try {
-            return \Carbon\Carbon::parse($sentAt)
+            return Carbon::parse($sentAt)
                 ->setTimezone($role->timezone ?: 'UTC')
                 ->translatedFormat('D j M, '.($role->use_24_hour_time ? 'H:i' : 'g:i A'));
         } catch (\Throwable $e) {
             return null;
         }
+    }
+
+    /**
+     * The graphic at its public address (GraphicLink): the stored picture and nothing else, so
+     * nothing is drawn or queried per schedule inside a request anybody can make.
+     */
+    public function publicImage(string $key)
+    {
+        $image = GraphicLink::image($key);
+
+        abort_if($image === null, 404);
+
+        return response($image, 200, [
+            'Content-Type' => 'image/png',
+            // Short, so a screen that asks again gets the next hour's picture.
+            'Cache-Control' => 'public, max-age=300',
+            'X-Robots-Tag' => 'noindex',
+        ]);
     }
 
     public function getSettings($subdomain)
@@ -214,11 +234,20 @@ class GraphicController extends Controller
             'text_show_all' => 'boolean',
             'number_events' => 'boolean',
             'force_english' => 'boolean',
+            'link_enabled' => 'boolean',
         ]);
+
+        // The public link is Enterprise: below it the page does not send the switch, and a
+        // request that does changes nothing, so a lapsed plan keeps its address for its return.
+        if (! $role->isEnterprise()) {
+            unset($validated['link_enabled']);
+        }
 
         // Merge with existing settings to preserve defaults
         $currentSettings = $role->graphic_settings ?? [];
         $newSettings = array_merge($currentSettings, $validated);
+        // link_key is the server's: never taken from the request (it is not validated above).
+        $newSettings = $request->has('link_enabled') && $role->isEnterprise() ? GraphicLink::settle($newSettings) : $newSettings;
 
         // Require recipient_emails when enabled is true. Only when the request is about the email
         // at all: the page leaves these keys out for a schedule whose plan no longer shows the
@@ -261,10 +290,19 @@ class GraphicController extends Controller
         $role->graphic_settings = $newSettings;
         $role->save();
 
+        // The picture at the public link is the saved graphic, so a save draws it again. A
+        // failure there leaves the last picture and must not fail the save that did go through.
+        try {
+            GraphicLink::refresh($role);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         return response()->json([
             'success' => true,
             'message' => __('messages.settings_saved'),
             'settings' => $role->graphic_settings,
+            'link_url' => GraphicLink::url($role),
         ]);
     }
 
@@ -581,7 +619,7 @@ class GraphicController extends Controller
         $lang = $english ? 'en' : ($role->language_code ?: 'en');
         $format = get_use_24_hour_time($role) ? 'H:i' : 'g:i A';
 
-        $rows = app(\App\Repos\EventRepo::class)->upcomingForGuest($role, null, 3);
+        $rows = app(EventRepo::class)->upcomingForGuest($role, null, 3);
 
         return response()->json(['cards' => $rows->map(function (array $row) use ($role, $template, $lang, $format) {
             $event = $row['event'];

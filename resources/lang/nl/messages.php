@@ -8302,4 +8302,13 @@ return [
     'webhook_test_redirected' => ':host antwoordde met een doorverwijzing (HTTP :status). Webhooks volgen geen doorverwijzingen, dus vul het adres in waarnaar wordt doorverwezen.',
     'newsletter_events_sub_schedule' => 'Sub-agenda',
     'newsletter_events_all_sub_schedules' => 'Alle sub-agenda\'s',
+    'graphic_row_link' => 'Openbare link',
+    'graphic_sum_link_on' => 'Aan',
+    'graphic_sum_link_locked' => 'Op een eigen adres',
+    'graphic_link_toggle' => 'De afbeelding op een openbaar adres houden',
+    'graphic_link_help' => 'Voor een scherm op je locatie, een website of iets anders dat een afbeelding van een adres toont. Iedereen die het adres heeft, kan de afbeelding zien. Ze wordt elk uur en bij elke keer opslaan opnieuw gemaakt.',
+    'graphic_link_address' => 'Adres',
+    'graphic_link_save_first' => 'Sla op om het adres te krijgen.',
+    'graphic_link_off_help' => 'Bij het opslaan wordt de afbeelding van haar adres gehaald. Zet je dit weer aan, dan komt er een nieuw adres.',
+    'graphic_link_locked' => 'Houd de afbeelding op een openbaar adres dat elk uur opnieuw wordt gemaakt, voor een scherm op je locatie of een website.',
 ];

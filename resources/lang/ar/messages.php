@@ -8300,4 +8300,13 @@ return [
     'webhook_test_redirected' => 'أجاب :host بإعادة توجيه (HTTP :status). لا تتبع الـ webhooks عمليات إعادة التوجيه، لذا أدخل العنوان الذي يعيد التوجيه إليه.',
     'newsletter_events_sub_schedule' => 'جدول فرعي',
     'newsletter_events_all_sub_schedules' => 'كل الجداول الفرعية',
+    'graphic_row_link' => 'رابط عام',
+    'graphic_sum_link_on' => 'مفعّل',
+    'graphic_sum_link_locked' => 'على عنوان خاص بها',
+    'graphic_link_toggle' => 'إبقاء الصورة على عنوان عام',
+    'graphic_link_help' => 'لشاشة في مكانك أو لموقع إلكتروني أو لأي شيء آخر يعرض صورة من عنوان. يستطيع كل من لديه العنوان أن يرى الصورة. يُعاد إنشاؤها كل ساعة وعند كل حفظ.',
+    'graphic_link_address' => 'العنوان',
+    'graphic_link_save_first' => 'احفظ للحصول على العنوان.',
+    'graphic_link_off_help' => 'عند الحفظ تُزال الصورة من عنوانها. وإعادة التفعيل تعطي عنوانًا جديدًا.',
+    'graphic_link_locked' => 'أبقِ الصورة على عنوان عام يُعاد إنشاؤها فيه كل ساعة، لشاشة في مكانك أو لموقع إلكتروني.',
 ];

@@ -6,6 +6,7 @@ use App\Http\Controllers\GraphicController;
 use App\Models\Role;
 use App\Models\User;
 use App\Utils\EventTextGenerator;
+use App\Utils\GeminiUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -296,7 +297,7 @@ class GraphicPageTest extends TestCase
 
         preg_match_all('/<button[^>]*data-row-group="graphic"[^>]*aria-controls="([^"]+)"/', $html, $rows);
         $this->assertSame(
-            ['graphic-pane-events', 'graphic-pane-flyers', 'graphic-pane-header', 'graphic-pane-caption', 'graphic-pane-email'],
+            ['graphic-pane-events', 'graphic-pane-flyers', 'graphic-pane-header', 'graphic-pane-caption', 'graphic-pane-email', 'graphic-pane-link'],
             $rows[1],
         );
 
@@ -430,7 +431,7 @@ class GraphicPageTest extends TestCase
         $this->createEvent($role->fresh(), ['name' => 'Night', 'custom_field_values' => ['fieldprivate' => 'zebra-seven', 'fieldpublic' => 'cellar']]);
 
         $prompts = [];
-        \App\Utils\GeminiUtils::fakeResponses(function ($prompt) use (&$prompts) {
+        GeminiUtils::fakeResponses(function ($prompt) use (&$prompts) {
             $prompts[] = $prompt;
 
             return [['text' => 'rewritten']];
@@ -442,7 +443,7 @@ class GraphicPageTest extends TestCase
                 'ai_prompt' => 'Add emoji.',
             ])->assertOk();
         } finally {
-            \App\Utils\GeminiUtils::fakeResponses(null);
+            GeminiUtils::fakeResponses(null);
         }
 
         $this->assertCount(1, $prompts, 'the rewrite asked the model once');

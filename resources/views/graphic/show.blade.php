@@ -224,6 +224,8 @@
             .gfx-switch:has(input:disabled) label { cursor: not-allowed; }
             /* A switch with its name, and a line under it. */
             .gfx-switch + .gfx-hint { margin-inline-start: 3.5rem; margin-top: 0.125rem; }
+            .gfx-link { display: flex; align-items: center; gap: 0.5rem; }
+            .gfx-link input { flex: 1 1 auto; min-width: 0; }
             .gfx-inline { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
             .gfx-inline .gfx-label { margin: 0; }
             .gfx-inline select { width: auto; min-width: 7.5rem; }
@@ -624,6 +626,7 @@
             'enterprise' => (bool) $isEnterprise,
             'aiReady' => (bool) $aiReady,
             'hosted' => $hosted,
+            'linkUrl' => \App\Services\GraphicLink::url($role),
             'userEmail' => auth()->user()->email,
             'file' => $role->subdomain.'-upcoming-events.png',
             // The schedule's list, read in the language its wording is written in: the one in
@@ -658,6 +661,7 @@
                 'header' => __('messages.graphic_row_header'),
                 'caption' => __('messages.graphic_row_caption'),
                 'email' => __('messages.graphic_row_email'),
+                'link' => __('messages.graphic_row_link'),
             ],
             'words' => [
                 'shape_auto' => __('messages.graphic_shape_auto_help'),
@@ -666,6 +670,8 @@
                 'per_row_rows' => __('messages.graphic_per_row_rows_auto'),
                 'per_row_list' => __('messages.graphic_per_row_list'),
                 'locked_email' => __('messages.graphic_sum_email_locked'),
+                'locked_link' => __('messages.graphic_sum_link_locked'),
+                'link_on' => __('messages.graphic_sum_link_on'),
                 'next' => __('messages.graphic_sum_next'),
                 'each' => __('messages.graphic_sum_per_schedule'),
                 'no_recurring' => __('messages.graphic_sum_no_recurring'),
@@ -1076,6 +1082,42 @@
                         </div>
                         @endif
                     </div>
+
+                    {{-- The public link: the saved graphic at an address that does not change. --}}
+                    <button type="button" class="event-subrow" :aria-expanded="open === 'link' ? 'true' : 'false'" data-row-group="graphic" data-tab="link" aria-controls="graphic-pane-link" @click="toggle('link')">
+                        <span class="event-row-title">{{ __('messages.graphic_row_link') }}</span>
+                        <span class="event-row-summary" :class="{ 'is-empty': ! s.link_enabled }"><bdi v-text="sum.link"></bdi></span>
+                        @unless ($isEnterprise)
+                        <x-lock-badge tier="enterprise" class="event-row-lock" />
+                        @else
+                        <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                        @endunless
+                    </button>
+                    <div id="graphic-pane-link" class="event-subrow-body" v-show="open === 'link'">
+                        @if ($isEnterprise)
+                        <fieldset :disabled="! canEdit" style="min-width: 0">
+                        <div class="gfx-field gfx-switch">
+                            <x-toggle name="link_enabled" :label="__('messages.graphic_link_toggle')" v-model="s.link_enabled" v-bind:disabled="! canEdit" />
+                        </div>
+                        <p class="gfx-hint">{{ __('messages.graphic_link_help') }}</p>
+                        </fieldset>
+                        {{-- The address is the saved one: shown while the link is on as saved, and gone the moment it is switched off here. --}}
+                        <div class="gfx-field" style="margin-top: 1rem" v-if="s.link_enabled && saved.link_enabled && linkUrl">
+                            <label class="gfx-label" for="graphic_link_url">{{ __('messages.graphic_link_address') }}</label>
+                            <div class="gfx-link">
+                                <input type="text" id="graphic_link_url" ref="link" readonly dir="ltr" :value="linkUrl" @focus="$event.target.select()">
+                                <button type="button" class="page-tool" @click="copyLink" v-text="linkCopied ? @js(__('messages.copied')) : @js(__('messages.copy'))"></button>
+                            </div>
+                        </div>
+                        <p class="gfx-hint is-plain" v-else-if="s.link_enabled" role="status">{{ __('messages.graphic_link_save_first') }}</p>
+                        <p class="gfx-hint is-plain" v-else-if="saved.link_enabled" role="status">{{ __('messages.graphic_link_off_help') }}</p>
+                        @else
+                        <div class="gfx-locked">
+                            <p>{{ __('messages.graphic_link_locked') }}</p>
+                            <button type="button" class="page-tool" data-modal-open="upgrade-graphic-link">{{ __('messages.upgrade_to_enterprise') }}</button>
+                        </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -1291,6 +1333,9 @@
     <x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/event-graphics')">
         {{ __('messages.graphic_email_locked') }}
     </x-upgrade-modal>
+    <x-upgrade-modal name="upgrade-graphic-link" tier="enterprise" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/event-graphics')">
+        {{ __('messages.graphic_link_locked') }}
+    </x-upgrade-modal>
     @endif
 
     <script {!! nonce_attr() !!}>window.Vue || document.write('<script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}><\/script>')</script>
@@ -1325,6 +1370,7 @@
             header: ['profile_image', 'header_text', 'footer_text'],
             caption: ['text_template', 'text_show_all', 'force_english', 'url_include_https', 'url_include_id', 'ai_prompt'],
             email: ['enabled', 'frequency', 'send_days', 'send_day', 'send_hour', 'recipient_emails'],
+            link: ['link_enabled'],
         };
         var words = boot.words;
 
@@ -1336,6 +1382,8 @@
                     defaultTemplate: boot.defaultTemplate,
                     canEdit: boot.canEdit,
                     enterprise: boot.enterprise,
+                    linkUrl: boot.linkUrl || '',
+                    linkCopied: false,
                     days: boot.days,
                     open: '',
                     img: { state: 'loading', src: '', w: 0, h: 0, message: '' },
@@ -1398,7 +1446,7 @@
                 dirtyGroups: function () {
                     var out = [];
                     for (var id in groups) {
-                        if (id === 'email' && ! this.enterprise) { continue; }
+                        if ((id === 'email' || id === 'link') && ! this.enterprise) { continue; }
                         var changed = groups[id].some(function (key) {
                             if (key === 'ai_prompt' && ! this.enterprise) { return false; }
                             return JSON.stringify(this.s[key]) !== JSON.stringify(this.saved[key]);
@@ -1467,6 +1515,7 @@
                         headerSet: header.length > 0,
                         caption: caption.join(' · '),
                         email: email,
+                        link: this.enterprise ? (s.link_enabled ? words.link_on : words.off) : (s.link_enabled ? words.paused : words.locked_link),
                     };
                 },
             },
@@ -1749,6 +1798,7 @@
                         out.send_day = s.frequency === 'monthly' ? s.send_day : (s.frequency === 'weekly' && week.length ? week[0] : 1);
                         out.send_hour = s.send_hour;
                         out.recipient_emails = s.recipient_emails;
+                        out.link_enabled = s.link_enabled;
                     }
                     return out;
                 },
@@ -1778,6 +1828,7 @@
                         self.saveState.busy = false;
                         if (result.ok && result.body.success) {
                             self.saved = sent;
+                            self.linkUrl = result.body.link_url || '';
                             self.saveState.done = true;
                             // "Your list uses this wording now", with the way to see it, stays long enough to be pressed.
                             self.saveState.list = list;
@@ -1862,6 +1913,13 @@
                         link.remove();
                         setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
                     });
+                },
+                copyLink: function () {
+                    var self = this;
+                    var done = function () { self.linkCopied = true; setTimeout(function () { self.linkCopied = false; }, 2000); };
+                    // Refused (no permission, or a page not served over https): the address is selected, to be taken by hand.
+                    var byHand = function () { if (self.$refs.link) { self.$refs.link.focus(); self.$refs.link.select(); } };
+                    try { navigator.clipboard.writeText(this.linkUrl).then(done, byHand); } catch (error) { byHand(); }
                 },
                 copyImage: function () {
                     var self = this;

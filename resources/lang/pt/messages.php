@@ -8301,4 +8301,13 @@ return [
     'webhook_test_redirected' => ':host respondeu com um redirecionamento (HTTP :status). Webhooks não seguem redirecionamentos, então informe o endereço para onde ele redireciona.',
     'newsletter_events_sub_schedule' => 'Sub-agenda',
     'newsletter_events_all_sub_schedules' => 'Todas as sub-agendas',
+    'graphic_row_link' => 'Link público',
+    'graphic_sum_link_on' => 'Ativado',
+    'graphic_sum_link_locked' => 'Em um endereço próprio',
+    'graphic_link_toggle' => 'Manter a imagem em um endereço público',
+    'graphic_link_help' => 'Para uma tela no seu espaço, um site ou qualquer outra coisa que mostre uma imagem a partir de um endereço. Qualquer pessoa que tenha o endereço pode ver a imagem. Ela é refeita a cada hora e sempre que as alterações são salvas.',
+    'graphic_link_address' => 'Endereço',
+    'graphic_link_save_first' => 'Salve para obter o endereço.',
+    'graphic_link_off_help' => 'Ao salvar, a imagem é retirada do seu endereço. Ativar de novo gera um endereço novo.',
+    'graphic_link_locked' => 'Mantenha a imagem em um endereço público, refeita a cada hora, para uma tela no seu espaço ou um site.',
 ];

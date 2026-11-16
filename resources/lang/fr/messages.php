@@ -8305,4 +8305,13 @@ return [
     'webhook_test_redirected' => ':host a répondu par une redirection (HTTP :status). Les webhooks ne suivent pas les redirections : saisissez l’adresse vers laquelle il redirige.',
     'newsletter_events_sub_schedule' => 'Sous-calendrier',
     'newsletter_events_all_sub_schedules' => 'Tous les sous-calendriers',
+    'graphic_row_link' => 'Lien public',
+    'graphic_sum_link_on' => 'Activé',
+    'graphic_sum_link_locked' => 'À une adresse qui lui est propre',
+    'graphic_link_toggle' => 'Garder l\'image à une adresse publique',
+    'graphic_link_help' => 'Pour un écran dans votre salle, un site web ou tout ce qui affiche une image à partir d\'une adresse. Toute personne qui a l\'adresse peut voir l\'image. Elle est recréée chaque heure et à chaque enregistrement.',
+    'graphic_link_address' => 'Adresse',
+    'graphic_link_save_first' => 'Enregistrez pour obtenir l\'adresse.',
+    'graphic_link_off_help' => 'L\'enregistrement retire l\'image de son adresse. Si vous le réactivez, l\'adresse sera nouvelle.',
+    'graphic_link_locked' => 'Gardez l\'image à une adresse publique, recréée chaque heure, pour un écran dans votre salle ou un site web.',
 ];

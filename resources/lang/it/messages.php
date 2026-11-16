@@ -8299,4 +8299,13 @@ return [
     'webhook_test_redirected' => ':host ha risposto con un reindirizzamento (HTTP :status). I webhook non seguono i reindirizzamenti, quindi inserisci l’indirizzo a cui reindirizza.',
     'newsletter_events_sub_schedule' => 'Sotto-calendario',
     'newsletter_events_all_sub_schedules' => 'Tutti i sotto-calendari',
+    'graphic_row_link' => 'Link pubblico',
+    'graphic_sum_link_on' => 'Attivo',
+    'graphic_sum_link_locked' => 'A un indirizzo tutto suo',
+    'graphic_link_toggle' => 'Tieni l\'immagine a un indirizzo pubblico',
+    'graphic_link_help' => 'Per uno schermo nel tuo locale, un sito web o qualsiasi altra cosa che mostri un\'immagine da un indirizzo. Chiunque abbia l\'indirizzo può vedere l\'immagine. Viene ricreata ogni ora e ogni volta che salvi.',
+    'graphic_link_address' => 'Indirizzo',
+    'graphic_link_save_first' => 'Salva per ottenere l\'indirizzo.',
+    'graphic_link_off_help' => 'Salvando, l\'immagine viene tolta dal suo indirizzo. Se lo riattivi, l\'indirizzo sarà nuovo.',
+    'graphic_link_locked' => 'Tieni l\'immagine a un indirizzo pubblico, ricreata ogni ora, per uno schermo nel tuo locale o un sito web.',
 ];

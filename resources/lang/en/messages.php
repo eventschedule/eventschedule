@@ -8372,4 +8372,13 @@ return [
     'webhook_test_redirected' => ':host answered with a redirect (HTTP :status). Webhooks do not follow redirects, so enter the address it redirects to.',
     'newsletter_events_sub_schedule' => 'Sub-schedule',
     'newsletter_events_all_sub_schedules' => 'All sub-schedules',
+    'graphic_row_link' => 'Public link',
+    'graphic_sum_link_on' => 'On',
+    'graphic_sum_link_locked' => 'At an address of its own',
+    'graphic_link_toggle' => 'Keep the image at a public address',
+    'graphic_link_help' => 'For a screen at your venue, a website or anything else that shows a picture from an address. Anyone who has the address can see the image. It is redrawn every hour and whenever you save.',
+    'graphic_link_address' => 'Address',
+    'graphic_link_save_first' => 'Save to get the address.',
+    'graphic_link_off_help' => 'Saving removes the image from its address. Switching this on again gives a new address.',
+    'graphic_link_locked' => 'Keep the image at a public address that is redrawn every hour, for a screen at your venue or a website.',
 ];

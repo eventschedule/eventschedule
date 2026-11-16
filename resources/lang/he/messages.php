@@ -8299,4 +8299,13 @@ return [
     'webhook_test_redirected' => ':host ענה בהפניה (HTTP :status). Webhooks לא עוקבים אחרי הפניות, לכן הזן את הכתובת שאליה הוא מפנה.',
     'newsletter_events_sub_schedule' => 'תת-לוח זמנים',
     'newsletter_events_all_sub_schedules' => 'כל תת-לוחות הזמנים',
+    'graphic_row_link' => 'קישור ציבורי',
+    'graphic_sum_link_on' => 'פועל',
+    'graphic_sum_link_locked' => 'בכתובת משלה',
+    'graphic_link_toggle' => 'שמור את התמונה בכתובת ציבורית',
+    'graphic_link_help' => 'למסך במקום שלכם, לאתר או לכל דבר אחר שמציג תמונה מכתובת. כל מי שיש לו את הכתובת יכול לראות את התמונה. היא נוצרת מחדש כל שעה ובכל שמירה.',
+    'graphic_link_address' => 'כתובת',
+    'graphic_link_save_first' => 'שמרו כדי לקבל את הכתובת.',
+    'graphic_link_off_help' => 'השמירה תסיר את התמונה מהכתובת שלה. הפעלה מחדש תיתן כתובת חדשה.',
+    'graphic_link_locked' => 'שמרו את התמונה בכתובת ציבורית שבה היא נוצרת מחדש כל שעה, למסך במקום שלכם או לאתר.',
 ];

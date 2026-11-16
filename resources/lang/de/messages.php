@@ -8300,4 +8300,13 @@ return [
     'webhook_test_redirected' => ':host hat mit einer Weiterleitung geantwortet (HTTP :status). Webhooks folgen keinen Weiterleitungen, also gib die Adresse ein, auf die weitergeleitet wird.',
     'newsletter_events_sub_schedule' => 'Unterzeitplan',
     'newsletter_events_all_sub_schedules' => 'Alle Unterzeitpläne',
+    'graphic_row_link' => 'Öffentlicher Link',
+    'graphic_sum_link_on' => 'An',
+    'graphic_sum_link_locked' => 'Unter einer eigenen Adresse',
+    'graphic_link_toggle' => 'Bild unter einer öffentlichen Adresse bereitstellen',
+    'graphic_link_help' => 'Für einen Bildschirm in Ihrem Veranstaltungsort, eine Website oder alles andere, das ein Bild von einer Adresse anzeigt. Jeder, der die Adresse kennt, kann das Bild sehen. Es wird jede Stunde und bei jedem Speichern neu erstellt.',
+    'graphic_link_address' => 'Adresse',
+    'graphic_link_save_first' => 'Speichern Sie, um die Adresse zu erhalten.',
+    'graphic_link_off_help' => 'Beim Speichern wird das Bild von seiner Adresse entfernt. Wenn Sie dies wieder einschalten, entsteht eine neue Adresse.',
+    'graphic_link_locked' => 'Stellen Sie das Bild unter einer öffentlichen Adresse bereit, die jede Stunde neu erstellt wird, für einen Bildschirm in Ihrem Veranstaltungsort oder eine Website.',
 ];

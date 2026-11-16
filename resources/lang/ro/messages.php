@@ -8320,4 +8320,13 @@ return [
     'webhook_test_redirected' => ':host a răspuns cu o redirecționare (HTTP :status). Webhook-urile nu urmează redirecționările, așa că introdu adresa către care redirecționează.',
     'newsletter_events_sub_schedule' => 'Sub-program',
     'newsletter_events_all_sub_schedules' => 'Toate sub-programele',
+    'graphic_row_link' => 'Link public',
+    'graphic_sum_link_on' => 'Activat',
+    'graphic_sum_link_locked' => 'La o adresă proprie',
+    'graphic_link_toggle' => 'Păstrează imaginea la o adresă publică',
+    'graphic_link_help' => 'Pentru un ecran din locația ta, un site sau orice altceva care afișează o imagine de la o adresă. Oricine are adresa poate vedea imaginea. Este refăcută în fiecare oră și de fiecare dată când salvezi.',
+    'graphic_link_address' => 'Adresă',
+    'graphic_link_save_first' => 'Salvează pentru a primi adresa.',
+    'graphic_link_off_help' => 'La salvare, imaginea este scoasă de la adresa ei. Dacă activezi din nou, adresa va fi una nouă.',
+    'graphic_link_locked' => 'Păstrează imaginea la o adresă publică, refăcută în fiecare oră, pentru un ecran din locația ta sau un site.',
 ];

@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use App\Utils\OpenAIUtils;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -27,7 +28,6 @@ class GraphicEmailService
 
         try {
             $settings = $role->graphic_settings;
-            $layout = $settings['layout'] ?? 'grid';
             $directRegistration = $role->direct_registration;
             $excludeRecurring = $settings['exclude_recurring'] ?? false;
 
@@ -38,13 +38,7 @@ class GraphicEmailService
             $maxPerSchedule = GraphicController::resolveMaxPerSchedule($settings['max_per_schedule'] ?? null);
             $poolLimit = GraphicController::resolveGraphicPoolLimit($eventLimit, $maxPerSchedule);
 
-            // Upcoming events, each series under its next occurrence (as on the page).
-            // Flyer events are always required for the graphic image.
-            $events = GraphicController::applyPerScheduleCap(
-                GraphicController::upcomingGraphicEvents($role, (bool) $excludeRecurring, true, $poolLimit),
-                $maxPerSchedule,
-                $role
-            )->take($eventLimit);
+            $events = $this->posterEvents($role);
 
             if ($events->isEmpty()) {
                 return false;
@@ -78,39 +72,10 @@ class GraphicEmailService
                 );
             }
 
-            // Build options array for the generator (matching web preview)
-            $datePosition = $settings['date_position'] ?? null;
-            if (! in_array($layout, ['grid', 'row'])) {
-                $datePosition = null;
-            }
-            $maxPerRow = GraphicController::resolveMaxPerRow($settings['max_per_row'] ?? null);
-            if (! in_array($layout, ['grid', 'row'])) {
-                $maxPerRow = null;
-            }
-            $overlayText = $settings['overlay_text'] ?? '';
-
-            // Generate output in English instead of the schedule language (no-op for English schedules)
-            // canForceEnglish(): the `_en` columns hold the schedule's translation TARGET, so a
-            // stale flag left over from when that target was English sent subscribers a graphic
-            // in the wrong language with English dates.
-            $forceEnglish = $role->canForceEnglish() && (bool) ($settings['force_english'] ?? false);
-
-            $options = [
-                'date_position' => $datePosition,
-                'max_per_row' => $maxPerRow,
-                'image_size' => $settings['image_size'] ?? null,
-                'overlay_text' => $overlayText,
-                'header_image_url' => $settings['header_image_url'] ?? null,
-                'profile_image' => (bool) ($settings['profile_image'] ?? false),
-                'header_text' => $settings['header_text'] ?? '',
-                'footer_text' => $settings['footer_text'] ?? '',
-                'number_events' => $numberEvents,
-                'force_english' => $forceEnglish,
-            ];
+            $forceEnglish = $this->forcesEnglish($role);
 
             // Generate the graphic image
-            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration, $options);
-            $imageData = $generator->generate();
+            $imageData = $this->drawPoster($role, $events);
 
             // Generate event text using shared template logic
             $textTemplate = $settings['text_template'] ?? '';
@@ -176,6 +141,69 @@ class GraphicEmailService
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * The events on the saved graphic: upcoming, each series under its next occurrence (as on the
+     * page), with a flyer, under the saved count and per-schedule cap.
+     */
+    public function posterEvents(Role $role): Collection
+    {
+        $settings = $role->graphic_settings;
+        $eventLimit = GraphicController::resolveGraphicEventLimit($settings['event_count'] ?? null);
+        $maxPerSchedule = GraphicController::resolveMaxPerSchedule($settings['max_per_schedule'] ?? null);
+        $poolLimit = GraphicController::resolveGraphicPoolLimit($eventLimit, $maxPerSchedule);
+
+        return GraphicController::applyPerScheduleCap(
+            GraphicController::upcomingGraphicEvents($role, (bool) ($settings['exclude_recurring'] ?? false), true, $poolLimit),
+            $maxPerSchedule,
+            $role
+        )->take($eventLimit);
+    }
+
+    /**
+     * The saved graphic as the scheduled email attaches it, or null when there is nothing to
+     * draw. The public link (GraphicLink) stores the same picture.
+     */
+    public function posterImage(Role $role): ?string
+    {
+        $events = $this->posterEvents($role);
+
+        return $events->isEmpty() ? null : $this->drawPoster($role, $events);
+    }
+
+    /**
+     * Generate output in English instead of the schedule language (no-op for English schedules).
+     * canForceEnglish(): the `_en` columns hold the schedule's translation TARGET, so a stale flag
+     * left over from when that target was English sent subscribers a graphic in the wrong
+     * language with English dates.
+     */
+    private function forcesEnglish(Role $role): bool
+    {
+        return $role->canForceEnglish() && (bool) (($role->graphic_settings ?? [])['force_english'] ?? false);
+    }
+
+    private function drawPoster(Role $role, Collection $events): string
+    {
+        $settings = $role->graphic_settings;
+        $layout = $settings['layout'] ?? 'grid';
+        $flyerLayout = in_array($layout, ['grid', 'row']);
+
+        // Build options array for the generator (matching web preview)
+        $options = [
+            'date_position' => $flyerLayout ? ($settings['date_position'] ?? null) : null,
+            'max_per_row' => $flyerLayout ? GraphicController::resolveMaxPerRow($settings['max_per_row'] ?? null) : null,
+            'image_size' => $settings['image_size'] ?? null,
+            'overlay_text' => $settings['overlay_text'] ?? '',
+            'header_image_url' => $settings['header_image_url'] ?? null,
+            'profile_image' => (bool) ($settings['profile_image'] ?? false),
+            'header_text' => $settings['header_text'] ?? '',
+            'footer_text' => $settings['footer_text'] ?? '',
+            'number_events' => (bool) ($settings['number_events'] ?? false),
+            'force_english' => $this->forcesEnglish($role),
+        ];
+
+        return (new EventGraphicGenerator($role, $events, $layout, $role->direct_registration, $options))->generate();
     }
 
     /**

@@ -13,6 +13,7 @@
         <x-doc-nav-link href="#variables">All Variables</x-doc-nav-link>
         <x-doc-nav-link href="#ai-prompt">AI Text Prompt</x-doc-nav-link>
         <x-doc-nav-link href="#email-scheduling">Email Scheduling</x-doc-nav-link>
+        <x-doc-nav-link href="#public-link">Public Link</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
 
@@ -37,7 +38,7 @@
 
         <div class="doc-callout doc-callout-plan mb-6">
             <div class="doc-callout-title">Free on every plan</div>
-            <p><x-doc-badge plan="free" /> Generating, downloading and copying event graphics is free on every plan, and so is uploading a flyer to an event. Two parts are <strong class="text-gray-900 dark:text-white">Enterprise</strong>: the <a href="#ai-prompt" class="doc-link">AI text prompt</a> and <a href="#email-scheduling" class="doc-link">scheduled graphic emails</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install counts as Enterprise, so nothing on this page is held back by plan there.</p>
+            <p><x-doc-badge plan="free" /> Generating, downloading and copying event graphics is free on every plan, and so is uploading a flyer to an event. Three parts are <strong class="text-gray-900 dark:text-white">Enterprise</strong>: the <a href="#ai-prompt" class="doc-link">AI text prompt</a>, <a href="#email-scheduling" class="doc-link">scheduled graphic emails</a> and the <a href="#public-link" class="doc-link">public link</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install counts as Enterprise, so nothing on this page is held back by plan there.</p>
             <p class="mt-2">On eventschedule.com every graphic carries a small eventschedule.com credit in its bottom-right corner, whatever your plan, and upgrading does not remove it. A selfhosted install adds no credit.</p>
         </div>
 
@@ -881,6 +882,32 @@ example.com/summer-concert</code></pre>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Nothing to send</div>
             <p>If no upcoming event has a flyer image when the send is due, no email goes out, and the schedule tries again at the next cadence. Send it now reports the same thing instead of sending an empty graphic, and the line under the switch in the Scheduled email row says a send is skipped in that case.</p>
+        </div>
+    </section>
+
+    <section id="public-link" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+            </svg>
+            Public Link
+        </h2>
+        <div class="doc-callout doc-callout-plan">
+            <div class="doc-callout-title">Enterprise feature</div>
+            <p><x-doc-badge plan="enterprise" /> The public link needs the <strong class="text-gray-900 dark:text-white">Enterprise</strong> plan. The control is in the <strong>Public link</strong> row.</p>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Keep the current graphic at an address that does not change, so a screen at your venue, a page on your website or anything else that shows a picture from an address always has your upcoming events. Switch on <strong>Keep the image at a public address</strong>, save, and the row shows the address with a <strong>Copy</strong> button.
+        </p>
+        <ul class="doc-list mb-4">
+            <li>The image at the address is drawn from the settings you last saved. It is redrawn every hour, so an event that has passed leaves it and a new one joins it, and again each time you save.</li>
+            <li>Anyone who has the address can see the image. The address is a long random one that does not name your schedule, and the image shows only what the graphic on this page shows.</li>
+            <li>Switching the link off and saving removes the image from its address. Switching it on again gives a new address, so the old one stays closed.</li>
+            <li>If no upcoming event has a flyer image, the last image stays in place until there is one.</li>
+        </ul>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Showing it on a screen</div>
+            <p>The address answers with a PNG image. A browser or a signage player keeps a copy for up to five minutes, so set the screen to load the address again from time to time (most players call this a refresh interval) and it will pick up each hour's image.</p>
         </div>
     </section>
 
