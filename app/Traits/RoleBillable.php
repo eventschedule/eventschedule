@@ -256,6 +256,13 @@ trait RoleBillable
             return false;
         }
 
+        // A cancelled trial gives no plan, as hasActiveSubscription() says: without this a trial
+        // cancelled on its first day kept Enterprise (and its 1,000 newsletter emails a month)
+        // to the end of the trial, unpaid.
+        if ($subscription->canceled() && $subscription->onTrial()) {
+            return false;
+        }
+
         // Only the configured enterprise IDs grant Enterprise. Stripe keeps billing an archived
         // price, so a customer left on a price ID config no longer names keeps paying the
         // Enterprise rate while this returns false and their features are withdrawn. A price

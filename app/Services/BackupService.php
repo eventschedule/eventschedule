@@ -1304,8 +1304,18 @@ class BackupService
         return $report;
     }
 
+    /**
+     * Whether this restore is for somebody whose restored audience the platform's mail would reach
+     * unpaid (AudienceMailGuard): the waitlists and interest lists are then not restored as live.
+     */
+    private bool $restoreUnsolicited = false;
+
     private function importSchedule(array $scheduleData, int $userId, bool $includesImages, BackupJob $job): array
     {
+        $restorer = User::find($userId);
+        $this->restoreUnsolicited = config('app.hosted') && $restorer && ! $restorer->isAdmin()
+            && ! AudienceMailGuard::ownerHasPaid($restorer);
+
         $report = [
             'schedules' => ['success' => 0, 'failed' => 0, 'failures' => []],
             'sub_schedules' => ['success' => 0, 'failed' => 0, 'failures' => []],
@@ -1784,6 +1794,11 @@ class BackupService
                             'locale' => $subData['locale'] ?? null,
                             'source' => $subData['source'] ?? 'import',
                             'confirmed_at' => $subData['confirmed_at'] ?? null,
+                            // Kept confirmed, so a migrating schedule keeps its list, and marked:
+                            // a backup is a file its owner can edit, so a restored subscriber is
+                            // mailed only once the owner has paid (AudienceMailGuard, rule A),
+                            // and not by the automatic announcements before then either.
+                            'origin' => 'restore',
                             'token' => RoleSubscriber::newToken(),
                             // ?? then ?:, not either alone: ?? misses an empty string (which a
                             // hand-edited backup can carry, and which Carbon would choke on),
@@ -2673,6 +2688,9 @@ class BackupService
         // Read back through Sale::guestLanguage(), which ignores anything not a supported language.
         $sale->language_code = is_string($data['language_code'] ?? null) ? substr($data['language_code'], 0, 10) : null;
         $sale->confirmed_at = $data['confirmed_at'] ?? null;
+        // A backup is a file its owner can edit: a restored buyer is not an opt-in
+        // (AudienceMailGuard, rule A) until the owner has paid.
+        $sale->origin = 'restore';
 
         // saveQuietly() below fires no hooks, so the saving() hook that normally stamps paid_at
         // does not run. Carry the original payment time across, falling back to created_at for
@@ -2975,7 +2993,11 @@ class BackupService
                 'name' => $data['name'] ?? '',
                 'email' => $data['email'],
                 'subdomain' => $role->subdomain,
-                'status' => $data['status'] ?? 'waiting',
+                // Restored for an owner who has not paid (hosted): no longer waiting, so no
+                // "tickets are available" mail goes to an address the file named.
+                'status' => $this->restoreUnsolicited && in_array($data['status'] ?? 'waiting', ['waiting', 'notified'], true)
+                    ? 'expired'
+                    : ($data['status'] ?? 'waiting'),
                 'locale' => $data['locale'] ?? null,
                 'notified_at' => $data['notified_at'] ?? null,
                 'expires_at' => $data['expires_at'] ?? null,
@@ -3009,7 +3031,9 @@ class BackupService
                 'name' => $data['name'] ?? null,
                 'locale' => $data['locale'] ?? null,
                 'source' => $data['source'] ?? 'event_page',
-                'confirmed_at' => $data['confirmed_at'] ?? null,
+                // Restored for an owner who has not paid (hosted): unconfirmed, so no notice about
+                // the event goes to an address the file named. Pruned with the unconfirmed sign-ups.
+                'confirmed_at' => $this->restoreUnsolicited ? null : ($data['confirmed_at'] ?? null),
                 'tickets_notified_at' => $data['tickets_notified_at'] ?? null,
                 'reminder_sent_at' => $data['reminder_sent_at'] ?? null,
                 'token' => EventInterest::newToken(),
@@ -3021,7 +3045,8 @@ class BackupService
     {
         $validator = Validator::make($data, [
             'subject' => 'required|string|max:500',
-            'status' => 'required|in:draft,scheduled,sent',
+            // 'review' is a newsletter held for review when the backup was made: restored as a draft.
+            'status' => 'required|in:draft,scheduled,sent,review',
         ]);
 
         if ($validator->fails()) {

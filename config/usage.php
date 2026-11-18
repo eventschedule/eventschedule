@@ -45,6 +45,10 @@ return [
     // Ceiling on each row table in the growth payload (/admin/growth and app:pull-growth). Hitting
     // it is reported in meta.truncated rather than silently shortening the table. `?:` because a
     // blank variable would otherwise cast to 0 and cap every table at one row.
+    // A newer sender's newsletter to more than this many people is held for an operator's review
+    // (App\Services\AudienceMailGuard). Hosted, through the platform's mail only.
+    'newsletter_review_threshold' => (int) (env('NEWSLETTER_REVIEW_THRESHOLD') ?: 10),
+
     'growth_row_cap' => (int) (env('GROWTH_ROW_CAP') ?: 20000),
 
     // Accounts one onboarding-nudge run may reach. A cap on PEOPLE for the whole run, not on

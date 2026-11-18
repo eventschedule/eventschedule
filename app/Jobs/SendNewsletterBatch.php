@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Newsletter;
 use App\Models\NewsletterRecipient;
+use App\Services\AudienceMailGuard;
 use App\Services\NewsletterService;
 use App\Services\UsageTrackingService;
 use Illuminate\Bus\Queueable;
@@ -37,6 +38,14 @@ class SendNewsletterBatch implements ShouldQueue
     {
         $newsletter = Newsletter::with('role')->find($this->newsletterId);
         if (! $newsletter || $newsletter->status === 'cancelled') {
+            return;
+        }
+
+        // Email sending paused on the owner's or the author's account since the send began
+        // (AudienceMailGuard): it stops here, and what has gone has gone. A column read per batch.
+        if (AudienceMailGuard::pausedNow($newsletter)) {
+            $newsletter->forceFill(['status' => 'cancelled'])->save();
+
             return;
         }
 

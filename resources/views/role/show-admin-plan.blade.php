@@ -161,6 +161,23 @@
                     {{ __('messages.plan_trial_charge_line_no_card', ['amount' => $trialAmount, 'date' => $subscription->trial_ends_at->translatedFormat('F j, Y')]) }}
                 @endif
             </p>
+            {{-- A trial sends the free plan's newsletter allowance (Role::newsletterLimit()); paying
+                 now lifts it. Owner only, as every billing action here is. --}}
+            @if (! $subscription->canceled() && $isOwner && config('app.hosted'))
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2" data-end-trial>
+                @if ($role->newsletterLimit() !== null)
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1 min-w-[240px]">
+                    {{ __('messages.newsletter_trial_limit', ['limit' => number_format($role->newsletterLimit()), 'plan_limit' => number_format((int) $role->planNewsletterLimit())]) }}
+                </p>
+                @endif
+                <form method="POST" action="{{ route('subscription.end_trial', ['subdomain' => $role->subdomain]) }}" data-confirm="{{ __('messages.end_trial_confirm_amount', ['amount' => $trialAmount]) }}">
+                    @csrf
+                    <button type="submit" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                        {{ __('messages.end_trial_pay_now', ['amount' => $trialAmount]) }}
+                    </button>
+                </form>
+            </div>
+            @endif
             @endif
 
             {{-- Subscription End Date (for cancelled subscriptions) --}}

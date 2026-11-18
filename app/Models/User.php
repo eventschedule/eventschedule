@@ -314,6 +314,12 @@ class User extends Authenticatable implements MustVerifyEmail
             // The "Turn off suggestions" switch. Not fillable either: SetupGuide::suggest() is
             // its one writer.
             'suggestions_off_at' => 'datetime',
+            // App\Services\AudienceMailGuard. None is fillable: written there and nowhere else.
+            'newsletter_trusted_at' => 'datetime',
+            'mail_disabled_at' => 'datetime',
+            'mail_access_requested_at' => 'datetime',
+            'mail_cleared_at' => 'datetime',
+            'mail_flagged_at' => 'datetime',
         ];
     }
 

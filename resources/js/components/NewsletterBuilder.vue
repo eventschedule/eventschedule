@@ -846,6 +846,13 @@
                         <div v-if="audience.allowance"><dt>{{ t.newsletter_allowance }}</dt><dd>{{ allowanceText }}</dd></div>
                     </dl>
 
+                    <!-- What will happen that is worth knowing before Send, without stopping it: imported
+                         addresses left out until the first payment, a quick review of the newsletter. -->
+                    <div v-for="notice in (audience.notices || [])" :key="notice" class="nb-warn" role="status">
+                        <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <p>{{ notice }}</p>
+                    </div>
+
                     <div v-if="audience.refusal" class="nb-warn" role="alert">
                         <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                         <div>

@@ -49,6 +49,14 @@ class ProcessScheduledNewsletters
                         'newsletter_id' => $newsletter->id,
                         'role_id' => $newsletter->role_id,
                     ]);
+                } elseif (is_array($result) && in_array($result[0], ['review', 'mail_paused', 'imported_unpaid'], true)) {
+                    // AudienceMailGuard: held for review ('review' is a status this runner never
+                    // reads, so it waits for an operator), paused, or only imported addresses left.
+                    Log::warning('Scheduled newsletter not sent: '.$result[0], [
+                        'newsletter_id' => $newsletter->id,
+                        'role_id' => $newsletter->role_id,
+                        'recipients' => $result[1] ?? null,
+                    ]);
                 } elseif (is_array($result) && $result[0] === 'requires_verification') {
                     // send() now drops the row to 'draft' and clears scheduled_at, so it leaves
                     // this queue for good rather than being re-picked and re-refused every tick.

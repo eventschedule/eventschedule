@@ -239,6 +239,25 @@ class AuditService
 
     const ADMIN_SPAM_UNCLEAR = 'admin.spam_unclear';
 
+    // Email sending paused on an account and let back on, and a newsletter held for review
+    // approved or sent back (AudienceMailGuard, /admin/mail-review). A pause the app made itself
+    // (a watched word, a shared card) is logged with no user.
+    const MAIL_PAUSED = 'admin.mail_paused';
+
+    const MAIL_ENABLED = 'admin.mail_enabled';
+
+    const MAIL_KEPT_PAUSED = 'admin.mail_kept_paused';
+
+    const MAIL_FLAGGED = 'admin.mail_flagged';
+
+    const MAIL_ACCESS_REQUESTED = 'admin.mail_access_requested';
+
+    const NEWSLETTER_HELD = 'admin.newsletter_held';
+
+    const NEWSLETTER_APPROVED = 'admin.newsletter_approved';
+
+    const NEWSLETTER_REJECTED = 'admin.newsletter_rejected';
+
     // A schedule that looks like somebody's private calendar, published by a calendar sync
     // (/admin/private-calendars), and the placeholder venues imports made out of meeting links.
     const ADMIN_CALENDAR_PRIVACY_HIDE = 'admin.calendar_privacy_hide';
@@ -271,6 +290,9 @@ class AuditService
     const SUBSCRIPTION_CANCEL = 'subscription.cancel';
 
     const SUBSCRIPTION_RESUME = 'subscription.resume';
+
+    // "End trial and start paying now" (SubscriptionController::endTrial()).
+    const SUBSCRIPTION_END_TRIAL = 'subscription.end_trial';
 
     const TICKET_TRIAL_START = 'subscription.ticket_trial_start';
 

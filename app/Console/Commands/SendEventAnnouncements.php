@@ -149,7 +149,9 @@ class SendEventAnnouncements extends Command
 
             // The one shared trust gate, sized to this send. An unverified schedule on the shared
             // platform mailer may reach a small audience and no more.
-            if (! $role->canSendAudienceMail($recipients->count(), $role->user)) {
+            // Email sending paused on the owner's account (AudienceMailGuard) stops the digest too.
+            if (\App\Services\AudienceMailGuard::mailPaused($role, $role->user)
+                || ! $role->canSendAudienceMail($recipients->count(), $role->user)) {
                 Log::warning('Event announcement blocked: schedule cannot send audience mail', [
                     'role_id' => $role->id,
                     'recipients' => $recipients->count(),

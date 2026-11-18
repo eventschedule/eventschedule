@@ -80,6 +80,18 @@ class SubscriptionWebhookController extends WebhookController
      */
     protected function handleInvoicePaymentSucceeded(array $payload)
     {
+        // A real payment: an invoice above zero, paid. What "the owner has paid" means
+        // (AudienceMailGuard::ownerHasPaid()); a subscription's status alone is not it.
+        $invoice = $payload['data']['object'] ?? [];
+        $subscriptionId = $invoice['subscription']
+            ?? ($invoice['parent']['subscription_details']['subscription'] ?? null);
+        if (is_string($subscriptionId) && (int) ($invoice['amount_paid'] ?? 0) > 0) {
+            \DB::table('subscriptions')->where('stripe_id', $subscriptionId)->update(['last_paid_at' => now()]);
+            // A shared-card pause was for an unpaid trial: paid, it is a flag for an operator.
+            $paidRoleId = \DB::table('subscriptions')->where('stripe_id', $subscriptionId)->value('role_id');
+            \App\Services\AudienceMailGuard::paymentArrived($paidRoleId ? Role::find($paidRoleId) : null);
+        }
+
         $role = Role::where('stripe_id', $payload['data']['object']['customer'])->first();
 
         if ($role) {

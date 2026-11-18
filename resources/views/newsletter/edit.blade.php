@@ -20,6 +20,18 @@
 
         @include('newsletter.partials._notices')
         @include('newsletter.partials._verification-warning')
+        @include('newsletter.partials._mail-guard')
+
+        {{-- Held for a quick review (AudienceMailGuard), or sent back with the operator's note. --}}
+        @if ($newsletter->status === 'review')
+        <x-page-notice tone="info" class="news-notice" :title="__('messages.newsletter_in_review_title')">
+            {{ __('messages.newsletter_in_review_body') }}
+        </x-page-notice>
+        @elseif ($newsletter->status === 'draft' && $newsletter->review_note)
+        <x-page-notice tone="warn" class="news-notice" :title="__('messages.newsletter_review_sent_back_title')">
+            <span v-pre>{{ $newsletter->review_note }}</span>
+        </x-page-notice>
+        @endif
 
         @if ($newsletter->isRepeating())
         @php

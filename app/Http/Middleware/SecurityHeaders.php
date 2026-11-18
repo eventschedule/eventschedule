@@ -111,8 +111,12 @@ class SecurityHeaders
             $csp[] = "frame-ancestors 'none'";
         }
 
-        // Don't set CSP for debug toolbar
-        if (! $request->is('_debugbar/*')) {
+        // Don't set CSP for debug toolbar. A page that must be stricter than the app's policy says
+        // so on the request (the operator's preview of an owner's newsletter, AdminMailReviewController).
+        $override = $request->attributes->get('csp_override');
+        if (is_string($override) && $override !== '') {
+            $response->headers->set('Content-Security-Policy', $override);
+        } elseif (! $request->is('_debugbar/*')) {
             $response->headers->set('Content-Security-Policy', implode('; ', $csp));
         }
 

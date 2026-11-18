@@ -8,12 +8,15 @@ use App\Models\Event;
 use App\Models\Referral;
 use App\Models\Role;
 use App\Models\SubscriptionCancellation;
+use App\Services\AudienceMailGuard;
 use App\Services\AuditService;
 use App\Services\UsageTrackingService;
 use App\Utils\PlanPriceUtils;
 use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Laravel\Cashier\Cashier;
 use Laravel\Cashier\Exceptions\IncompletePayment;
@@ -138,24 +141,32 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Whether Stripe matched the security code of the card checkout just saved (its cvc_check is
-     * "pass"). Failed, unchecked and unavailable are all no, as is a card Stripe cannot find.
+     * The card checkout just saved, as Stripe has it, or null when there is none or Stripe cannot
+     * find it. Asked once per checkout: the security code check and the card's fingerprint both
+     * read it.
      */
-    private function securityCodeMatched(mixed $paymentMethod): bool
+    private function paymentMethod(mixed $paymentMethod): ?object
     {
         if (! is_string($paymentMethod) || $paymentMethod === '') {
-            return false;
+            return null;
         }
 
         try {
-            $method = Cashier::stripe()->paymentMethods->retrieve($paymentMethod);
+            return Cashier::stripe()->paymentMethods->retrieve($paymentMethod);
         } catch (\Throwable $e) {
             report($e);
 
-            return false;
+            return null;
         }
+    }
 
-        return ($method->card->checks->cvc_check ?? null) === 'pass';
+    /**
+     * Whether Stripe matched the security code of the card checkout just saved (its cvc_check is
+     * "pass"). Failed, unchecked and unavailable are all no, as is a card Stripe cannot find.
+     */
+    private function securityCodeMatched(?object $method): bool
+    {
+        return ($method?->card?->checks?->cvc_check ?? null) === 'pass';
     }
 
     /**
@@ -212,6 +223,10 @@ class SubscriptionController extends Controller
             // A new or swapped subscription is always created at what we sell today.
             $priceId = PlanPriceUtils::current('enterprise', $request->plan);
 
+            // The card given for the upgrade is fingerprinted like a checkout's (AudienceMailGuard).
+            // It is charged, so a card seen on another account flags the account, never pauses it.
+            AudienceMailGuard::recordCardFingerprint(auth()->user(), $role, $this->paymentMethod($request->payment_method)?->card?->fingerprint ?? null, startsTrial: false);
+
             try {
                 $subscription = $role->subscription('default');
                 $role->createOrGetStripeCustomer();
@@ -220,7 +235,7 @@ class SubscriptionController extends Controller
 
                 // Update plan info with lock to prevent race with webhook
                 \DB::transaction(function () use ($role, $request) {
-                    $role = \App\Models\Role::lockForUpdate()->find($role->id);
+                    $role = Role::lockForUpdate()->find($role->id);
                     $role->plan_type = 'enterprise';
                     $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
                     $role->plan_source = null;
@@ -266,7 +281,16 @@ class SubscriptionController extends Controller
             // 2026-11-18 five trials started in a day, three of them on one card whose code had
             // failed and two on another, each on an account of its own. A checkout that charges
             // today is left to Stripe's own screening, which declines a failed code.
-            if ($trialEnd && ! $this->securityCodeMatched($request->payment_method)) {
+            $method = $this->paymentMethod($request->payment_method);
+
+            // The card, by Stripe's fingerprint: one already used on another account pauses this
+            // account's email sending when the checkout starts a trial (nothing is charged), and
+            // flags it for an operator when the card is charged today (AudienceMailGuard).
+            // Recorded for every checkout that reaches the card, refused or not; the checkout
+            // itself goes on.
+            AudienceMailGuard::recordCardFingerprint(auth()->user(), $role, $method?->card?->fingerprint ?? null, startsTrial: (bool) $trialEnd);
+
+            if ($trialEnd && ! $this->securityCodeMatched($method)) {
                 return redirect()->back()->with('error', __('messages.subscription_card_code_unverified'));
             }
 
@@ -277,7 +301,13 @@ class SubscriptionController extends Controller
                 $subscriptionBuilder->trialUntil($trialEnd);
             }
 
-            $subscriptionBuilder->create($request->payment_method);
+            $subscription = $subscriptionBuilder->create($request->payment_method);
+
+            // Charged today: paid now, without waiting for the webhook, which can arrive before
+            // the subscription row exists (AudienceMailGuard::ownerHasPaid()).
+            if (! $trialEnd) {
+                AudienceMailGuard::recordPaymentFromStripe($subscription);
+            }
 
             // Only once the subscription exists: a declined card or an abandoned 3DS step
             // (IncompletePayment, below) must not spend the login's one trial. Stamped for a
@@ -344,7 +374,7 @@ class SubscriptionController extends Controller
      * What the owner is told after checkout: whether anything was charged, how much and when.
      * Entering a card read as paying, so a trial that charged nothing has to say so.
      */
-    private function subscribedMessage(string $tier, string $plan, ?\Carbon\Carbon $trialEnd, bool $forEvent): string
+    private function subscribedMessage(string $tier, string $plan, ?Carbon $trialEnd, bool $forEvent): string
     {
         $amount = plan_price(PlatformPricing::amount($tier === 'enterprise' ? 'enterprise' : 'pro', $plan === 'yearly' ? 'yearly' : 'monthly'));
 
@@ -454,6 +484,87 @@ class SubscriptionController extends Controller
         return redirect()
             ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
             ->with('message', __('messages.subscription_cancelled'));
+    }
+
+    /**
+     * "End trial and start paying now": the trial ends today and the card is charged now, which
+     * lifts the trial's limits (a trial sends the free plan's newsletter allowance,
+     * Role::newsletterLimit()).
+     *
+     * Asked of Stripe with payment_behavior pending_if_incomplete, so a charge that fails leaves
+     * the subscription as it was, still on its trial, instead of ending the trial unpaid. A card
+     * that wants a 3D Secure step goes to Cashier's payment page, as checkout does for an
+     * IncompletePayment; Stripe applies the change once it is confirmed, and the webhook brings
+     * the subscription row along.
+     */
+    public function endTrial(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (auth()->user()->id != $role->user_id) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $subscription = $role->subscription('default');
+        $planTab = route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan']);
+
+        if (! $subscription || ! $subscription->onTrial() || $subscription->canceled()) {
+            return redirect($planTab)->with('error', __('messages.subscription_not_on_trial'));
+        }
+
+        // One at a time per subscription: a double submit must not ask Stripe twice.
+        $lock = Cache::lock('end-trial:'.$subscription->stripe_id, 30);
+        if (! $lock->get()) {
+            return redirect($planTab)->with('error', __('messages.please_wait').'...');
+        }
+
+        try {
+            try {
+                $stripeSubscription = $subscription->updateStripeSubscription([
+                    'trial_end' => 'now',
+                    'payment_behavior' => 'pending_if_incomplete',
+                    'expand' => ['latest_invoice.payment_intent'],
+                ]);
+            } catch (\Exception $e) {
+                UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION_FAILED, $role->id);
+                \Log::error('Ending a trial failed', ['error' => $e->getMessage(), 'role' => $role->id]);
+
+                return redirect($planTab)->with('error', __('messages.subscription_end_trial_failed'));
+            }
+
+            $pending = $stripeSubscription->pending_update ?? null;
+            $status = $stripeSubscription->status ?? null;
+
+            // Active, and nothing left pending: the charge went through. past_due is a charge that
+            // failed, which is not a success however Stripe left the trial.
+            if (! $pending && $status === 'active') {
+                $subscription->forceFill(['trial_ends_at' => null, 'stripe_status' => 'active']);
+                // The invoice the trial's end raised, paid now: the owner has paid (the webhook
+                // says the same a moment later).
+                $paid = (int) ($stripeSubscription->latest_invoice->amount_paid ?? 0) > 0;
+                if ($paid) {
+                    $subscription->forceFill(['last_paid_at' => now()]);
+                }
+                $subscription->save();
+                if ($paid) {
+                    AudienceMailGuard::paymentArrived($role);
+                }
+
+                AuditService::log(AuditService::SUBSCRIPTION_END_TRIAL, auth()->id(), 'Role', $role->id, null, null, $role->subdomain);
+
+                return redirect($planTab)->with('message', __('messages.subscription_trial_ended'));
+            }
+
+            // The charge needs the cardholder (3D Secure): Cashier's own payment page, then back.
+            $intent = $stripeSubscription->latest_invoice->payment_intent ?? null;
+            if ($intent && ($intent->status ?? null) === 'requires_action' && ! empty($intent->id)) {
+                return redirect()->route('cashier.payment', [$intent->id, 'redirect' => $planTab]);
+            }
+
+            return redirect($planTab)->with('error', __('messages.subscription_end_trial_declined'));
+        } finally {
+            $lock->release();
+        }
     }
 
     /**

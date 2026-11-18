@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\Newsletter;
 use App\Models\User;
+use App\Services\NewsletterService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -22,7 +23,7 @@ class NewsletterRepeatSkippedMail extends Mailable
     use Queueable, SerializesModels;
 
     /** Why a run can be skipped. Each has a messages.newsletter_repeat_reason_* line. */
-    public const REASONS = ['no_events', 'picked_passed', 'no_recipients', 'limit_exceeded', 'over_plan', 'requires_verification', 'failed'];
+    public const REASONS = ['no_events', 'picked_passed', 'no_recipients', 'limit_exceeded', 'over_plan', 'requires_verification', 'mail_paused', 'imported_unpaid', 'failed'];
 
     public function __construct(
         public Newsletter $newsletter,
@@ -55,7 +56,7 @@ class NewsletterRepeatSkippedMail extends Mailable
             with: [
                 'role' => $role,
                 'recipient' => $this->recipient,
-                'subjectLine' => Newsletter::fillPlaceholders($this->newsletter->subject, $role, app(\App\Services\NewsletterService::class)->monthFor($this->newsletter, $this->due)),
+                'subjectLine' => Newsletter::fillPlaceholders($this->newsletter->subject, $role, app(NewsletterService::class)->monthFor($this->newsletter, $this->due)),
                 'dueText' => $when($this->due),
                 'nextText' => $this->next ? $when($this->next) : null,
                 'reasonText' => __('messages.newsletter_repeat_reason_'.$reason, [

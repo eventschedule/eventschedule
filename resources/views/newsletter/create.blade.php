@@ -19,6 +19,7 @@
 
         @include('newsletter.partials._notices')
         @include('newsletter.partials._verification-warning')
+        @include('newsletter.partials._mail-guard')
 
         {{-- Template picker --}}
         @if (! request('template_id') && ($savedTemplates ?? collect())->count())

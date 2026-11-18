@@ -202,6 +202,9 @@
             <p class="page-lead">{{ __('messages.newsletter_import_lead') }}</p>
         </div>
 
+        {{-- Before the list goes in: who it can be mailed to, and when. --}}
+        @include('newsletter.partials._mail-guard', ['showImportRule' => true])
+
         <div id="import-emails-app" class="page-stack">
             {{-- Segment target --}}
             <section class="ap-card rounded-xl page-card">

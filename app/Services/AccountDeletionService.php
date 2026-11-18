@@ -302,6 +302,11 @@ class AccountDeletionService
         $this->byIds(DB::table('newsletter_recipients')
             ->whereIn('newsletter_id', DB::table('newsletters')->whereNull('role_id')->select('id'))
             ->where('user_id', $user->id));
+
+        // The card fingerprints kept for fraud prevention (AudienceMailGuard): they lose the
+        // account and keep only a one-way hash, deleted by PrunePersonalData after 12 months, as
+        // the privacy policy says. No foreign key reaches them.
+        AudienceMailGuard::forgetFingerprints($user);
     }
 
     /**

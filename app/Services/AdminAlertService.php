@@ -9,6 +9,7 @@ use App\Models\BoostStatement;
 use App\Models\EventFeed;
 use App\Models\FederatedInstance;
 use App\Models\LegalDocument;
+use App\Models\Newsletter;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleRefund;
@@ -110,6 +111,12 @@ class AdminAlertService
         // own details in public until someone looks, which is the more urgent of the two.
         'calendar_exposures',
         'spam_suspects',
+        // Amber: a schedule's newsletter held for review (AudienceMailGuard) is an owner waiting
+        // to reach their audience, and a paused account that asked for its email back is too.
+        'newsletters_review',
+        'mail_access_requests',
+        // A paying account a watched word or a shared card would have paused: nothing stopped.
+        'mail_flagged',
         // Amber: a site serving a copy of the marketing pages (MarketingCopyWatch). Drains when
         // the operator marks it contacted or not a copy.
         'marketing_copies',
@@ -416,6 +423,56 @@ class AdminAlertService
                 }
             },
 
+            // Hosted only, as the guard is. Guarded as spam_suspects is: new columns on an
+            // install that may not have migrated yet.
+            'newsletters_review' => function () use ($isHosted) {
+                if (! $isHosted) {
+                    return 0;
+                }
+
+                try {
+                    return AudienceMailGuard::heldQuery()->count();
+                } catch (QueryException $e) {
+                    if (! in_array($e->getCode(), ['42S02', '42S22'], true)) {
+                        report($e);
+                    }
+
+                    return 0;
+                }
+            },
+
+            'mail_access_requests' => function () use ($isHosted) {
+                if (! $isHosted) {
+                    return 0;
+                }
+
+                try {
+                    return AudienceMailGuard::openRequests()->count();
+                } catch (QueryException $e) {
+                    if (! in_array($e->getCode(), ['42S02', '42S22'], true)) {
+                        report($e);
+                    }
+
+                    return 0;
+                }
+            },
+
+            'mail_flagged' => function () use ($isHosted) {
+                if (! $isHosted) {
+                    return 0;
+                }
+
+                try {
+                    return AudienceMailGuard::flagged()->count();
+                } catch (QueryException $e) {
+                    if (! in_array($e->getCode(), ['42S02', '42S22'], true)) {
+                        report($e);
+                    }
+
+                    return 0;
+                }
+            },
+
             'marketing_copies' => function () {
                 try {
                     return MarketingCopyWatch::count();
@@ -664,6 +721,9 @@ class AdminAlertService
             'boost_statements_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-partners', 'red', 'Boost'],
             'calendar_exposures' => ['manage', 'private-calendars', 'admin.private_calendars', [], '', 'amber', __('messages.private_calendars')],
             'spam_suspects' => ['manage', 'blocked', 'admin.blocked', [], '#suspects', 'amber', __('messages.blocked')],
+            'newsletters_review' => ['manage', 'mail-review', 'admin.mail_review', [], '#held', 'amber', __('messages.mail_review')],
+            'mail_access_requests' => ['manage', 'mail-review', 'admin.mail_review', [], '#requests', 'amber', __('messages.mail_review')],
+            'mail_flagged' => ['manage', 'mail-review', 'admin.mail_review', [], '#flagged', 'blue', __('messages.mail_review')],
             'marketing_copies' => ['manage', 'copies', 'admin.copies', [], '#copies', 'amber', __('messages.copies')],
             // ?status=flagged, not approved: the filter behind it repeats this row's own
             // count query, so the link lands on exactly the instances it counted rather

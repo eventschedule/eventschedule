@@ -81,6 +81,9 @@ class AudienceResolver
 
         return RoleSubscriber::where('role_id', $role->id)
             ->confirmed()
+            // A subscriber a backup restore brought in signed up nowhere here: not mailed by the
+            // platform until the owner has paid (AudienceMailGuard, rule A).
+            ->when(! AudienceMailGuard::mayMailUnsolicited($role), fn ($q) => $q->whereNull('origin'))
             ->get()
             ->reject(fn ($subscriber) => isset($excluded[strtolower($subscriber->email)])
                 || $this->isTestEmail($subscriber->email))

@@ -289,6 +289,9 @@ class SpamWatch
         if ($clearance->wasRecentlyCreated) {
             AuditService::log(AuditService::ADMIN_SPAM_CLEAR, $actor->id, 'App\\Models\\User', $user->id, null, null, 'Marked account '.$user->id.' not spam');
         }
+
+        // The words paused its email (AudienceMailGuard): not spam lets it back on.
+        AudienceMailGuard::liftSpamWatchPause($user);
     }
 
     /** Flag again: the account is back on the list while a word still matches. */
@@ -404,6 +407,60 @@ class SpamWatch
                 $query->orWhere($column, 'like', '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $word).'%');
             }
         }
+    }
+
+    /**
+     * Whether a watched word turns up for this account NOW: the scan's own conditions, read live
+     * for this one account rather than from the cached ids, so a word added a moment ago or a
+     * schedule renamed a moment ago counts at once. Not for a blocked account, an administrator,
+     * the demo or an account marked not spam. AudienceMailGuard asks it before every send.
+     */
+    public static function flagsNow(User $user): bool
+    {
+        if (! self::canBeFlagged($user) || self::words() === []) {
+            return false;
+        }
+
+        if (SpamClearance::where('user_id', $user->id)->exists()) {
+            return false;
+        }
+
+        return (self::matches(collect([$user]), 1)[$user->id]['total'] ?? 0) > 0;
+    }
+
+    /**
+     * The first watched word in a piece of text someone wrote (a newsletter's subject or body),
+     * or null. Case and accents are ignored, as the database's comparison ignores them for the
+     * scan: "Bítcoin" is bitcoin here too. Letters of other scripts are left as they are.
+     */
+    public static function wordInText(string $text): ?string
+    {
+        $words = self::words();
+
+        if ($words === [] || trim($text) === '') {
+            return null;
+        }
+
+        $plain = self::folded($text);
+
+        foreach ($words as $word) {
+            if (str_contains($plain, self::folded($word))) {
+                return $word;
+            }
+        }
+
+        return null;
+    }
+
+    /** Lower case with the accents taken off, and every run of spaces one space. */
+    private static function folded(string $text): string
+    {
+        if (class_exists(\Normalizer::class)) {
+            $text = (string) \Normalizer::normalize($text, \Normalizer::FORM_D);
+            $text = (string) preg_replace('/\p{Mn}+/u', '', $text);
+        }
+
+        return (string) preg_replace('/\s+/u', ' ', mb_strtolower($text));
     }
 
     /**

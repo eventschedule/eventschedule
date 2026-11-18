@@ -7,11 +7,13 @@ use App\Models\BlocklistEntry;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AccountBlockService;
+use App\Services\AudienceMailGuard;
 use App\Services\AuditService;
 use App\Services\Blocklist;
 use App\Services\DemoService;
 use App\Services\SpamWatch;
 use App\Utils\UrlUtils;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -148,6 +150,10 @@ class AdminBlockController extends Controller
             // offered for an administrator, the demo or a blocked account.
             'spam' => SpamWatch::canBeFlagged($user) ? (SpamWatch::matches(collect([$user]), 10)[$user->id] ?? null) : null,
             'spamClearance' => SpamWatch::clearance($user),
+            // Email sending (AudienceMailGuard), hosted only: whether it is paused, and the other
+            // accounts a card of this one's was used on.
+            'mailCard' => config('app.hosted') && ! $user->isAdmin(),
+            'sharedCard' => config('app.hosted') ? AudienceMailGuard::sharedCardAccounts($user) : collect(),
         ]);
     }
 
@@ -361,7 +367,7 @@ class AdminBlockController extends Controller
      * Where an add goes back to: the list, or the dashboard's live view when it came from the
      * menu beside a country there (admin/realtime/_breakdown).
      */
-    private function afterAdding(Request $request): \Illuminate\Http\RedirectResponse
+    private function afterAdding(Request $request): RedirectResponse
     {
         return redirect()->to($request->input('from') === 'dashboard' ? route('admin.dashboard') : route('admin.blocked').'#list');
     }

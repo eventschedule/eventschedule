@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class NewsletterSegment extends Model
 {
@@ -47,6 +49,9 @@ class NewsletterSegment extends Model
             default => __('messages.subschedule'),
         };
     }
+
+    /** Sales that are no purchase: never in a buyers segment. */
+    public const NOT_A_SALE = ['cancelled', 'expired', 'refunded'];
 
     /** The kinds a schedule's segment may be. The rest are the platform's (no schedule). */
     public const SCHEDULE_TYPES = ['all_followers', 'all_subscribers', 'ticket_buyers', 'manual', 'waitlist', 'group'];
@@ -122,7 +127,7 @@ class NewsletterSegment extends Model
             return collect();
         }
 
-        return \App\Models\RoleSubscriber::where('role_id', $this->role->id)
+        return RoleSubscriber::where('role_id', $this->role->id)
             ->confirmed()
             ->get(['email', 'name'])
             ->map(fn ($subscriber) => (object) [
@@ -158,9 +163,9 @@ class NewsletterSegment extends Model
      * Returned as a subquery, never a plucked list: a curator can list tens of thousands of events
      * and binding one placeholder each can exceed MySQL's prepared-statement limit.
      */
-    private function mailableEventIds(): \Illuminate\Database\Query\Builder
+    private function mailableEventIds(): Builder
     {
-        return \Illuminate\Support\Facades\DB::table('event_role')
+        return DB::table('event_role')
             // Joined only to reach creator_role_id. Many-to-one on event_role.event_id, so this
             // cannot multiply rows, and the subquery still yields exactly one column.
             ->join('events', 'events.id', '=', 'event_role.event_id')
@@ -176,13 +181,127 @@ class NewsletterSegment extends Model
             ->select('event_role.event_id');
     }
 
-    protected function resolveTicketBuyers(): Collection
+    /**
+     * Which of these addresses gave themselves to this schedule: a follower, a confirmed email
+     * subscriber, a member, a buyer or registrant of one of its events, or somebody on one of its
+     * waitlists. The rest came from an import or were typed in by hand, which is all a 'manual'
+     * segment can tell (AudienceMailGuard::mayMailUnsolicited()).
+     *
+     * Asked in chunks of addresses, never by listing the whole audience: an import holds up to
+     * ten thousand.
+     *
+     * @param  array<int, string>  $emails  lowercase
+     * @return array<string, true> the opted-in addresses, lowercase, as keys
+     */
+    public static function optedInAmong(Role $role, array $emails): array
+    {
+        $found = [];
+        $segment = (new self(['role_id' => $role->id]))->setRelation('role', $role);
+
+        foreach (array_chunk(array_values(array_unique($emails)), 1000) as $chunk) {
+            // Only what the person did themselves: a subscriber nobody restored, a paid sale the
+            // owner did not enter, a place on a waitlist that is still open.
+            $lists = [
+                $role->followers()->reorder()->whereIn('users.email', $chunk)->pluck('users.email'),
+                $role->members()->reorder()->whereIn('users.email', $chunk)->pluck('users.email'),
+                // A checkout's tick box counts through the paid sale below, not on its own: the row
+                // is made before the payment, which may never come.
+                RoleSubscriber::where('role_id', $role->id)->confirmed()->whereNull('origin')
+                    ->where('source', '!=', 'checkout')->whereIn('email', $chunk)->pluck('email'),
+                Sale::whereIn('event_id', $segment->mailableEventIds())->where('status', 'paid')
+                    ->whereNot(fn ($q) => self::ownerEntered($q))->whereIn('email', $chunk)->pluck('email'),
+                TicketWaitlist::whereIn('event_id', $segment->mailableEventIds())->whereIn('status', ['waiting', 'notified'])->whereIn('email', $chunk)->pluck('email'),
+            ];
+
+            foreach ($lists as $list) {
+                foreach ($list as $email) {
+                    $found[strtolower((string) $email)] = true;
+                }
+            }
+        }
+
+        return $found;
+    }
+
+    /**
+     * A sale the owner put there rather than one the buyer made: an attendee import, the API, the
+     * box office, or a backup restore. Not an opt-in (AudienceMailGuard, rule A). An import from
+     * before sales.origin carries payment_method 'import'.
+     */
+    public static function ownerEntered($query)
+    {
+        // COALESCE: a NULL payment_method would make the NOT of this NULL, and drop the row from
+        // optedInAmong(), which asks for the sales this is not.
+        return $query->whereRaw("COALESCE(sales.payment_method, '') IN ('import', 'box_office')")->orWhereNotNull('sales.origin');
+    }
+
+    /**
+     * The addresses of this segment that reached it by a way nobody chose themselves (rule A):
+     * all of a manual segment, the sales the owner entered, the subscribers a restore brought in.
+     *
+     * @return list<string> lowercase
+     */
+    public function unsolicitedEmails(): array
+    {
+        if (! $this->role && $this->type !== 'manual') {
+            return [];
+        }
+
+        // A sale counts as the buyer's own only when it is paid and the owner did not enter it.
+        $notOwn = fn ($q) => $q->where(fn ($w) => self::ownerEntered($w)->orWhere('sales.status', '!=', 'paid'));
+
+        $emails = match ($this->type) {
+            'manual' => $this->segmentUsers()->pluck('email'),
+            'ticket_buyers' => $this->buyerSales()?->where($notOwn)->pluck('email'),
+            'group' => $this->groupSales()?->where($notOwn)->pluck('email'),
+            'all_subscribers' => self::unsolicitedSubscriberEmails($this->role),
+            default => collect(),
+        };
+
+        return collect($emails ?? [])->map(fn ($email) => strtolower((string) $email))->unique()->values()->all();
+    }
+
+    /**
+     * Confirmed subscribers who did not sign up here themselves (rule A): those a backup restore
+     * brought in, and those a checkout's tick box made with no paid sale behind them (the row is
+     * made before the payment). Shared with NewsletterService's "everyone" audience.
+     *
+     * @return list<string> lowercase
+     */
+    public static function unsolicitedSubscriberEmails(Role $role): array
+    {
+        $segment = (new self(['role_id' => $role->id]))->setRelation('role', $role);
+
+        return RoleSubscriber::where('role_id', $role->id)
+            ->confirmed()
+            ->where(fn ($q) => $q->whereNotNull('origin')
+                ->orWhere(fn ($checkout) => $checkout->where('source', 'checkout')
+                    ->whereNotExists(fn ($sale) => $sale->selectRaw('1')
+                        ->from('sales')
+                        ->whereColumn('sales.email', 'role_subscribers.email')
+                        ->whereIn('sales.event_id', $segment->mailableEventIds())
+                        ->where('sales.status', 'paid')
+                        ->whereRaw("COALESCE(sales.payment_method, '') NOT IN ('import', 'box_office')")
+                        ->whereNull('sales.origin'))))
+            ->pluck('email')
+            ->map(fn ($email) => strtolower((string) $email))
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Who bought: every sale but a cancelled, expired or refunded one. Rule A is stricter, and only
+     * where it applies (unsolicitedEmails(), optedInAmong()).
+     */
+    private function buyerSales(): ?\Illuminate\Database\Eloquent\Builder
     {
         if (! $this->role) {
-            return collect();
+            return null;
         }
 
         $query = Sale::whereIn('event_id', $this->mailableEventIds())
+            ->whereNotIn('status', self::NOT_A_SALE)
             ->whereNotNull('email')
             ->where('email', '!=', '');
 
@@ -196,6 +315,34 @@ class NewsletterSegment extends Model
         if (! empty($criteria['date_to'])) {
             $query->where('created_at', '<=', $criteria['date_to'].' 23:59:59');
         }
+
+        return $query;
+    }
+
+    private function groupSales(): ?\Illuminate\Database\Eloquent\Builder
+    {
+        $criteria = $this->filter_criteria;
+        if (! $this->role || empty($criteria['group_id'])) {
+            return null;
+        }
+
+        // The sub-schedule filter goes on THIS role's pivot row, not on any row carrying that
+        // group_id - groups belong to one schedule, so the two agree, but pinning the role keeps a
+        // hand-crafted group_id from another schedule out.
+        return Sale::whereIn('event_id', $this->mailableEventIds()
+            ->where('event_role.group_id', $criteria['group_id']))
+            ->whereNotIn('status', self::NOT_A_SALE)
+            ->whereNotNull('email')
+            ->where('email', '!=', '');
+    }
+
+    protected function resolveTicketBuyers(): Collection
+    {
+        if (! $this->role) {
+            return collect();
+        }
+
+        $query = $this->buyerSales();
 
         return $query->select('user_id', 'email', 'name')
             ->distinct('email')
@@ -224,19 +371,12 @@ class NewsletterSegment extends Model
             return collect();
         }
 
-        $criteria = $this->filter_criteria;
-        if (empty($criteria['group_id'])) {
+        $query = $this->groupSales();
+        if (! $query) {
             return collect();
         }
 
-        // The sub-schedule filter goes on THIS role's pivot row, not on any row carrying that
-        // group_id - groups belong to one schedule, so the two agree, but pinning the role keeps a
-        // hand-crafted group_id from another schedule out.
-        return Sale::whereIn('event_id', $this->mailableEventIds()
-            ->where('event_role.group_id', $criteria['group_id']))
-            ->whereNotNull('email')
-            ->where('email', '!=', '')
-            ->select('user_id', 'email', 'name')
+        return $query->select('user_id', 'email', 'name')
             ->distinct('email')
             ->get()
             ->map(fn ($sale) => (object) [
@@ -294,11 +434,11 @@ class NewsletterSegment extends Model
             return collect();
         }
 
-        $roleIds = \App\Models\Role::where('plan_type', $planType)
+        $roleIds = Role::where('plan_type', $planType)
             ->where('is_deleted', false)
             ->pluck('id');
 
-        $userIds = \Illuminate\Support\Facades\DB::table('role_user')
+        $userIds = DB::table('role_user')
             ->whereIn('role_id', $roleIds)
             ->whereIn('level', ['owner', 'admin'])
             ->pluck('user_id')

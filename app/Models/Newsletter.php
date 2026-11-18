@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Newsletter extends Model
 {
@@ -40,10 +41,26 @@ class Newsletter extends Model
         // builder). A posted `repeat` would otherwise ride in on any fill() of the request.
         'repeat' => 'array',
         'events_as_of' => 'datetime',
+        // Held for review (status 'review') and the operator's note when it was not approved.
+        // Set in code only (AudienceMailGuard, NewsletterService::send()), never filled.
+        'held_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'review_mix' => 'array',
     ];
 
     /** The cadences a newsletter can repeat at. */
     public const REPEAT_EVERY = ['week', 'month'];
+
+    /**
+     * An operator's approval is for the one newsletter they read: a clone, a repeat's copy or a
+     * test's remainder starts without it, and without its review state.
+     */
+    protected static function booted(): void
+    {
+        static::replicating(function (Newsletter $copy) {
+            $copy->forceFill(['approved_at' => null, 'held_at' => null, 'review_note' => null, 'review_mix' => null]);
+        });
+    }
 
     /**
      * A newsletter that sends a copy of itself on a cadence (issue #134). It stays 'scheduled',
@@ -198,7 +215,7 @@ class Newsletter extends Model
 
         if ($role->profile_image_url) {
             $blocks[] = [
-                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'id' => Str::uuid()->toString(),
                 'type' => 'profile_image',
                 'data' => [],
             ];
@@ -206,32 +223,32 @@ class Newsletter extends Model
 
         if ($role->header_image_url) {
             $blocks[] = [
-                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'id' => Str::uuid()->toString(),
                 'type' => 'header_banner',
                 'data' => [],
             ];
         }
 
         $blocks[] = [
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'type' => 'heading',
             'data' => ['text' => '', 'level' => 'h1', 'align' => 'center'],
         ];
 
         $blocks[] = [
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'type' => 'text',
             'data' => ['content' => ''],
         ];
 
         $blocks[] = [
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'type' => 'events',
             'data' => ['layout' => 'cards', 'useAllEvents' => true, 'eventIds' => []],
         ];
 
         $blocks[] = [
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'type' => 'text',
             'data' => ['content' => ''],
         ];
@@ -239,7 +256,7 @@ class Newsletter extends Model
         $socialLinks = self::buildSocialLinksForRole($role);
         if (! empty($socialLinks)) {
             $blocks[] = [
-                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'id' => Str::uuid()->toString(),
                 'type' => 'social_links',
                 'data' => ['links' => $socialLinks],
             ];

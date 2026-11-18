@@ -976,6 +976,10 @@
                         <td>Offered during that period. It undoes the cancellation</td>
                     </tr>
                     <tr>
+                        <td><strong>End trial and pay now</strong></td>
+                        <td>Offered while a plan's free trial runs, with the price on the button. It ends the trial today and charges the card at once, which lifts the trial's limits: during a trial, newsletters are limited to the Free plan's 10 emails a month (see <a href="{{ route('marketing.docs.newsletters') }}#allowance" class="doc-link">Newsletters</a>). If the charge does not go through, the trial carries on and nothing is charged; a card that asks for a security check opens the payment page first</td>
+                    </tr>
+                    <tr>
                         <td><strong>Change to Free Plan</strong></td>
                         <td>For a Pro plan held without a subscription: moves the schedule to Free at once, after a confirmation</td>
                     </tr>

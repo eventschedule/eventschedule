@@ -4077,6 +4077,8 @@ class TicketController extends Controller
                     $sale->subdomain = $subdomain;
                     $sale->secret = strtolower(Str::random(32));
                     $sale->payment_method = 'import';
+                    // Entered by the owner, not made by the buyer: not an opt-in (AudienceMailGuard).
+                    $sale->origin = 'import';
                     $sale->payment_amount = $amount;
                     $sale->status = $status;
 

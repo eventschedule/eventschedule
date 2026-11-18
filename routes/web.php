@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminFederationController;
 use App\Http\Controllers\AdminFeedController;
 use App\Http\Controllers\AdminLegalController;
+use App\Http\Controllers\AdminMailReviewController;
 use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\AdminRealtimeController;
 use App\Http\Controllers\AdminTranslationController;
@@ -711,6 +712,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/newsletter-segments/{hash}/users', [NewsletterController::class, 'storeSegmentUser'])->name('newsletter.segment.user.store');
     Route::put('/newsletter-segments/{hash}/users/{userHash}', [NewsletterController::class, 'updateSegmentUser'])->name('newsletter.segment.user.update');
     Route::delete('/newsletter-segments/{hash}/users/{userHash}', [NewsletterController::class, 'deleteSegmentUser'])->name('newsletter.segment.user.delete');
+    Route::post('/newsletters/request-mail-access', [NewsletterController::class, 'requestMailAccess'])->name('newsletter.request_mail_access');
     Route::get('/newsletter-import', [NewsletterController::class, 'importForm'])->name('newsletter.import');
     Route::post('/newsletter-import', [NewsletterController::class, 'importStore'])->name('newsletter.import.store');
     Route::get('/newsletter-templates', [NewsletterController::class, 'templates'])->name('newsletter.templates');
@@ -863,6 +865,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/{subdomain}/subscription/portal', [SubscriptionController::class, 'portal'])->name('subscription.portal');
     Route::post('/{subdomain}/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
     Route::post('/{subdomain}/subscription/resume', [SubscriptionController::class, 'resume'])->name('subscription.resume');
+    Route::post('/{subdomain}/subscription/end-trial', [SubscriptionController::class, 'endTrial'])->name('subscription.end_trial');
     Route::post('/{subdomain}/subscription/swap', [SubscriptionController::class, 'swap'])->name('subscription.swap');
     Route::post('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
@@ -1255,6 +1258,16 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::post('/admin/blocked/account/{hash}/not-spam', [AdminBlockController::class, 'notSpam'])->name('admin.blocked.not_spam');
         Route::post('/admin/blocked/account/{hash}/flag-again', [AdminBlockController::class, 'flagAgain'])->name('admin.blocked.flag_again');
         Route::post('/admin/blocked/words', [AdminBlockController::class, 'saveWords'])->name('admin.blocked.words');
+        // Newsletters held for review and accounts whose email sending is paused
+        // (AudienceMailGuard). Registered everywhere; the controller 404s off the hosted install.
+        Route::get('/admin/mail-review', [AdminMailReviewController::class, 'index'])->name('admin.mail_review');
+        Route::get('/admin/mail-review/newsletters/{hash}/preview', [AdminMailReviewController::class, 'preview'])->name('admin.mail_review.preview');
+        Route::post('/admin/mail-review/newsletters/{hash}/approve', [AdminMailReviewController::class, 'approve'])->name('admin.mail_review.approve');
+        Route::post('/admin/mail-review/newsletters/{hash}/reject', [AdminMailReviewController::class, 'reject'])->name('admin.mail_review.reject');
+        Route::post('/admin/mail-review/accounts/{hash}/pause', [AdminMailReviewController::class, 'pause'])->name('admin.mail_review.pause');
+        Route::post('/admin/mail-review/accounts/{hash}/enable', [AdminMailReviewController::class, 'enable'])->name('admin.mail_review.enable');
+        Route::post('/admin/mail-review/accounts/{hash}/keep-paused', [AdminMailReviewController::class, 'keepPaused'])->name('admin.mail_review.keep_paused');
+        Route::post('/admin/mail-review/accounts/{hash}/dismiss-flag', [AdminMailReviewController::class, 'dismissFlag'])->name('admin.mail_review.dismiss_flag');
         // Schedules a calendar sync made into somebody's private calendar (CalendarExposureWatch).
         // On every install: any install's owners can connect a calendar.
         Route::get('/admin/private-calendars', [AdminCalendarPrivacyController::class, 'index'])->name('admin.private_calendars');

@@ -16,8 +16,10 @@
         <x-doc-nav-link href="#recipients">Recipients & Segments</x-doc-nav-link>
         <x-doc-nav-link href="#managing-segments" sub>Managing Segments</x-doc-nav-link>
         <x-doc-nav-link href="#importing-emails" sub>Importing Emails</x-doc-nav-link>
+        <x-doc-nav-link href="#imported-addresses" sub>When Imported Addresses Are Mailed</x-doc-nav-link>
         <x-doc-nav-link href="#sending">Sending</x-doc-nav-link>
         <x-doc-nav-link href="#verification" sub>Verification Above 50 Recipients</x-doc-nav-link>
+        <x-doc-nav-link href="#review" sub>Review of a First Newsletter</x-doc-nav-link>
         <x-doc-nav-link href="#ab-testing">A/B Testing</x-doc-nav-link>
         <x-doc-nav-link href="#analytics">Analytics</x-doc-nav-link>
         <x-doc-nav-link href="#managing">Managing Newsletters</x-doc-nav-link>
@@ -121,6 +123,9 @@
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Connect your own mail server in the <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">Email Settings</a> row of the schedule's Integrations tab and the cap is lifted for that schedule, because the messages leave through your provider and not ours.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            During a free trial of Pro or Enterprise the allowance is the Free plan's 10 a month: the higher allowance comes with the first payment. The Newsletters tab and Review and send say so, and the owner can choose <strong class="text-gray-900 dark:text-white">End trial and pay now</strong> on the <a href="{{ route('marketing.docs.managing_schedules') }}#plan-actions" class="doc-link">Plan tab</a> to start paying today and lift it.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             While a schedule has a limit, a meter reads "5 of 100 newsletter emails sent this month" with what remains: beside the opening line of the Newsletters tab, and at the end of the title row on the Create and Edit pages. Test sends are excluded from the count. Sending is checked against the whole recipient list up front: if a send would push you past the limit it is refused outright, never delivered in part, so trim the segment or upgrade first.
@@ -659,6 +664,11 @@
             <div class="doc-callout-title">Only import people who agreed to hear from you</div>
             <p>Importing adds each address to the segment and nothing else: no account is created for anyone, and nobody is added to your followers. You are responsible for having their permission to email them, and every recipient counts against your monthly allowance.</p>
         </div>
+
+        <h3 id="imported-addresses" class="doc-subheading">When Imported Addresses Are Mailed</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            On eventschedule.com, addresses you imported or typed into a segment by hand are mailed once your plan's first payment has gone through, on this schedule or another of yours. A free trial is not a payment, and neither is a complimentary plan from before paid subscriptions (a plan our team grants you does count), so on a trial (and on the Free plan) a newsletter goes only to the people who gave your schedule their address themselves: followers, email subscribers, people who bought a ticket or registered, and people on a waitlist. Addresses you entered yourself count as imported too: attendees you imported or sold to at the box office, sales made through the API, and anything restored from a backup. An imported address that also signed up itself is mailed as usual. The Import Emails tab says this before you import, and <strong class="text-gray-900 dark:text-white">Review and send</strong> says how many imported addresses will be left out; a newsletter that would go to nobody else is refused. A schedule with its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> mails imported addresses at once, and selfhosted installs are not affected.
+        </p>
     </section>
 
     <!-- Sending -->
@@ -710,13 +720,21 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When a send is skipped</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A send is skipped when its Events block has nothing to list (no events in the range, or the events you picked have all passed), when nobody is in its segments, when it would go over the month's <a href="#allowance" class="doc-link">allowance</a>, or when it needs a <a href="#verification" class="doc-link">verification</a>. The schedule's owner, and whoever set it up while they are still on the team, get an email saying why, and the next one goes out as planned. Every copy counts against the allowance of the month it goes out in, and a repeat that could never fit in your plan's monthly allowance is refused when you set it up.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A send is skipped when its Events block has nothing to list (no events in the range, or the events you picked have all passed), when nobody is in its segments (or everyone in them was <a href="#imported-addresses" class="doc-link">imported</a> and your plan has not been paid for yet), when email sending is paused on the account, when it would go over the month's <a href="#allowance" class="doc-link">allowance</a>, or when it needs a <a href="#verification" class="doc-link">verification</a>. The schedule's owner, and whoever set it up while they are still on the team, get an email saying why, and the next one goes out as planned. Every copy counts against the allowance of the month it goes out in, and a repeat that could never fit in your plan's monthly allowance is refused when you set it up.</p>
             </div>
         </div>
 
         <h3 id="verification" class="doc-subheading">Verification Above 50 Recipients</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             On eventschedule.com, a newsletter going to more than 50 recipients needs either <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">your own email settings</a> on the schedule or a <a href="{{ route('marketing.docs.account_settings') }}#profile" class="doc-link">verified phone number</a> in your profile. Up to 50 recipients it goes out without either, and so does a test. Until you have one, a notice on the Newsletters tab and in the builder says so and links to both, and a larger send, whether now or scheduled, is refused. The automatic new-event digest follows the same rule. Selfhosted installs are not affected.
+        </p>
+
+        <h3 id="review" class="doc-subheading">Review of a First Newsletter</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            On eventschedule.com, a newer account's newsletter waits for a quick review by our team before it goes out once it, together with what the account sent in the last 30 days, reaches more than 10 people. It applies until a newsletter of yours has been approved, or once your account is more than 30 days old and has paid. A newsletter that mentions something often used in scams is reviewed too, unless your plan has been paid for. Pressing send (or a scheduled time arriving) puts the newsletter In review: the Newsletters tab and the newsletter say "Waiting for a quick review before it goes out", and it cannot be changed meanwhile. It goes out as soon as it is approved, and later newsletters are not held. If it is not approved it comes back as a draft with a note saying why. Review and send says beforehand when a newsletter will be reviewed. A schedule with its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> is not reviewed, and neither are selfhosted installs.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            If something about an account looks off, email sending can be paused on it while we take a quick look. The Newsletters tab then says "Email sending is paused on your account while we take a quick look", and newsletters and automatic new-event emails do not go out; a newsletter already going out stops where it is. Tickets, confirmations and the updates people asked for about an event (such as a cancellation notice to an event's interest list) still go out. An account whose plan has been paid for is not paused this way. Press <strong class="text-gray-900 dark:text-white">Request access</strong> there and we will look at your account; you can ask once a day.
         </p>
 
         <div class="doc-callout doc-callout-info">

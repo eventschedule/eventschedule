@@ -583,6 +583,9 @@ class ApiSaleController extends Controller
                 $sale->subdomain = $subdomain;
                 $sale->payment_method = $event->payment_method;
                 $sale->status = 'unpaid';
+                // Made by the owner's API key, not by the buyer: not an opt-in (AudienceMailGuard),
+                // even once it is marked paid.
+                $sale->origin = 'api';
                 $sale->save();
 
                 // Create sale tickets

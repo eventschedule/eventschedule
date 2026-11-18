@@ -80,6 +80,13 @@ class PrunePersonalData extends Command
                 ->delete(),
             // updated_at, not created_at: signing up again re-sends the email with a fresh token on
             // the same row, and that new link must not be pruned the next morning.
+            // A deleted account's card fingerprints, kept as a one-way hash to recognise the same
+            // card on a new account (AudienceMailGuard), for the months the privacy policy says.
+            'hashed card fingerprints' => $this->deleteInBatches(
+                DB::table('payment_fingerprints')
+                    ->whereNull('user_id')
+                    ->where('hashed_at', '<', now()->subMonths(\App\Services\AudienceMailGuard::HASHED_FINGERPRINT_MONTHS))
+            ),
             'unconfirmed sign-ups' => $this->deleteInBatches(
                 DB::table('role_subscribers')
                     ->whereNull('confirmed_at')

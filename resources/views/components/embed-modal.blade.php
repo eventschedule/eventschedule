@@ -34,7 +34,10 @@
     // mail a subscriber gets, and both of these silence them without telling the owner.
     $embedAnnouncementsOff = ! $role->announce_new_events;
     $embedAudienceLimit = (int) config('usage.audience_mail_unverified_max_recipients', 50);
-    $embedNeedsVerification = config('app.hosted') && ! config('app.is_testing')
+    // Email sending paused on the account (AudienceMailGuard) stops the digest whatever the
+    // audience's size, so it is said as itself, not as a verification the owner cannot fix.
+    $embedMailPaused = \App\Services\AudienceMailGuard::mailPausedForDisplay($role, auth()->user());
+    $embedNeedsVerification = ! $embedMailPaused && config('app.hosted') && ! config('app.is_testing')
         && ! $role->canSendAudienceMail($embedAudienceLimit + 1);
 @endphp
 <div id="embed-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -96,7 +99,7 @@
                                 </div>
                             </div>
 
-                            @if ($embedAnnouncementsOff || $embedNeedsVerification)
+                            @if ($embedAnnouncementsOff || $embedNeedsVerification || $embedMailPaused)
                             <div data-embed-for="subscribe" hidden class="mb-4 space-y-3">
                                 @if ($embedAnnouncementsOff)
                                 <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
@@ -108,6 +111,21 @@
                                             <p class="font-medium">{{ __('messages.embed_subscribe_announcements_off') }}</p>
                                             <p class="mt-1">
                                                 <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#settings-tab-notifications" class="underline font-medium">{{ __('messages.embed_subscribe_turn_on_announcements') }}</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                                @if ($embedMailPaused)
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <div class="flex">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <div class="ms-3 text-sm text-amber-700 dark:text-amber-300">
+                                            <p class="font-medium">{{ __('messages.mail_paused_owner_title') }}</p>
+                                            <p class="mt-1">
+                                                <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="underline font-medium">{{ __('messages.mail_access_request') }}</a>
                                             </p>
                                         </div>
                                     </div>

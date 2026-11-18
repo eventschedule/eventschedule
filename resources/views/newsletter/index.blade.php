@@ -18,6 +18,14 @@
         </div>
         @else
         @include('newsletter.partials._verification-warning')
+        @include('newsletter.partials._mail-guard')
+
+        @if ($newsletters instanceof \Illuminate\Pagination\AbstractPaginator && collect($newsletters->items())->contains('status', 'review'))
+        {{-- A newsletter waiting for a quick review (AudienceMailGuard). --}}
+        <x-page-notice tone="info" class="news-notice" :title="__('messages.newsletter_in_review_title')">
+            {{ __('messages.newsletter_in_review_body') }}
+        </x-page-notice>
+        @endif
 
         <div class="page-head">
             <p class="page-lead">{{ __('messages.newsletters_list_lead') }}</p>
@@ -29,7 +37,7 @@
             $roleParam = \App\Utils\UrlUtils::encodeId($role->id);
             $readerZone = auth()->user()->timezone ?? $role->timezone ?? 'UTC';
             $timeFormat = get_use_24_hour_time($role) ? 'M j, H:i' : 'M j, g:i A';
-            $statusTones = ['scheduled' => 'is-warn', 'sending' => 'is-info', 'sent' => 'is-on'];
+            $statusTones = ['scheduled' => 'is-warn', 'sending' => 'is-info', 'sent' => 'is-on', 'review' => 'is-warn'];
         @endphp
         <div class="ap-card rounded-xl overflow-hidden">
             <table class="page-table is-hover">
@@ -122,7 +130,7 @@
                         <td class="c-num" data-label="{{ __('messages.click_rate') }}">{{ $clicks }}</td>
                         <td class="c-date">{{ $newsletter->created_at->translatedFormat('M j, Y') }}</td>
                         <td class="c-actions">
-                            @if ($newsletter->status === 'draft' || $newsletter->status === 'scheduled')
+                            @if (in_array($newsletter->status, ['draft', 'scheduled', 'review'], true))
                             <a href="{{ route('newsletter.edit', ['hash' => $hash, 'role_id' => $roleParam]) }}" class="event-link">{{ __('messages.edit') }}</a>
                             @endif
                             @if ($wasSent)

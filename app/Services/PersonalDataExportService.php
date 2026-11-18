@@ -42,6 +42,7 @@ class PersonalDataExportService
         'backup_jobs' => 'Job bookkeeping; the archives are the user\'s own downloads.',
         'calendar_exposures' => 'Which of a schedule\'s events look like a private calendar to the operator\'s check (CalendarExposureWatch): kinds and a hash, no text. Bookkeeping about the schedule\'s own events, deleted with the event.',
         'calendar_exposure_reviews' => 'An operator\'s decisions about a schedule that looked like a private calendar (hidden, paused, told, reviewed). About the schedule, not something the person gave, and deleted with the schedule.',
+        'payment_fingerprints' => 'Stripe\'s fingerprint of the card used at each plan checkout (never the card number), kept to see one card on several accounts (AudienceMailGuard). An operator\'s anti-abuse record, not something the person gave in a readable form; when the account is deleted only a one-way hash is kept, for 12 months (AccountDeletionService, PrunePersonalData).',
         'spam_clearances' => 'An operator\'s decision that an account a watched word turned up for is not spam (SpamWatch). It is about the account, not something the person gave, and it is deleted with the account.',
         'calendar_syncs' => 'Which event maps to which calendar entry; covered by the calendar_connections summary.',
         'microsoft_calendar_syncs' => 'Same, for Outlook.',

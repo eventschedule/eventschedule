@@ -351,6 +351,8 @@ class HelpUtils
         'admin/domains*' => '/docs/saas/custom-domains#admin-management',
         'admin/referrals*' => '/docs/selfhost/admin#manage-referrals',
         'admin/newsletter*' => '/docs/selfhost/admin#manage-newsletters',
+        // Hosted only: what the owner is told about a held newsletter and paused email.
+        'admin/mail-review*' => '/docs/newsletters#review',
         'admin/blog*' => '/docs/selfhost/admin#manage-blog',
         'admin/audit-log*' => '/docs/selfhost/admin#system-audit-log',
         'admin/queue*' => '/docs/selfhost/admin#system-queue',

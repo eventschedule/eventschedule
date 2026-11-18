@@ -4972,6 +4972,9 @@ class Role extends Model implements MustVerifyEmail
     {
         // Selfhost runs the operator's own mail server, and the test env has no reputation to
         // protect. Matches the existing gates, which both short-circuit on the same two.
+        // A paused account (AudienceMailGuard) is NOT asked here: this gate also guards the
+        // notices people asked for about one event (EventChangeNotifier, SendEventInterestMail),
+        // which a pause must never stop. Newsletters and announcements ask mailPaused() themselves.
         if (! config('app.hosted') || config('app.is_testing')) {
             return true;
         }
@@ -4997,7 +5000,38 @@ class Role extends Model implements MustVerifyEmail
         return $recipients > 0 && $recipients <= $limit;
     }
 
+    /**
+     * May this schedule mail addresses nobody gave it themselves (an import, or typed into a
+     * segment by hand)? On the hosted install, through the platform's mail, only once the owner
+     * has paid. AudienceMailGuard holds the rule.
+     */
+    public function mayMailUnsolicitedAudience(): bool
+    {
+        return \App\Services\AudienceMailGuard::mayMailUnsolicited($this);
+    }
+
+    /** Newsletter emails a month on the hosted free plan, and while a paid plan is on a trial. */
+    public const FREE_NEWSLETTER_LIMIT = 10;
+
     public function newsletterLimit(): ?int
+    {
+        if (! config('app.hosted') || $this->hasEmailSettings()) {
+            return null;
+        }
+
+        // A trial gives the plan's features, not its mail: until the first payment the allowance
+        // is the free plan's (decided 2026-11-18, after a trial account mailed a phishing list
+        // through the platform's sender). Ending the trial early (SubscriptionController::
+        // endTrial()) lifts it.
+        if ($this->onSubscriptionTrial()) {
+            return self::FREE_NEWSLETTER_LIMIT;
+        }
+
+        return $this->planNewsletterLimit();
+    }
+
+    /** What the plan sends a month once it is paid for: the figure a trial is waiting for. */
+    public function planNewsletterLimit(): ?int
     {
         if (! config('app.hosted') || $this->hasEmailSettings()) {
             return null;
@@ -5013,7 +5047,35 @@ class Role extends Model implements MustVerifyEmail
             return 100;
         }
 
-        return 10;
+        return self::FREE_NEWSLETTER_LIMIT;
+    }
+
+    /**
+     * A Stripe subscription is still inside its trial window, so nothing has been paid for it yet.
+     * Cancelled or not: a cancelled trial runs to its end, and must not keep a plan's allowance
+     * meanwhile. endTrial() asks for an uncancelled one itself.
+     */
+    public function onSubscriptionTrial(): bool
+    {
+        if (! config('app.hosted')) {
+            return false;
+        }
+
+        $subscription = $this->subscription('default');
+
+        return $subscription && $subscription->onTrial();
+    }
+
+    /** A trial that can be ended early and paid for now: running and not cancelled. */
+    public function canEndTrial(): bool
+    {
+        if (! config('app.hosted')) {
+            return false;
+        }
+
+        $subscription = $this->subscription('default');
+
+        return $subscription && $subscription->onTrial() && ! $subscription->canceled();
     }
 
     public function newslettersSentThisMonth(): int
@@ -5024,15 +5086,16 @@ class Role extends Model implements MustVerifyEmail
             ->where('sent_at', '>=', now()->startOfMonth())
             ->sum('sent_count');
 
-        // Count emails from currently sending newsletters via recipient records
-        $sendingEmails = (int) NewsletterRecipient::whereIn('newsletter_id',
-            $this->newsletters()
-                ->where('status', 'sending')
-                ->where('updated_at', '>=', now()->startOfMonth())
-                ->select('id')
-        )->whereIn('status', ['pending', 'sent'])->count();
+        // Every other newsletter's recipients, by each row's own status (sent, pending or failed),
+        // whatever became of the newsletter: one deleted after it went out ('cancelled') still
+        // spent the allowance, or deleting and sending again would refill it.
+        $otherEmails = \App\Services\AudienceMailGuard::recipientRowsSince(
+            fn ($q) => $q->where('newsletters.role_id', $this->id),
+            now()->startOfMonth(),
+            exceptSentNewsletters: true,
+        )->count();
 
-        return $sentEmails + $sendingEmails;
+        return $sentEmails + $otherEmails;
     }
 
     public function canSendNewsletter(): bool
