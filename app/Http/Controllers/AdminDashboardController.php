@@ -111,9 +111,9 @@ class AdminDashboardController extends Controller
      * exact count). Null when the card failed or the tables are not there yet.
      */
     /**
-     * The MRR chart's points: a short month for the axis, the month in full (or Today) for the
-     * tooltip, the amount, and the amount as the page prints money. Sample mode draws a steady
-     * climb that ends on the sample's own MRR.
+     * The MRR chart's points, a week apart over three months: a date for the axis, the date in
+     * full (or Today) for the tooltip, the amount, and the amount as the page prints money.
+     * Sample mode draws a steady climb that ends on the sample's own MRR.
      *
      * @param  list<array{at: Carbon, mrr: float}>|null  $points
      */
@@ -121,16 +121,16 @@ class AdminDashboardController extends Controller
     {
         if ($points === null) {
             $points = [];
-            foreach (range(11, 0) as $back) {
-                $points[] = ['at' => now()->startOfMonth()->subMonthsNoOverflow($back), 'mrr' => round($mrr * (12 - $back) / 12, 2)];
+            foreach (range(13, 0) as $back) {
+                $points[] = ['at' => now()->subWeeks($back), 'mrr' => round($mrr * (20 - $back) / 20, 2)];
             }
         }
 
         $last = count($points) - 1;
 
         return [
-            'labels' => array_map(fn ($point) => $point['at']->translatedFormat('M'), $points),
-            'titles' => array_map(fn ($point, $index) => $index === $last ? __('messages.today') : $point['at']->translatedFormat('F Y'), $points, array_keys($points)),
+            'labels' => array_map(fn ($point) => $point['at']->translatedFormat('M j'), $points),
+            'titles' => array_map(fn ($point, $index) => $index === $last ? __('messages.today') : $point['at']->translatedFormat('M j, Y'), $points, array_keys($points)),
             'values' => array_map(fn ($point) => (float) $point['mrr'], $points),
             'formatted' => array_map(fn ($point) => plan_price($point['mrr']), $points),
             // How the platform's currency prints a whole amount, for the axis: the page puts each

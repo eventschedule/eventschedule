@@ -439,7 +439,7 @@ class AdminDashboardPageTest extends TestCase
 
     /**
      * The top of the page is four panels: Visitors, Revenue, Sign-ups and Active users, the last
-     * two moved out of the Now and Revenue cards (2026-11), and Revenue draws MRR over the last 12
+     * two moved out of the Now and Revenue cards (2026-11), and Revenue draws MRR over the last three
      * months, ending on the figure it prints. Selfhost has no billing, so Visitors and Sign-ups
      * only. Mutation: leave the series out of the revenue answer, or the panels out of the page.
      */
@@ -456,8 +456,9 @@ class AdminDashboardPageTest extends TestCase
 
         $answer = $this->revenue()->assertOk()->json();
         $history = $answer['mrr_history'];
-        $this->assertCount(12, $history['labels']);
-        $this->assertCount(12, $history['values']);
+        // A week apart over three months, and now.
+        $this->assertCount(14, $history['labels']);
+        $this->assertCount(14, $history['values']);
         $this->assertSame($answer['mrr'], end($history['formatted']));
         $this->assertSame(__('messages.today'), end($history['titles']));
         $this->assertSame(plan_price(7), $history['axis']);

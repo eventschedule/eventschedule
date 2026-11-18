@@ -533,7 +533,7 @@
                 mrrSummary: function () {
                     var h = this.revenue && this.revenue.mrr_history;
                     if (!h || !h.formatted.length) return 'MRR';
-                    return 'MRR, ' + this.msg.last12Months + ': ' + h.titles[0] + ' ' + h.formatted[0] + ', ' + h.titles[h.titles.length - 1] + ' ' + h.formatted[h.formatted.length - 1];
+                    return 'MRR, ' + this.msg.last3Months + ': ' + h.titles[0] + ' ' + h.formatted[0] + ', ' + h.titles[h.titles.length - 1] + ' ' + h.formatted[h.formatted.length - 1];
                 },
             },
 

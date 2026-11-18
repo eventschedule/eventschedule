@@ -355,23 +355,24 @@ class RecurringRevenueTest extends TestCase
         $dated($this->subscribe($this->schedule(), 'price_pro_y'), ['created_at' => '2026-09-20 00:00:00', 'trial_ends_at' => '2026-10-04 00:00:00']);
         // A trial cancelled before it ended never billed.
         $dated($this->subscribe($this->schedule(), 'price_ent_m', 'canceled'), ['created_at' => '2026-04-01 00:00:00', 'trial_ends_at' => '2026-04-15 00:00:00', 'ends_at' => '2026-04-15 00:00:00']);
-        // A schedule since deleted, cancelled: counted for the months it billed (May to July).
-        $dated($this->subscribe($this->schedule(['is_deleted' => true]), 'price_pro_m', 'canceled'), ['created_at' => '2026-05-01 00:00:00', 'ends_at' => '2026-08-01 00:00:00']);
+        // A schedule since deleted, cancelled: counted for the weeks it billed (August).
+        $dated($this->subscribe($this->schedule(['is_deleted' => true]), 'price_pro_m', 'canceled'), ['created_at' => '2026-08-01 00:00:00', 'ends_at' => '2026-08-30 00:00:00']);
         // A deleted schedule with a live subscription is an orphan, never revenue.
         $dated($this->subscribe($this->schedule(['is_deleted' => true]), 'price_ent_m'), ['created_at' => '2026-01-05 00:00:00']);
 
         $history = RecurringRevenue::history();
 
-        $this->assertCount(12, $history);
+        // A week apart over 13 weeks (three months), and now.
+        $this->assertCount(14, $history);
         $this->assertSame(
-            ['2025-12-31', '2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30', '2026-05-31', '2026-06-30', '2026-07-31', '2026-08-31', '2026-09-30', '2026-10-31', '2026-11-18'],
+            ['2026-08-19', '2026-08-26', '2026-09-02', '2026-09-09', '2026-09-16', '2026-09-23', '2026-09-30', '2026-10-07', '2026-10-14', '2026-10-21', '2026-10-28', '2026-11-04', '2026-11-11', '2026-11-18'],
             array_map(fn ($point) => $point['at']->toDateString(), $history)
         );
         $this->assertSame(
-            [0.0, 0.0, 0.0, 15.0, 15.0, 20.0, 25.0, 25.0, 20.0, 5.0, 9.17, 9.17],
+            [25.0, 25.0, 20.0, 20.0, 5.0, 5.0, 5.0, 9.17, 9.17, 9.17, 9.17, 9.17, 9.17, 9.17],
             array_column($history, 'mrr')
         );
         // It ends on the live figure.
-        $this->assertSame(RecurringRevenue::summary()['mrr'], $history[11]['mrr']);
+        $this->assertSame(RecurringRevenue::summary()['mrr'], $history[13]['mrr']);
     }
 }

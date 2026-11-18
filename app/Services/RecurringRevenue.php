@@ -282,8 +282,8 @@ class RecurringRevenue
     }
 
     /**
-     * MRR at the end of each of the last $months - 1 months and now, oldest first, for the
-     * dashboard's chart. Nothing records MRR as it happens, so the past is REBUILT from each
+     * MRR a week apart over the last $weeks weeks (13 is three months), and now, oldest first,
+     * for the dashboard's chart. Nothing records MRR as it happens, so the past is REBUILT from each
      * subscription's own dates: it bills from its start (after its trial, if it had one) until it
      * ended, at the price it is on today. A price change, or a renewal Stripe gave up on before
      * the subscription was cancelled, is not in it, so the past is an estimate and the page says
@@ -296,7 +296,7 @@ class RecurringRevenue
      *
      * @return list<array{at: Carbon, mrr: float}>
      */
-    public static function history(int $months = 12, ?Carbon $now = null, ?float $current = null): array
+    public static function history(int $weeks = 13, ?Carbon $now = null, ?float $current = null): array
     {
         $now ??= now();
 
@@ -334,8 +334,8 @@ class RecurringRevenue
         }
 
         $points = [];
-        for ($back = $months - 1; $back >= 1; $back--) {
-            $at = $now->copy()->startOfMonth()->subMonthsNoOverflow($back - 1)->subSecond();
+        for ($back = $weeks; $back >= 1; $back--) {
+            $at = $now->copy()->subWeeks($back);
             $time = $at->getTimestamp();
             $cents = 0;
 

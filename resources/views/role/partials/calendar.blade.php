@@ -117,7 +117,14 @@
         $uniqueCategoryIds = array_unique($eventCategoryIds);
         $hasOnlineEvents = collect($events)->contains(fn($event) => !empty($event->event_url));
 
-        $displayLang = isset($role) ? $role->displayLanguageCode() : 'en';
+        // The language the names are shown in. On a guest page, the one the visitor is reading
+        // (displayLanguageCode(), which follows ?lang= and the session's translate flag). In the
+        // admin portal and on the dashboard, always the schedule's own: the translate flag is the
+        // session's, not the schedule's, so a member who once read another schedule in English saw
+        // their own Hebrew schedule's events under the English the AI import had stored (2026-11-18).
+        $displayLang = isset($role)
+            ? ($route === 'guest' ? $role->displayLanguageCode() : ($role->language_code ?: 'en'))
+            : 'en';
 
         $eventToVueArray = function($event) use ($role, $subdomain, $route, $displayLang) {
             $groupId = isset($role) ? $event->getGroupIdForSubdomain($role->subdomain) : null;

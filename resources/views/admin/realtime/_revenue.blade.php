@@ -41,8 +41,13 @@
                 <p class="mt-1 dashboard-stat-value text-2xl font-bold leading-7 text-gray-900 dark:text-white"><span dir="ltr">+@{{ revenue.trial_mrr }}</span></p>
                 {{-- The same pair as the paying box beside it: what the trials would add a month,
                      and a year. --}}
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ msg.ifConvert }}</p>
-                <p v-if="revenue.trial_arr" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">ARR <span dir="ltr">+@{{ revenue.trial_arr }}</span></p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <span class="whitespace-nowrap">MRR</span>
+                    <template v-if="revenue.trial_arr">
+                        <span class="mx-1" aria-hidden="true">&middot;</span>
+                        <span class="whitespace-nowrap">ARR <span dir="ltr">+@{{ revenue.trial_arr }}</span></span>
+                    </template>
+                </p>
             </div>
         </div>
 
@@ -54,14 +59,14 @@
         </p>
     </template>
 
-    {{-- MRR at the end of each month and now (RecurringRevenue::history()). The months before
+    {{-- MRR a week apart over three months, and now (RecurringRevenue::history()). The weeks before
          this one are rebuilt from each subscription's dates at today's prices, which the line
          under the chart says. It takes what height the card has left beside the Visitors panel
          and never sets it: the canvas sits in a box of its own. --}}
     <div v-if="revenue && revenue.mrr_history" class="flex-1 flex flex-col px-4 sm:px-5 pt-3 pb-4" style="border-top: 1px solid var(--ap-hairline)">
         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white">MRR</h3>
-            <span class="text-xs text-gray-500 dark:text-gray-400">@{{ msg.last12Months }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">@{{ msg.last3Months }}</span>
         </div>
         <div class="relative flex-1 mt-2" style="min-height: 6rem">
             <div class="absolute inset-0"><canvas ref="mrrChart" role="img" :aria-label="mrrSummary"></canvas></div>

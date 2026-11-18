@@ -149,7 +149,6 @@
                 'details' => __('messages.details'),
                 'paying' => __('messages.admin_dash_paying'),
                 'inTrial' => __('messages.admin_dash_in_trial'),
-                'ifConvert' => __('messages.admin_dash_if_convert'),
                 'atRisk' => __('messages.admin_dash_at_risk'),
                 // :label is what fill() swaps for the amount.
                 'ofMrr' => __('messages.admin_dash_of_mrr', ['amount' => ':label']),
@@ -157,7 +156,7 @@
                 // The active users chart in the Revenue card (hosted).
                 'activeUsers' => __('messages.active_users_7_days'),
                 'last12Weeks' => __('messages.admin_dash_last_12_weeks'),
-                'last12Months' => __('messages.admin_dash_last_12_months'),
+                'last3Months' => __('messages.admin_dash_last_3_months'),
                 'mrrRebuilt' => __('messages.admin_dash_mrr_rebuilt'),
                 'organizers' => __('messages.admin_dash_organizers'),
                 'countOfTotal' => __('messages.admin_dash_count_of_total', ['count' => ':count', 'total' => ':total']),

@@ -21,7 +21,14 @@ trait CalendarDataTrait
         // The language the visitor is reading, resolved once. Event text is then selected BY
         // language rather than by a "show the translation" boolean, which inverts for aggregated
         // events whose own language pair differs from this schedule's - see Event::textInLanguage().
-        $displayLang = $displayLang ?: ($role ? $role->displayLanguageCode() : 'en');
+        //
+        // Outside a guest page (the admin portal, the dashboard) the event is shown as written: the
+        // schedule's own language, or the event's where there is no schedule. displayLanguageCode()
+        // follows the session's translate flag, which is the person's and not the schedule's, and
+        // the dashboard's 'en' showed a Hebrew event under its English copy (2026-11-18).
+        $displayLang = $guestView
+            ? ($displayLang ?: ($role ? $role->displayLanguageCode() : 'en'))
+            : ($role?->language_code ?: $event->getLanguageCode());
         $eventName = $event->nameInLanguage($displayLang, $role);
         $shortDescription = $event->shortDescriptionInLanguage($displayLang, $role);
         $venueName = $event->getVenueDisplayName(true, $displayLang);

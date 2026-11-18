@@ -5513,7 +5513,10 @@ class Event extends Model
             }
         }
 
-        if ($translated && $this->getTranslationLanguageCode() === $want) {
+        // Never a "translation" into the language the event is written in. A schedule whose second
+        // language is set to its own (Hebrew to Hebrew) still has the English copy an AI import
+        // stored in the _en column, and served it as the Hebrew one (2026-11-18).
+        if ($translated && $this->getTranslationLanguageCode() === $want && $this->getLanguageCode() !== $want) {
             return $translated;
         }
 
