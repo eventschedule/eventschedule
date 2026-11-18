@@ -8,6 +8,7 @@ use App\Jobs\SendQueuedSms;
 use App\Jobs\SyncEventToGoogleCalendar;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
+use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\PromoCode;
@@ -634,7 +635,12 @@ class EventRepo
      * A row that carries an email, a phone or a video is left to make its own schedule, because
      * those are details of a particular person the existing one may not share, and an email sends
      * an invitation. The account-wide merge page (RoleController::sameNameGroups()) groups on the
-     * same key, so what a save reuses and what that page offers to merge agree.
+     * same key, and a group the person marked "Not duplicates" there is two different people, so
+     * nothing is reused for that name: the save makes a schedule of its own, as it always did.
+     *
+     * $user is the person who is SAVING, never the owner standing in for an anonymous guest:
+     * a stranger's typed name must not land on the owner's own schedules (saveEvent() passes null
+     * for a guest submission).
      *
      * @param  array<string, mixed>  $member
      */
@@ -652,15 +658,30 @@ class EventRepo
 
         $countryCode = $countryCode ? strtolower($countryCode) : null;
 
-        return Role::where('type', $type)
-            ->where('is_deleted', false)
+        // Deleted rows too, because the merge page's group (and so the hash a dismissal was
+        // stored under) includes them. An empty country is the merge page's key for null as well.
+        $sameName = Role::where('type', $type)
             ->where('name_normalized', $name)
-            ->when($countryCode, fn ($q) => $q->where('country_code', $countryCode), fn ($q) => $q->whereNull('country_code'))
+            ->when(
+                $countryCode,
+                fn ($q) => $q->where('country_code', $countryCode),
+                fn ($q) => $q->where(fn ($q) => $q->whereNull('country_code')->orWhere('country_code', ''))
+            )
             ->whereIn('id', DB::table('role_user')->where('user_id', $user->id)->select('role_id'))
             ->withCount(['events' => fn ($q) => $q->select(DB::raw('count(distinct events.id)'))])
             ->orderBy('events_count', 'desc')
             ->orderBy('id')
-            ->get()
+            ->get();
+
+        if ($sameName->count() > 1 && DismissedVenueMergeSuggestion::where('user_id', $user->id)
+            ->whereNull('role_id')
+            ->where('venue_ids_hash', DismissedVenueMergeSuggestion::hashForVenueIds($sameName->pluck('id')->all()))
+            ->exists()) {
+            return null;
+        }
+
+        return $sameName
+            ->where('is_deleted', false)
             ->first(fn (Role $role) => $role->isEditableBy($user));
     }
 
@@ -1054,16 +1075,21 @@ class EventRepo
 
         $roles = [];
         $roleIds = [];
+        $reusedMemberIds = [];
 
         if ($request->members) {
             foreach ($request->members as $memberId => $member) {
                 $isNewMember = ! $memberId || strpos($memberId, 'new_') === 0;
                 $existingParticipant = $isNewMember
-                    ? $this->existingParticipantNamed($member, $request->role_type ?: 'talent', $request->country_code ?: $currentRole?->country_code, $user)
+                    ? $this->existingParticipantNamed($member, $request->role_type ?: 'talent', $request->country_code ?: $currentRole?->country_code, $isGuestSubmission ? null : $user)
                     : null;
 
                 if ($existingParticipant) {
                     $role = $existingParticipant;
+                    // Counted as submitted by the later passes that keep what the form posted,
+                    // which read only real ids off the request: an attached schedule typed in
+                    // again as "Someone new" on an edit would otherwise be taken off the event.
+                    $reusedMemberIds[] = $role->id;
                 } elseif ($isNewMember) {
                     $role = new Role;
                     $role->name = $member['name'];
@@ -1899,6 +1925,7 @@ class EventRepo
                 }
                 $submittedMemberRoleIds[] = UrlUtils::decodeId($memberId);
             }
+            $submittedMemberRoleIds = array_merge($submittedMemberRoleIds, $reusedMemberIds);
             $previousTalentIds = $event->roles()
                 ->where('roles.type', 'talent')
                 ->pluck('roles.id')
@@ -1967,6 +1994,7 @@ class EventRepo
                     $ownMemberIds[] = UrlUtils::decodeId($memberId);
                 }
             }
+            $ownMemberIds = array_merge($ownMemberIds, $reusedMemberIds);
         }
 
         if ($currentRole && ! empty($existingAttachedIds)) {

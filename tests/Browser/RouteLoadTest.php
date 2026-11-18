@@ -277,6 +277,7 @@ class RouteLoadTest extends DuskTestCase
                 '/settings',
                 '/following',
                 '/following/merge-venues',
+                '/following/merge-participants',
                 '/tickets',
                 '/sales',
                 '/analytics',

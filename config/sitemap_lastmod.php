@@ -43,7 +43,7 @@ return [
     '/docs/analytics' => '2026-11-11',
     '/docs/appointments' => '2026-10-23',
     '/docs/boost' => '2026-10-23',
-    '/docs/creating-events' => '2026-11-12',
+    '/docs/creating-events' => '2026-11-18',
     '/docs/creating-schedules' => '2026-11-18',
     '/docs/developer/api' => '2026-11-12',
     '/docs/developer/webhooks' => '2026-10-23',

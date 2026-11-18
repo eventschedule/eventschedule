@@ -6827,7 +6827,7 @@ return [
     'merge_venues_events_label' => 'Eventos: :count',
     'merge_venues_upcoming_events_label' => 'Próximos eventos aquí: :count',
     'merge_participants_title' => 'Combinar participantes duplicados',
-    'merge_participants_intro_all' => 'Estos calendarios de participantes parecen duplicados entre sí. Elige el que quieres conservar en cada grupo y combínalos.',
+    'merge_participants_intro_all' => 'Estas programaciones de participantes parecen duplicadas entre sí. Elige cuál conservar en cada grupo y combínalas.',
     'merge_participants_empty_state_all' => 'No se encontraron participantes duplicados.',
     'merge_participants_summary_counts' => 'Participantes a combinar: :venues. Eventos a mover: :events.',
     'merge_participants_preview_summary' => 'Mover :events eventos de :sources participantes a :target (:overlap ya en :target). ¿Continuar?',

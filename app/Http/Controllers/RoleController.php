@@ -1710,44 +1710,69 @@ class RoleController extends Controller
      * @param  array<int, string>  $dismissedHashes
      * @return array<int, array<int, Role>>
      */
-    private function mergeableGroups(array $candidateGroups, array $dismissedHashes, \Illuminate\Support\Collection $levelsByRoleId): array
+    private function mergeableGroups(array $candidateGroups, array $dismissedHashes, Collection $levelsByRoleId): array
     {
+        // Which candidates somebody runs, in one query: Role::hasRealOwner() for the lot. "Nobody
+        // runs it" is that, never ! isClaimed() alone, which reads an owned schedule whose
+        // address is unverified as a placeholder (canMergeRoles() would then refuse every merge
+        // the page offered, and the Following notice would never clear).
+        $candidateIds = collect($candidateGroups)->flatten(1)->pluck('id')->all();
+        $runIds = empty($candidateIds) ? [] : DB::table('roles')
+            ->join('role_user', function ($join) {
+                $join->on('role_user.role_id', '=', 'roles.id')->on('role_user.user_id', '=', 'roles.user_id');
+            })
+            ->whereIn('roles.id', $candidateIds)
+            ->whereIn('role_user.level', ['owner', 'admin'])
+            ->pluck('roles.id')
+            ->all();
+
+        // Mirrors isEditableBy() in memory: owner or admin always, a follower only where nobody
+        // runs it. Deciding what to DISPLAY is all this does - mergeMyDuplicatesGroup() still
+        // runs the real canMergeRoles() per pair on re-fetched rows.
+        $editable = fn (Role $role) => in_array($levelsByRoleId[$role->id] ?? null, ['owner', 'admin'], true)
+            || (($levelsByRoleId[$role->id] ?? null) === 'follower' && ! $role->isClaimed() && ! in_array($role->id, $runIds));
+
         $groups = [];
 
         foreach ($candidateGroups as $group) {
-            $ids = array_map(fn ($v) => $v->id, $group);
-            $hash = DismissedVenueMergeSuggestion::hashForVenueIds($ids);
+            // A dismissal is stored against the WHOLE group, as it always was, so one made before
+            // the page narrowed its groups still holds, and a save can find it from the name
+            // alone (EventRepo::existingParticipantNamed()).
+            $fullHash = DismissedVenueMergeSuggestion::hashForVenueIds(array_map(fn ($v) => $v->id, $group));
 
-            if (in_array($hash, $dismissedHashes, true)) {
+            if (in_array($fullHash, $dismissedHashes, true)) {
                 continue;
             }
 
-            // A group needs a legal target: isEditableBy only grants a follower rights on an
-            // UNCLAIMED venue, so a group whose only viable survivor is someone else's claimed
-            // venue can never be merged. Showing it would just be a button that always fails.
-            //
-            // Mirrors canMergeRoles + isEditableBy in memory. Deciding what to DISPLAY is all
-            // this does - mergeMyVenuesGroup() still runs the real canMergeRoles() per pair on
-            // re-fetched rows, so that stays the authority at the mutation point.
-            $target = VenueUtils::pickBest($group);
-            $editable = fn (Role $venue) => in_array($levelsByRoleId[$venue->id] ?? null, ['owner', 'admin'], true)
-                || (! $venue->isClaimed() && ($levelsByRoleId[$venue->id] ?? null) === 'follower');
+            // Only what can be merged is offered: the target among the schedules this person may
+            // edit, and every one of those nobody has claimed. Someone else's real page that they
+            // follow stays off the group rather than taking the group down with it - picked as
+            // the target (it wins pickBest()), it used to hide the copies the page is for.
+            $offerable = array_values(array_filter($group, $editable));
 
-            $mergeable = $editable($target)
-                ? collect($group)->filter(fn (Role $source) => $source->id !== $target->id
-                    && ! $source->isClaimed()
-                    && $editable($source))->values()
-                : collect();
-
-            if ($mergeable->isEmpty()) {
+            if (count($offerable) < 2) {
                 continue;
             }
 
-            foreach ($group as $venue) {
-                $venue->ids_hash = $hash;
+            $target = VenueUtils::pickBest($offerable);
+            $shown = array_values(array_filter($offerable, fn (Role $role) => $role->id === $target->id || ! $role->isClaimed()));
+
+            if (count($shown) < 2) {
+                continue;
             }
 
-            $groups[] = $group;
+            $shownHash = DismissedVenueMergeSuggestion::hashForVenueIds(array_map(fn ($v) => $v->id, $shown));
+
+            if (in_array($shownHash, $dismissedHashes, true)) {
+                continue;
+            }
+
+            foreach ($shown as $role) {
+                $role->ids_hash = $shownHash;
+                $role->dismiss_hash = $fullHash;
+            }
+
+            $groups[] = $shown;
         }
 
         return $groups;
@@ -1993,7 +2018,7 @@ class RoleController extends Controller
         DismissedVenueMergeSuggestion::firstOrCreate([
             'user_id' => auth()->user()->id,
             'role_id' => null,
-            'venue_ids_hash' => DismissedVenueMergeSuggestion::hashForVenueIds($venueIds),
+            'venue_ids_hash' => $group[0]->dismiss_hash,
         ]);
 
         return redirect()->route(self::myMergeRoute($type));
@@ -2026,6 +2051,8 @@ class RoleController extends Controller
             return mb_substr($local, 0, 1).str_repeat('*', 3).'@'.$head.str_repeat('*', 3)
                 .(str_contains($domain, '.') ? mb_substr($domain, mb_strrpos($domain, '.')) : '');
         }
+        // The whole group's hash (mergeableGroups()), not the posted ids': the page shows only
+        // what can be merged, and "Not duplicates" is about every schedule of that name.
 
         // The tail is capped at a third of the value, so a short one cannot come back unmasked:
         // without this, anything three characters or fewer was returned verbatim.

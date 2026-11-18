@@ -309,6 +309,7 @@ class RouteLoadTest extends TestCase
             '/settings',
             '/following',
             '/following/merge-venues',
+            '/following/merge-participants',
             '/tickets',
             '/my-carpools',
             '/sales',

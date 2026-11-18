@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Role;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\Feature\Characterization\Concerns\SavesEventsOverHttp;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -74,15 +75,116 @@ class ParticipantDuplicatesTest extends TestCase
     public function test_the_same_name_twice_in_one_save_is_one_participant(): void
     {
         [$owner, $curator] = $this->curator();
-        $this->stubTalent('Bobcats');
-        $this->followRole($owner, Role::where('name', 'Bobcats')->first());
 
+        // Nothing by that name yet: the first row makes the schedule, the second lands on it.
         $this->postCreateEvent($owner, $curator, [
             'members' => ['new_a' => ['name' => 'Bobcats'], 'new_b' => ['name' => 'Bobcats']],
         ])->assertRedirect();
 
-        $this->assertSame(1, Role::where('type', 'talent')->where('name', 'Bobcats')->count());
-        $this->assertSame(1, $this->latestEvent()->roles->where('type', 'talent')->count());
+        $bobcats = Role::where('type', 'talent')->where('name', 'Bobcats')->get();
+        $this->assertCount(1, $bobcats);
+        $this->assertSame(1, DB::table('event_role')
+            ->where('event_id', $this->latestEvent()->id)
+            ->where('role_id', $bobcats[0]->id)
+            ->count());
+    }
+
+    public function test_an_anonymous_guest_submission_does_not_land_on_the_owners_schedules(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator', [
+            'country_code' => 'us',
+            'accept_requests' => true,
+            'require_account' => false,
+        ]);
+        $placeholder = $this->stubTalent('Childress Lady Cats');
+        $this->followRole($owner, $placeholder);
+
+        $this->postJson(route('event.guest_import.store', ['subdomain' => $curator->subdomain]), [
+            'name' => 'Stranger Game',
+            'starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+            'duration' => 2,
+            'members' => ['new_talent_0' => ['name' => 'Childress Lady Cats']],
+        ])->assertOk();
+
+        $event = \App\Models\Event::where('name', 'Stranger Game')->firstOrFail();
+        $this->assertTrue($event->is_guest_submission);
+        $this->assertFalse($event->roles->contains('id', $placeholder->id));
+    }
+
+    public function test_a_name_marked_not_duplicates_is_not_reused(): void
+    {
+        [$owner, $curator] = $this->curator();
+        $a = $this->stubTalent('DJ Sam');
+        $b = $this->stubTalent('DJ Sam');
+        $this->followRole($owner, $a);
+        $this->followRole($owner, $b);
+
+        $this->actingAs($owner)->post(route('following.merge_participants_dismiss'), [
+            'venue_ids' => [UrlUtils::encodeId($a->id), UrlUtils::encodeId($b->id)],
+        ])->assertRedirect();
+
+        $this->addGame($owner, $curator, ['name' => 'DJ Sam']);
+
+        $this->assertSame(3, Role::where('type', 'talent')->where('name', 'DJ Sam')->count());
+        $this->assertFalse($this->latestEvent()->roles->contains('id', $a->id));
+        $this->assertFalse($this->latestEvent()->roles->contains('id', $b->id));
+    }
+
+    public function test_a_placeholder_in_another_country_is_not_reused(): void
+    {
+        [$owner, $curator] = $this->curator();
+        $elsewhere = $this->stubTalent('Lions', ['country_code' => 'ca']);
+        $this->followRole($owner, $elsewhere);
+
+        $this->addGame($owner, $curator, ['name' => 'Lions']);
+
+        $this->assertFalse($this->latestEvent()->roles->contains('id', $elsewhere->id));
+    }
+
+    public function test_with_no_country_on_either_side_the_name_is_enough(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator', ['country_code' => null]);
+        $placeholder = $this->stubTalent('Lions', ['country_code' => null]);
+        $this->followRole($owner, $placeholder);
+
+        $this->addGame($owner, $curator, ['name' => 'Lions']);
+
+        $this->assertTrue($this->latestEvent()->roles->contains('id', $placeholder->id));
+    }
+
+    public function test_a_deleted_placeholder_is_not_reused(): void
+    {
+        [$owner, $curator] = $this->curator();
+        $gone = $this->stubTalent('Lions', ['is_deleted' => true]);
+        $this->followRole($owner, $gone);
+
+        $this->addGame($owner, $curator, ['name' => 'Lions']);
+
+        $this->assertFalse($this->latestEvent()->roles->contains('id', $gone->id));
+        $this->assertSame(1, Role::where('name', 'Lions')->where('is_deleted', false)->count());
+    }
+
+    public function test_retyping_an_attached_participant_on_an_edit_keeps_it_on_the_event(): void
+    {
+        [$owner, $curator] = $this->curator();
+        $band = $this->createRole($owner, 'talent', ['name' => 'My Band', 'country_code' => 'us']);
+
+        $this->postCreateEvent($owner, $curator, [
+            'members' => [UrlUtils::encodeId($band->id) => ['name' => 'My Band']],
+        ])->assertRedirect();
+        $event = $this->latestEvent();
+        $this->assertTrue($event->roles->contains('id', $band->id));
+
+        // The chip removed and the same name typed in again as "Someone new".
+        $this->putUpdateEvent($owner, $curator, $event, [
+            'members_submitted' => 1,
+            'members' => ['new_again' => ['name' => 'My Band']],
+        ])->assertRedirect();
+
+        $this->assertTrue($event->fresh()->roles->contains('id', $band->id));
+        $this->assertSame(1, Role::where('type', 'talent')->where('name', 'My Band')->count());
     }
 
     public function test_a_row_with_an_email_still_makes_its_own_schedule(): void
@@ -152,6 +254,37 @@ class ParticipantDuplicatesTest extends TestCase
             $this->assertDatabaseHas('roles', ['id' => $source->id, 'is_deleted' => true]);
             $this->assertTrue($event->fresh()->roles->contains('id', $target->id));
         }
+        $this->assertSame(0, $this->get(route('following'))->viewData('duplicateParticipantCount'));
+    }
+
+    public function test_a_followed_real_page_does_not_hide_the_copies(): void
+    {
+        [$owner] = $this->curator();
+        $real = $this->createRole($this->createOwner(), 'talent', ['name' => 'The Rovers', 'country_code' => 'us']);
+        $this->followRole($owner, $real);
+        $copyA = $this->stubTalent('The Rovers');
+        $copyB = $this->stubTalent('The Rovers');
+        $this->followRole($owner, $copyA);
+        $this->followRole($owner, $copyB);
+
+        $groups = $this->actingAs($owner)->get(route('following.merge_participants'))->viewData('groups');
+
+        $this->assertCount(1, $groups);
+        $this->assertEqualsCanonicalizing([$copyA->id, $copyB->id], array_map(fn ($r) => $r->id, $groups[0]));
+    }
+
+    public function test_a_page_somebody_runs_is_not_offered_even_when_its_address_is_unverified(): void
+    {
+        [$owner] = $this->curator();
+        // Owned, but the contact is not verified: isClaimed() is false, hasRealOwner() is true.
+        $theirs = $this->createRole($this->createOwner(), 'talent', [
+            'name' => 'The Rovers', 'country_code' => 'us', 'email_verified_at' => null,
+        ]);
+        $this->followRole($owner, $theirs);
+        $this->followRole($owner, $this->stubTalent('The Rovers'));
+
+        $this->actingAs($owner);
+        $this->assertCount(0, $this->get(route('following.merge_participants'))->viewData('groups'));
         $this->assertSame(0, $this->get(route('following'))->viewData('duplicateParticipantCount'));
     }
 

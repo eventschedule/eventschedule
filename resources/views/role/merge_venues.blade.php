@@ -64,8 +64,9 @@
     </x-slot>
 
     @php
-        // One view, two addresses: a curator schedule's own duplicates (/{subdomain}/merge-venues)
-        // and the account's (/following/merge-venues). The way back is named after the page it
+        // One view, three addresses: a curator schedule's own duplicate venues
+        // (/{subdomain}/merge-venues), and the account's venues and participants
+        // (/following/merge-venues, /following/merge-participants). The way back is named after the page it
         // leads to, the schedule or Following, where it used to be a button that said "Back".
         $mergeSubdomain = request()->route('subdomain');
         $mergeRole = $mergeSubdomain ? \App\Models\Role::subdomain($mergeSubdomain)->first() : null;
@@ -278,9 +279,10 @@
                             .replace(':sources', result.body.source_count)
                             .replace(':events', result.body.total_events)
                             .replace(':overlap', result.body.overlap_events)
-                            .replace(/:target/g, result.body.target_name);
+                            // A function, so a name holding "$&" or "$1" is printed as written.
+                            .replace(/:target/g, function () { return result.body.target_name; });
                         if (result.body.target_is_deleted) {
-                            msg += ' ' + reviveSuffixTemplate.replace(/:target/g, result.body.target_name);
+                            msg += ' ' + reviveSuffixTemplate.replace(/:target/g, function () { return result.body.target_name; });
                         }
                         if (confirm(msg)) {
                             form.submit();
