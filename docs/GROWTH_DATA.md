@@ -422,7 +422,7 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `rows` has one entry per CURRENT variant, largest `share` first (a page round keeps the order
     the variants are written in, the control first):
     - `key`, `headline`, `subtitle`, and `is_default` for the control;
-    - `page` (schema 29): `full` for today's homepage, `light` for the light one. A round of
+    - `page` (schema 29): `full` for today's homepage, `new` for the new one. A round of
       headlines is `full` throughout;
     - `saved_schedule`, `saved_event` (schema 29): of the accounts counted in `signups`, how many
       own a schedule (deleted ones included) and how many made an event. Counted over exactly
@@ -448,7 +448,7 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `winner` (`{key, date}`): the locked variant and the day it locked.
   - `reset_at`: the day the counts were last started over from `/admin/growth`, or null.
   - A page round's own fields (schema 29), null or empty for a round of headlines:
-    - `p_light_better`: the chance the light page brings more signups per visitor than today's.
+    - `p_new_better`: the chance the new page brings more signups per visitor than today's.
       Drawn from a seed made of the counts, so the same counts always read the same figure;
     - `started_at`: the first day a current variant was counted since `reset_at`;
     - `looks`: the three dates, 4, 7 and 10 weeks after `started_at`, on which the round is meant
@@ -464,9 +464,9 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     - **A visitor is one browser on one day,** and a visitor without analytics consent is given
       a page afresh on each view and in each new tab, so some people count in both arms. That
       pulls the two arms toward each other.
-    - **The light page sends more visitors on to other pages,** and a signup made from another
-      page is credited only with marketing consent, so its `signups` are understated somewhat
-      more than the other arm's.
+    - **A page that sends more visitors on to other pages has its `signups` understated more,**
+      because a signup made from another page is credited only with marketing consent. The new
+      page links out less than today's (no feature tour), so today's arm is the one understated.
     - **`marketing_pages` is not split by arm.** Its `reached_end` and `signup_clicks` for the
       homepage move while a page round runs, because half the visitors get a page a quarter the
       length.
@@ -698,14 +698,15 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
-- **29** (2026-11-16)
-  - **`hero_test` can hold a page round:** two homepages under one headline. New on the section:
-    `split`, `ended`, `p_light_better`, `started_at`, `looks`, `next_look`, and the phases
-    `fixed` and `ended`. New on each row: `page`, `saved_schedule`, `saved_event`,
-    `schedule_rate`. A page round's rows are not sorted by share.
-  - **The variant keys changed.** `promote_sell`, the one headline since 2026-10-22, is retired;
-    the same headline now runs as `home_full` (today's page) and `home_light`. `promote_sell`
-    stays in `signups.hero_variant` for the accounts that carry it.
+- **29** (2026-11-18)
+  - **`hero_test` can hold a page round:** two homepages, each a variant with its `page`
+    (`full`, today's, or `new`). New on the section: `split`, `ended`, `p_new_better`,
+    `started_at`, `looks`, `next_look`, and the phases `fixed` and `ended`. New on each row:
+    `page`, `saved_schedule`, `saved_event`, `schedule_rate`. A page round's rows are not sorted
+    by share.
+  - **No round is running yet.** `promote_sell` stays the one headline (phase `baseline`). The
+    round waiting to start is `home_today` (today's page) against `home_new` (the new homepage,
+    "Fill the room. Keep the money."), new keys, so that nobody is carried into either arm.
 
 - **28** (2026-11-12)
   - **New section `marketing_pages`:** per marketing page and device (phone or desktop), the

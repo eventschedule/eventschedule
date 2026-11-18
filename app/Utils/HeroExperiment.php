@@ -45,10 +45,10 @@ use Throwable;
  * lang/<locale>/marketing.php). From 2026-10-04 to 2026-10-08 they were built from this copy, and
  * search clicks fell, so a search result no longer follows the default or the winner.
  *
- * A WHOLE-PAGE ROUND (from 2026-11): a variant may name a `page` ('light'; none means 'full',
- * today's homepage). The homepage then prints both middles in one document, the light one hidden,
- * and the same picker puts data-home on #hp before either is parsed, so the pick is still the
- * browser's and the edge still stores one page. A set that names a page is FIXED (isFixed()): the
+ * A WHOLE-PAGE ROUND (from 2026-11): a variant may name a `page` ('new'; none means 'full',
+ * today's homepage). The homepage then prints both pages in one document, the new one hidden, and
+ * the picker, the first thing inside #hp, puts data-home on it before either page is parsed, so
+ * the pick is still the browser's and the edge still stores one page. A set that names a page is FIXED (isFixed()): the
  * traffic is split evenly and nothing is locked by the code, because clicks do not mean the same
  * thing on two pages with different numbers of buttons, and what the round is judged on (a signup
  * that goes on to save a schedule and an event) arrives days after the visit. A person ends it,
@@ -74,10 +74,10 @@ final class HeroExperiment
     /** Rendered by the server while the test runs, and to visitors without JS. */
     public const DEFAULT = 'promote_sell';
 
-    /** The homepage a variant shows: today's, or the light one (marketing/partials/home-light). */
+    /** The homepage a variant shows: today's, or the new one (marketing/partials/home-new). */
     public const PAGE_FULL = 'full';
 
-    public const PAGE_LIGHT = 'light';
+    public const PAGE_NEW = 'new';
 
     /**
      * line1/line2 must each fit the 24-character .es-mask budget (see the h1 in
@@ -90,15 +90,14 @@ final class HeroExperiment
      * the ?hero= sign-up credit keep running, so its numbers carry on as the baseline the next
      * round is measured against. A round with two or more variants starts the test again by itself.
      *
-     * A variant may also carry 'page' => PAGE_LIGHT (see the class docblock).
+     * A variant may also carry 'page' => PAGE_NEW (see the class docblock).
      */
     public const VARIANTS = [
         // The only arm again (a baseline), as from 2026-10-22. The light page round of 2026-11
         // ('home_full' against 'home_light': today's page against a lighter copy of it) never
-        // went live. Before it shipped it was replaced by a round of today's page against a
-        // completely new homepage, which brings new keys of its own, so that nobody is carried
-        // into one of its arms from this baseline. The light page's partial is still in the file
-        // and no variant prints it.
+        // went live: it was replaced by NEW_PAGE_ROUND below, today's page against a completely
+        // new one, which waits here until it is approved. Its keys are new, so that nobody is
+        // carried into one of its arms from this baseline.
         'promote_sell' => [
             'line1' => 'Promote and sell',
             'line2' => 'from your event calendar',
@@ -124,6 +123,30 @@ final class HeroExperiment
         // marketing_experiment_stats and users.hero_variant under their keys; stats() reads only
         // the keys listed here, so re-adding one under the SAME key would resume its history
         // (from the last reset, if there has been one).
+    ];
+
+    /**
+     * The next round, NOT live: today's page against the new homepage, "Keep the money"
+     * (marketing/partials/home-new, designed 2026-11-18). It goes live by becoming VARIANTS, with
+     * DEFAULT set to 'home_today', once its rendered pages have been approved. Until then the tests
+     * run it through useVariants().
+     *
+     * 'home_today' is today's page and headline word for word; 'home_new' is the new page, whose
+     * hero prints this copy, so the rules every variant keeps (24 characters a line, "event
+     * calendar" and bookings in the fold, no paid plan) hold for both heroes.
+     */
+    public const NEW_PAGE_ROUND = [
+        'home_today' => [
+            'line1' => 'Promote and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
+        ],
+        'home_new' => [
+            'line1' => 'Fill the room.',
+            'line2' => 'Keep the money.',
+            'subtitle' => 'A free event calendar of your own. Sell tickets and take bookings with zero platform fees, paid straight into your own account.',
+            'page' => self::PAGE_NEW,
+        ],
     ];
 
     /** Weeks after the round began at which a fixed round is looked at, the last one ending it. */
@@ -234,7 +257,7 @@ final class HeroExperiment
     /** The homepage a variant shows. A variant that names none shows today's. */
     public static function pageOf(string $key): string
     {
-        return (self::variants()[$key]['page'] ?? self::PAGE_FULL) === self::PAGE_LIGHT ? self::PAGE_LIGHT : self::PAGE_FULL;
+        return (self::variants()[$key]['page'] ?? self::PAGE_FULL) === self::PAGE_NEW ? self::PAGE_NEW : self::PAGE_FULL;
     }
 
     /**
@@ -950,9 +973,9 @@ final class HeroExperiment
             usort($rows, fn ($a, $b) => $b['share'] <=> $a['share']);
         }
 
-        // The chance the light page is the better one on signups, where exactly one variant is it.
-        $light = array_values(array_filter(array_keys($state['stats']), fn ($key) => self::pageOf($key) === self::PAGE_LIGHT));
-        $pLight = $fixed && count($light) === 1 && count($state['stats']) > 1 ? $state['p_signups'][$light[0]] : null;
+        // The chance the new page is the better one on signups, where exactly one variant is it.
+        $new = array_values(array_filter(array_keys($state['stats']), fn ($key) => self::pageOf($key) === self::PAGE_NEW));
+        $pNew = $fixed && count($new) === 1 && count($state['stats']) > 1 ? $state['p_signups'][$new[0]] : null;
 
         $started = $fixed ? self::startedAt() : null;
         $looks = [];
@@ -999,7 +1022,7 @@ final class HeroExperiment
             // are null or empty for a round of headlines alone.
             'split' => $fixed ? 'even' : 'adaptive',
             'ended' => $ended,
-            'p_light_better' => $pLight,
+            'p_new_better' => $pNew,
             'started_at' => $started?->toDateString(),
             'looks' => $looks,
             'next_look' => $nextLook,

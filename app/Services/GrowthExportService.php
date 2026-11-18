@@ -720,7 +720,7 @@ class GrowthExportService
                 .'each meta.releases entry date a deploy to its commit where the host sets APP_COMMIT; '
                 .'hero_test.daily splits the headline test by day.',
             'Since schema_version 29, hero_test can hold a page round: two homepages under one headline '
-                .'(rows[].page full or light), split evenly (split even) and ended by a person, never by '
+                .'(rows[].page full or new), split evenly (split even) and ended by a person, never by '
                 .'the code. Its rows carry saved_schedule and saved_event over the same accounts as '
                 .'signups. Decide on signups per visitor at the dates in looks, not on any day between: '
                 .'a visitor is a browser-day, and a visitor without analytics consent is given a page '

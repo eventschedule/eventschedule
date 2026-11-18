@@ -108,12 +108,16 @@
         $hpFontFile = preg_match('~/\* latin \*/.*?url\(([^)]+\.woff2)\)~s', $hpFontCss, $hpFontMatch) ? $hpFontMatch[1] : null;
 
         // Which of the two homepages this document holds (App\Utils\HeroExperiment, a page round).
-        // While the round runs it holds both middles, today's on show and the light one hidden,
-        // and the picker in the hero says which a visitor sees. Once a person has ended it, only
+        // While the round runs it holds both, today's on show and the new one hidden, and the
+        // picker at the top of #hp says which a visitor sees. Once a person has ended it, only
         // the page it was ended on is printed. With no round, or off the nexus: today's alone.
-        $hpLightPage = $hero['page'] === \App\Utils\HeroExperiment::PAGE_LIGHT;
-        $hpShowFull = $hero['both'] || ! $hpLightPage;
-        $hpShowLight = $hero['both'] || $hpLightPage;
+        $hpNewPage = $hero['page'] === \App\Utils\HeroExperiment::PAGE_NEW;
+        $hpShowFull = $hero['both'] || ! $hpNewPage;
+        $hpShowNew = $hero['both'] || $hpNewPage;
+        $hpNewAlone = $hpShowNew && ! $hpShowFull;
+        // The new page's hero prints its own variant's words: the one whose page is new.
+        $hpNewKey = $hpShowNew ? array_search(\App\Utils\HeroExperiment::PAGE_NEW, $hero['pages'], true) : false;
+        $hpNewCopy = $hpNewKey !== false && isset($hero['variants'][$hpNewKey]) ? $hero['variants'][$hpNewKey] : $hero['default'];
     @endphp
 
     {{-- The search result is its own pair of strings and does NOT follow the headline test below.
@@ -2597,12 +2601,12 @@
         {{-- What else lives at the foot of the screen stands on the dock while it is up. --}}
         html.hp-dock-on [data-cookie-consent] { bottom: calc(var(--hp-dock-h, 4.5rem) + 0.75rem); }
 
-        {{-- The light homepage (a page round of App\Utils\HeroExperiment): which of the two
-           middles is on show, and the light one's own look. Here, in the head, so the rules are
-           in force before either middle is parsed; and above "Motion off", which stays the
-           sheet's last block. --}}
-        @if ($hpShowLight)
-            @include('marketing.partials.home-light-styles')
+        {{-- The new homepage (a page round of App\Utils\HeroExperiment): which of the two pages
+           is on show, and the new one's own look. Here, in the head, so the rules are in force
+           before either page is parsed; and above "Motion off", which stays the sheet's last
+           block. --}}
+        @if ($hpShowNew)
+            @include('marketing.partials.home-new-styles')
         @endif
         html.hp-dock-on .es-head-start { display: none !important; }
         {{-- The calculator's footnote, folded to two lines on a phone by the script. --}}
@@ -2781,10 +2785,194 @@
         $claimSuffix = '.' . (str_contains($claimHost, '.') && ! filter_var($claimHost, FILTER_VALIDATE_IP) ? $claimHost : 'eventschedule.com');
     @endphp
 
-    {{-- data-home="light" puts the light homepage on show (partials/home-light-styles). The server
-         prints it only once a page round has been ended on the light page; while one runs, the
-         picker below sets it for the visitors given that page. --}}
-    <div id="hp" @if ($hpLightPage) data-home="light" @endif>
+    {{-- data-home="new" puts the new homepage on show (partials/home-new-styles). The server
+         prints it only once a page round has been ended on the new page; while one runs, the
+         picker, the first thing inside #hp, sets it for the visitors given that page, before
+         either page is parsed. --}}
+    <div id="hp" @if ($hpNewPage) data-home="new" @endif>
+
+    @guest
+        @if ($hero['running'])
+            {{-- Runs before the entrance animations reveal the text, so the swap never
+                 shows. With analytics consent the pick is remembered in sessionStorage
+                 (es_hero, es_hero_clicked) so a visitor sees one headline and is counted
+                 once per session; without it nothing is stored, the headline is picked
+                 afresh on each view, and a view and a click are counted per page view.
+
+                 The pick reaches sign-up on the app host two ways. It rides the link:
+                 ?hero=<key> is added to a sign-up or sign-in link as it is pressed, and
+                 CaptureUtmParameters keeps it in the session, so nothing is stored in the
+                 browser and no consent is needed. And it is copied into the
+                 es_attribution cookie by the layout's attribution script (which reads
+                 window.esHero, and writes the cookie only with marketing consent), which
+                 covers a visitor who signs up from another page. Writing that cookie from
+                 here instead would make the attribution script think it already ran and
+                 lose the landing page and utm_* values.
+
+                 tag() is what puts the pick on the link:
+                 - Only the two app URLs in `targets`, compared whole. A substring match
+                   on /login would also tag a showcase card for a schedule called
+                   "loginlounge", and send its page a query string it has no use for.
+                 - Sign-in as well as sign-up: a social sign-in from there creates
+                   accounts.
+                 - As the link is pressed, not once on load: the links below this script
+                   do not exist yet, and initClaim() (marketing-home.js) rebuilds the
+                   claim button's href from its original each time the visitor types.
+                 - On both events: pointerdown covers a middle click and a long press,
+                   click covers the keyboard and the claim box's Enter, and a phone
+                   keyboard can commit its text between the two.
+                 - In its own listeners: the click-beacon listener stops acting after
+                   the first click.
+                 A PAGE round (a variant with a page, see HeroExperiment): show() puts
+                 data-home on #hp for the pick's page. It runs here, the first thing inside
+                 #hp, before either page is parsed, and the rules that read it are in the
+                 head, so neither page is ever drawn and then taken away. The words of the
+                 pick wait in window.esHeroCopy for today's hero, which sets them as it is
+                 parsed; the new page's hero prints its own. A throw puts #hp back as the
+                 server printed it, which is today's page while a round runs.
+                 ?home=new or ?home=full shows that page to whoever asks, for looking at
+                 it: nothing is picked, stored, beaconed or put on a link, so window.esHero
+                 stays unset and the attribution script credits nothing.
+
+                 These notes are up here so they are not sent to every visitor. --}}
+            <script {!! nonce_attr() !!}>
+                (function () {
+                    try {
+                        var variants = @json($hero['variants']);
+                        var weights = @json($hero['weights']);
+                        var pages = @json($hero['pages']);
+                        var endpoint = @json(url('/marketing/hero'));
+                        var targets = [@json(app_url('/sign_up')), @json(app_url('/login'))];
+                        var param = @json(\App\Utils\HeroExperiment::LINK_PARAMETER);
+                        var key = null;
+                        var fresh = false;
+                        var remember = !!(window.esConsent && window.esConsent.has('analytics'));
+                        var clicked = false;
+                        var root = document.getElementById('hp');
+                        var show = function (page) {
+                            if (page === 'new') {
+                                root.setAttribute('data-home', 'new');
+                            } else {
+                                root.removeAttribute('data-home');
+                            }
+                        };
+
+                        var forced = (location.search.match(/[?&]home=(new|full)(?:&|$)/) || [])[1];
+                        if (forced) {
+                            for (var k in pages) {
+                                if (pages[k] === forced) {
+                                    show(forced);
+                                    break;
+                                }
+                            }
+                            return;
+                        }
+
+                        var match = document.cookie.match(/(?:^|;\s*)es_attribution=([^;]*)/);
+                        if (match) {
+                            try {
+                                key = JSON.parse(decodeURIComponent(match[1])).hero || null;
+                            } catch (e) {}
+                        }
+                        if ((!key || !variants[key]) && remember) {
+                            try {
+                                key = sessionStorage.getItem('es_hero');
+                            } catch (e) {}
+                        }
+                        if (!key || !variants[key]) {
+                            var roll = Math.random();
+                            var keys = Object.keys(weights);
+                            key = keys[keys.length - 1];
+                            for (var i = 0; i < keys.length; i++) {
+                                roll -= weights[keys[i]];
+                                if (roll < 0) {
+                                    key = keys[i];
+                                    break;
+                                }
+                            }
+                            fresh = true;
+                        }
+                        if (remember) {
+                            try {
+                                sessionStorage.setItem('es_hero', key);
+                            } catch (e) {}
+                        }
+
+                        window.esHero = { key: key, fresh: fresh };
+
+                        show(pages[key]);
+
+                        // Set by today's hero as it is parsed (it does not exist yet).
+                        window.esHeroCopy = variants[key];
+
+                        var send = function (event) {
+                            var body = JSON.stringify({ variant: key, event: event });
+                            try {
+                                if (navigator.sendBeacon && navigator.sendBeacon(endpoint, new Blob([body], { type: 'application/json' }))) {
+                                    return;
+                                }
+                            } catch (e) {}
+                            try {
+                                fetch(endpoint, { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: body }).catch(function () {});
+                            } catch (e) {}
+                        };
+
+                        if (fresh) {
+                            send('view');
+                        }
+
+                        var tag = function (e) {
+                            try {
+                                var link = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+                                if (!link) {
+                                    return;
+                                }
+                                var url = new URL(link.getAttribute('href'), location.href);
+                                if (targets.indexOf(url.origin + url.pathname) !== -1 && url.searchParams.get(param) !== key) {
+                                    url.searchParams.set(param, key);
+                                    link.setAttribute('href', url.toString());
+                                }
+                            } catch (e) {}
+                        };
+                        document.addEventListener('pointerdown', tag, true);
+                        document.addEventListener('click', tag, true);
+
+                        // Any sign-up link on the page, not only the hero button: the
+                        // headline is what is being tested, wherever the reader acts on it.
+                        // First click per session with consent, so the rate is per
+                        // visitor; per page view without it, matching how views count.
+                        document.addEventListener('click', function (e) {
+                            var link = e.target && e.target.closest ? e.target.closest('a[href*="/sign_up"]') : null;
+                            if (!link || clicked) {
+                                return;
+                            }
+                            if (remember) {
+                                try {
+                                    if (sessionStorage.getItem('es_hero_clicked') === key) {
+                                        return;
+                                    }
+                                    sessionStorage.setItem('es_hero_clicked', key);
+                                } catch (e) {}
+                            }
+                            clicked = true;
+                            send('click');
+                        }, true);
+                    } catch (e) {
+                        try {
+                            var hp = document.getElementById('hp');
+                            if (@json($hpNewPage)) {
+                                hp.setAttribute('data-home', 'new');
+                            } else {
+                                hp.removeAttribute('data-home');
+                            }
+                        } catch (e2) {}
+                    }
+                })();
+            </script>
+        @endif
+    @endguest
+
+    @if ($hpShowFull)
 
     <!-- ============================================================ -->
     <!-- 1. Hero: the headline between two walls of real posters      -->
@@ -2823,182 +3011,19 @@
             <p class="es-fade-up es-d-2 hp-sub" data-hero="sub">{{ $hero['default']['subtitle'] }}</p>
 
             @guest
-                @if ($hero['running'])
-                    {{-- Runs before the entrance animations reveal the text, so the swap never
-                         shows. With analytics consent the pick is remembered in sessionStorage
-                         (es_hero, es_hero_clicked) so a visitor sees one headline and is counted
-                         once per session; without it nothing is stored, the headline is picked
-                         afresh on each view, and a view and a click are counted per page view.
-
-                         The pick reaches sign-up on the app host two ways. It rides the link:
-                         ?hero=<key> is added to a sign-up or sign-in link as it is pressed, and
-                         CaptureUtmParameters keeps it in the session, so nothing is stored in the
-                         browser and no consent is needed. And it is copied into the
-                         es_attribution cookie by the layout's attribution script (which reads
-                         window.esHero, and writes the cookie only with marketing consent), which
-                         covers a visitor who signs up from another page. Writing that cookie from
-                         here instead would make the attribution script think it already ran and
-                         lose the landing page and utm_* values.
-
-                         tag() is what puts the pick on the link:
-                         - Only the two app URLs in `targets`, compared whole. A substring match
-                           on /login would also tag a showcase card for a schedule called
-                           "loginlounge", and send its page a query string it has no use for.
-                         - Sign-in as well as sign-up: a social sign-in from there creates
-                           accounts.
-                         - As the link is pressed, not once on load: the links below this script
-                           do not exist yet, and initClaim() (marketing-home.js) rebuilds the
-                           claim button's href from its original each time the visitor types.
-                         - On both events: pointerdown covers a middle click and a long press,
-                           click covers the keyboard and the claim box's Enter, and a phone
-                           keyboard can commit its text between the two.
-                         - In its own listeners: the click-beacon listener stops acting after
-                           the first click.
-                         A PAGE round (a variant with a page, see HeroExperiment): show() puts
-                         data-home on #hp for the pick's page. It runs here, in the hero, before
-                         the film's screen and both middles are parsed, and the rules that read it
-                         are in the head, so neither page is ever drawn and then taken away. A
-                         throw puts #hp back as the server printed it, which is today's page while
-                         a round runs.
-                         ?home=light or ?home=full shows that page to whoever asks, for looking at
-                         it: nothing is picked, stored, beaconed or put on a link, so window.esHero
-                         stays unset and the attribution script credits nothing.
-
-                         These notes are up here so they are not sent to every visitor. --}}
+                @if ($hero['running'] && $hpShowFull)
+                    {{-- The pick's words (the picker at the top of #hp chose them before this hero
+                         was parsed, window.esHeroCopy), set before the entrance animations reveal
+                         the text, so the swap never shows. --}}
                     <script {!! nonce_attr() !!}>
                         (function () {
-                            try {
-                                var variants = @json($hero['variants']);
-                                var weights = @json($hero['weights']);
-                                var pages = @json($hero['pages']);
-                                var endpoint = @json(url('/marketing/hero'));
-                                var targets = [@json(app_url('/sign_up')), @json(app_url('/login'))];
-                                var param = @json(\App\Utils\HeroExperiment::LINK_PARAMETER);
-                                var key = null;
-                                var fresh = false;
-                                var remember = !!(window.esConsent && window.esConsent.has('analytics'));
-                                var clicked = false;
-                                var root = document.getElementById('hp');
-                                var show = function (page) {
-                                    if (page === 'light') {
-                                        root.setAttribute('data-home', 'light');
-                                    } else {
-                                        root.removeAttribute('data-home');
-                                    }
-                                };
-
-                                var forced = (location.search.match(/[?&]home=(light|full)(?:&|$)/) || [])[1];
-                                if (forced) {
-                                    for (var k in pages) {
-                                        if (pages[k] === forced) {
-                                            show(forced);
-                                            break;
-                                        }
-                                    }
-                                    return;
-                                }
-
-                                var match = document.cookie.match(/(?:^|;\s*)es_attribution=([^;]*)/);
-                                if (match) {
-                                    try {
-                                        key = JSON.parse(decodeURIComponent(match[1])).hero || null;
-                                    } catch (e) {}
-                                }
-                                if ((!key || !variants[key]) && remember) {
-                                    try {
-                                        key = sessionStorage.getItem('es_hero');
-                                    } catch (e) {}
-                                }
-                                if (!key || !variants[key]) {
-                                    var roll = Math.random();
-                                    var keys = Object.keys(weights);
-                                    key = keys[keys.length - 1];
-                                    for (var i = 0; i < keys.length; i++) {
-                                        roll -= weights[keys[i]];
-                                        if (roll < 0) {
-                                            key = keys[i];
-                                            break;
-                                        }
-                                    }
-                                    fresh = true;
-                                }
-                                if (remember) {
-                                    try {
-                                        sessionStorage.setItem('es_hero', key);
-                                    } catch (e) {}
-                                }
-
-                                window.esHero = { key: key, fresh: fresh };
-
-                                show(pages[key]);
-
-                                var copy = variants[key];
-                                document.querySelector('[data-hero="l1"]').textContent = copy.line1;
-                                document.querySelector('[data-hero="l2"]').textContent = copy.line2;
-                                document.querySelector('[data-hero="sub"]').textContent = copy.subtitle;
-
-                                var send = function (event) {
-                                    var body = JSON.stringify({ variant: key, event: event });
-                                    try {
-                                        if (navigator.sendBeacon && navigator.sendBeacon(endpoint, new Blob([body], { type: 'application/json' }))) {
-                                            return;
-                                        }
-                                    } catch (e) {}
-                                    try {
-                                        fetch(endpoint, { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: body }).catch(function () {});
-                                    } catch (e) {}
-                                };
-
-                                if (fresh) {
-                                    send('view');
-                                }
-
-                                var tag = function (e) {
-                                    try {
-                                        var link = e.target && e.target.closest ? e.target.closest('a[href]') : null;
-                                        if (!link) {
-                                            return;
-                                        }
-                                        var url = new URL(link.getAttribute('href'), location.href);
-                                        if (targets.indexOf(url.origin + url.pathname) !== -1 && url.searchParams.get(param) !== key) {
-                                            url.searchParams.set(param, key);
-                                            link.setAttribute('href', url.toString());
-                                        }
-                                    } catch (e) {}
-                                };
-                                document.addEventListener('pointerdown', tag, true);
-                                document.addEventListener('click', tag, true);
-
-                                // Any sign-up link on the page, not only the hero button: the
-                                // headline is what is being tested, wherever the reader acts on it.
-                                // First click per session with consent, so the rate is per
-                                // visitor; per page view without it, matching how views count.
-                                document.addEventListener('click', function (e) {
-                                    var link = e.target && e.target.closest ? e.target.closest('a[href*="/sign_up"]') : null;
-                                    if (!link || clicked) {
-                                        return;
-                                    }
-                                    if (remember) {
-                                        try {
-                                            if (sessionStorage.getItem('es_hero_clicked') === key) {
-                                                return;
-                                            }
-                                            sessionStorage.setItem('es_hero_clicked', key);
-                                        } catch (e) {}
-                                    }
-                                    clicked = true;
-                                    send('click');
-                                }, true);
-                            } catch (e) {
-                                try {
-                                    var hp = document.getElementById('hp');
-                                    if (@json($hpLightPage)) {
-                                        hp.setAttribute('data-home', 'light');
-                                    } else {
-                                        hp.removeAttribute('data-home');
-                                    }
-                                } catch (e2) {}
+                            var copy = window.esHeroCopy;
+                            if (!copy) {
+                                return;
                             }
+                            document.querySelector('[data-hero="l1"]').textContent = copy.line1;
+                            document.querySelector('[data-hero="l2"]').textContent = copy.line2;
+                            document.querySelector('[data-hero="sub"]').textContent = copy.subtitle;
                         })();
                     </script>
                 @endif
@@ -3027,21 +3052,10 @@
                  who has already decided and is scrolling. Both are still on this page, in the
                  ticketing feature and the "everything else" grid. --}}
             <p class="es-fade-up es-d-4 hp-hero-foot">
-                {{-- The film's screen is not on the light page, so there the same words open the
-                     film itself, in a new tab. One of the two is on show (hp-full-only,
-                     hp-lite-only), and once a page round has ended only one is printed. --}}
-                @if ($hpShowFull)
-                <a href="#showcase" class="hp-demo hp-full-only" data-video-open>
+                <a href="#showcase" class="hp-demo" data-video-open>
                     <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></i>
                     Watch the 3-minute overview
                 </a>
-                @endif
-                @if ($hpShowLight)
-                <a href="https://www.youtube-nocookie.com/embed/w1JLIvGmIjQ?autoplay=1" target="_blank" rel="noopener" class="hp-demo hp-lite-only">
-                    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></i>
-                    Watch the 3-minute overview
-                </a>
-                @endif
                 <span>Set up in under 2 minutes. Open source, and yours to selfhost.</span>
                 {{-- The free ways in, said beside the button: the only import this page named
                      before was Eventbrite's, on Pro (the pill further down). Google Calendar and
@@ -3089,15 +3103,10 @@
         </div>
 
         {{-- The screen. It stands inside the hero so the two walls run on beside it, and it comes
-             before the wall in the document. It belongs to today's page: the light page hides it
-             (and its script then leaves the film alone, see initShowreel()), and a page round
-             ended on the light page does not print it. The page's script reads the address the
-             posters print from the screen's address bar, so without the screen that address
-             stands here, unseen. --}}
-        @unless ($hpShowFull)
-            <span data-claim-echo hidden>{{ ltrim($claimSuffix, '.') }}</span>
-        @endunless
-        @if ($hpShowFull)
+             before the wall in the document. A visitor given the new page has all of today's page
+             hidden, the screen too, and its script then leaves the film alone (initShowreel()).
+             The page's script reads the address the posters print from the screen's address
+             bar. --}}
         <div id="showcase" class="hp-stage">
             <div class="es-persp relative" data-scene="showcase">
                     <div class="es-frame relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/15 dark:border-white/10 dark:bg-[#101016] dark:shadow-black/50">
@@ -3189,7 +3198,6 @@
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.1s;">From first event to sold-out show, in one short tour.</p>
             </div>
         </div>
-        @endif
 
         {{-- The wall (desktop): two wings of drifting poster columns, hinged beside the headline.
              A pointer can open any poster. A keyboard does not stop at them: up to twenty-five
@@ -3274,9 +3282,7 @@
             ],
         ];
     @endphp
-    {{-- Today's middle, from the line-up to the questions. The hero above and the closing panel
-         below are both homepages'; .hp-full is what the light page hides. --}}
-    @if ($hpShowFull)
+    {{-- Today's middle, from the line-up to the questions. --}}
     <div class="hp-full">
     <section class="hp-lineup" aria-label="Who uses Event Schedule">
         <h2 class="sr-only">Who uses Event Schedule</h2>
@@ -4383,12 +4389,6 @@
     </section>
 
     </div>
-    @endif
-
-    {{-- The light homepage's middle (a page round of App\Utils\HeroExperiment). --}}
-    @if ($hpShowLight)
-        @include('marketing.partials.home-light')
-    @endif
 
     <!-- ============================================================ -->
     <!-- 10. Finale: claim your name                                  -->
@@ -4434,6 +4434,13 @@
         </div>
     </section>
 
+    @endif
+
+    {{-- The new homepage, whole (a page round of App\Utils\HeroExperiment). --}}
+    @if ($hpShowNew)
+        @include('marketing.partials.home-new')
+    @endif
+
     {{-- The phone's way in, wherever the reader is: a bar at the foot of the screen with the one
          button, from the moment the hero's claim box has scrolled away until the finale's comes
          into view. A button and no field: a field fixed to the foot of the screen jumps when a
@@ -4462,7 +4469,9 @@
             var root = document.documentElement;
 
             var dock = document.querySelector('[data-hp-dock]');
-            var claim = document.querySelector('#top .hp-claimwrap');
+            {{-- The page on show: the new homepage has a hero box and a closing panel of its own. --}}
+            var newShown = document.getElementById('hp').getAttribute('data-home') === 'new';
+            var claim = document.querySelector(newShown ? '#hn-top .hn-claimwrap' : '#top .hp-claimwrap');
             if (dock && claim && 'IntersectionObserver' in window) {
                 var phone = window.matchMedia('(max-width: 767px)');
                 var past = false;
@@ -4518,7 +4527,7 @@
                     });
                     update();
                 });
-                [document.getElementById('claim'), document.querySelector('footer')].forEach(function (el) {
+                [document.getElementById(newShown ? 'hn-claim' : 'claim'), document.querySelector('footer')].forEach(function (el) {
                     if (el) {
                         endObserver.observe(el);
                     }
@@ -4689,7 +4698,7 @@
                 poster.querySelectorAll('[data-claim-name]').forEach(function (el) { el.setAttribute('data-default', el.textContent); });
                 // Pressing your poster puts the cursor in the box it is waiting on.
                 poster.addEventListener('click', function () {
-                    var box = document.getElementById(poster.closest('.hp-finale') ? 'es-claim-input' : 'es-claim-hero');
+                    var box = document.getElementById(poster.getAttribute('data-claim-for') || (poster.closest('.hp-finale') ? 'es-claim-input' : 'es-claim-hero'));
                     if (box) {
                         box.focus();
                     }

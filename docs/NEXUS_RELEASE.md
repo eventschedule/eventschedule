@@ -307,10 +307,11 @@ No migration, no env var.
   run a round whose variants name a page: both pages in one document, the browser showing one, an
   even split that nothing ends by itself, and a "Homepage test" card on `/admin/growth` with each
   page's visitors, clicks, signups and how many saved a schedule and an event. It was built for a
-  light copy of today's page, which never went live: before it shipped, that round was replaced by
-  a round against a completely new homepage, still being designed.
-- **What runs:** `promote_sell` alone, as since 2026-10-22, on today's page. The light page's
-  partial is in the file and printed by no variant; `/?home=light` shows nothing different.
+  light copy of today's page, which never went live and is gone: the round it is for is today's
+  page against a completely new homepage, "Keep the money" (`marketing/partials/home-new`, held in
+  `HeroExperiment::NEW_PAGE_ROUND`), which waits for its rendered pages to be approved.
+- **What runs:** `promote_sell` alone, as since 2026-10-22, on today's page. Nothing prints the
+  new page yet, and `/?home=new` shows nothing different.
 - Needs `npm run build` (one line in `marketing-home.js` keeps a hidden film from downloading).
   No migration, no env var.
 

@@ -117,8 +117,8 @@ class GrowthSummary
         // The same states the /admin/growth card shows, in the pull's own English.
         $status = match ($test['phase'] ?? null) {
             'fixed' => sprintf(
-                'Page test, split evenly. Chance the light page brings more signups: %s. Next look: %s.',
-                self::percent($test['p_light_better'] ?? null),
+                'Page test, split evenly. Chance the new page brings more signups: %s. Next look: %s.',
+                self::percent($test['p_new_better'] ?? null),
                 $test['next_look'] ?? '?',
             ),
             'ended' => sprintf('Page test ended on %s, which every visitor now gets.', $test['ended'] ?? '?'),

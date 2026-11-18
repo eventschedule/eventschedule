@@ -135,15 +135,7 @@ class GrowthDataEndpointTest extends TestCase
 
         // A page round (one headline on two homepages), so the per-page fields are read; the counts
         // go to its control, today's page. Splitting between variants is HeroExperimentTest's.
-        $copy = [
-            'line1' => 'Promote and sell',
-            'line2' => 'from your event calendar',
-            'subtitle' => 'One page for your events and your open hours.',
-        ];
-        HeroExperiment::useVariants([
-            'home_full' => $copy,
-            'home_light' => $copy + ['page' => HeroExperiment::PAGE_LIGHT],
-        ]);
+        HeroExperiment::useVariants(HeroExperiment::NEW_PAGE_ROUND);
 
         try {
             $this->assertPageRoundTravels();
@@ -154,7 +146,7 @@ class GrowthDataEndpointTest extends TestCase
 
     private function assertPageRoundTravels(): void
     {
-        $variant = 'home_full';
+        $variant = 'home_today';
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'click');
@@ -169,7 +161,7 @@ class GrowthDataEndpointTest extends TestCase
 
         $this->assertNotNull($payload['hero_test'], 'the pull has no headline test in it');
         $rows = collect($payload['hero_test']['rows'])->keyBy('key');
-        $this->assertEqualsCanonicalizing(['home_full', 'home_light'], $rows->keys()->all());
+        $this->assertEqualsCanonicalizing(['home_today', 'home_new'], $rows->keys()->all());
         $this->assertSame(2, $rows[$variant]['visitors']);
         $this->assertSame(1, $rows[$variant]['clicks']);
         $this->assertSame(1, $rows[$variant]['signups']);
@@ -177,7 +169,7 @@ class GrowthDataEndpointTest extends TestCase
         $this->assertSame('fixed', $payload['hero_test']['phase']);
         $this->assertSame('even', $payload['hero_test']['split']);
         // What the round is read on, per page (schema 29).
-        $this->assertSame(['full', 'light'], [$rows['home_full']['page'], $rows['home_light']['page']]);
+        $this->assertSame(['full', 'new'], [$rows['home_today']['page'], $rows['home_new']['page']]);
         $this->assertSame([0, 0], [$rows[$variant]['saved_schedule'], $rows[$variant]['saved_event']]);
         $this->assertCount(3, $payload['hero_test']['looks']);
 

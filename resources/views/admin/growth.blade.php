@@ -253,14 +253,14 @@
                 // A page round (two homepages, split evenly, ended by hand) is told apart from a
                 // round of headlines by its split; once ended it still says which page it was.
                 $homeTest = $heroTest !== null && ($heroTest['split'] ?? null) === 'even';
-                $homePageName = fn ($page) => $page === 'light' ? __('messages.home_test_page_light') : __('messages.home_test_page_full');
+                $homePageName = fn ($page) => $page === \App\Utils\HeroExperiment::PAGE_NEW ? __('messages.home_test_page_new') : __('messages.home_test_page_full');
             @endphp
             <x-page-card flush id="hero-test" class="scroll-mt-4" :title="$homeTest ? __('messages.home_test') : __('messages.hero_test')" :lead="$homeTest ? __('messages.home_test_help') : __('messages.hero_test_help')">
                 @if ($heroTest !== null)
                 <x-slot name="aside">
                     <div class="page-actions">
                     {{-- Ending is offered while a page round runs, one button a page, the page that
-                         is the change (the light one) last. Reset, which starts over, is the
+                         is the change (the new one) last. Reset, which starts over, is the
                          destroying one. --}}
                     @if ($homeTest && $heroTest['phase'] === 'fixed')
                         @foreach ($heroTest['rows'] as $row)
@@ -269,7 +269,7 @@
                                 @csrf
                                 <input type="hidden" name="range" value="{{ $range }}">
                                 <input type="hidden" name="variant" value="{{ $row['key'] }}">
-                                <x-secondary-button class="!py-2" type="submit">{{ $row['page'] === 'light' ? __('messages.home_test_end_light') : __('messages.home_test_end_full') }}</x-secondary-button>
+                                <x-secondary-button class="!py-2" type="submit">{{ $row['page'] === \App\Utils\HeroExperiment::PAGE_NEW ? __('messages.home_test_end_new') : __('messages.home_test_end_full') }}</x-secondary-button>
                             </form>
                         @endforeach
                     @endif
@@ -316,8 +316,8 @@
                             @endif
                         </p>
                         @if ($homeTest && $heroTest['phase'] === 'fixed')
-                            @if ($heroTest['p_light_better'] !== null)
-                                <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.home_test_chance_light', ['percent' => round($heroTest['p_light_better'] * 100, 1).'%']) }}</p>
+                            @if ($heroTest['p_new_better'] !== null)
+                                <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.home_test_chance_new', ['percent' => round($heroTest['p_new_better'] * 100, 1).'%']) }}</p>
                             @endif
                             @if (! empty($heroTest['looks']))
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.home_test_looks', [

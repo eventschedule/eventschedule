@@ -474,18 +474,21 @@ has to stay that way:
 **A page round** (from 2026-11-16) tests two homepages the same way, and for the same reason
 nothing about it is decided by the server:
 
-- A variant may name a `page`. While such a round runs the homepage prints BOTH middles in one
-  document: today's sections in `.hp-full`, the light page's in `.hp-lite`
-  (`marketing/partials/home-light`), between a hero and a closing panel that are the same
-  elements for both. The same picker sets `data-home="light"` on `#hp` for a visitor given the
-  light page. It runs in the hero, before either middle is parsed, and the rules that read the
-  attribute are in the page's head stylesheet, so neither page is drawn and then taken away.
+- A variant may name a `page`. While such a round runs the homepage prints BOTH pages in one
+  document, inside `#hp`: today's sections, and the new page in `.hn`
+  (`marketing/partials/home-new`, its own hero to its own closing panel). The picker is the first
+  thing inside `#hp` and sets `data-home="new"` on it for a visitor given the new page, before
+  either page is parsed; the rules that read the attribute are in the page's head stylesheet
+  (`marketing/partials/home-new-styles`), so neither page is drawn and then taken away. Today's
+  hero keeps the one `<h1>`; the new page's headline is a heading by role until it is printed
+  alone. Its wall shows the same poster images as today's, so the eager ones are asked for once
+  whichever page is on show.
   Never move those rules into the body, and never let the server print the attribute while a
   round runs: the stored copy would show one page to everyone.
 - There is one URL, one title and one description, and today's whole text is in the HTML for
   both. A second address, a redirect or a swap after load would each cost a flash, a second URL
   to keep out of the index, or a request the edge cannot store.
-- `/?home=light` and `/?home=full` show a page to whoever asks. A query string is never stored
+- `/?home=new` and `/?home=full` show a page to whoever asks. A query string is never stored
   at the edge, and the picker leaves `window.esHero` unset for them, so nothing is beaconed,
   stored or put on a sign-up link.
 - A person ends the round (`HeroExperiment::end()`, the card on `/admin/growth`). From the next
