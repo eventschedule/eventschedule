@@ -6723,6 +6723,8 @@ return [
     'admin_dash_signed_up_with' => 'Se registraron con',
     'admin_dash_both' => 'Ambos',
     'admin_dash_last_12_weeks' => 'Últimas 12 semanas',
+    'admin_dash_last_12_months' => 'Últimos 12 meses',
+    'admin_dash_mrr_rebuilt' => 'Meses anteriores reconstruidos a partir de las fechas de suscripción con los precios actuales',
     'admin_dash_active_unavailable' => 'Ejecuta las migraciones de la base de datos para empezar a contar los usuarios activos.',
     'admin_dash_count_of_total' => ':count de :total',
     'admin_dash_active_30_days' => 'Activos en 30 días',

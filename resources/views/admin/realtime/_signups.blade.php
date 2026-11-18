@@ -9,8 +9,8 @@
     $sourceInline = 'md:hidden xl:block min-[1400px]:hidden';
 @endphp
 <section class="realtime-signups ap-card rounded-xl flex flex-col" aria-labelledby="realtime-signups-heading">
-    {{-- The count, the bars per hour and the steps reached are the Now card's (_now), at the top
-         of the page; this card is who those people are. --}}
+    {{-- The count, the bars per hour and the steps reached are the Sign-ups panel's
+         (_signups-panel), at the top of the page; this card is who those people are. --}}
     <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-3">
         <div class="flex items-baseline gap-2 min-w-0">
             <h2 id="realtime-signups-heading" class="text-base font-semibold text-gray-900 dark:text-white">@{{ msg.signups }}</h2>

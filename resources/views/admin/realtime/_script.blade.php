@@ -80,20 +80,35 @@
         .realtime-now-consent { order: 2; }
         .realtime-now-chart { order: 1; }
     }
-    /* The top: the Now card, and on hosted the Revenue card in the corner. From xl they take the
-       Today grid's three columns, so the corner card stands over the Activity rail; below xl the
-       corner card follows the Now card. */
+    /* The top, four panels: Visitors (the Now card, or what stands in its place) and Sign-ups,
+       and on hosted Revenue and Active users in the corner. From md the corner two sit side by
+       side under the other two; from xl they take the Today grid's three columns, two rows, so the
+       corner stands over the Activity rail. Below md they follow one another. */
+    @media (min-width: 768px) {
+        .realtime-top[data-corner] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .realtime-top[data-corner] > * { grid-column: 1 / -1; grid-row: 1; }
+        .realtime-top[data-corner] > .realtime-panel-signups { grid-column: 1 / -1; grid-row: 2; }
+        .realtime-top[data-corner] > .realtime-corner { grid-column: 1; grid-row: 3; }
+        .realtime-top[data-corner] > .realtime-panel-active { grid-column: 2; grid-row: 3; }
+    }
     @media (min-width: 1280px) {
         .realtime-top[data-corner] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .realtime-top[data-corner] > :not(.realtime-corner) { grid-column: 1 / span 2; grid-row: 1; }
+        .realtime-top[data-corner] > * { grid-column: 1 / span 2; grid-row: 1; }
+        .realtime-top[data-corner] > .realtime-panel-signups { grid-column: 1 / span 2; grid-row: 2; }
         .realtime-top[data-corner] > .realtime-corner { grid-column: 3; grid-row: 1; }
+        .realtime-top[data-corner] > .realtime-panel-active { grid-column: 3; grid-row: 2; }
     }
-    /* In those two thirds the Now card's head has room for its three parts only once the frame is
-       near its full width: below that the chart was squeezed to a sliver between the number and
-       the consent line, which goes under the two instead. */
-    @media (min-width: 1280px) and (max-width: 1599.98px) {
-        .realtime-top[data-corner] .realtime-now-head { grid-template-columns: auto minmax(0, 1fr); }
-        .realtime-top[data-corner] .realtime-now-consent { grid-column: 1 / -1; }
+    /* Beside Revenue, the Visitors panel stands as tall as Revenue's figures and MRR line. It
+       spends that height on its own chart: the number with the consent split beside it, and page
+       views per minute under both, the full width, taking what is left. In one row the chart was a
+       sliver between the two, and the panel was half empty. */
+    @media (min-width: 1280px) {
+        .realtime-top[data-corner] #realtime-now { display: flex; flex-direction: column; }
+        .realtime-top[data-corner] .realtime-now-head,
+        .realtime-top[data-corner] .realtime-now-head.is-quiet { flex: 1 1 auto; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+        .realtime-top[data-corner] .realtime-now-consent { order: 1; grid-column: auto; }
+        .realtime-top[data-corner] .realtime-now-chart { order: 2; grid-column: 1 / -1; align-self: stretch; display: flex; flex-direction: column; }
+        .realtime-top[data-corner] .realtime-now-chart > .relative { flex: 1 1 auto; height: auto; min-height: 6rem; }
     }
     /* What stands in a card's place until its numbers arrive. */
     .realtime-skeleton { background: var(--ap-tint-sunken); }
@@ -513,6 +528,12 @@
                 chartSummary: function () {
                     var total = (this.p.minutes || []).reduce(function (sum, m) { return sum + m.consented + m.unidentified; }, 0);
                     return this.msg.viewsPerMinute + ': ' + this.fmt(total);
+                },
+                // The MRR chart said in words: where the year began and where it is now.
+                mrrSummary: function () {
+                    var h = this.revenue && this.revenue.mrr_history;
+                    if (!h || !h.formatted.length) return 'MRR';
+                    return 'MRR, ' + this.msg.last12Months + ': ' + h.titles[0] + ' ' + h.formatted[0] + ', ' + h.titles[h.titles.length - 1] + ' ' + h.formatted[h.formatted.length - 1];
                 },
             },
 
@@ -1057,7 +1078,7 @@
                             return;
                         }
                         self.revenue = data;
-                        self.$nextTick(self.drawActiveChart);
+                        self.$nextTick(function () { self.drawActiveChart(); self.drawMrrChart(); });
                     }).catch(function () {
                         if (!self.revenue) self.revenue = { failed: true };
                     });
@@ -1120,6 +1141,63 @@
                                     grid: { color: colors.grid },
                                     border: { display: false },
                                     ticks: { color: colors.ink, font: { size: 11 }, precision: 0, maxTicksLimit: 4 },
+                                },
+                            },
+                        },
+                    });
+                },
+                // The Revenue panel's MRR line: a month-end each, now last. Money on the axis and in
+                // the tooltip as the server formats it, never a symbol written here.
+                drawMrrChart: function () {
+                    var self = this, canvas = this.$refs.mrrChart, h = this.revenue && this.revenue.mrr_history;
+                    if (this.mrrChart) { try { this.mrrChart.destroy(); } catch (e) {} this.mrrChart = null; }
+                    if (!h || !canvas) return;
+                    if (typeof Chart === 'undefined') {
+                        if ((this.mrrTries = (this.mrrTries || 0) + 1) < 100) setTimeout(function () { self.drawMrrChart(); }, 50);
+                        return;
+                    }
+                    var colors = chartColors(), last = h.values.length - 1;
+                    // The probed green is rgb(), the same colour at an eighth for the fill under the line.
+                    var rgb = /^rgba?\(([^,]+),([^,]+),([^,)]+)/.exec((colors.green || '').replace(/\s/g, ''));
+                    var fill = rgb ? 'rgba(' + rgb[1] + ',' + rgb[2] + ',' + rgb[3] + ',0.12)' : 'transparent';
+                    // The axis in the platform's currency, as the server prints a whole amount.
+                    var money = function (value) { return (h.axis || '7').replace('7', numberFormat.format(Math.round(value))); };
+                    this.mrrChart = new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: h.labels,
+                            datasets: [{ label: 'MRR', data: h.values, borderColor: colors.green, backgroundColor: fill, fill: true, borderWidth: 2, tension: 0.3,
+                                pointRadius: h.values.map(function (value, index) { return index === last ? 3 : 0; }), pointBackgroundColor: colors.green, pointHoverRadius: 4 }],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: false,
+                            interaction: { mode: 'index', intersect: false },
+                            layout: { padding: { top: 4, right: 4 } },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    rtl: CONFIG.rtl,
+                                    callbacks: {
+                                        title: function (items) { return items.length ? h.titles[items[0].dataIndex] : ''; },
+                                        label: function (item) { return 'MRR: ' + h.formatted[item.dataIndex]; },
+                                    },
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    reverse: CONFIG.rtl,
+                                    grid: { display: false },
+                                    border: { display: false },
+                                    ticks: { color: colors.ink, font: { size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 4 },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    position: CONFIG.rtl ? 'right' : 'left',
+                                    grid: { color: colors.grid },
+                                    border: { display: false },
+                                    ticks: { color: colors.ink, font: { size: 11 }, maxTicksLimit: 3, callback: function (value) { return money(value); } },
                                 },
                             },
                         },
@@ -1363,6 +1441,7 @@
                 },
                 recolorChart: function () {
                     this.drawActiveChart();
+                    this.drawMrrChart();
                     if (!this.chart) return;
                     var colors = chartColors();
                     this.chart.data.datasets[0].backgroundColor = colors.blue;

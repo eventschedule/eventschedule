@@ -6722,6 +6722,8 @@ return [
     'admin_dash_signed_up_with' => 'נרשמו באמצעות',
     'admin_dash_both' => 'שניהם',
     'admin_dash_last_12_weeks' => '12 השבועות האחרונים',
+    'admin_dash_last_12_months' => '12 החודשים האחרונים',
+    'admin_dash_mrr_rebuilt' => 'החודשים הקודמים שוחזרו מתאריכי המנויים לפי המחירים של היום',
     'admin_dash_active_unavailable' => 'יש להריץ את המיגרציות של מסד הנתונים כדי להתחיל לספור משתמשים פעילים.',
     'admin_dash_count_of_total' => ':count מתוך :total',
     'admin_dash_active_30_days' => 'פעילים ב-30 ימים',

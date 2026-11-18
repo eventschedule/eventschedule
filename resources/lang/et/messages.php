@@ -6724,6 +6724,8 @@ return [
     'admin_dash_signed_up_with' => 'Registreerusid kasutades',
     'admin_dash_both' => 'Mõlemad',
     'admin_dash_last_12_weeks' => 'Viimased 12 nädalat',
+    'admin_dash_last_12_months' => 'Viimased 12 kuud',
+    'admin_dash_mrr_rebuilt' => 'Varasemad kuud on taastatud tellimuste kuupäevadest tänaste hindadega',
     'admin_dash_active_unavailable' => 'Aktiivsete kasutajate loendamise alustamiseks käivitage andmebaasi migratsioonid.',
     'admin_dash_count_of_total' => ':count / :total',
     'admin_dash_active_30_days' => 'Aktiivsed 30 päeva jooksul',

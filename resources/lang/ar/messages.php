@@ -6723,6 +6723,8 @@ return [
     'admin_dash_signed_up_with' => 'سجّلوا عبر',
     'admin_dash_both' => 'كلاهما',
     'admin_dash_last_12_weeks' => 'آخر 12 أسبوعًا',
+    'admin_dash_last_12_months' => 'آخر 12 شهرًا',
+    'admin_dash_mrr_rebuilt' => 'الأشهر السابقة مُعاد بناؤها من تواريخ الاشتراكات بأسعار اليوم',
     'admin_dash_active_unavailable' => 'شغّل ترحيلات قاعدة البيانات لبدء احتساب المستخدمين النشطين.',
     'admin_dash_count_of_total' => ':count من :total',
     'admin_dash_active_30_days' => 'نشطون خلال 30 يومًا',

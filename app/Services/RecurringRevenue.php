@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Role;
 use App\Utils\PlanPriceUtils;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -279,7 +281,80 @@ class RecurringRevenue
             ->all();
     }
 
-    private static function liveRows(): \Illuminate\Support\Collection
+    /**
+     * MRR at the end of each of the last $months - 1 months and now, oldest first, for the
+     * dashboard's chart. Nothing records MRR as it happens, so the past is REBUILT from each
+     * subscription's own dates: it bills from its start (after its trial, if it had one) until it
+     * ended, at the price it is on today. A price change, or a renewal Stripe gave up on before
+     * the subscription was cancelled, is not in it, so the past is an estimate and the page says
+     * so. The last point is breakdown()'s MRR ($current, when the caller has just read it), so the
+     * line ends on the figure printed above it.
+     *
+     * Same population as liveRows(), except that a deleted schedule's subscription counts for the
+     * time it billed when it was cancelled (a deleted schedule with a LIVE subscription is the
+     * orphan liveRows() leaves out, and stays out). Statuses that never billed are left out.
+     *
+     * @return list<array{at: Carbon, mrr: float}>
+     */
+    public static function history(int $months = 12, ?Carbon $now = null, ?float $current = null): array
+    {
+        $now ??= now();
+
+        $rows = DB::table('subscriptions')
+            ->join('roles', 'roles.id', '=', 'subscriptions.role_id')
+            ->where('subscriptions.type', 'default')
+            ->whereNotIn('subscriptions.stripe_status', ['incomplete', 'incomplete_expired'])
+            ->whereNotNull('roles.user_id')
+            ->where(fn ($q) => $q->where('roles.is_deleted', false)->orWhereNotNull('subscriptions.ends_at'))
+            ->whereNot(fn ($q) => Role::constrainDemoContent($q))
+            ->get(['subscriptions.id', 'subscriptions.stripe_price', 'subscriptions.created_at',
+                'subscriptions.trial_ends_at', 'subscriptions.ends_at']);
+
+        $multiPrice = $rows->whereNull('stripe_price')->pluck('id');
+        $itemPrices = $multiPrice->isEmpty() ? collect() : DB::table('subscription_items')
+            ->whereIn('subscription_id', $multiPrice)
+            ->get(['subscription_id', 'stripe_price'])
+            ->groupBy('subscription_id');
+
+        // Each subscription once: when it began billing, when it stopped, and what it is worth.
+        $spans = [];
+        foreach ($rows as $row) {
+            $prices = $row->stripe_price !== null
+                ? [$row->stripe_price]
+                : ($itemPrices[$row->id] ?? collect())->pluck('stripe_price')->all();
+            [, $cents] = self::place($prices);
+
+            $from = max(strtotime((string) $row->created_at), $row->trial_ends_at ? strtotime((string) $row->trial_ends_at) : 0);
+            $until = $row->ends_at ? strtotime((string) $row->ends_at) : PHP_INT_MAX;
+
+            // A trial cancelled before it ended never billed: it ends where its trial does.
+            if ($cents > 0 && $from < $until) {
+                $spans[] = [$from, $until, $cents];
+            }
+        }
+
+        $points = [];
+        for ($back = $months - 1; $back >= 1; $back--) {
+            $at = $now->copy()->startOfMonth()->subMonthsNoOverflow($back - 1)->subSecond();
+            $time = $at->getTimestamp();
+            $cents = 0;
+
+            foreach ($spans as [$from, $until, $amount]) {
+                if ($from <= $time && $until > $time) {
+                    $cents += $amount;
+                }
+            }
+
+            $points[] = ['at' => $at, 'mrr' => round($cents / 1200, 2)];
+        }
+
+        // The figure the caller already has, or read again.
+        $points[] = ['at' => $now->copy(), 'mrr' => $current ?? self::breakdown()['totals']['mrr']];
+
+        return $points;
+    }
+
+    private static function liveRows(): Collection
     {
         return DB::table('subscriptions')
             ->join('roles', 'roles.id', '=', 'subscriptions.role_id')

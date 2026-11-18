@@ -438,6 +438,38 @@ class AdminDashboardPageTest extends TestCase
     }
 
     /**
+     * The top of the page is four panels: Visitors, Revenue, Sign-ups and Active users, the last
+     * two moved out of the Now and Revenue cards (2026-11), and Revenue draws MRR over the last 12
+     * months, ending on the figure it prints. Selfhost has no billing, so Visitors and Sign-ups
+     * only. Mutation: leave the series out of the revenue answer, or the panels out of the page.
+     */
+    public function test_the_top_is_four_panels_and_revenue_draws_mrr_over_time(): void
+    {
+        config(['app.hosted' => true, 'app.is_nexus' => true]);
+
+        $html = $this->page()->getContent();
+        foreach (['id="realtime-now"', 'id="dash-revenue"', '<section class="realtime-panel-signups', '<section class="realtime-panel-active', 'ref="mrrChart"', 'ref="activeChart"'] as $part) {
+            $this->assertStringContainsString($part, $html, $part);
+        }
+        // Sign-ups and Active users are panels of their own, not the foot of another card.
+        $this->assertStringNotContainsString('class="realtime-now-signups', $html);
+
+        $answer = $this->revenue()->assertOk()->json();
+        $history = $answer['mrr_history'];
+        $this->assertCount(12, $history['labels']);
+        $this->assertCount(12, $history['values']);
+        $this->assertSame($answer['mrr'], end($history['formatted']));
+        $this->assertSame(__('messages.today'), end($history['titles']));
+        $this->assertSame(plan_price(7), $history['axis']);
+
+        config(['app.hosted' => false, 'app.is_nexus' => false]);
+        $html = $this->page()->getContent();
+        $this->assertStringContainsString('<section class="realtime-panel-signups', $html);
+        $this->assertStringNotContainsString('<section class="realtime-panel-active', $html);
+        $this->assertStringNotContainsString('ref="mrrChart"', $html);
+    }
+
+    /**
      * /admin/users shows the same record, and says "Estimate" while the window still reaches back
      * before counting began. Before the tables exist, both pages say nothing of the kind and the
      * dashboard tells the operator to migrate. Mutation: print the figure bare on /admin/users.

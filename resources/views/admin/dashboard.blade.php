@@ -157,6 +157,8 @@
                 // The active users chart in the Revenue card (hosted).
                 'activeUsers' => __('messages.active_users_7_days'),
                 'last12Weeks' => __('messages.admin_dash_last_12_weeks'),
+                'last12Months' => __('messages.admin_dash_last_12_months'),
+                'mrrRebuilt' => __('messages.admin_dash_mrr_rebuilt'),
                 'organizers' => __('messages.admin_dash_organizers'),
                 'countOfTotal' => __('messages.admin_dash_count_of_total', ['count' => ':count', 'total' => ':total']),
                 'active30' => __('messages.admin_dash_active_30_days'),
@@ -221,10 +223,11 @@
                 @include('admin.realtime._toolbar')
             </template>
 
-            {{-- The Now card and, on hosted, Revenue in the corner. From xl the two take the three
-                 columns of the Today grid below (realtime-top in _script), so the corner card stands
-                 over the Activity rail, and the board of who is where runs the full width under
-                 both. With tracking off, the card that says how to turn it on takes the Now card's
+            {{-- Four panels: Visitors (the Now card) and Sign-ups, and on hosted Revenue and Active
+                 users in the corner beside them. From xl they take the three columns of the Today
+                 grid below, two rows (realtime-top in _script), so the corner stands over the
+                 Activity rail, and the board of who is where runs the full width under them. With
+                 tracking off, the card that says how to turn it on takes the Visitors panel's
                  place. --}}
             <div class="realtime-top grid grid-cols-1 gap-4" @if (config('app.hosted')) data-corner @endif>
                 @include('admin.realtime._off')
@@ -242,6 +245,14 @@
 
                 @if (config('app.hosted'))
                     @include('admin.realtime._revenue')
+                @endif
+
+                <template v-if="p.state === 'ok' || p.state === 'waiting'">
+                    @include('admin.realtime._signups-panel')
+                </template>
+
+                @if (config('app.hosted'))
+                    @include('admin.realtime._active')
                 @endif
             </div>
 

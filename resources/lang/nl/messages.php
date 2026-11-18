@@ -6725,6 +6725,8 @@ return [
     'admin_dash_signed_up_with' => 'Aangemeld met',
     'admin_dash_both' => 'Beide',
     'admin_dash_last_12_weeks' => 'Laatste 12 weken',
+    'admin_dash_last_12_months' => 'Laatste 12 maanden',
+    'admin_dash_mrr_rebuilt' => 'Eerdere maanden herberekend uit abonnementsdatums tegen de prijzen van vandaag',
     'admin_dash_active_unavailable' => 'Voer de databasemigraties uit om actieve gebruikers te gaan tellen.',
     'admin_dash_count_of_total' => ':count van :total',
     'admin_dash_active_30_days' => 'Actief in 30 dagen',

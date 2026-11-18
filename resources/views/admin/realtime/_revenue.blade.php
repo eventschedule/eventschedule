@@ -1,4 +1,4 @@
-{{-- Hosted only: the Revenue card in the dashboard's top corner. The two figures of the old
+{{-- Hosted only: the Revenue panel in the dashboard's top corner, beside Visitors. The two figures of the old
      dashboard's Revenue card, what Stripe is billing and what the trials would add (shown beside
      it, never inside it), and the at-risk line when there is something at risk. Details opens
      /admin/revenue (the boost markup, subscription health). It stands beside the Now card's head only
@@ -41,13 +41,8 @@
                 <p class="mt-1 dashboard-stat-value text-2xl font-bold leading-7 text-gray-900 dark:text-white"><span dir="ltr">+@{{ revenue.trial_mrr }}</span></p>
                 {{-- The same pair as the paying box beside it: what the trials would add a month,
                      and a year. --}}
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    <span>@{{ msg.ifConvert }}</span>
-                    <template v-if="revenue.trial_arr">
-                        <span class="mx-1" aria-hidden="true">&middot;</span>
-                        <span class="whitespace-nowrap">ARR <span dir="ltr">+@{{ revenue.trial_arr }}</span></span>
-                    </template>
-                </p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ msg.ifConvert }}</p>
+                <p v-if="revenue.trial_arr" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">ARR <span dir="ltr">+@{{ revenue.trial_arr }}</span></p>
             </div>
         </div>
 
@@ -59,26 +54,19 @@
         </p>
     </template>
 
-    {{-- People active in the seven days up to each date (App\Services\ActiveDays), the chart the
-         growth panel shows on a selfhosted install. It takes what height the card has left beside
-         the Now card, and never sets it: the canvas sits in a box of its own. --}}
-    <div v-if="revenue && revenue.active" class="flex-1 flex flex-col px-4 sm:px-5 pt-3 pb-4" style="border-top: 1px solid var(--ap-hairline)">
+    {{-- MRR at the end of each month and now (RecurringRevenue::history()). The months before
+         this one are rebuilt from each subscription's dates at today's prices, which the line
+         under the chart says. It takes what height the card has left beside the Visitors panel
+         and never sets it: the canvas sits in a box of its own. --}}
+    <div v-if="revenue && revenue.mrr_history" class="flex-1 flex flex-col px-4 sm:px-5 pt-3 pb-4" style="border-top: 1px solid var(--ap-hairline)">
         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">@{{ msg.activeUsers }}</h3>
-            <span class="text-xs text-gray-500 dark:text-gray-400">@{{ msg.last12Weeks }}</span>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">MRR</h3>
+            <span class="text-xs text-gray-500 dark:text-gray-400">@{{ msg.last12Months }}</span>
         </div>
-        <p class="mt-1 flex flex-wrap items-baseline gap-x-2">
-            <span class="dashboard-stat-value text-2xl font-bold leading-7 text-gray-900 dark:text-white">@{{ fmt(revenue.active.active_7d) }}</span>
-            <span v-if="revenue.active.change !== null" dir="ltr" class="text-sm font-medium" :class="revenue.active.change >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-600 dark:text-red-400'">@{{ signedPct(revenue.active.change) }}</span>
-        </p>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            <span class="whitespace-nowrap">@{{ activeLine(revenue.active) }}</span>
-            <span class="mx-1" aria-hidden="true">&middot;</span>
-            <span class="whitespace-nowrap">@{{ msg.active30 }} @{{ fmt(revenue.active.active_30d) }}</span>
-        </p>
-        <div class="relative flex-1 mt-3" style="min-height: 6rem">
-            <div class="absolute inset-0"><canvas ref="activeChart" role="img" :aria-label="msg.activeUsers"></canvas></div>
+        <div class="relative flex-1 mt-2" style="min-height: 6rem">
+            <div class="absolute inset-0"><canvas ref="mrrChart" role="img" :aria-label="mrrSummary"></canvas></div>
         </div>
+        <p class="mt-2 text-[11px] leading-snug text-gray-500 dark:text-gray-400">@{{ msg.mrrRebuilt }}</p>
     </div>
 
 </section>

@@ -6725,6 +6725,8 @@ return [
     'admin_dash_signed_up_with' => 'Зарегистрировались через',
     'admin_dash_both' => 'Оба',
     'admin_dash_last_12_weeks' => 'Последние 12 недель',
+    'admin_dash_last_12_months' => 'Последние 12 месяцев',
+    'admin_dash_mrr_rebuilt' => 'Прошлые месяцы восстановлены по датам подписок по сегодняшним ценам',
     'admin_dash_active_unavailable' => 'Выполните миграции базы данных, чтобы начать подсчёт активных пользователей.',
     'admin_dash_count_of_total' => ':count из :total',
     'admin_dash_active_30_days' => 'Активны за 30 дней',

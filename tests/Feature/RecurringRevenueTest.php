@@ -335,4 +335,43 @@ class RecurringRevenueTest extends TestCase
         $this->assertSame(1, $breakdown['totals']['billing_count']);
         $this->assertSame(240.0, $breakdown['totals']['arr']);
     }
+
+    /**
+     * The MRR chart (RecurringRevenue::history()): each month-end rebuilt from the subscriptions'
+     * own dates at today's prices, and now, which is the live figure. Mutation: drop the trial
+     * from a subscription's start, or count a cancelled one past its end, or let a deleted
+     * schedule's live subscription in.
+     */
+    public function test_history_is_rebuilt_from_each_subscriptions_dates(): void
+    {
+        $this->travelTo('2026-11-18 12:00:00');
+        $dated = fn (int $id, array $dates) => DB::table('subscriptions')->where('id', $id)->update($dates);
+
+        // Pro monthly since June, still paying: 5 a month from the end of June.
+        $dated($this->subscribe($this->schedule(), 'price_pro_m'), ['created_at' => '2026-06-10 00:00:00']);
+        // Enterprise monthly from March, cancelled in September: 15 a month for March to August.
+        $dated($this->subscribe($this->schedule(), 'price_ent_m', 'canceled'), ['created_at' => '2026-03-02 00:00:00', 'ends_at' => '2026-09-15 00:00:00']);
+        // Pro yearly with a trial that ended in October: 50 / 12 from the end of October.
+        $dated($this->subscribe($this->schedule(), 'price_pro_y'), ['created_at' => '2026-09-20 00:00:00', 'trial_ends_at' => '2026-10-04 00:00:00']);
+        // A trial cancelled before it ended never billed.
+        $dated($this->subscribe($this->schedule(), 'price_ent_m', 'canceled'), ['created_at' => '2026-04-01 00:00:00', 'trial_ends_at' => '2026-04-15 00:00:00', 'ends_at' => '2026-04-15 00:00:00']);
+        // A schedule since deleted, cancelled: counted for the months it billed (May to July).
+        $dated($this->subscribe($this->schedule(['is_deleted' => true]), 'price_pro_m', 'canceled'), ['created_at' => '2026-05-01 00:00:00', 'ends_at' => '2026-08-01 00:00:00']);
+        // A deleted schedule with a live subscription is an orphan, never revenue.
+        $dated($this->subscribe($this->schedule(['is_deleted' => true]), 'price_ent_m'), ['created_at' => '2026-01-05 00:00:00']);
+
+        $history = RecurringRevenue::history();
+
+        $this->assertCount(12, $history);
+        $this->assertSame(
+            ['2025-12-31', '2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30', '2026-05-31', '2026-06-30', '2026-07-31', '2026-08-31', '2026-09-30', '2026-10-31', '2026-11-18'],
+            array_map(fn ($point) => $point['at']->toDateString(), $history)
+        );
+        $this->assertSame(
+            [0.0, 0.0, 0.0, 15.0, 15.0, 20.0, 25.0, 25.0, 20.0, 5.0, 9.17, 9.17],
+            array_column($history, 'mrr')
+        );
+        // It ends on the live figure.
+        $this->assertSame(RecurringRevenue::summary()['mrr'], $history[11]['mrr']);
+    }
 }
