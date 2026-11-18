@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-other-sites-on-browse-the-homepage-test-against-a-new-page-no-jquery-2026-11-18) | not yet | One migration (in the start command); before: check the site's custom header and footer code for jQuery; after: purge `/` at the edge, look at `/?home=new`, `/browse` and `/admin` |
 | [Unreleased](#unreleased-federation-address-moves-network-search-and-the-home-schedule-2026-11-18) | not yet | Nothing; after: watch `/admin/federation` and the first `federation:maintain` run |
 | [Unreleased](#unreleased-promoter-links-2026-11-11) | not yet | One migration (in the start command); nothing after |
 | [Unreleased](#unreleased-donations-at-checkout-2026-11-11) | not yet | One migration (in the start command); nothing after |
@@ -102,6 +103,45 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: other sites on /browse, the homepage test against a new page, no jQuery (2026-11-18)
+
+**What ships:**
+- **Events from other sites stand on the `/browse` wall** among this site's own, marked with a globe
+  and the site's name, at most four at a time and one per schedule, with "More from other sites"
+  after the wall. A switch heads the wall (All events / From other sites); that view
+  (`?show=network`, noindex) lists every listing, 24 at a time up to 192. `?lang=` no longer
+  filters it alone (`language` does). Their pictures get light copies, queued a few at a time by
+  `federation:maintain` (`GenerateFederatedImageVariants`).
+- **The homepage test is a page round:** today's page (`home_today`) against a new homepage,
+  "Keep the money" (`home_new`, `marketing/partials/home-new`), half of visitors each, in one
+  stored copy of `/`. `promote_sell` is retired. Nothing ends it by itself: the "Homepage test" card
+  on `/admin/growth` gives its look dates (4, 7 and 10 weeks) and its End buttons.
+- **Admin dashboard:** four panels at the top (Visitors, Revenue, Sign-ups, Active users), MRR over
+  the last 12 months under the revenue figures (the months before this one rebuilt from
+  subscription dates at today's prices), and the trials' ARR beside their MRR.
+- **jQuery is no longer loaded** on any page. The app's own scripts are covered; code pasted into
+  a custom header or footer that calls `$(` or `jQuery` would now throw.
+- "Federation" reads "the Event Schedule network" on the docs and `/selfhost`, `/saas` and
+  `/open-source`.
+
+**Migration:** `2026_11_18_000000_add_image_variants_to_federated_events_table`, one nullable JSON
+column on `federated_events` (a small table). Runs in the start command.
+
+**Before the deploy:** check `/admin/settings` for custom header or footer code that uses jQuery
+(`$(`, `jQuery`); if there is any, it has to load jQuery itself.
+
+**After the deploy:**
+1. Purge `/` in Cloudflare (or wait ten minutes), so the stored copy holds both pages.
+2. Look at `/?home=new` and `/?home=full` (a preview: nothing is counted), then `/` in a private
+   window a few times: either page, never one flashing into the other.
+3. `/browse`: posters from other sites carry the globe; the switch opens `?show=network`.
+4. `/admin`: the four panels and the MRR line.
+5. Week 2: a guardrail look at the Homepage test card; stop on today's page if signups per visitor
+   are clearly down on the new one.
+
+*Undo:* console rollback. A rollback puts `promote_sell` back as the one headline; the round's
+counts stay under its keys.
 
 ## Unreleased: federation address moves, network search and the home schedule (2026-11-18)
 
@@ -300,22 +340,14 @@ on an older install (the enum value is missing). Update first.
 
 No migration, no env var.
 
-## Unreleased: whole-page rounds for the homepage test, not running (2026-11-16, 2026-11-18)
+## Unreleased: whole-page rounds for the homepage test (2026-11-16, 2026-11-18)
 
-**What ships:**
-- **The machinery for testing two whole homepages, switched off.** `App\Utils\HeroExperiment` can
-  run a round whose variants name a page: both pages in one document, the browser showing one, an
-  even split that nothing ends by itself, and a "Homepage test" card on `/admin/growth` with each
-  page's visitors, clicks, signups and how many saved a schedule and an event. It was built for a
-  light copy of today's page, which never went live and is gone: the round it is for is today's
-  page against a completely new homepage, "Keep the money" (`marketing/partials/home-new`, held in
-  `HeroExperiment::NEW_PAGE_ROUND`), which waits for its rendered pages to be approved.
-- **What runs:** `promote_sell` alone, as since 2026-10-22, on today's page. Nothing prints the
-  new page yet, and `/?home=new` shows nothing different.
-- Needs `npm run build` (one line in `marketing-home.js` keeps a hidden film from downloading).
-  No migration, no env var.
-
-**After the deploy:** nothing. The new homepage round gets its own entry when it is approved.
+**What ships:** the machinery for testing two whole homepages (`App\Utils\HeroExperiment`: both
+pages in one document, the browser showing one, an even split that nothing ends by itself, and a
+"Homepage test" card on `/admin/growth` with each page's visitors, clicks, signups and how many
+saved a schedule and an event). It was built for a light copy of today's page, which never went
+live and is gone; the round it runs is the one in the entry above. Needs `npm run build` (one line
+in `marketing-home.js` keeps a hidden film from downloading). No migration, no env var.
 
 ## Unreleased: homepage pass, one headline (2026-10-22)
 

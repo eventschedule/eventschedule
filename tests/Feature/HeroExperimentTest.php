@@ -810,21 +810,27 @@ class HeroExperimentTest extends TestCase
 
     /** The two arms differ in their page and in nothing a visitor reads above the fold. */
     /**
-     * The site runs one headline on today's page, a baseline, until the new homepage's round is
-     * approved: nothing prints the new page and nothing is split.
+     * The site runs round four: today's page against the new one, split evenly, both printed in
+     * the one stored copy of the page with today's on show. Mutation: put promote_sell back as
+     * the only arm, or make 'home_new' the default.
      */
-    public function test_the_site_runs_one_headline_on_todays_page(): void
+    public function test_the_site_runs_todays_page_against_the_new_one(): void
     {
         HeroExperiment::useVariants(null);
 
-        $this->assertSame(['promote_sell'], array_keys(HeroExperiment::VARIANTS));
-        $this->assertSame('promote_sell', HeroExperiment::DEFAULT);
-        $this->assertSame(['promote_sell' => 'full'], HeroExperiment::forPage()['pages']);
-        $this->assertFalse(HeroExperiment::isFixed());
+        $this->assertSame(['home_today', 'home_new'], array_keys(HeroExperiment::VARIANTS));
+        $this->assertSame(HeroExperiment::NEW_PAGE_ROUND, HeroExperiment::VARIANTS);
+        $this->assertSame('home_today', HeroExperiment::DEFAULT);
+        $this->assertSame(['home_today' => 'full', 'home_new' => 'new'], HeroExperiment::forPage()['pages']);
+        $this->assertSame(['home_today' => 0.5, 'home_new' => 0.5], HeroExperiment::forPage()['weights']);
+        $this->assertTrue(HeroExperiment::isFixed());
 
         $html = $this->get('/')->assertOk()->getContent();
-        $this->assertStringNotContainsString('class="hn"', $html);
-        $this->assertStringNotContainsString('data-home="new"', $html);
+        $this->assertStringContainsString('<div class="hn">', $html);
+        $this->assertStringContainsString('class="hp-full"', $html);
+        $this->assertDoesNotMatchRegularExpression('/<div id="hp"[^>]*data-home/', $html);
+        // A retired key is no longer counted.
+        $this->beacon(['variant' => 'promote_sell', 'event' => 'view'])->assertStatus(422);
     }
 
     /**

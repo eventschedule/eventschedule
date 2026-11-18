@@ -72,7 +72,7 @@ final class HeroExperiment
     public const EXPERIMENT = 'home_hero';
 
     /** Rendered by the server while the test runs, and to visitors without JS. */
-    public const DEFAULT = 'promote_sell';
+    public const DEFAULT = 'home_today';
 
     /** The homepage a variant shows: today's, or the new one (marketing/partials/home-new). */
     public const PAGE_FULL = 'full';
@@ -92,21 +92,18 @@ final class HeroExperiment
      *
      * A variant may also carry 'page' => PAGE_NEW (see the class docblock).
      */
-    public const VARIANTS = [
-        // The only arm again (a baseline), as from 2026-10-22. The light page round of 2026-11
-        // ('home_full' against 'home_light': today's page against a lighter copy of it) never
-        // went live: it was replaced by NEW_PAGE_ROUND below, today's page against a completely
-        // new one, which waits here until it is approved. Its keys are new, so that nobody is
-        // carried into one of its arms from this baseline.
-        'promote_sell' => [
-            'line1' => 'Promote and sell',
-            'line2' => 'from your event calendar',
-            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
-        ],
-        // 'promote_sell' says "Promote and sell"
-        // rather than the round-three control's "Plan, promote, and sell", so the money verb is
-        // one of two, not lost in a list of three. Picked by hand on 2026-10-22, before the test's
-        // own lock rules were met.
+    public const VARIANTS = self::NEW_PAGE_ROUND + [
+        // Round four, from 2026-11-18: a page round, today's homepage ('home_today') against a
+        // completely new one ('home_new'), held in NEW_PAGE_ROUND. Split evenly, ended by a person
+        // on its look dates (LOOK_WEEKS), never by the code.
+        //
+        // Retired 2026-11-18 when the page round began: 'promote_sell' ("Promote and sell / from
+        // your event calendar", the one headline, a baseline from 2026-10-22; 'home_today' is the
+        // same words under a new key, so nobody is carried into the round from it). The light
+        // page round ('home_full' against 'home_light', 2026-11-16) never went live.
+        // 'promote_sell' said "Promote and sell" rather than the round-three control's "Plan,
+        // promote, and sell", so the money verb is one of two, not lost in a list of three. Picked
+        // by hand on 2026-10-22, before the test's own lock rules were met.
         // Retired 2026-10-22, when 'promote_sell' was made the only headline, after round three
         // (from 2026-10-04) had it ahead on signups per visitor from 2026-10-08 on, and with most
         // of its signups going on to save a schedule: 'plan_sell' ("Plan, promote, and sell / from
@@ -126,10 +123,8 @@ final class HeroExperiment
     ];
 
     /**
-     * The next round, NOT live: today's page against the new homepage, "Keep the money"
-     * (marketing/partials/home-new, designed 2026-11-18). It goes live by becoming VARIANTS, with
-     * DEFAULT set to 'home_today', once its rendered pages have been approved. Until then the tests
-     * run it through useVariants().
+     * Round four, live from 2026-11-18 (VARIANTS is this set): today's page against the new
+     * homepage, "Keep the money" (marketing/partials/home-new, designed 2026-11-18).
      *
      * 'home_today' is today's page and headline word for word; 'home_new' is the new page, whose
      * hero prints this copy, so the rules every variant keeps (24 characters a line, "event

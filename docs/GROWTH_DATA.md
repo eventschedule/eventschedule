@@ -704,9 +704,10 @@ created over the API or WhatsApp cannot carry a price.
     `started_at`, `looks`, `next_look`, and the phases `fixed` and `ended`. New on each row:
     `page`, `saved_schedule`, `saved_event`, `schedule_rate`. A page round's rows are not sorted
     by share.
-  - **No round is running yet.** `promote_sell` stays the one headline (phase `baseline`). The
-    round waiting to start is `home_today` (today's page) against `home_new` (the new homepage,
-    "Fill the room. Keep the money."), new keys, so that nobody is carried into either arm.
+  - **The variant keys changed.** From 2026-11-18 the round is `home_today` (today's page, the
+    words `promote_sell` had) against `home_new` (the new homepage, "Fill the room. Keep the
+    money."), new keys, so that nobody is carried into either arm. `promote_sell` is retired and
+    stays in `signups.hero_variant` for the accounts that carry it.
 
 - **28** (2026-11-12)
   - **New section `marketing_pages`:** per marketing page and device (phone or desktop), the
