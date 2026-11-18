@@ -29,6 +29,10 @@ class EmbedScriptTest extends TestCase
         $this->assertStringContainsString('public', $cache);
         $this->assertStringContainsString('max-age='.EmbedScriptController::MAX_AGE, $cache);
         $this->assertLessThanOrEqual(600, EmbedScriptController::MAX_AGE, 'a fix must reach every site that pasted it within minutes');
+        // An Expires of its own, or Apache's mod_expires appends a year's max-age (seen live).
+        $expires = strtotime((string) $response->headers->get('Expires'));
+        $this->assertNotFalse($expires);
+        $this->assertLessThanOrEqual(time() + EmbedScriptController::MAX_AGE + 5, $expires);
         $this->assertSame([], $response->headers->getCookies(), 'outside the web group: no session, no cookie');
         $this->assertSame(file_get_contents(resource_path('embed/embed.js')), $response->getContent());
         $this->assertSame(app_url('/embed.js'), url('/embed.js'));

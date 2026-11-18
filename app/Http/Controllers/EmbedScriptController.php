@@ -25,6 +25,11 @@ class EmbedScriptController extends Controller
         return response($script, 200, [
             'Content-Type' => 'application/javascript; charset=utf-8',
             'Cache-Control' => 'public, max-age='.self::MAX_AGE,
+            // Said outright: Apache's mod_expires (public/.htaccess gives application/javascript a
+            // year) adds its own max-age to any script response, this one included, unless an
+            // Expires is already there. Seen live on 2026-11-18 as "max-age=300, public,
+            // max-age=31536000", which a cache may read as a year: a fix would never reach a page.
+            'Expires' => gmdate('D, d M Y H:i:s', time() + self::MAX_AGE).' GMT',
             'X-Content-Type-Options' => 'nosniff',
             // A script tag on any site loads it; this lets one with crossorigin="anonymous" too.
             'Access-Control-Allow-Origin' => '*',
