@@ -225,3 +225,5 @@ Contributions are welcome! Please open an [issue](https://github.com/eventschedu
 ## License
 
 Event Schedule is licensed under the [Attribution Assurance License (AAL)](LICENSE), an [OSI-approved](https://opensource.org/license/aal) BSD-style license with an attribution requirement. In practice, guest pages on a selfhosted install keep a small Event Schedule credit linking back to the project.
+
+The licence covers the code, not the name: you can run it as a service of your own, but under your own name and logo, not as "Event Schedule". See [TRADEMARK.md](TRADEMARK.md).

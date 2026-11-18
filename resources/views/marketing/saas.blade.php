@@ -10,7 +10,7 @@
     @php
         $howToSteps = [
             ['name' => 'Deploy the platform', 'text' => 'Install Event Schedule on your own server with Docker or the Softaculous one-click installer, then point wildcard DNS at it so every customer can get a subdomain.'],
-            ['name' => 'Apply your branding', 'text' => 'Point APP_LOGO_LIGHT and APP_LOGO_DARK at your own logos, run the install on your own domain, and set APP_MARKETING_URL so the platform runs under your brand, bar the small attribution link the license asks for.'],
+            ['name' => 'Apply your branding', 'text' => 'Point APP_LOGO_LIGHT and APP_LOGO_DARK at your own logos, run the install on your own domain, and set APP_MARKETING_URL so the platform runs under your own name and brand, bar the small attribution link the license asks for. The license covers the code, not the Event Schedule name or logo.'],
             ['name' => 'Connect Stripe and set your prices', 'text' => 'Connect your Stripe account, create prices for your Pro and Enterprise tiers, set the trial length with TRIAL_DAYS, and open sign-ups.'],
         ];
     @endphp
@@ -1377,7 +1377,7 @@
                                 <span class="hp-ico"><svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg></span>
                                 <div>
                                     <h4 class="sk-h4">The AAL license</h4>
-                                    <p>Event Schedule is open source under the Attribution Assurance License. Use it commercially at no cost; just keep the attribution intact.</p>
+                                    <p>Event Schedule is open source under the Attribution Assurance License. Use it commercially at no cost; just keep the attribution intact. The license covers the code, not the name: launch your platform under a name and logo of your own.</p>
                                 </div>
                             </div>
                             <div class="sk-ask is-link">
@@ -2237,6 +2237,11 @@
                 'a' => 'Event Schedule is open source under the Attribution Assurance License (AAL). You can run it commercially at no cost as long as you keep the attribution, which appears as a small link in the corner of every public schedule page. There are no license fees, no revenue share, and no per-ticket fees.',
             ],
             [
+                'q' => 'Can I call my platform Event Schedule?',
+                'a' => 'No. The license lets you use the code, not the name: the Event Schedule name and logo may not be used to promote a product built from it without written permission. Give your platform its own name, logo and domain, and if you want to mention where it comes from, say it is "Powered by Event Schedule". The small credit on public schedule pages already does that for you.',
+                'more' => ['label' => 'Read the trademark policy', 'href' => 'https://github.com/eventschedule/eventschedule/blob/main/TRADEMARK.md'],
+            ],
+            [
                 'q' => 'Can I set my own subscription prices?',
                 'a' => 'Yes. You create the products and prices in your own Stripe account, and the built-in Free, Pro, and Enterprise tiers use them. You also control the trial length with a single TRIAL_DAYS setting. Whatever your customers pay lands in your Stripe account, and subscriptions are billed per schedule, so a customer who runs three pays for each one they upgrade.',
             ],
@@ -2310,7 +2315,11 @@
                             <div class="faq-answer">
                                 <p>{{ $faq['a'] }}</p>
                                 @isset($faq['more'])
-                                    <p><x-link href="{{ route($faq['more']['href']) }}">{{ $faq['more']['label'] }}</x-link></p>
+                                    @if (str_starts_with($faq['more']['href'], 'https://'))
+                                        <p><x-link href="{{ $faq['more']['href'] }}" target="_blank">{{ $faq['more']['label'] }}</x-link></p>
+                                    @else
+                                        <p><x-link href="{{ route($faq['more']['href']) }}">{{ $faq['more']['label'] }}</x-link></p>
+                                    @endif
                                 @endisset
                             </div>
                         </details>

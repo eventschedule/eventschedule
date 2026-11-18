@@ -117,7 +117,7 @@
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Make it yours</h4>
-                <p>Set <code class="doc-inline-code">SUPPORT_EMAIL</code> and publish your own legal pages. See <a href="#support-email" class="doc-link">Support Address</a> and <a href="#legal-pages" class="doc-link">Legal Pages</a>.</p>
+                <p>Give the platform a name and logo of your own, set <code class="doc-inline-code">SUPPORT_EMAIL</code> and publish your own legal pages. See <a href="#branding" class="doc-link">Branding</a>, <a href="#support-email" class="doc-link">Support Address</a> and <a href="#legal-pages" class="doc-link">Legal Pages</a>.</p>
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Connect Stripe, if you sell plans</h4>
@@ -215,7 +215,7 @@
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Build the marketing site</h4>
-                <p>With WordPress or any other tool; see <a href="#marketing-options" class="doc-link">Building the Site</a>. Write your own copy, your own feature list and your own screenshots: Event Schedule's pages are not yours to copy.</p>
+                <p>With WordPress or any other tool; see <a href="#marketing-options" class="doc-link">Building the Site</a>. Write your own copy, your own feature list and your own screenshots, under your platform's own name: Event Schedule's pages are not yours to copy, and neither is its name (see <a href="#branding" class="doc-link">Branding</a>).</p>
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Answer the addresses the app links to</h4>
@@ -464,6 +464,17 @@
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The logo at the top of the admin portal's sidebar does not read these variables. It always loads <code class="doc-inline-code">public/images/light_logo.webp</code>, with <code class="doc-inline-code">light_logo.png</code> for a browser without WebP, so replace those two files to change it.</p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Use the code, not the name</div>
+            <p>The <a href="https://github.com/eventschedule/eventschedule/blob/main/LICENSE" target="_blank" rel="noopener" class="doc-link">Attribution Assurance License</a>
+            lets you run, change and sell a service built on the code. It does not let you use the
+            Event Schedule name or logo to promote it: the platform you offer, its domain, its social
+            pages and any app you publish need a name and logo of your own, and the files
+            above replace ours. You may say your platform is "Powered by Event Schedule", as a credit
+            and not as your brand. The <a href="https://github.com/eventschedule/eventschedule/blob/main/TRADEMARK.md" target="_blank" rel="noopener" class="doc-link">trademark policy</a>
+            lists what is and is not allowed, and how to ask for permission.</p>
+        </div>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">One credit a page</div>
