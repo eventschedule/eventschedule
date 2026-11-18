@@ -3072,7 +3072,9 @@ class BackupService
         $newsletter->sent_count = $data['sent_count'] ?? 0;
         $newsletter->open_count = $data['open_count'] ?? 0;
         $newsletter->click_count = $data['click_count'] ?? 0;
-        $newsletter->type = $data['type'] ?? null;
+        // Always the schedule's own: a backup is a file its owner can edit, and an 'admin'
+        // newsletter is the platform's, which NewsletterService::send() mails to every user.
+        $newsletter->type = 'schedule';
         $newsletter->saveQuietly();
 
         return $newsletter;
@@ -3120,7 +3122,9 @@ class BackupService
         $segment = new NewsletterSegment;
         $segment->role_id = $role->id;
         $segment->name = $data['name'] ?? '';
-        $segment->type = $data['type'] ?? 'manual';
+        // Only a schedule's own kinds: 'all_users', 'plan_tier', 'signup_date' and 'admins' are the
+        // platform's, and resolve to every account on the install whoever owns the row.
+        $segment->type = in_array($data['type'] ?? null, NewsletterSegment::SCHEDULE_TYPES, true) ? $data['type'] : 'manual';
 
         $criteria = $data['filter_criteria'] ?? null;
         if (is_array($criteria)) {

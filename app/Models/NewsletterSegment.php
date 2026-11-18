@@ -48,8 +48,16 @@ class NewsletterSegment extends Model
         };
     }
 
+    /** The kinds a schedule's segment may be. The rest are the platform's (no schedule). */
+    public const SCHEDULE_TYPES = ['all_followers', 'all_subscribers', 'ticket_buyers', 'manual', 'waitlist', 'group'];
+
     public function resolveRecipients(): Collection
     {
+        // A platform-wide kind on a schedule's row (a restored backup could set one) reaches nobody.
+        if ($this->role_id !== null && ! in_array($this->type, self::SCHEDULE_TYPES, true)) {
+            return collect();
+        }
+
         return match ($this->type) {
             'all_followers' => $this->resolveFollowers(),
             'all_subscribers' => $this->resolveSubscribers(),

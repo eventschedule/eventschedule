@@ -146,9 +146,14 @@ class Newsletter extends Model
         return str_replace('{month}', $month, $text);
     }
 
+    /**
+     * The platform's own newsletter, sent to the install's users. Only ever one with no schedule:
+     * a schedule's row carrying 'admin' (a restored backup could set it) is that schedule's, and
+     * goes through every check a schedule's newsletter does.
+     */
     public function isAdmin(): bool
     {
-        return $this->type === 'admin';
+        return $this->type === 'admin' && $this->role_id === null;
     }
 
     public function scopeAdmin($query)
