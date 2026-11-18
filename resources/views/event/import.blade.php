@@ -1942,7 +1942,7 @@
             generateTimeOptions() {
                 var options = [];
                 var use24hr = {{ $use24hr ? 'true' : 'false' }};
-                for (var m = 0; m < 1440; m += 30) {
+                for (var m = 0; m < 1440; m += 15) {
                     var h = Math.floor(m / 60);
                     var min = m % 60;
                     var label;

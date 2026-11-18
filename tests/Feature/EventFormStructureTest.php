@@ -279,4 +279,19 @@ class EventFormStructureTest extends TestCase
 
         return $keys[1];
     }
+
+    /**
+     * The time lists step every quarter of an hour: at half hours, an agenda part could not be
+     * picked to start at 9:45 or end at 10:15 (a customer, 2026-11-18), nor an event start there.
+     * A time typed by hand may still be any minute. Mutation: put either list back on 30.
+     */
+    public function test_the_time_lists_step_every_quarter_hour(): void
+    {
+        $form = file_get_contents(resource_path('views/event/edit.blade.php'));
+
+        $this->assertStringContainsString('var TIME_STEP_MINUTES = 15;', $form);
+        $this->assertSame(2, substr_count($form, 'm += TIME_STEP_MINUTES'), 'the event and the agenda pickers both read the step');
+        $this->assertStringNotContainsString('m += 30', $form);
+        $this->assertStringNotContainsString('m += 30', file_get_contents(resource_path('views/event/import.blade.php')));
+    }
 }

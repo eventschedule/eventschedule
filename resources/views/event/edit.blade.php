@@ -1202,6 +1202,10 @@
         return null;
     }
 
+    // The time pickers' step: a quarter of an hour, so an agenda or an event can start at 9:45
+    // or end at 10:15 from the list. A time typed by hand may be any minute.
+    var TIME_STEP_MINUTES = 15;
+
     function formatMinutesToTime(minutes) {
         var h = Math.floor(minutes / 60) % 24;
         var m = minutes % 60;
@@ -1220,7 +1224,7 @@
         inputEl._timepickerInit = true;
 
         var timeOptions = [];
-        for (var m = 0; m < 1440; m += 30) {
+        for (var m = 0; m < 1440; m += TIME_STEP_MINUTES) {
             timeOptions.push(formatMinutesToTime(m));
         }
 
@@ -1292,7 +1296,7 @@
         function scrollToNearest() {
             var minutes = parseTimeToMinutes(inputEl.value);
             if (minutes === null) minutes = 540; // Default to 9am
-            var closest = Math.round(minutes / 30) * 30;
+            var closest = Math.round(minutes / TIME_STEP_MINUTES) * TIME_STEP_MINUTES;
             if (closest >= 1440) closest = 0;
             var target = formatMinutesToTime(closest);
             var items = getVisibleItems();
@@ -1604,7 +1608,7 @@
         // Custom time picker dropdown
         function initTimePicker(inputEl, dropdownEl, getDefaultMinutes) {
             var timeOptions = [];
-            for (var m = 0; m < 1440; m += 30) {
+            for (var m = 0; m < 1440; m += TIME_STEP_MINUTES) {
                 timeOptions.push(formatMinutesToTime(m));
             }
 
@@ -1678,7 +1682,7 @@
                 var minutes = parseTimeToMinutes(inputEl.value);
                 if (minutes === null) minutes = getDefaultMinutes();
                 // Find closest 30-min slot
-                var closest = Math.round(minutes / 30) * 30;
+                var closest = Math.round(minutes / TIME_STEP_MINUTES) * TIME_STEP_MINUTES;
                 if (closest >= 1440) closest = 0;
                 var target = formatMinutesToTime(closest);
                 var items = getVisibleItems();
