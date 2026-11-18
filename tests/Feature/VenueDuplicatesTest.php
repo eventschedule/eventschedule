@@ -371,6 +371,30 @@ class VenueDuplicatesTest extends TestCase
         $this->assertContains(UrlUtils::encodeId($theirs->id), $ids);
     }
 
+    /**
+     * The same, where the other venue is owned but its address is not verified: not claimed, and
+     * still run by somebody (hasRealOwner()), so the merge page will not offer it either.
+     */
+    public function test_the_picker_keeps_a_stub_beside_a_venue_somebody_runs_with_an_unverified_address(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+
+        $theirs = $this->createRole($this->createOwner(), 'venue', [
+            'name' => 'Hoodna', 'city' => 'Tel Aviv', 'country_code' => 'il', 'email_verified_at' => null,
+        ]);
+        $stub = $this->stubVenue('Hoodna', ['city' => 'Tel Aviv', 'country_code' => 'il']);
+        $this->followRole($owner, $theirs);
+        $this->followRole($owner, $stub);
+
+        $this->actingAs($owner);
+        $ids = collect($this->get(route('event.create', ['subdomain' => $talent->subdomain]))->viewData('venues'))
+            ->pluck('id')->all();
+
+        $this->assertContains(UrlUtils::encodeId($stub->id), $ids);
+        $this->assertContains(UrlUtils::encodeId($theirs->id), $ids);
+    }
+
     public function test_the_picker_keeps_a_stub_carrying_its_own_address(): void
     {
         $owner = $this->createOwner();

@@ -1353,6 +1353,22 @@ class RoleController extends Controller
      * crafted requests from mixing venues that happen to each be in some
      * duplicate group but not the same one.
      */
+    /**
+     * The account-wide group (mergeableGroups()) whose WHOLE set holds every one of $ids, or null.
+     *
+     * @return array<int, Role>|null
+     */
+    private function fullGroupOf(array $groups, array $ids): ?array
+    {
+        foreach ($groups as $group) {
+            if (! array_diff($ids, $group[0]->full_ids ?? [])) {
+                return $group;
+            }
+        }
+
+        return null;
+    }
+
     private function idsBelongToSingleGroup(array $groups, array $ids): bool
     {
         foreach ($groups as $group) {
@@ -1691,12 +1707,15 @@ class RoleController extends Controller
             ->pluck('venue_ids_hash')
             ->all();
 
+        $runIds = VenueUtils::runIds($allRoles->pluck('id')->all());
+
         foreach ($types as $type) {
             $venues = $allRoles->where('type', $type)->values();
             $result[$type] = $this->mergeableGroups(
                 $type === 'venue' ? VenueUtils::duplicateGroups($venues) : self::sameNameGroups($venues),
                 $dismissedHashes,
-                $levelsByRoleId
+                $levelsByRoleId,
+                $runIds
             );
         }
 
@@ -1710,22 +1729,15 @@ class RoleController extends Controller
      * @param  array<int, string>  $dismissedHashes
      * @return array<int, array<int, Role>>
      */
-    private function mergeableGroups(array $candidateGroups, array $dismissedHashes, Collection $levelsByRoleId): array
+    /**
+     * @param  array<int, int>  $runIds  the candidates somebody runs (VenueUtils::runIds()):
+     *                                   "nobody runs it" is that, never ! isClaimed() alone, which
+     *                                   reads an owned schedule whose address is unverified as a
+     *                                   placeholder (canMergeRoles() would then refuse every merge
+     *                                   the page offered, and the notice would never clear).
+     */
+    private function mergeableGroups(array $candidateGroups, array $dismissedHashes, \Illuminate\Support\Collection $levelsByRoleId, array $runIds): array
     {
-        // Which candidates somebody runs, in one query: Role::hasRealOwner() for the lot. "Nobody
-        // runs it" is that, never ! isClaimed() alone, which reads an owned schedule whose
-        // address is unverified as a placeholder (canMergeRoles() would then refuse every merge
-        // the page offered, and the Following notice would never clear).
-        $candidateIds = collect($candidateGroups)->flatten(1)->pluck('id')->all();
-        $runIds = empty($candidateIds) ? [] : DB::table('roles')
-            ->join('role_user', function ($join) {
-                $join->on('role_user.role_id', '=', 'roles.id')->on('role_user.user_id', '=', 'roles.user_id');
-            })
-            ->whereIn('roles.id', $candidateIds)
-            ->whereIn('role_user.level', ['owner', 'admin'])
-            ->pluck('roles.id')
-            ->all();
-
         // Mirrors isEditableBy() in memory: owner or admin always, a follower only where nobody
         // runs it. Deciding what to DISPLAY is all this does - mergeMyDuplicatesGroup() still
         // runs the real canMergeRoles() per pair on re-fetched rows.
@@ -1767,9 +1779,14 @@ class RoleController extends Controller
                 continue;
             }
 
+            // The whole group rides along: a merge or a dismissal is checked against it, not
+            // against what was shown, so a source claimed between render and submit is skipped
+            // by canMergeRoles() (the partial-result message) rather than refusing the batch.
+            $fullIds = array_map(fn ($v) => $v->id, $group);
             foreach ($shown as $role) {
                 $role->ids_hash = $shownHash;
                 $role->dismiss_hash = $fullHash;
+                $role->full_ids = $fullIds;
             }
 
             $groups[] = $shown;
@@ -1900,7 +1917,7 @@ class RoleController extends Controller
         }
 
         $groups = $this->userVenueDuplicateGroups(auth()->user(), $type);
-        if (! $this->idsBelongToSingleGroup($groups, array_merge([$targetId], $sourceIds))) {
+        if (! $this->fullGroupOf($groups, array_merge([$targetId], $sourceIds))) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -1943,7 +1960,7 @@ class RoleController extends Controller
         }
 
         $groups = $this->userVenueDuplicateGroups($user, $type);
-        if (! $this->idsBelongToSingleGroup($groups, array_merge([$targetId], $sourceIds))) {
+        if (! $this->fullGroupOf($groups, array_merge([$targetId], $sourceIds))) {
             return redirect()->route(self::myMergeRoute($type))
                 ->with('error', __('messages.not_authorized'));
         }
@@ -2010,11 +2027,14 @@ class RoleController extends Controller
         }
 
         $groups = $this->userVenueDuplicateGroups(auth()->user(), $type);
-        if (! $this->idsBelongToSingleGroup($groups, $venueIds)) {
+        $group = $this->fullGroupOf($groups, $venueIds);
+        if (! $group) {
             return redirect()->route(self::myMergeRoute($type))
                 ->with('error', __('messages.not_authorized'));
         }
 
+        // The whole group's hash (mergeableGroups()), not the posted ids': the page shows only
+        // what can be merged, and "Not duplicates" is about every schedule of that name.
         DismissedVenueMergeSuggestion::firstOrCreate([
             'user_id' => auth()->user()->id,
             'role_id' => null,
@@ -2051,8 +2071,6 @@ class RoleController extends Controller
             return mb_substr($local, 0, 1).str_repeat('*', 3).'@'.$head.str_repeat('*', 3)
                 .(str_contains($domain, '.') ? mb_substr($domain, mb_strrpos($domain, '.')) : '');
         }
-        // The whole group's hash (mergeableGroups()), not the posted ids': the page shows only
-        // what can be merged, and "Not duplicates" is about every schedule of that name.
 
         // The tail is capped at a third of the value, so a short one cannot come back unmasked:
         // without this, anything three characters or fewer was returned verbatim.

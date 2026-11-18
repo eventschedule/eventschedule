@@ -622,6 +622,36 @@ class EventRepo
     }
 
     /**
+     * The same-name schedules existingParticipantNamed() found marked "Not duplicates", for the
+     * row it was last asked about, or null.
+     *
+     * @var array<int, int>|null
+     */
+    private ?array $keptApartIds = null;
+
+    /**
+     * A schedule made for a name its owner marked "Not duplicates" joins that dismissal.
+     *
+     * A dismissal is a hash of the exact set of schedules, and the new one is connected to the
+     * person like the rest, so without this the set is one larger, nobody dismissed it, the merge
+     * page offers it again and the next save lands on whichever of them has the most events: a
+     * schedule its owner said was somebody else.
+     */
+    private function keepApart(Role $role, User $user): void
+    {
+        if ($this->keptApartIds === null
+            || ! DB::table('role_user')->where('user_id', $user->id)->where('role_id', $role->id)->exists()) {
+            return;
+        }
+
+        DismissedVenueMergeSuggestion::firstOrCreate([
+            'user_id' => $user->id,
+            'role_id' => null,
+            'venue_ids_hash' => DismissedVenueMergeSuggestion::hashForVenueIds(array_merge($this->keptApartIds, [$role->id])),
+        ]);
+    }
+
+    /**
      * The participant schedule a "Someone new" row names, when the person saving already has one
      * by that name: any of their schedules (owner, admin or follower) of the same type, name and
      * country that they may edit, so their own placeholders and schedules they run, never
@@ -646,6 +676,8 @@ class EventRepo
      */
     private function existingParticipantNamed(array $member, string $type, ?string $countryCode, ?User $user): ?Role
     {
+        $this->keptApartIds = null;
+
         if (! $user || ! empty($member['email']) || ! empty($member['phone']) || ! empty($member['youtube_url'])) {
             return null;
         }
@@ -677,6 +709,9 @@ class EventRepo
             ->whereNull('role_id')
             ->where('venue_ids_hash', DismissedVenueMergeSuggestion::hashForVenueIds($sameName->pluck('id')->all()))
             ->exists()) {
+            // saveEvent() adds the schedule it makes to this dismissal (keepApart()).
+            $this->keptApartIds = $sameName->pluck('id')->all();
+
             return null;
         }
 
@@ -1146,6 +1181,10 @@ class EventRepo
 
                     if ($followNewRoles && (! $matchingUser || $matchingUser->id != $user->id)) {
                         $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+                    }
+
+                    if (! $isGuestSubmission) {
+                        $this->keepApart($role, $user);
                     }
                 } else {
                     $roleId = UrlUtils::decodeId($memberId);

@@ -6829,7 +6829,7 @@ return [
     'merge_participants_title' => 'Combinar participantes duplicados',
     'merge_participants_intro_all' => 'Estas programaciones de participantes parecen duplicadas entre sí. Elige cuál conservar en cada grupo y combínalas.',
     'merge_participants_empty_state_all' => 'No se encontraron participantes duplicados.',
-    'merge_participants_summary_counts' => 'Participantes a combinar: :venues. Eventos a mover: :events.',
+    'merge_participants_summary_counts' => 'Participantes que se combinan: :venues. Eventos que se mueven: :events.',
     'merge_participants_preview_summary' => 'Mover :events eventos de :sources participantes a :target (:overlap ya en :target). ¿Continuar?',
     'merge_participants_partial_result' => 'Se combinaron :done de :total participantes en :target. Se omitieron :skipped (ya no se pueden combinar).',
     'possible_duplicate_participants_banner' => 'Puede que tengas :count participantes duplicados para revisar',

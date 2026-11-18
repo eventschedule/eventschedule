@@ -5,6 +5,7 @@ namespace App\Utils;
 use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Role;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The one definition of "these venue schedules look like the same place".
@@ -188,12 +189,18 @@ class VenueUtils
 
         $kept = collect();
         $collapsed = 0;
+        $runIds = null;
 
         // The NARROW key - see collapseKey(). The merge page groups on the wider one, because
         // there the answer is an offer behind a confirmation; here it removes a row the user has
         // no way to search back up.
         foreach (self::groupDuplicates($venues, forCollapse: true) as $group) {
-            if (count($group) < 2 || self::isDismissed($group, $dismissedHashes) || ! self::isSafeToCollapse($group)) {
+            // Asked once, and only when there is a group to decide: most pickers have none.
+            if (count($group) >= 2 && $runIds === null) {
+                $runIds = self::runIds($venues->pluck('id')->all());
+            }
+
+            if (count($group) < 2 || self::isDismissed($group, $dismissedHashes) || ! self::isSafeToCollapse($group, $runIds ?? [])) {
                 $kept = $kept->concat($group);
 
                 continue;
@@ -213,6 +220,33 @@ class VenueUtils
         return [$kept->values(), $collapsed];
     }
 
+    /**
+     * Which of these schedules somebody runs, in one query: Role::hasRealOwner() for the lot.
+     *
+     * "Nobody runs this schedule" is ! hasRealOwner(), never ! isClaimed() alone (an owned
+     * schedule whose address is unverified is not claimed), so both the merge pages and the
+     * picker ask this before treating a follower as able to merge into a schedule.
+     *
+     * @param  array<int, int>  $ids
+     * @return array<int, int>
+     */
+    public static function runIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        return DB::table('roles')
+            ->join('role_user', function ($join) {
+                $join->on('role_user.role_id', '=', 'roles.id')->on('role_user.user_id', '=', 'roles.user_id');
+            })
+            ->whereIn('roles.id', $ids)
+            ->whereIn('role_user.level', ['owner', 'admin'])
+            ->pluck('roles.id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
     /** @param  array<int, string>  $dismissedHashes */
     private static function isDismissed(array $group, array $dismissedHashes): bool
     {
@@ -225,7 +259,8 @@ class VenueUtils
         return in_array($hash, $dismissedHashes, true);
     }
 
-    private static function isSafeToCollapse(array $group): bool
+    /** @param  array<int, int>  $runIds  runIds() of the venues on the picker */
+    private static function isSafeToCollapse(array $group, array $runIds = []): bool
     {
         $claimed = collect($group)->filter(fn (Role $v) => $v->isClaimed())->count();
 
@@ -246,7 +281,7 @@ class VenueUtils
         $level = $survivor->pivot?->level;
 
         $canMergeInto = in_array($level, ['owner', 'admin'], true)
-            || (! $survivor->isClaimed() && $level === 'follower');
+            || (! $survivor->isClaimed() && ! in_array($survivor->id, $runIds) && $level === 'follower');
 
         if (! $canMergeInto) {
             return false;

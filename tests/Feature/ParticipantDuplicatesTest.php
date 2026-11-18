@@ -110,6 +110,7 @@ class ParticipantDuplicatesTest extends TestCase
         $event = \App\Models\Event::where('name', 'Stranger Game')->firstOrFail();
         $this->assertTrue($event->is_guest_submission);
         $this->assertFalse($event->roles->contains('id', $placeholder->id));
+        $this->assertTrue($event->roles->contains(fn ($role) => $role->type === 'talent' && $role->name === 'Childress Lady Cats'));
     }
 
     public function test_a_name_marked_not_duplicates_is_not_reused(): void
@@ -129,6 +130,64 @@ class ParticipantDuplicatesTest extends TestCase
         $this->assertSame(3, Role::where('type', 'talent')->where('name', 'DJ Sam')->count());
         $this->assertFalse($this->latestEvent()->roles->contains('id', $a->id));
         $this->assertFalse($this->latestEvent()->roles->contains('id', $b->id));
+
+        // And on every save after it: the schedule each save makes joins the dismissal, so the
+        // group never comes back to the merge page and no save picks one of them.
+        $this->addGame($owner, $curator, ['name' => 'DJ Sam']);
+
+        $this->assertSame(4, Role::where('type', 'talent')->where('name', 'DJ Sam')->count());
+        $this->assertCount(0, $this->get(route('following.merge_participants'))->viewData('groups'));
+    }
+
+    public function test_not_duplicates_is_about_every_schedule_of_the_name_not_only_those_shown(): void
+    {
+        [$owner, $curator] = $this->curator();
+        $real = $this->createRole($this->createOwner(), 'talent', ['name' => 'The Rovers', 'country_code' => 'us']);
+        $copyA = $this->stubTalent('The Rovers');
+        $copyB = $this->stubTalent('The Rovers');
+        foreach ([$real, $copyA, $copyB] as $role) {
+            $this->followRole($owner, $role);
+        }
+
+        // The page shows the two copies (the real page is someone else's); the post names those.
+        $this->actingAs($owner)->post(route('following.merge_participants_dismiss'), [
+            'venue_ids' => [UrlUtils::encodeId($copyA->id), UrlUtils::encodeId($copyB->id)],
+        ])->assertRedirect(route('following.merge_participants'));
+
+        $this->addGame($owner, $curator, ['name' => 'The Rovers']);
+
+        $this->assertFalse($this->latestEvent()->roles->contains('id', $copyA->id));
+        $this->assertFalse($this->latestEvent()->roles->contains('id', $copyB->id));
+    }
+
+    public function test_a_source_claimed_after_the_page_was_drawn_is_skipped_not_refused(): void
+    {
+        [$owner] = $this->curator();
+        $stubs = collect(range(1, 3))->map(function () use ($owner) {
+            $stub = $this->stubTalent('Lady Cats');
+            $this->followRole($owner, $stub);
+
+            return $stub;
+        });
+        $this->actingAs($owner);
+        $this->assertCount(3, $this->get(route('following.merge_participants'))->viewData('groups')[0]);
+
+        // Between render and submit, somebody claims one of the sources.
+        $claimant = $this->createOwner();
+        $claimed = $stubs[2];
+        $claimed->user_id = $claimant->id;
+        $claimed->email = 'lady.cats.coach@gmail.com';
+        $claimed->email_verified_at = now();
+        $claimed->save();
+        $claimant->roles()->attach($claimed->id, ['level' => 'owner', 'created_at' => now()]);
+
+        $this->post(route('following.merge_participants_group'), [
+            'target_id' => UrlUtils::encodeId($stubs[0]->id),
+            'source_ids' => [UrlUtils::encodeId($stubs[1]->id), UrlUtils::encodeId($claimed->id)],
+        ])->assertRedirect()->assertSessionHas('message');
+
+        $this->assertDatabaseHas('roles', ['id' => $stubs[1]->id, 'is_deleted' => true]);
+        $this->assertDatabaseHas('roles', ['id' => $claimed->id, 'is_deleted' => false]);
     }
 
     public function test_a_placeholder_in_another_country_is_not_reused(): void
