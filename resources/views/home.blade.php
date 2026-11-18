@@ -51,6 +51,10 @@
         </div>
         @endif
 
+        @if(! empty($homeSchedulePrompt))
+            @include('partials.home-schedule-prompt', ['role' => $homeSchedulePrompt])
+        @endif
+
         @if(!empty($showFederationPrompt))
             {{-- No bottom padding of its own here: space-y-4 already spaces it. --}}
             @include('partials.federation-prompt', ['padded' => false])

@@ -1190,7 +1190,7 @@
             </svg>
             Settings (System)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. There are eight, and a plain selfhost sees four of them: Header / Footer Code, Event Schedule network, Platform currency and Realtime visitors, plus Accommodation affiliate when it is enabled. None of these settings can be changed while the install is in demo mode.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. There are nine, and a plain selfhost sees five of them: Home schedule, Header / Footer Code, Event Schedule network, Platform currency and Realtime visitors, plus Accommodation affiliate when it is enabled. None of these settings can be changed while the install is in demo mode.</p>
 
         <x-doc-screenshot id="selfhost-admin--settings" alt="The admin Settings page, opening on the Header / Footer Code card" />
 
@@ -1204,6 +1204,11 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr>
+                        <td><a href="#settings-home-schedule" class="doc-link">Home schedule</a></td>
+                        <td>Shows one schedule at your site's own address</td>
+                        <td>A selfhost install, once it has a schedule</td>
+                    </tr>
                     <tr>
                         <td><a href="#settings-header-footer" class="doc-link">Header / Footer Code</a></td>
                         <td>Injects your own code into every public guest page</td>
@@ -1247,6 +1252,15 @@
                 </tbody>
             </table>
         </div>
+
+        <h3 id="settings-home-schedule" class="doc-subheading">Home schedule</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A selfhost install puts every schedule under a path, so a schedule called <code class="doc-inline-code">example</code> lives at <code class="doc-inline-code">https://events.example.com/example</code>. Most installs run one schedule, and the address people know is the bare one. Pick that schedule here and <code class="doc-inline-code">https://events.example.com</code> shows it, instead of the sign-in page.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Everywhere it is named</strong> - the page's canonical address, share links, emails, QR codes, the sitemap and the <a href="#settings-network" class="doc-link">network</a> listing all use the site's own address.</li>
+            <li><strong class="text-gray-900 dark:text-white">What stays where it was</strong> - its events and sub-schedules keep their addresses under the path, and the old address of the schedule keeps working, so links already shared do not break.</li>
+            <li><strong class="text-gray-900 dark:text-white">Signing in</strong> - the site's address no longer opens the sign-in page, so you and your team sign in at <code class="doc-inline-code">/login</code>.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Choose <strong class="text-gray-900 dark:text-white">None</strong> to go back. If the chosen schedule is deleted, the address opens the sign-in page again on its own.</p>
 
         <h3 id="settings-header-footer" class="doc-subheading">Header and footer code</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">This is where site-wide tracking such as <strong class="text-gray-900 dark:text-white">Google Tag Manager</strong> or Google Analytics goes.</p>

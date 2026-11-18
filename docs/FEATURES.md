@@ -171,6 +171,7 @@ Available only when `IS_HOSTED=false` (selfhosted deployments).
 |---------|--------------|-------|
 | Auto import from URLs | `resources/views/role/edit.blade.php` (the Integrations > Auto import row, `integration-tab-auto-import`), `!config('app.hosted')` | AI-powered daily import (`app:import-curator-events`, `routes/console.php`) of events from a list of external URLs. The optional city list is a filter, not a search: `ImportCuratorEvents` drops an imported event whose city is not on it |
 | App update | `can_self_update()` (`app/helpers.php`): any signed-in user on a plain selfhost, admins only on a self-hosted SaaS install, never on eventschedule.com | One-click application updates |
+| Home schedule | `HomeSchedule::available()` (`App\Support\HomeSchedule`): `! config('app.hosted') && ! config('app.is_nexus')`; chosen at `/admin/settings#home-schedule` | One schedule shown at the site's own address (`ServeHomeSchedule` reads `/` as `/{subdomain}`), and that address handed out for it; its events, sub-schedules and short links stay under its path, and its old address keeps working. Signing in moves to `/login`. A dashboard banner tells the admin of an install with one schedule |
 
 ## Network Features
 
@@ -182,7 +183,7 @@ operator, not per schedule.
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
 | Federation | `FederationService::isEnabled()` - `! config('app.is_nexus') && Setting::get('federation_enabled')` | Shares public events with the eventschedule.com listings; every listing links back to the event on the origin site. Off by default, enabled by an admin at `/admin/settings`. Each schedule is opt-in via `roles.federation_enabled` (null = undecided, the default, and shares nothing; false vetoes co-listed events). Owners are offered one-click listing on the dashboard, admins on the settings card (for schedules they own), and anyone who can edit a schedule on its page |
-| Federation moderation | `AdminFederationController`, `config('app.is_nexus')` | Nexus-only. Approve, suspend or delist instances, and block individual listings, at `/admin/federation`. The first approval emails the operator a welcome with setup steps (`FederationWelcomeService`); installs approved before that can be sent it from the same screen. An install whose reported address stops matching the record is flagged: accept the new address, confirm the one on record, or suspend the install |
+| Federation moderation | `AdminFederationController`, `config('app.is_nexus')` | Nexus-only. Approve, suspend or delist instances, and block individual listings, at `/admin/federation`. The first approval emails the operator a welcome with setup steps (`FederationWelcomeService`); installs approved before that can be sent it from the same screen. An install that reports another address stays listed meanwhile: a change of scheme or `www.` alone is taken on the spot; anything else is flagged, and adopted by Accept or by `federation:maintain` when the old address redirects to the new host (`FederationAddressService`), which emails the operator; or confirm the one on record, or suspend the install |
 
 ## Platform Admin (every install)
 

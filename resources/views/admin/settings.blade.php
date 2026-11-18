@@ -134,6 +134,47 @@
              flashes a toast instead, because its save lands on the card, not the top. --}}
         <x-page-flash :keys="['success' => 'success']" />
 
+        {{-- Selfhost only: which schedule the site's own address shows (App\Support\HomeSchedule).
+             Its own form and route, like the cards below. --}}
+        @if ($homeScheduleAvailable && $homeScheduleChoices->isNotEmpty())
+        @php
+            $homeRoot = rtrim(url('/'), '/');
+            $homeSelected = old('home_schedule', $homeScheduleId ? \App\Utils\UrlUtils::encodeId($homeScheduleId) : '');
+        @endphp
+        <x-page-card beside id="home-schedule" class="scroll-mt-24" :title="__('messages.home_schedule_title')" :lead="__('messages.home_schedule_description', ['url' => $homeRoot])">
+            <form method="POST" action="{{ route('admin.settings.update_home_schedule') }}" class="{{ $formClass }}">
+                @csrf
+
+                <div class="page-form-fields">
+                    <div>
+                        <x-input-label for="home_schedule" :value="__('messages.home_schedule_label', ['url' => $homeRoot])" />
+                        {{-- v-pre: schedule names are somebody's text, and this page sits in a Vue mount. --}}
+                        <select id="home_schedule" name="home_schedule" v-pre {{ $demo ? 'disabled' : '' }}
+                            class="mt-1 block w-full sm:max-w-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                            <option value="">{{ __('messages.home_schedule_none') }}</option>
+                            @foreach ($homeScheduleChoices as $homeChoice)
+                                @php $homeHash = \App\Utils\UrlUtils::encodeId($homeChoice->id); @endphp
+                                <option value="{{ $homeHash }}" @selected($homeSelected === $homeHash)>{{ $homeChoice->name }} ({{ $homeChoice->subdomain }})</option>
+                            @endforeach
+                        </select>
+                        <p class="sys-help">{{ __('messages.home_schedule_help') }}</p>
+                        {{-- What the option takes away, said where it is switched on. --}}
+                        <p class="sys-help">{{ __('messages.home_schedule_login_note', ['url' => route('login')]) }}</p>
+                        <x-input-error class="mt-2" :messages="$errors->get('home_schedule')" />
+                    </div>
+
+                    @if ($demo)
+                    <x-page-notice tone="warn">{{ __('messages.demo_mode_settings_disabled') }}</x-page-notice>
+                    @endif
+                </div>
+
+                <div class="page-form-actions">
+                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                </div>
+            </form>
+        </x-page-card>
+        @endif
+
         <x-page-card beside :title="__('messages.header_footer_code')" :lead="__('messages.header_footer_code_intro')">
             <form method="POST" action="{{ route('admin.settings.update') }}" class="{{ $formClass }}">
                 @csrf
@@ -182,6 +223,13 @@
                         $federationErrorKey = $federationLastError === 'rejected' ? 'rejected_reconnecting' : $federationLastError;
                     @endphp
                     <x-page-notice tone="warn">{{ __('messages.federation_error_'.$federationErrorKey) }}</x-page-notice>
+                @endif
+
+                {{-- APP_URL changed and the network still checks links against the old address.
+                     Nothing for the operator to do, but without this the preview would only say
+                     events are waiting, with no reason. Both addresses are this install's own. --}}
+                @if ($federationEnabled && $federationAddressPending)
+                    <div v-pre><x-page-notice tone="warn">{{ __('messages.federation_address_pending', ['new' => $federationOwnUrl, 'old' => $federationNetworkUrl]) }}</x-page-notice></div>
                 @endif
 
                 {{-- Where the install stands, first, once there is anything to say - before the

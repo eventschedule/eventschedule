@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-federation-address-moves-network-search-and-the-home-schedule-2026-11-18) | not yet | Nothing; after: watch `/admin/federation` and the first `federation:maintain` run |
 | [Unreleased](#unreleased-promoter-links-2026-11-11) | not yet | One migration (in the start command); nothing after |
 | [Unreleased](#unreleased-donations-at-checkout-2026-11-11) | not yet | One migration (in the start command); nothing after |
 | [Unreleased](#unreleased-apple-wallet-passes-2026-11-11) | not yet | Nothing until you choose to switch it on (env vars in the app spec) |
@@ -101,6 +102,33 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: federation address moves, network search and the home schedule (2026-11-18)
+
+**What ships:**
+- **An approved install that changes its address stays listed.** A push or a registration from
+  another address no longer sends an approved install back to pending (which took its listings off
+  `/browse`): only the scheme or a `www.` changing is taken on the spot; anything else is a claim
+  on `/admin/federation`, adopted by Accept or, hourly, by `federation:maintain` when the OLD address
+  redirects to the claimed host (`FederationAddressService`). An adopted address mails the operator
+  (`FederationAddressConfirmed`). Every API answer now says which address the network has, so an
+  install on this release holds its events while they differ and sends everything again once they
+  agree; reconcile reports a listing whose link is off the install's address as missing, which
+  installs of every release already re-send.
+- **`/search` lists network events** (name, blurb, schedule, venue, city), as `/browse` does.
+- **Selfhost only: a home schedule** (Admin > Settings > Home schedule) shown at the site's root,
+  with a dashboard banner for an install with one schedule. Nothing on the nexus.
+
+**No migration, no build, no env var.**
+
+**After the deploy:**
+- `federation:maintain` now makes up to ten outbound requests an hour, one to each claiming
+  install's OLD address (through the SSRF guard). It may adopt claims already standing and mail
+  each of those operators once.
+- An install that an earlier host change sent back to pending stays pending: review it on
+  `/admin/federation`.
+
+*Undo:* console rollback. Addresses adopted meanwhile stay adopted; that is the record being right.
 
 ## Unreleased: promoter links (2026-11-11)
 

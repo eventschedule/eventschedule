@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
+use App\Services\FederationAddressService;
 use App\Services\FederationService;
 use App\Services\FederationWelcomeService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -89,20 +91,16 @@ class ApiFederationController extends Controller
                 return response()->json(['error' => 'Signature verification failed'], 403);
             }
 
-            // A host change is a different site, not a new address for the same one:
-            // isAcceptable() authorises backlinks against whatever site_url currently
-            // says, so silently accepting this would let an instance approved as
-            // goodsite.example start publishing links to spam.example. The flagged_at
-            // tripwire below cannot catch it - that compares a *push* against the
-            // record, and by then the record itself has already been rewritten.
-            $movedHost = $instance->host() !== null && $instance->host() !== $host;
+            // The address is weighed exactly as a push weighs it, never simply written:
+            // isAcceptable() authorises backlinks against whatever site_url says, so
+            // taking a new host on a registration's word would let an instance approved
+            // as goodsite.example start publishing links to spam.example. A new host is
+            // a claim the install stays approved and listed through, where it used to
+            // send an approved install back to review and take every listing down.
+            // See FederationAddressService::note().
+            app(FederationAddressService::class)->note($instance, $validated['site_url'], registering: true);
 
             $instance->fill([
-                'site_url' => $validated['site_url'],
-                // The record has just moved, so a pending claim against the old one is
-                // stale. Left set, it would offer the admin an "accept" that reverts
-                // site_url to an address this install no longer reports.
-                'reported_site_url' => null,
                 'name' => $validated['name'] ?? $instance->name,
                 'contact_email' => $validated['contact_email'] ?? $instance->contact_email,
                 'secret' => $validated['secret'],
@@ -112,19 +110,6 @@ class ApiFederationController extends Controller
                 'locale' => $locale ?? $instance->locale,
             ]);
             $instance->last_seen_at = now();
-
-            if ($movedHost) {
-                $instance->flagged_at = now();
-
-                // Back to the review queue, but only from approved: re-pending a
-                // suspended instance would hand it an escape from moderation.
-                if ($instance->status === FederatedInstance::STATUS_APPROVED) {
-                    $instance->status = FederatedInstance::STATUS_PENDING;
-                    $instance->approved_at = null;
-                    $instance->approved_by = null;
-                }
-            }
-
             $instance->save();
 
             // An approved install that was never welcomed, now telling us where to write.
@@ -135,11 +120,7 @@ class ApiFederationController extends Controller
                 app(FederationWelcomeService::class)->send($instance);
             }
 
-            return response()->json([
-                'status' => $instance->status,
-                'registered' => true,
-                'listings_url' => $instance->listingsUrl(),
-            ]);
+            return response()->json(['registered' => true] + $instance->apiState());
         }
 
         // Ceiling on unreviewed registrations. Existing instances are unaffected - the
@@ -166,11 +147,7 @@ class ApiFederationController extends Controller
         // into a spam relay. Notifications are tied to admin actions instead, plus
         // the signed re-registration of an already approved install above.
 
-        return response()->json([
-            'status' => $instance->status,
-            'registered' => true,
-            'listings_url' => $instance->listingsUrl(),
-        ], 201);
+        return response()->json(['registered' => true] + $instance->apiState(), 201);
     }
 
     /**
@@ -192,7 +169,7 @@ class ApiFederationController extends Controller
         abort_unless(config('app.is_nexus'), 404);
 
         $instance = $this->authenticateInstance($request);
-        if ($instance instanceof \Illuminate\Http\JsonResponse) {
+        if ($instance instanceof JsonResponse) {
             return $instance;
         }
 
@@ -257,9 +234,7 @@ class ApiFederationController extends Controller
                     'limit' => self::MAX_EVENTS_PER_INSTANCE,
                     'accepted' => $accepted,
                     'skipped' => $skipped,
-                    'status' => $instance->status,
-                    'listings_url' => $instance->listingsUrl(),
-                ], 422);
+                ] + $instance->apiState(), 422);
             }
 
             $row = $existing ?: new FederatedEvent([
@@ -282,10 +257,7 @@ class ApiFederationController extends Controller
             'accepted' => $accepted,
             'skipped' => $skipped,
             'skipped_ids' => $skippedIds,
-            'status' => $instance->status,
-            // The id in it is encoded with this app's key, so the install cannot build it.
-            'listings_url' => $instance->listingsUrl(),
-        ]);
+        ] + $instance->apiState());
     }
 
     /**
@@ -304,7 +276,7 @@ class ApiFederationController extends Controller
         abort_unless(config('app.is_nexus'), 404);
 
         $instance = $this->authenticateInstance($request);
-        if ($instance instanceof \Illuminate\Http\JsonResponse) {
+        if ($instance instanceof JsonResponse) {
             return $instance;
         }
 
@@ -358,17 +330,21 @@ class ApiFederationController extends Controller
 
         // Which of the ids the sender believes are synced do we actually not have?
         $checkIds = $validated['known_ids'] ?? $manifest;
+        // A listing whose link is not on the install's address any more (it moved, and the move was
+        // adopted) is reported missing too: every install, of every release, re-sends what is
+        // missing, so its listings come back with links to where it is now. Blocked rows count as
+        // present, or a blocked listing would be asked for every hour.
         $present = FederatedEvent::where('federated_instance_id', $instance->id)
             ->whereIn('external_id', $checkIds)
+            ->get(['external_id', 'url', 'blocked_at'])
+            ->filter(fn ($row) => $row->blocked_at !== null || $instance->ownsUrl($row->url))
             ->pluck('external_id')
             ->all();
 
         return response()->json([
             'removed' => $removed,
             'missing' => array_values(array_diff($checkIds, $present)),
-            'status' => $instance->status,
-            'listings_url' => $instance->listingsUrl(),
-        ]);
+        ] + $instance->apiState());
     }
 
     /**
@@ -393,55 +369,16 @@ class ApiFederationController extends Controller
 
         // Derived from the CURRENT mismatch, not stamped blindly. This runs on every push,
         // so a flag that only ever went on could never be cleared by an admin: the next
-        // push an hour later put it straight back.
+        // push an hour later put it straight back. Ahead of store()'s backlink check, so a
+        // move within the same site is adopted in time for the push that reports it.
+        //
+        // A matching push clears the flag of an APPROVED instance only, whatever raised
+        // it. Gating on reported_site_url as well would strand the rows flagged before that
+        // column existed: they carry no address, so an operator who has since fixed their
+        // APP_URL could never drain the alert. See FederationAddressService::note().
         $siteUrl = $request->json('site_url');
         if (is_string($siteUrl) && $siteUrl !== '') {
-            // Bounded before it reaches the column. This value is STORED now, where it
-            // used to be compared and thrown away, so an over-long site_url would fail
-            // the insert and 500 a push that is otherwise fine. Truncating rather than
-            // dropping keeps the stored value identical to the compared one, so the
-            // same junk address stays "already seen" instead of re-flagging every hour.
-            $reported = rtrim($siteUrl, '/');
-            if (mb_strlen($reported) > 255) {
-                $reported = mb_substr($reported, 0, 255);
-            }
-
-            $onRecord = rtrim((string) $instance->site_url, '/');
-
-            if ($reported !== $onRecord) {
-                // Two hosts sharing one identity, most likely a restored backup. Accept
-                // the data but surface it: silently trusting the new host would let a
-                // clone inherit an approved instance's standing.
-                //
-                // Kept, so the admin screen can show WHICH address is being claimed and
-                // offer to adopt it. A full-URL compare on purpose, unlike register()'s
-                // host compare: a scheme or path change is exactly what this catches.
-                $isNewAddress = $instance->flagged_at === null
-                    || rtrim((string) $instance->reported_site_url, '/') !== $reported;
-
-                $instance->reported_site_url = $reported;
-
-                // Only for an address not already seen, so flagged_at reads as when the
-                // mismatch STARTED rather than when it last pushed - and so an admin who
-                // has reviewed this exact address is not re-alerted every hour.
-                if ($isNewAddress) {
-                    $instance->flagged_at = now();
-                }
-            } elseif ($instance->flagged_at !== null && $instance->isApproved()) {
-                // The install is reporting the address on record again: the mismatch is
-                // over, so the flag goes with it.
-                //
-                // isApproved() is the whole guard, and it is sufficient. register() - the
-                // only other thing that raises this flag - de-approves as it does so, so
-                // a register-path flag is never sitting on an approved instance; a
-                // pending or suspended one keeps its flag for a human. Gating on
-                // reported_site_url instead would strand exactly the rows that most need
-                // this: those flagged before that column existed carry no reported
-                // address, so an operator who has since fixed their APP_URL could never
-                // drain the alert at all.
-                $instance->reported_site_url = null;
-                $instance->flagged_at = null;
-            }
+            app(FederationAddressService::class)->note($instance, $siteUrl);
         }
 
         // The version this install is running now. It used to arrive only with a registration,

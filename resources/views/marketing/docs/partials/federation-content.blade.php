@@ -381,14 +381,22 @@
             </tbody>
         </table>
     </div>
+    <h3 id="moving" class="doc-subheading">Moving to a new address</h3>
     <p>
-        If your install's address (<code class="doc-inline-code">APP_URL</code>) changes, the network
-        does not take the new address on trust. A listing's link has to be on the address the
-        install registered with, so events sent from the new one are refused, and show as
-        <em>Not accepted</em>, until the team at eventschedule.com has confirmed the change.
-        Registering again from the new address, with
-        <code class="doc-inline-code">php artisan federation:push --register</code>, puts an
-        approved install back into review first.
+        If your install's address (<code class="doc-inline-code">APP_URL</code>) changes, there is
+        nothing to re-register. The next hourly sync tells the network the new address, and your
+        install stays approved, with its listings live at the old address, while the change is
+        confirmed:
+    </p>
+    <ul class="doc-list">
+        <li><strong>The same address</strong> (only <code class="doc-inline-code">www.</code> or <code class="doc-inline-code">https</code> changed): accepted on the spot.</li>
+        <li><strong>Anything else</strong> (a new domain, or a new path): accepted within a couple of hours if the old address redirects to the new one. Otherwise the team at eventschedule.com confirms it. Either way you get an email once it is accepted.</li>
+    </ul>
+    <p>
+        Until then new and changed events wait, and the network card in
+        <strong>Admin &gt; Settings</strong> says so. Once the change is confirmed, every event is
+        sent again with links to the new address, so your listings are up to date within a couple
+        of hours.
     </p>
 </section>
 

@@ -23,6 +23,13 @@ class DismissedNextStep extends Model
      */
     public const FEDERATION_LISTING = 'federation_listing';
 
+    /**
+     * The dashboard banner telling a selfhost admin with a single schedule that it can be shown at
+     * the site's own address (App\Support\HomeSchedule::promptFor()). Per user and per that
+     * schedule, for the same reason as above, and with its own route. Silences no email.
+     */
+    public const HOME_SCHEDULE = 'home_schedule';
+
     protected $fillable = [
         'user_id',
         'role_id',

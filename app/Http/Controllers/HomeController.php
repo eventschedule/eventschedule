@@ -325,6 +325,9 @@ class HomeController extends Controller
             ? collect()
             : $federation->listingPromptSchedules($user);
 
+        // A selfhost install with one schedule can show it at the site's own address.
+        $homeSchedulePrompt = \App\Support\HomeSchedule::promptFor($user);
+
         return view('home', compact(
             'events',
             'month',
@@ -347,7 +350,7 @@ class HomeController extends Controller
             'venues',
             'curators',
             'defaultCurrency',
-            'pendingActionItems', 'nextStepItems', 'nextStepsDismissedBefore', 'showFederationPrompt', 'federationListingSchedules',
+            'pendingActionItems', 'nextStepItems', 'nextStepsDismissedBefore', 'showFederationPrompt', 'federationListingSchedules', 'homeSchedulePrompt',
         ));
     }
 
@@ -1347,6 +1350,32 @@ class HomeController extends Controller
         }
 
         return $returnUrl;
+    }
+
+    /**
+     * Turn down the dashboard banner suggesting the install's one schedule be shown at the site's
+     * address. Recorded against the schedule the banner named, so a different schedule later (the
+     * first one deleted, another made) is suggested afresh.
+     */
+    public function dismissHomeSchedulePrompt(Request $request): RedirectResponse
+    {
+        if (is_demo_mode()) {
+            return redirect()->back();
+        }
+
+        $role = \App\Support\HomeSchedule::promptFor($request->user());
+
+        if ($role) {
+            DB::table('dismissed_next_steps')->insertOrIgnore([
+                'user_id' => $request->user()->id,
+                'role_id' => $role->id,
+                'step_type' => DismissedNextStep::HOME_SCHEDULE,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->back();
     }
 
     /**

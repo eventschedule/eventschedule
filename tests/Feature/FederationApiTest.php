@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Http\Controllers\Api\ApiFederationController;
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
+use App\Services\FederationAddressService;
 use App\Services\FederationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -239,7 +241,7 @@ class FederationApiTest extends TestCase
 
         // The link itself is gone, not merely unread.
         $this->assertFalse(
-            \Illuminate\Support\Facades\Schema::hasColumn('federated_events', 'event_url')
+            Schema::hasColumn('federated_events', 'event_url')
         );
     }
 
@@ -597,14 +599,11 @@ class FederationApiTest extends TestCase
     }
 
     /**
-     * A register-path flag survives the matching pushes that follow it.
-     *
-     * Driven through the real endpoint rather than by hand-setting columns: register()
-     * de-approves as it flags, and that de-approval is precisely what protects the flag
-     * here. A fixture that set flagged_at on an approved row would be asserting against a
-     * state register() cannot produce, and would pin the wrong guard.
+     * A register-path claim is the same claim a push makes, and the pushes that follow it
+     * keep it standing: they report the new address, which is not the one on record.
+     * Driven through the real endpoint rather than by hand-setting columns.
      */
-    public function test_a_matching_push_does_not_clear_a_register_path_flag(): void
+    public function test_pushes_after_a_register_path_claim_keep_it_standing(): void
     {
         $instance = $this->makeInstance();
 
@@ -615,18 +614,156 @@ class FederationApiTest extends TestCase
         ])->assertOk();
 
         $instance->refresh();
-        $this->assertSame(FederatedInstance::STATUS_PENDING, $instance->status);
-        $this->assertNotNull($instance->flagged_at);
+        $this->assertSame(FederatedInstance::STATUS_APPROVED, $instance->status);
+        $this->assertSame('https://moved.test', $instance->reported_site_url);
+        $flaggedAt = $instance->flagged_at;
+        $this->assertNotNull($flaggedAt);
 
-        // The moved install now pushes, reporting the address register() just recorded.
+        $this->travel(2)->hours();
+
+        // The moved install now pushes from its new address. Its event links there, so it is
+        // refused until the address is adopted, and the claim is not re-stamped.
         $this->signed(self::EVENTS, [
             'instance_id' => $instance->instance_id,
             'site_url' => 'https://moved.test',
-            'items' => [$this->item()],
+            'items' => [$this->item(['url' => 'https://moved.test/venue/summer-show'])],
+        ])->assertOk()
+            ->assertJsonPath('accepted', 0)
+            ->assertJsonPath('site_url', 'https://operator.test')
+            ->assertJsonPath('address_review', true);
+
+        $fresh = $instance->fresh();
+        $this->assertSame('https://moved.test', $fresh->reported_site_url);
+        $this->assertTrue($fresh->flagged_at->equalTo($flaggedAt));
+    }
+
+    /**
+     * A registration nobody approved yet carries no standing, so its record follows the
+     * install, flagged so the reviewer sees it moved.
+     */
+    public function test_a_pending_registration_follows_its_install(): void
+    {
+        $instance = $this->makeInstance(['status' => FederatedInstance::STATUS_PENDING]);
+
+        $this->signed(self::REGISTER, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://moved.test/',
+            'secret' => $this->secret,
+        ])->assertOk()->assertJsonPath('status', FederatedInstance::STATUS_PENDING);
+
+        $fresh = $instance->fresh();
+        $this->assertSame('https://moved.test', $fresh->site_url);
+        $this->assertNull($fresh->reported_site_url);
+        $this->assertNotNull($fresh->flagged_at);
+    }
+
+    /**
+     * ownsUrl() checks hosts, and "www." is folded into the same site, so a scheme or www change
+     * cannot let an install link anywhere new. It is adopted in time for the push that reports it:
+     * the event linking to the new form is accepted.
+     */
+    public function test_a_change_of_scheme_or_www_is_adopted_by_the_push_that_reports_it(): void
+    {
+        $instance = $this->makeInstance(['site_url' => 'http://www.operator.test']);
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://operator.test',
+            'items' => [$this->item(['url' => 'https://operator.test/venue/summer-show'])],
+        ])->assertOk()
+            ->assertJsonPath('accepted', 1)
+            ->assertJsonPath('site_url', 'https://operator.test')
+            ->assertJsonPath('address_review', false);
+
+        $fresh = $instance->fresh();
+        $this->assertSame('https://operator.test', $fresh->site_url);
+        $this->assertNull($fresh->reported_site_url);
+        $this->assertNull($fresh->flagged_at);
+        $this->assertSame(FederatedInstance::STATUS_APPROVED, $fresh->status);
+    }
+
+    /**
+     * A path, a port or a query on the same host is a claim, never taken on the install's word: the
+     * record is the address the redirect check fetches, and a path an install chooses (one of its
+     * own events whose registration link goes elsewhere) would let a later claim on another host be
+     * "confirmed" by a redirect the claimant wrote.
+     */
+    public function test_a_new_path_port_or_query_on_the_same_host_is_a_claim(): void
+    {
+        foreach (['https://operator.test/sched', 'https://operator.test:8443', 'https://operator.test/?x=1'] as $reported) {
+            $instance = $this->makeInstance(['instance_id' => (string) Str::uuid()]);
+
+            $this->signed(self::RECONCILE, [
+                'instance_id' => $instance->instance_id,
+                'site_url' => $reported,
+                'external_ids' => [],
+                'run_token' => 'run-1',
+            ])->assertOk();
+
+            $fresh = $instance->fresh();
+            $this->assertSame('https://operator.test', $fresh->site_url, $reported);
+            $this->assertNotNull($fresh->flagged_at, $reported);
+        }
+
+        // And a query, a fragment or credentials can never become the record, by any route.
+        $this->assertFalse(FederatedInstance::isAdoptableUrl('https://operator.test/?x=1'));
+        $this->assertFalse(FederatedInstance::isAdoptableUrl('https://operator.test/#top'));
+        $this->assertFalse(FederatedInstance::isAdoptableUrl('https://me:pw@operator.test'));
+        $this->assertTrue(FederatedInstance::isAdoptableUrl('https://operator.test/events'));
+    }
+
+    /**
+     * After a move is adopted, the listings the network holds still link to the old address.
+     * Reconcile reports them missing, which every install of every release re-sends.
+     */
+    public function test_reconcile_asks_again_for_listings_off_the_installs_address(): void
+    {
+        $instance = $this->makeInstance(['site_url' => 'https://moved.test']);
+
+        foreach (['on-old' => 'https://operator.test/venue/a', 'on-new' => 'https://moved.test/venue/b'] as $id => $url) {
+            FederatedEvent::create([
+                'federated_instance_id' => $instance->id,
+                'external_id' => $id,
+                'url' => $url,
+                'name' => 'Show '.$id,
+                'next_occurrence_at' => now()->addWeek(),
+            ]);
+        }
+
+        $this->signed(self::RECONCILE, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://moved.test',
+            'external_ids' => ['on-old', 'on-new'],
+            'known_ids' => ['on-old', 'on-new'],
+            'run_token' => 'run-1',
+        ])->assertOk()->assertJsonPath('missing', ['on-old']);
+    }
+
+    /** A suspended install's record is a human's to change, even within its own site. */
+    public function test_a_suspended_install_does_not_move_itself_within_its_site(): void
+    {
+        $instance = $this->makeInstance(['status' => FederatedInstance::STATUS_SUSPENDED]);
+
+        $this->signed(self::RECONCILE, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://www.operator.test',
+            'external_ids' => [],
+            'run_token' => 'run-1',
         ])->assertOk();
 
-        // Still flagged and still pending: the reviewer's signal that it moved survives.
-        $this->assertNotNull($instance->fresh()->flagged_at);
+        $fresh = $instance->fresh();
+        $this->assertSame('https://operator.test', $fresh->site_url);
+        $this->assertSame('https://www.operator.test', $fresh->reported_site_url);
+        $this->assertNotNull($fresh->flagged_at);
+    }
+
+    /** "www.example.com" is not "evilexample.com", and a subdomain is not the parent site. */
+    public function test_same_site_is_the_host_with_or_without_www_and_nothing_else(): void
+    {
+        $this->assertTrue(FederationAddressService::sameSite('https://www.a.test', 'http://A.test/x'));
+        $this->assertFalse(FederationAddressService::sameSite('https://a.test', 'https://evila.test'));
+        $this->assertFalse(FederationAddressService::sameSite('https://a.test', 'https://events.a.test'));
+        $this->assertFalse(FederationAddressService::sameSite('', ''));
     }
 
     /**

@@ -10,6 +10,14 @@
 // European form below.
 // An operator's own pt wording (/admin/translations) comes along for the keys not listed here.
 return array_replace(require __DIR__.'/../pt/messages.php', function_exists('operator_lang_overrides') ? operator_lang_overrides('pt', 'messages') : [], [
+    'home_schedule_description' => 'Mostre um calendário no próprio endereço do site, para que as pessoas o encontrem em :url em vez de num caminho.',
+    'home_schedule_prompt_body' => 'Neste momento, :url abre a página de início de sessão. Pode mostrar o seu calendário, e todas as ligações para o calendário passam a usar esse endereço. As ligações já partilhadas continuam a funcionar.',
+    'home_schedule_login_note' => 'Com isto ativado, o endereço do site deixa de abrir a página de início de sessão: para iniciar sessão, use :url.',
+    'home_schedule_none' => 'Nenhum (o endereço abre a página de início de sessão)',
+    'home_schedule_help' => 'A página dele e todas as ligações para ela usam este endereço. Os eventos mantêm os próprios endereços, e o endereço antigo continua a funcionar, por isso as ligações já partilhadas não deixam de funcionar.',
+    'federation_address_confirmed_intro' => 'A rede tem agora a sua instalação no endereço abaixo. Todos os anúncios estão a ser enviados de novo com ligações para ele.',
+    'federation_address_pending' => 'O endereço desta instalação mudou para :new, e a rede ainda a tem em :old. Os eventos novos e alterados aguardam até a mudança ser confirmada, e depois tudo é enviado de novo com as novas ligações. Se :old redirecionar para :new, isso acontece dentro de uma hora. Caso contrário, a equipa do eventschedule.com confirma a mudança.',
+    'federation_address_redirect_note' => 'Aceite automaticamente dentro de uma hora se o endereço registado redirecionar para o novo.',
     'event_create_daily_limit_reached' => 'Atingiu o limite diário para criar eventos. Tente novamente amanhã.',
     'custom_footer_code_help' => 'Inserido antes da tag de fecho </body> das páginas públicas.',
     'event_deleted' => 'Evento eliminado com sucesso',

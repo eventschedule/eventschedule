@@ -102,6 +102,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/whatsapp/webhook',
         ]);
 
+        // A selfhost install's chosen schedule at its root: "/" is read as "/{subdomain}" before
+        // routing (App\Support\HomeSchedule). Selfhost only, so it never meets a custom domain.
+        $middleware->prepend(\App\Http\Middleware\ServeHomeSchedule::class);
+
         // Resolve custom domains before routing (must be first)
         $middleware->prepend(ResolveCustomDomain::class);
 

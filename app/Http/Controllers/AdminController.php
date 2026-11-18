@@ -2905,8 +2905,8 @@ class AdminController extends Controller
         // docs) ask for the network card with a query string: intended() keeps it, where it
         // drops a #fragment. Browsers do keep a fragment from a Location header, so turn it
         // back into the anchor here.
-        if ($request->query('card') === 'federation') {
-            return redirect()->to(route('admin.settings').'#federation');
+        if (in_array($request->query('card'), ['federation', 'home-schedule'], true)) {
+            return redirect()->to(route('admin.settings').'#'.$request->query('card'));
         }
 
         // The nexus never renders the federation card, so skip the queries that feed
@@ -2974,6 +2974,14 @@ class AdminController extends Controller
             'federationLastSyncedAt' => Setting::get('federation_last_synced_at'),
             'federationLastError' => Setting::get('federation_last_error'),
             'federationListingsUrl' => Setting::get('federation_listings_url'),
+            // The schedule a selfhost install shows at its own address (App\Support\HomeSchedule).
+            'homeScheduleAvailable' => \App\Support\HomeSchedule::available(),
+            'homeScheduleId' => \App\Support\HomeSchedule::id(),
+            'homeScheduleChoices' => \App\Support\HomeSchedule::available() ? \App\Support\HomeSchedule::choices() : collect(),
+            // The network has this install at an older address: events wait until it has the new one.
+            'federationAddressPending' => $federation->addressPending(),
+            'federationNetworkUrl' => Setting::get('federation_network_url'),
+            'federationOwnUrl' => $federation->ownUrl(),
             // The whole point of enabling this is knowing exactly what leaves your
             // install, so show it rather than describing it - including why a listed
             // event has not gone yet.
@@ -3100,6 +3108,48 @@ class AdminController extends Controller
         );
 
         return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));
+    }
+
+    /**
+     * Which schedule a selfhost install shows at its own address, if any (App\Support\HomeSchedule).
+     * Its own endpoint, like the other cards: a shared one would have to carry this through.
+     */
+    public function updateHomeSchedule(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin() || ! \App\Support\HomeSchedule::available()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Only from the set the card offers, by encoded id like every id the page prints.
+        $offered = \App\Support\HomeSchedule::choices()
+            ->mapWithKeys(fn ($role) => [UrlUtils::encodeId($role->id) => $role->id]);
+
+        $request->validate([
+            'home_schedule' => ['nullable', 'string', Rule::in($offered->keys()->all())],
+        ]);
+
+        if (is_demo_mode()) {
+            return redirect()->route('admin.settings')->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        $old = ['home_schedule_id' => \App\Support\HomeSchedule::id()];
+        $new = ['home_schedule_id' => $request->filled('home_schedule') ? $offered[$request->input('home_schedule')] : null];
+
+        if ($old !== $new) {
+            \App\Support\HomeSchedule::set($new['home_schedule_id']);
+
+            AuditService::log(
+                AuditService::ADMIN_SETTINGS_UPDATE,
+                auth()->id(),
+                null,
+                null,
+                $old,
+                $new,
+                'Updated home schedule',
+            );
+        }
+
+        return redirect()->to(route('admin.settings').'#home-schedule')->with('success', __('messages.settings_saved'));
     }
 
     /**

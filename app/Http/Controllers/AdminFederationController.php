@@ -8,6 +8,7 @@ use App\Mail\FederationInstanceWelcome;
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
 use App\Services\AuditService;
+use App\Services\FederationAddressService;
 use App\Services\FederationWelcomeService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -169,9 +170,10 @@ class AdminFederationController extends Controller
         $instance = FederatedInstance::findOrFail(UrlUtils::decodeId($hash));
         $reported = $instance->reported_site_url;
 
-        // Nothing to adopt: a flag raised by register() (which moves site_url itself), a
-        // second submit, or a row flagged before this column existed - those carry the
-        // mismatch but not the address, and only the next push can supply it.
+        // Nothing to adopt: a flag raised by register() on a registration nobody approved
+        // yet (which moves site_url itself), a second submit, or a row flagged before this
+        // column existed - those carry the mismatch but not the address, and only the next
+        // push can supply it.
         //
         // The flag has to be standing too. applyStatus() used to settle a flag without
         // touching the claim that came with it, so a suspended-then-reapproved row could
@@ -192,22 +194,12 @@ class AdminFederationController extends Controller
             return back()->with('error', __('messages.federation_address_invalid'));
         }
 
-        $previous = $instance->site_url;
-
-        $instance->site_url = $reported;
-        $instance->reported_site_url = null;
-        $instance->flagged_at = null;
-        $instance->save();
-
-        AuditService::log(
-            AuditService::ADMIN_FEDERATION_ACCEPT_ADDRESS,
-            auth()->id(),
-            'FederatedInstance',
-            $instance->id,
-            ['site_url' => $previous],
-            ['site_url' => $reported],
-            'Accepted federated instance address change',
-        );
+        // The same write the hourly redirect check makes, so the operator hears about it the same
+        // way and a push landing in between cannot be overwritten. A false past the checks above
+        // is that race: another request (or the redirect check) got there first.
+        if (! app(FederationAddressService::class)->adopt($instance, auth()->id())) {
+            return back()->with('warning', __('messages.federation_nothing_changed'));
+        }
 
         return back()->with('message', __('messages.federation_address_accepted'));
     }
@@ -489,11 +481,9 @@ class AdminFederationController extends Controller
      * What is left is a flag with nothing to adopt, where site_url on record is all there
      * is to judge. Several ways to get there, none of them only historical:
      *  - flagged before reported_site_url existed, which is the live nexus row;
-     *  - a push flagged a full-URL mismatch (a path or scheme change on the same host),
-     *    then the install re-registered on that same host. register() nulls the stale
-     *    claim but only stamps flagged_at on a HOST change, so the flag outlives the
-     *    address that raised it. See FederationHardeningTest::
-     *    test_re_registering_drops_a_pending_address_claim;
+     *  - a pending or suspended install claimed an address and then re-registered at the
+     *    one on record: register() drops the stale claim and leaves the flag for a human
+     *    (FederationAddressService::note());
      *  - the install reported junk, which the push path never validates.
      *
      * Written as a conditional UPDATE rather than a read-then-save, because the guard has

@@ -610,6 +610,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
     Route::post('/dashboard/config', [HomeController::class, 'saveDashboardConfig'])->name('home.save_config');
     Route::post('/dashboard/federation-prompt/dismiss', [HomeController::class, 'dismissFederationPrompt'])->name('home.federation_prompt_dismiss');
+    Route::post('/dashboard/home-schedule-prompt/dismiss', [HomeController::class, 'dismissHomeSchedulePrompt'])->name('home.home_schedule_prompt_dismiss');
     Route::post('/dashboard/federation/list', [HomeController::class, 'listOnFederation'])->name('home.federation_list');
     Route::post('/dashboard/federation/list/dismiss', [HomeController::class, 'dismissFederationListing'])->name('home.federation_list_dismiss');
     Route::post('/dashboard/next-steps/dismiss', [HomeController::class, 'dismissNextStep'])->name('home.next_steps_dismiss');
@@ -1178,6 +1179,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::post('/admin/settings/accommodation', [AdminController::class, 'updateStay22Settings'])->name('admin.settings.update_stay22');
         Route::post('/admin/settings/home-quotes', [AdminController::class, 'updateHomeQuotes'])->name('admin.settings.update_home_quotes');
         Route::post('/admin/settings/currency', [AdminController::class, 'updateCurrencySettings'])->name('admin.settings.update_currency');
+        Route::post('/admin/settings/home-schedule', [AdminController::class, 'updateHomeSchedule'])->name('admin.settings.update_home_schedule');
         Route::post('/admin/settings/plan-pricing', [AdminController::class, 'updatePlanPricingSettings'])->name('admin.settings.update_plan_pricing');
 
         // Operator-authored privacy policy / terms / cookie policy. One endpoint per

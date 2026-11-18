@@ -851,6 +851,10 @@
         // The address the schedule hands out: its domain only when that is the main address, and
         // never one that is still pending or failed.
         $scheduleUrl = $role->getGuestUrl(true);
+        // What its short links and sub-schedules hang off. The same address, except for a selfhost
+        // install's home schedule (App\Support\HomeSchedule): its page is at the site's root,
+        // and everything under it stays under its path.
+        $schedulePathBase = $role->exists ? $role->guestPathBase(true) : '';
         // Split by hand: parse_url() mangles a non-ASCII host on macOS.
         $scheduleLinkText = $scheduleUrl ? \App\Utils\UrlUtils::clean($scheduleUrl) : '';
         $scheduleLinkSlash = strpos($scheduleLinkText, '/');
@@ -2988,7 +2992,7 @@
                                         \App\Utils\UrlUtils::reservedPathSlugs(),
                                         array_filter($socialLinkSlugs),
                                     );
-                                    $socialHostPrefix = preg_replace('/^https?:\/\//', '', $scheduleUrl);
+                                    $socialHostPrefix = preg_replace('/^https?:\/\//', '', $schedulePathBase);
                                 @endphp
                                 @foreach($role->decodeLinks('social_links') as $link)
                                 @php
@@ -3036,7 +3040,7 @@
                                                 <p class="link-slug-url text-xs truncate {{ $linkSlug !== '' ? 'text-gray-400 dark:text-gray-500' : 'text-gray-300 dark:text-gray-600 italic' }}" dir="ltr">{{ $socialHostPrefix }}/{{ $linkSlug !== '' ? $linkSlug : $linkSuggestion }}</p>
                                                 {{-- Copy only when the slug is live: copying a suggestion
                                                      would hand the owner a URL that does not resolve. --}}
-                                                <button type="button" data-action="copy-vanity-url" class="link-slug-copy flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors" data-url="{{ $scheduleUrl }}/{{ $linkSlug }}" title="{{ __('messages.copy') }}" @if ($linkSlug === '') style="display:none" @endif>
+                                                <button type="button" data-action="copy-vanity-url" class="link-slug-copy flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors" data-url="{{ $schedulePathBase }}/{{ $linkSlug }}" title="{{ __('messages.copy') }}" @if ($linkSlug === '') style="display:none" @endif>
                                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>
                                                 </button>
                                                 <button type="button" class="btn-edit-link-slug link-slug-toggle flex-shrink-0 text-xs text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] transition-colors">{{ $linkSlug !== '' ? __('messages.edit') : __('messages.add') }}</button>
@@ -3695,8 +3699,8 @@
                                                 </div>
                                                 @if ($groupSlug)
                                                 <div class="sched-sub-url" id="group-url-display-{{ $groupKey }}">
-                                                    <a href="{{ $scheduleUrl }}/{{ $groupSlug }}" target="_blank" rel="noopener" class="sched-sub-link" dir="ltr">{{ \App\Utils\UrlUtils::clean($scheduleUrl) }}/{{ $groupSlug }}</a>
-                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $scheduleUrl }}/{{ $groupSlug }}" class="event-icon-btn" title="{{ __('messages.copy') }}" aria-label="{{ __('messages.copy') }}">
+                                                    <a href="{{ $schedulePathBase }}/{{ $groupSlug }}" target="_blank" rel="noopener" class="sched-sub-link" dir="ltr">{{ \App\Utils\UrlUtils::clean($schedulePathBase) }}/{{ $groupSlug }}</a>
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $schedulePathBase }}/{{ $groupSlug }}" class="event-icon-btn" title="{{ __('messages.copy') }}" aria-label="{{ __('messages.copy') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
                                                         </svg>
@@ -3704,7 +3708,7 @@
                                                     <button type="button" data-action="toggle-group-slug" data-group-id="{{ $groupKey }}" id="edit-button-{{ $groupKey }}" class="event-link" title="{{ __('messages.edit') }}: {{ __('messages.slug') }}">{{ __('messages.edit') }}</button>
                                                 </div>
                                                 <div class="sched-sub-url hidden" id="group-slug-edit-{{ $groupKey }}">
-                                                    <span class="event-slug-prefix" dir="ltr">{{ \App\Utils\UrlUtils::clean($scheduleUrl) }}/</span>
+                                                    <span class="event-slug-prefix" dir="ltr">{{ \App\Utils\UrlUtils::clean($schedulePathBase) }}/</span>
                                                     <x-text-input id="group_slug_{{ $groupKey }}" name="groups[{{ $groupKey }}][slug]" type="text" class="block w-full" :value="$groupSlug" aria-label="{{ __('messages.slug') }}" />
                                                     <button type="button" data-action="toggle-group-slug" data-group-id="{{ $groupKey }}" id="cancel-button-{{ $groupKey }}" class="event-link hidden">{{ __('messages.cancel') }}</button>
                                                 </div>
@@ -10926,7 +10930,8 @@ document.addEventListener('DOMContentLoaded', function() {
             payment_links: JSON.parse(document.getElementById('payment_links_data').value || '[]')
         };
         var currentLinkType = '';
-        var guestUrl = @json($scheduleUrl);
+        // Short links hang off this, never the address a home schedule shows at the root.
+        var guestUrl = @json($schedulePathBase);
 
         // Helper: update hidden input and trigger unsaved changes warning
         function updateLinkInput(linkType) {

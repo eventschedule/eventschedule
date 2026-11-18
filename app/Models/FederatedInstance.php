@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
@@ -146,7 +147,7 @@ class FederatedInstance extends Model
      */
     public function listingsUrl(): string
     {
-        return marketing_url('/browse').'?instance='.\App\Utils\UrlUtils::encodeId($this->id).'#network';
+        return marketing_url('/browse').'?instance='.UrlUtils::encodeId($this->id).'#network';
     }
 
     /**
@@ -207,20 +208,61 @@ class FederatedInstance extends Model
      *
      * The empty string is the same story: a push of "/" rtrims to '', which differs from
      * the record, so it flags - and would re-flag hourly once cleared.
+     *
+     * Also the guard on FederationAddressService::adopt(), which the admin's Accept button
+     * and the hourly redirect check both go through.
      */
     public function hasAdoptableAddress(): bool
     {
-        $reported = $this->reported_site_url;
+        return self::isAdoptableUrl($this->reported_site_url);
+    }
 
-        if (! is_string($reported) || $reported === '') {
+    /**
+     * An address fit to become site_url: registration's own rule, plus a host to check
+     * backlinks against. Shared with FederationAddressService, which adopts a same-site
+     * address without a human, so nothing becomes the record that registration would refuse.
+     */
+    public static function isAdoptableUrl(mixed $url): bool
+    {
+        if (! is_string($url) || $url === '') {
             return false;
         }
 
         $fails = Validator::make(
-            ['site_url' => $reported],
+            ['site_url' => $url],
             ['site_url' => ['required', 'url', 'max:255']]
         )->fails();
 
-        return ! $fails && (bool) parse_url($reported, PHP_URL_HOST);
+        if ($fails) {
+            return false;
+        }
+
+        // A site's address, nothing more: no query, fragment or credentials. The record is what the
+        // redirect check fetches, and a query is a way to make a page of the install's own redirect
+        // wherever its author likes.
+        $parts = parse_url($url) ?: [];
+
+        return ! empty($parts['host'])
+            && ! isset($parts['query'])
+            && ! isset($parts['fragment'])
+            && ! isset($parts['user'])
+            && ! isset($parts['pass']);
+    }
+
+    /**
+     * What every API response tells the install about itself. site_url is the address the
+     * network checks its links against: an install that has moved compares it with its own
+     * APP_URL, holds its events back while they differ (they would only be refused), and sends
+     * everything again once they agree. address_review says a claim is waiting to be looked at.
+     */
+    public function apiState(): array
+    {
+        return [
+            'status' => $this->status,
+            // The id in it is encoded with this app's key, so the install cannot build it.
+            'listings_url' => $this->listingsUrl(),
+            'site_url' => rtrim((string) $this->site_url, '/'),
+            'address_review' => $this->flagged_at !== null && $this->reported_site_url !== null,
+        ];
     }
 }

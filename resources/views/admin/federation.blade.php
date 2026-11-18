@@ -267,8 +267,8 @@
                                              That leaves the instance at whatever status it had, so
                                              on an approved row there is no Approve button and the
                                              copy must not talk about approving. Not adoptable means
-                                             either register() raised the flag - it moves site_url
-                                             itself and sends an approved row back to pending, where
+                                             either register() raised the flag on a registration
+                                             nobody approved yet - it moves site_url itself, and
                                              Approve and Suspend settle it - or the claim is gone or
                                              was never usable, and confirming the address on record
                                              is what settles it. --}}
@@ -286,6 +286,11 @@
                                                     <dd class="font-medium text-amber-900 dark:text-amber-100 break-all">{{ $instance->reported_site_url }}</dd>
                                                 </div>
                                             </dl>
+                                            @if ($instance->isApproved())
+                                                {{-- federation:maintain checks this hourly; see
+                                                     FederationAddressService::verifyByRedirect(). --}}
+                                                <p class="mt-2 text-sm">{{ __('messages.federation_address_redirect_note') }}</p>
+                                            @endif
                                             <div class="mt-3">
                                                 <button type="submit" formaction="{{ route('admin.federation.accept_address', $hash) }}"
                                                         data-confirm="{{ __('messages.federation_accept_address_confirm', ['url' => $instance->reported_site_url]) }}"

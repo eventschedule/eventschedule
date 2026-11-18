@@ -4,13 +4,14 @@ namespace App\Console\Commands;
 
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
+use App\Services\FederationAddressService;
 use App\Utils\ImageUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Console\Command;
 
 /**
- * Nexus-side upkeep for federated listings: fetch their images, drop what has
- * expired, and stop holding files nothing references.
+ * Nexus-side upkeep for federated listings: confirm installs that moved, fetch their
+ * images, drop what has expired, and stop holding files nothing references.
  */
 class FederationMaintenance extends Command
 {
@@ -57,6 +58,9 @@ class FederationMaintenance extends Command
             return self::SUCCESS;
         }
 
+        // Ahead of the images: an install whose move is confirmed here sends everything again
+        // on its next push, with images at its new address.
+        $this->info('Confirmed '.app(FederationAddressService::class)->verifyByRedirect().' moved address(es).');
         $this->info('Fetched '.$this->fetchImages((int) $this->option('limit')).' image(s).');
         $this->info('Pruned '.$this->pruneExpired().' expired listing(s).');
         $this->info('Pruned '.$this->pruneTombstones().' tombstone(s).');

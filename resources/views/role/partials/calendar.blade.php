@@ -50,6 +50,12 @@
     $guestBasePath = $role && $role->subdomain
         ? rtrim(parse_url(route('role.view_guest', ['subdomain' => $role->subdomain]), PHP_URL_PATH) ?? '', '/')
         : '';
+    // Where the schedule's own page is, which is not always $guestBasePath: a selfhost install's
+    // home schedule (App\Support\HomeSchedule) is shown at the site's root, while its sub-schedules
+    // stay under its path. So a sub-schedule is $guestBasePath/{group} and "no sub-schedule" is this.
+    $guestOwnPath = $role && \App\Support\HomeSchedule::is($role)
+        ? rtrim(parse_url(url('/'), PHP_URL_PATH) ?? '', '/')
+        : $guestBasePath;
     $firstDay = $role?->first_day_of_week ?? 0;
     // The owner's event animation (resources/css/list-reveal.css), or ?list_animation= when an
     // owner is previewing an unsaved choice. Only on the schedule's own guest page: never in the
@@ -346,6 +352,9 @@
     $filterShareBaseUrl = ($isAdminRoute && $role && $role->subdomain)
         ? rtrim($role->getCanonicalUrl() ?: route('role.view_guest', ['subdomain' => $role->subdomain]), '/')
         : '';
+    $filterShareGroupBaseUrl = ($isAdminRoute && $role && $role->subdomain && \App\Support\HomeSchedule::is($role))
+        ? rtrim(route('role.view_guest', ['subdomain' => $role->subdomain]), '/')
+        : $filterShareBaseUrl;
 
     // Labels for the active-filter chips, resolved through customLabel() like the panel's own.
     $filterChipLabels = [
@@ -2554,6 +2563,8 @@ const calendarApp = createApp({
             pastLoadFailed: false,
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
             guestBasePath: @json($guestBasePath),
+            guestOwnPath: @json($guestOwnPath),
+            filterShareGroupBaseUrl: @json($filterShareGroupBaseUrl),
             route: '{{ $route }}',
             tab: '{{ $tab ?? '' }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
@@ -3102,9 +3113,13 @@ const calendarApp = createApp({
         shareableFilterUrl() {
             const base = this.route === 'admin'
                 ? this.filterShareBaseUrl
-                : (window.location.origin + this.guestBasePath);
+                : window.location.origin;
             if (!base) return '';
-            const url = base + (this.selectedGroup ? '/' + encodeURIComponent(this.selectedGroup) : '');
+            // A sub-schedule always lives under the schedule's path, even when the schedule
+            // itself is shown at the site's root (a selfhost home schedule).
+            const url = this.route === 'admin'
+                ? (this.selectedGroup ? this.filterShareGroupBaseUrl + '/' + encodeURIComponent(this.selectedGroup) : base)
+                : base + (this.selectedGroup ? this.guestBasePath + '/' + encodeURIComponent(this.selectedGroup) : this.guestOwnPath);
             const params = new URLSearchParams();
             if (this.selectedCategory) params.set('category', this.selectedCategory);
             this.customFieldUrlParams().forEach(([name, value]) => params.set(name, value));
@@ -4976,7 +4991,7 @@ const calendarApp = createApp({
             // (or by clearFilters, which reaches here through it) because the new sub-schedule
             // does not offer that category.
             const currentUrl = new URL(window.location);
-            currentUrl.pathname = (this.guestBasePath + (newGroupSlug ? '/' + newGroupSlug : '')) || '/';
+            currentUrl.pathname = (newGroupSlug ? this.guestBasePath + '/' + newGroupSlug : this.guestOwnPath) || '/';
             currentUrl.searchParams.delete('schedule');
             currentUrl.searchParams.delete('category');
 

@@ -8191,6 +8191,7 @@ class MarketingController extends Controller
         $query = trim($request->input('q', ''));
         $schedules = collect();
         $events = collect();
+        $networkEvents = collect();
 
         if (strlen($query) >= 2) {
             $escapedQuery = str_replace(['%', '_'], ['\\%', '\\_'], $query);
@@ -8243,6 +8244,28 @@ class MarketingController extends Controller
                 ),
                 12
             );
+
+            // Events other Event Schedule sites share with this one. They have no schedule row
+            // here to be found by, so their schedule's name, venue and city are matched as well:
+            // otherwise a search for the schedule itself (its name is the obvious thing to type)
+            // finds none of its events. listable() is what /browse shows - approved instance,
+            // image fetched, not blocked or past - and the intake already applied the
+            // excluded-country policy. Soonest first, like /browse's network section.
+            if (config('app.is_nexus')) {
+                $networkEvents = FederatedEvent::listable()
+                    ->where(function ($q) use ($escapedQuery) {
+                        $like = '%'.$escapedQuery.'%';
+                        $q->where('name', 'like', $like)
+                            ->orWhere('short_description', 'like', $like)
+                            ->orWhere('schedule_name', 'like', $like)
+                            ->orWhere('venue_name', 'like', $like)
+                            ->orWhere('city', 'like', $like);
+                    })
+                    ->orderBy('next_occurrence_at')
+                    ->orderBy('id')
+                    ->limit(12)
+                    ->get();
+            }
         }
 
         return view('marketing.search', [
@@ -8250,6 +8273,10 @@ class MarketingController extends Controller
             'searched' => strlen($query) >= 2,
             'schedules' => $schedules,
             'events' => $events,
+            // The date, time, place and source host exactly as /browse's network section words them.
+            'networkCards' => collect(BrowseWall::remote($networkEvents)['tiles'])
+                ->map(fn ($tile, $i) => $tile + ['blurb' => $networkEvents[$i]->short_description])
+                ->all(),
         ]);
     }
 
@@ -9528,6 +9555,7 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'Queue', 'description' => 'Monitor the scheduler and the background job queue: heartbeat, rails, per-task health and failed jobs.', 'url' => $r['selfhost_admin'].'#system-queue', 'category' => 'Selfhost', 'keywords' => 'queue jobs background worker scheduler schedule tasks cron heartbeat stalled overdue rails'],
             ['page' => 'Admin Panel', 'section' => 'Logs', 'description' => 'View application error logs.', 'url' => $r['selfhost_admin'].'#system-logs', 'category' => 'Selfhost', 'keywords' => 'logs errors debug'],
             ['page' => 'Admin Panel', 'section' => 'Settings', 'description' => 'Add custom header and footer code (Google Tag Manager, analytics) injected into all public guest pages.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'settings header footer code google tag manager gtm analytics tracking script head body'],
+            ['page' => 'Admin Panel', 'section' => 'Home Schedule', 'description' => 'Show one schedule at your site\'s own address instead of the sign-in page.', 'url' => $r['selfhost_admin'].'#settings-home-schedule', 'category' => 'Selfhost', 'keywords' => 'home schedule homepage root domain address url path default schedule landing'],
             ['page' => 'Admin Panel', 'section' => 'Plan pricing', 'description' => 'Set what your platform advertises Pro and Enterprise at, without editing .env, and move every page at once.', 'url' => $r['selfhost_admin'].'#settings-plan-pricing', 'category' => 'Selfhost', 'keywords' => 'plan pricing custom pricing price amount pro enterprise monthly yearly advertise marketing prices upgrade prompts STRIPE_PRICE_MONTHLY_AMOUNT selfhost'],
             ['page' => 'Admin Panel', 'section' => 'Platform Currency', 'description' => 'Set the currency your platform shows its own prices in, and the fallback currency for a new event.', 'url' => $r['selfhost_admin'].'#settings-currency', 'category' => 'Selfhost', 'keywords' => 'platform currency symbol dollar euro pound rand yen PLATFORM_CURRENCY plan price marketing prices default currency white label'],
             ['page' => 'Admin Panel', 'section' => 'Event Schedule network', 'description' => 'Share your public events with eventschedule.com, pick which of your schedules to list, and see what has been sent.', 'url' => $r['selfhost_admin'].'#settings-network', 'category' => 'Selfhost', 'keywords' => 'federation network share events eventschedule.com listings contact email list these schedules connection status pending approved suspended preview sent needs an image'],
@@ -9632,6 +9660,7 @@ class MarketingController extends Controller
             ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Every field that leaves your install, and where each one ends up.', 'url' => $r['saas_federation'].'#privacy', 'category' => 'SaaS', 'keywords' => 'privacy data shared attendees tickets what is sent fields schedule link contact email version online joining link'],
             ['page' => 'Federation', 'section' => 'Which Events Are Listed', 'description' => 'The conditions an event must meet to be shared with the network.', 'url' => $r['saas_federation'].'#what-qualifies', 'category' => 'SaaS', 'keywords' => 'qualify eligible public image listed'],
             ['page' => 'Federation', 'section' => 'When a Sync Does Not Complete', 'description' => 'The notices on the settings card and what to do about each.', 'url' => $r['saas_federation'].'#sync-errors', 'category' => 'SaaS', 'keywords' => 'sync error notice failed'],
+            ['page' => 'Federation', 'section' => 'Moving to a New Address', 'description' => 'What happens to your listings when APP_URL changes, and how the new address is confirmed.', 'url' => $r['saas_federation'].'#moving', 'category' => 'SaaS', 'keywords' => 'app_url domain move change address redirect'],
             ['page' => 'Federation', 'section' => 'Turning It Off', 'description' => 'Switching off takes the listings down.', 'url' => $r['saas_federation'].'#turning-off', 'category' => 'SaaS', 'keywords' => 'disable turn off remove listings'],
             ['page' => 'Federation', 'section' => 'The Prompt on the Dashboard', 'description' => 'List on the network, in one click, from a schedule owner\'s dashboard.', 'url' => $r['saas_federation'].'#listing-prompt', 'category' => 'SaaS', 'keywords' => 'dashboard prompt list on the network'],
             ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['selfhost_federation'].'#overview', 'category' => 'Selfhost', 'keywords' => 'federation network listings discovery traffic backlink'],
@@ -9642,6 +9671,7 @@ class MarketingController extends Controller
             ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Every field that leaves your install, and where each one ends up.', 'url' => $r['selfhost_federation'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'privacy data shared attendees tickets what is sent fields schedule link contact email version online joining link'],
             ['page' => 'Federation', 'section' => 'Which Events Are Listed', 'description' => 'The conditions an event must meet to be shared with the network.', 'url' => $r['selfhost_federation'].'#what-qualifies', 'category' => 'Selfhost', 'keywords' => 'qualify eligible public image listed'],
             ['page' => 'Federation', 'section' => 'When a Sync Does Not Complete', 'description' => 'The notices on the settings card and what to do about each.', 'url' => $r['selfhost_federation'].'#sync-errors', 'category' => 'Selfhost', 'keywords' => 'sync error notice failed'],
+            ['page' => 'Federation', 'section' => 'Moving to a New Address', 'description' => 'What happens to your listings when APP_URL changes, and how the new address is confirmed.', 'url' => $r['selfhost_federation'].'#moving', 'category' => 'Selfhost', 'keywords' => 'app_url domain move change address redirect'],
             ['page' => 'Federation', 'section' => 'Turning It Off', 'description' => 'Switching off takes the listings down.', 'url' => $r['selfhost_federation'].'#turning-off', 'category' => 'Selfhost', 'keywords' => 'disable turn off remove listings'],
             ['page' => 'Federation', 'section' => 'The Prompt on the Dashboard', 'description' => 'List on the network, in one click, from a schedule owner\'s dashboard.', 'url' => $r['selfhost_federation'].'#listing-prompt', 'category' => 'Selfhost', 'keywords' => 'dashboard prompt list on the network'],
 

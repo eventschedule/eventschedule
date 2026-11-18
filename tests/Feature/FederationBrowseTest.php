@@ -69,6 +69,42 @@ class FederationBrowseTest extends TestCase
         return $event;
     }
 
+    /**
+     * Search finds network events too. They have no schedule row here, so the schedule's name, the
+     * venue and the city are matched as well as the event's own name: searching for the schedule
+     * itself is the obvious thing to type.
+     */
+    public function test_search_finds_network_listings_by_name_schedule_venue_and_city(): void
+    {
+        $instance = $this->makeInstance();
+        $this->makeListing($instance, ['schedule_name' => 'Example Club']);
+
+        foreach (['Summer Show', 'Example Club', 'The Hall', 'Berlin'] as $query) {
+            $this->get('/search?q='.urlencode($query))
+                ->assertOk()
+                ->assertSee('Federated Summer Show')
+                ->assertSee('https://operator.test/venue/summer-show', false)
+                ->assertSee('data-federated-click', false);
+        }
+
+        $this->get('/search?q=nothingmatches')->assertOk()->assertDontSee('Federated Summer Show');
+    }
+
+    /** Search shows only what /browse shows: nothing from an install that is not approved, or blocked. */
+    public function test_search_leaves_out_listings_browse_would_not_show(): void
+    {
+        $this->makeListing($this->makeInstance(['status' => FederatedInstance::STATUS_PENDING]), ['name' => 'Pending Gig']);
+        $blocked = $this->makeListing($this->makeInstance([
+            'instance_id' => (string) Str::uuid(),
+        ]), ['name' => 'Blocked Gig']);
+        $blocked->block();
+
+        $this->get('/search?q=Gig')
+            ->assertOk()
+            ->assertDontSee('Pending Gig')
+            ->assertDontSee('Blocked Gig');
+    }
+
     public function test_an_approved_listing_appears_and_links_to_the_origin(): void
     {
         $this->makeListing($this->makeInstance());

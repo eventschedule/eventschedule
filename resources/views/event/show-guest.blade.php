@@ -200,7 +200,8 @@
        list of other events renders FIRST and links to the same place, and one block is what
        keeps the two from drifting apart. --}}
   @php
-    $backUrl = route('role.view_guest', ['subdomain' => $role->subdomain]);
+    // A selfhost install's home schedule is at the site's own address (App\Support\HomeSchedule).
+    $backUrl = \App\Support\HomeSchedule::is($role) ? url('/') : route('role.view_guest', ['subdomain' => $role->subdomain]);
     $queryParams = [];
     if (request('category')) $queryParams['category'] = request('category');
     if (request('schedule')) $queryParams['schedule'] = request('schedule');

@@ -505,7 +505,7 @@
             ],
             [
                 'q' => 'What does a search actually match?',
-                'a' => 'Schedules are matched on their web address, which is a starts-with, and on their name, city and short description, which are contains. Events are matched on their own name and short description only, so a city name finds the venue rather than the individual nights. Two characters is the minimum.',
+                'a' => 'Schedules are matched on their web address, which is a starts-with, and on their name, city and short description, which are contains. Events are matched on their own name and short description only, so a city name finds the venue rather than the individual nights. Events shared by other Event Schedule sites have no schedule here to be found by, so they are also matched on their schedule\'s name, their venue and their city, and listed under their own heading with a link straight to the site they come from. Two characters is the minimum.',
             ],
             [
                 'q' => 'How do I get my own events in here?',
@@ -513,7 +513,7 @@
             ],
             [
                 'q' => 'Why only twelve results?',
-                'a' => 'A lookup returns up to twelve schedules, alphabetically by name, and up to twelve upcoming events, soonest first, favouring a spread of schedules so one busy organizer does not crowd out the rest. It is a lookup rather than a directory listing: narrow the wording, or type the schedule web address, to land on the record you want. Browse is the wider view if you would rather read across everything that is on.',
+                'a' => 'A lookup returns up to twelve schedules, alphabetically by name, up to twelve upcoming events, soonest first, favouring a spread of schedules so one busy organizer does not crowd out the rest, and up to twelve events from other Event Schedule sites, soonest first. It is a lookup rather than a directory listing: narrow the wording, or type the schedule web address, to land on the record you want. Browse is the wider view if you would rather read across everything that is on.',
             ],
             [
                 'q' => 'Can I search past events?',
@@ -640,7 +640,7 @@
                     q = "{{ $query }}"
                     @if($searched)
                         &middot; {{ $schedules->count() }} {{ \Illuminate\Support\Str::plural('schedule', $schedules->count()) }}
-                        &middot; {{ $events->count() }} {{ \Illuminate\Support\Str::plural('event', $events->count()) }}
+                        &middot; {{ $events->count() + count($networkCards) }} {{ \Illuminate\Support\Str::plural('event', $events->count() + count($networkCards)) }}
                     @endif
                 </span>
             </div>
@@ -741,6 +741,61 @@
             </div>
             @endif
 
+            @if($searched && count($networkCards) > 0)
+            {{-- Events other Event Schedule sites share with this one. Each card goes straight to
+                 the event on its own site: a direct, followable link, because that backlink is what
+                 sharing on the network gives an operator. Clicks are counted by a beacon below,
+                 never by a redirect. Matched on name, blurb, schedule, venue and city. --}}
+            <div class="mb-16">
+                <div class="flex items-center gap-3 mb-3">
+                    <h2 class="es-look-ink text-2xl font-black tracking-tight">{{ __('messages.federation_browse_heading') }}</h2>
+                    <span class="es-look-pill">{{ count($networkCards) }}</span>
+                </div>
+                <p class="es-look-muted mb-8 text-sm">{{ __('messages.federation_browse_intro') }}</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($networkCards as $card)
+                    <a href="{{ $card['url'] }}" target="_blank" rel="noopener" data-federated-click="{{ $card['hash'] }}" class="es-look-card es-look-hover group flex flex-col overflow-hidden hover:-translate-y-1 hover:shadow-lg">
+                        <div class="flex flex-1 flex-col p-6">
+                            <h3 class="es-look-hover-title es-look-ink mb-2 text-lg font-bold transition-colors"><bdi>{{ $card['name'] }}</bdi></h3>
+                            @if($card['blurb'])
+                                <p class="es-look-muted mb-4 line-clamp-2 text-sm"><bdi>{{ $card['blurb'] }}</bdi></p>
+                            @endif
+                            <div class="mt-auto flex flex-col gap-2">
+                                @if($card['when'])
+                                    <div class="es-look-meta">
+                                        <svg aria-hidden="true" class="h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span class="es-look-mono">{{ $card['when'] }}@if($card['time']) <bdi dir="ltr">{{ $card['time'] }}</bdi>@endif</span>
+                                    </div>
+                                @endif
+                                @if($card['place'])
+                                    <div class="es-look-meta">
+                                        <svg aria-hidden="true" class="h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span class="truncate"><bdi>{{ $card['place'] }}</bdi></span>
+                                    </div>
+                                @endif
+                                @if($card['source'])
+                                    {{-- Where the click goes, as on /browse's source badge. --}}
+                                    <div class="es-look-meta">
+                                        <svg aria-hidden="true" class="h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                        <span class="es-look-mono truncate"><bdi dir="ltr">{{ $card['source'] }}</bdi></span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             @if(!$searched)
             {{-- Query too short: an unfilled cell, and what to put in it --}}
             <div class="es-look-slot mx-auto max-w-2xl p-8 text-center sm:p-10">
@@ -757,7 +812,7 @@
                     @endforeach
                 </div>
             </div>
-            @elseif($schedules->count() === 0 && $events->count() === 0)
+            @elseif($schedules->count() === 0 && $events->count() === 0 && count($networkCards) === 0)
             {{-- No Results: the empty cell, which is the offer --}}
             <div class="es-look-slot mx-auto max-w-3xl p-8 sm:p-12">
                 <div class="text-center">
@@ -1225,6 +1280,21 @@
     </nav>
 
     </div>
+
+    @if(count($networkCards) > 0)
+    <script {!! nonce_attr() !!}>
+        {{-- Count a visit to another site without touching the href, which must stay a direct
+             followable link to the origin. The same beacon /browse sends. Delegated: CSP blocks
+             inline handlers. --}}
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('[data-federated-click]');
+            if (!link || !navigator.sendBeacon) return;
+            var body = new FormData();
+            body.append('_token', '{{ csrf_token() }}');
+            navigator.sendBeacon('{{ marketing_url('/browse/federated/') }}' + link.dataset.federatedClick + '/click', body);
+        });
+    </script>
+    @endif
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

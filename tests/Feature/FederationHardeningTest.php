@@ -293,9 +293,12 @@ class FederationHardeningTest extends TestCase
 
     /**
      * isAcceptable() authorises backlinks against whatever site_url currently says, so
-     * an approved instance quietly re-pointing it is a way to publish links anywhere.
+     * an approved instance re-registering on another host must not re-point it. The new
+     * host is a claim: the record stays, the install stays approved and listed at it, and
+     * the review screen offers to adopt the address. It used to send the install back to
+     * pending, which took every listing off the network until somebody approved it again.
      */
-    public function test_changing_the_site_url_host_sends_an_instance_back_for_review(): void
+    public function test_changing_the_site_url_host_is_a_claim_not_a_new_record(): void
     {
         $instance = $this->makeInstance(['approved_at' => now()]);
 
@@ -303,12 +306,17 @@ class FederationHardeningTest extends TestCase
             'instance_id' => $instance->instance_id,
             'site_url' => 'https://spam.example',
             'secret' => $this->secret,
-        ])->assertOk()->assertJsonPath('status', FederatedInstance::STATUS_PENDING);
+        ])->assertOk()
+            ->assertJsonPath('status', FederatedInstance::STATUS_APPROVED)
+            ->assertJsonPath('site_url', 'https://operator.test')
+            ->assertJsonPath('address_review', true);
 
         $instance->refresh();
-        $this->assertSame(FederatedInstance::STATUS_PENDING, $instance->status);
+        $this->assertSame(FederatedInstance::STATUS_APPROVED, $instance->status);
+        $this->assertSame('https://operator.test', $instance->site_url);
+        $this->assertSame('https://spam.example', $instance->reported_site_url);
         $this->assertNotNull($instance->flagged_at);
-        $this->assertNull($instance->approved_at);
+        $this->assertNotNull($instance->approved_at);
     }
 
     /**

@@ -3412,7 +3412,22 @@ class Role extends Model implements MustVerifyEmail
         $href = UrlUtils::safeHref($link->url ?? null);
         $slug = $this->shortLinkSlugs()[$index] ?? '';
 
-        return $href !== null && $slug !== '' ? $this->getGuestUrl().'/'.$slug : $href;
+        return $href !== null && $slug !== '' ? $this->guestPathBase().'/'.$slug : $href;
+    }
+
+    /**
+     * The address this schedule's sub-pages hang off: its short links (/{slug}) and sub-schedules
+     * (/{group}). The same as getGuestUrl() for every schedule but a selfhost install's home
+     * schedule, whose own page is at the site's root while everything under it stays under its
+     * path: site/facebook would be another schedule's address, or nobody's.
+     */
+    public function guestPathBase($useCustomDomain = false): string
+    {
+        if ($this->isClaimed() && \App\Support\HomeSchedule::is($this)) {
+            return route('role.view_guest', ['subdomain' => $this->subdomain]);
+        }
+
+        return (string) $this->getGuestUrl($useCustomDomain);
     }
 
     public function getFirstVideoUrl()
@@ -3529,6 +3544,12 @@ class Role extends Model implements MustVerifyEmail
 
         if ($useCustomDomain && ($domain = $this->handedOutCustomDomain())) {
             return $domain;
+        }
+
+        // A selfhost install's home schedule is served at the site's own address, and that is the
+        // address handed out. Its old path keeps answering.
+        if (\App\Support\HomeSchedule::is($this)) {
+            return url('/');
         }
 
         return route('role.view_guest', ['subdomain' => $this->subdomain]);

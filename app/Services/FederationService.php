@@ -165,7 +165,7 @@ class FederationService
 
         $payload = [
             'instance_id' => $this->instanceId(),
-            'site_url' => rtrim((string) config('app.url'), '/'),
+            'site_url' => $this->ownUrl(),
             'name' => config('app.name'),
             'contact_email' => Setting::get('federation_contact_email'),
             'secret' => $this->secret(),
@@ -189,6 +189,72 @@ class FederationService
         }
 
         return $result;
+    }
+
+    /** This install's own address, in the form the network compares it in. */
+    public function ownUrl(): string
+    {
+        return rtrim((string) config('app.url'), '/');
+    }
+
+    /**
+     * Does the network have this install at another address than APP_URL?
+     *
+     * Every response says which address the network checks this install's links against
+     * (FederatedInstance::apiState()). While it is not ours, every event we send would be refused,
+     * and a refused event is marked so and never sent again until it is edited: so new events wait
+     * instead, and the settings card says why. A network from before it said so leaves nothing
+     * stored, and nothing is held.
+     */
+    public function addressPending(): bool
+    {
+        $network = Setting::get('federation_network_url');
+
+        return is_string($network) && $network !== '' && rtrim($network, '/') !== $this->ownUrl();
+    }
+
+    /**
+     * After a move, the network holds every listing at the old address until it is sent again,
+     * and every event refused while the new address was waiting stays refused. So once the
+     * network has the address this install has, and it is not the one the listings were last
+     * sent from, everything goes again. External ids do not depend on the address, so each
+     * listing is replaced, never doubled.
+     *
+     * The first answer after an update (nothing recorded yet) records the address the network has
+     * the listings at, whatever it is: an install that was already part-way through a move when it
+     * updated then still sends everything again once the move is taken. Nothing is resent at that
+     * first answer, because a whole catalogue resent by every install on the update would be churn
+     * for no move.
+     */
+    protected function noteNetworkAddress(mixed $networkUrl): void
+    {
+        if (! is_string($networkUrl) || $networkUrl === '') {
+            return;
+        }
+
+        $networkUrl = rtrim($networkUrl, '/');
+
+        if ($networkUrl !== Setting::get('federation_network_url')) {
+            Setting::set('federation_network_url', $networkUrl);
+        }
+
+        $sentFrom = Setting::get('federation_sent_from_url');
+
+        if (! is_string($sentFrom) || $sentFrom === '') {
+            Setting::set('federation_sent_from_url', $networkUrl);
+
+            return;
+        }
+
+        if ($networkUrl !== $this->ownUrl() || $sentFrom === $networkUrl) {
+            return;
+        }
+
+        Event::where(fn ($q) => $q->whereNotNull('federated_at')->orWhereNotNull('federated_skipped_at'))
+            ->toBase()
+            ->update(['federated_at' => null, 'federated_hash' => null, 'federated_skipped_at' => null]);
+
+        Setting::set('federation_sent_from_url', $networkUrl);
     }
 
     /**
@@ -221,6 +287,13 @@ class FederationService
         $maxPerRun ??= self::PUSH_MAX_PER_RUN;
         $pushed = 0;
         $failed = false;
+
+        // The network is still checking links against an older address of ours, so all of these
+        // would be refused - and stay refused. The reconcile that follows carries our address,
+        // and its answer says when the network has it.
+        if ($this->addressPending()) {
+            return ['pushed' => 0, 'failed' => false, 'held' => true];
+        }
 
         // Two budgets, not one. Recurring events are re-checked every run because their
         // dates move, so a single shared limit would let a few hundred of them fill the
@@ -297,6 +370,13 @@ class FederationService
                 break;
             }
 
+            // The first push after APP_URL changed: the answer says the network still has the old
+            // address, so what it refused was refused for that and goes again once the new one is
+            // confirmed. Nothing in this chunk is marked, and the rest of the run waits.
+            if ($this->addressPending()) {
+                return ['pushed' => $pushed, 'failed' => false, 'held' => true];
+            }
+
             // The nexus names what it refused - an event whose backlink is off-host, or
             // whose title trips the junk filter, will never be accepted as-is. Those get
             // the skipped marker rather than the delivered one, so reconcile does not
@@ -314,7 +394,7 @@ class FederationService
             $pushed += count($ids);
         }
 
-        return ['pushed' => $pushed, 'failed' => $failed];
+        return ['pushed' => $pushed, 'failed' => $failed, 'held' => false];
     }
 
     /**
@@ -777,7 +857,7 @@ class FederationService
         }
 
         $payload['instance_id'] ??= $this->instanceId();
-        $payload['site_url'] ??= rtrim((string) config('app.url'), '/');
+        $payload['site_url'] ??= $this->ownUrl();
         // On every call, not only at registration: the network picks the instructions in its
         // welcome email by version, and an install updates long after it registered.
         $payload['app_version'] ??= config('self-update.version_installed');
@@ -810,6 +890,7 @@ class FederationService
         }
 
         $this->recordSuccess($json['status'] ?? null, $json['listings_url'] ?? null);
+        $this->noteNetworkAddress($json['site_url'] ?? null);
 
         return ['ok' => true, 'body' => $json];
     }
