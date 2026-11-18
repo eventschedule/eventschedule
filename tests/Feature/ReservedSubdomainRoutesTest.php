@@ -28,6 +28,8 @@ class ReservedSubdomainRoutesTest extends TestCase
      * and the admin rename give only [a-z0-9] words joined by hyphens, three characters or more.
      */
     private const CANNOT_BE_A_SUBDOMAIN = [
+        // A dot (the embed's host-page script, /embed.js).
+        'embed.js',
         // An underscore.
         '_debugbar',
         '_dusk',

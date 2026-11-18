@@ -1064,7 +1064,7 @@
                 $moreGone = $event->rowsSoldOutOn($moreDate);
               @endphp
               <span class="whitespace-nowrap">
-                <a href="{{ $embedEvent ? \App\Support\EmbedEventView::eventUrl($event, $subdomain, $moreDate) : $event->getGuestUrl($subdomain, $moreDate) }}" class="gk-link" rel="nofollow" @if ($embedEvent) target="_self" @endif>{{ $moreDt->translatedFormat($moreDt->year !== $startDt->year ? 'D, M j, Y' : 'D, M j') }}</a>@if ($moreGone) <span class="text-gray-500 dark:text-gray-400">({{ __('messages.sold_out') }})</span>@endif
+                <a href="{{ $embedEvent ? \App\Support\EmbedEventView::eventUrl($event, $subdomain, $moreDate) : $event->getGuestUrl($subdomain, $moreDate) }}" class="gk-link" rel="nofollow"@if ($embedEvent) target="_self"@endif>{{ $moreDt->translatedFormat($moreDt->year !== $startDt->year ? 'D, M j, Y' : 'D, M j') }}</a>@if ($moreGone) <span class="text-gray-500 dark:text-gray-400">({{ __('messages.sold_out') }})</span>@endif
               </span>
             @endforeach
           </div>
