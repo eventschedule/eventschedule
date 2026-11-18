@@ -285,6 +285,7 @@ class HelpUtils
         // route parameter. Kept so the mapping survives if that fallback ever tightens, and so
         // the page is not silently relying on it.
         'following/merge-venues*' => '/docs/creating-schedules#merge',
+        'following/merge-participants*' => '/docs/creating-schedules#merge',
         'following' => '/docs/sharing#followers',
         // The tickets the signed-in person HOLDS (TicketController::tickets), not the organizer's
         // side: no guide section covers this page, so Help opens the docs home rather than

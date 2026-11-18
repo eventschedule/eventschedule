@@ -621,6 +621,50 @@ class EventRepo
     }
 
     /**
+     * The participant schedule a "Someone new" row names, when the person saving already has one
+     * by that name: any of their schedules (owner, admin or follower) of the same type, name and
+     * country that they may edit, so their own placeholders and schedules they run, never
+     * somebody else's real page they merely follow.
+     *
+     * Without it a curator posting a team's season through "Someone new" made a new placeholder
+     * per game, each with its own address (childress-lady-cats2, 3, ...), and the Following list
+     * and the event form's picker filled with copies. The venue side has had this safety net
+     * since name_normalized was added; this is the same lookup on the same column.
+     *
+     * A row that carries an email, a phone or a video is left to make its own schedule, because
+     * those are details of a particular person the existing one may not share, and an email sends
+     * an invitation. The account-wide merge page (RoleController::sameNameGroups()) groups on the
+     * same key, so what a save reuses and what that page offers to merge agree.
+     *
+     * @param  array<string, mixed>  $member
+     */
+    private function existingParticipantNamed(array $member, string $type, ?string $countryCode, ?User $user): ?Role
+    {
+        if (! $user || ! empty($member['email']) || ! empty($member['phone']) || ! empty($member['youtube_url'])) {
+            return null;
+        }
+
+        $name = GeminiUtils::normalizeForMatch($member['name'] ?? null);
+
+        if ($name === '') {
+            return null;
+        }
+
+        $countryCode = $countryCode ? strtolower($countryCode) : null;
+
+        return Role::where('type', $type)
+            ->where('is_deleted', false)
+            ->where('name_normalized', $name)
+            ->when($countryCode, fn ($q) => $q->where('country_code', $countryCode), fn ($q) => $q->whereNull('country_code'))
+            ->whereIn('id', DB::table('role_user')->where('user_id', $user->id)->select('role_id'))
+            ->withCount(['events' => fn ($q) => $q->select(DB::raw('count(distinct events.id)'))])
+            ->orderBy('events_count', 'desc')
+            ->orderBy('id')
+            ->get()
+            ->first(fn (Role $role) => $role->isEditableBy($user));
+    }
+
+    /**
      * A venue schedule for a place no schedule stands for yet: unclaimed, with the look every
      * new venue gets, in the country and language of the schedule it is made for.
      *
@@ -1013,7 +1057,14 @@ class EventRepo
 
         if ($request->members) {
             foreach ($request->members as $memberId => $member) {
-                if (! $memberId || strpos($memberId, 'new_') === 0) {
+                $isNewMember = ! $memberId || strpos($memberId, 'new_') === 0;
+                $existingParticipant = $isNewMember
+                    ? $this->existingParticipantNamed($member, $request->role_type ?: 'talent', $request->country_code ?: $currentRole?->country_code, $user)
+                    : null;
+
+                if ($existingParticipant) {
+                    $role = $existingParticipant;
+                } elseif ($isNewMember) {
                     $role = new Role;
                     $role->name = $member['name'];
                     $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
@@ -1119,6 +1170,11 @@ class EventRepo
 
                         $role->save();
                     }
+                }
+
+                // Two rows typed with one name in one save land on one schedule.
+                if (in_array($role->id, $roleIds)) {
+                    continue;
                 }
 
                 $roles[] = $role;

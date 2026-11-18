@@ -634,6 +634,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/following/merge-venues/preview', [RoleController::class, 'mergeMyVenuesPreview'])->name('following.merge_venues_preview');
     Route::post('/following/merge-venues', [RoleController::class, 'mergeMyVenuesGroup'])->name('following.merge_venues_group');
     Route::post('/following/merge-venues/dismiss', [RoleController::class, 'dismissMyVenueMergeSuggestion'])->name('following.merge_venues_dismiss');
+    // The same page for participant schedules (talent), which a curator typing a team in as
+    // "Someone new" for every game piles up the same way. Ahead of /{subdomain}/{slug} too.
+    Route::get('/following/merge-participants', [RoleController::class, 'mergeMyParticipants'])->name('following.merge_participants');
+    Route::get('/following/merge-participants/preview', [RoleController::class, 'mergeMyParticipantsPreview'])->name('following.merge_participants_preview');
+    Route::post('/following/merge-participants', [RoleController::class, 'mergeMyParticipantsGroup'])->name('following.merge_participants_group');
+    Route::post('/following/merge-participants/dismiss', [RoleController::class, 'dismissMyParticipantMergeSuggestion'])->name('following.merge_participants_dismiss');
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/my-carpools', [CarpoolController::class, 'myCarpools'])->name('my_carpools');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');

@@ -1635,14 +1635,38 @@ class RoleController extends Controller
      * Each venue is decorated with $venue->future_event_count (its TOTAL event count here) and
      * $venue->ids_hash, which the shared merge view and the dismissal check both read.
      *
+     * $type 'talent' gives the same page for participant schedules: a curator who types a team
+     * under "Someone new" for every game ends up with one stub per game, all followed by them.
+     * Those are grouped on their WHOLE name and country (sameNameGroups()), never on the leading
+     * comma segment the venue key uses, because an act is routinely called "Earth, Wind & Fire".
+     *
      * @return array<int, array<int, Role>>
      */
-    private function userVenueDuplicateGroups(User $user): array
+    private function userVenueDuplicateGroups(User $user, string $type = 'venue'): array
     {
-        $roleIds = DB::table('role_user')->where('user_id', $user->id)->pluck('role_id');
+        return $this->userDuplicateGroupsByType($user, [$type])[$type];
+    }
 
-        if ($roleIds->isEmpty()) {
-            return [];
+    /**
+     * userVenueDuplicateGroups() for several types in one pass, keyed by type: /following
+     * counts venues and participants on every load, and two scans were four more queries there.
+     *
+     * @param  array<int, string>  $types
+     * @return array<string, array<int, array<int, Role>>>
+     */
+    private function userDuplicateGroupsByType(User $user, array $types): array
+    {
+        $result = array_fill_keys($types, []);
+
+        // The two facts canMergeRoles() would re-query per venue, fetched once. This method runs
+        // on every /following load, so a per-member isEditor()/isFollowing() pair would be N+1
+        // against exactly the users who have the most duplicates.
+        $levelsByRoleId = DB::table('role_user')
+            ->where('user_id', $user->id)
+            ->pluck('level', 'role_id');
+
+        if ($levelsByRoleId->isEmpty()) {
+            return $result;
         }
 
         // Not $user->roles(): that filters is_deleted, and soft-deleted duplicates are half the
@@ -1652,29 +1676,45 @@ class RoleController extends Controller
         // COUNT(DISTINCT event_id), not withCount's count(*): event_role holds one row per
         // (event, role, sub-schedule), so a plain count double-counts an event filed under two
         // sub-schedules. Matches what venueDuplicateGroups() does on the curator page.
-        $venues = Role::whereIn('id', $roleIds)
-            ->where('type', 'venue')
+        $allRoles = Role::whereIn('id', $levelsByRoleId->keys())
+            ->whereIn('type', $types)
             ->withCount(['events' => fn ($q) => $q->select(DB::raw('count(distinct events.id)'))])
             ->get();
 
-        foreach ($venues as $venue) {
+        foreach ($allRoles as $venue) {
             $venue->future_event_count = (int) $venue->events_count;
         }
 
+        // Dismissals share the venue table: a hash is of role ids, which are unique across types.
         $dismissedHashes = DismissedVenueMergeSuggestion::where('user_id', $user->id)
             ->whereNull('role_id')
             ->pluck('venue_ids_hash')
             ->all();
 
-        // The two facts canMergeRoles() would re-query per venue, fetched once. This method runs
-        // on every /following load, so a per-member isEditor()/isFollowing() pair would be N+1
-        // against exactly the users who have the most duplicates.
-        $levelsByRoleId = DB::table('role_user')
-            ->where('user_id', $user->id)
-            ->pluck('level', 'role_id');
+        foreach ($types as $type) {
+            $venues = $allRoles->where('type', $type)->values();
+            $result[$type] = $this->mergeableGroups(
+                $type === 'venue' ? VenueUtils::duplicateGroups($venues) : self::sameNameGroups($venues),
+                $dismissedHashes,
+                $levelsByRoleId
+            );
+        }
 
+        return $result;
+    }
+
+    /**
+     * The candidate groups that are worth offering: not dismissed, and with a legal target.
+     *
+     * @param  array<int, array<int, Role>>  $candidateGroups
+     * @param  array<int, string>  $dismissedHashes
+     * @return array<int, array<int, Role>>
+     */
+    private function mergeableGroups(array $candidateGroups, array $dismissedHashes, \Illuminate\Support\Collection $levelsByRoleId): array
+    {
         $groups = [];
-        foreach (VenueUtils::duplicateGroups($venues) as $group) {
+
+        foreach ($candidateGroups as $group) {
             $ids = array_map(fn ($v) => $v->id, $group);
             $hash = DismissedVenueMergeSuggestion::hashForVenueIds($ids);
 
@@ -1713,33 +1753,115 @@ class RoleController extends Controller
         return $groups;
     }
 
+    /**
+     * Schedules of one type that share a name and a country, in groups of two or more. The
+     * account-wide participant merge page and EventRepo::existingParticipantNamed() use the same
+     * key (roles.name_normalized and the country), so what a save reuses and what this page
+     * offers to merge never disagree.
+     *
+     * @return array<int, array<int, Role>>
+     */
+    private static function sameNameGroups(iterable $roles): array
+    {
+        $grouped = [];
+
+        foreach ($roles as $role) {
+            $name = GeminiUtils::normalizeForMatch($role->name);
+
+            if ($name === '') {
+                continue;
+            }
+
+            $grouped[$name.'|'.strtolower((string) $role->country_code)][] = $role;
+        }
+
+        return array_values(array_filter($grouped, fn ($group) => count($group) > 1));
+    }
+
     public function mergeMyVenues()
+    {
+        return $this->mergeMyDuplicates('venue');
+    }
+
+    public function mergeMyParticipants()
+    {
+        return $this->mergeMyDuplicates('talent');
+    }
+
+    public function mergeMyVenuesPreview(Request $request)
+    {
+        return $this->mergeMyDuplicatesPreview($request, 'venue');
+    }
+
+    public function mergeMyParticipantsPreview(Request $request)
+    {
+        return $this->mergeMyDuplicatesPreview($request, 'talent');
+    }
+
+    public function mergeMyVenuesGroup(Request $request)
+    {
+        return $this->mergeMyDuplicatesGroup($request, 'venue');
+    }
+
+    public function mergeMyParticipantsGroup(Request $request)
+    {
+        return $this->mergeMyDuplicatesGroup($request, 'talent');
+    }
+
+    public function dismissMyVenueMergeSuggestion(Request $request)
+    {
+        return $this->dismissMyMergeSuggestion($request, 'venue');
+    }
+
+    public function dismissMyParticipantMergeSuggestion(Request $request)
+    {
+        return $this->dismissMyMergeSuggestion($request, 'talent');
+    }
+
+    /** The route names of the account-wide merge page for one type of schedule. */
+    private static function myMergeRoute(string $type, string $action = ''): string
+    {
+        return ($type === 'venue' ? 'following.merge_venues' : 'following.merge_participants').$action;
+    }
+
+    private function mergeMyDuplicates(string $type)
     {
         if (is_demo_mode()) {
             return redirect()->route('home')->with('error', __('messages.demo_mode_restriction'));
         }
 
         return view('role/merge_venues', $this->myVenueMergeViewData(
-            $this->userVenueDuplicateGroups(auth()->user())
+            $this->userVenueDuplicateGroups(auth()->user(), $type),
+            $type
         ));
     }
 
     /** Shared view payload so one merge view serves both the curator page and this one. */
-    private function myVenueMergeViewData(array $groups): array
+    private function myVenueMergeViewData(array $groups, string $type = 'venue'): array
     {
-        return [
+        $data = [
             'groups' => $groups,
             'backUrl' => route('following'),
-            'mergeUrl' => route('following.merge_venues_group'),
-            'previewUrl' => route('following.merge_venues_preview'),
-            'dismissUrl' => route('following.merge_venues_dismiss'),
+            'mergeUrl' => route(self::myMergeRoute($type, '_group')),
+            'previewUrl' => route(self::myMergeRoute($type, '_preview')),
+            'dismissUrl' => route(self::myMergeRoute($type, '_dismiss')),
             'introKey' => 'merge_venues_intro_all',
             'emptyStateKey' => 'merge_venues_empty_state_all',
             'eventCountKey' => 'merge_venues_events_count',
         ];
+
+        if ($type === 'talent') {
+            $data['titleKey'] = 'merge_participants_title';
+            $data['introKey'] = 'merge_participants_intro_all';
+            $data['emptyStateKey'] = 'merge_participants_empty_state_all';
+            $data['summaryKey'] = 'merge_participants_summary_counts';
+            $data['previewSummaryKey'] = 'merge_participants_preview_summary';
+        }
+
+        return $data;
     }
 
-    public function mergeMyVenuesPreview(Request $request)
+    private function mergeMyDuplicatesPreview(Request $request, string $type)
     {
         if (is_demo_mode()) {
             return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
@@ -1752,12 +1874,12 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 422);
         }
 
-        $groups = $this->userVenueDuplicateGroups(auth()->user());
+        $groups = $this->userVenueDuplicateGroups(auth()->user(), $type);
         if (! $this->idsBelongToSingleGroup($groups, array_merge([$targetId], $sourceIds))) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        $target = Role::where('id', $targetId)->where('type', 'venue')->firstOrFail();
+        $target = Role::where('id', $targetId)->where('type', $type)->firstOrFail();
 
         // Every event, not just the upcoming ones: this page is not scoped to a schedule, so
         // there is no "on this schedule" window to match.
@@ -1780,10 +1902,10 @@ class RoleController extends Controller
         ]);
     }
 
-    public function mergeMyVenuesGroup(Request $request)
+    private function mergeMyDuplicatesGroup(Request $request, string $type)
     {
         if (is_demo_mode()) {
-            return redirect()->route('following.merge_venues')
+            return redirect()->route(self::myMergeRoute($type))
                 ->with('error', __('messages.demo_mode_restriction'));
         }
 
@@ -1795,14 +1917,14 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $groups = $this->userVenueDuplicateGroups($user);
+        $groups = $this->userVenueDuplicateGroups($user, $type);
         if (! $this->idsBelongToSingleGroup($groups, array_merge([$targetId], $sourceIds))) {
-            return redirect()->route('following.merge_venues')
+            return redirect()->route(self::myMergeRoute($type))
                 ->with('error', __('messages.not_authorized'));
         }
 
-        $target = Role::where('id', $targetId)->where('type', 'venue')->firstOrFail();
-        $sources = Role::whereIn('id', $sourceIds)->where('type', 'venue')->get();
+        $target = Role::where('id', $targetId)->where('type', $type)->firstOrFail();
+        $sources = Role::whereIn('id', $sourceIds)->where('type', $type)->get();
 
         // Partition rather than reject the batch, matching the curator flow: one venue someone
         // claimed between render and submit should not cost the user the other four merges.
@@ -1833,7 +1955,7 @@ class RoleController extends Controller
             $message = str_replace(
                 [':done', ':total', ':skipped', ':target'],
                 [$validated->count(), $sources->count(), $skipped->count(), $target->getDisplayName(false)],
-                __('messages.merge_venues_partial_result')
+                __($type === 'venue' ? 'messages.merge_venues_partial_result' : 'messages.merge_participants_partial_result')
             );
         } else {
             $message = str_replace(
@@ -1843,17 +1965,17 @@ class RoleController extends Controller
             );
         }
 
-        $next = count($this->userVenueDuplicateGroups($user)) > 0
-            ? route('following.merge_venues')
+        $next = count($this->userVenueDuplicateGroups($user, $type)) > 0
+            ? route(self::myMergeRoute($type))
             : route('following');
 
         return redirect($next)->with('message', $message);
     }
 
-    public function dismissMyVenueMergeSuggestion(Request $request)
+    private function dismissMyMergeSuggestion(Request $request, string $type)
     {
         if (is_demo_mode()) {
-            return redirect()->route('following.merge_venues')
+            return redirect()->route(self::myMergeRoute($type))
                 ->with('error', __('messages.demo_mode_restriction'));
         }
 
@@ -1862,9 +1984,9 @@ class RoleController extends Controller
             return redirect()->back();
         }
 
-        $groups = $this->userVenueDuplicateGroups(auth()->user());
+        $groups = $this->userVenueDuplicateGroups(auth()->user(), $type);
         if (! $this->idsBelongToSingleGroup($groups, $venueIds)) {
-            return redirect()->route('following.merge_venues')
+            return redirect()->route(self::myMergeRoute($type))
                 ->with('error', __('messages.not_authorized'));
         }
 
@@ -1874,7 +1996,7 @@ class RoleController extends Controller
             'venue_ids_hash' => DismissedVenueMergeSuggestion::hashForVenueIds($venueIds),
         ]);
 
-        return redirect()->route('following.merge_venues');
+        return redirect()->route(self::myMergeRoute($type));
     }
 
     /**
@@ -4720,9 +4842,14 @@ class RoleController extends Controller
         // the ajax branch returns the table partial, which has no banner. The filter box types
         // straight into that ajax branch, so without this the scan ran on every keystroke.
         $duplicateVenueCount = 0;
+        $duplicateParticipantCount = 0;
         if (! request()->ajax() && ! $filter) {
-            foreach ($this->userVenueDuplicateGroups($user) as $group) {
+            $duplicates = $this->userDuplicateGroupsByType($user, ['venue', 'talent']);
+            foreach ($duplicates['venue'] as $group) {
                 $duplicateVenueCount += count($group);
+            }
+            foreach ($duplicates['talent'] as $group) {
+                $duplicateParticipantCount += count($group);
             }
         }
 
@@ -4733,6 +4860,7 @@ class RoleController extends Controller
             'memberSyncCalendarIds' => $memberSyncCalendarIds,
             'editableRoleIds' => $editableRoleIds,
             'duplicateVenueCount' => $duplicateVenueCount,
+            'duplicateParticipantCount' => $duplicateParticipantCount,
         ];
 
         if (request()->ajax()) {

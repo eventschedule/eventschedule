@@ -491,6 +491,10 @@
             <li><strong class="text-gray-900 dark:text-white">From a Curator schedule</strong> - a banner on the <strong class="text-gray-900 dark:text-white">Schedule</strong> tab, scoped to the venues in that schedule's upcoming events.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300">Duplicates are also collapsed in the venue picker when you add an event, so you only see one option per place. That is only done where it is safe: two venues that share a name but each carry their own contact details or address both stay on the list.</p>
+
+        <h3 class="doc-subheading">Merge Duplicate Participants</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same page exists for participants (Talent schedules), and a notice on <strong class="text-gray-900 dark:text-white">Following</strong> opens it. It groups the participants you are connected to that share a name and a country, such as a team that was added as <strong class="text-gray-900 dark:text-white">Someone New</strong> for every game, and merges each group with the same <strong class="text-gray-900 dark:text-white">Merge</strong> and <strong class="text-gray-900 dark:text-white">Not duplicates</strong> buttons.</p>
+        <p class="text-gray-600 dark:text-gray-300">New copies are not made in the first place: when you add a participant with <strong class="text-gray-900 dark:text-white">Someone New</strong> and one of your schedules already has that name, the event goes on that schedule. A participant added with an email, a phone number or a video still gets a schedule of their own.</p>
     </section>
 
     <!-- Style -->
