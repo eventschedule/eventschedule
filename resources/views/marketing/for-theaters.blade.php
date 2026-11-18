@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Theater Calendars | Runs, Season Passes and Ticketing</x-slot>
-    <x-slot name="description">Build a theater calendar the way a season works: runs with dark days, previews, matinees, access performances and season tickets, all on one link.</x-slot>
+    <x-slot name="title">Season Passes for Theaters | Theater Calendar and Ticketing</x-slot>
+    <x-slot name="description">Season passes for professional theaters, on a theater calendar built the way a season works: runs with dark days, previews, matinees and access performances.</x-slot>
     <x-slot name="breadcrumbTitle">For Theaters</x-slot>
 
     <x-slot name="headMeta">

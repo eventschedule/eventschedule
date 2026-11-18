@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Nightclub Event Calendars | Entry, Capacity and Tickets</x-slot>
-    <x-slot name="description">Run your club's door from one link: capacity limits, ticket tiers that change price on the clock, free QR scanning and zero platform fees.</x-slot>
+    <x-slot name="title">Nightclub Ticket Sales Online | Club Schedule, Zero Fees</x-slot>
+    <x-slot name="description">Sell nightclub tickets online with price tiers on the clock, capacity limits and free QR scanning at the door, all from your club schedule. Zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Nightclubs</x-slot>
 
     <x-slot name="headMeta">
@@ -1233,7 +1233,7 @@
                 <div class="nc-hero-type">
                     <h1 class="nc-d nc-h1">
                         <x-marketing.hero-eyebrow class="nc-strip nc-eyebrow es-fade-up es-d-1">
-                            <span>Nightclub event calendar and tickets</span>
+                            <span>Nightclub ticket sales and club schedule</span>
                         </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">The night is won </span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">at the door.</span></span>

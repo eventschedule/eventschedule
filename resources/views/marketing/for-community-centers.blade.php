@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Community Center Calendar | Programs, RSVPs, Hall Hire</x-slot>
-    <x-slot name="description">The lobby timetable, online: weekly programs set once, free sign-ups with a cap, hall-hire requests you approve and a calendar members subscribe to.</x-slot>
+    <x-slot name="title">Free Community Center Schedule | Programs, RSVPs, Hall Hire</x-slot>
+    <x-slot name="description">Your community center schedule online: weekly programs set once, free sign-ups with a cap, hall-hire requests you approve and a calendar members subscribe to.</x-slot>
     <x-slot name="breadcrumbTitle">For Community Centers</x-slot>
 
     <x-slot name="headMeta">
@@ -981,7 +981,7 @@
             <div class="cm-wrap cm-hero-grid">
                 <div class="cm-hero-copy">
                     <h1 class="cm-h cm-h1">
-                        <x-marketing.hero-eyebrow class="cm-eyebrow es-fade-up es-d-1">Community center calendar, for recreation facilities too</x-marketing.hero-eyebrow>
+                        <x-marketing.hero-eyebrow class="cm-eyebrow es-fade-up es-d-1">Community center schedule, for recreation facilities too</x-marketing.hero-eyebrow>
                         <span class="es-fade-up es-d-1">The board reaches</span>
                         <span class="es-fade-up es-d-2">whoever <span class="cm-hl">walks past it</span>.</span>
                     </h1>

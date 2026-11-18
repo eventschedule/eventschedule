@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Comedy Club Schedules | Sell the Night, Add the Lineup Later</x-slot>
-    <x-slot name="description">Friday at eight sells before anyone knows who is on. Set the night up once, sell tickets with zero platform fees, and add the comics when they are booked.</x-slot>
+    <x-slot name="title">Comedy Club Ticketing and Schedules | Sell the Night First</x-slot>
+    <x-slot name="description">Comedy club ticketing with zero platform fees: set Friday at eight up once, sell it before anyone knows who is on, and add the comics when they are booked.</x-slot>
     <x-slot name="breadcrumbTitle">For Comedy Clubs</x-slot>
 
     <x-slot name="headMeta">
@@ -1061,7 +1061,7 @@
                                 <div class="cc-screen-in">
                                     <span class="cc-tonight" aria-hidden="true">Tonight!</span>
                                     <h1 class="cc-h1">
-                                        <x-marketing.hero-eyebrow class="cc-eyebrow">Comedy club schedules and lineups</x-marketing.hero-eyebrow>
+                                        <x-marketing.hero-eyebrow class="cc-eyebrow">Comedy club ticketing, schedules and lineups</x-marketing.hero-eyebrow>
                                         <span class="es-mask"><span class="es-mask-line">They buy</span></span>
                                         <span class="es-mask es-mask-2"><span class="es-mask-line">the night,</span></span>
                                         <span class="es-mask cc-mask-3"><span class="es-mask-line">not <span class="cc-h1-names">the names</span>.</span></span>

@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Nonprofit Event Management | Zero Platform Fees</x-slot>
-    <x-slot name="description">Nonprofit event management for galas, volunteer days and campaigns: capped free sign-ups, ticket sales with zero platform fees and a page supporters follow.</x-slot>
+    <x-slot name="title">Nonprofit Ticket Sales and Free Event Registration</x-slot>
+    <x-slot name="description">Nonprofit ticket sales with zero platform fees, and free online event registration for galas, volunteer days and campaigns, on one page supporters follow.</x-slot>
     <x-slot name="breadcrumbTitle">For Nonprofits</x-slot>
 
     <x-slot name="structuredData">
@@ -351,7 +351,7 @@
             <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <x-marketing.hero-eyebrow class="block es-cause-tag es-fade-up es-d-1 mb-5">Nonprofit event management, without the platform fee</x-marketing.hero-eyebrow>
+                        <x-marketing.hero-eyebrow class="block es-cause-tag es-fade-up es-d-1 mb-5">Nonprofit ticket sales and free registration, without the platform fee</x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">The ticket pays for the cause.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">Not for <span class="es-cause-grad">the platform</span>.</span></span>
                     </h1>

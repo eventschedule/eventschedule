@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Festival Schedule | Stages, Lineups and Weekend Passes</x-slot>
-    <x-slot name="description">Every stage its own link, every set on the lineup, and a weekend pass that scans at each gate on one QR code. Zero platform fees on what fans pay you.</x-slot>
+    <x-slot name="title">Festival Scheduling Software | Stages, Lineups, Weekend Passes</x-slot>
+    <x-slot name="description">Festival scheduling with every stage on its own link, every set on the lineup, and a weekend pass that scans at each gate on one QR code. Zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Festivals</x-slot>
 
     <x-slot name="structuredData">
@@ -386,7 +386,7 @@
             <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <x-marketing.hero-eyebrow class="block es-fest-tag es-fade-up es-d-1 mb-5">Festival schedule and lineup, stage by stage</x-marketing.hero-eyebrow>
+                        <x-marketing.hero-eyebrow class="block es-fest-tag es-fade-up es-d-1 mb-5">Festival scheduling and lineups, stage by stage</x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Three stages.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">One <span class="es-fest-grad">pass</span>.</span></span>
                     </h1>
