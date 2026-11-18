@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use App\Models\Event;
+use App\Models\FederatedEvent;
 use App\Models\Role;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -19,11 +20,24 @@ use Illuminate\Support\Collection;
  * (Event::nextOccurrenceFrom(), which knows the rhythm, the skipped dates and the end of the
  * run). So a weekly night is on the wall under the day it is next on, not last under "Recurring"
  * with the date the series began, and a series that has run out is not on it at all.
+ *
+ * Events other Event Schedule sites share here (FederatedEvent, "from other sites") are posters
+ * on the same wall: a listing is next on at the first of its own dates that has not finished
+ * (nextListing()), counts as one schedule of its site (listingKey()), and is drawn in the same
+ * shape as a local poster, with the site it comes from (remotePoster()). At most NETWORK_CAP of
+ * them stand on the mixed wall, so one busy site cannot fill it; the page's "From other sites"
+ * view lists every one (networkPick()).
  */
 class BrowseWall
 {
     /** Posters on the wall. */
     public const LIMIT = 24;
+
+    /** The most posters from other sites on the mixed wall. Their own view has every one. */
+    public const NETWORK_CAP = 4;
+
+    /** Listings looked at for the wall and the count, soonest by their stored date first. */
+    public const NETWORK_POOL = 2000;
 
     /** Stretches of time, in the order the wall runs. */
     public const BANDS = ['today', 'week', 'later'];
@@ -83,6 +97,143 @@ class BrowseWall
         }
 
         return null;
+    }
+
+    /**
+     * When a listing from another site is next on, as next() is for an event, or null when it is
+     * over. From its own dates (the occurrences its site resolved, or its start), each lasting
+     * as long as its first did, or NO_LENGTH_HOURS. Never from next_occurrence_at, which is
+     * stamped when the listing arrives and kept for a day after it has passed.
+     *
+     * @return array{at: Carbon, ends: Carbon, running: bool, date: ?string}|null
+     */
+    public static function nextListing(FederatedEvent $listing, ?Carbon $now = null): ?array
+    {
+        $now ??= Carbon::now('UTC');
+        $zone = $listing->safeTimezone();
+
+        $length = $listing->starts_at && $listing->ends_at && $listing->ends_at->gt($listing->starts_at)
+            ? max(1, (int) round($listing->starts_at->diffInMinutes($listing->ends_at)))
+            : self::NO_LENGTH_HOURS * 60;
+
+        $starts = [];
+
+        foreach ((array) ($listing->occurrences ?: []) as $occurrence) {
+            try {
+                $starts[] = Carbon::parse((string) $occurrence)->setTimezone($zone);
+            } catch (\Throwable) {
+                // One unreadable date costs that date, not the listing.
+            }
+        }
+
+        // No dates of its own (intake refuses that, but a row is only a row): the one it was
+        // stored with, as its single date.
+        $only = $listing->starts_at ?? $listing->next_occurrence_at;
+
+        if (! $starts && $only) {
+            $starts[] = $only->copy()->setTimezone($zone);
+        }
+
+        usort($starts, fn (Carbon $a, Carbon $b) => $a->getTimestamp() <=> $b->getTimestamp());
+
+        foreach ($starts as $at) {
+            $ends = $at->copy()->addMinutes($length);
+
+            if ($ends->gte($now)) {
+                return ['at' => $at, 'ends' => $ends, 'running' => $at->lte($now), 'date' => null];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The schedule a listing counts against: its site's, by the schedule's own address, or its
+     * name when the site sent none, or the listing alone. Never equal to a local schedule's key.
+     */
+    public static function listingKey(FederatedEvent $listing): string
+    {
+        $schedule = $listing->schedule_url ?: mb_strtolower(trim((string) $listing->schedule_name));
+
+        return 'f'.$listing->federated_instance_id.':'.($schedule !== '' ? $schedule : 'e'.$listing->id);
+    }
+
+    /**
+     * The mixed wall: local events and listings from other sites together, one for each schedule,
+     * soonest first, and at most $networkCap listings. A tie on the start is settled by kind and
+     * then id, never by comparing ids from two tables.
+     *
+     * @return Collection<int, Event|FederatedEvent>
+     */
+    public static function pickMixed(Collection $events, Collection $listings, int $limit = self::LIMIT, int $networkCap = self::NETWORK_CAP, ?Carbon $now = null): Collection
+    {
+        $now ??= Carbon::now('UTC');
+        $on = [];
+
+        foreach ($events as $event) {
+            if ($next = self::next($event, $now)) {
+                $on[] = [[$next['at']->getTimestamp(), 0, $event->id], $event];
+            }
+        }
+
+        foreach ($listings as $listing) {
+            if ($next = self::nextListing($listing, $now)) {
+                $on[] = [[$next['at']->getTimestamp(), 1, $listing->id], $listing];
+            }
+        }
+
+        usort($on, fn ($a, $b) => $a[0] <=> $b[0]);
+
+        $taken = [];
+        $picked = [];
+        $network = 0;
+
+        foreach ($on as [, $item]) {
+            if (count($picked) >= $limit) {
+                break;
+            }
+
+            $remote = $item instanceof FederatedEvent;
+
+            if ($remote && $network >= $networkCap) {
+                continue;
+            }
+
+            $keys = $remote ? [self::listingKey($item)] : DiscoveryUtils::scheduleKeys($item);
+
+            if (array_intersect_key($taken, array_flip($keys))) {
+                continue;
+            }
+
+            $taken += array_fill_keys($keys, true);
+            $picked[] = $item;
+            $network += $remote ? 1 : 0;
+        }
+
+        return collect($picked);
+    }
+
+    /**
+     * Every listing from other sites that is still to come or on now, soonest first: the "From
+     * other sites" view, and the count beside its switch. Not one per schedule there, or a site
+     * with one busy schedule would show one poster.
+     *
+     * @return Collection<int, FederatedEvent>
+     */
+    public static function networkPick(Collection $listings, ?Carbon $now = null): Collection
+    {
+        $now ??= Carbon::now('UTC');
+        $on = [];
+
+        foreach ($listings as $listing) {
+            if ($next = self::nextListing($listing, $now)) {
+                $on[] = [[$next['at']->getTimestamp(), $listing->id], $listing];
+            }
+        }
+
+        usort($on, fn ($a, $b) => $a[0] <=> $b[0]);
+
+        return collect(array_column($on, 1));
     }
 
     /**
@@ -160,7 +311,11 @@ class BrowseWall
         $posters = [];
 
         foreach ($events as $event) {
-            if ($poster = self::poster($event, $now, $more, $plain)) {
+            $poster = $event instanceof FederatedEvent
+                ? self::remotePoster($event, $now)
+                : self::poster($event, $now, $more, $plain);
+
+            if ($poster) {
                 $posters[$poster['band']][] = $poster;
             }
         }
@@ -208,8 +363,9 @@ class BrowseWall
     }
 
     /**
-     * Listings other Event Schedule sites share here. Their pictures are copies kept on this
-     * install with no recorded shape, so each is fitted inside one box.
+     * Listings from other sites as plain tiles, for a page that is not a wall (/search): every
+     * listing it is given, each with its blurb. A listing whose dates have all passed (listable()
+     * keeps one for a day) is shown at the date it was stored with.
      *
      * @return array{tiles: array<int, array<string, mixed>>}
      */
@@ -219,35 +375,106 @@ class BrowseWall
         $tiles = [];
 
         foreach ($listings as $listing) {
-            $zone = $listing->safeTimezone();
-            $at = $listing->next_occurrence_at?->copy()->setTimezone($zone);
-
-            $tiles[] = [
-                'kind' => 'flyer',
-                'remote' => true,
-                'ratio' => 1.0,
-                'exact' => false,
-                'name' => $listing->name,
-                'url' => $listing->url,
-                'image' => $listing->imageUrl(),
-                'srcset' => null,
-                'when' => $at ? $at->format('D, M j').($at->year !== $now->year ? ', '.$at->year : '') : '',
-                'time' => $at ? $at->format('g:ia').' '.$at->format('T') : null,
-                'rhythm' => null,
-                'live' => false,
-                'schedule' => null,
-                'scheduleUrl' => null,
-                'more' => false,
-                // "Online" comes from the sender's own flag, never from a missing venue.
-                'place' => $listing->locationLabel() ?: ($listing->isOnline() ? __('messages.online') : ''),
-                'country' => '',
-                'source' => $listing->sourceHost(),
-                'hash' => UrlUtils::encodeId($listing->id),
-                'hidden' => false,
-            ];
+            if ($tile = self::remotePoster($listing, $now, true)) {
+                $tiles[] = $tile;
+            }
         }
 
         return ['tiles' => $tiles];
+    }
+
+    /**
+     * A listing from another site, drawn as a local poster is: the same bands and words for when
+     * it is on, its schedule's name linked to the schedule's own page (held to the site's own host
+     * when it arrived), the place, and the site it comes from. Its picture keeps its recorded
+     * shape and is served from the light copies once they are made (HasImageVariants).
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function remotePoster(FederatedEvent $listing, Carbon $now, bool $stored = false): ?array
+    {
+        $next = self::nextListing($listing, $now);
+
+        if (! $next && $stored && $listing->next_occurrence_at) {
+            $at = $listing->next_occurrence_at->copy()->setTimezone($listing->safeTimezone());
+            $next = ['at' => $at, 'ends' => $at, 'running' => false, 'date' => null];
+        }
+
+        if (! $next) {
+            return null;
+        }
+
+        $moment = self::moment($next, $now, false);
+        $size = $listing->imageSourceDimensions();
+        $ratio = PosterWall::clampRatio($size ? $size[0] / $size[1] : null);
+
+        return [
+            'kind' => 'flyer',
+            'remote' => true,
+            'band' => $moment['band'],
+            'ratio' => $ratio,
+            'exact' => $size && abs($ratio - $size[0] / $size[1]) < 0.02,
+            'name' => $listing->name,
+            'url' => $listing->url,
+            'image' => $listing->imageVariantUrl(ImageUtils::VARIANT_WIDTH) ?: $listing->imageUrl(),
+            'srcset' => $listing->imageVariantSrcset(),
+            'when' => $moment['when'],
+            'time' => $moment['time'],
+            'rhythm' => null,
+            'stamp' => $moment['stamp'],
+            'live' => $next['running'],
+            'schedule' => $listing->schedule_name ?: null,
+            'scheduleUrl' => $listing->schedule_name ? ($listing->schedule_url ?: null) : null,
+            'more' => false,
+            // "Online" comes from the sender's own flag, never from a missing venue.
+            'place' => $listing->locationLabel() ?: ($listing->isOnline() ? __('messages.online') : ''),
+            'country' => $listing->country_code ? CountryUtils::getName($listing->country_code) : '',
+            'ink' => crc32(self::listingKey($listing)) % self::INKS,
+            'long' => mb_strlen((string) $listing->name) > 44 ? 2 : (mb_strlen((string) $listing->name) > 22 ? 1 : 0),
+            'source' => $listing->sourceHost(),
+            'blurb' => $listing->short_description,
+            'hash' => UrlUtils::encodeId($listing->id),
+            'hidden' => false,
+            'scheduleHash' => null,
+        ];
+    }
+
+    /**
+     * When something is on, in the wall's words: its band, the day ("Today", "Tomorrow", a
+     * weekday, or a date), its time, and what a poster set in type prints large. Counted in whole
+     * days between today WHERE IT HAPPENS and its start, on the calendar: a difference of
+     * midnights is a fraction of a day across a clock change.
+     *
+     * @param  array{at: Carbon, ends: Carbon, running: bool, date: ?string}  $next
+     * @return array{band: string, days: int, day: string, when: string, time: ?string, stamp: array<string, string>, today: Carbon}
+     */
+    private static function moment(array $next, Carbon $now, bool $several, ?string $range = null): array
+    {
+        $at = $next['at'];
+        $today = $now->copy()->setTimezone($at->getTimezone());
+        $days = (int) Carbon::parse($today->toDateString(), 'UTC')->diffInDays(Carbon::parse($at->toDateString(), 'UTC'), false);
+        $band = match (true) {
+            $next['running'] || $days <= 0 => 'today',
+            $days <= 6 => 'week',
+            default => 'later',
+        };
+
+        $year = $at->year !== $today->year ? ', '.$at->year : '';
+        $day = match (true) {
+            $days === 0 => 'Today',
+            $days === 1 => 'Tomorrow',
+            default => $at->format('D'),
+        };
+
+        return [
+            'band' => $band,
+            'days' => $days,
+            'day' => $day,
+            'when' => $range ?? ($days > 1 || $days < 0 ? $at->format('D, M j').$year : $day),
+            'time' => $several ? null : $at->format('g:ia'),
+            'stamp' => ['top' => $day, 'num' => $at->format('j'), 'mon' => $range ?? $at->format('M')],
+            'today' => $today,
+        ];
     }
 
     /** @return array<string, mixed>|null */
@@ -267,25 +494,10 @@ class BrowseWall
             return null;
         }
 
-        $at = $next['at'];
-        // Whole days between today WHERE IT HAPPENS and its start, counted on the calendar: a
-        // difference of midnights is a fraction of a day across a clock change.
-        $today = $now->copy()->setTimezone($at->getTimezone());
-        $days = (int) Carbon::parse($today->toDateString(), 'UTC')->diffInDays(Carbon::parse($at->toDateString(), 'UTC'), false);
-        $band = match (true) {
-            $next['running'] || $days <= 0 => 'today',
-            $days <= 6 => 'week',
-            default => 'later',
-        };
-
         $several = $event->is_multi_day && ! $next['date'];
-        $year = $at->year !== $today->year ? ', '.$at->year : '';
-        $day = match (true) {
-            $days === 0 => 'Today',
-            $days === 1 => 'Tomorrow',
-            default => $at->format('D'),
-        };
-        $range = $several ? self::range($at, $next['ends'], $today) : null;
+        $today = $now->copy()->setTimezone($next['at']->getTimezone());
+        $range = $several ? self::range($next['at'], $next['ends'], $today) : null;
+        $moment = self::moment($next, $now, $several, $range);
 
         $role = $event->getViewableRole();
         $flyer = (bool) $event->flyer_image_url;
@@ -295,7 +507,7 @@ class BrowseWall
 
         return [
             'kind' => $flyer ? 'flyer' : 'type',
-            'band' => $band,
+            'band' => $moment['band'],
             'ratio' => $ratio,
             // A picture whose shape was never recorded, or is narrower or wider than any tile
             // may be, is fitted inside its box, and the box is filled with its own colours.
@@ -304,11 +516,11 @@ class BrowseWall
             'url' => $url,
             'image' => $event->getImageUrl(480),
             'srcset' => $event->imageSrcset(),
-            'when' => $range ?? ($days > 1 || $days < 0 ? $at->format('D, M j').$year : $day),
-            'time' => $several ? null : $at->format('g:ia'),
+            'when' => $moment['when'],
+            'time' => $moment['time'],
             'rhythm' => self::rhythm($event),
             // What a poster set in type prints large: the day it is on.
-            'stamp' => ['top' => $day, 'num' => $at->format('j'), 'mon' => $range ?? $at->format('M')],
+            'stamp' => $moment['stamp'],
             'live' => $next['running'],
             'schedule' => $role?->name,
             'scheduleUrl' => $role && self::linkable($role, $event) ? ($role->getGuestUrl() ?: null) : null,

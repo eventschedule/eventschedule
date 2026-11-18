@@ -1370,7 +1370,7 @@ return [
             <li><a href="{{ route('marketing.docs.saas.custom_domains') }}" class="doc-link">Custom Domains</a> - Allow your customers to use their own domain names with their schedules, including DigitalOcean App Platform setup</li>
             <li><a href="{{ route('marketing.docs.saas.twilio') }}" class="doc-link">Twilio Integration</a> - Set up phone number verification and WhatsApp messaging</li>
             <li><a href="{{ route('marketing.docs.saas.facebook_login') }}" class="doc-link">Facebook Login</a> - Let your customers sign up and log in with Facebook</li>
-            <li><a href="{{ route('marketing.docs.saas.federation') }}" class="doc-link">Federation</a> - Share your customers' public events with the eventschedule.com listings, with every listing linking back to your platform</li>
+            <li><a href="{{ route('marketing.docs.saas.federation') }}" class="doc-link">The Event Schedule network</a> - Share your customers' public events with the eventschedule.com listings, with every listing linking back to your platform</li>
             <li><a href="{{ route('marketing.docs.saas.monetization') }}" class="doc-link">Monetization</a> - Show ads on your free tier's public pages, sell promotional placement to your paid schedules, and earn an accommodation affiliate commission</li>
             <li><a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">Admin Panel</a> - Grant plans, edit any tenant's schedule name, subdomain and contact details, and release or restore a squatted subdomain</li>
             <li><a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe Integration</a> - Keys, webhooks and Stripe Connect for both subscription billing and ticket payments</li>

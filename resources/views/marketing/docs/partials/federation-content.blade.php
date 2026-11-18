@@ -14,7 +14,7 @@
         Overview
     </h2>
     <p>
-        Federation is an optional network that shares your public events with the listings on
+        The Event Schedule network is an optional way to share your public events with the listings on
         <a href="https://eventschedule.com/browse" target="_blank" rel="noopener noreferrer" class="doc-link">eventschedule.com</a>.
         Every listing links straight back to the event on your own site, so the discovery traffic
         comes to you rather than staying somewhere else.
@@ -288,8 +288,11 @@
 
     <h3 id="browse-page" class="doc-subheading">On the browse page</h3>
     <p>
-        Listings appear in their own section on the eventschedule.com browse page, badged with your
-        site's address and filterable by country and language. Clicking one goes straight to the
+        Listings stand among eventschedule.com's own events on its browse page, each marked with a
+        globe and your site's address, and at most four from other sites at a time. Visitors can also
+        switch the page to <strong>From other sites</strong>, which lists every one of them and
+        filters by country and language; the link under <strong>See your listings</strong> opens it
+        on yours alone. Clicking one goes straight to the
         event on your site: there is no copy of the event page on eventschedule.com, and the link is
         a normal followable link rather than a tracking redirect. It points at the event's address on
         your install itself, never at a custom domain a schedule may have. eventschedule.com counts

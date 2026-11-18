@@ -1286,7 +1286,7 @@
             <li><strong class="text-gray-900 dark:text-white">The preview</strong> - exactly which schedules and events would be sent, each event marked sent, next sync, needs an image or not accepted, so nothing leaves your install unseen</li>
             <li><strong class="text-gray-900 dark:text-white">Two counts under the preview</strong> - why it may be shorter than you expect: schedules that have not verified an email address or phone number, and other owners' schedules that have not been listed yet, whose owners are asked on their dashboards</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">See <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">Federation</a> for the full picture.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">See <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">The Event Schedule network</a> for the full picture.</p>
 
         <h3 id="settings-monetization" class="doc-subheading">Monetization</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">This card configures advertising on free schedules: whether to show AdSense, the publisher and ad slot IDs, whether personalized ads are allowed, whether to run your own promotions marketplace, whether promotions take priority over AdSense, and the prices you charge per thousand impressions and per click. It stays hidden unless <code class="doc-inline-code">ADS_ENABLED=true</code> and the install is a multi-tenant hosted platform other than eventschedule.com, because a selfhosted install resolves every schedule to Enterprise and so has no free tier for an ad to appear on. See <a href="{{ route('marketing.docs.saas.monetization') }}" class="doc-link">Monetization</a> for what each setting does.</p>
@@ -1406,7 +1406,7 @@
             <li><strong class="text-gray-900 dark:text-white">Each install</strong> - its name, address and contact email, when it was last seen, its public schedules and a sample of the listings it would publish, so an approval is never made on a name alone</li>
             <li><strong class="text-gray-900 dark:text-white">Actions</strong> - <strong>Approve</strong>, after which the install's listings publish automatically, <strong>Suspend</strong>, which hides them, and <strong>Send welcome email</strong>. Ticking several installs applies one action to all of them</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300">The <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">Federation</a> guide describes the whole exchange from the selfhost side.</p>
+        <p class="text-gray-600 dark:text-gray-300">The <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">Event Schedule network</a> guide describes the whole exchange from the selfhost side.</p>
     </section>
 
     <!-- System: Support (hosted only) -->

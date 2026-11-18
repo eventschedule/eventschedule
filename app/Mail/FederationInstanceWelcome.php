@@ -120,7 +120,7 @@ class FederationInstanceWelcome extends Mailable
                 : __('messages.federation_welcome_cta_listings'),
             'guideUrl' => $guideUrl,
             'updateGuideUrl' => marketing_url('/docs/selfhost/admin').'#system-app-update',
-            'browseUrl' => marketing_url('/browse').'#network',
+            'browseUrl' => marketing_url('/browse?show=network'),
             'bold' => fn (string $key, array $replace = [], array $boldKeys = []) => $this->bold($key, $replace, $boldKeys),
         ];
     }

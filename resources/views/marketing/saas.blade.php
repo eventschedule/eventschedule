@@ -1554,7 +1554,7 @@
             <div id="federation" class="sk-block sk-duo is-even">
                 <div data-reveal>
                     <p class="hp-kicker">Free, opt-in</p>
-                    <h3 class="sk-h3" style="margin-top: 0.9rem;"><span class="hp-ink-grad">Federation</span> sends traffic back to you</h3>
+                    <h3 class="sk-h3" style="margin-top: 0.9rem;"><span class="hp-ink-grad">The Event Schedule network</span> sends traffic back to you</h3>
                     <p class="hp-lead" style="margin-top: 1rem;">An optional network that sends discovery traffic back to your platform.</p>
                     <p class="sk-p">Share your customers' public events, online and in person, to the eventschedule.com listings. Every listing links straight back to the event on your platform: extra reach and SEO for your customers. It stays off until you switch it on, and we review each install once before anything is published.</p>
                     <ul class="hp-checks">
@@ -2143,7 +2143,7 @@
             ['Wire up billing', 'Stripe platform keys, the Price IDs for Pro and Enterprise, and the subscription webhook with its signing secret set, never blank. Set the prices you show, and the currency, at /admin/settings so they match what Stripe charges.'],
             ['Choose the trial', '<code>TRIAL_DAYS</code> is the one trial each account gets when it first subscribes. The default is 7, and the shipped .env.example says 365, so set it on purpose.'],
             ['Test like a customer', 'Create a schedule and verify its email: until then its page is not found by anyone signed out. Subscribe with Stripe\'s test card, then cancel in Stripe and watch the Plan tab follow, which proves the webhook.'],
-            ['Open the doors', 'demo.yourdomain.com is built for you and reset every hour, so prospects can try the admin before signing up. Then switch on what earns or brings traffic: federation, ads and promotions on your free tier, the accommodation map.'],
+            ['Open the doors', 'demo.yourdomain.com is built for you and reset every hour, so prospects can try the admin before signing up. Then switch on what earns or brings traffic: the Event Schedule network, ads and promotions on your free tier, the accommodation map.'],
         ];
     @endphp
     <section id="costs" class="hp-sec">
@@ -2209,7 +2209,7 @@
 
             <div class="sk-docs" data-reveal>
                 <span class="sk-module-no" style="margin: 0 0.4rem 0 0;">Read next</span>
-                @foreach ([['Monetization', route('marketing.docs.saas.monetization')], ['Federation', route('marketing.docs.saas.federation')], ['Admin panel', route('marketing.docs.selfhost.admin')]] as $doc)
+                @foreach ([['Monetization', route('marketing.docs.saas.monetization')], ['Event Schedule network', route('marketing.docs.saas.federation')], ['Admin panel', route('marketing.docs.selfhost.admin')]] as $doc)
                     <a href="{{ $doc[1] }}">
                         {{ $doc[0] }}
                         {!! $skArrow !!}

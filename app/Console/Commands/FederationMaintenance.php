@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\GenerateFederatedImageVariants;
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
 use App\Services\FederationAddressService;
@@ -43,12 +44,18 @@ class FederationMaintenance extends Command
     public const TOMBSTONE_DAYS = 180;
 
     /**
-     * Rows removed per prune per run. Deleting a listing also deletes its stored image,
-     * which on the hosted nexus is an HTTP call to object storage - and this command
-     * runs inside the cron request, so an unbounded sweep could starve everything
+     * Rows removed per prune per run. Deleting a listing also deletes its stored image and its
+     * two light copies, which on the hosted nexus are three calls to object storage - and this
+     * command runs inside the cron request, so an unbounded sweep could starve everything
      * scheduled after it.
      */
-    public const PRUNE_LIMIT = 500;
+    public const PRUNE_LIMIT = 200;
+
+    /**
+     * Listings whose light copies are queued per run. The copies are made by queued jobs, never
+     * here, so this bounds only how much one run hands the queue.
+     */
+    public const VARIANT_LIMIT = 20;
 
     public function handle(): int
     {
@@ -62,6 +69,7 @@ class FederationMaintenance extends Command
         // on its next push, with images at its new address.
         $this->info('Confirmed '.app(FederationAddressService::class)->verifyByRedirect().' moved address(es).');
         $this->info('Fetched '.$this->fetchImages((int) $this->option('limit')).' image(s).');
+        $this->info('Queued light copies for '.$this->queueImageVariants().' image(s).');
         $this->info('Pruned '.$this->pruneExpired().' expired listing(s).');
         $this->info('Pruned '.$this->pruneTombstones().' tombstone(s).');
         $this->info('Pruned '.$this->pruneStaleInstances().' stale instance(s).');
@@ -132,6 +140,9 @@ class FederationMaintenance extends Command
 
             $row->image_path = ImageUtils::saveImageData($data, $row->image_url, 'federated_');
             $row->image_fetched_url = $row->image_url;
+            // The copies were of the picture this one replaces (deleted with it below), and are
+            // made again for this one by queueImageVariants().
+            $row->image_variants = null;
             $row->save();
 
             if ($previous && $previous !== $row->image_path) {
@@ -142,6 +153,28 @@ class FederationMaintenance extends Command
         }
 
         return $fetched;
+    }
+
+    /**
+     * Queue the light copies (and the recorded size) of stored pictures that have none yet: new
+     * ones, and those stored before the copies existed. Approved instances only, like the fetch;
+     * a copy that cannot be made is recorded as skipped by the job, so it is not queued again.
+     */
+    public function queueImageVariants(int $limit = self::VARIANT_LIMIT): int
+    {
+        $rows = FederatedEvent::whereNotNull('image_path')
+            ->whereNull('image_variants')
+            ->whereNull('blocked_at')
+            ->whereHas('instance', fn ($q) => $q->approved())
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get(['id', 'image_path']);
+
+        foreach ($rows as $row) {
+            GenerateFederatedImageVariants::dispatch($row->id, $row->image_path);
+        }
+
+        return $rows->count();
     }
 
     /**

@@ -147,7 +147,7 @@ class FederatedInstance extends Model
      */
     public function listingsUrl(): string
     {
-        return marketing_url('/browse').'?instance='.UrlUtils::encodeId($this->id).'#network';
+        return marketing_url('/browse').'?show=network&instance='.UrlUtils::encodeId($this->id);
     }
 
     /**

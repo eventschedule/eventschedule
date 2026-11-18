@@ -15,6 +15,10 @@
     // A name is one level under whatever heads it: a stretch of time on the wall, the section
     // itself in an even grid.
     $nameTag = $grid ? 'h3' : 'h4';
+    // Where the poster that is not printed yet leads: sign-up, or, on the "From other sites" view,
+    // the guide to sharing a site's own events here.
+    $blankUrl = $blankUrl ?? app_url('/sign_up');
+    $blankSay = $blankSay ?? 'Put yours up';
 @endphp
 {{-- An even grid never has more columns than it has pictures, so a short list still ends flush. --}}
 <div class="{{ $grid ? 'bw-grid' : 'bw-wall' }}"@if ($grid) style="--n4:{{ in_array($count, [3, 5, 6, 9], true) ? 3 : 4 }};--n6:{{ max(4, min(6, $count)) }};--n8:{{ max(6, min(8, $count)) }}"@endif>
@@ -59,24 +63,24 @@
                 $shapes = collect($profiles)->map(fn ($profile) => '--r'.$profile.':'.($rows[$profile]['ratio'][$index] ?? $tile['ratio']))->implode(';');
             @endphp
             <div class="bw-tile bw-poster bw-blank {{ $arrive }}" style="--r:{{ $tile['ratio'] }};{{ $shapes }};--i:{{ $index }}">
-                <a href="{{ app_url('/sign_up') }}" class="bw-frame">
+                <a href="{{ $blankUrl }}" class="bw-frame">
                     <span class="bw-clip bw-blank-face">
                         <span class="bw-blank-k">This space is free</span>
                         <span class="bw-blank-t">Your event here</span>
                         <span class="bw-blank-go">
-                            Put yours up
+                            {{ $blankSay }}
                             <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </span>
                     </span>
                 </a>
             </div>
         @else
-            <article class="bw-tile bw-poster bw-{{ $tile['kind'] }} {{ $fit ? 'bw-fit' : '' }} {{ $lone ? 'bw-lone' : '' }} {{ ! empty($tile['hidden']) ? 'is-hidden' : '' }} {{ $arrive }}" style="--r:{{ $grid ? 1 : $tile['ratio'] }};--i:{{ $index }}">
+            <article @if (! empty($tile['remote'])) id="l-{{ $tile['hash'] }}" @endif class="bw-tile bw-poster bw-{{ $tile['kind'] }} {{ $fit ? 'bw-fit' : '' }} {{ $lone ? 'bw-lone' : '' }} {{ ! empty($tile['hidden']) ? 'is-hidden' : '' }} {{ $arrive }}" style="--r:{{ $grid ? 1 : $tile['ratio'] }};--i:{{ $index }}">
                 {{-- The whole poster is the link, and the first thing in the tile for a keyboard.
                      A remote one goes straight to its origin and is deliberately followable: the
                      backlink is what sharing here is for. --}}
                 @if (! empty($tile['remote']))
-                    <a href="{{ $tile['url'] }}" target="_blank" rel="noopener" data-federated-click="{{ $tile['hash'] }}" class="bw-link" aria-label="{{ $tile['name'] }}"></a>
+                    <a href="{{ $tile['url'] }}" target="_blank" rel="noopener" data-federated-click="{{ $tile['hash'] }}" class="bw-link" aria-label="{{ $tile['name'] }}{{ $tile['source'] ? ', on '.$tile['source'] : '' }}, opens in a new tab"></a>
                 @else
                     <a href="{{ $tile['url'] }}" target="_blank" rel="noopener" class="bw-link" aria-label="{{ $tile['name'] }}"></a>
                 @endif
@@ -123,8 +127,11 @@
                     @if (! empty($tile['live']))
                         <span class="bw-live"><i aria-hidden="true"></i>On now</span>
                     @endif
-                    @if (! empty($tile['source']))
-                        <span class="bw-source">{{ $tile['source'] }}</span>
+                    {{-- From another site: a globe at the top-end corner, where it never meets "On
+                         now" at the top-start. The site's name is in the caption, never over the
+                         picture, where a phone's narrow poster would cut it off. --}}
+                    @if (! empty($tile['remote']))
+                        <span class="bw-globe" aria-hidden="true">@include('marketing.partials.browse-globe')</span>
                     @endif
                 </div>
 
@@ -147,6 +154,16 @@
                         @if ($tile['more'] && $tile['scheduleUrl'])
                             <p class="bw-more-of"><a href="{{ $tile['scheduleUrl'] }}" target="_blank" rel="noopener">More from them</a></p>
                         @endif
+                    @endif
+                    {{-- The site it comes from, left to right in any language, and broken after a
+                         dot rather than cut when it is longer than the poster is wide. --}}
+                    @if (! empty($tile['remote']) && ! empty($tile['source']))
+                        <p class="bw-src">
+                            @include('marketing.partials.browse-globe')
+                            <span class="sr-only">From another site:</span>
+                            <bdi dir="ltr">{!! implode('.<wbr>', array_map('e', explode('.', $tile['source']))) !!}</bdi>
+                            <svg class="bw-src-out" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M9 7h8v8" /></svg>
+                        </p>
                     @endif
 
                     @if ($admin)

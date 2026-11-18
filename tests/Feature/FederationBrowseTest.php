@@ -198,10 +198,22 @@ class FederationBrowseTest extends TestCase
         $this->makeListing($instance, ['name' => 'English Gig', 'language' => 'en']);
         $this->makeListing($instance, ['name' => 'Deutsches Konzert', 'language' => 'de']);
 
-        $this->get('/browse?lang=de')
+        $this->get('/browse?language=de')
             ->assertOk()
             ->assertSee('Deutsches Konzert')
             ->assertDontSee('English Gig');
+
+        // An older link's `lang` beside the view still filters; on its own it only sets the
+        // page's language (SetUserLanguage), as it does on every other page.
+        $this->get('/browse?show=network&lang=de')
+            ->assertOk()
+            ->assertSee('Deutsches Konzert')
+            ->assertDontSee('English Gig');
+
+        $this->get('/browse?lang=de')
+            ->assertOk()
+            ->assertSee('Deutsches Konzert')
+            ->assertSee('English Gig');
     }
 
     /** Linked from the federation review screen, to show one instance's blast radius. */

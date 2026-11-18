@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasImageVariants;
 use App\Utils\ImageUtils;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Storage;
  */
 class FederatedEvent extends Model
 {
+    use HasImageVariants;
+
     /**
      * Columns a push is allowed to write. `blocked_at` is deliberately absent so an
      * admin block survives a re-push, mirroring how Event keeps
@@ -57,7 +60,16 @@ class FederatedEvent extends Model
         'blocked_at' => 'datetime',
         'geo_lat' => 'float',
         'geo_lon' => 'float',
+        // The light copies of the stored picture and its size (HasImageVariants), written only by
+        // GenerateFederatedImageVariants. Not in UPSERT_FIELDS: a push never writes it.
+        'image_variants' => 'array',
     ];
+
+    /** The stored picture the light copies are made from: this install's copy of the listing's. */
+    public function imageVariantSourceColumn(): string
+    {
+        return 'image_path';
+    }
 
     protected static function booted(): void
     {
@@ -89,6 +101,8 @@ class FederatedEvent extends Model
 
         try {
             Storage::delete(config('filesystems.default') == 'local' ? '/public/'.$path : '/'.$path);
+            // And its light copies (HasImageVariants), named from it, or they outlive it.
+            ImageUtils::deleteStoredVariants($path, ImageUtils::VARIANT_WIDTHS);
         } catch (\Throwable $e) {
             report($e);
         }

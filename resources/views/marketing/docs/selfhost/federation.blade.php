@@ -1,9 +1,9 @@
 <x-docs-page
     key="selfhost/federation"
-    title="Federation on a Selfhost Install - Event Schedule"
+    title="The Event Schedule Network on a Selfhost Install - Event Schedule"
     description="Share public events from your selfhosted install with the eventschedule.com listings. Off by default, opted into per schedule, linked back to your site."
     lede="Share your public events with the eventschedule.com listings and send the discovery traffic back to your own site. An administrator turns the network on for the whole install, eventschedule.com approves it once, and each schedule then chooses whether to be listed."
-    article-description="Federation shares the public events on a selfhosted Event Schedule install with the eventschedule.com listings. An administrator enables it for the whole install, eventschedule.com reviews that install once, and each schedule chooses whether its events are listed. Every listing links back to the event on the origin site."
+    article-description="The Event Schedule network shares the public events on a selfhosted Event Schedule install with the eventschedule.com listings. An administrator enables it for the whole install, eventschedule.com reviews that install once, and each schedule chooses whether its events are listed. Every listing links back to the event on the origin site."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>

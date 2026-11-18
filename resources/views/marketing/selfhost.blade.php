@@ -2163,7 +2163,7 @@
                     <div class="sh-leave">
                         <p>Two optional features can send data to eventschedule.com. Both start off.</p>
                         <ul>
-                            <li><span><strong>Federation</strong>Your public events, once an admin switches it on.</span><span class="sh-state" data-sh-fed-state>off</span></li>
+                            <li><span><strong>The Event Schedule network</strong>Your public events, once an admin switches it on.</span><span class="sh-state" data-sh-fed-state>off</span></li>
                             <li><span><strong>Translation sharing</strong>Wording you corrected, when an admin presses Share.</span><span class="sh-state">off</span></li>
                         </ul>
                     </div>
@@ -2174,11 +2174,11 @@
                 <div class="sh-card" data-reveal="panel">
                     <span class="sh-only-tag">Opt in, off by default</span>
                     <h3 class="hp-h3">Or share out, on your terms</h3>
-                    <p>Federation is a bridge that carries your events to eventschedule.com, and it only exists if an admin switches it on. Your public events appear in the main listings, and every listing links back to the event on your own site.</p>
+                    <p>The Event Schedule network is a bridge that carries your events to eventschedule.com, and it only exists if an admin switches it on. Your public events appear in the main listings, and every listing links back to the event on your own site.</p>
 
                     <div class="sh-fed" data-sh-fed data-on="0">
                         <div class="sh-fed-top">
-                            <span id="sh-fed-label">Federation<small>A demonstration. Flip it to see what would be shared.</small></span>
+                            <span id="sh-fed-label">Share with the network<small>A demonstration. Flip it to see what would be shared.</small></span>
                             <button type="button" class="sh-switch" role="switch" aria-checked="false" aria-labelledby="sh-fed-label" data-sh-fed-switch></button>
                         </div>
                         {{-- Three example events, so the rule can be seen: only the public one
@@ -2214,7 +2214,7 @@
                     </ul>
                     <p style="margin-top: 1.25rem;">
                         <a href="{{ route('marketing.docs.selfhost.federation') }}" class="hp-more sh-more">
-                            Read the federation guide
+                            Read the network guide
                             <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $arrowPath }}" /></svg>
                         </a>
                     </p>
@@ -2531,7 +2531,7 @@
                 'heading' => 'Operations',
                 'links' => [
                     ['Admin panel', 'marketing.docs.selfhost.admin'],
-                    ['Federation', 'marketing.docs.selfhost.federation'],
+                    ['Event Schedule network', 'marketing.docs.selfhost.federation'],
                     ['Boost ads', 'marketing.docs.selfhost.boost'],
                     ['Accessibility', 'marketing.docs.selfhost.accessibility'],
                 ],
@@ -2601,7 +2601,7 @@
             ['q' => 'Can I run it without a crontab?', 'a' => 'Yes. Set APP_CRON_SECRET in .env to a long random string, then have your control panel or any outside cron service request https://your-domain.com/translate_data?secret=YOUR_SECRET once a minute. It runs the same schedule as the cron entry. Use one or the other, never both, because each is a complete copy of the schedule. The Docker stack needs neither: its scheduler container does the job.'],
             ['q' => 'Which payment methods work on a selfhosted install?', 'a' => 'Stripe, PayPal, Payfast (for rand), Razorpay (for Indian rupees), Invoice Ninja, a payment link and cash, with no platform fee on any of them. Stripe runs on the platform keys in your .env, which is the only Stripe rail a selfhost has. PayPal and Razorpay can each be one account for the whole install, set with PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET or RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET, or each schedule owner can connect their own in Settings > Payment Methods. Neither has to call your server for an ordinary sale, so only their optional webhooks need a public address. A Stripe, PayPal or Razorpay sale can be refunded from the Sales page, in full or in part, and the money goes back through the provider.'],
             ['q' => 'Which features need my own accounts or keys?', 'a' => 'Anything that talks to another service needs your own account with it, and that part does nothing until you add the credentials: an SMTP service or Amazon SES for email (or the server\'s own sendmail), Stripe, PayPal, Payfast or Razorpay for payments, a Google or Microsoft app for calendar sync, a Gemini or OpenAI key for the AI features, a Google Wallet issuer account and an Apple Developer Program membership for the wallet buttons on tickets, Google keys for maps and YouTube search, Twilio for phone verification and events created from WhatsApp, a OneSignal app for push notifications, Cloudflare Turnstile keys for the challenge on public forms, a Facebook app for Sign in with Facebook, an OpenStreetMap-style address search (MAP_GEOCODER_URL) for the venue map, and a Meta ad account for Boost. Everything else, CalDAV sync included, needs no keys of yours in .env.'],
-            ['q' => 'Does a selfhosted install send anything back to Event Schedule?', 'a' => 'Not unless an admin switches something on. There is no usage reporting and no phone-home. Two optional features do send data to eventschedule.com, and both start off. Federation shares only your public events into the eventschedule.com listings, with every listing linking back to your own site, and a schedule is only listed once someone who manages it says yes. Translation sharing sends wording you corrected in the translation manager, when an admin presses Share or, with automatic sharing on, as it is saved. Crash reports are a third opt-in: the Report errors to the developers box in the setup wizard, unticked unless you tick it (REPORT_ERRORS in .env), sends errors to Event Schedule\'s error tracker. The daily update check asks GitHub, not us, for the newest version number.'],
+            ['q' => 'Does a selfhosted install send anything back to Event Schedule?', 'a' => 'Not unless an admin switches something on. There is no usage reporting and no phone-home. Two optional features do send data to eventschedule.com, and both start off. The Event Schedule network shares only your public events into the eventschedule.com listings, with every listing linking back to your own site, and a schedule is only listed once someone who manages it says yes. Translation sharing sends wording you corrected in the translation manager, when an admin presses Share or, with automatic sharing on, as it is saved. Crash reports are a third opt-in: the Report errors to the developers box in the setup wizard, unticked unless you tick it (REPORT_ERRORS in .env), sends errors to Event Schedule\'s error tracker. The daily update check asks GitHub, not us, for the newest version number.'],
             ['q' => 'Can I run it as a white-label SaaS for my own customers?', 'a' => 'Yes. Set IS_HOSTED=true and the same install runs multi-tenant, with a subdomain per customer, Stripe subscription billing and your own prices on the Pro and Enterprise tiers. You set the prices and keep the revenue. One thing to know before you price it: the licence credit stays on the public pages of every customer you charge. It is a small chip in the corner, it sits on your free tier too, and it is the whole of what the software costs you.'],
             ['q' => 'Can I move from the hosted version to selfhosted?', 'a' => 'Yes. Backup and restore is built in, so you can export your schedule data, with images if you want them, and import it into your own install.'],
         ];

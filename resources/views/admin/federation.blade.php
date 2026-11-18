@@ -395,7 +395,7 @@
                                      pending or suspended instance this page would be empty. --}}
                                 @if ($instance->isApproved() && $instance->live_events_count > 0)
                                     <p class="mt-3 text-sm">
-                                        <x-link href="{{ marketing_url('/browse?instance='.$hash).'#network' }}" target="_blank" :nofollow="true">
+                                        <x-link href="{{ marketing_url('/browse?show=network&instance='.$hash) }}" target="_blank" :nofollow="true">
                                             {{ trans_choice('messages.federation_view_live_listings', $instance->live_events_count, ['count' => number_format($instance->live_events_count)]) }}
                                         </x-link>
                                     </p>

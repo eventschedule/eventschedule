@@ -240,7 +240,7 @@ class FederationWelcomeTest extends TestCase
         $html = (new FederationInstanceWelcome($instance))->render();
 
         $this->assertStringContainsString(e(trans_choice('messages.federation_welcome_received_title', 2, ['count' => 2])), $html);
-        $this->assertStringContainsString('?instance='.UrlUtils::encodeId($instance->id), $html);
+        $this->assertStringContainsString('show=network&amp;instance='.UrlUtils::encodeId($instance->id), $html);
     }
 
     /** A welcome sent long after approval - the backfill case - reports what is live. */
@@ -565,7 +565,7 @@ class FederationWelcomeTest extends TestCase
 
         $instance = FederatedInstance::where('instance_id', $id)->first();
         $this->assertSame($instance->listingsUrl(), $response->json('listings_url'));
-        $this->assertStringContainsString('?instance='.UrlUtils::encodeId($instance->id), $response->json('listings_url'));
+        $this->assertStringContainsString('?show=network&instance='.UrlUtils::encodeId($instance->id), $response->json('listings_url'));
     }
 
     // ------------------------------------------------------------------ review fixes

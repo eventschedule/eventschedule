@@ -968,7 +968,7 @@
             ],
             [
                 'key' => 'federation',
-                'title' => 'Federation is off until you turn it on',
+                'title' => 'The Event Schedule network is off until you turn it on',
                 'plan' => 'free',
                 'excerpt' => $src::method(\App\Services\FederationService::class, 'isEnabled', [["Setting::get('federation_enabled')", 1]]),
                 'note' => 'A setting on the instance, not a plan tier, and false until an administrator changes it.',

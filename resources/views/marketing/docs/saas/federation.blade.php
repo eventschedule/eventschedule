@@ -16,10 +16,10 @@
      the setup-guide link together - not a canonical on its own. --}}
 <x-docs-page
     key="saas/federation"
-    title="Federation on a White-Label SaaS - Event Schedule"
+    title="The Event Schedule Network on a White-Label SaaS - Event Schedule"
     description="Share your customers' public events with the eventschedule.com listings. Each customer schedule opts in for itself, and every listing links back to you."
     lede="Share your customers' public events with the eventschedule.com listings and send the discovery traffic back to your platform. You turn the network on for the whole install, eventschedule.com approves it once, and each customer's schedule then chooses whether to be listed."
-    article-description="Federation shares the public events on a multi-tenant Event Schedule install with the eventschedule.com listings. The operator enables it for the whole install, eventschedule.com reviews that install once, and each customer schedule chooses whether its events are listed. Every listing links back to the event on the operator's own site."
+    article-description="The Event Schedule network shares the public events on a multi-tenant Event Schedule install with the eventschedule.com listings. The operator enables it for the whole install, eventschedule.com reviews that install once, and each customer schedule chooses whether its events are listed. Every listing links back to the event on the operator's own site."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>

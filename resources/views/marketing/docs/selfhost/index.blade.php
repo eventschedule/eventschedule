@@ -60,7 +60,7 @@
 
         <p class="mb-4">Then the optional pieces, in any order:</p>
         <ul class="doc-list mb-6">
-            <li><a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">Federation</a> lists your public events on eventschedule.com and links each one back to your site. It stays off until you turn it on in the admin panel.</li>
+            <li><a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">The Event Schedule network</a> lists your public events on eventschedule.com and links each one back to your site. It stays off until you turn it on in the admin panel.</li>
             <li><a href="{{ route('marketing.docs.selfhost.boost') }}" class="doc-link">Boost</a> runs Meta ads from inside the app, billed to the one Meta ad account you configure, so every campaign spends your money.</li>
             <li><a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> puts an "Add to Google Wallet" button on every ticket, free registrations included, and needs a Google Wallet issuer account of your own.</li>
             <li><a href="{{ route('marketing.docs.selfhost.apple_wallet') }}" class="doc-link">Apple Wallet</a> puts an "Add to Apple Wallet" button beside it, and needs an Apple Developer Program membership of your own.</li>

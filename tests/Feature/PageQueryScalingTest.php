@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\CustomDomainSetting;
 use App\Models\Event;
+use App\Models\FederatedEvent;
+use App\Models\FederatedInstance;
 use App\Models\MarketingCopyHost;
 use App\Models\Newsletter;
 use App\Models\PromoterLink;
@@ -94,6 +96,8 @@ class PageQueryScalingTest extends TestCase
         'admin realtime so far' => 11, // 8
         'admin blocked' => 18, // 15
         'admin copies' => 14,
+        'browse' => 18, // 15
+        'browse other sites' => 21, // 18
         'api events' => 16, // 13
         'api schedules' => 12, // 9
         'api categories' => 6, // 3
@@ -193,7 +197,8 @@ class PageQueryScalingTest extends TestCase
 
             // Another organizer's schedule: one event on the curator's list, one asking the venue.
             $other = $this->createRole($this->createOwner(), 'talent', ['name' => 'Visiting Act '.$i]);
-            $listed = $this->createEvent($other, ['name' => 'Guest set '.$i, 'creator_role_id' => $other->id, 'starts_at' => $when->copy()->addHour()->format('Y-m-d H:i:s')]);
+            // With a flyer, so it is one of /browse's posters too.
+            $listed = $this->createEvent($other, ['name' => 'Guest set '.$i, 'creator_role_id' => $other->id, 'starts_at' => $when->copy()->addHour()->format('Y-m-d H:i:s'), 'flyer_image_url' => 'flyer_'.$i.'.jpg']);
             $listed->roles()->attach($this->curator->id, ['is_accepted' => true]);
             $request = $this->createEvent($other, ['name' => 'Asks to play '.$i, 'creator_role_id' => $other->id, 'starts_at' => $when->copy()->addDay()->format('Y-m-d H:i:s')]);
             $request->roles()->attach($this->venue->id, ['is_accepted' => null]);
@@ -209,6 +214,27 @@ class PageQueryScalingTest extends TestCase
             ]);
 
             $this->createAppointmentType($this->venue, ['name' => 'Studio session '.$i]);
+
+            // An event another site shares here, on a schedule of its own (/browse).
+            $site = FederatedInstance::firstOrCreate(['instance_id' => 'scaling-site'], [
+                'site_url' => 'https://other-site.test',
+                'name' => 'Other site',
+                'secret' => str_repeat('a', 40),
+                'status' => FederatedInstance::STATUS_APPROVED,
+            ]);
+            $listing = FederatedEvent::create([
+                'federated_instance_id' => $site->id,
+                'external_id' => 'scaling-'.$i,
+                'url' => 'https://other-site.test/e/'.$i,
+                'name' => 'Shared night '.$i,
+                'schedule_name' => 'Shared schedule '.$i,
+                'schedule_url' => 'https://other-site.test/s'.$i,
+                'timezone' => 'UTC',
+                'starts_at' => $when->copy()->addHours(2),
+                'next_occurrence_at' => $when->copy()->addHours(2),
+            ]);
+            $listing->image_path = 'federated_'.$i.'.jpg';
+            $listing->save();
 
             DB::table('realtime_hits')->insert([
                 'hit_key' => str_pad(dechex($i), 32, '0', STR_PAD_LEFT),
@@ -249,6 +275,8 @@ class PageQueryScalingTest extends TestCase
             'admin realtime trends', 'admin realtime so far', 'admin blocked', 'admin copies',
             // The API
             'api events', 'api schedules', 'api categories',
+            // The marketing site's pages that list
+            'browse', 'browse other sites',
         ];
 
         return array_combine($pages, array_map(fn ($page) => [$page], $pages));
@@ -305,6 +333,9 @@ class PageQueryScalingTest extends TestCase
             'guest schedule sitemap' => $this->get('/'.$sub.'/sitemap.xml'),
             'guest request form' => $this->followingRedirects()->get('/'.$sub.'/request'),
             'guest booking page' => $this->get('/'.$sub.'/book'),
+
+            'browse' => $this->get('/browse'),
+            'browse other sites' => $this->get('/browse?show=network'),
 
             'dashboard' => $this->actingAs($owner)->get(route('home')),
             'following' => $this->actingAs($owner)->get(route('following')),

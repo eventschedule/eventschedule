@@ -1,7 +1,15 @@
 <x-marketing-layout>
     {{-- SEO Slots --}}
-    <x-slot name="title">Upcoming Events: Music, Comedy, Classes | Event Schedule</x-slot>
-    <x-slot name="description">Upcoming live music, comedy, classes, markets and meetups, soonest first. Free to browse, no account needed. Search by event, city or schedule.</x-slot>
+    @if ($networkView)
+        {{-- Every listing other sites share, filtered as asked: a view of /browse, not a page of
+             its own for a search engine, whose answer is /browse itself. --}}
+        <x-slot name="title">Events From Other Sites | Event Schedule</x-slot>
+        <x-slot name="description">Upcoming events shared by independent sites on the Event Schedule network. Each opens on its own site.</x-slot>
+        <x-slot name="robots">noindex, follow</x-slot>
+    @else
+        <x-slot name="title">Upcoming Events: Music, Comedy, Classes | Event Schedule</x-slot>
+        <x-slot name="description">Upcoming live music, comedy, classes, markets and meetups, soonest first. Free to browse, no account needed. Search by event, city or schedule.</x-slot>
+    @endif
     <x-slot name="breadcrumbTitle">Browse</x-slot>
 
     <x-slot name="headMeta">
@@ -10,7 +18,8 @@
         @endif
     </x-slot>
 
-    {{-- Structured data: list only the publicly visible events --}}
+    {{-- Structured data: this site's own public events on the mixed wall, never a listing from
+         another site (that page is theirs) and nothing on the "From other sites" view. --}}
     <x-slot name="structuredData">
     @php
         $itemListElements = [];
@@ -28,7 +37,7 @@
             ];
         }
     @endphp
-    @if(count($itemListElements))
+    @if(count($itemListElements) && ! $networkView)
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {{-- SeoUtils::jsonLd escapes < and >, which is load-bearing here: this block is echoed
          raw, so a closing script tag inside an event name would otherwise terminate the
@@ -57,9 +66,13 @@
     @php
         $tiles = $wall['tiles'];
         $rows = $wall['rows'];
-        $networkCount = $federatedEvents->count();
-        $hasNetworkSection = $networkCount > 0 || $federatedCountry || $federatedLanguage || $federatedInstance;
         $schedules = $wall['count'];
+        $networkUrl = marketing_url('/browse?show=network');
+        $teaserTiles = $teaser['tiles'] ?? [];
+        $filtered = $federatedCountry !== '' || $federatedLanguage !== '' || $federatedInstance !== '';
+        // The switch is offered while other sites have something on, and always on their view.
+        $hasSwitch = $networkView || $networkTotal > 0;
+        $shareGuide = marketing_url('/docs/selfhost/federation');
         $discoveryNotice = $browseAdmin && is_array(session('discovery_notice')) ? session('discovery_notice') : null;
 
         // Questions a visitor actually asks, then the one an organizer asks.
@@ -74,11 +87,11 @@
             ],
             [
                 'q' => 'Why is there only one event from each schedule?',
-                'a' => 'So that the page shows who is putting things on rather than who posts the most. Each schedule is here once, with the next thing it has on. Its name under the poster opens the schedule, where the rest are.',
+                'a' => 'So that the page shows who is putting things on rather than who posts the most. Each schedule is here once, with the next thing it has on, and at most four posters come from other sites. Its name under the poster opens the schedule, where the rest are. From other sites lists every one of theirs.',
             ],
             [
-                'q' => 'Why are some listings from other websites?',
-                'a' => 'Event Schedule is open source, so other people run their own copies of it and some choose to share their events here. Those posters open on the site that published them.',
+                'q' => 'Why are some events from other websites?',
+                'a' => 'Event Schedule is open source, so other people run their own copies of it, and some share their events here. Those posters carry a globe and the name of the site they come from, and open on it. From other sites, above the posters, shows only theirs.',
             ],
             [
                 'q' => 'Can I browse by city?',
@@ -109,8 +122,13 @@
                 </p>
                 {{-- Broken by hand from a tablet up, where the type is sized to its column so the
                      second line always fits; left to balance itself on a phone. --}}
-                <h1 class="bw-h1 es-fade-up es-d-1">Upcoming events, from <br>the people <span class="bw-lit">putting them on.</span></h1>
-                <p class="bw-lede es-fade-up es-d-2">Live music, comedy, classes, markets and more. Free to browse, no account needed.</p>
+                @if ($networkView)
+                    <h1 class="bw-h1 es-fade-up es-d-1">Upcoming events, from <br>other <span class="bw-lit">Event Schedule sites.</span></h1>
+                    <p class="bw-lede es-fade-up es-d-2">Shared by independent sites that run their own copy of Event Schedule. Each event opens on its own site.</p>
+                @else
+                    <h1 class="bw-h1 es-fade-up es-d-1">Upcoming events, from <br>the people <span class="bw-lit">putting them on.</span></h1>
+                    <p class="bw-lede es-fade-up es-d-2">Live music, comedy, classes, markets and more. Free to browse, no account needed.</p>
+                @endif
             </div>
 
             <div class="bw-hero-do es-fade-up es-d-3">
@@ -127,14 +145,11 @@
                     </div>
                 </form>
 
-                @if (count($wall['bands']) > 1 || $hasNetworkSection)
+                @if (count($wall['bands']) > 1)
                     <nav class="bw-jump" aria-label="Jump to">
                         @foreach ($wall['bands'] as $band)
                             <a href="#when-{{ $band['band'] }}">{{ $band['title'] }}</a>
                         @endforeach
-                        @if ($hasNetworkSection)
-                            <a href="#network">Other sites</a>
-                        @endif
                     </nav>
                 @endif
             </div>
@@ -150,6 +165,76 @@
         <div class="bw-ambient" aria-hidden="true">
             <div class="bw-ambient-in"><img alt=""><img alt=""></div>
         </div>
+
+        {{-- The wall's own header: every event, or only those other sites share. Two links that
+             read as one control. #network is the address the welcome mail and older links name;
+             the script at the foot of the page takes it to the view. --}}
+        @if ($hasSwitch)
+            <div class="bw-col">
+                <div class="bw-switch-row">
+                    <nav id="network" class="bw-switch" aria-label="Which events">
+                        <a href="{{ marketing_url('/browse') }}" @if (! $networkView) aria-current="page" @endif>All events</a>
+                        <a href="{{ $networkUrl }}" @if ($networkView && ! $filtered) aria-current="page" @elseif ($networkView) aria-current="true" @endif>
+                            @include('marketing.partials.browse-globe')
+                            From other sites
+                            @if ($networkTotal > 0)
+                                <span class="bw-switch-n"><span aria-hidden="true">&middot; </span>{{ $networkTotal }}</span>
+                            @endif
+                        </a>
+                    </nav>
+
+                    @if ($networkView)
+                        {{-- Plain GET filters: the page stays crawlable, shareable, and free of a
+                             JS mount. `language`, not `lang`, which also sets the page's own. --}}
+                        <form method="GET" action="{{ marketing_url('/browse') }}" class="bw-filters">
+                            <input type="hidden" name="show" value="network">
+                            {{-- Carried through, or picking a country would silently drop the
+                                 site this view was opened for. --}}
+                            @if ($federatedInstance !== '')
+                                <input type="hidden" name="instance" value="{{ $federatedInstance }}">
+                            @endif
+                            <label for="federated-country" class="sr-only">{{ __('messages.federation_filter_all_countries') }}</label>
+                            <select id="federated-country" name="country" data-auto-submit>
+                                <option value="">{{ __('messages.federation_filter_all_countries') }}</option>
+                                @foreach ($federatedCountries as $code)
+                                    <option value="{{ $code }}" @selected($federatedCountry === $code)>{{ \App\Utils\CountryUtils::getName($code) ?: $code }}</option>
+                                @endforeach
+                            </select>
+
+                            <label for="federated-language" class="sr-only">{{ __('messages.federation_filter_all_languages') }}</label>
+                            <select id="federated-language" name="language" data-auto-submit>
+                                <option value="">{{ __('messages.federation_filter_all_languages') }}</option>
+                                @foreach ($federatedLanguages as $code)
+                                    <option value="{{ $code }}" @selected($federatedLanguage === $code)>{{ isset(config('app.supported_languages')[$code]) ? __('messages.'.config('app.supported_languages')[$code]) : $code }}</option>
+                                @endforeach
+                            </select>
+
+                            <noscript>
+                                <button type="submit" class="bw-btn bw-btn-sm">{{ __('messages.filter') }}</button>
+                            </noscript>
+                        </form>
+                    @endif
+                </div>
+
+                @if ($networkView)
+                    {{-- The hero above already says what these are; this is the invitation. --}}
+                    <p class="bw-switch-say">
+                        Run your own copy of Event Schedule? <a href="{{ $shareGuide }}">Share your events here</a>
+                    </p>
+                    @if ($federatedInstance !== '')
+                        <p class="bw-switch-say">
+                            @if ($instanceListing)
+                                From <bdi dir="ltr">{{ $instanceListing->sourceHost() }}</bdi>
+                                <span aria-hidden="true">&middot;</span>
+                                {{ $federatedTotal }} {{ $federatedTotal === 1 ? 'event' : 'events' }}
+                                <span aria-hidden="true">&middot;</span>
+                            @endif
+                            <a href="{{ $networkUrl }}">Show all sites</a>
+                        </p>
+                    @endif
+                @endif
+            </div>
+        @endif
 
         {{-- The wall runs the width of the window. With nothing on it, the words that stand in
              for it keep to the column the rest of the page's words are on. --}}
@@ -171,12 +256,35 @@
                 @endforeach
             @endif
 
-            @if (count($tiles))
+            @if (count($tiles) && $networkView)
+                @include('marketing.partials.browse-wall', ['tiles' => $tiles, 'rows' => $rows, 'admin' => $browseAdmin, 'blankUrl' => $shareGuide, 'blankSay' => 'Share your site\'s events'])
+
+                @if ($nextHash && $federatedLimit < \App\Http\Controllers\MarketingController::NETWORK_VIEW_CAP)
+                    <p class="bw-more">
+                        <a href="{{ request()->fullUrlWithQuery(['federated_limit' => $federatedLimit + \App\Utils\BrowseWall::LIMIT]) }}#l-{{ $nextHash }}" class="bw-ghost">
+                            {{ __('messages.federation_show_more') }}
+                        </a>
+                    </p>
+                @elseif ($nextHash)
+                    <p class="bw-after">{{ $federatedTotal }} events in all. Pick a country to narrow it.</p>
+                @endif
+            @elseif ($networkView)
+                {{-- Nothing to show: say why, and the way back. --}}
+                <p class="bw-none">
+                    @if ($filtered)
+                        {{ __('messages.federation_browse_no_results') }}
+                        <a href="{{ $networkUrl }}">Show every site, country and language</a>
+                    @else
+                        No other sites have events on right now.
+                        <a href="{{ marketing_url('/browse') }}">See all events</a>
+                    @endif
+                </p>
+            @elseif (count($tiles))
                 @include('marketing.partials.browse-wall', ['tiles' => $tiles, 'rows' => $rows, 'admin' => $browseAdmin])
 
                 <p class="bw-after">
                     Not seeing it?
-                    <a href="{{ marketing_url('/search') }}">Search for something specific</a>
+                    <a href="{{ marketing_url('/search') }}">Search for something specific</a>@if ($networkTotal > 0), or <a href="{{ $networkUrl }}">see what other sites have on</a>@endif
                 </p>
             @else
                 {{-- Nothing on. Say so once, and go straight to the one thing that can be offered. --}}
@@ -198,79 +306,29 @@
         </div>
     </section>
 
-    {{-- Federated listings from other Event Schedule installs.
-
-         Their own section rather than mixed into the wall above: provenance stays obvious, and
-         the local query keeps its single ordering and limit. Not rendered at all when the
-         network has nothing to show. --}}
-    @if($hasNetworkSection)
-        <section id="network" class="bw-stage bw-network">
+    {{-- The next few events from other sites that are not on the wall above, and the way to all
+         of them: the wall holds at most four of theirs, and these posters send visitors to the
+         sites that share them. --}}
+    @if (! $networkView && count($teaserTiles))
+        <section class="bw-stage bw-network" aria-labelledby="more-network">
             <div class="bw-col">
                 <div class="bw-head">
                     <div>
-                        <h2>{{ __('messages.federation_browse_heading') }}</h2>
-                        <p>{{ __('messages.federation_browse_intro') }}</p>
+                        <h2 id="more-network">More from other sites</h2>
+                        <p>Shared by independent sites on the Event Schedule network. Each opens on its own site.</p>
                     </div>
-
-                    {{-- Plain GET filters. In-person events make location filtering essential, and
-                         keeping this server-side means the page stays crawlable, shareable, and
-                         free of a JS mount. --}}
-                    <form method="GET" action="{{ marketing_url('/browse') }}" class="bw-filters">
-                        {{-- Carried through, or picking a country would silently drop the
-                             instance scope this page was opened with. --}}
-                        @if($federatedInstance)
-                            <input type="hidden" name="instance" value="{{ $federatedInstance }}">
-                        @endif
-                        <label for="federated-country" class="sr-only">{{ __('messages.federation_filter_all_countries') }}</label>
-                        <select id="federated-country" name="country" data-auto-submit>
-                            <option value="">{{ __('messages.federation_filter_all_countries') }}</option>
-                            @foreach($federatedCountries as $code)
-                                <option value="{{ $code }}" @selected($federatedCountry === $code)>{{ \App\Utils\CountryUtils::getName($code) ?: $code }}</option>
-                            @endforeach
-                        </select>
-
-                        <label for="federated-language" class="sr-only">{{ __('messages.federation_filter_all_languages') }}</label>
-                        <select id="federated-language" name="lang" data-auto-submit>
-                            <option value="">{{ __('messages.federation_filter_all_languages') }}</option>
-                            @foreach($federatedLanguages as $code)
-                                <option value="{{ $code }}" @selected($federatedLanguage === $code)>{{ isset(config('app.supported_languages')[$code]) ? __('messages.'.config('app.supported_languages')[$code]) : $code }}</option>
-                            @endforeach
-                        </select>
-
-                        <noscript>
-                            <button type="submit" class="bw-btn bw-btn-sm">{{ __('messages.filter') }}</button>
-                        </noscript>
-                    </form>
+                    <a href="{{ $networkUrl }}" class="bw-ghost">See all {{ $networkTotal }}</a>
                 </div>
             </div>
-
-            <div class="{{ $networkCount > 0 ? 'bw-bleed' : 'bw-col' }}">
-                @if($networkCount > 0)
-                    @include('marketing.partials.browse-wall', ['tiles' => $network['tiles'], 'rows' => [], 'admin' => $browseAdmin, 'grid' => true])
-
-                    @if($federatedTotal > $networkCount && $federatedLimit < 96)
-                        <p class="bw-more">
-                            <a href="{{ request()->fullUrlWithQuery(['federated_limit' => $federatedLimit + 24]) }}#network" class="bw-ghost">
-                                {{ __('messages.federation_show_more') }}
-                            </a>
-                        </p>
-                    @endif
-                @else
-                    {{-- Visitor-facing wording: this branch is only ever reached with a filter set. --}}
-                    <p class="bw-none">
-                        {{ __('messages.federation_browse_no_results') }}
-                        @if($federatedCountry || $federatedLanguage || $federatedInstance)
-                            <a href="{{ marketing_url('/browse') }}#network">Show every country and language</a>
-                        @endif
-                    </p>
-                @endif
+            <div class="bw-bleed">
+                @include('marketing.partials.browse-wall', ['tiles' => $teaserTiles, 'rows' => [], 'admin' => $browseAdmin, 'grid' => true])
             </div>
         </section>
     @endif
 
     {{-- Admin-only: what is hidden, and the way back. Both sections are always drawn for an
          admin, so an Unhide that empties one still lands on it and on its note. --}}
-    @if ($browseAdmin)
+    @if ($browseAdmin && ! $networkView)
         <section id="hidden-events" class="bw-stage bw-hidden">
             <div class="bw-col">
                 <div class="bw-head">
@@ -425,6 +483,13 @@
 
     <script {!! nonce_attr() !!}>
         (function () {
+            {{-- /browse#network was where other sites' events were, and the welcome mail of
+                 every site that joined before 2026-11 still links there: take it to their view. --}}
+            if (location.hash === '#network' && !/[?&]show=network\b/.test(location.search)) {
+                location.replace(@json($networkUrl));
+                return;
+            }
+
             {{-- Submit a filter on change. The AP layout has a shared data-auto-submit handler,
                  but marketing pages do not load it. --}}
             document.addEventListener('change', function (e) {

@@ -566,6 +566,39 @@
     #bw .bw-source { bottom: 0.5rem; inset-inline-start: 0.5rem; display: block; font-weight: 600; }
     #bw .bw-flag { top: 0.5rem; inset-inline-start: 0.5rem; background-color: #b45309; }
 
+    /* From another site: a globe at the top-end corner, the one "On now" never takes. */
+    #bw .bw-globe {
+        position: absolute;
+        z-index: 1;
+        top: 0.5rem;
+        inset-inline-end: 0.5rem;
+        display: grid;
+        place-items: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 999px;
+        background-color: rgba(7, 10, 20, 0.78);
+        color: #ffffff;
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+    }
+    #bw .bw-globe-i { width: 1rem; height: 1rem; flex: none; }
+    /* And the site's name, under the caption, in the caption's quietest ink. */
+    #bw .bw-src {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.3rem;
+        margin-top: 0.35rem;
+        color: var(--bw-ink-3);
+        font-size: 0.78rem;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+    #bw .bw-src bdi { min-width: 0; overflow-wrap: anywhere; }
+    #bw .bw-src .bw-globe-i { width: 0.9rem; height: 0.9rem; margin-top: 0.08rem; }
+    #bw .bw-src-out { width: 0.8rem; height: 0.8rem; flex: none; margin-top: 0.12rem; }
+    [dir="rtl"] #bw .bw-src-out { transform: scaleX(-1); }
+
     /* --- Its caption --- */
     /* Its words stand on the wall, never on its light: the light stops short of the poster's
        foot, and the caption is drawn over whatever of it is left. */
@@ -924,6 +957,55 @@
         font-weight: 600;
     }
     #bw .bw-more { margin-top: 2rem; text-align: center; }
+
+    /* The wall's header: All events, or From other sites. Two links read as one control, the
+       one you are on pressed in. Filters beside it on the other-sites view. */
+    #bw .bw-switch-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem 1rem;
+        margin-bottom: 1.25rem;
+    }
+    #bw .bw-switch {
+        display: inline-flex;
+        max-width: 100%;
+        padding: 0.25rem;
+        border: 1px solid var(--bw-line);
+        border-radius: 999px;
+        background-color: var(--bw-bg-2);
+    }
+    #bw .bw-switch a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        min-height: 2.5rem;
+        padding: 0 1rem;
+        border-radius: 999px;
+        color: var(--bw-ink-2);
+        font-size: 0.95rem;
+        font-weight: 700;
+        white-space: nowrap;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    #bw .bw-switch a:hover { color: var(--bw-ink); }
+    #bw .bw-switch a[aria-current] {
+        background-color: var(--bw-ink);
+        color: var(--bw-bg);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+    #bw .bw-switch .bw-globe-i { width: 1rem; height: 1rem; }
+    #bw .bw-switch-n { font-variant-numeric: tabular-nums; opacity: 0.8; }
+    #bw .bw-switch-say { max-width: 46rem; margin: -0.5rem 0 1.25rem; color: var(--bw-ink-2); font-size: 0.95rem; }
+    #bw .bw-switch-say a { color: var(--bw-blue); font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
+    #bw .bw-switch-say bdi { font-weight: 700; color: var(--bw-ink); }
+    @media (max-width: 639px) {
+        #bw .bw-switch { display: flex; width: 100%; }
+        #bw .bw-switch a { flex: 1 1 auto; justify-content: center; padding: 0 0.75rem; }
+        #bw .bw-switch-row .bw-filters { width: 100%; }
+        #bw .bw-switch-row .bw-filters select { flex: 1 1 10rem; }
+    }
     #bw .bw-none { color: var(--bw-ink-2); font-size: 1.0625rem; }
     #bw .bw-none a { margin-inline-start: 0.5rem; }
 

@@ -238,10 +238,14 @@ class MarketingController extends Controller
         return 'marketing.wall.'.md5((string) config('app.url'));
     }
 
-    /** The cache key browseWall() reads and writes: which events /browse's wall is chosen from. */
+    /**
+     * The cache key browseWall() reads and writes: which events and listings /browse's wall is
+     * chosen from. Named for its shape (v2: local and network ids, the teaser and the count): a
+     * copy cached under the old name by the code before it would not hold the new keys.
+     */
     public static function browseCacheKey(): string
     {
-        return self::wallCacheKey().'.browse';
+        return self::wallCacheKey().'.browse.v2';
     }
 
     /**
@@ -8273,10 +8277,9 @@ class MarketingController extends Controller
             'searched' => strlen($query) >= 2,
             'schedules' => $schedules,
             'events' => $events,
-            // The date, time, place and source host exactly as /browse's network section words them.
-            'networkCards' => collect(BrowseWall::remote($networkEvents)['tiles'])
-                ->map(fn ($tile, $i) => $tile + ['blurb' => $networkEvents[$i]->short_description])
-                ->all(),
+            // The date, time, place and source host exactly as /browse's posters from other sites
+            // word them, each with its blurb.
+            'networkCards' => BrowseWall::remote($networkEvents)['tiles'],
         ]);
     }
 
@@ -8289,14 +8292,31 @@ class MarketingController extends Controller
 
         $now = Carbon::now('UTC');
 
-        // One poster for each schedule: the event it has on next (BrowseWall). $more names the
-        // schedules that have something else coming up as well.
-        [$events, $more] = $this->browseWall($now);
+        // Normalise every filter to a scalar BEFORE the query. filled() is true for an array too,
+        // so ?country[]=US used to reach strtoupper(array) - a TypeError, i.e. a 500 on this
+        // public page.
+        $scalar = fn (string $key) => is_scalar($request->input($key)) ? trim((string) $request->input($key)) : '';
+
+        $federatedCountry = strtoupper($scalar('country'));
+        // Everything one site publishes here: installs' "See your listings" and the review screen.
+        $federatedInstance = $scalar('instance');
+        $show = $scalar('show');
+        // `language`, not `lang`: ?lang= also sets the page's own language for a guest
+        // (SetUserLanguage). An old link's `lang` is read only beside `show` or `instance`, where
+        // it can only have meant the filter.
+        $federatedLanguage = $scalar('language') !== ''
+            ? $scalar('language')
+            : ($show !== '' || $federatedInstance !== '' ? $scalar('lang') : '');
+
+        // "From other sites": asked for, or implied by any of its filters or its page size.
+        $networkView = $show === 'network'
+            || $federatedInstance !== '' || $federatedCountry !== '' || $scalar('language') !== ''
+            || $request->has('federated_limit');
 
         // Admins also see hidden events so they can restore them. Deliberately NOT spread and
         // NOT widened: this is a moderation list, where demoting an event past the 50th row
-        // would put it out of reach of the person whose job is to find it.
-        $hiddenEvents = $isAdmin
+        // would put it out of reach of the person whose job is to find it. The mixed wall only.
+        $hiddenEvents = $isAdmin && ! $networkView
             ? $this->publicUpcomingEventsQuery()
                 ->where('is_hidden_from_discovery', true)
                 ->orderByRaw('starts_at IS NULL, starts_at ASC')
@@ -8305,75 +8325,95 @@ class MarketingController extends Controller
             : collect();
 
         // And the schedules hidden whole ("Hide schedule"), newest first, each with its Unhide.
-        $hiddenSchedules = $isAdmin
+        $hiddenSchedules = $isAdmin && ! $networkView
             ? DiscoveryHiddenSchedule::with('role')->latest()->latest('id')->limit(100)->get()->filter(fn ($row) => $row->role)
             : collect();
 
-        // Federated listings render as their own labelled section rather than being
-        // interleaved: every discovery query here ends in a single Eloquent builder
-        // with its own ordering and limit, so mixing a second corpus in would need a
-        // UNION or a merge-and-re-sort in PHP.
-        // Normalise to a scalar BEFORE the query. filled() is true for an array too, so
-        // ?country[]=US used to reach strtoupper(array) - a TypeError, i.e. a 500 on this
-        // public page. Casting instead of rejecting would only trade that for an
-        // "Array to string conversion" warning and a filter on the string "ARRAY".
-        $federatedCountry = is_scalar($request->input('country'))
-            ? strtoupper(trim((string) $request->input('country')))
-            : '';
-        $federatedLanguage = is_scalar($request->input('lang'))
-            ? trim((string) $request->input('lang'))
-            : '';
+        // The mixed wall: one poster for each schedule, local and from other sites, soonest first
+        // (BrowseWall), the count of what other sites have on, and the next few of theirs.
+        [$items, $more, $networkTotal, $teaser] = $this->browseWall($now);
 
-        // Everything one instance publishes here, linked from the federation review
-        // screen so an admin can see the blast radius of an approval.
-        $federatedInstance = is_scalar($request->input('instance'))
-            ? trim((string) $request->input('instance'))
-            : '';
-        $federatedInstanceId = (int) ($federatedInstance !== '' ? UrlUtils::decodeId($federatedInstance) : 0);
+        $networkItems = collect();
+        $federatedTotal = 0;
+        $federatedLimit = BrowseWall::LIMIT;
+        $nextHash = null;
+        $instanceListing = null;
 
-        $federatedQuery = FederatedEvent::listable()
-            ->when($federatedCountry !== '', fn ($q) => $q->where('country_code', $federatedCountry))
-            ->when($federatedLanguage !== '', fn ($q) => $q->where('language', $federatedLanguage))
-            // Keyed on the raw string, NEVER on the decoded id. decodeId() returns null
-            // for an unreadable hash, so when($federatedInstanceId) would fall through
-            // and quietly serve the whole corpus as though no filter had been asked
-            // for. A null would not save it either: where($column, null) is rewritten
-            // by the builder into IS NULL, which matches nothing by accident rather
-            // than on purpose. Casting to 0 makes the never-match deliberate.
-            ->when($federatedInstance !== '', fn ($q) => $q->where('federated_instance_id', $federatedInstanceId))
-            ->orderBy('next_occurrence_at');
+        if ($networkView) {
+            $instanceId = (int) ($federatedInstance !== '' ? UrlUtils::decodeId($federatedInstance) : 0);
 
-        $federatedLimit = min(max((int) $request->input('federated_limit', 12), 12), 96);
-        $federatedTotal = (clone $federatedQuery)->count();
-        $federatedEvents = $federatedQuery->limit($federatedLimit)->get();
+            $listings = FederatedEvent::listable()
+                ->when($federatedCountry !== '', fn ($q) => $q->where('country_code', $federatedCountry))
+                ->when($federatedLanguage !== '', fn ($q) => $q->where('language', $federatedLanguage))
+                // Keyed on the raw string, NEVER on the decoded id. decodeId() returns null for an
+                // unreadable hash, so when($instanceId) would fall through and serve the whole
+                // network as though no site had been asked for. Cast to 0, it matches nothing.
+                ->when($federatedInstance !== '', fn ($q) => $q->where('federated_instance_id', $instanceId))
+                ->orderBy('next_occurrence_at')
+                ->orderBy('id')
+                ->limit(BrowseWall::NETWORK_POOL)
+                ->get();
+
+            $all = BrowseWall::networkPick($listings, $now);
+            $federatedTotal = $all->count();
+            // 24 at a time, up to 192: past that a country narrows it better than scrolling.
+            $federatedLimit = min(max((int) $request->input('federated_limit', BrowseWall::LIMIT), BrowseWall::LIMIT), self::NETWORK_VIEW_CAP);
+            $federatedLimit -= $federatedLimit % BrowseWall::LIMIT;
+            $networkItems = $all->take($federatedLimit)->values();
+
+            // "Show more" lands on the first poster it adds (its link names it), not at the top.
+            if ($all->count() > $federatedLimit) {
+                $nextHash = UrlUtils::encodeId($all->values()[$federatedLimit]->id);
+            }
+
+            if ($federatedInstance !== '') {
+                $instanceListing = $listings->first();
+            }
+        }
+
+        // Structured data names this site's own events only: a listing is another site's page.
+        $events = $items->filter(fn ($item) => $item instanceof Event)->values();
 
         return view('marketing.browse', [
             'events' => $events,
-            'wall' => BrowseWall::build($events, $more, $now),
-            'network' => BrowseWall::remote($federatedEvents, $now),
+            'networkView' => $networkView,
+            'wall' => BrowseWall::build($networkView ? $networkItems : $items, $networkView ? [] : $more, $now),
+            'teaser' => $networkView ? null : BrowseWall::build($teaser, [], $now, plain: true),
+            'networkTotal' => $networkTotal,
+            'nextHash' => $nextHash,
+            'instanceListing' => $instanceListing,
             'hidden' => BrowseWall::build($hiddenEvents, [], $now, plain: true),
             'browseAdmin' => $isAdmin,
             'hiddenEvents' => $hiddenEvents,
             'hiddenSchedules' => $hiddenSchedules,
-            'federatedEvents' => $federatedEvents,
             'federatedTotal' => $federatedTotal,
             'federatedLimit' => $federatedLimit,
-            'federatedCountries' => $this->federatedFilterValues('country_code'),
-            'federatedLanguages' => $this->federatedFilterValues('language'),
+            'federatedCountries' => $networkView ? $this->federatedFilterValues('country_code') : [],
+            'federatedLanguages' => $networkView ? $this->federatedFilterValues('language') : [],
             'federatedCountry' => $federatedCountry,
             'federatedLanguage' => $federatedLanguage,
             'federatedInstance' => $federatedInstance,
         ]);
     }
 
+    /** The most listings the "From other sites" view shows, 24 at a time. */
+    public const NETWORK_VIEW_CAP = 192;
+
+    /** Listings from other sites shown after the mixed wall, beside "See all". */
+    public const NETWORK_TEASER = 6;
+
     /**
-     * The events on /browse's wall, soonest first, and the schedules among them that have more.
+     * What /browse's mixed wall is made of: local events and listings from other sites, one for
+     * each schedule (BrowseWall::pickMixed(), at most BrowseWall::NETWORK_CAP from other sites),
+     * the schedules among the local ones that have more, the count of listings other sites have
+     * on, and the next few of theirs that are not on the wall.
      *
-     * Two reads make the pool. Dated events that have not ended, a few per owning schedule
+     * Two reads make the local pool. Dated events that have not ended, a few per owning schedule
      * (DiscoveryUtils::candidates()), in the order they are on: what is running now first, then
      * by start. And every series, because when a series is next on cannot be asked of SQL - the
      * rhythm, the skipped dates and the end of the run are Event::nextOccurrenceFrom()'s.
-     * BrowseWall::pick() then keeps one event for each credited schedule.
+     * Listings come from FederatedEvent::listable(), and when each is next on is worked out from
+     * its own dates (BrowseWall::nextListing()).
      *
      * "Not ended" is in the SQL, before the pool is cut, on purpose. Chosen afterwards, a studio
      * with three classes already over today had no row left in its three places, and was off the
@@ -8382,14 +8422,15 @@ class MarketingController extends Controller
      * holds rows the pick then throws away.
      *
      * Only events whose poster shows a picture (own flyer, or a talent/venue schedule's profile
-     * photo). The FAQ on the page describes these rules, so keep the two in step.
+     * photo); a listing always has one. The FAQ on the page describes these rules, so keep the two
+     * in step.
      *
      * The ids are cached with the homepage wall's (marketing.wall_cache_seconds, 0 in tests) and
-     * dropped with it. Each request reloads those rows through the same visibility rules and
-     * picks again, so an event that has ended or been unpublished since is gone at once and
-     * only a NEW event waits out the cache.
+     * dropped with it. Each request reloads those rows through the same visibility rules
+     * (listable() for a listing, so an admin's Hide is immediate) and picks again, so an event that
+     * has ended or been unpublished since is gone at once and only a NEW event waits out the cache.
      *
-     * @return array{0: Collection, 1: array<string, bool>}
+     * @return array{0: Collection, 1: array<string, bool>, 2: int, 3: Collection}
      */
     private function browseWall(Carbon $now): array
     {
@@ -8429,25 +8470,43 @@ class MarketingController extends Controller
                 ->limit(BrowseWall::SERIES)
                 ->get();
 
+            $listings = FederatedEvent::listable()
+                ->orderBy('next_occurrence_at')
+                ->orderBy('id')
+                ->limit(BrowseWall::NETWORK_POOL)
+                ->get();
+
             $pool = $dated->concat($series);
-            $picked = BrowseWall::pick($pool, BrowseWall::LIMIT, $now);
+            $picked = BrowseWall::pickMixed($pool, $listings, BrowseWall::LIMIT, BrowseWall::NETWORK_CAP, $now);
+            $local = $picked->filter(fn ($item) => $item instanceof Event)->values();
+            $remote = $picked->filter(fn ($item) => $item instanceof FederatedEvent)->pluck('id')->all();
+            $network = BrowseWall::networkPick($listings, $now);
 
             return [
-                'ids' => $picked->pluck('id')->all(),
-                'more' => BrowseWall::schedulesWithMore($pool, $picked, $now),
+                'ids' => $local->pluck('id')->all(),
+                'remote' => $remote,
+                'more' => BrowseWall::schedulesWithMore($pool, $local, $now),
+                'network_total' => $network->count(),
+                'teaser' => $network->reject(fn ($listing) => in_array($listing->id, $remote, true))
+                    ->take(self::NETWORK_TEASER)->pluck('id')->values()->all(),
             ];
         };
 
         $ttl = (int) config('marketing.wall_cache_seconds');
         $chosen = $ttl > 0 ? Cache::remember(self::browseCacheKey(), $ttl, $build) : $build();
 
-        if (! $chosen['ids']) {
-            return [(new Event)->newCollection(), []];
-        }
+        $events = ($chosen['ids'] ?? []) ? $listed()->whereIn('events.id', $chosen['ids'])->get() : collect();
+        // The wall's listings and the next few after it, in one read.
+        $remoteIds = array_merge($chosen['remote'] ?? [], $chosen['teaser'] ?? []);
+        $read = $remoteIds ? FederatedEvent::listable()->whereIn('id', $remoteIds)->get() : collect();
+        $listings = $read->whereIn('id', $chosen['remote'] ?? [])->values();
+        $teaser = BrowseWall::networkPick($read->whereIn('id', $chosen['teaser'] ?? [])->values(), $now);
 
         return [
-            BrowseWall::pick($listed()->whereIn('events.id', $chosen['ids'])->get(), BrowseWall::LIMIT, $now),
-            $chosen['more'],
+            BrowseWall::pickMixed($events, $listings, BrowseWall::LIMIT, BrowseWall::NETWORK_CAP, $now),
+            $chosen['more'] ?? [],
+            (int) ($chosen['network_total'] ?? 0),
+            $teaser,
         ];
     }
 
@@ -9641,7 +9700,7 @@ class MarketingController extends Controller
             ['page' => 'Twilio Integration', 'section' => 'WhatsApp Setup', 'description' => 'Register and configure WhatsApp messaging.', 'url' => $r['saas_twilio'].'#whatsapp', 'category' => 'SaaS', 'keywords' => 'whatsapp messaging sender'],
             ['page' => 'Twilio Integration', 'section' => 'Testing', 'description' => 'Test SMS and WhatsApp functionality.', 'url' => $r['saas_twilio'].'#testing', 'category' => 'SaaS', 'keywords' => 'test sms whatsapp verify'],
             ['page' => 'Twilio Integration', 'section' => 'SMS Invitations', 'description' => 'Team invitations and claim links sent by text message.', 'url' => $r['saas_twilio'].'#sms-invitations', 'category' => 'SaaS', 'keywords' => 'sms invitations text message invite team claim link phone'],
-            ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['saas_federation'].'#overview', 'category' => 'SaaS', 'keywords' => 'federation network listings discovery traffic backlink'],
+            ['page' => 'Event Schedule Network', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['saas_federation'].'#overview', 'category' => 'SaaS', 'keywords' => 'federation network listings discovery traffic backlink'],
             ['page' => 'Monetization', 'section' => 'Overview', 'description' => 'Show ads on free schedules and sell promotional placement to paid ones. The licence credit is not an upsell.', 'url' => $r['saas_monetization'].'#overview', 'category' => 'SaaS', 'keywords' => 'monetization ads adsense revenue advertising free tier earn upsell branding white label attribution credit'],
             ['page' => 'Monetization', 'section' => 'Consent and privacy', 'description' => 'Consent management, non-personalized ads and Global Privacy Control.', 'url' => $r['saas_monetization'].'#consent', 'category' => 'SaaS', 'keywords' => 'consent gdpr cmp privacy personalized ads sec-gpc eea uk cookie banner COOKIE_CONSENT_BANNER utm attribution cookies'],
             ['page' => 'Monetization', 'section' => 'Google AdSense', 'description' => 'Configure your publisher ID and ad slot for free-tier pages.', 'url' => $r['saas_monetization'].'#adsense', 'category' => 'SaaS', 'keywords' => 'adsense google publisher id ad slot ca-pub display unit'],
@@ -9653,27 +9712,27 @@ class MarketingController extends Controller
             ['page' => 'Monetization', 'section' => 'Turning it off', 'description' => 'What is safe to switch off, and what stops settling if ADS_ENABLED is removed with campaigns outstanding.', 'url' => $r['saas_monetization'].'#disable', 'category' => 'SaaS', 'keywords' => 'disable turn off ads_enabled'],
             ['page' => 'Monetization', 'section' => 'Environment variables', 'description' => 'Every monetization variable and its default.', 'url' => $r['saas_monetization'].'#environment', 'category' => 'SaaS', 'keywords' => 'env variables ads adsense promotions stay22'],
             ['page' => 'Monetization', 'section' => 'Opting out', 'description' => 'How any schedule keeps promotions and AdSense off its pages.', 'url' => $r['saas_monetization'].'#promotions-opt-out', 'category' => 'SaaS', 'keywords' => 'opt out promotions do not show'],
-            ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['saas_federation'].'#enable', 'category' => 'SaaS', 'keywords' => 'enable turn on register approve settings welcome email contact email list these schedules checklist status'],
-            ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in for itself, in one click from the dashboard or its page; new schedules start undecided and share nothing.', 'url' => $r['saas_federation'].'#per-schedule', 'category' => 'SaaS', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto list on the network prompt dashboard one click dismiss listed badge'],
-            ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['saas_federation'].'#listings', 'category' => 'SaaS', 'keywords' => 'listing card link backlink filter country language image needs an image preview'],
-            ['page' => 'Federation', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['saas_federation'].'#sync', 'category' => 'SaaS', 'keywords' => 'sync hourly cron federation:push verified reconnect rejected not recognised'],
-            ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Every field that leaves your install, and where each one ends up.', 'url' => $r['saas_federation'].'#privacy', 'category' => 'SaaS', 'keywords' => 'privacy data shared attendees tickets what is sent fields schedule link contact email version online joining link'],
-            ['page' => 'Federation', 'section' => 'Which Events Are Listed', 'description' => 'The conditions an event must meet to be shared with the network.', 'url' => $r['saas_federation'].'#what-qualifies', 'category' => 'SaaS', 'keywords' => 'qualify eligible public image listed'],
-            ['page' => 'Federation', 'section' => 'When a Sync Does Not Complete', 'description' => 'The notices on the settings card and what to do about each.', 'url' => $r['saas_federation'].'#sync-errors', 'category' => 'SaaS', 'keywords' => 'sync error notice failed'],
-            ['page' => 'Federation', 'section' => 'Moving to a New Address', 'description' => 'What happens to your listings when APP_URL changes, and how the new address is confirmed.', 'url' => $r['saas_federation'].'#moving', 'category' => 'SaaS', 'keywords' => 'app_url domain move change address redirect'],
-            ['page' => 'Federation', 'section' => 'Turning It Off', 'description' => 'Switching off takes the listings down.', 'url' => $r['saas_federation'].'#turning-off', 'category' => 'SaaS', 'keywords' => 'disable turn off remove listings'],
-            ['page' => 'Federation', 'section' => 'The Prompt on the Dashboard', 'description' => 'List on the network, in one click, from a schedule owner\'s dashboard.', 'url' => $r['saas_federation'].'#listing-prompt', 'category' => 'SaaS', 'keywords' => 'dashboard prompt list on the network'],
-            ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['selfhost_federation'].'#overview', 'category' => 'Selfhost', 'keywords' => 'federation network listings discovery traffic backlink'],
-            ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['selfhost_federation'].'#enable', 'category' => 'Selfhost', 'keywords' => 'enable turn on register approve settings welcome email contact email list these schedules checklist status'],
-            ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in for itself, in one click from the dashboard or its page; new schedules start undecided and share nothing.', 'url' => $r['selfhost_federation'].'#per-schedule', 'category' => 'Selfhost', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto list on the network prompt dashboard one click dismiss listed badge'],
-            ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['selfhost_federation'].'#listings', 'category' => 'Selfhost', 'keywords' => 'listing card link backlink filter country language image needs an image preview'],
-            ['page' => 'Federation', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['selfhost_federation'].'#sync', 'category' => 'Selfhost', 'keywords' => 'sync hourly cron federation:push verified reconnect rejected not recognised'],
-            ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Every field that leaves your install, and where each one ends up.', 'url' => $r['selfhost_federation'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'privacy data shared attendees tickets what is sent fields schedule link contact email version online joining link'],
-            ['page' => 'Federation', 'section' => 'Which Events Are Listed', 'description' => 'The conditions an event must meet to be shared with the network.', 'url' => $r['selfhost_federation'].'#what-qualifies', 'category' => 'Selfhost', 'keywords' => 'qualify eligible public image listed'],
-            ['page' => 'Federation', 'section' => 'When a Sync Does Not Complete', 'description' => 'The notices on the settings card and what to do about each.', 'url' => $r['selfhost_federation'].'#sync-errors', 'category' => 'Selfhost', 'keywords' => 'sync error notice failed'],
-            ['page' => 'Federation', 'section' => 'Moving to a New Address', 'description' => 'What happens to your listings when APP_URL changes, and how the new address is confirmed.', 'url' => $r['selfhost_federation'].'#moving', 'category' => 'Selfhost', 'keywords' => 'app_url domain move change address redirect'],
-            ['page' => 'Federation', 'section' => 'Turning It Off', 'description' => 'Switching off takes the listings down.', 'url' => $r['selfhost_federation'].'#turning-off', 'category' => 'Selfhost', 'keywords' => 'disable turn off remove listings'],
-            ['page' => 'Federation', 'section' => 'The Prompt on the Dashboard', 'description' => 'List on the network, in one click, from a schedule owner\'s dashboard.', 'url' => $r['selfhost_federation'].'#listing-prompt', 'category' => 'Selfhost', 'keywords' => 'dashboard prompt list on the network'],
+            ['page' => 'Event Schedule Network', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['saas_federation'].'#enable', 'category' => 'SaaS', 'keywords' => 'enable turn on register approve settings welcome email contact email list these schedules checklist status'],
+            ['page' => 'Event Schedule Network', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in for itself, in one click from the dashboard or its page; new schedules start undecided and share nothing.', 'url' => $r['saas_federation'].'#per-schedule', 'category' => 'SaaS', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto list on the network prompt dashboard one click dismiss listed badge'],
+            ['page' => 'Event Schedule Network', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['saas_federation'].'#listings', 'category' => 'SaaS', 'keywords' => 'listing card link backlink filter country language image needs an image preview'],
+            ['page' => 'Event Schedule Network', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['saas_federation'].'#sync', 'category' => 'SaaS', 'keywords' => 'sync hourly cron federation:push verified reconnect rejected not recognised'],
+            ['page' => 'Event Schedule Network', 'section' => 'What is shared', 'description' => 'Every field that leaves your install, and where each one ends up.', 'url' => $r['saas_federation'].'#privacy', 'category' => 'SaaS', 'keywords' => 'privacy data shared attendees tickets what is sent fields schedule link contact email version online joining link'],
+            ['page' => 'Event Schedule Network', 'section' => 'Which Events Are Listed', 'description' => 'The conditions an event must meet to be shared with the network.', 'url' => $r['saas_federation'].'#what-qualifies', 'category' => 'SaaS', 'keywords' => 'qualify eligible public image listed'],
+            ['page' => 'Event Schedule Network', 'section' => 'When a Sync Does Not Complete', 'description' => 'The notices on the settings card and what to do about each.', 'url' => $r['saas_federation'].'#sync-errors', 'category' => 'SaaS', 'keywords' => 'sync error notice failed'],
+            ['page' => 'Event Schedule Network', 'section' => 'Moving to a New Address', 'description' => 'What happens to your listings when APP_URL changes, and how the new address is confirmed.', 'url' => $r['saas_federation'].'#moving', 'category' => 'SaaS', 'keywords' => 'app_url domain move change address redirect'],
+            ['page' => 'Event Schedule Network', 'section' => 'Turning It Off', 'description' => 'Switching off takes the listings down.', 'url' => $r['saas_federation'].'#turning-off', 'category' => 'SaaS', 'keywords' => 'disable turn off remove listings'],
+            ['page' => 'Event Schedule Network', 'section' => 'The Prompt on the Dashboard', 'description' => 'List on the network, in one click, from a schedule owner\'s dashboard.', 'url' => $r['saas_federation'].'#listing-prompt', 'category' => 'SaaS', 'keywords' => 'dashboard prompt list on the network'],
+            ['page' => 'Event Schedule Network', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['selfhost_federation'].'#overview', 'category' => 'Selfhost', 'keywords' => 'federation network listings discovery traffic backlink'],
+            ['page' => 'Event Schedule Network', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['selfhost_federation'].'#enable', 'category' => 'Selfhost', 'keywords' => 'enable turn on register approve settings welcome email contact email list these schedules checklist status'],
+            ['page' => 'Event Schedule Network', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in for itself, in one click from the dashboard or its page; new schedules start undecided and share nothing.', 'url' => $r['selfhost_federation'].'#per-schedule', 'category' => 'Selfhost', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto list on the network prompt dashboard one click dismiss listed badge'],
+            ['page' => 'Event Schedule Network', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['selfhost_federation'].'#listings', 'category' => 'Selfhost', 'keywords' => 'listing card link backlink filter country language image needs an image preview'],
+            ['page' => 'Event Schedule Network', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['selfhost_federation'].'#sync', 'category' => 'Selfhost', 'keywords' => 'sync hourly cron federation:push verified reconnect rejected not recognised'],
+            ['page' => 'Event Schedule Network', 'section' => 'What is shared', 'description' => 'Every field that leaves your install, and where each one ends up.', 'url' => $r['selfhost_federation'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'privacy data shared attendees tickets what is sent fields schedule link contact email version online joining link'],
+            ['page' => 'Event Schedule Network', 'section' => 'Which Events Are Listed', 'description' => 'The conditions an event must meet to be shared with the network.', 'url' => $r['selfhost_federation'].'#what-qualifies', 'category' => 'Selfhost', 'keywords' => 'qualify eligible public image listed'],
+            ['page' => 'Event Schedule Network', 'section' => 'When a Sync Does Not Complete', 'description' => 'The notices on the settings card and what to do about each.', 'url' => $r['selfhost_federation'].'#sync-errors', 'category' => 'Selfhost', 'keywords' => 'sync error notice failed'],
+            ['page' => 'Event Schedule Network', 'section' => 'Moving to a New Address', 'description' => 'What happens to your listings when APP_URL changes, and how the new address is confirmed.', 'url' => $r['selfhost_federation'].'#moving', 'category' => 'Selfhost', 'keywords' => 'app_url domain move change address redirect'],
+            ['page' => 'Event Schedule Network', 'section' => 'Turning It Off', 'description' => 'Switching off takes the listings down.', 'url' => $r['selfhost_federation'].'#turning-off', 'category' => 'Selfhost', 'keywords' => 'disable turn off remove listings'],
+            ['page' => 'Event Schedule Network', 'section' => 'The Prompt on the Dashboard', 'description' => 'List on the network, in one click, from a schedule owner\'s dashboard.', 'url' => $r['selfhost_federation'].'#listing-prompt', 'category' => 'Selfhost', 'keywords' => 'dashboard prompt list on the network'],
 
             // ===== DEVELOPER =====
 
