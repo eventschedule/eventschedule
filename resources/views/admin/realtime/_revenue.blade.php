@@ -39,7 +39,15 @@
             <div class="rounded-xl px-3 py-2.5" style="background: var(--ap-tint-sunken)">
                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400">@{{ msg.inTrial }} <span class="text-gray-900 dark:text-white tabular-nums">@{{ fmt(revenue.trialing_count) }}</span></p>
                 <p class="mt-1 dashboard-stat-value text-2xl font-bold leading-7 text-gray-900 dark:text-white"><span dir="ltr">+@{{ revenue.trial_mrr }}</span></p>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ msg.ifConvert }}</p>
+                {{-- The same pair as the paying box beside it: what the trials would add a month,
+                     and a year. --}}
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <span>@{{ msg.ifConvert }}</span>
+                    <template v-if="revenue.trial_arr">
+                        <span class="mx-1" aria-hidden="true">&middot;</span>
+                        <span class="whitespace-nowrap">ARR <span dir="ltr">+@{{ revenue.trial_arr }}</span></span>
+                    </template>
+                </p>
             </div>
         </div>
 

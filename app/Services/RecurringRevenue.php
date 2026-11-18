@@ -83,7 +83,7 @@ class RecurringRevenue
      * @return array{
      *     plans: array<string, array{tier: string, term: string, billing_count: int, mrr: float, arr: float, trialing_count: int, trial_mrr: float}>,
      *     unrecognized: array{billing_count: int, trialing_count: int},
-     *     totals: array{mrr: float, arr: float, billing_count: int, trialing_count: int, unrecognized_count: int, trial_mrr: float, past_due_count: int, cancelling_count: int, at_risk_count: int, at_risk_mrr: float}
+     *     totals: array{mrr: float, arr: float, billing_count: int, trialing_count: int, unrecognized_count: int, trial_mrr: float, trial_arr: float, past_due_count: int, cancelling_count: int, at_risk_count: int, at_risk_mrr: float}
      * }
      */
     public static function breakdown(): array
@@ -184,6 +184,9 @@ class RecurringRevenue
                 // in trialing_count and nowhere else.
                 'unrecognized_count' => $unrecognized['billing_count'],
                 'trial_mrr' => round($trialCents / 1200, 2),
+                // What the trials would add a year if every one converted, from the same yearly
+                // cents ARR is: never trial_mrr * 12, which carries its rounding twelve times.
+                'trial_arr' => round($trialCents / 100, 2),
                 'past_due_count' => $pastDue,
                 'cancelling_count' => $cancelling,
                 'at_risk_count' => $atRisk,

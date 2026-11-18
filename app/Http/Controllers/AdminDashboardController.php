@@ -88,6 +88,7 @@ class AdminDashboardController extends Controller
             'mrr' => plan_price($totals['mrr']),
             'arr' => plan_price($totals['arr']),
             'trial_mrr' => plan_price($totals['trial_mrr']),
+            'trial_arr' => plan_price($totals['trial_arr'] ?? $totals['trial_mrr'] * 12),
             'at_risk_mrr' => plan_price($totals['at_risk_mrr']),
             'billing_count' => (int) $totals['billing_count'],
             'trialing_count' => (int) $totals['trialing_count'],

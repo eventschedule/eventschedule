@@ -170,7 +170,7 @@ class AdminDashboardSample
             'unrecognized' => ['billing_count' => 0, 'trialing_count' => 0],
             'totals' => [
                 'mrr' => 192.5, 'arr' => 2310.0, 'billing_count' => 29, 'trialing_count' => 5, 'unrecognized_count' => 0,
-                'trial_mrr' => 34.17, 'past_due_count' => 2, 'cancelling_count' => 1, 'at_risk_count' => 3, 'at_risk_mrr' => 15.0,
+                'trial_mrr' => 34.17, 'trial_arr' => 410.0, 'past_due_count' => 2, 'cancelling_count' => 1, 'at_risk_count' => 3, 'at_risk_mrr' => 15.0,
             ],
         ];
     }

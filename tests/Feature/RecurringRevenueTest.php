@@ -256,6 +256,8 @@ class RecurringRevenueTest extends TestCase
         $this->assertSame([5.0, 0.0, 0.0, 0.0], array_column($breakdown['plans'], 'trial_mrr'));
         $this->assertSame(1, $breakdown['totals']['trialing_count']);
         $this->assertSame(5.0, $breakdown['totals']['trial_mrr']);
+        // A year of it, from the same cents: the dashboard's "ARR" beside "if they all convert".
+        $this->assertSame(60.0, $breakdown['totals']['trial_arr']);
         // And the revenue is what it was without them.
         $this->assertSame(46.67, $breakdown['totals']['mrr']);
     }
