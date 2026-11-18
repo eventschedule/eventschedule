@@ -26,7 +26,16 @@
         .ticket-embed-card .gk-buybar { position: static; margin: 1.25rem -1.5rem -1.25rem; padding: .875rem 1.5rem; border-radius: 0; background: transparent; }
     </style>
 
-    <div class="pt-4 pb-4 px-4">
+    @php
+        // The widget used to hold the form itself, posted from the frame. A frame on the
+        // organizer's own site is cross-site and is never sent the SameSite=lax session cookie, so
+        // that post came back 419 in every browser, and a payment page refuses to be framed
+        // anyway. So the widget lists what is on offer and its one button opens the event's page in
+        // a new tab with the form open, where the buyer finishes (App\Support\EmbedEventView).
+        $widgetDate = \App\Models\Event::isOccurrenceDate($date ?? null) ? $date : null;
+        $widgetButtonClass = 'inline-flex w-full items-center justify-center gap-x-2 rounded-md px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-md';
+    @endphp
+    <div class="pt-4 pb-4 px-4" data-embed-root>
         <div class="ticket-embed-card max-w-xl mx-auto overflow-hidden">
 
             {{-- Header --}}
@@ -62,7 +71,17 @@
 
                 @if ($isTicketMode)
                     @if ($event->hasProTicketingPlan() && $event->canSellTickets($eventDate))
-                        @include('event.tickets')
+                        @include('event.partials.embed-ticket-list', ['embedTicketDate' => $eventDate])
+                        @php
+                            $widgetLabel = $event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets');
+                        @endphp
+                        <a href="{{ \App\Support\EmbedEventView::pageUrl($event, $subdomain, $widgetDate, 'tickets') }}" target="_blank" rel="noopener"
+                           data-embed-checkout="tickets" aria-label="{{ $widgetLabel }} ({{ __('messages.opens_in_new_tab') }})"
+                           class="mt-5 {{ $widgetButtonClass }}" style="background-color: var(--es-accent); color: var(--es-accent-text);">
+                            {{ $widgetLabel }}
+                            <svg class="h-4 w-4 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                        </a>
+                        <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">{{ __('messages.embed_events_help') }}</p>
                     @else
                         <div class="text-center py-8">
                             <p class="text-gray-500 dark:text-gray-400">{{ __('messages.tickets_not_available_embed') }}</p>
@@ -77,7 +96,16 @@
                          event and then refuse what was sent. A FULL event still passes, and the
                          form shows its waitlist. --}}
                     @if ($event->canAcceptRsvp($eventDate))
-                        @include('event.rsvp')
+                        @php
+                            $widgetLabel = $event->isRsvpFull($eventDate) ? __('messages.join_waitlist') : $role->customLabel('register');
+                        @endphp
+                        <a href="{{ \App\Support\EmbedEventView::pageUrl($event, $subdomain, $widgetDate, 'rsvp') }}" target="_blank" rel="noopener"
+                           data-embed-checkout="rsvp" aria-label="{{ $widgetLabel }} ({{ __('messages.opens_in_new_tab') }})"
+                           class="{{ $widgetButtonClass }}" style="background-color: var(--es-accent); color: var(--es-accent-text);">
+                            {{ $widgetLabel }}
+                            <svg class="h-4 w-4 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                        </a>
+                        <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">{{ __('messages.embed_events_help') }}</p>
                     @else
                         <div class="text-center py-8">
                             <p class="text-gray-500 dark:text-gray-400">{{ __('messages.registration_not_available_embed') }}</p>

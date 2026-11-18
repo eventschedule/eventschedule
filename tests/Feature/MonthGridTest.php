@@ -327,6 +327,12 @@ class MonthGridTest extends TestCase
         $this->assertStringContainsString(':data-ev="chip.id" :data-date="day.date" :aria-label="chip.label">', $guest);
         $this->assertSame(1, preg_match('/<a class="gk-cal-ev" :class="chip\.cls" :href="chip\.url"\s+target="_blank" rel="noopener"/', $embed));
         $this->assertSame(0, preg_match('/<a class="gk-cal-ev" :class="chip\.cls" :href="chip\.url"\s+target="_blank"/', $guest));
+        // An embed that shows events on the organizer's site keeps those links: monthClick() takes
+        // a plain click to embedOpenEvent(), and the rest is the browser's, to the event's page.
+        $onsite = $this->get('/'.$this->role->subdomain.'?embed=true&events=onsite&layout=calendar')->getContent();
+        $this->assertSame(1, preg_match('/<a class="gk-cal-ev" :class="chip\.cls" :href="chip\.url"\s+target="_blank" rel="noopener"/', $onsite));
+        $this->assertStringContainsString('embedOnsite: true', $onsite);
+        $this->assertStringContainsString('embedOnsite: false', $embed);
     }
 
     /**

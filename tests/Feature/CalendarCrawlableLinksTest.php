@@ -114,6 +114,13 @@ class CalendarCrawlableLinksTest extends TestCase
         $this->assertStringContainsString(self::DIRECT_REGISTRATION_TEST, $handler[1]);
         $this->assertStringContainsString('e.preventDefault();', $handler[1]);
         $this->assertStringContainsString(self::DIRECT_REGISTRATION_OPEN, $handler[1]);
+
+        // An embed that shows events on the organizer's site (?events=onsite) keeps the same link,
+        // to the event's page in a new tab, for crawlers, middle clicks and "open in new tab": only
+        // a plain click is taken over, after direct registration has had its say, and by the one
+        // opener, which repeats the guards above (EmbedEventViewTest holds it).
+        $this->assertStringContainsString('this.embedOpenEvent(this.getEventUrl(event), event.name, e);', $handler[1]);
+        $this->assertGreaterThan(strpos($handler[1], self::DIRECT_REGISTRATION_OPEN), strpos($handler[1], 'this.embedOpenEvent('));
     }
 
     /**

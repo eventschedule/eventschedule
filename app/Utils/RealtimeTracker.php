@@ -34,6 +34,9 @@ class RealtimeTracker
 
     public const SURFACES = ['wp', 'gp', 'ap', 'auth', 'embed'];
 
+    /** The request attribute that holds the real visitor while a page renders as nobody. */
+    public const VIEWER_ATTRIBUTE = 'realtime_viewer';
+
     /** Heartbeats slow down once this many page views are "now", to protect the one web container. */
     public const BUSY_THRESHOLD = 300;
 
@@ -203,7 +206,11 @@ class RealtimeTracker
             return null;
         }
 
-        $user = $request->user();
+        // A page drawn as a signed-out visitor sees it (the framed event view) still knows who is
+        // really there (RendersGuestNotFound::renderSignedOut()): false for nobody.
+        $user = $request->attributes->has(self::VIEWER_ATTRIBUTE)
+            ? ($request->attributes->get(self::VIEWER_ATTRIBUTE) ?: null)
+            : $request->user();
         $isDemo = $user && DemoService::isDemoUser($user);
 
         $path = self::path($request);

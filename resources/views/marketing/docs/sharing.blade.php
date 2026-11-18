@@ -7,6 +7,7 @@
     <x-slot:toc>
         <x-doc-nav-link href="#schedule-url">Your Schedule URL</x-doc-nav-link>
         <x-doc-nav-link href="#embed">Embedding on Your Website</x-doc-nav-link>
+        <x-doc-nav-link href="#embed-events" sub>When Someone Opens an Event</x-doc-nav-link>
         <x-doc-nav-link href="#embed-parameters" sub>URL Parameters</x-doc-nav-link>
         <x-doc-nav-link href="#embed-multilingual" sub>One Calendar per Language</x-doc-nav-link>
         <x-doc-nav-link href="#embed-subscribe-form" sub>Embedding a Signup Form</x-doc-nav-link>
@@ -60,6 +61,7 @@
             <li>Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu beside the schedule's name and choose <strong class="text-gray-900 dark:text-white">Embed Schedule</strong>. A dialog opens over the page</li>
             <li>Leave <strong class="text-gray-900 dark:text-white">Widget</strong> on <strong class="text-gray-900 dark:text-white">Calendar</strong>. The other option, <strong class="text-gray-900 dark:text-white">Signup form</strong>, is covered in <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a> below</li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Theme</strong>. <strong class="text-gray-900 dark:text-white">Match the visitor's device</strong> follows each visitor's light or dark setting; choose Light or Dark to match your website instead</li>
+            <li>Choose what happens <strong class="text-gray-900 dark:text-white">When someone opens an event</strong>: <strong class="text-gray-900 dark:text-white">Show it on your website</strong> (the default), or <strong class="text-gray-900 dark:text-white">Open the event's page in a new tab</strong>. See <a href="#embed-events" class="doc-link">When someone opens an event</a></li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Layout</strong>. Leave it on <strong class="text-gray-900 dark:text-white">Schedule default</strong> to follow your schedule's own Default Layout, or choose Calendar or List to pin this one frame</li>
             <li>If your schedule <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">offers a second language</a>, pick the <strong class="text-gray-900 dark:text-white">Language</strong> the frame shows: your own, or the translation, which adds <code class="doc-inline-code">lang=</code> to the code. See <a href="#embed-multilingual" class="doc-link">a calendar for each language</a></li>
             <li>Check the <strong class="text-gray-900 dark:text-white">Preview</strong>, which reloads each time you change the widget, theme or layout</li>
@@ -77,6 +79,28 @@
             <div class="doc-callout-title">Free plans get a credit line <x-doc-badge plan="free" /></div>
             <p>On a Free hosted plan the copied snippet includes a small "Powered by Event Schedule" line underneath the iframe. It sits outside the frame, so you can see exactly what you are pasting. <a href="{{ route('marketing.docs.schedule_styling') }}#remove-branding" class="doc-link">Removing branding</a> is a Pro feature. Selfhosted installs never add the line.</p>
         </div>
+
+        <h3 class="doc-subheading" id="embed-events">When Someone Opens an Event</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The Embed dialog asks what a click on an event does. Both choices are free on every plan.</p>
+        <ul class="doc-list mb-4">
+            <li><strong class="text-gray-900 dark:text-white">Show it on your website.</strong> The event opens over your own page, in a window with a close button at its corner, or as a full-screen sheet on a phone, so visitors stay on your site. It shows what the event's page shows about the event: the flyer, the date and time, the venue and its map, the description, the performers, the agenda, videos, sponsors, Add to Calendar, and the ticket types with their prices. The copied code is the iframe plus one small script, which opens the window and also fits the frame to the calendar's height.</li>
+            <li><strong class="text-gray-900 dark:text-white">Open the event's page in a new tab.</strong> A click opens the event's own page in a new tab, and your page stays open behind it. Code copied before this choice existed works this way, and keeps working this way.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">Tickets and registration always open in a new tab.</strong> The <strong class="text-gray-900 dark:text-white">Buy Tickets</strong> or <strong class="text-gray-900 dark:text-white">Register</strong> button opens the event's page with the form already open, on a secure page. A frame on another website gets no session from the browser, so a purchase cannot be completed inside it, and payment pages refuse to be framed. <strong class="text-gray-900 dark:text-white">View full page</strong> opens the event's page too, with the rest: following, comments and photos, the calendar feed and the "Notify me" box.</p>
+        <ul class="doc-list mb-4">
+            <li><strong class="text-gray-900 dark:text-white">Back and close.</strong> Escape, the close button, a click beside the window or the browser's Back button closes it and returns to the event that was clicked.</li>
+            <li><strong class="text-gray-900 dark:text-white">A link to the open event.</strong> While an event is open, your page's address ends in <code class="doc-inline-code">#es-event=</code>, and Share copies that address. Opened again, it opens your page with the event showing.</li>
+            <li><strong class="text-gray-900 dark:text-white">It is counted.</strong> An event opened this way counts as a view of that event on your <a href="{{ route('marketing.docs.analytics') }}" class="doc-link">Analytics</a> page, under <strong class="text-gray-900 dark:text-white">Your website</strong> as where it came from. Loads of the calendar itself are still not counted.</li>
+            <li><strong class="text-gray-900 dark:text-white">Password-protected events</strong> are not shown in the frame: it says the event has a password and links to its page, where the password is asked. An event that has been removed says it is no longer available, with the way back to the calendar.</li>
+            <li><strong class="text-gray-900 dark:text-white">Your own analytics.</strong> The script raises <code class="doc-inline-code">eventschedule:event-opened</code> when an event opens and <code class="doc-inline-code">eventschedule:checkout</code> when Buy Tickets or Register is pressed, on your page's <code class="doc-inline-code">window</code>, with the event's address in <code class="doc-inline-code">event.detail.url</code>.</li>
+        </ul>
+
+        <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Website Builders</h4>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">A builder that removes scripts.</strong> The calendar still works: events open inside the calendar's own frame, with <strong class="text-gray-900 dark:text-white">Back to the calendar</strong> at the top, which returns to the same month and the same place in the list. The frame keeps the height in the code, so give it room.</li>
+            <li><strong class="text-gray-900 dark:text-white">A builder that puts pasted code in a box of its own</strong> (Wix's Embed HTML, and some others). The script runs inside that box, where a window over the page could only fill the box, so events open inside the calendar's frame, as above. Make the builder's box tall enough for the calendar: its height setting, not the code's, is the one that counts there.</li>
+            <li><strong class="text-gray-900 dark:text-white">WordPress, Squarespace and plain HTML</strong> keep the script, so events open over your page.</li>
+        </ul>
 
         <h3 class="doc-subheading" id="embed-parameters">URL Parameters</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Add these to the embed URL to change how the frame renders. They go after <code class="doc-inline-code">?embed=true</code>, separated by <code class="doc-inline-code">&amp;</code>.</p>
@@ -110,6 +134,10 @@
                         <td>Show only the events with one value in a <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="doc-link">custom field</a> set to Show as Filter, for example <code class="doc-inline-code">custom_1=room+a</code>. N is the number shown next to the field in your settings, and matching ignores capital letters and extra spaces. Custom fields are a Pro feature</td>
                     </tr>
                     <tr>
+                        <td><code class="doc-inline-code">events=onsite</code></td>
+                        <td>Show an event on your website when it is clicked, over your page with the script beside the frame, or inside the frame without it. Left off, an event opens its page in a new tab. See <a href="#embed-events" class="doc-link">When someone opens an event</a></td>
+                    </tr>
+                    <tr>
                         <td><code class="doc-inline-code">form=subscribe</code></td>
                         <td>Show the email signup form instead of the calendar. See <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a></td>
                     </tr>
@@ -128,7 +156,7 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mt-4">The frame's width and height are plain iframe attributes, not parameters: <code class="doc-inline-code">width="100%"</code> lets it fill whatever column you drop it into, and you choose the height. Nothing measures the calendar and resizes the frame for you. The signup form is the exception, below.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-4">The frame's width and height are plain iframe attributes, not parameters: <code class="doc-inline-code">width="100%"</code> lets it fill whatever column you drop it into, and the height is where it starts. With the script that comes with <strong class="text-gray-900 dark:text-white">Show it on your website</strong>, the frame then fits itself to the calendar; without it, the frame keeps the height you chose. The signup form sizes itself too, below.</p>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Link to One Room</div>
@@ -442,7 +470,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The embed is cut off, scrolls, or does not fit a phone</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The frame does not size itself, so give it the room. Set a height of at least 600 pixels, for example <code class="doc-inline-code">height="800"</code>, and raise it (<code class="doc-inline-code">height="1000"</code> or more) when a long list scrolls inside the frame. Set <code class="doc-inline-code">width="100%"</code> so it fits whatever column it is in, phones included, or use the <a href="#responsive-embed" class="doc-link">responsive code</a> below to keep its shape.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">With the script that comes with <strong class="text-gray-900 dark:text-white">Show it on your website</strong>, the frame fits itself to the calendar; if your builder removed the script, or puts the code in a box of its own, the frame keeps its height, so give it the room (in the builder's own height setting, where it has one). Set a height of at least 600 pixels, for example <code class="doc-inline-code">height="800"</code>, and raise it (<code class="doc-inline-code">height="1000"</code> or more) when a long list scrolls inside the frame. Set <code class="doc-inline-code">width="100%"</code> so it fits whatever column it is in, phones included, or use the <a href="#responsive-embed" class="doc-link">responsive code</a> below to keep its shape.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong layout</h4>

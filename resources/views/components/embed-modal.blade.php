@@ -16,6 +16,19 @@
     // route with &form=subscribe. The iframe title names the schedule for screen readers; it is
     // escaped once here, for the attribute it lands in, and @json below makes it safe for the JS.
     $embedSubscribeTitle = e(__('messages.embed_subscribe_iframe_title', ['schedule' => $role->name]));
+    $embedCalendarTitle = e(__('messages.embed_calendar_iframe_title', ['schedule' => $role->name]));
+
+    // "When someone opens an event". Show it on your website is the default for code copied from
+    // now on: ?events=onsite, and embed.js beside the frame (App\Support\EmbedEventView). Code
+    // copied before has no parameter and keeps opening the event's page in a new tab, so nobody's
+    // site changes under them. The script's address is the app host's, which never moves.
+    $embedScriptUrl = app_url('/embed.js');
+    $embedOnsiteUrl = $embedUrl.'&events='.\App\Support\EmbedEventView::ONSITE;
+    $embedCalendarSnippet = function (string $url, bool $onsite) use ($embedCalendarTitle, $embedScriptUrl, $embedBrandingLine) {
+        return '<iframe src="'.$url.'" title="'.$embedCalendarTitle.'" width="100%" height="800" frameborder="0" style="border: none;" allow="clipboard-write; web-share; fullscreen"></iframe>'
+            .($onsite ? "\n".'<script src="'.$embedScriptUrl.'" async></script>' : '')
+            .$embedBrandingLine;
+    };
 
     // Whether a signup would actually hear about anything. Announcements are the only automatic
     // mail a subscriber gets, and both of these silence them without telling the owner.
@@ -140,6 +153,20 @@
                             </div>
                             @endif
 
+                            {{-- When someone opens an event. The help line is the one thing an owner
+                                 has to know about the first choice: buying never happens in the frame. --}}
+                            <div class="mb-4" data-embed-for="calendar">
+                                <label for="embed-events" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    {{ __('messages.embed_events_label') }}
+                                </label>
+                                <select id="embed-events" aria-describedby="embed-events-help"
+                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm">
+                                    <option value="onsite">{{ __('messages.embed_events_onsite') }}</option>
+                                    <option value="">{{ __('messages.embed_events_new_tab') }}</option>
+                                </select>
+                                <p id="embed-events-help" class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.embed_events_help') }} <x-link href="{{ marketing_url('/docs/sharing#embed-events') }}" target="_blank">{{ __('messages.learn_more') }}</x-link></p>
+                            </div>
+
                             <!-- Layout -->
                             <div class="mb-4" data-embed-for="calendar">
                                 <label for="embed-layout" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -161,7 +188,7 @@
                                 </label>
                                 <div class="flex">
                                     <input type="text" id="embed-url" readonly
-                                           value="{{ $embedUrl }}"
+                                           value="{{ $embedOnsiteUrl }}"
                                            class="block w-full rounded-s-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm">
                                     <button type="button" id="embed-url-btn" class="js-copy-embed-url inline-flex items-center rounded-e-lg border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:border-[var(--brand-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-blue)]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -179,7 +206,7 @@
                                 <div class="flex">
                                     <textarea id="iframe-code" readonly rows="4"
                                               class="block w-full rounded-s-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm font-mono text-xs"
-                                              style="resize: vertical;">{{ '<iframe src="'.$embedUrl.'" width="100%" height="800" frameborder="0" style="border: none;"></iframe>'.$embedBrandingLine }}</textarea>
+                                              style="resize: vertical;">{{ $embedCalendarSnippet($embedOnsiteUrl, true) }}</textarea>
                                     <button type="button" id="iframe-code-btn" class="js-copy-iframe-code inline-flex items-center rounded-e-lg border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:border-[var(--brand-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-blue)]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
@@ -193,6 +220,8 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     {{ __('messages.preview') }}
                                 </label>                                
+                                {{-- The preview has embed.js beside it as a website would (below), so a
+                                     click in it does what the code you copy will do. --}}
                                 <div id="embed-preview-box" class="border border-gray-300 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900" style="height: 300px; overflow: auto;">
                                     {{-- No src until the modal opens; the script below sets it. --}}
                                     <iframe id="embed-preview-iframe"
@@ -214,8 +243,11 @@
     </div>
 </div>
 
+<script src="{{ $embedScriptUrl }}" async {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
 const embedBaseUrl = @json($embedUrl);
+const embedCalendarTitle = @json($embedCalendarTitle);
+const embedScriptUrl = @json($embedScriptUrl);
 const embedPreviewBaseUrl = @json($previewUrl);
 const embedBrandingLine = @json($embedBrandingLine);
 const embedSubscribeTitle = @json($embedSubscribeTitle);
@@ -238,8 +270,13 @@ function buildEmbedUrl(base) {
 
     if (selectedEmbedValue('embed-widget') === 'subscribe') {
         params.push('form=subscribe');
-    } else if (selectedEmbedValue('embed-layout')) {
-        params.push('layout=' + encodeURIComponent(selectedEmbedValue('embed-layout')));
+    } else {
+        if (selectedEmbedValue('embed-layout')) {
+            params.push('layout=' + encodeURIComponent(selectedEmbedValue('embed-layout')));
+        }
+        if (selectedEmbedValue('embed-events') === 'onsite') {
+            params.push('events=onsite');
+        }
     }
 
     const theme = selectedEmbedValue('embed-theme');
@@ -261,7 +298,12 @@ function buildEmbedUrl(base) {
 
 function buildEmbedSnippet(url) {
     if (selectedEmbedValue('embed-widget') !== 'subscribe') {
-        return '<iframe src="' + url + '" width="100%" height="800" frameborder="0" style="border: none;"></iframe>' + embedBrandingLine;
+        // Showing events on the website: embed.js beside the frame, which opens them over the page
+        // and fits the frame to the calendar. The closing tag is split so it cannot end THIS block.
+        const onsite = selectedEmbedValue('embed-events') === 'onsite';
+        return '<iframe src="' + url + '" title="' + embedCalendarTitle + '" width="100%" height="800" frameborder="0" style="border: none;" allow="clipboard-write; web-share; fullscreen"></iframe>'
+            + (onsite ? '\n<script src="' + embedScriptUrl + '" async><' + '/script>' : '')
+            + embedBrandingLine;
     }
 
     // The listener resizes only the frame that sent the message (e.source), and reads only a
@@ -444,15 +486,16 @@ document.addEventListener('click', function(event) {
         copyIframeCode();
         return;
     }
-    // Close modal when clicking outside
+    // Close modal when clicking outside. Not on a press in the event a preview click opened over
+    // the page (embed.js's overlay), which stands above this dialog.
     const modal = document.getElementById('embed-modal');
-    if (! modal.classList.contains('hidden') && ! event.target.closest('.relative.transform')) {
+    if (! modal.classList.contains('hidden') && ! event.target.closest('.relative.transform') && ! event.target.closest('[data-eventschedule-overlay]')) {
         closeEmbedModal();
     }
 });
 
 document.addEventListener('change', function(event) {
-    if (['embed-layout', 'embed-widget', 'embed-theme', 'embed-lang'].includes(event.target.id)) {
+    if (['embed-layout', 'embed-widget', 'embed-theme', 'embed-lang', 'embed-events'].includes(event.target.id)) {
         updateEmbedSnippets();
     }
 });

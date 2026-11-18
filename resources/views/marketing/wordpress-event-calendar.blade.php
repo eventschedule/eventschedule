@@ -17,8 +17,11 @@
            (event/edit.blade.php), so Free users type the RSVP URL themselves (docs/tickets
            #embed-widget). The ticket widget is Pro (Event::hasProTicketingPlan()); the RSVP one is
            free.
-         - Events in an embedded calendar open their page in a new tab (role/partials/
-           calendar.blade.php, target="_blank" when $embed).
+         - Events in an embedded calendar open over the host page (embed.js) or inside the frame
+           when the script is stripped, with ?events=onsite, which the Embed dialog's code carries
+           by default; without it they open their page in a new tab (role/partials/
+           calendar.blade.php, target="_blank" when $embed). WordPress keeps a script in the Custom
+           HTML block for the same users it keeps an iframe for.
          - The month grid needs about 768px of frame width; below it the embed shows the agenda
            (docs/sharing #embed).
          WordPress facts: iframes survive the Custom HTML block only for users with the
@@ -409,7 +412,7 @@
                 <div class="es-wp-panel mt-8 p-6" data-reveal="panel">
                     <h3 class="es-wp-ink text-base font-bold">What visitors get inside the frame</h3>
                     <p class="es-wp-muted mt-2 text-sm leading-relaxed">
-                        Your events only, with no header, footer or ads. Clicking an event opens its full page in a new tab, with the details, the map, add-to-calendar and the Register or Buy button, so your WordPress page stays open behind it. On a Free schedule the copied code adds a small "Powered by Event Schedule" line under the frame, outside it, where you can see and delete it; <x-link href="{{ marketing_url('/features/white-label') }}">removing our branding</x-link> from your pages is part of Pro. The full list of options is in the <x-link href="{{ marketing_url('/docs/sharing') }}#embed-parameters">embedding guide</x-link>.
+                        Your events only, with no header, footer or ads. Clicking an event shows it over your WordPress page, with the details, the map, prices and add-to-calendar, so visitors stay on your site; Register or Buy opens the event's page in a new tab, on a secure page. On a Free schedule the copied code adds a small "Powered by Event Schedule" line under the frame, outside it, where you can see and delete it; <x-link href="{{ marketing_url('/features/white-label') }}">removing our branding</x-link> from your pages is part of Pro. The full list of options is in the <x-link href="{{ marketing_url('/docs/sharing') }}#embed-parameters">embedding guide</x-link>.
                     </p>
                 </div>
             </div>
@@ -633,7 +636,7 @@
                         ['The block saved, but the calendar vanished', 'WordPress strips iframe code from users without the "unfiltered HTML" permission. On a normal site that means Administrators and Editors can embed it and Authors and Contributors cannot; on a multisite network only a Super Admin can. Ask someone with that role to paste the code.'],
                         ['It is a WordPress.com site', 'WordPress.com keeps iframe code only on a paid plan with its hosting features switched on. On other plans, link to your schedule\'s page from a button or menu item instead, which works on every plan.'],
                         ['The frame is blank or refused', 'Almost always a missing ?embed=true. Every other Event Schedule address refuses to load inside a frame, so copy the code from the Embed Schedule dialog rather than your browser\'s address bar. A security plugin that restricts which sites may be framed can do the same.'],
-                        ['It is cut off or shows a scrollbar', 'The frame has the height written in the code and does not resize itself. Raise the height, for example from 800 to 1000, and keep the width at 100% so it fills the column on phones as well.'],
+                        ['It is cut off or shows a scrollbar', 'The small script in the code fits the frame to the calendar. If the script was removed, or you copied the code that opens events in a new tab, the frame keeps the height written in the code: raise it, for example from 800 to 1000, and keep the width at 100% so it fills the column on phones as well.'],
                     ];
                 @endphp
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="80">

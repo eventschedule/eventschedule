@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Support\EmbedEventView;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -64,6 +66,26 @@ class EmbedLayoutParamTest extends TestCase
 
         $this->assertRendersLayout('/'.$calendarRole->subdomain.'?embed=true&layout=list', 'list');
         $this->assertRendersLayout('/'.$listRole->subdomain.'?embed=true&layout=calendar', 'calendar');
+    }
+
+    /**
+     * The Embed dialog's "Show it on your website" adds events=onsite beside layout=: the two are
+     * read apart, and an event opened in the frame carries the layout back (EmbedEventView).
+     */
+    public function test_the_layout_param_holds_beside_events_onsite(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['event_layout' => 'calendar']);
+        $this->createEvent($role);
+
+        $this->get('/'.$role->subdomain.'?embed=true&layout=list&events=onsite')
+            ->assertOk()
+            ->assertSee("currentView: 'list'", false)
+            ->assertSee('embedOnsite: true', false);
+        $this->assertSame(['layout' => 'calendar'], array_intersect_key(
+            EmbedEventView::carried(Request::create('/?layout=grid&embed=true&view=event')),
+            ['layout' => true]
+        ), 'grid is the month calendar, as everywhere else');
     }
 
     public function test_grid_and_month_are_aliases_for_the_month_calendar(): void

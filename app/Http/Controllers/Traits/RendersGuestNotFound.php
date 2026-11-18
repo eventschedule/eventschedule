@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Traits;
 use App\Models\AnalyticsMissingDaily;
 use App\Models\PageView;
 use App\Models\Role;
+use App\Support\EmbedEventView;
+use App\Utils\RealtimeTracker;
 use Illuminate\Http\Response;
 
 /**
@@ -45,6 +47,19 @@ trait RendersGuestNotFound
     {
         $this->recordMissingAddress($role, $slug);
 
+        // An event opened inside an embedded calendar that is not there any more (deleted, made a
+        // draft, a stale link on the host page's #es-event=): a quiet card that says so, with the
+        // way back to the calendar it came from, in place of a blank frame or overlay.
+        if (EmbedEventView::requested()) {
+            return $this->renderSignedOut(fn () => response()->view('event/embed-unavailable', [
+                'role' => $role,
+                'event' => null,
+                'reason' => 'missing',
+                'pageUrl' => null,
+                'backUrl' => EmbedEventView::calendarUrl($role),
+            ], 404));
+        }
+
         // An embed is an iframe on somebody else's site; a full-bleed 404 inside it is louder than
         // the failure warrants, and there is no useful "back to the schedule" from in there.
         if (request()->embed) {
@@ -60,6 +75,40 @@ trait RendersGuestNotFound
             // for exactly those. app_url() at least lands the visitor somewhere real.
             'homeUrl' => $role->getCanonicalUrl() ?: app_url(),
         ], 404);
+    }
+
+    /**
+     * Render as a signed-out visitor sees it, whoever is signed in: what a page any site may frame
+     * shows (the framed event view and its "not available" card, see EmbedEventView). Every
+     * `auth()->user()`, `@auth` and `$request->user()` the views ask is answered by a guard that
+     * knows nobody, for the length of the render and no longer: the session is not touched, so
+     * the person is still signed in on the next request.
+     *
+     * The response is built inside the closure, and Illuminate\Http\Response renders a view as it
+     * is handed one, so nothing is left to render after the guard is put back.
+     *
+     * Who is really there is kept on the request (RealtimeTracker::VIEWER_ATTRIBUTE) for the one
+     * reader that must not be fooled: the live view, which leaves out a schedule's own team and the
+     * installation's admins, as the page-view counters and the guest funnel do.
+     */
+    protected function renderSignedOut(callable $render)
+    {
+        $auth = auth();
+        $previous = $auth->getDefaultDriver();
+        request()->attributes->set(RealtimeTracker::VIEWER_ATTRIBUTE, $auth->user() ?? false);
+
+        $auth->viaRequest('embed-signed-out', fn () => null);
+        config(['auth.guards.embed_signed_out' => [
+            'driver' => 'embed-signed-out',
+            'provider' => config('auth.guards.'.$previous.'.provider', 'users'),
+        ]]);
+        $auth->shouldUse('embed_signed_out');
+
+        try {
+            return $render();
+        } finally {
+            $auth->shouldUse($previous);
+        }
     }
 
     /**

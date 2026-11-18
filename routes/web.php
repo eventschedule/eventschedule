@@ -28,6 +28,7 @@ use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\CalendarReviewController;
 use App\Http\Controllers\CarpoolController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\EmbedScriptController;
 use App\Http\Controllers\EventbriteController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventFeedController;
@@ -531,6 +532,12 @@ Route::post('/api/whatsapp/webhook', [WhatsAppWebhookController::class, 'handle'
 // the scheduler, so it must not be the first thing to break under load.
 Route::get('/release_tickets', [TicketController::class, 'release'])->name('release_tickets')->middleware('throttle:5,1,cron_release');
 Route::get('/translate_data', [AppController::class, 'translateData'])->name('translate_data')->middleware('throttle:5,1,cron_translate');
+
+// embed.js: the script beside an embedded calendar that shows its events over the organizer's own
+// page (EmbedScriptController says why it is a route and not a file in public/). Outside 'web',
+// as the sitemaps are, so it never sets a cookie. Domain-less, like the routes around it: the
+// copied code names it on the app host (app_url('/embed.js')).
+Route::get('/embed.js', EmbedScriptController::class)->withoutMiddleware('web')->name('embed.script');
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');

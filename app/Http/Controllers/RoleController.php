@@ -51,6 +51,7 @@ use App\Services\ScheduleTransferService;
 use App\Services\SmsService;
 use App\Services\TicketPresets;
 use App\Services\UsageTrackingService;
+use App\Support\EmbedEventView;
 use App\Utils\AiImageIssuance;
 use App\Utils\Aurora;
 use App\Utils\ColorUtils;
@@ -2319,6 +2320,20 @@ class RoleController extends Controller
         $user = auth()->user();
         $curatorRoles = $user ? $user->curators() : collect();
 
+        // An event opened inside an embedded calendar (EmbedEventView: ?embed=true&view=event).
+        // It is drawn for a signed-out visitor whoever is signed in: a cross-site frame has no
+        // session anyway, and a page that may now be framed by any site must not carry anybody's
+        // member tools or ticket links, or it is a clickjacking surface. So from here the event is
+        // looked up as nobody would, which also keeps a draft and a booking out of the frame.
+        // $viewer stays the real visitor, for the one thing that asks who it is: whether the
+        // visit is counted.
+        $viewer = $user;
+        $embedEventView = EmbedEventView::requested($request) && ($slug || $id || $request->id);
+        if ($embedEventView) {
+            $user = null;
+            $curatorRoles = collect();
+        }
+
         $role = Role::subdomain($subdomain)->with('groups')->first();
 
         // is_deleted too, not just isClaimed(). An admin releasing a squatted subdomain renames
@@ -2878,8 +2893,17 @@ class RoleController extends Controller
                 ->get();
         }
 
-        // Track view for analytics (non-member visits only, skip embeds)
-        if (! request()->embed && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+        // Track view for analytics (non-member visits only, skip embeds). An event opened inside an
+        // embedded calendar IS counted, as a view of that event that came from the organizer's
+        // website: it used to be a click from the frame to the event's page in a new tab, which
+        // counted, and leaving it out would make their event views fall the day they switch to
+        // showing events on their site. The calendar's own loads stay uncounted. Behind the
+        // password gate nothing is shown, so nothing is counted.
+        if ($embedEventView) {
+            if ($event && ! $event->isPasswordProtected() && (! $viewer || (! $viewer->isMember($subdomain) && ! $viewer->isAdmin()))) {
+                app(AnalyticsService::class)->recordView($role, $event, $request, 'embed');
+            }
+        } elseif (! request()->embed && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
             app(AnalyticsService::class)->recordView($role, $event, $request);
         }
 
@@ -2919,6 +2943,27 @@ class RoleController extends Controller
 
             $view = 'event/show-guest-ticket-embed';
             $event->loadMissing(['tickets']);
+        } elseif ($embedEventView && $event) {
+            // A password event's form posts to us and would come back to a frame with no session,
+            // so the frame says the event has a password and links to its page, where it is asked.
+            if ($event->isPasswordProtected()) {
+                return $this->renderSignedOut(fn () => response()->view('event/embed-unavailable', [
+                    'role' => $role,
+                    'event' => $event,
+                    'reason' => 'password',
+                    'pageUrl' => EmbedEventView::pageUrl($event, $subdomain, $requestedOccurrence, null, $request),
+                    'backUrl' => EmbedEventView::calendarUrl($role, $request),
+                ]));
+            }
+
+            $view = 'event/show-guest';
+
+            // The guest funnel's first stage, as the event's own page counts it: a click in the
+            // frame used to open that page, so this keeps the funnel measuring the same thing.
+            GuestFunnel::count('event_view', $request, $role, embeddedEvent: true);
+
+            $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
+            $photoLimitReached = ! $role->canUploadPhoto();
         } elseif ($embed) {
             $view = 'role/show-guest-embed';
         } elseif ($event) {
@@ -3072,41 +3117,47 @@ class RoleController extends Controller
             $upcoming = $this->eventRepo->upcomingForGuest($role, $selectedGroup, 50);
         }
 
-        $response = response()
-            ->view($view, compact(
-                'subdomain',
-                'events',
-                'upcoming',
-                'moreEvents',
-                'carouselEvents',
-                'hasActivePolls',
-                'role',
-                'otherRole',
-                'month',
-                'year',
-                'startOfMonth',
-                'user',
-                'event',
-                'embed',
-                'date',
-                'requestedOccurrence',
-                'curatorRoles',
-                'fonts',
-                'selectedGroup',
-                'pastEvents',
-                'hasMorePastEvents',
-                'myPendingVideos',
-                'myPendingComments',
-                'myPendingPhotos',
-                'photoLimitReached',
-                'userSale',
-                'userSales',
-                'publicFeedbacks',
-                'feedbackCount',
-                'avgRating',
-            ));
+        $embedEvent = $embedEventView && $event && $view === 'event/show-guest';
 
-        return $response;
+        // compact() before the closure: an arrow function captures the variables it names, and a
+        // name inside compact() is a string, not a variable it can see.
+        $viewData = compact(
+            'subdomain',
+            'events',
+            'upcoming',
+            'moreEvents',
+            'carouselEvents',
+            'hasActivePolls',
+            'role',
+            'otherRole',
+            'month',
+            'year',
+            'startOfMonth',
+            'user',
+            'event',
+            'embed',
+            'date',
+            'requestedOccurrence',
+            'curatorRoles',
+            'fonts',
+            'selectedGroup',
+            'pastEvents',
+            'hasMorePastEvents',
+            'myPendingVideos',
+            'myPendingComments',
+            'myPendingPhotos',
+            'photoLimitReached',
+            'userSale',
+            'userSales',
+            'publicFeedbacks',
+            'feedbackCount',
+            'avgRating',
+            'embedEvent',
+        );
+
+        $render = fn () => response()->view($view, $viewData);
+
+        return $embedEvent ? $this->renderSignedOut($render) : $render();
     }
 
     public function checkEventPassword(Request $request, $subdomain)

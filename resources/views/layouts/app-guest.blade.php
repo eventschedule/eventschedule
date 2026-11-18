@@ -272,6 +272,13 @@
 
     <x-slot name="head">
 
+        {{-- An event inside an embedded calendar: every link leaves the frame, because our own
+             pages, the maps, a video and an organizer's own site all refuse to be framed, and the
+             frame has no session to buy with. Back and the other dates of a series say _self. --}}
+        @if ($embedEvent)
+        <base target="_blank">
+        @endif
+
         {{-- Use the schedule's logo as the favicon on its guest pages (Pro/Enterprise) --}}
         @if ($role->isPro() && $role->profile_image_url)
             <link rel="icon" href="{{ $role->profile_image_url }}">
@@ -652,8 +659,10 @@
     </nav>
     @endif
 
-    {{-- es-credit-chip: lifted clear of the mobile CTA bar by accessibility-widget.css. --}}
-    @if (! request()->embed && $creditReason)
+    {{-- es-credit-chip: lifted clear of the mobile CTA bar by accessibility-widget.css. An event
+         shown inside an embedded calendar carries it as the event's own page does: the copied
+         code's credit line is under the calendar, not under an overlay. --}}
+    @if ((! request()->embed || $embedEvent) && $creditReason)
     <div class="es-credit-chip flex justify-{{ $isRtl ? 'start' : 'end' }} p-4 {{ $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
         {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
         <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}"
@@ -666,6 +675,12 @@
 
     @if ($role->show_accessibility_widget)
         @include('partials.accessibility-widget')
+    @endif
+
+    {{-- An embedded calendar, and an event shown inside one, talk to embed.js on the organizer's
+         page when it is there (partials/embed-frame says how). --}}
+    @if (request()->embed && ! request('graphic') && request()->get('form') !== 'subscribe')
+        @include('partials.embed-frame')
     @endif
 
 </x-app-layout>

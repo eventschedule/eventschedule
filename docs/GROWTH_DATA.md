@@ -217,7 +217,9 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     schedules, and embeds. What each one is:
     - `gp_event_visitors`: was shown an event page. Past the password prompt, and not somebody a
       direct-registration link sent straight elsewhere. Every event page counts, with or without
-      anything to buy on it.
+      anything to buy on it. From 2026-11-18 that includes an event opened inside a calendar
+      embedded on the organizer's own website (the Embed dialog's "Show it on your website"), the
+      one embed counted: before, the same click opened the event's page in a new tab, which counted.
     - `gp_list_taps`: went from a schedule's list, its month grid or its video carousel into an
       event, in the same tab or a new one.
     - `gp_form_opens`: opened a ticket or sign-up form that could lead to an order. Not a waitlist,

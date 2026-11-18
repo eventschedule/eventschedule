@@ -1683,7 +1683,12 @@
             </svg>
             Embed Widget
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Embed a ticket purchase or RSVP form directly on your own website using an iframe. Visitors can buy tickets or register without leaving your site. <a href="{{ marketing_url('/features/embed-tickets') }}" class="doc-link">Embed Tickets</a> shows what the checkout looks like on a site.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Put one event's tickets or its registration on your own website using an iframe. The widget shows the event, its ticket types and their prices, and one button, <strong class="text-gray-900 dark:text-white">Buy Tickets</strong> or <strong class="text-gray-900 dark:text-white">Register</strong>, that opens the event's page in a new tab with the form already open, where the buyer finishes on a secure page. <a href="{{ marketing_url('/features/embed-tickets') }}" class="doc-link">Embed Tickets</a> shows what the checkout looks like.</p>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Why the form is not inside the frame</div>
+            <p>A frame on another website gets no session from the browser, so a form sent from inside it cannot be accepted, and payment pages refuse to load inside another site's frame anyway. Opening the event's page in a new tab keeps your page open behind it. To show a whole calendar whose events open over your page, see <a href="{{ route('marketing.docs.sharing') }}#embed-events" class="doc-link">When someone opens an event</a>.</p>
+        </div>
 
         <div class="doc-callout doc-callout-plan mb-6">
             <div class="doc-callout-title">RSVP embed is free; the ticket embed is Pro</div>
@@ -1695,7 +1700,7 @@
             <li>Open your event for editing and go to the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab</li>
             <li>Press <strong class="text-gray-900 dark:text-white">Sell tickets</strong> or <strong class="text-gray-900 dark:text-white">Free registration</strong> and save the event</li>
             <li>Click the <strong class="text-gray-900 dark:text-white">Embed Tickets</strong> (or <strong class="text-gray-900 dark:text-white">Embed Registration</strong>) link at the end of the tab's title row</li>
-            <li>Copy the iframe code and paste it into your website's HTML</li>
+            <li>Copy the code and paste it into your website's HTML. It is the iframe and one small script that fits the frame to the widget; a builder that strips the script leaves the frame at the 420 pixels written in it, which you can raise</li>
         </ol>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">The link that opens the snippet only appears on a saved event of a Pro schedule. On the Free plan you can still embed the RSVP form by building the URL yourself from the parameters below.</p>
@@ -1713,11 +1718,11 @@
                 <tbody>
                     <tr>
                         <td><code class="doc-inline-code">tickets=true</code></td>
-                        <td>Show the ticket purchase form <x-doc-badge plan="pro" /></td>
+                        <td>Show the ticket types and their prices, with a button to buy them <x-doc-badge plan="pro" /></td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">rsvp=true</code></td>
-                        <td>Show the RSVP registration form <x-doc-badge plan="free" /></td>
+                        <td>Show the event with a button to register <x-doc-badge plan="free" /></td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">embed=true</code></td>
@@ -1729,7 +1734,7 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">promo=CODE</code></td>
-                        <td>Pre-fill a promo code</td>
+                        <td>Pre-fill a promo code in the form the button opens</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">lang=xx</code></td>
@@ -1741,7 +1746,7 @@
 
         <h3 class="doc-subheading">What to Expect</h3>
         <ul class="doc-list">
-            <li><strong class="text-gray-900 dark:text-white">Payment leaves the frame.</strong> Every payment method except cash sends the buyer out of the iframe to pay: Stripe, PayPal, Payfast, Razorpay, Invoice Ninja and a payment link all open in the full browser window, since payment pages generally refuse to load inside another site's frame. Stripe, PayPal, Payfast and Razorpay bring the buyer back to their ticket page afterwards. Cash checkouts and free registrations complete inside the embed. A free order on an event that takes payment online leaves the frame like a paid one, skipping the payment page and opening its ticket page in the full window.</li>
+            <li><strong class="text-gray-900 dark:text-white">Buying happens in a new tab.</strong> The button opens the event's page with the ticket or registration form open, and everything from there, quantities, seats, add-ons, promo codes and payment by any method, happens on that page as it would for a visitor who went there directly. Stripe, PayPal, Payfast and Razorpay bring the buyer back to their ticket page afterwards.</li>
             <li><strong class="text-gray-900 dark:text-white">Hidden events do not embed.</strong> The Tickets tab does not offer the embed link on an <strong class="text-gray-900 dark:text-white">Unlisted</strong> event, and Draft and Internal events are open to schedule members only. A password-protected event only embeds for someone who has already entered the password.</li>
             <li><strong class="text-gray-900 dark:text-white">One event per widget.</strong> The <a href="#cart" class="doc-link">multi-event cart</a> is not offered inside an embed.</li>
         </ul>

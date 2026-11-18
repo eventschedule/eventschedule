@@ -16,6 +16,17 @@
     $embedTicketUrl = $event->getGuestUrl($role->subdomain, $eventDate) . '?' . $embedParam . '=true&embed=true';
     // For preview, use current request's protocol to avoid HTTPS cert issues in local dev
     $previewTicketUrl = preg_replace('/^https?:/', request()->getScheme() . ':', $embedTicketUrl);
+
+    // The same embed.js the calendar's code carries: with it beside the frame, the widget fits the
+    // frame to itself (partials/embed-frame reports its height once greeted). Without it, a
+    // builder that strips scripts keeps the fallback height, which fits a widget of a few ticket
+    // types and its button. The title names the event for screen readers; escaped once here for
+    // the attribute it lands in, and once more by the textarea it is printed into.
+    $embedScriptUrl = app_url('/embed.js');
+    $embedTicketHeight = 420;
+    $embedTicketSnippet = '<iframe src="'.$embedTicketUrl.'" title="'.e($event->name).'" width="100%" height="'.$embedTicketHeight.'" frameborder="0" style="border: none;"></iframe>'
+        ."\n".'<script src="'.$embedScriptUrl.'" async></script>'
+        .($role->showBranding() ? "\n".'<p style="font-size: 12px; text-align: right; margin-top: 4px; opacity: 0.6;"><a href="https://eventschedule.com" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Powered by Event Schedule</a></p>' : '');
 @endphp
 <div id="embed-ticket-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="embed-ticket-modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
@@ -42,9 +53,12 @@
                             {{ $isRsvpMode ? __('messages.embed_registration') : __('messages.embed_tickets') }}
                         </h3>
                         <div class="mt-4">
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
                                 {{ $isRsvpMode ? __('messages.embed_registration_description') : __('messages.embed_tickets_description') }}
                             </p>
+                            {{-- The widget lists what is on offer; buying or signing up is on the event's
+                                 page, which its button opens in a new tab (show-guest-ticket-embed). --}}
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.embed_events_help') }}</p>
 
                             <!-- Embed URL -->
                             <div class="mb-4">
@@ -71,8 +85,7 @@
                                 <div class="flex">
                                     <textarea id="embed-ticket-iframe-code" readonly rows="4"
                                               class="block w-full rounded-s-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm font-mono text-xs"
-                                              style="resize: vertical;"><iframe src="{{ $embedTicketUrl }}" width="100%" height="700" frameborder="0" style="border: none;"></iframe>
-@if($role->showBranding())<p style="font-size: 12px; text-align: right; margin-top: 4px; opacity: 0.6;"><a href="https://eventschedule.com" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Powered by Event Schedule</a></p>@endif</textarea>
+                                              style="resize: vertical;">{{ $embedTicketSnippet }}</textarea>
                                     <button type="button" id="embed-ticket-iframe-btn" class="js-copy-embed-ticket-iframe inline-flex items-center rounded-e-lg border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:border-[var(--brand-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-blue)]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
@@ -89,7 +102,7 @@
                                 <div class="border border-gray-300 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900" style="height: 350px; overflow: auto;">
                                     <iframe id="embed-ticket-preview-iframe"
                                             data-src="{{ $previewTicketUrl }}"
-                                            width="100%" height="700" frameborder="0"
+                                            width="100%" height="{{ $embedTicketHeight }}" frameborder="0"
                                             style="border: none; border-radius: 4px;"></iframe>
                                 </div>
                             </div>
@@ -107,6 +120,8 @@
     </div>
 </div>
 
+{{-- The preview fits itself as the copied code will (embed.js loads once per page). --}}
+<script src="{{ $embedScriptUrl }}" async {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
 function openEmbedTicketModal() {
     document.getElementById('embed-ticket-modal').classList.remove('hidden');

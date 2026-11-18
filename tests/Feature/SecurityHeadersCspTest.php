@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Routing\Route;
 use Tests\TestCase;
 
 /**
@@ -237,7 +238,7 @@ class SecurityHeadersCspTest extends TestCase
         $this->app['env'] = 'production';
 
         $request = Request::create('https://sub.eventschedule.test/?embed=true', 'GET');
-        $route = new \Illuminate\Routing\Route('GET', '/', ['as' => 'role.view_guest']);
+        $route = new Route('GET', '/', ['as' => 'role.view_guest']);
         $request->setRouteResolver(fn () => $route);
 
         $response = (new SecurityHeaders)->handle($request, fn ($r) => new Response('ok'));
@@ -245,5 +246,31 @@ class SecurityHeadersCspTest extends TestCase
 
         $this->assertStringContainsString('frame-ancestors *', $csp);
         $this->assertFalse($response->headers->has('X-Frame-Options'));
+    }
+
+    /**
+     * An event shown inside an embedded calendar (?embed=true&view=event, App\Support\
+     * EmbedEventView) is the event's own route with embed=true, so it may be framed by any site as
+     * the calendar is; without embed=true the same route stays unframable. Its <base target> needs
+     * nothing of base-uri, which restricts a base HREF only.
+     */
+    public function test_an_event_shown_in_a_frame_is_framable_and_its_page_is_not(): void
+    {
+        $this->app['env'] = 'production';
+
+        $route = new Route('GET', '/{slug}/{id}', ['as' => 'event.view_guest_with_id']);
+
+        $framed = Request::create('https://sub.eventschedule.test/show/abc?embed=true&view=event&events=onsite', 'GET');
+        $framed->setRouteResolver(fn () => $route);
+        $response = (new SecurityHeaders)->handle($framed, fn ($r) => new Response('ok'));
+        $this->assertStringContainsString('frame-ancestors *', $response->headers->get('Content-Security-Policy'));
+        $this->assertFalse($response->headers->has('X-Frame-Options'));
+        $this->assertStringContainsString("base-uri 'self'", $response->headers->get('Content-Security-Policy'));
+
+        $page = Request::create('https://sub.eventschedule.test/show/abc?view=event', 'GET');
+        $page->setRouteResolver(fn () => $route);
+        $response = (new SecurityHeaders)->handle($page, fn ($r) => new Response('ok'));
+        $this->assertStringContainsString("frame-ancestors 'none'", $response->headers->get('Content-Security-Policy'));
+        $this->assertSame('DENY', $response->headers->get('X-Frame-Options'));
     }
 }

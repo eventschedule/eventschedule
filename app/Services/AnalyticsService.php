@@ -35,11 +35,13 @@ class AnalyticsService
     private array $userRoleIds = [];
 
     /**
-     * Record a page view (returns false if bot detected)
+     * Record a page view (returns false if bot detected). $source names where the view came from
+     * when the request cannot say it: 'embed' for an event opened inside the calendar embedded on
+     * the organizer's own website (see PageView::recordView()).
      */
-    public function recordView(Role $role, ?Event $event, Request $request): bool
+    public function recordView(Role $role, ?Event $event, Request $request, ?string $source = null): bool
     {
-        return PageView::recordView($role, $event, $request);
+        return PageView::recordView($role, $event, $request, $source);
     }
 
     /**

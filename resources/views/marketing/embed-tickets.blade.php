@@ -1,17 +1,17 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">Embed Tickets on Your Website | Full Checkout in One iframe</x-slot>
-    <x-slot name="description">How to embed tickets on your website: one iframe tag sells one event, with ticket types, questions and promo codes. Phones, height and payment explained.</x-slot>
+    <x-slot name="title">Embed Tickets on Your Website | Sell From Your Own Page</x-slot>
+    <x-slot name="description">How to embed tickets on your website: one iframe tag shows an event's tickets and prices, and opens a secure checkout in a new tab. Phones and payment explained.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Tickets</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Embed Tickets"
-        description="Embed a ticket purchase or RSVP form on any website with one iframe tag. Supports every payment method, dark mode, and 13 languages." />
+        description="Show an event's tickets and prices, or its registration, on any website with one iframe tag, with a secure checkout one click away in a new tab. Every payment method, dark mode, and 13 languages." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "HowTo",
-        "name": "How to embed a ticket form on your own website",
+        "name": "How to embed an event's tickets on your own website",
         "description": "Turn on tickets or registration, copy the iframe tag out of the event, and paste it into your page.",
         "step": [
             {
@@ -30,7 +30,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Paste it into your page",
-                "text": "Drop the tag into your website's HTML wherever the form belongs. Any block that accepts raw HTML will take it. Nothing needs installing."
+                "text": "Drop the tag into your website's HTML wherever the tickets belong. Any block that accepts raw HTML will take it. Nothing needs installing."
             }
         ]
     }
@@ -342,45 +342,8 @@
         .es-widg-row:last-child { border-bottom: 0; }
         .es-widg-row-name { color: var(--w-ink); }
         .es-widg-row-note { color: var(--w-muted); }
-        .es-widg-qty {
-            flex: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 2rem;
-            padding: 0.15rem 0.4rem;
-            border: 1px solid var(--w-line);
-            border-radius: 0.3rem;
-            background-color: var(--w-sub);
-            color: var(--w-ink);
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.72rem;
-            font-variant-numeric: tabular-nums;
-        }
-        .es-widg-input {
-            border: 1px solid var(--w-line);
-            border-radius: 0.4rem;
-            background-color: var(--w-sub);
-            padding: 0.45rem 0.6rem;
-            color: var(--w-muted);
-        }
-        .es-widg-input-label {
-            display: block;
-            color: var(--w-muted);
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-        .es-widg-total {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 1rem;
-            border-top: 1px solid var(--w-line);
-            padding-top: 0.7rem;
-            color: var(--w-ink);
-        }
+        .es-widg-price { flex: none; color: var(--w-ink); font-variant-numeric: tabular-nums; }
+        .es-widg-say { color: var(--w-muted); text-align: center; font-size: 0.62rem; line-height: 1.35; }
         .es-widg-pay {
             display: block;
             width: 100%;
@@ -607,34 +570,45 @@
             'time'    => '8:00 PM',
             'accent'  => '#11429b',
             'rows'    => [
-                ['General admission', '$18', '2'],
-                ['Supporter', '$35', '0'],
+                ['General admission', '$18'],
+                ['Supporter', '$35'],
             ],
-            'total'   => '$36',
         ];
 
-        // The seven layers of the widget, in the order they render. Each one is
-        // a real part of resources/views/event/show-guest-ticket-embed.blade.php
-        // or of the purchase view it includes.
+        // The five layers of the widget, in the order they render. Each one is a
+        // real part of resources/views/event/show-guest-ticket-embed.blade.php or
+        // of the ticket list it includes (event/partials/embed-ticket-list). The
+        // checkout itself is the event page's own form, which the button opens in
+        // a new tab: a frame on someone else's site gets no session to buy with,
+        // and payment pages refuse to be framed.
         $layers = [
-            ['01', 'The header bar', 'Your schedule\'s accent colour, the event name, and the date and start time of the occurrence being sold. The name is a link out to the full event page, and it opens in the parent window rather than inside the frame.'],
-            ['02', 'The ticket rows', 'Every ticket type on sale for that date, each with its own price and its own remaining count for that date. A multi-use pass is simply another type, add-ons appear once a ticket is chosen, and a type that has run out reads sold out. When every type has gone, the frame turns into a waitlist form instead of a dead end.'],
-            ['03', 'Buyer details', 'A name and an email address. Switch on individual tickets and each attendee gets their own row, their own confirmation email and their own QR code, with an Add to Google Wallet button wherever wallet passes are switched on.'],
-            ['04', 'Your own questions', 'Custom fields you attached to the event or to a single ticket type, answered here at checkout instead of in a follow-up email thread.'],
-            ['05', 'Codes', 'A promo code box, once the event has a live code, and a gift card box on schedules that sell them. A code can also arrive pre-filled from the embed URL, so a link in a newsletter carries its own discount.'],
-            ['06', 'Total and pay', 'The running total, any discount applied, the choice to pay monthly on an event that offers installments, and the button that starts checkout on whichever payment method the event uses.'],
-            ['07', 'The foot', 'A "Powered by Event Schedule" line, shown only on a schedule on the Free plan of eventschedule.com. The ticket widget needs Pro, and a Pro or Enterprise schedule carries no branding, so a ticket widget never shows it. Where it does appear is the registration form of a free event, which embeds free on every plan. A selfhosted install never carries it.'],
+            ['01', 'The header bar', 'Your schedule\'s accent colour, the event name, and the date and start time of the occurrence being sold. The name is a link to the full event page.'],
+            ['02', 'The ticket rows', 'Every ticket type on sale for that date, each with its own price, and Sold Out beside a type that has run out for that date. Add-ons are left to the checkout, where they are offered once a ticket is chosen.'],
+            ['03', 'The button', 'Buy Tickets, or Get Tickets when every type is free, or Register on a free event. It opens the event\'s page in a new tab with the ticket form already open, carrying the language and any promo code the tag was given, and your page stays open in the tab behind.'],
+            ['04', 'The line under it', 'One sentence that tells the buyer what the button does before they press it: tickets and registration open in a new tab, on a secure page. Nobody is surprised by a tab they did not expect.'],
+            ['05', 'The foot', 'A "Powered by Event Schedule" line, shown only on a schedule on the Free plan of eventschedule.com. The ticket widget needs Pro, and a Pro or Enterprise schedule carries no branding, so a ticket widget never shows it. Where it does appear is the registration widget of a free event, which embeds free on every plan. A selfhosted install never carries it.'],
+        ];
+
+        // What the button opens: the event page's own checkout, in a new tab.
+        // Every row is a part of the purchase form on the event page.
+        $checkout = [
+            ['Quantities and seats', 'How many of each type, and on a seated event the seats themselves, picked on the map.'],
+            ['Buyer details', 'A name and an email address, and with individual tickets switched on a name, an email and a QR code for each guest.'],
+            ['Your own questions', 'Custom fields you attached to the event or to one ticket type, answered at checkout instead of in a follow-up email thread.'],
+            ['Add-ons and codes', 'Extras with their own stock, a promo code box once the event has a live code, and a gift card box on schedules that sell them.'],
+            ['Paying', 'The total, a monthly plan on an event that offers installments, and the button that starts payment on whichever method the event uses.'],
+            ['A full house', 'When every type has gone and the event takes a waitlist, the form becomes the waitlist.'],
         ];
 
         // The published interface. Every row is in the docs and in the code that
         // reads it; nothing here is aspirational.
         $params = [
-            ['tickets=true', 'Mode', 'Renders the ticket purchase form. This is what the Embed Tickets link hands you.'],
-            ['rsvp=true', 'Mode', 'Renders the registration form instead, for an event that takes RSVPs rather than payments.'],
+            ['tickets=true', 'Mode', 'Shows the ticket types and their prices, with a button that opens the ticket form on the event\'s page. This is what the Embed Tickets link hands you.'],
+            ['rsvp=true', 'Mode', 'Shows the event with a Register button instead, for an event that takes RSVPs rather than payments.'],
             ['embed=true', 'Required', 'Strips the schedule header, footer and banner, and is the flag that permits the page to be framed at all.'],
             ['dark=true', 'Optional', 'Forces the dark finish, and dark=false forces the light one. Left off, the widget follows the visitor\'s own system setting.'],
-            ['promo=CODE', 'Optional', 'Pre-fills the promo code box, so one link can carry its own discount.'],
-            ['lang=xx', 'Optional', 'Sets the interface language. Thirteen are supported, Arabic and Hebrew among them, and those lay the form out right to left.'],
+            ['promo=CODE', 'Optional', 'Carried to the ticket form the button opens, where it fills the promo code box, so one link can carry its own discount.'],
+            ['lang=xx', 'Optional', 'Sets the interface language, of the widget and of the page its button opens. Thirteen are supported, Arabic and Hebrew among them, and those lay the widget out right to left.'],
         ];
 
         // Accent finishes. The ink is picked by the same rule the product uses:
@@ -664,29 +638,29 @@
             ['Plan', 'Pro or Enterprise', 'The ticket widget is a paid feature, and the Embed Tickets link shows on Pro schedules only. The registration form of a free event embeds on every plan: on Free, build its address by hand. The calendar embed, which puts your dates on a page rather than a checkout, is free too.'],
             ['Event', 'Saved, and not unlisted', 'The link appears on an event that exists and is publicly reachable. An unlisted event is link-only and can carry a password, so it gets no widget.'],
             ['Mode', 'Tickets or registration on', 'Press Sell tickets or Free registration in the Tickets tab and save the event. The link appears beside the tab\'s title once it is, so add at least one ticket type before you paste the tag anywhere.'],
-            ['Host page', 'Any HTML', 'One iframe tag. No script, no package, no build step, and nothing that needs updating when your events change.'],
+            ['Host page', 'Any HTML', 'One iframe tag and one small script beside it that fits the frame to the widget. No package, no build step, and nothing that needs updating when your events change.'],
         ];
 
         $faqs = [
             [
                 'q' => 'Can people buy tickets without leaving my website?',
-                'a' => 'Almost. Choosing tickets, entering names and emails, answering your questions and applying a promo code all happen inside the widget on your page. The payment itself does not: on Stripe, PayPal, Payfast, Razorpay, Invoice Ninja or a payment link, Checkout opens the provider\'s page in the full browser window, because payment pages generally refuse to load inside another site\'s frame. With Stripe, PayPal, Payfast and Razorpay the buyer is brought back to their ticket page afterwards. Only an event paid in cash or at the door completes entirely inside the frame.',
+                'a' => 'Your page stays open behind the purchase. The widget shows the event, its ticket types and their prices on your page, and its Buy Tickets button opens the event\'s page in a new tab with the ticket form already open, where the buyer chooses, pays and gets their tickets on a secure page. A form inside a frame on another website gets no session from the browser, so it cannot be completed there, and payment pages refuse to load inside another site\'s frame anyway.',
             ],
             [
                 'q' => 'How do I get the embed code?',
-                'a' => 'Open the event in the admin portal and go to the Tickets section. Switch on tickets or registration, then click the Embed Tickets link next to the heading (it reads Embed Registration on an RSVP event). The panel gives you the embed URL, a ready-made iframe tag, and a live preview of the widget. Copy the tag into your website\'s HTML wherever the form belongs.',
+                'a' => 'Open the event in the admin portal and go to the Tickets section. Switch on tickets or registration, then click the Embed Tickets link next to the heading (it reads Embed Registration on an RSVP event). The panel gives you the embed URL, a ready-made iframe tag, and a live preview of the widget. Copy the tag into your website\'s HTML wherever the tickets belong.',
             ],
             [
                 'q' => 'Which payment methods work inside the widget?',
-                'a' => 'All of them: Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a custom payment URL, and cash or at the door. Which window the checkout finishes in is decided by the event\'s payment method rather than by the amount. On cash it completes inside the frame. Every other method opens in the parent window instead, because payment portals frequently refuse to be framed. With Stripe, PayPal, Payfast and Razorpay the buyer is brought back to their ticket page afterwards, not to the frame on your site.',
+                'a' => 'All of them: Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a custom payment URL, and cash or at the door. The buyer pays on the event\'s page, which the widget opens in a new tab, exactly as they would if they had gone there directly. With Stripe, PayPal, Payfast and Razorpay the buyer is brought back to their ticket page afterwards.',
             ],
             [
                 'q' => 'Does the widget do everything my event page does?',
-                'a' => 'Everything that sells the ticket. Three things stay on the full event page, on purpose. The multi-event cart: the widget sells the one event it was copied from, because a cart held inside someone else\'s page would be out of reach of the rest of your schedule. The quiet "Tell me if anything changes" link beside the buy button, there when you have switched on the "Notify me" card, which takes an email address for news about the event rather than an order. And the tick-box that lets a buyer sign up to hear from your schedule. The event name in the header bar opens that full page, in the parent window.',
+                'a' => 'No, on purpose. The widget shows what is on sale and what it costs, and the event\'s page does the selling: its button opens that page in a new tab with the ticket form open, for the quantities, the seats, your questions, add-ons, codes and the payment. The multi-event cart, the "Notify me" card once you switch it on, and the tick-box that lets a buyer sign up to hear from your schedule are on that page too.',
             ],
             [
                 'q' => 'Can I use it for free events and registrations?',
-                'a' => 'Yes, and that part is free on every plan. If the event takes registrations rather than payments, the tag carries rsvp=true instead of tickets=true and the widget renders the registration form, with the capacity per date and the waitlist on a full date. On a Pro schedule the Tickets tab hands you the tag through its Embed Registration link. On the Free plan that link is not shown, so build the address yourself: the event\'s own address followed by ?rsvp=true&embed=true, inside an iframe tag like the one at the top of this page.',
+                'a' => 'Yes, and that part is free on every plan. If the event takes registrations rather than payments, the tag carries rsvp=true instead of tickets=true and the widget\'s button opens the registration form on the event\'s page, with the capacity per date and the waitlist on a full date. On a Pro schedule the Tickets tab hands you the tag through its Embed Registration link. On the Free plan that link is not shown, so build the address yourself: the event\'s own address followed by ?rsvp=true&embed=true, inside an iframe tag like the one at the top of this page.',
             ],
             [
                 'q' => 'Does it follow dark mode?',
@@ -706,11 +680,11 @@
             ],
             [
                 'q' => 'Can I sell tickets to several events on one page?',
-                'a' => 'Yes, with one tag per event. Each widget sells only the event it was copied from and has its own Checkout, so a buyer who wants two events pays twice. If your visitors usually buy several, link them to your schedule page instead: its multi-event cart takes one payment for events that share an owner, a currency and a payment method (Stripe, PayPal, Razorpay or cash).',
+                'a' => 'Yes, with one tag per event. Each widget sells only the event it was copied from and its button opens that event\'s own checkout, so a buyer who wants two events pays twice. If your visitors usually buy several, link them to your schedule page instead: its multi-event cart takes one payment for events that share an owner, a currency and a payment method (Stripe, PayPal, Razorpay or cash).',
             ],
             [
-                'q' => 'Why does the form scroll inside its box on my phone?',
-                'a' => 'Because the frame is shorter than the form. An iframe keeps the height written in the tag (700 pixels in the one you copy), and nothing inside this one resizes it. A phone stacks the form, so it is taller there than on a computer. Raise the height in the tag until the Checkout button fits with no scrolling inside the frame, testing with the largest order a buyer is likely to make, and check any box your site builder puts around the code.',
+                'q' => 'Why is the Buy Tickets button cut off on my phone?',
+                'a' => 'Because the frame is shorter than the widget. The small script in the code you copy fits the frame to the widget, so this happens when something stopped it: a site builder that strips scripts, or one that puts the code in a box of its own with a fixed height. Without the script the frame keeps the height written in the tag (420 pixels), and every ticket type adds a row, which a phone may wrap onto two lines. Raise the height in the tag, or the builder\'s own box, until the button sits inside the frame with nothing cut off.',
             ],
             [
                 'q' => 'Why does my embed say tickets are no longer available?',
@@ -749,14 +723,14 @@
                 <div>
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
                         <x-marketing.hero-eyebrow class="block es-widg-eyebrow es-fade-up es-d-1 mb-5">Embed tickets &middot; Pro plan</x-marketing.hero-eyebrow>
-                        <span class="es-mask"><span class="es-mask-line">Embed the whole checkout,</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">as <span class="es-widg-accent">one part</span>.</span></span>
+                        <span class="es-mask"><span class="es-mask-line">Your prices on your page,</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">checkout <span class="es-widg-accent">one click</span> away.</span></span>
                     </h1>
 
                     <p class="es-widg-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
-                        Not a link that takes people somewhere else. One iframe tag, and the ticket
-                        types, the buyer details, your own questions, the promo code and the running
-                        total all happen on the page you already own.
+                        One iframe tag puts the event, its ticket types and what each costs on the
+                        page you already own. Buy Tickets opens the checkout on a secure page in a new
+                        tab, with the form already open, and your page stays open behind it.
                     </p>
 
                     <div class="es-fade-up es-d-3 mb-8 flex flex-col gap-3 sm:flex-row">
@@ -774,7 +748,7 @@
                         <p class="es-widg-measure-label mb-1.5">The whole integration</p>
                         <div class="es-widg-measure mb-3"></div>
                         <p class="es-widg-mono es-widg-muted break-all text-xs leading-relaxed">
-                            &lt;iframe src="https://your-schedule.eventschedule.com/riverside-sessions?tickets=true&#38;embed=true" width="100%" height="700" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;
+                            &lt;iframe src="https://your-schedule.eventschedule.com/riverside-sessions?tickets=true&#38;embed=true" width="100%" height="420" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;<br>&lt;script src="https://app.eventschedule.com/embed.js" async&gt;&lt;/script&gt;
                         </p>
                     </div>
                 </div>
@@ -794,48 +768,26 @@
                                 </div>
 
                                 <div class="px-5 py-4">
-                                    @foreach ($demo['rows'] as [$rowName, $rowPrice, $rowQty])
+                                    @foreach ($demo['rows'] as [$rowName, $rowPrice])
                                         <div class="es-widg-row">
-                                            <div class="min-w-0 flex-1">
-                                                <p class="es-widg-row-name truncate text-sm font-semibold">{{ $rowName }}</p>
-                                                <p class="es-widg-row-note es-widg-mono text-xs">{{ $rowPrice }}</p>
-                                            </div>
-                                            <span class="es-widg-qty" aria-hidden="true">{{ $rowQty }}</span>
+                                            <p class="es-widg-row-name min-w-0 flex-1 truncate text-sm font-semibold">{{ $rowName }}</p>
+                                            <span class="es-widg-price es-widg-mono text-sm">{{ $rowPrice }}</span>
                                         </div>
                                     @endforeach
 
-                                    <div class="mt-4 grid grid-cols-2 gap-2.5" aria-hidden="true">
-                                        <div>
-                                            <span class="es-widg-input-label mb-1">Name</span>
-                                            <div class="es-widg-input text-xs">Alex Moreau</div>
-                                        </div>
-                                        <div>
-                                            <span class="es-widg-input-label mb-1">Email</span>
-                                            <div class="es-widg-input truncate text-xs">alex@example.com</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <span class="es-widg-input-label mb-1">Promo code</span>
-                                        <div class="es-widg-input es-widg-mono text-xs">RIVER10</div>
-                                    </div>
-
-                                    <div class="es-widg-total mt-4">
-                                        <span class="text-sm font-semibold">Total</span>
-                                        <span class="es-widg-mono text-lg font-bold">{{ $demo['total'] }}</span>
-                                    </div>
-
-                                    <div class="es-widg-pay mt-4" style="background-color: {{ $demo['accent'] }}; color: #ffffff;">Pay {{ $demo['total'] }}</div>
+                                    <div class="es-widg-pay mt-5" style="background-color: {{ $demo['accent'] }}; color: #ffffff;">Buy Tickets<svg aria-hidden="true" class="ms-1 inline-block h-3.5 w-3.5 align-[-0.15em] rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></div>
+                                    <p class="es-widg-say mt-2">Tickets and registration open in a new tab, on a secure page.</p>
                                 </div>
                             </div>
 
                             <div class="es-widg-measure-v hidden sm:block" style="right: -1.5rem;" aria-hidden="true"></div>
-                            <span class="es-widg-measure-vlabel hidden sm:block" style="left: auto; right: -1.35rem;" aria-hidden="true">height: 700</span>
+                            <span class="es-widg-measure-vlabel hidden sm:block" style="left: auto; right: -1.35rem;" aria-hidden="true">height: fits</span>
                         </div>
 
                         <p class="es-widg-muted mt-5 text-center text-xs">
-                            One tag, and two numbers in it. Choosing, answering, discounting and
-                            totalling all happen right there, in the space you gave it.
+                            One tag, and a script that fits the frame to the part. What is on sale and
+                            what it costs sit right there; choosing and paying happen one click away,
+                            on a secure page.
                         </p>
                     </div>
                 </div>
@@ -858,9 +810,9 @@
                 </div>
                 <p class="es-widg-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
                     There are three ways to take ticket money through a site you already run. They
-                    differ in one thing: how much of the buying happens on your page before the buyer
-                    is handed to the payment provider. None of them is wrong. Each suits a different
-                    kind of page.
+                    differ in one thing: how much of the event a visitor sees on your page before they
+                    press the button that takes them to buy. None of them is wrong. Each suits a
+                    different kind of page.
                 </p>
             </div>
 
@@ -874,13 +826,13 @@
                     ],
                     [
                         'The ticket widget',
-                        'The ticket form sits inside your page. Ticket types, buyer details, your own questions and the promo code are all answered without leaving it. At Checkout an online payment opens in the full browser window, and with Stripe, PayPal, Payfast or Razorpay the buyer ends on their ticket page. Cash is the one method that finishes in the frame.',
-                        'One event per widget, and Pro on eventschedule.com for any tickets, free ones included. The registration form of a free event embeds the same way, free on every plan.',
-                        'one page promotes one event, such as a show page or a workshop page, and you want the decision made right there.',
+                        'The event, its ticket types and what each costs sit inside your page, with one Buy Tickets button. It opens the event\'s page in a new tab with the ticket form already open, so the buyer goes straight to choosing and paying on a secure page, and your page is still there in the tab behind.',
+                        'One event per widget, and Pro on eventschedule.com for any tickets, free ones included. The registration widget of a free event embeds the same way, free on every plan.',
+                        'one page promotes one event, such as a show page or a workshop page, and you want its prices in front of people right there.',
                     ],
                     [
-                        'A calendar that links to each event',
-                        'The calendar embed puts every date on your page, and each event links to its own page to buy. It answers "which night?" before "how many tickets?", which is the right order for a venue or a series.',
+                        'A calendar of every event',
+                        'The calendar embed puts every date on your page, and a click shows the event over your page, prices included, with the same button to buy on its own page. It answers "which night?" before "how many tickets?", which is the right order for a venue or a series.',
                         'Free on every plan, and it updates itself as you add dates. It pairs well with a widget on the page of your one big event.',
                         'you run many dates and the visitor first needs to choose one.',
                     ],
@@ -913,8 +865,8 @@
                         </thead>
                         <tbody>
                             @foreach ([
-                                ['Where tickets are chosen', 'The event page', 'Your page', 'The event page'],
-                                ['Where an online payment is made', 'The provider\'s page', 'The provider\'s page, in the full window', 'The provider\'s page'],
+                                ['Where the prices are seen', 'The event page', 'Your page', 'Your page'],
+                                ['Where tickets are chosen and paid for', 'The event page', 'The event page, in a new tab', 'The event page, in a new tab'],
                                 ['Several events in one order', 'Yes, with the multi-event cart (Stripe, PayPal, Razorpay or cash)', 'No, one event per widget', 'Yes, from the event pages'],
                                 ['Needs a block that takes raw HTML', 'No', 'Yes', 'Yes'],
                                 ['Plan, for the part itself', 'Any', 'Pro for tickets, free for registration', 'Any'],
@@ -947,14 +899,15 @@
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <p class="es-widg-eyebrow mb-4" data-reveal>02 &middot; The anatomy</p>
                 <h2 class="es-balance es-widg-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Seven layers, and all of them are real.
+                    Five layers on your page, and the checkout one click away.
                 </h2>
                 <div class="mx-auto mb-5 max-w-[10rem]" data-reveal style="--reveal-delay: 0.08s;">
                     <div class="es-widg-measure"></div>
                 </div>
                 <p class="es-widg-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    The embed is not a cut-down version of the checkout that lives on your schedule.
-                    It is the same purchase form, in a smaller frame, with the navigation taken off.
+                    The widget is the part of buying that belongs on your page: what is on sale and
+                    what it costs. The checkout is the event page's own form, opened in a new tab,
+                    not a cut-down copy of it squeezed into a frame.
                 </p>
             </div>
 
@@ -972,47 +925,20 @@
                                     </div>
                                 @elseif ($num === '02')
                                     <div class="px-4 py-2">
-                                        @foreach ($demo['rows'] as [$rowName, $rowPrice, $rowQty])
+                                        @foreach ($demo['rows'] as [$rowName, $rowPrice])
                                             <div class="es-widg-row">
-                                                <div class="min-w-0 flex-1">
-                                                    <p class="es-widg-row-name truncate text-xs font-semibold">{{ $rowName }}</p>
-                                                    <p class="es-widg-row-note es-widg-mono text-[0.7rem]">{{ $rowPrice }}</p>
-                                                </div>
-                                                <span class="es-widg-qty" aria-hidden="true">{{ $rowQty }}</span>
+                                                <p class="es-widg-row-name min-w-0 flex-1 truncate text-xs font-semibold">{{ $rowName }}</p>
+                                                <span class="es-widg-price es-widg-mono text-xs">{{ $rowPrice }}</span>
                                             </div>
                                         @endforeach
                                     </div>
                                 @elseif ($num === '03')
-                                    <div class="grid grid-cols-2 gap-2.5 px-4 py-3.5" aria-hidden="true">
-                                        <div>
-                                            <span class="es-widg-input-label mb-1">Name</span>
-                                            <div class="es-widg-input text-[0.7rem]">Alex Moreau</div>
-                                        </div>
-                                        <div>
-                                            <span class="es-widg-input-label mb-1">Email</span>
-                                            <div class="es-widg-input truncate text-[0.7rem]">alex@example.com</div>
-                                        </div>
+                                    <div class="px-4 py-3.5" aria-hidden="true">
+                                        <div class="es-widg-pay" style="background-color: {{ $demo['accent'] }}; color: #ffffff;">Buy Tickets<svg aria-hidden="true" class="ms-1 inline-block h-3.5 w-3.5 align-[-0.15em] rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></div>
                                     </div>
                                 @elseif ($num === '04')
-                                    <div class="px-4 py-3.5" aria-hidden="true">
-                                        <span class="es-widg-input-label mb-1">Which workshop are you joining?</span>
-                                        <div class="es-widg-input text-[0.7rem]">Songwriting</div>
-                                    </div>
-                                @elseif ($num === '05')
-                                    <div class="flex items-end gap-2 px-4 py-3.5" aria-hidden="true">
-                                        <div class="min-w-0 flex-1">
-                                            <span class="es-widg-input-label mb-1">Promo code</span>
-                                            <div class="es-widg-input es-widg-mono text-[0.7rem]">RIVER10</div>
-                                        </div>
-                                        <span class="es-widg-qty">Apply</span>
-                                    </div>
-                                @elseif ($num === '06')
-                                    <div class="px-4 py-3.5" aria-hidden="true">
-                                        <div class="es-widg-total" style="border-top: 0; padding-top: 0;">
-                                            <span class="text-xs font-semibold">Total</span>
-                                            <span class="es-widg-mono text-sm font-bold">{{ $demo['total'] }}</span>
-                                        </div>
-                                        <div class="es-widg-pay mt-2.5" style="background-color: {{ $demo['accent'] }}; color: #ffffff;">Pay {{ $demo['total'] }}</div>
+                                    <div class="px-4 py-3" aria-hidden="true">
+                                        <p class="es-widg-say">Tickets and registration open in a new tab, on a secure page.</p>
                                     </div>
                                 @else
                                     <div class="es-widg-foot" style="border-top: 0;">Powered by Event Schedule</div>
@@ -1027,6 +953,29 @@
                     </li>
                 @endforeach
             </ol>
+
+            {{-- What the button opens: the event page's own form, in a new tab. --}}
+            <div class="es-widg-card mt-10 overflow-hidden p-6 sm:p-7" data-reveal="panel">
+                <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 class="es-widg-ink text-lg font-bold">Behind the button, in the new tab</h3>
+                    <span class="es-widg-muted es-widg-mono text-xs">the event page's own checkout</span>
+                </div>
+                <div class="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($checkout as [$cTitle, $cBody])
+                        <div>
+                            <p class="es-widg-ink mb-1 text-sm font-semibold">{{ $cTitle }}</p>
+                            <p class="es-widg-muted text-sm leading-relaxed">{{ $cBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="es-widg-muted es-widg-rule-t mt-6 pt-4 text-sm leading-relaxed">
+                    Why a new tab: a form inside a frame on another website gets no session from the
+                    browser, so it cannot be completed there, and payment pages refuse to load inside
+                    another site's frame. On its own page the checkout has the address bar a buyer
+                    looks for before typing a card number, and your page is still open in the tab
+                    behind it when they are done.
+                </p>
+            </div>
 
             <div class="mt-10 text-center" data-reveal>
                 <span class="es-widg-plan es-widg-plan-pro">Pro</span>
@@ -1059,7 +1008,7 @@
 
                     <ul class="space-y-4" data-reveal-group="90">
                         @foreach ([
-                            ['Nothing to install', 'No script tag, no npm package, no build step. A block that accepts raw HTML is the entire requirement.'],
+                            ['Nothing to install', 'One iframe tag and one small script beside it, no npm package, no build step. A block that accepts raw HTML is the entire requirement.'],
                             ['It cannot drift', 'Change a price, add a ticket type, sell out a date, and the frame on your site is already correct. The tag never changes again.'],
                             ['It works on selfhosted too', 'The same tag with your own install\'s address in it. Nothing about the widget calls out to us.'],
                         ] as [$t, $d])
@@ -1145,20 +1094,14 @@
                             <p class="es-widg-bar-sub mt-0.5 text-[0.7rem]">{{ $demo['when'] }} &middot; {{ $demo['time'] }}</p>
                         </div>
                         <div class="px-4 py-3">
-                            @foreach ($demo['rows'] as [$rowName, $rowPrice, $rowQty])
+                            @foreach ($demo['rows'] as [$rowName, $rowPrice])
                                 <div class="es-widg-row">
-                                    <div class="min-w-0 flex-1">
-                                        <p class="es-widg-row-name truncate text-xs font-semibold">{{ $rowName }}</p>
-                                        <p class="es-widg-row-note es-widg-mono text-[0.7rem]">{{ $rowPrice }}</p>
-                                    </div>
-                                    <span class="es-widg-qty" aria-hidden="true">{{ $rowQty }}</span>
+                                    <p class="es-widg-row-name min-w-0 flex-1 truncate text-xs font-semibold">{{ $rowName }}</p>
+                                    <span class="es-widg-price es-widg-mono text-xs">{{ $rowPrice }}</span>
                                 </div>
                             @endforeach
-                            <div class="es-widg-total mt-3">
-                                <span class="text-xs font-semibold">Total</span>
-                                <span class="es-widg-mono text-sm font-bold">{{ $demo['total'] }}</span>
-                            </div>
-                            <div class="es-widg-pay mt-3" style="background-color: {{ $demo['accent'] }}; color: #ffffff;">Pay {{ $demo['total'] }}</div>
+                            <div class="es-widg-pay mt-3" style="background-color: {{ $demo['accent'] }}; color: #ffffff;">Buy Tickets<svg aria-hidden="true" class="ms-1 inline-block h-3.5 w-3.5 align-[-0.15em] rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></div>
+                            <p class="es-widg-say mt-2">Tickets and registration open in a new tab, on a secure page.</p>
                         </div>
                     </div>
                     <p class="es-widg-muted mt-3 text-sm">What a visitor whose system is set light sees, whichever mode you are reading this page in.</p>
@@ -1175,20 +1118,14 @@
                             <p class="es-widg-bar-sub mt-0.5 text-[0.7rem]">{{ $demo['when'] }} &middot; {{ $demo['time'] }}</p>
                         </div>
                         <div class="px-4 py-3">
-                            @foreach ($demo['rows'] as [$rowName, $rowPrice, $rowQty])
+                            @foreach ($demo['rows'] as [$rowName, $rowPrice])
                                 <div class="es-widg-row">
-                                    <div class="min-w-0 flex-1">
-                                        <p class="es-widg-row-name truncate text-xs font-semibold">{{ $rowName }}</p>
-                                        <p class="es-widg-row-note es-widg-mono text-[0.7rem]">{{ $rowPrice }}</p>
-                                    </div>
-                                    <span class="es-widg-qty" aria-hidden="true">{{ $rowQty }}</span>
+                                    <p class="es-widg-row-name min-w-0 flex-1 truncate text-xs font-semibold">{{ $rowName }}</p>
+                                    <span class="es-widg-price es-widg-mono text-xs">{{ $rowPrice }}</span>
                                 </div>
                             @endforeach
-                            <div class="es-widg-total mt-3">
-                                <span class="text-xs font-semibold">Total</span>
-                                <span class="es-widg-mono text-sm font-bold">{{ $demo['total'] }}</span>
-                            </div>
-                            <div class="es-widg-pay mt-3" style="background-color: {{ $demo['accent'] }}; color: #ffffff;">Pay {{ $demo['total'] }}</div>
+                            <div class="es-widg-pay mt-3" style="background-color: {{ $demo['accent'] }}; color: #ffffff;">Buy Tickets<svg aria-hidden="true" class="ms-1 inline-block h-3.5 w-3.5 align-[-0.15em] rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></div>
+                            <p class="es-widg-say mt-2">Tickets and registration open in a new tab, on a secure page.</p>
                         </div>
                     </div>
                     <p class="es-widg-muted mt-3 text-sm">The same part with the dark finish, forced by the URL or picked up from the visitor's own setting.</p>
@@ -1217,9 +1154,9 @@
                 <div class="es-widg-card flex flex-col p-6" data-reveal>
                     <h3 class="es-widg-ink mb-2 text-base font-bold">Thirteen languages</h3>
                     <p class="es-widg-muted mb-4 text-sm leading-relaxed">
-                        Set <span class="es-widg-key">lang=xx</span> and the widget speaks it. Arabic
-                        and Hebrew lay the whole form out right to left, including the ticket rows and
-                        the total.
+                        Set <span class="es-widg-key">lang=xx</span> and the widget speaks it, and so does
+                        the checkout its button opens. Arabic and Hebrew lay the whole widget out right
+                        to left, ticket rows included.
                     </p>
                     <div class="mt-auto flex flex-wrap gap-1.5" aria-hidden="true">
                         @foreach (array_keys(config('app.supported_languages')) as $langCode)
@@ -1253,12 +1190,12 @@
 
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="100">
                 @foreach ([
-                    ['Stripe', 'Opens in the parent window', 'Your own connected account. The buyer leaves the frame for the payment page and lands on their ticket when it is done.'],
-                    ['PayPal', 'Opens in the parent window', 'Your own connected account. The buyer approves on PayPal and lands on their ticket, issued the moment they return.'],
-                    ['Payfast and Razorpay', 'Opens in the parent window', 'South African rand (Payfast) or Indian rupees (Razorpay) only. The buyer pays on the provider\'s page and lands on their ticket afterwards.'],
-                    ['Invoice Ninja', 'Opens in the parent window', 'For anyone already invoicing through Invoice Ninja, including the payment-link mode.'],
-                    ['Custom payment URL', 'Opens in the parent window', 'Point the event at any payment page you already run, and it is used instead.'],
-                    ['Cash or at the door', 'Finishes in the frame', 'No processor involved. The order is recorded, confirmed and emailed without the buyer leaving your page, and a free ticket on a cash event finishes here too.'],
+                    ['Stripe', 'From the event page', 'Your own connected account. The buyer goes from the checkout to Stripe\'s payment page and lands on their ticket when it is done.'],
+                    ['PayPal', 'From the event page', 'Your own connected account. The buyer approves on PayPal and lands on their ticket, issued the moment they return.'],
+                    ['Payfast and Razorpay', 'From the event page', 'South African rand (Payfast) or Indian rupees (Razorpay) only. The buyer pays on the provider\'s page and lands on their ticket afterwards.'],
+                    ['Invoice Ninja', 'From the event page', 'For anyone already invoicing through Invoice Ninja, including the payment-link mode.'],
+                    ['Custom payment URL', 'From the event page', 'Point the event at any payment page you already run, and it is used instead.'],
+                    ['Cash or at the door', 'On the event page', 'No processor involved. The order is recorded, confirmed and emailed from the checkout tab, and a free ticket on a cash event finishes there too.'],
                 ] as [$payName, $payWhere, $payNote])
                     <div class="es-widg-card es-widg-hover flex flex-col p-6" data-reveal>
                         <h3 class="es-widg-ink mb-1 text-base font-bold">{{ $payName }}</h3>
@@ -1269,10 +1206,11 @@
             </div>
 
             <p class="es-widg-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
-                Payment portals frequently refuse to be loaded inside an iframe, so every method
-                except cash breaks out to the parent window rather than failing quietly in a box on
-                your page. It is decided by the event's payment method, not by the amount, and it is
-                the one step of checkout that happens outside the frame.
+                Payment pages refuse to be loaded inside another site's frame, and a form in a
+                frame on your site cannot hold the buyer's session, so no payment is attempted in a
+                box on your page where it would fail quietly. Every method runs on the event's own
+                page in a new tab, exactly as for a buyer who went there directly, and your page is
+                still open behind it.
             </p>
         </div>
     </section>
@@ -1349,7 +1287,7 @@
                 @foreach ([
                     ['01', 'Put something on sale', 'Open the event, go to the Tickets section, and switch on tickets or registration. Add at least one ticket type so there is something to buy.'],
                     ['02', 'Copy the tag', 'Click Embed Tickets next to the heading. The panel shows the embed URL, the iframe tag and a live preview of the widget as it will look on your page.'],
-                    ['03', 'Paste it in', 'Drop the tag into your website\'s HTML where the form belongs. Any block that takes raw HTML will accept it, and you never touch it again.'],
+                    ['03', 'Paste it in', 'Drop the tag into your website\'s HTML where the tickets belong. Any block that takes raw HTML will accept it, and you never touch it again.'],
                 ] as [$n, $t, $d])
                     <div class="es-widg-card es-widg-hover flex flex-col p-7" data-reveal="panel">
                         <span class="es-widg-num mb-4" aria-hidden="true">{{ $n }}</span>
@@ -1391,39 +1329,37 @@
                 </div>
                 <p class="es-widg-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
                     Pasting the tag takes a minute. What decides whether people buy through it is
-                    how it sits on a phone, and whether you tried a purchase before the link went
-                    out. This is the part most embedded checkouts get wrong.
+                    whether the button is in view on a phone, and whether you tried a purchase before
+                    the link went out.
                 </p>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2" data-reveal-group="100">
                 <div class="es-widg-card flex flex-col p-7" data-reveal="panel">
-                    <p class="es-widg-measure-label mb-1.5">height: yours to set</p>
+                    <p class="es-widg-measure-label mb-1.5">height: fits itself</p>
                     <div class="es-widg-measure mb-5"></div>
-                    <h3 class="es-widg-ink mb-2 text-lg font-bold">Height is the one number to get right</h3>
+                    <h3 class="es-widg-ink mb-2 text-lg font-bold">The frame fits the widget</h3>
                     <p class="es-widg-muted mb-4 text-sm leading-relaxed">
-                        The tag you copy is 700 pixels tall and stays that size: nothing inside the
-                        frame tells your page how tall the form has become. When the form is longer
-                        than the frame, it scrolls inside it. On a phone that is a scroll inside a
-                        scroll, and a buyer who cannot find the Checkout button leaves.
+                        The small script in the code you copy asks the widget how tall it is and sizes
+                        the frame to match, on a phone and on a computer, however many ticket types the
+                        event sells. There is no number to tune while the script is there.
                     </p>
                     <p class="es-widg-muted text-sm leading-relaxed">
-                        The form grows with every ticket type, add-on and question you add, and with
-                        individual tickets switched on it asks a name and an email for each guest. A
-                        phone stacks what a computer sets side by side, so the same form is taller
-                        there. Size the frame for the phone, on the event as it will really sell.
+                        Some site builders strip scripts, or put pasted code in a box of their own. Then
+                        the frame keeps the height in the tag, 420 pixels, which fits a bar, a few ticket
+                        types and the button. An event with more types needs more, so check it on a phone.
                     </p>
                 </div>
 
                 <div class="es-widg-card flex flex-col p-7" data-reveal="panel">
                     <p class="es-widg-measure-label mb-1.5">four steps, one phone</p>
                     <div class="es-widg-measure mb-5"></div>
-                    <h3 class="es-widg-ink mb-4 text-lg font-bold">Setting the height on a phone</h3>
+                    <h3 class="es-widg-ink mb-4 text-lg font-bold">When the script is stripped: the height on a phone</h3>
                     <ol class="space-y-3">
                         @foreach ([
                             'Publish the page with the tag in it and open it on a phone, not in a narrowed desktop window.',
-                            'Make the largest order a buyer is likely to make: several tickets, an add-on, every question answered.',
-                            'Raise height="700" in steps of 100 until the Checkout button sits inside the frame with no inner scrolling.',
+                            'Put every ticket type you will sell on the event first, with its real name.',
+                            'Raise height="420" in steps of 50 until the Buy Tickets button and the line under it sit inside the frame with nothing cut off.',
                             'If the taller frame leaves too much room on a computer, give the iframe a class and set a smaller height above your site\'s phone breakpoint in its own CSS.',
                         ] as $hi => $hStep)
                             <li class="flex items-start gap-3">
@@ -1446,7 +1382,7 @@
                     <p class="es-widg-muted mb-5 text-sm leading-relaxed">
                         Some builders place your code in a box with a height of its own. Make that
                         box at least as tall as the frame, or the builder cuts the bottom off, and
-                        the Checkout button goes with it.
+                        the Buy Tickets button goes with it.
                     </p>
                     <p class="es-widg-muted mt-auto text-sm leading-relaxed">
                         The same blocks hold the calendar embed, and its page walks through each
@@ -1461,9 +1397,10 @@
                     <ol class="space-y-3">
                         @foreach ([
                             'Open your page in a private window, signed out, so you see what a stranger sees.',
+                            'Press Buy Tickets: the event page should open in a new tab with the ticket form open, and your page should still be in the tab behind it.',
                             'Buy the cheapest ticket with your own card. Follow it out to the payment page and back (on Stripe, PayPal, Payfast or Razorpay): you should land on your ticket page and receive the confirmation email.',
                             'Find the order on the Sales page, then refund it there. On Stripe, PayPal and Razorpay the money goes back through the provider; on other methods Mark as Refunded records it.',
-                            'If you share a promo link, open it once and check that promo=CODE has filled the box.',
+                            'If you share a promo link, press Buy Tickets from it once and check that the code arrived in the checkout\'s promo box.',
                             'If the event repeats, check that the date in the header bar is the night you mean to sell.',
                         ] as $ti => $tStep)
                             <li class="flex items-start gap-3">
@@ -1493,11 +1430,11 @@
                         <tbody>
                             @foreach ([
                                 ['Leaving last week\'s tag on a weekly event', 'The tag names one date. Once that night has started, the frame reads "Tickets are no longer available for this event." with a link to the event page.', 'Copy a fresh tag for each date you sell, or link a series to your schedule page, where every coming date is listed.'],
-                                ['A frame sized on a computer', 'On a phone, a form that scrolls inside the page that scrolls, with Checkout out of sight.', 'Set the height on a phone, with the largest likely order, as above.'],
+                                ['A builder that stripped the script, sized on a computer', 'On a phone, the Buy Tickets button below the bottom edge of the frame, or a box that scrolls inside the page that scrolls.', 'Keep the script if the builder allows it; otherwise set the height on a phone, with every ticket type in place, as above.'],
                                 ['Embedding before the event is public', 'Nothing useful: a Draft or Internal event is open to schedule members only, and an Unlisted event gets no Embed Tickets link.', 'Publish the event first, then copy the tag.'],
                                 ['A ticket widget on a schedule that is not Pro', 'The same "no longer available" sentence, on a date still to come, which reads as sold out.', 'Upgrade to Pro, or link out to the event page. A free event\'s registration form embeds on any plan.'],
-                                ['Counting on a thank-you message on your page', 'Nothing: after paying online the buyer is on the provider\'s page or their ticket page, not back on your site.', 'Put what buyers need to know on the event itself, and treat your page as the place they decide.'],
-                                ['Stacking widgets for people who buy several events', 'Two Checkouts and two payments for someone who wanted both nights.', 'Send them to your schedule page instead, where the multi-event cart takes one payment for events with the same owner, currency and payment method (Stripe, PayPal, Razorpay or cash).'],
+                                ['Counting on a thank-you message on your page', 'Nothing new: after paying the buyer is on their ticket page in the checkout tab, and your page is in the tab behind it as they left it.', 'Put what buyers need to know on the event itself, and treat your page as the place they decide.'],
+                                ['Stacking widgets for people who buy several events', 'Two buttons, two checkouts and two payments for someone who wanted both nights.', 'Send them to your schedule page instead, where the multi-event cart takes one payment for events with the same owner, currency and payment method (Stripe, PayPal, Razorpay or cash).'],
                             ] as [$mWhat, $mSees, $mFix])
                                 <tr>
                                     <td><span class="es-widg-ink font-semibold">{{ $mWhat }}</span></td>
@@ -1530,7 +1467,7 @@
                         <span class="es-widg-muted es-widg-mono text-[0.65rem] uppercase tracking-widest">this page</span>
                     </div>
                     <h3 class="es-widg-ink mb-2 text-lg font-bold">The ticket widget</h3>
-                    <p class="es-widg-muted text-sm leading-relaxed">The ticket purchase form itself, on your page, with the rest of Pro ticketing: promo codes, custom fields and the ticket waitlist. An RSVP event's registration form embeds free on every plan.</p>
+                    <p class="es-widg-muted text-sm leading-relaxed">Your event's ticket types and prices on your page, with one button to its checkout, and the rest of Pro ticketing behind it: promo codes, custom fields and the ticket waitlist. An RSVP event's registration widget embeds free on every plan.</p>
                 </div>
 
                 <div class="es-widg-card flex flex-col p-7" data-reveal="panel">
@@ -1539,7 +1476,7 @@
                         <span class="es-widg-muted es-widg-mono text-[0.65rem] uppercase tracking-widest">the other one</span>
                     </div>
                     <h3 class="es-widg-ink mb-2 text-lg font-bold">The calendar embed</h3>
-                    <p class="es-widg-muted mb-4 text-sm leading-relaxed">A different tag for a different job: your whole schedule on the page, linking out to each event. Free on every plan.</p>
+                    <p class="es-widg-muted mb-4 text-sm leading-relaxed">A different tag for a different job: your whole schedule on the page, with each event opening over it. Free on every plan.</p>
                     <div class="mt-auto">
                         <x-link href="{{ marketing_url('/features/embed-calendar') }}">Embed calendar</x-link>
                     </div>
@@ -1635,7 +1572,7 @@
                 <div data-reveal>
                     <x-feature-link-card
                         name="Gift Cards"
-                        description="Balance-tracked gift cards, redeemable in the widget alongside a promo code"
+                        description="Balance-tracked gift cards, redeemable at checkout alongside a promo code"
                         :url="marketing_url('/features/gift-cards')"
                         icon-color="green"
                     >
@@ -1739,9 +1676,9 @@
                     </h2>
 
                     {{-- The page opened by measuring the part. It closes by handing you back
-                         the same two figures, which are the only two the tag contains. --}}
+                         the same two figures: the width, and a height the script fits. --}}
                     <div class="mx-auto mb-8 max-w-[17rem]">
-                        <p class="es-widg-measure-label mb-1.5">width: 100% &middot; height: 700</p>
+                        <p class="es-widg-measure-label mb-1.5">width: 100% &middot; height: fits</p>
                         <div class="es-widg-measure"></div>
                     </div>
 

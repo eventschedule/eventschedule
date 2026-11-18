@@ -170,7 +170,9 @@ class PromotionSlotRenderTest extends TestCase
             $scanned++;
             $contents = file_get_contents($file->getPathname());
 
-            if (str_contains($contents, 'ad-slot="true"') || str_contains($contents, 'adSlot="true"')) {
+            // The event page's slot is off only when it is shown inside an embedded calendar
+            // (App\Support\EmbedEventView), which is someone else's website.
+            if (str_contains($contents, 'ad-slot="true"') || str_contains($contents, 'adSlot="true"') || str_contains($contents, ':ad-slot="! $embedEvent"')) {
                 $optedIn[] = str_replace(resource_path('views').'/', '', $file->getPathname());
             }
         }

@@ -6,6 +6,7 @@ use App\Models\MarketingDailyStat;
 use App\Models\PageView;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Support\EmbedEventView;
 use Illuminate\Http\Request;
 
 /**
@@ -36,6 +37,9 @@ use Illuminate\Http\Request;
  *   - a schedule's own team and the installation's admins (signed in, on a host where they are);
  *   - demo schedules (Role::isDemoContent()), whose visitors come from the marketing site;
  *   - embeds. A form embedded in someone else's site is a different page with different traffic;
+ *     except an event opened inside an embedded calendar (EmbedEventView), whose event_view is
+ *     counted: a click in the frame used to open the event's page, which counted, and the stage
+ *     would otherwise fall for every organizer who chooses to show events on their own site;
  *   - bots, by the same filters the page-view counters use.
  *
  * Three stages happen only in the browser and arrive by a beacon (GuestFunnelBeaconController).
@@ -69,10 +73,10 @@ class GuestFunnel
      * $role may be a subdomain, for the handlers that have no Role in hand. It is only looked up
      * once the cheaper tests have passed.
      */
-    public static function counts(Request $request, Role|string|null $role): bool
+    public static function counts(Request $request, Role|string|null $role, bool $embeddedEvent = false): bool
     {
         // Truthiness, as the pages themselves decide whether they are an embed.
-        if (! $role || $request->input('embed')) {
+        if (! $role || ($request->input('embed') && ! ($embeddedEvent && EmbedEventView::requested($request)))) {
             return false;
         }
 
@@ -92,10 +96,10 @@ class GuestFunnel
      * Count one stage for this visitor, once today. Never throws: a counter must not cost a page
      * view, a follow or an order that has already been stored.
      */
-    public static function count(string $stage, Request $request, Role|string|null $role): void
+    public static function count(string $stage, Request $request, Role|string|null $role, bool $embeddedEvent = false): void
     {
         try {
-            if (isset(self::STAGES[$stage]) && self::counts($request, $role)) {
+            if (isset(self::STAGES[$stage]) && self::counts($request, $role, $embeddedEvent && $stage === 'event_view')) {
                 // A page is asked for with a document's Accept header; a fetch() is not, and the
                 // mailing list form is sent by one.
                 self::record($stage, $request, in_array($request->method(), ['GET', 'HEAD'], true));

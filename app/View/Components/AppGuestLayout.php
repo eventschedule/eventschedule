@@ -119,6 +119,13 @@ class AppGuestLayout extends Component
          * subscribe embed sets html and body transparent, which a layer of its own would ignore.
          */
         public bool $paintBackground = true,
+        /**
+         * Whether this is an event shown inside an embedded calendar (App\Support\EmbedEventView):
+         * every link leaves the frame (<base target="_blank">), the frame talks to embed.js on the
+         * organizer's page (partials/embed-frame), and a Free schedule's credit chip is drawn, as
+         * on the event's own page, where every other embed leaves it to the copied code.
+         */
+        public bool $embedEvent = false,
     ) {}
 
     /**

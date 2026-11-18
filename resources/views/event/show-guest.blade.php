@@ -1,4 +1,12 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :occurrence-date="$requestedOccurrence ?? null" :fonts="$fonts" :showMobileBackground="true" :otherRole="$otherRole" :ad-slot="true" :example-bar="true" :cart="true">
+{{-- $embedEvent: this event inside an embedded calendar (App\Support\EmbedEventView), on the
+     organizer's own website. The same page, as a signed-out visitor sees it (the controller
+     renders it so), with nothing that cannot work in a frame on another site: no form to buy or
+     sign up with (a cross-site frame has no session), no fan content, follow, polls or carpool, no
+     mailing list, no ads, cart or phone bar. Buying and registering open the event's page in a new
+     tab; every other link does too (<base target="_blank"> in the layout), but Back and the other
+     dates of a series, which stay in the frame. --}}
+@php $embedEvent = (bool) ($embedEvent ?? false); @endphp
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :occurrence-date="$requestedOccurrence ?? null" :fonts="$fonts" :showMobileBackground="true" :otherRole="$otherRole" :ad-slot="! $embedEvent" :example-bar="! $embedEvent" :cart="! $embedEvent" :embed-event="$embedEvent">
 
   <style {!! nonce_attr() !!}>
     /* GP Dropdown Menus */
@@ -20,6 +28,12 @@
        children of the row on a laptop, so its layout is what it was. */
     .gp-cta-wide { display: none; }
     @media (min-width: 640px) { .gp-cta-wide { display: contents; } }
+    @if ($embedEvent)
+    {{-- In a frame the row is the only one: there is no phone bar. --}}
+    .gp-cta-wide { display: contents; }
+    [data-embed-share][data-copied] .gk-share-icon { display: none; }
+    [data-embed-share]:not([data-copied]) .gk-share-done { display: none; }
+    @endif
   </style>
 
   <main>
@@ -102,7 +116,7 @@
 
     // The ride board. Decided up here because the row of laptop buttons below is hidden on a
     // phone unless this link is in it.
-    $carpoolRole = ($role->isPro() && $role->carpool_enabled) ? $role : null;
+    $carpoolRole = ($role->isPro() && $role->carpool_enabled && ! $embedEvent) ? $role : null;
     $showCarpool = $carpoolRole && (! $event->days_of_week || $date);
 
     // The organizer's gallery, when the event's owning schedule is on a paid plan. With no flyer
@@ -194,7 +208,9 @@
   <div class="h-[68px]"></div>
   @endif
 
+  @unless ($embedEvent)
   @include('role.partials.guest-banner', ['onEventPage' => true])
+  @endunless
 
   {{-- Built here rather than beside the breadcrumb that used to own it: the left column's
        list of other events renders FIRST and links to the same place, and one block is what
@@ -229,8 +245,13 @@
     if (!empty($queryParams)) {
       $backUrl .= '?' . http_build_query($queryParams);
     }
+    // In a frame, back to the calendar the frame came from, built from what it carried
+    // (never an address the request names).
+    if ($embedEvent) {
+      $backUrl = \App\Support\EmbedEventView::calendarUrl($role);
+    }
   @endphp
-  <div class="container mx-auto gk-event-page px-0 sm:px-5 pt-4 pb-20 sm:pb-8">
+  <div class="container mx-auto gk-event-page px-0 sm:px-5 pt-4 {{ $embedEvent ? 'pb-6' : 'pb-20 sm:pb-8' }}" @if ($embedEvent) data-embed-root @endif>
     {{-- Two columns on a laptop; on a phone their children are dealt into one, in the order the
          kit's .gk-o rules give (partials/guest-kit-styles says why). --}}
     <div class="gk-event">
@@ -837,7 +858,9 @@
 
         {{-- The schedule's other upcoming events carry on down this column, as they always
              did (event/partials/more-events says what changed about how). --}}
+        @unless ($embedEvent)
         @include('event.partials.more-events')
+        @endunless
 
         </div>
       </div>
@@ -883,9 +906,18 @@
 
         {{-- Breadcrumb --}}
         <nav id="gp-back-link" aria-label="Breadcrumb" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
+          @if ($embedEvent)
+          {{-- Stays in the frame. embed-frame's script makes it the browser's Back when the frame
+               came from the calendar, which brings the list back where it was, and in the
+               overlay it closes the overlay. --}}
+          <a href="{{ $backUrl }}" target="_self" data-embed-back class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
+            {{ $role->isRtl() ? '→' : '←' }} {{ __('messages.embed_back_to_calendar') }}
+          </a>
+          @else
           <a href="{{ $backUrl }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
             {{ $role->isRtl() ? '→' : '←' }} {{ $role->customLabel('back_to_schedule') }}
           </a>
+          @endif
           @if (auth()->user() && auth()->user()->canEditEvent($event))
             <span>|</span>
             <a href="{{ app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false)) }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
@@ -901,6 +933,7 @@
         {{-- Event title --}}
         <h1
           id="gp-event-title"
+          @if ($embedEvent) tabindex="-1" data-embed-heading @endif
           class="text-gray-900 dark:text-gray-100 text-[28px] sm:text-[36px] lg:text-[44px] leading-snug font-bold {{ $role->isRtl() ? 'rtl text-right' : '' }}"
           dir="{{ content_dir_for_language($eventName, $displayLang) }}"
         >
@@ -1031,7 +1064,7 @@
                 $moreGone = $event->rowsSoldOutOn($moreDate);
               @endphp
               <span class="whitespace-nowrap">
-                <a href="{{ $event->getGuestUrl($subdomain, $moreDate) }}" class="gk-link" rel="nofollow">{{ $moreDt->translatedFormat($moreDt->year !== $startDt->year ? 'D, M j, Y' : 'D, M j') }}</a>@if ($moreGone) <span class="text-gray-500 dark:text-gray-400">({{ __('messages.sold_out') }})</span>@endif
+                <a href="{{ $embedEvent ? \App\Support\EmbedEventView::eventUrl($event, $subdomain, $moreDate) : $event->getGuestUrl($subdomain, $moreDate) }}" class="gk-link" rel="nofollow" @if ($embedEvent) target="_self" @endif>{{ $moreDt->translatedFormat($moreDt->year !== $startDt->year ? 'D, M j, Y' : 'D, M j') }}</a>@if ($moreGone) <span class="text-gray-500 dark:text-gray-400">({{ __('messages.sold_out') }})</span>@endif
               </span>
             @endforeach
           </div>
@@ -1300,10 +1333,47 @@
         @endif
 
         {{-- CTA buttons --}}
-        <div id="gp-event-cta" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left {{ $showCarpool ? 'inline-flex flex-wrap' : 'hidden sm:inline-flex' }} self-start {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-event-cta" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left {{ ($showCarpool || $embedEvent) ? 'inline-flex flex-wrap' : 'hidden sm:inline-flex' }} self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         <div class="gp-cta-wide">
+        @php
+          // In a frame, one way to buy or sign up: the event's own page in a new tab, with the form
+          // open, where there is a session to buy with. Said in the button's name too.
+          $embedCta = $embedEvent ? function (string $form, string $label) use ($event, $subdomain, $date) {
+              return [
+                  'href' => \App\Support\EmbedEventView::pageUrl($event, $subdomain, \App\Models\Event::isOccurrenceDate($date) ? $date : null, $form),
+                  'label' => $label,
+                  'aria' => $label.' ('.__('messages.opens_in_new_tab').')',
+              ];
+          } : null;
+        @endphp
         @if ($event->is_cancelled)
             <span class="text-base text-red-600 dark:text-red-400 font-medium">{{ __('messages.event_cancelled_guest_notice') }}</span>
+        @elseif ($embedEvent && $event->canAcceptRsvp($date))
+            @php $cta = $embedCta('rsvp', $event->isRsvpFull($date) ? __('messages.join_waitlist') : $role->customLabel('register')); @endphp
+            <a href="{{ $cta['href'] }}" target="_blank" rel="noopener" data-embed-checkout="rsvp" aria-label="{{ $cta['aria'] }}"
+               class="min-w-[180px] inline-flex items-center justify-center gap-x-2 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+               style="background-color: var(--es-accent); color: var(--es-accent-text);">
+              {{ $cta['label'] }}
+              <svg class="h-4 w-4 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+            </a>
+        @elseif ($embedEvent && $event->canSellTickets($date) && ($saleOffersForm || $saleShowsRows))
+            @if (! $saleOffersForm)
+            <span class="text-base font-semibold text-gray-700 dark:text-gray-200" data-sale-state="{{ $saleState }}">{{ $saleStateLabel }}</span>
+            @endif
+            @php
+              $cta = $embedCta('tickets', ! $saleOffersForm ? $role->customLabel('tickets')
+                  : ($saleState === 'sold_out' ? __('messages.join_waitlist')
+                  : ($event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets'))));
+            @endphp
+            <a href="{{ $cta['href'] }}" target="_blank" rel="noopener" data-embed-checkout="tickets" aria-label="{{ $cta['aria'] }}"
+               class="min-w-[180px] inline-flex items-center justify-center gap-x-2 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+               style="background-color: var(--es-accent); color: var(--es-accent-text);">
+              {{ $cta['label'] }}
+              <svg class="h-4 w-4 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+            </a>
+            @if (! $saleOffersForm && $saleState !== 'sold_out' && ! $event->is_draft)
+              @php $showCalendarPopup = true; @endphp
+            @endif
         @elseif ($event->canAcceptRsvp($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
@@ -1458,7 +1528,20 @@
         </a>
         @endif
         {{-- Share button --}}
-        @if (!$event->is_draft)
+        @if ($embedEvent && ! $event->is_draft)
+        {{-- Plain script, in partials/embed-frame: inside the overlay it shares the organizer's own
+             page with this event open on it, and otherwise the event's page, never this frame's
+             address. --}}
+        <button type="button"
+                data-embed-share
+                data-share-title="{{ $eventName }}"
+                data-share-url="{{ \App\Support\EmbedEventView::pageUrl($event, $subdomain, $requestedOccurrence) }}"
+                class="flex-shrink-0 w-[42px] h-[42px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                title="{{ $role->customLabel('share') }}" aria-label="{{ $role->customLabel('share') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gk-share-icon w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gk-share-done w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+        </button>
+        @elseif (!$event->is_draft)
         <div class="gp-cta-wide">
         <button type="button"
                 id="gp-event-share"
@@ -1487,11 +1570,22 @@
         @endif
         </div>
 
+        @if ($embedEvent)
+        {{-- What the tickets cost, to read; buying is on the event's page (the button above).
+             Inside the facts' panel, which is the one that closes just below. --}}
+        @include('event.partials.embed-ticket-list')
+        {{-- The quiet way out to everything this frame leaves off. --}}
+        <a href="{{ \App\Support\EmbedEventView::pageUrl($event, $subdomain, $requestedOccurrence) }}" target="_blank" rel="noopener" data-embed-full-page
+           class="self-start text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
+          {{ __('messages.embed_view_full_page') }}<span class="sr-only"> ({{ __('messages.opens_in_new_tab') }})</span>
+        </a>
+        @endif
+
         </div>
 
         {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile).
              $phoneCalendar is the same flag the bar's button reads: they come together or not at all. --}}
-        @if ($phoneCalendar)
+        @if ($phoneCalendar && ! $embedEvent)
         <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
           <div class="fixed inset-0 bg-black/60" id="calendar-mobile-overlay"></div>
           <div class="gp-bottom-sheet fixed inset-x-0 bottom-0 rounded-t-2xl shadow-xl">
@@ -1548,12 +1642,13 @@
 
         {{-- A cancelled payment coming back to a page with no ticket form to say it in. Where
              there is one, the same line is inside the form's panel below. --}}
-        @if ($event->canAcceptRsvp($date) || ! $event->canSellTickets($date))
+        @if (! $embedEvent && ($event->canAcceptRsvp($date) || ! $event->canSellTickets($date)))
             @include('event.partials.payment-cancelled')
         @endif
 
-        {{-- RSVP form section (hidden by default, shown on CTA click) --}}
-        @if ($event->canAcceptRsvp($date))
+        {{-- RSVP form section (hidden by default, shown on CTA click). Never in a frame: see the top. --}}
+        @if ($embedEvent)
+        @elseif ($event->canAcceptRsvp($date))
         <div id="gp-event-form" class="gk-o3 scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
              @if (request()->get('rsvp') === 'true' || $formRefused)
@@ -1796,7 +1891,7 @@
                   @if ($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang))
                   <div dir="{{ content_dir_for_language($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! \App\Utils\MarkdownUtils::demoteH1($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang)) !!}</div>
                   @endif
-                  @if (!is_demo_role($role))
+                  @if (!is_demo_role($role) && ! $embedEvent)
                   @php
                     $partVideos = $part->approvedVideos;
                     $partComments = $part->approvedComments;
@@ -1990,7 +2085,7 @@
                   @if ($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang))
                   <div dir="{{ content_dir_for_language($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! \App\Utils\MarkdownUtils::demoteH1($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang)) !!}</div>
                   @endif
-                  @if (!is_demo_role($role))
+                  @if (!is_demo_role($role) && ! $embedEvent)
                   @php
                     $partVideos = $part->approvedVideos;
                     $partComments = $part->approvedComments;
@@ -2194,7 +2289,7 @@
             $myEventLevelPendingPhotos = $myEventLevelPendingPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
           }
         @endphp
-        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoData->count() > 0 || ($event->parts->count() == 0 && $event->isFanContentEnabled())))
+        @if (!is_demo_role($role) && ! $embedEvent && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoData->count() > 0 || ($event->parts->count() == 0 && $event->isFanContentEnabled())))
         <div id="gp-fan-content" class="gk-o8 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
 
           {{-- Polls --}}
@@ -2589,7 +2684,9 @@
              written assumption that the container was still open. It was not, so the panel
              rendered straight onto the schedule's background: on a light background image in
              dark mode, near-white heading and body text on a photo, which is unreadable. --}}
+        @unless ($embedEvent)
         @include('partials.subscribe-panel')
+        @endunless
 
         {{-- End of content section --}}
 
@@ -2606,7 +2703,7 @@
            disagree. It used to read
            `! $event->isPro()`, which is true when any schedule on the bill is paid - so a
            free curator's page dropped this card while still carrying the free-tier credit. --}}
-    @if ($role->showBranding())
+    @if ($role->showBranding() && ! $embedEvent)
     <div class="gk-event-foot">
       <div id="gp-create-your-own" class="gk-panel gk-panel-flush gk-create bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm {{ $role->isRtl() ? 'rtl' : '' }}">
         <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
@@ -2631,7 +2728,8 @@
 
   </main>
 
-  {{-- Sticky mobile CTA --}}
+  {{-- Sticky mobile CTA. Not in a frame, whose one row of buttons is drawn at every width. --}}
+  @unless ($embedEvent)
   <div id="gp-mobile-cta" x-data="{ shareState: 'idle' }"
        class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
@@ -2756,6 +2854,7 @@
       @endif
     </div>
   </div>
+  @endunless
 
   {{-- Lift the fixed things in the bottom corner clear of whichever bar is at the foot of the
        screen: the phone's bar, or, while the form is open, the form's own (.gk-buybar), which
@@ -3046,7 +3145,7 @@
     @endif
   </script>
 
-@if (! is_demo_mode())
+@if (! is_demo_mode() && ! $embedEvent)
     @include('partials.follow-consent-modal')
 @endif
 
@@ -3055,10 +3154,14 @@
 @endif
 
 {{-- $formCounts: the form can lead to an order (a sign-up with room, a ticket that can be bought).
-     $formOpen: the same test that opens the form with the page, minus the refused-submit cases. --}}
+     $formOpen: the same test that opens the form with the page, minus the refused-submit cases.
+     Not in a frame: it has no form, and its event_view is counted by the controller, which knows
+     who is really signed in (this page is rendered as nobody). --}}
+@unless ($embedEvent)
 @include('partials.guest-funnel', [
     'formCounts' => $event->canAcceptRsvp($date) ? ! $event->isRsvpFull($date) : ($event->canSellTickets($date) && $saleState === 'open'),
     'formOpen' => ($event->canAcceptRsvp($date) && request()->get('rsvp') === 'true') || (! $event->canAcceptRsvp($date) && $event->canSellTickets($date) && request()->get('tickets') === 'true'),
 ])
+@endunless
 
 </x-app-guest-layout>

@@ -383,7 +383,7 @@ class PageView
     /**
      * Record a page view (returns false if bot detected)
      */
-    public static function recordView(Role $role, ?Event $event, Request $request): bool
+    public static function recordView(Role $role, ?Event $event, Request $request, ?string $source = null): bool
     {
         $userAgent = $request->userAgent();
 
@@ -431,6 +431,12 @@ class PageView
         };
         if (! $sourceOverride && $request->query('promo')) {
             $sourceOverride = 'promo';
+        }
+        // Named by the caller, never by the request: 'embed' is an event opened inside the calendar
+        // on the organizer's own website, whose referrer is our own calendar frame and so would
+        // read as direct. A campaign in the address still wins, as it does over a referrer.
+        if (! $sourceOverride && $source === 'embed') {
+            $sourceOverride = 'embed';
         }
         if (! $scheduleCapped) {
             AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);

@@ -153,8 +153,10 @@ class CancelledPaymentReturnTest extends TestCase
         $html = $this->flashCancelled($this->event)
             ->get($this->event->fresh()->getGuestUrl($this->role->subdomain).'?embed=true&tickets=true')->assertOk()->getContent();
 
+        // The widget no longer holds the form (a cross-site frame has no session to buy with):
+        // it says so above its list, and its button opens the event's page to try again.
         $this->assertStringContainsString('data-payment-cancelled', $html);
-        $this->assertStringContainsString('paymentCancelled: true', $html);
+        $this->assertStringContainsString('data-embed-checkout="tickets"', $html);
     }
 
     public function test_a_paid_order_clears_what_the_form_had_saved(): void

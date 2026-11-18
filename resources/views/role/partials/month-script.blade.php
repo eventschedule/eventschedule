@@ -1136,6 +1136,27 @@ return {
             }
             // Into the event: one of the guest pages' daily counts, as a press on a row of the list is.
             this.countListTap();
+            // On the organizer's own site (an embed with events=onsite), the event opens there.
+            if (this.embedOnsite) {
+                const e = this.filteredEvents.find((x) => String(x.id) === String(el.dataset.ev));
+                if (this.embedOpenEvent(el.getAttribute('href'), e ? e.name : '', ev)) {
+                    this.embedOpener = el;
+                    this.monthHide();
+                }
+            }
+        },
+        // A link in the card or the day's panel to the event itself, on the organizer's own site
+        // (embedOnsite): the event opens there, and focus comes back to the event in the month.
+        monthEmbedFollow(ev, id) {
+            if (!this.embedOnsite || !ev || !ev.currentTarget) return;
+            const m = this.monthHands;
+            const back = (m && m.cur && m.cur.el) || (m && m.day && m.day.opener) || null;
+            const e = this.filteredEvents.find((x) => String(x.id) === String(id));
+            if (this.embedOpenEvent(ev.currentTarget.getAttribute('href'), e ? e.name : '', ev)) {
+                if (back && back.isConnected) this.embedOpener = back;
+                this.monthHide();
+                this.monthCloseDay(true);
+            }
         },
         monthKey(ev) {
             const m = this.monthHands, root = this.$refs.monthRoot, peek = this.$refs.monthPeekEl;

@@ -2575,6 +2575,14 @@ const calendarApp = createApp({
             route: '{{ $route }}',
             tab: '{{ $tab ?? '' }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
+            {{-- The Embed dialog's "Show it on your website" (?events=onsite, App\Support\
+                 EmbedEventView): a plain click on an event shows it on the organizer's own page,
+                 in embed.js's overlay when the page has it and in this frame when it does not.
+                 Without it an embed opens the event's page in a new tab, as it always has. --}}
+            embedOnsite: {{ isset($embed) && $embed && request()->query('events') === \App\Support\EmbedEventView::ONSITE ? 'true' : 'false' }},
+            embedOpener: null,
+            embedLabels: { close: @json(__('messages.close')), dialog: @json(__('messages.event_details')) },
+            embedDark: @json(in_array(request()->query('dark'), ['true', 'false'], true) ? request()->query('dark') : null),
             // The layout ?layout= asked for, or null. Read from the helper rather than $role
             // because this partial also renders on the home route, which has none. It is the
             // requested value, not currentView, so a link from here to an event carries what
@@ -4344,11 +4352,79 @@ const calendarApp = createApp({
                 queryParams.push('lang=' + encodeURIComponent(this.carryLang));
             }
 
+            // Showing events on the organizer's site: what the frame was set to and where it is,
+            // which the embed never writes to its own address, so the event shown in the frame
+            // keeps its theme and language and its Back returns to this month
+            // (App\Support\EmbedEventView::carried() reads the same keys).
+            if (this.embedOnsite) {
+                queryParams.push('events=onsite');
+                if (this.embedDark) {
+                    queryParams.push('dark=' + this.embedDark);
+                }
+                if (this.pageMonth && this.pageYear) {
+                    queryParams.push('month=' + encodeURIComponent(this.pageMonth));
+                    queryParams.push('year=' + encodeURIComponent(this.pageYear));
+                }
+            }
+
             if (queryParams.length > 0) {
                 url += '?' + queryParams.join('&');
             }
 
             return url;
+        },
+        // An event shown on the organizer's own site (embedOnsite): the event's page with
+        // embed=true&view=event, which RoleController renders as a framed event. Only a plain
+        // click: a modified or middle click, or a press with no event to read, is the browser's
+        // own, to the link's real address in a new tab. Returns whether it handled the click.
+        //
+        // With embed.js on the host page (it has greeted this frame), the host opens it in its
+        // overlay from a PATH this sends, resolved against this frame's own origin; an event whose
+        // page is on another of our hosts is shown in this frame instead, as is every event when
+        // the host page has no script or wraps the code in a frame of its own.
+        embedOpenEvent(url, name, e) {
+            if (!this.embedOnsite || !url) return false;
+            if (e && (e.defaultPrevented || (e.button !== undefined && e.button !== 0) || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return false;
+            let target;
+            try {
+                target = new URL(url, window.location.href);
+            } catch (err) {
+                return false;
+            }
+            if (!/^https?:$/.test(target.protocol)) return false;
+            if (e) e.preventDefault();
+            target.searchParams.set('embed', 'true');
+            target.searchParams.set('view', 'event');
+
+            const opener = e && e.target && e.target.closest ? (e.target.closest('a, button, [tabindex]') || e.currentTarget) : document.activeElement;
+            this.embedOpener = opener || null;
+
+            const frame = window.esEmbedFrame;
+            if (frame && frame.greeted && !frame.overlay && target.origin === window.location.origin
+                && frame.post('open', {
+                    path: target.pathname + target.search,
+                    name: String(name || '').slice(0, 200),
+                    lang: document.documentElement.lang || '',
+                    dir: this.isRtl ? 'rtl' : 'ltr',
+                    theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+                    // Plain strings: the data object is a reactive proxy, which postMessage cannot
+                    // clone, and a refused message would quietly open the event in the frame.
+                    labels: { close: String(this.embedLabels.close), dialog: String(this.embedLabels.dialog) },
+                })) {
+                return true;
+            }
+
+            // In this frame. The month on screen is written to this page's own address first, so
+            // the browser's Back (the event's Back) returns to it, and the list keeps its place.
+            try {
+                const here = new URL(window.location.href);
+                here.searchParams.set('month', this.pageMonth);
+                here.searchParams.set('year', this.pageYear);
+                window.history.replaceState(window.history.state, '', here.toString());
+            } catch (err) {}
+            this.rememberList();
+            window.location.href = target.toString();
+            return true;
         },
         // A link to another guest page (a venue's) in the language this page is shown in.
         withLang(url) {
@@ -4505,6 +4581,7 @@ const calendarApp = createApp({
             }
 
             this.countListTap();
+            this.embedOpenEvent(this.getEventUrl(event), event.name, e);
         },
         // One of the guest pages' daily counts (App\Utils\GuestFunnel): a visitor went from a
         // schedule's list or month grid into an event. Only on the schedule's own page, and only
@@ -4528,6 +4605,10 @@ const calendarApp = createApp({
             const openInNewTab = this.embed || this.route === 'admin';
 
             this.countListTap();
+
+            if (this.embedOpenEvent(url, event.name, e)) {
+                return;
+            }
 
             if (openInNewTab) {
                 window.open(url, '_blank');
@@ -5012,6 +5093,17 @@ const calendarApp = createApp({
         if (this.route === 'guest') {
             this.recallList();
             window.addEventListener('pagehide', () => this.rememberList());
+        }
+        // The overlay embed.js opened for an event from here was closed: the focus comes back to
+        // what was pressed (partials/embed-frame raises this on the host's word).
+        if (this.embedOnsite) {
+            document.addEventListener('es-embed:closed', () => {
+                const el = this.embedOpener;
+                this.embedOpener = null;
+                if (el && el.isConnected && el.focus) {
+                    try { el.focus({ preventScroll: true }); } catch (e) {}
+                }
+            });
         }
         // Check localStorage for saved view preference. Skipped when ?layout= asked for a
         // specific view, and inside an embed: the embedding site chooses the layout, there

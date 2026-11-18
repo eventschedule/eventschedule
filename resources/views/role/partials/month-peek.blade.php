@@ -35,7 +35,7 @@
         <button type="button" class="gk-peek-x" aria-label="{{ __('messages.close') }}" @click="monthPeekClose">{!! $monthIcon($monthIcons['x']) !!}</button>
 
         {{-- The picture, with the state it is in on it; or, where there is none, the day in its place. --}}
-        <a v-if="monthPeek.src" :key="monthPeek.id + '|' + monthPeek.date" class="gk-peek-media" :class="{ 'gk-peek-media-tall': monthPeek.tall }" :href="monthPeek.url"{!! $monthTarget !!} tabindex="-1" aria-hidden="true">
+        <a v-if="monthPeek.src" :key="monthPeek.id + '|' + monthPeek.date" class="gk-peek-media" :class="{ 'gk-peek-media-tall': monthPeek.tall }" :href="monthPeek.url"{!! $monthTarget !!} tabindex="-1" aria-hidden="true" @click="monthEmbedFollow($event, monthPeek.id)">
             <img class="gk-peek-glow" :src="monthPeek.glow" alt=""><img class="gk-peek-img" :src="monthPeek.src" alt="" @load="monthPeekImg">
             <span v-if="monthPeek.pills.length" class="gk-peek-state"><span v-for="pill in monthPeek.pills" :key="pill.text" class="gk-peek-pill" :class="pill.cls" v-text="pill.text"></span></span>
         </a>
@@ -54,7 +54,7 @@
         <div class="gk-peek-body">
             <span v-if="monthPeek.src && monthPeek.pills.length" class="sr-only" v-text="monthPeek.pills.map((pill) => pill.text).join(', ')"></span>
             <p v-if="monthPeek.src" class="gk-peek-when"><b v-if="monthPeek.word" v-text="monthPeek.word"></b><template v-for="(part, at) in monthPeek.when" :key="at"><bdi v-if="part.clock" dir="ltr" class="gk-peek-clock" v-text="part.text"></bdi><span v-else v-text="part.text"></span></template></p>
-            <h3 class="gk-peek-title" id="gk-peek-title"><a :href="monthPeek.url"{!! $monthTarget !!}><span v-if="monthPeek.locked" class="gk-cal-flag gk-peek-lock">{!! $monthIcon($monthIcons['lock']) !!}</span><bdi v-text="monthPeek.name"></bdi></a></h3>
+            <h3 class="gk-peek-title" id="gk-peek-title"><a :href="monthPeek.url"{!! $monthTarget !!} @click="monthEmbedFollow($event, monthPeek.id)"><span v-if="monthPeek.locked" class="gk-cal-flag gk-peek-lock">{!! $monthIcon($monthIcons['lock']) !!}</span><bdi v-text="monthPeek.name"></bdi></a></h3>
             <p v-if="monthPeek.where" class="gk-peek-line">{!! $monthIcon($monthIcons['pin']) !!}<a v-if="monthPeek.where.url" :href="monthPeek.where.url"{!! $monthTarget !!}><bdi v-text="monthPeek.where.name"></bdi></a><span v-else><bdi v-text="monthPeek.where.name"></bdi></span></p>
             <p v-else-if="monthPeek.online" class="gk-peek-line">{!! $monthIcon($monthIcons['globe']) !!}<span>{{ __('messages.online') }}</span></p>
             <p v-if="monthPeek.who" class="gk-peek-line"><span v-if="monthPeek.faces.length" class="gk-peek-faces"><img v-for="face in monthPeek.faces" :key="face" :src="face" alt="" loading="lazy"></span><template v-else>{!! $monthIcon($monthIcons['mic']) !!}</template><span><bdi v-text="monthPeek.who"></bdi></span></p>
@@ -66,10 +66,10 @@
             {{-- The way on is last in the row, as on every form of the app; what it costs is on it. --}}
             <div class="gk-peek-actions">
                 <a v-if="monthPeek.view" class="gk-peek-btn gk-peek-btn-secondary" :href="monthPeek.view" target="_blank" rel="noopener">{{ __('messages.view_event') }}</a>
-                <a v-if="monthPeek.details" class="gk-peek-btn gk-peek-btn-secondary gk-peek-more" :href="monthPeek.details"{!! $monthTarget !!}>{{ __('messages.details') }}</a>
+                <a v-if="monthPeek.details" class="gk-peek-btn gk-peek-btn-secondary gk-peek-more" :href="monthPeek.details"{!! $monthTarget !!} @click="monthEmbedFollow($event, monthPeek.id)">{{ __('messages.details') }}</a>
                 <a class="gk-peek-btn gk-peek-go" :class="'gk-peek-btn-' + monthPeek.go.kind" data-peek-go :href="monthPeek.go.href"
                    @if ($monthNewTab) :target="monthPeek.go.edit ? null : '_blank'" :rel="monthPeek.go.edit ? null : 'noopener'" @endif
-                   :aria-label="monthPeek.go.price ? monthPeek.go.label + ', ' + monthPeek.go.price : null" @click="countListTap()"><template v-if="monthPeek.go.edit">{!! $monthIcon($monthIcons['edit']) !!}</template><span class="gk-peek-go-l" v-text="monthPeek.go.label"></span><span v-if="monthPeek.go.price" class="gk-peek-go-price"><bdi v-text="monthPeek.go.price"></bdi></span></a>
+                   :aria-label="monthPeek.go.price ? monthPeek.go.label + ', ' + monthPeek.go.price : null" @click="countListTap(); monthPeek.go.plain && monthEmbedFollow($event, monthPeek.id)"><template v-if="monthPeek.go.edit">{!! $monthIcon($monthIcons['edit']) !!}</template><span class="gk-peek-go-l" v-text="monthPeek.go.label"></span><span v-if="monthPeek.go.price" class="gk-peek-go-price"><bdi v-text="monthPeek.go.price"></bdi></span></a>
             </div>
         </div>
 
@@ -108,7 +108,7 @@
     <p v-if="monthDayPanel.away" class="gk-dayp-away"><b>{{ __('messages.unavailable') }}:</b> <bdi v-text="monthDayPanel.away"></bdi></p>
     <ul class="gk-dayp-rows">
         <li v-for="row in monthDayPanel.rows" :key="row.key">
-            <a class="gk-dayp-row" :class="row.cls" :href="row.url"{!! $monthTarget !!} :data-ev="row.id" @click="countListTap()">
+            <a class="gk-dayp-row" :class="row.cls" :href="row.url"{!! $monthTarget !!} :data-ev="row.id" @click="countListTap(); monthEmbedFollow($event, row.id)">
                 <time class="gk-dayp-time"><i v-if="row.dot" class="gk-cal-dot gk-dayp-dot" :style="{ background: row.dot }"></i><bdi dir="ltr" v-text="row.time"></bdi></time>
                 <span class="gk-dayp-body">
                     <span class="gk-dayp-name"><bdi v-text="row.name"></bdi><span v-if="row.locked" class="gk-cal-flag">{!! $monthIcon($monthIcons['lock']) !!}</span></span>

@@ -2591,4 +2591,10 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'graphic_link_paused' => 'A sua ligação pública está em pausa. O endereço volta a responder quando a agenda voltar ao Enterprise.',
     'graphic_unsaved_help_link_on' => 'Ao guardar, a imagem é colocada num endereço público.',
     'graphic_unsaved_help_link_off' => 'Ao guardar, a imagem é retirada de vez do seu endereço público.',
+    'embed_events_new_tab' => 'Abrir a página do evento num novo separador',
+    'embed_events_help' => 'Os bilhetes e as inscrições abrem num novo separador, numa página segura.',
+    'opens_in_new_tab' => 'abre num novo separador',
+    'embed_event_unavailable_body' => 'Pode ter sido movido ou removido. Volte ao calendário para ver a programação.',
+    'embed_event_password_body' => 'Este evento tem palavra-passe. Abra a página do evento para a introduzir.',
+    'embed_source' => 'O seu site',
 ]);
