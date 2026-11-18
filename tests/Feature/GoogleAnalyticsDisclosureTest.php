@@ -45,6 +45,7 @@ class GoogleAnalyticsDisclosureTest extends TestCase
     private const ALLOWED_VIEWS = [
         'marketing/faq.blade.php' => 'says the product has no Google Analytics integration for schedules',
         'marketing/index.blade.php' => 'says the built-in analytics need no Google Analytics account',
+        'marketing/partials/home-new.blade.php' => 'the new homepage says the same: the built-in analytics need no Google Analytics account',
         'marketing/docs/selfhost/admin.blade.php' => 'operator docs: what ANALYTICS_ID and the header code box do',
     ];
 

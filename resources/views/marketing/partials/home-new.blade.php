@@ -9,7 +9,9 @@
      What it shares with today's page, so both arms work the same way: the name boxes (.es-claim,
      which initClaim() in marketing-home.js carries into sign-up), the posters that take the typed
      name (data-claim-poster), the dock at the foot of a phone's screen, and the wall's posters
-     ($wallCards: the same images, so whichever page is on show the browser asks for them once).
+     ($wallCards: the same images). Every picture here is lazy: today's page, hidden or not, asks
+     for the first six eagerly, so they are in the cache by the time this wall is laid out, and the
+     homepage's eager budget (ImageVariantsTest) holds for the document as a whole.
 
      Expects from the homepage: $hpNewCopy (the variant's headline and subtitle), $hpNewAlone (it
      is the only page printed), $wallCards, $hpWallIsReal, $claimSuffix and $hpArrow. Every
@@ -108,7 +110,7 @@
                             <figure class="hn-fig" @if ($hnCopy) aria-hidden="true" @endif>
                                 @if ($hnCard['url'] && ! $hnCopy)
                                     <a href="{{ $hnCard['url'] }}" class="hn-card">
-                                        <img src="{{ $hnCard['img'] }}" alt="{{ $hnCard['name'] }}" width="208" height="277" loading="{{ $hnCard['eager'] && $hnRowIndex === 0 ? 'eager' : 'lazy' }}" decoding="async">
+                                        <img src="{{ $hnCard['img'] }}" alt="{{ $hnCard['name'] }}" width="208" height="277" loading="lazy" decoding="async">
                                     </a>
                                 @else
                                     <span class="hn-card">

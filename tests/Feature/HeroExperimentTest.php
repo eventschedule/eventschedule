@@ -892,10 +892,10 @@ class HeroExperimentTest extends TestCase
         // The new hero prints its own variant's words.
         $this->assertStringContainsString(e(self::PAGE_ROUND['home_new']['subtitle']), $html);
 
-        // Its wall asks for the same eager posters as today's, so neither page costs the other a
-        // download: every eager image on the page is one of today's eager ones.
-        preg_match_all('/<img[^>]+src="([^"]+)"[^>]*loading="eager"/', $html, $eager);
-        $this->assertLessThanOrEqual(6, count(array_unique($eager[1])));
+        // Its wall shows today's posters and asks for none eagerly: today's page, hidden or not,
+        // already does, so neither page costs the other a download.
+        $new = substr($html, strpos($html, '<div class="hn">'));
+        $this->assertStringNotContainsString('loading="eager"', substr($new, 0, strpos($new, 'id="hn-claim"')));
 
         // And no id twice, which two copies of a section would bring.
         preg_match_all('/\sid="([^"]+)"/', $html, $ids);
