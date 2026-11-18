@@ -34,6 +34,10 @@
             .sys-panel p {
               margin: 0.5rem 0 0;
             }
+            /* The network card, arrived at from the dashboard's invitation. */
+            .page-card.sys-invited {
+              box-shadow: 0 0 0 2px var(--brand-blue), var(--ap-shadow-card);
+            }
             .sys-sub {
               margin: 0 0 0.5rem;
               font-size: 0.875rem;
@@ -211,9 +215,14 @@
         </x-page-card>
 
         @if ($federationAvailable)
-        {{-- Anchor target for the dashboard adoption prompt's "Open settings" link. --}}
-        <x-page-card beside id="federation" class="scroll-mt-24" :title="__('messages.federation_settings_title')" :lead="__('messages.federation_settings_description')">
+        {{-- Anchor target for the dashboard adoption prompt's "Open settings" link. Arriving from
+             the dashboard's invitation, it is marked and says what happens next (once: a flash). --}}
+        <x-page-card beside id="federation" class="scroll-mt-24 {{ $federationFromInvite ? 'sys-invited' : '' }}" :title="__('messages.federation_settings_title')" :lead="__('messages.federation_settings_description')">
             <div class="page-form-fields">
+                @if ($federationFromInvite && ! $federationEnabled)
+                    <x-page-notice tone="info">{{ __('messages.federation_invite_next_steps', ['site' => parse_url((string) config('app.nexus_url'), PHP_URL_HOST) ?: 'eventschedule.com']) }}</x-page-notice>
+                @endif
+
                 {{-- A failed sync is otherwise completely silent, and a silent sync failure
                      is the most likely long-run failure mode. Mapped to a small set of
                      states rather than echoing the raw response back to the screen.
@@ -278,16 +287,27 @@
                         {{-- Only the network can build this link (the id in it is encoded with its
                              key), so it arrives with every sync; FederationService only keeps one
                              that points at the configured network. --}}
-                        @if ($federationStateKey === 'approved' && $federationListingsUrl && $federationSentTotal > 0)
-                            <p>
-                                <x-link href="{{ $federationListingsUrl }}" target="_blank">{{ __('messages.federation_see_listings') }}</x-link>
+                        {{-- Beside it, what sharing has brought: the visits the network sent here in
+                             the last 30 days, as its last answer counted them. --}}
+                        @php
+                            $federationShowListings = $federationStateKey === 'approved' && $federationListingsUrl && $federationSentTotal > 0;
+                            $federationShowVisits = $federationStateKey === 'approved' && $federationVisits !== null;
+                        @endphp
+                        @if ($federationShowListings || $federationShowVisits)
+                            <p class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                                @if ($federationShowListings)
+                                    <x-link href="{{ $federationListingsUrl }}" target="_blank">{{ __('messages.federation_see_listings') }}</x-link>
+                                @endif
+                                @if ($federationShowVisits)
+                                    <span id="federation-visits">{{ trans_choice('messages.federation_visits_30d', $federationVisits, ['count' => number_format($federationVisits)]) }}</span>
+                                @endif
                             </p>
                         @endif
                     </div>
                 @endif
             </div>
 
-            <form method="POST" action="{{ route('admin.settings.update') }}" class="{{ $formClass }} {{ $federationLastError || $federationConnected ? 'mt-5' : '' }}">
+            <form method="POST" action="{{ route('admin.settings.update') }}" class="{{ $formClass }} {{ $federationLastError || $federationConnected || ($federationFromInvite && ! $federationEnabled) ? 'mt-5' : '' }}">
                 @csrf
 
                 {{-- Both cards post to the same endpoint, so each has to be explicit

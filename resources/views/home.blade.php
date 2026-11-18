@@ -11,7 +11,8 @@
 
          The page is server-rendered. Three small scripts ride on it: the shared popup menus of
          layouts/app, the Realtime tile's refresh (home/_live-script) and the Customize dialog,
-         which is its own Vue island (home/_customize). The calendar below is its own Vue root and
+         which is its own Vue island (home/_customize); now and then a fourth, the invitation to the
+         network (home/_federation-invite), another island. The calendar below is its own Vue root and
          none of this wraps it.
 
          space-y-4 rather than an mb-4 on each block: one rhythm, as on admin/dashboard. --}}
@@ -55,9 +56,10 @@
             @include('partials.home-schedule-prompt', ['role' => $homeSchedulePrompt])
         @endif
 
-        @if(!empty($showFederationPrompt))
-            {{-- No bottom padding of its own here: space-y-4 already spaces it. --}}
-            @include('partials.federation-prompt', ['padded' => false])
+        {{-- The network: the invitation to join (a modal, home/_federation-invite, included at the
+             foot of the page), or once joined and approved, the one-time card saying so. --}}
+        @if (! empty($federationLiveCount))
+            @include('home._federation-live', ['liveCount' => $federationLiveCount])
         @endif
 
         {{-- Needs attention: what is owed, across every schedule. A row of chips, each as wide as
@@ -150,5 +152,8 @@
         @if (! empty($dashboard['live']))
             @include('home._live-script')
         @endif
+    @endif
+    @if (! empty($federationInvite))
+        @include('home._federation-invite', ['invite' => $federationInvite])
     @endif
 </x-app-admin-layout>

@@ -10,6 +10,14 @@
         </div>
     @endif
 
+    {{-- From the dashboard's invitation to join the network: the settings it opens are behind
+         this confirm, which would otherwise be a password box with no word about why. --}}
+    @if (! empty($fromFederationInvite))
+        <p class="mb-3 text-sm font-medium text-gray-900 dark:text-white">
+            {{ __('messages.federation_invite_confirm_context', ['site' => parse_url((string) config('app.nexus_url'), PHP_URL_HOST) ?: 'eventschedule.com']) }}
+        </p>
+    @endif
+
     <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
         {{ __('messages.admin_confirm_password') }}
     </div>

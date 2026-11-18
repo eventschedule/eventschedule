@@ -263,6 +263,18 @@ class FederatedInstance extends Model
             'listings_url' => $this->listingsUrl(),
             'site_url' => rtrim((string) $this->site_url, '/'),
             'address_review' => $this->flagged_at !== null && $this->reported_site_url !== null,
+            // The visits this site sent to the install's pages in the last 30 days, today included,
+            // which its settings card shows beside "See your listings". One SUM over the daily rows.
+            'visits_30d' => $this->visitsLast30Days(),
         ];
+    }
+
+    /** Clicks out to this install over the last 30 days, today included (FederationStats' window). */
+    public function visitsLast30Days(): int
+    {
+        return (int) FederationClicksDaily::query()
+            ->where('federated_instance_id', $this->id)
+            ->where('date', '>=', now()->startOfDay()->subDays(29)->toDateString())
+            ->sum('clicks');
     }
 }

@@ -301,6 +301,11 @@ class User extends Authenticatable implements MustVerifyEmail
             'carpool_notifications_enabled' => 'boolean',
             'follow_consent_dismissed' => 'boolean',
             'federation_prompt_dismissed' => 'boolean',
+            // The network invitation's clock (FederationService::inviteDue()). Not fillable:
+            // written only by its own conditional updates.
+            'federation_invite_at' => 'datetime',
+            'federation_invite_count' => 'integer',
+            'federation_live_seen_at' => 'datetime',
             'push_settings' => 'array',
             'schedule_form_viewed_at' => 'datetime',
             'event_form_viewed_at' => 'datetime',

@@ -4122,9 +4122,10 @@ class RoleController extends Controller
         }
 
         // Federation nudge, on the schedule tab only - this is the page you land on
-        // after creating an event, which is where the prompt is meant to appear.
+        // after creating an event, which is where the prompt is meant to appear. On the
+        // invitation's clock (shouldInvite()): its Not now counts as one of the three asks.
         $showFederationPrompt = $tab === 'schedule'
-            && app(\App\Services\FederationService::class)->shouldPromptAdoption(auth()->user());
+            && app(\App\Services\FederationService::class)->shouldInvite(auth()->user());
 
         // And once the install has joined, the same moment is when to ask about THIS schedule.
         // Defined on every tab: compact() below throws on a name that was never set.

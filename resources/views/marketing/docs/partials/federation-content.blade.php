@@ -75,11 +75,26 @@
         tick.</li>
         <li>Click <strong>Save</strong>.</li>
     </ol>
+    <h3 id="invitation" class="doc-subheading">The invitation on the dashboard</h3>
     <p>
-        An administrator who has not switched it on is also offered it: once the install has a
-        public upcoming event that would be shared, a suggestion appears on the dashboard and on a
-        schedule's page, and its <strong>Open settings</strong> button goes straight to the card.
-        <strong>Dismiss</strong> hides the suggestion for that administrator for good.
+        An administrator who has not switched it on is invited to, now and then. Once the install has
+        a public upcoming event with a picture that would be shared, the dashboard opens a short
+        window, <strong>Put your events on eventschedule.com</strong>, showing your own next event the
+        way it would look on the listings, with your site's name on it. <strong>See what's on it</strong>
+        opens the events other sites already share, and <strong>Choose what to share</strong> opens
+        this card, after your admin password, with a line saying what happens next.
+    </p>
+    <p>
+        It is asked at most three times, at least 30 days apart, and each administrator has their own
+        count. It waits while your account is less than a week old, while you are partway through
+        the setup guide and while anything is listed under <strong>Needs attention</strong>, and on
+        that visit the dashboard's other suggestions wait for the next one. <strong>Not now</strong>,
+        or closing the window, counts as one of the three; <strong>Don't ask again</strong> ends it
+        for you. An install that has switched sharing on, or ever did, is never asked again.
+    </p>
+    <p>
+        A schedule's page shows the same invitation as a line above the calendar, on the same count:
+        its <strong>Not now</strong> is one of the three as well.
     </p>
 
     <h3 id="review" class="doc-subheading">What saving does</h3>
@@ -105,7 +120,7 @@
                 </tr>
                 <tr>
                     <td>Approved</td>
-                    <td>Your events are being listed. The card says how many have been sent, with a link to <strong>See your listings on eventschedule.com</strong></td>
+                    <td>Your events are being listed. The card says how many have been sent, with a link to <strong>See your listings on eventschedule.com</strong> and how many visits the network sent to your pages in the last 30 days</td>
                 </tr>
                 <tr>
                     <td>Suspended</td>
@@ -122,6 +137,11 @@
         The same status, the last sync, the number of events shared and the number of schedules
         still not decided are on the <strong>Federation</strong> card of
         <strong>Admin &rarr; Dashboard</strong>.
+    </p>
+    <p>
+        The first sync after approval that has events on the network shows each administrator a
+        one-time card on their dashboard, <strong>You're on the Event Schedule network</strong>,
+        with the number of events that are live and a <strong>See them</strong> link to your listings.
     </p>
 
     <h3 id="preview" class="doc-subheading">The preview on the card</h3>

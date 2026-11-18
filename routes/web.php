@@ -618,6 +618,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
     Route::post('/dashboard/config', [HomeController::class, 'saveDashboardConfig'])->name('home.save_config');
     Route::post('/dashboard/federation-prompt/dismiss', [HomeController::class, 'dismissFederationPrompt'])->name('home.federation_prompt_dismiss');
+    Route::post('/dashboard/federation-prompt/later', [HomeController::class, 'laterFederationPrompt'])->name('home.federation_prompt_later');
     Route::post('/dashboard/home-schedule-prompt/dismiss', [HomeController::class, 'dismissHomeSchedulePrompt'])->name('home.home_schedule_prompt_dismiss');
     Route::post('/dashboard/federation/list', [HomeController::class, 'listOnFederation'])->name('home.federation_list');
     Route::post('/dashboard/federation/list/dismiss', [HomeController::class, 'dismissFederationListing'])->name('home.federation_list_dismiss');

@@ -1279,7 +1279,7 @@
         <h3 id="settings-network" class="doc-subheading">Event Schedule network</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">This card opts your installation into sharing its public events with the eventschedule.com listings. From top to bottom:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Where the install stands</strong> - once it has connected: pending review, approved with the number of events on the network and a link to them, or suspended, and when the last sync ran. A sync that failed is reported here too</li>
+            <li><strong class="text-gray-900 dark:text-white">Where the install stands</strong> - once it has connected: pending review, approved with the number of events on the network, a link to them and the visits the network sent to your pages in the last 30 days, or suspended, and when the last sync ran. A sync that failed is reported here too</li>
             <li><strong class="text-gray-900 dark:text-white">Share events with the network</strong> - the toggle itself. Turning it off withdraws the listings again</li>
             <li><strong class="text-gray-900 dark:text-white">Contact email</strong> - lets the moderators reach you with their decision and the steps to get listed</li>
             <li><strong class="text-gray-900 dark:text-white">Also list these schedules</strong> - the schedules you own that have not been listed yet, each with how many of its events would be shared, so switching sharing on and choosing what to share is one save</li>

@@ -315,18 +315,42 @@ class HomeController extends Controller
         $nextStepItems = SetupGuide::withoutCoveredSteps($this->getNextStepItems($roleIds));
         $nextStepsDismissedBefore = $this->nextStepsDismissedBefore;
 
-        // Nudge admins to turn federation on once there is something worth sharing.
+        // The invitation to put this install's events on eventschedule.com: a modal, now and then
+        // (FederationService::shouldInvite()), and never over owed work. The dashboard no longer
+        // shows the banner: the modal replaces it. Counted here, after every redirect above, by a
+        // conditional UPDATE that only one tab can win, so closing it needs no request.
         $federation = app(FederationService::class);
-        $showFederationPrompt = $federation->shouldPromptAdoption($user);
+        $federationInvite = null;
+        if ($pendingActionItems->isEmpty()
+            && $federation->shouldInvite($user)
+            && $federation->recordInvite($user)) {
+            // The picture is a nicety: an event that cannot be drawn costs the picture, never the
+            // dashboard (the ask is already counted, and the invitation still shows).
+            try {
+                $poster = $federation->invitePoster($user);
+            } catch (\Throwable $e) {
+                report($e);
+                $poster = null;
+            }
+            $federationInvite = ['poster' => $poster];
+        }
+
+        // The first approved sync with events on the network, told once to each admin.
+        $federationLiveCount = $federationInvite ? null : $federation->takeLiveCard($user);
 
         // Once the install HAS joined: offer the owner their undecided schedules. Never both
         // prompts at once - one asks the operator to join, the other assumes they have.
-        $federationListingSchedules = $showFederationPrompt
+        $federationListingSchedules = $federationInvite
             ? collect()
             : $federation->listingPromptSchedules($user);
 
         // A selfhost install with one schedule can show it at the site's own address.
-        $homeSchedulePrompt = \App\Support\HomeSchedule::promptFor($user);
+        $homeSchedulePrompt = $federationInvite ? null : \App\Support\HomeSchedule::promptFor($user);
+
+        // One ask per visit: while the invitation is open, the suggestions wait for the next one.
+        if ($federationInvite) {
+            $nextStepItems = collect();
+        }
 
         return view('home', compact(
             'events',
@@ -350,7 +374,8 @@ class HomeController extends Controller
             'venues',
             'curators',
             'defaultCurrency',
-            'pendingActionItems', 'nextStepItems', 'nextStepsDismissedBefore', 'showFederationPrompt', 'federationListingSchedules', 'homeSchedulePrompt',
+            'pendingActionItems', 'nextStepItems', 'nextStepsDismissedBefore', 'federationListingSchedules', 'homeSchedulePrompt',
+            'federationInvite', 'federationLiveCount',
         ));
     }
 
@@ -1379,10 +1404,24 @@ class HomeController extends Controller
     }
 
     /**
-     * Permanently hide the federation suggestion for this user.
+     * The schedule page banner's "Not now": one of the invitation's three asks, on the same clock as
+     * the dashboard's modal (FederationService::recordInvite()), so the banner goes for thirty days.
+     * The modal's own Not now needs no request: the dashboard counted it when it showed it.
+     */
+    public function laterFederationPrompt(Request $request, FederationService $federation): RedirectResponse
+    {
+        if (! is_demo_mode() && $federation->shouldInvite($request->user())) {
+            $federation->recordInvite($request->user());
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * "Don't ask again": the invitation to join the network ends for this user.
      *
-     * redirect()->back() rather than a fixed route, because the banner appears on both
-     * the dashboard and the schedule page and one action serves both.
+     * redirect()->back() rather than a fixed route: the dashboard's invitation posts it, and an
+     * older page's banner may still.
      */
     public function dismissFederationPrompt(Request $request): RedirectResponse
     {

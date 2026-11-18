@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
+use App\Utils\SetupGuide;
 use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -53,6 +54,18 @@ class FederationService
 
     /** Schedules one "List on the network" prompt offers at once. */
     public const LISTING_PROMPT_LIMIT = 20;
+
+    /** The invitation to join is made at most this many times to one admin... */
+    public const INVITE_TIMES = 3;
+
+    /** ...this many days apart... */
+    public const INVITE_GAP_DAYS = 30;
+
+    /** ...and never to an account younger than this, which has other things to learn first. */
+    public const INVITE_ACCOUNT_DAYS = 7;
+
+    /** How long after the first approved sync an admin who has not seen it is still told. */
+    public const LIVE_CARD_DAYS = 30;
 
     /**
      * Is this install configured to federate at all? The system-level switch is the
@@ -114,6 +127,221 @@ class FederationService
             now()->addMinutes(self::ADOPTION_PROMPT_CACHE_MINUTES),
             fn () => $this->federatableQuery(true)->exists()
         );
+    }
+
+    /**
+     * Should this admin be invited to join the network now: the dashboard's modal, and the
+     * schedule page's banner.
+     *
+     * shouldPromptAdoption() (an admin, not the nexus, no demo, never connected, something to
+     * share) and three things of its own: the account is a week old, the invitation is due on its
+     * clock (inviteDue()), and the person is not in the middle of the setup guide, which has a
+     * first event and a page to share to ask about. The dashboard adds one more, nothing in
+     * "Needs attention", because it is the one page that knows (HomeController::home()).
+     *
+     * The cheap checks first: the clock and the account's age are columns already loaded.
+     */
+    public function shouldInvite(?object $user): bool
+    {
+        if (! $user || ! $this->inviteDue($user) || ! $this->shouldPromptAdoption($user)) {
+            return false;
+        }
+
+        return ! $this->inSetupGuide($user);
+    }
+
+    /**
+     * Is the invitation due on this admin's clock: asked fewer than INVITE_TIMES times, the last
+     * at least INVITE_GAP_DAYS ago, on an account at least INVITE_ACCOUNT_DAYS old.
+     */
+    public function inviteDue(object $user): bool
+    {
+        if ((int) $user->federation_invite_count >= self::INVITE_TIMES) {
+            return false;
+        }
+
+        if (! $user->created_at || Carbon::parse($user->created_at)->gt(now()->subDays(self::INVITE_ACCOUNT_DAYS))) {
+            return false;
+        }
+
+        return ! $user->federation_invite_at
+            || Carbon::parse($user->federation_invite_at)->lte(now()->subDays(self::INVITE_GAP_DAYS));
+    }
+
+    /** Somewhere between the setup guide's first step and its last, and not hidden. */
+    public function inSetupGuide(object $user): bool
+    {
+        $state = SetupGuide::state($user instanceof User ? $user : null);
+
+        return $state !== null && empty($state['hidden']) && empty($state['finished']);
+    }
+
+    /**
+     * Count one invitation: the dashboard showing the modal, or the banner's Not now.
+     *
+     * One conditional UPDATE, so two tabs opened at once count once and only one of them shows the
+     * modal; that is also why closing the modal (Not now, Escape) needs no request. On the bare
+     * table, so updated_at does not move. Answers whether THIS call counted it.
+     */
+    public function recordInvite(User $user): bool
+    {
+        $now = now();
+
+        // Code ahead of its migration (an install that migrates by hand): no invitation rather
+        // than a dashboard that 500s on an unknown column.
+        try {
+            $counted = $this->countInvite($user, $now);
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return false;
+        }
+
+        if ($counted) {
+            $user->forceFill([
+                'federation_invite_at' => $now,
+                'federation_invite_count' => (int) $user->federation_invite_count + 1,
+            ])->syncOriginalAttributes(['federation_invite_at', 'federation_invite_count']);
+        }
+
+        return $counted;
+    }
+
+    private function countInvite(User $user, \Illuminate\Support\Carbon $now): bool
+    {
+        return DB::table('users')
+            ->where('id', $user->id)
+            ->where('federation_invite_count', '<', self::INVITE_TIMES)
+            ->where(fn ($q) => $q->whereNull('federation_invite_at')
+                ->orWhere('federation_invite_at', '<=', $now->copy()->subDays(self::INVITE_GAP_DAYS)))
+            ->update([
+                'federation_invite_at' => $now,
+                'federation_invite_count' => DB::raw('federation_invite_count + 1'),
+            ]) > 0;
+    }
+
+    /**
+     * The picture in the invitation: this admin's own next event that would be shared, drawn the way
+     * eventschedule.com's /browse would draw it, with the badge naming this site. From this install's
+     * own data only - the page never calls the network - and null when nothing has a picture to
+     * show, in which case the invitation has no picture at all.
+     *
+     * Only events of schedules the admin owns or administers: the picture is "yours".
+     */
+    public function invitePoster(User $user): ?array
+    {
+        $roleIds = $user->roles()->wherePivotIn('level', ['owner', 'admin'])->pluck('roles.id');
+
+        if ($roleIds->isEmpty()) {
+            return null;
+        }
+
+        $best = null;
+
+        $events = $this->federatableQuery(true)
+            ->whereIn('creator_role_id', $roleIds)
+            ->with(['roles', 'creatorRole'])
+            ->orderByRaw('days_of_week IS NOT NULL')
+            ->orderBy('starts_at')
+            ->limit(8)
+            ->get();
+
+        foreach ($events as $event) {
+            $payload = $this->buildPayload($event);
+
+            if (! $payload || empty($payload['starts_at'])) {
+                continue;
+            }
+
+            $start = Carbon::parse($payload['starts_at']);
+
+            if ($start->lt(now()->subHours(6))) {
+                continue;
+            }
+
+            if (! $best || $start->lt($best['start'])) {
+                $best = ['start' => $start, 'event' => $event, 'payload' => $payload];
+            }
+        }
+
+        if (! $best) {
+            return null;
+        }
+
+        $event = $best['event'];
+        $payload = $best['payload'];
+        $local = $best['start']->copy()->setTimezone($event->scheduleTimezone())->locale(app()->getLocale());
+        $place = collect([$payload['city'] ?: $payload['venue_name'], $payload['state']])->filter()->first();
+
+        return [
+            'name' => (string) $event->name,
+            // The size /browse asks for; the payload's absolute address is what it would fetch.
+            'image' => $event->getImageUrl(480) ?: $payload['image_url'],
+            'when' => $local->isoFormat('ddd, D MMM'),
+            'time' => $local->isoFormat('LT'),
+            'place' => $place ? (string) $place : null,
+            'schedule' => $payload['schedule_name'] ? (string) $payload['schedule_name'] : null,
+            'source' => (string) (parse_url($this->ownUrl(), PHP_URL_HOST) ?: ''),
+        ];
+    }
+
+    /**
+     * Remember the first sync that comes back approved with events on the network, for the
+     * dashboard's one-time "You're on the Event Schedule network" card (takeLiveCard()). Run after
+     * each sync (federation:sync); once it has written, it never asks again.
+     */
+    public function noteLive(): void
+    {
+        if (Setting::get('federation_live_at') || $this->status() !== 'approved') {
+            return;
+        }
+
+        // Cheap first: an approved install with nothing sent asks this once an hour.
+        if (! Event::whereNotNull('federated_at')->exists()) {
+            return;
+        }
+
+        $sent = $this->previewTotals()['sent'];
+
+        if ($sent < 1) {
+            return;
+        }
+
+        Setting::set('federation_live_at', (string) now());
+        Setting::set('federation_live_count', (string) $sent);
+    }
+
+    /**
+     * The one-time card's number of live events for this admin, or null for no card. Counted as
+     * seen in the same conditional UPDATE, so it is shown once per admin, on whichever visit comes
+     * first; an admin who only arrives after LIVE_CARD_DAYS is not told old news.
+     */
+    public function takeLiveCard(User $user): ?int
+    {
+        if (! $user->isAdmin() || ! $this->isEnabled() || is_demo_mode()) {
+            return null;
+        }
+
+        $at = Setting::get('federation_live_at');
+        $count = (int) Setting::get('federation_live_count');
+
+        if (! $at || $count < 1) {
+            return null;
+        }
+
+        $at = Carbon::parse($at);
+
+        if ($at->lt(now()->subDays(self::LIVE_CARD_DAYS))
+            || ($user->federation_live_seen_at && Carbon::parse($user->federation_live_seen_at)->gte($at))) {
+            return null;
+        }
+
+        $taken = DB::table('users')
+            ->where('id', $user->id)
+            ->where(fn ($q) => $q->whereNull('federation_live_seen_at')->orWhere('federation_live_seen_at', '<', $at))
+            ->update(['federation_live_seen_at' => now()]) > 0;
+
+        return $taken ? $count : null;
     }
 
     /**
@@ -889,7 +1117,7 @@ class FederationService
             return ['ok' => false, 'body' => $json, 'status' => $response->status()];
         }
 
-        $this->recordSuccess($json['status'] ?? null, $json['listings_url'] ?? null);
+        $this->recordSuccess($json['status'] ?? null, $json['listings_url'] ?? null, $json['visits_30d'] ?? null);
         $this->noteNetworkAddress($json['site_url'] ?? null);
 
         return ['ok' => true, 'body' => $json];
@@ -930,11 +1158,12 @@ class FederationService
         Setting::set('federation_last_error_at', (string) now());
     }
 
-    protected function recordSuccess(?string $status, $listingsUrl = null): void
+    protected function recordSuccess(?string $status, $listingsUrl = null, $visits = null): void
     {
         // Read before the writes below: each write clears the settings cache, and reading after
         // them would read the whole table again for every batch sent.
         $knownListingsUrl = Setting::get('federation_listings_url');
+        $knownVisits = Setting::get('federation_visits_30d');
 
         Setting::set('federation_last_error', null);
         Setting::set('federation_last_error_at', null);
@@ -952,6 +1181,12 @@ class FederationService
         if (is_string($listingsUrl) && $listingsUrl !== $knownListingsUrl
             && $this->isNexusUrl($listingsUrl)) {
             Setting::set('federation_listings_url', $listingsUrl);
+        }
+
+        // The visits the network sent to this install's pages in the last 30 days, for the
+        // settings card. A network older than this field sends none, and the line stays away.
+        if (is_int($visits) && $visits >= 0 && (string) $visits !== (string) $knownVisits) {
+            Setting::set('federation_visits_30d', (string) $visits);
         }
     }
 

@@ -1,10 +1,10 @@
 {{-- Suggests turning federation on, once the install has an event that would actually
-     be shared. Shown to admins only, since enabling it is an admin action, and
-     dismissible permanently per user.
+     be shared. Shown to admins only, since enabling it is an admin action.
 
-     Included from both the dashboard and the schedule tab, because creating an event
-     redirects to the schedule page rather than the dashboard - a dashboard-only banner
-     would never appear at the moment the trigger fires.
+     On the schedule tab, because creating an event redirects there rather than to the
+     dashboard. The dashboard asks with its own modal (home/_federation-invite) instead, and
+     both run on one clock (FederationService::shouldInvite()): "Not now" here counts as one
+     of the invitation's three asks, thirty days apart. "Don't ask again" is the modal's.
 
      Informational blue rather than the amber warning panel: this is an invitation, not
      a problem, and on curator schedules it deliberately sits below the real warnings.
@@ -33,12 +33,11 @@
 
                 {{-- Wraps on mobile. Forward action last. --}}
                 <div class="mt-3 flex flex-wrap items-center gap-4">
-                    <form method="POST" action="{{ route('home.federation_prompt_dismiss') }}">
+                    <form method="POST" action="{{ route('home.federation_prompt_later') }}">
                         @csrf
                         <button type="submit"
-                                aria-label="{{ __('messages.federation_prompt_dismiss_label') }}"
                                 class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline">
-                            {{ __('messages.dismiss') }}
+                            {{ __('messages.not_now') }}
                         </button>
                     </form>
 

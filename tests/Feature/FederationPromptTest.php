@@ -36,10 +36,13 @@ class FederationPromptTest extends TestCase
         return app(FederationService::class);
     }
 
-    /** An admin with one event that would actually be shared. */
+    /**
+     * An admin with one event that would actually be shared. The account is ten days old: the
+     * invitation waits a week (FederationInviteTest holds that).
+     */
     private function adminWithShareableEvent(): array
     {
-        $admin = $this->createOwner(true);
+        $admin = $this->agedAdmin();
         $role = $this->createRole($admin, 'venue');
         $event = $this->createEvent($role, [
             'name' => 'A Real Show',
@@ -48,6 +51,14 @@ class FederationPromptTest extends TestCase
         ]);
 
         return [$admin, $role, $event];
+    }
+
+    private function agedAdmin(): User
+    {
+        $admin = $this->createOwner(true);
+        $admin->forceFill(['created_at' => now()->subDays(10)])->saveQuietly();
+
+        return $admin->fresh();
     }
 
     public function test_it_shows_for_an_admin_once_there_is_something_to_share(): void
@@ -125,7 +136,7 @@ class FederationPromptTest extends TestCase
     public function test_dismissal_does_not_hide_it_for_a_different_admin(): void
     {
         [$admin] = $this->adminWithShareableEvent();
-        $other = $this->createOwner(true);
+        $other = $this->agedAdmin();
 
         $admin->federation_prompt_dismissed = true;
         $admin->saveQuietly();
@@ -134,6 +145,7 @@ class FederationPromptTest extends TestCase
         $this->assertTrue($this->service()->shouldPromptAdoption($other));
     }
 
+    /** On the dashboard it is the invitation's modal now, not the banner (FederationInviteTest). */
     public function test_it_renders_on_the_dashboard(): void
     {
         [$admin] = $this->adminWithShareableEvent();
@@ -141,7 +153,8 @@ class FederationPromptTest extends TestCase
         $this->actingAs($admin)
             ->get(route('home'))
             ->assertOk()
-            ->assertSee(__('messages.federation_prompt_title'));
+            ->assertSee('id="federation-invite"', false)
+            ->assertDontSee(__('messages.federation_prompt_title'));
     }
 
     /**
@@ -165,7 +178,7 @@ class FederationPromptTest extends TestCase
      */
     public function test_the_learn_more_link_points_at_the_nexus_not_the_marketing_site(): void
     {
-        [$admin] = $this->adminWithShareableEvent();
+        [$admin, $role] = $this->adminWithShareableEvent();
 
         config([
             'app.marketing_url' => 'https://white-labeled-operator.test',
@@ -173,10 +186,15 @@ class FederationPromptTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get(route('home'))
+            ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
             ->assertOk()
             ->assertSee('https://eventschedule.com/docs/selfhost/federation', false)
             ->assertDontSee('https://white-labeled-operator.test/docs', false);
+
+        // And the dashboard's invitation links to the network's own listings, on the nexus too.
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('https://eventschedule.com/browse?show=network', false);
     }
 
     public function test_dismissing_from_one_page_hides_it_on_both(): void
@@ -188,7 +206,7 @@ class FederationPromptTest extends TestCase
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertDontSee(__('messages.federation_prompt_title'));
+            ->assertDontSee('id="federation-invite"', false);
 
         $this->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
             ->assertOk()

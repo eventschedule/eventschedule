@@ -75,7 +75,11 @@ class AdminController extends Controller
             return redirect()->route('home');
         }
 
-        return view('admin.confirm-password');
+        // Arriving from the invitation to join the network: say why a password is asked for.
+        $intended = (string) session('url.intended', '');
+        $fromInvite = str_contains($intended, 'card=federation') && str_contains($intended, 'from=invite');
+
+        return view('admin.confirm-password', ['fromFederationInvite' => $fromInvite]);
     }
 
     /**
@@ -2939,7 +2943,13 @@ class AdminController extends Controller
         // drops a #fragment. Browsers do keep a fragment from a Location header, so turn it
         // back into the anchor here.
         if (in_array($request->query('card'), ['federation', 'home-schedule'], true)) {
-            return redirect()->to(route('admin.settings').'#'.$request->query('card'));
+            // From the dashboard's invitation to join the network: the card is marked and says
+            // what happens next, once (admin/settings).
+            $redirect = redirect()->to(route('admin.settings').'#'.$request->query('card'));
+
+            return $request->query('card') === 'federation' && $request->query('from') === 'invite'
+                ? $redirect->with('federation_from_invite', true)
+                : $redirect;
         }
 
         // The nexus never renders the federation card, so skip the queries that feed
@@ -3007,6 +3017,10 @@ class AdminController extends Controller
             'federationLastSyncedAt' => Setting::get('federation_last_synced_at'),
             'federationLastError' => Setting::get('federation_last_error'),
             'federationListingsUrl' => Setting::get('federation_listings_url'),
+            // Visits the network sent here in the last 30 days, as its last answer said. Null
+            // until a network that counts them has answered.
+            'federationVisits' => Setting::get('federation_visits_30d') === null ? null : (int) Setting::get('federation_visits_30d'),
+            'federationFromInvite' => (bool) session('federation_from_invite'),
             // The schedule a selfhost install shows at its own address (App\Support\HomeSchedule).
             'homeScheduleAvailable' => \App\Support\HomeSchedule::available(),
             'homeScheduleId' => \App\Support\HomeSchedule::id(),
