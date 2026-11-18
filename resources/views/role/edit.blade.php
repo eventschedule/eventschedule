@@ -252,7 +252,7 @@
         }
 
         function updateFontOptions() {
-            var langCode = $('#language_code').val();
+            var langCode = esVal(document.getElementById('language_code'));
             var filteredFonts = filterFontsByLanguage(langCode);
             var select = document.getElementById('font_family');
             var currentValue = select.value;
@@ -289,24 +289,27 @@
             $scriptFontFamily = $scriptValue(old('font_family', $role->font_family));
             $scriptLanguageCode = $scriptValue(old('language_code', $role->language_code));
         @endphp
+        {{-- Written the way .val() wrote them: no event is fired (resources/js/style/state.js counts on
+             that), and #background is no element (the backgrounds are radios), so that line has
+             always written nothing. --}}
         document.addEventListener('DOMContentLoaded', () => {
-            $('#background').val(@json($scriptBackground));
-            $('#background_colors').val(@json($scriptBackgroundColors));
+            esSetVal(document.getElementById('background'), @json($scriptBackground));
+            esSetVal(document.getElementById('background_colors'), @json($scriptBackgroundColors));
 
             // If stored background_colors doesn't match any preset option, select "Custom"
-            var $bgColors = $('#background_colors');
+            var bgColors = document.getElementById('background_colors');
             var storedBgColors = @json($scriptBackgroundColors);
-            if (storedBgColors && $bgColors.val() !== storedBgColors) {
-                $bgColors.val('');
+            if (storedBgColors && esVal(bgColors) !== storedBgColors) {
+                esSetVal(bgColors, '');
                 // Pre-populate custom color inputs from stored values
                 var storedColors = storedBgColors.split(', ');
-                if (storedColors.length >= 1) $('#custom_color1').val(storedColors[0]);
-                if (storedColors.length >= 2) $('#custom_color2').val(storedColors[1]);
+                if (storedColors.length >= 1) esSetVal(document.getElementById('custom_color1'), storedColors[0]);
+                if (storedColors.length >= 2) esSetVal(document.getElementById('custom_color2'), storedColors[1]);
             }
 
-            $('#font_family').val(@json($scriptFontFamily));
-            $('#language_code').val(@json($scriptLanguageCode));
-            $('#timezone').val(@json(\App\Utils\TimezoneUtils::canonicalize(old('timezone', $role->timezone)) ?? old('timezone', $role->timezone)));
+            esSetVal(document.getElementById('font_family'), @json($scriptFontFamily));
+            esSetVal(document.getElementById('language_code'), @json($scriptLanguageCode));
+            esSetVal(document.getElementById('timezone'), @json(\App\Utils\TimezoneUtils::canonicalize(old('timezone', $role->timezone)) ?? old('timezone', $role->timezone)));
 
             updateFontOptions();
 
@@ -560,11 +563,11 @@
             var ci = window.getCountryInput('country_code');
             if (ci) {
                 var selected = ci.getSelectedCountryData();
-                $('#country_code').val(selected.iso2);
+                esSetVal(document.getElementById('country_code'), selected.iso2);
             }
         }
 
-        // The Background row shows the pane of the type chosen. Plain DOM, no jQuery.
+        // The Background row shows the pane of the type chosen.
         function onChangeBackground() {
             var checked = document.querySelector('input[name="background"]:checked');
             var background = checked ? checked.value : '';
@@ -683,43 +686,53 @@
             syncLogo();
         });
 
+        {{-- The answer line keeps what Validate found on the element itself (esValidatedAddress),
+             where Accept reads it. A text of undefined is left unwritten, as .text(undefined)
+             was a read. --}}
         function onValidateClick() {
-            $('#address_response').text(@json(__('messages.searching'), JSON_UNESCAPED_UNICODE) + '...').show();
-            $('#accept_button').hide();
+            var answer = document.getElementById('address_response');
+            if (answer) {
+                answer.textContent = @json(__('messages.searching'), JSON_UNESCAPED_UNICODE) + '...';
+            }
+            esShow(answer);
+            esHide(document.getElementById('accept_button'));
             var ci = window.getCountryInput('country_code');
             var country = ci ? ci.getSelectedCountryData() : null;
-            $.post({
-                url: '{{ route('validate_address') }}',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    address1: $('#address1').val(),
-                    city: $('#city').val(),
-                    state: $('#state').val(),
-                    postal_code: $('#postal_code').val(),
-                    country_code: country ? country.iso2 : '',
-                },
-                success: function(response) {
-                    if (response) {
-                        var address = response['data']['formatted_address'];
-                        $('#address_response').text(address);
-                        $('#accept_button').show();
-                        $('#address_response').data('validated_address', response['data']);
-                    } else {
-                        $('#address_response').text(@json(__('messages.address_not_found'), JSON_UNESCAPED_UNICODE));    
+            esPost('{{ route('validate_address') }}', {
+                _token: '{{ csrf_token() }}',
+                address1: esVal(document.getElementById('address1')),
+                city: esVal(document.getElementById('city')),
+                state: esVal(document.getElementById('state')),
+                postal_code: esVal(document.getElementById('postal_code')),
+                country_code: country ? country.iso2 : '',
+            }, function(response) {
+                var answer = document.getElementById('address_response');
+                if (response) {
+                    var address = response['data']['formatted_address'];
+                    if (answer && address !== undefined) {
+                        answer.textContent = address;
                     }
-                },
-                error: function(xhr, status, error) {
-                    $('#address_response').text(@json(__('messages.an_error_occurred'), JSON_UNESCAPED_UNICODE));
+                    esShow(document.getElementById('accept_button'));
+                    if (answer) {
+                        answer.esValidatedAddress = response['data'];
+                    }
+                } else if (answer) {
+                    answer.textContent = @json(__('messages.address_not_found'), JSON_UNESCAPED_UNICODE);
+                }
+            }, function(xhr, status, error) {
+                var answer = document.getElementById('address_response');
+                if (answer) {
+                    answer.textContent = @json(__('messages.an_error_occurred'), JSON_UNESCAPED_UNICODE);
                 }
             });
         }
 
         function viewMap() {
             var address = [
-                $('#address1').val(),
-                $('#city').val(),
-                $('#state').val(),
-                $('#postal_code').val(),
+                esVal(document.getElementById('address1')),
+                esVal(document.getElementById('city')),
+                esVal(document.getElementById('state')),
+                esVal(document.getElementById('postal_code')),
                 (window.getCountryInput('country_code') ? window.getCountryInput('country_code').getSelectedCountryData().name : '')
             ].filter(Boolean).join(', ');
 
@@ -741,16 +754,17 @@
 
         function acceptAddress(event) {
             event.preventDefault();
-            var validatedAddress = $('#address_response').data('validated_address');
+            var answer = document.getElementById('address_response');
+            var validatedAddress = answer ? answer.esValidatedAddress : undefined;
             if (validatedAddress) {
-                $('#address1').val(validatedAddress['address1']);
-                $('#city').val(validatedAddress['city']);
-                $('#state').val(validatedAddress['state']);
-                $('#postal_code').val(validatedAddress['postal_code']);
-                                
+                esSetVal(document.getElementById('address1'), validatedAddress['address1']);
+                esSetVal(document.getElementById('city'), validatedAddress['city']);
+                esSetVal(document.getElementById('state'), validatedAddress['state']);
+                esSetVal(document.getElementById('postal_code'), validatedAddress['postal_code']);
+
                 // Hide the address response and accept button after accepting
-                $('#address_response').hide();
-                $('#accept_button').hide();
+                esHide(answer);
+                esHide(document.getElementById('accept_button'));
             }
         }
 

@@ -46,7 +46,185 @@
         <meta name="twitter:card" content="summary_large_image">
     @endif    
 
-    <script src="{{ asset('js/jquery.min.js') }}" {!! nonce_attr() !!}></script>
+    {{-- What the portal used jQuery for, in plain script, here where jQuery was loaded so that
+         everything that ran after it still does. Each helper does what the jQuery call it replaced
+         did, step for step, quirks included; tests/Browser/SharedScriptsJourneyTest.php was run
+         green on jQuery and holds them to it.
+
+         esReady(fn)        - $(document).ready(fn): after DOMContentLoaded, each in its own
+                              timer, in the order asked (jQuery 3 runs ready callbacks async).
+         esShow / esHide    - .show() / .hide(): hiding remembers the inline display, showing
+                              puts it back, or the display a fresh element of the tag would have
+                              when only a stylesheet (the hidden class) is hiding it.
+         esVal / esSetVal   - .val() / .val(v): a select-one with nothing chosen reads null, a
+                              null or undefined is written as '', \r is dropped from what is read.
+         esPost(url, data, success, error) - $.post: form-encoded, X-Requested-With sent, a JSON
+                              answer parsed, error(xhr, status, the HTTP status text). --}}
+    <script {!! nonce_attr() !!}>
+    (function () {
+        var readyQueue = [];
+        var isReady = false;
+        document.addEventListener('DOMContentLoaded', function () {
+            isReady = true;
+            readyQueue.splice(0).forEach(function (fn) { window.setTimeout(fn); });
+        });
+        window.esReady = function (fn) {
+            if (isReady) {
+                window.setTimeout(fn);
+            } else {
+                readyQueue.push(fn);
+            }
+        };
+
+        var defaultDisplays = {};
+        function defaultDisplay(el) {
+            var name = el.nodeName;
+            if (defaultDisplays[name]) {
+                return defaultDisplays[name];
+            }
+            var probe = el.ownerDocument.body.appendChild(el.ownerDocument.createElement(name));
+            var display = getComputedStyle(probe).display;
+            probe.parentNode.removeChild(probe);
+            if (display === 'none') {
+                display = 'block';
+            }
+            defaultDisplays[name] = display;
+            return display;
+        }
+        function hiddenWithinTree(el) {
+            return el.style.display === 'none'
+                || (el.style.display === '' && el.isConnected && getComputedStyle(el).display === 'none');
+        }
+        window.esShow = function (el) {
+            if (!el || !el.style) {
+                return;
+            }
+            var value = null;
+            if (el.style.display === 'none') {
+                value = el.__esDisplay || null;
+                if (!value) {
+                    el.style.display = '';
+                }
+            }
+            if (el.style.display === '' && hiddenWithinTree(el)) {
+                value = defaultDisplay(el);
+            }
+            if (value != null) {
+                el.style.display = value;
+            }
+        };
+        window.esHide = function (el) {
+            if (!el || !el.style) {
+                return;
+            }
+            var display = el.style.display;
+            if (display !== 'none') {
+                el.__esDisplay = display;
+                el.style.display = 'none';
+            }
+        };
+
+        function optionValue(option) {
+            var value = option.getAttribute('value');
+            return value != null ? value : (option.textContent.match(/[^\x20\t\r\n\f]+/g) || []).join(' ');
+        }
+        window.esVal = function (el) {
+            if (!el) {
+                return undefined;
+            }
+            if (el.nodeName === 'SELECT') {
+                var options = el.options, index = el.selectedIndex, one = el.type === 'select-one';
+                var values = one ? null : [], max = one ? index + 1 : options.length;
+                for (var i = index < 0 ? max : (one ? index : 0); i < max; i++) {
+                    var option = options[i];
+                    if ((option.selected || i === index) && !option.disabled
+                        && (!option.parentNode.disabled || option.parentNode.nodeName !== 'OPTGROUP')) {
+                        if (one) {
+                            return optionValue(option);
+                        }
+                        values.push(optionValue(option));
+                    }
+                }
+                return values;
+            }
+            var value = el.value;
+            return typeof value === 'string' ? value.replace(/\r/g, '') : (value == null ? '' : value);
+        };
+        window.esSetVal = function (el, value) {
+            if (!el || el.nodeType !== 1) {
+                return;
+            }
+            if (value == null) {
+                value = '';
+            } else if (typeof value === 'number') {
+                value += '';
+            } else if (Array.isArray(value)) {
+                value = value.map(function (v) { return v == null ? '' : v + ''; });
+            }
+            if (el.nodeName === 'SELECT') {
+                var wanted = Array.isArray(value) ? value : [value];
+                var chosen = false, options = el.options, i = options.length;
+                while (i--) {
+                    if ((options[i].selected = wanted.indexOf(optionValue(options[i])) > -1)) {
+                        chosen = true;
+                    }
+                }
+                if (!chosen) {
+                    el.selectedIndex = -1;
+                }
+                return;
+            }
+            el.value = value;
+        };
+
+        window.esPost = function (url, data, success, error) {
+            var headers = {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'Accept': '*/*',
+            };
+            {{-- Only to this site, as jQuery did: elsewhere the header would ask for a preflight. --}}
+            if (new URL(url, window.location.href).origin === window.location.origin) {
+                headers['X-Requested-With'] = 'XMLHttpRequest';
+            }
+            var body = Object.keys(data).map(function (key) {
+                var value = data[key];
+                return encodeURIComponent(key) + '=' + encodeURIComponent(value == null ? '' : value);
+            }).join('&');
+            fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: headers,
+                body: body,
+            }).then(function (response) {
+                response.text().then(function (text) {
+                    var ok = response.status >= 200 && response.status < 300 || response.status === 304;
+                    if (!ok) {
+                        error(response, 'error', response.statusText);
+                        return;
+                    }
+                    if (response.status === 204) {
+                        success(undefined, 'nocontent', response);
+                        return;
+                    }
+                    var parsed = text;
+                    if (/\bjson\b/.test(response.headers.get('Content-Type') || '')) {
+                        try {
+                            parsed = JSON.parse(text);
+                        } catch (e) {
+                            error(response, 'parsererror', e);
+                            return;
+                        }
+                    }
+                    success(parsed, 'success', response);
+                }, function () {
+                    error(response, 'error', '');
+                });
+            }, function () {
+                error(null, 'error', '');
+            });
+        };
+    })();
+    </script>
     <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>window._ssI18n={noResults:@json(__('messages.no_results_found'))};</script>
     <script src="{{ asset('js/searchable-select.js') }}" defer {!! nonce_attr() !!}></script>
@@ -56,59 +234,54 @@
     @include('partials.google-analytics')
 
     <script {!! nonce_attr() !!}>
-    function onPopUpClick(id, event) {
-        if (typeof $ === 'undefined') return;
+    {{-- The pop-up menus. $toggle is the button that was pressed: the shared click handler below
+         passes it, and ticket/sales passes an event of its own whose currentTarget is the button. --}}
+    function onPopUpClick(id, event, toggle) {
         event.stopPropagation();
-        var menu = $('#' + id);
-        if (menu.is(':hidden')) {
+        {{-- A plain id is looked up directly, anything else as a selector, as $('#' + id) did: an
+             empty one throws rather than quietly closing whatever is open. --}}
+        var menu = /^[\w-]+$/.test(id) ? document.getElementById(id) : document.querySelector('#' + id);
+        {{-- jQuery's :hidden - no box at all. A menu that is not on the page is not hidden either,
+             so a toggle for one closes whatever is open, as it always did. --}}
+        if (menu && !(menu.offsetWidth || menu.offsetHeight || menu.getClientRects().length)) {
             // Get button position
-            var button = event.currentTarget;
+            var button = toggle || event.currentTarget;
             var rect = button.getBoundingClientRect();
 
             // Position dropdown with fixed positioning
             var isRtl = document.documentElement.dir === 'rtl';
+            menu.style.position = 'fixed';
+            menu.style.top = (rect.bottom + 4) + 'px';
+            menu.style.zIndex = '1000';
             if (isRtl) {
-                menu.css({
-                    'position': 'fixed',
-                    'top': (rect.bottom + 4) + 'px',
-                    'left': rect.left + 'px',
-                    'right': 'auto',
-                    'z-index': '1000'
-                });
+                menu.style.left = rect.left + 'px';
+                menu.style.right = 'auto';
             } else {
-                menu.css({
-                    'position': 'fixed',
-                    'top': (rect.bottom + 4) + 'px',
-                    'right': (window.innerWidth - rect.right) + 'px',
-                    'left': 'auto',
-                    'z-index': '1000'
-                });
+                menu.style.right = (window.innerWidth - rect.right) + 'px';
+                menu.style.left = 'auto';
             }
 
-            // removeClass, not .show(): .show() writes an inline display, and event/show-guest
-            // toggles these same menus with classList.toggle('hidden'). Once an inline display
-            // exists the class can never win again, so a single Escape press - hidePopUp is bound
-            // globally on keydown - used to kill "Add to Calendar" for the rest of the session.
-            // Every .pop-up-menu in the app ships with the hidden class, so this is equivalent.
-            menu.removeClass('hidden').css('display', '');
+            // The class, not an inline display: event/show-guest toggles these same menus with
+            // classList.toggle('hidden'). Once an inline display exists the class can never win
+            // again, so a single Escape press - hidePopUp is bound globally on keydown - used to
+            // kill "Add to Calendar" for the rest of the session. Every .pop-up-menu in the app
+            // ships with the hidden class.
+            menu.classList.remove('hidden');
+            menu.style.display = '';
 
             // Kept on the screen. A menu hangs from its button's end edge, which is right for a
             // button at the end of a row and puts the menu past the viewport for one at the start
             // of a narrow row: the dashboard's phone menu opened off the left edge, with New
             // schedule and Customize out of reach. Measured after it is shown, since a hidden box
             // has no width; a menu that already fits is left exactly where it was.
-            var box = menu[0] ? menu[0].getBoundingClientRect() : null;
+            var box = menu.getBoundingClientRect();
             var gutter = 8;
-            if (box && box.left < gutter) {
-                menu.css({
-                    'left': Math.max(gutter, Math.min(rect.left, window.innerWidth - box.width - gutter)) + 'px',
-                    'right': 'auto'
-                });
-            } else if (box && box.right > window.innerWidth - gutter) {
-                menu.css({
-                    'right': Math.max(gutter, Math.min(window.innerWidth - rect.right, window.innerWidth - box.width - gutter)) + 'px',
-                    'left': 'auto'
-                });
+            if (box.left < gutter) {
+                menu.style.left = Math.max(gutter, Math.min(rect.left, window.innerWidth - box.width - gutter)) + 'px';
+                menu.style.right = 'auto';
+            } else if (box.right > window.innerWidth - gutter) {
+                menu.style.right = Math.max(gutter, Math.min(window.innerWidth - rect.right, window.innerWidth - box.width - gutter)) + 'px';
+                menu.style.left = 'auto';
             }
 
             // Several toggles ship a hardcoded aria-expanded that never changes. Keep it honest
@@ -116,40 +289,83 @@
             // use data-popup-target, but ticket/sales.blade.php delegates a second family through
             // data-popup-toggle, and setting the attribute on open without clearing it on close
             // would strand those permanently expanded.
-            $(button).attr('aria-expanded', 'true');
-            $(document).on('click', hidePopUp);
+            button.setAttribute('aria-expanded', 'true');
+            documentClicks.push(hidePopUp);
         } else {
             hidePopUp();
         }
     }
 
     function hidePopUp() {
-        if (typeof $ === 'undefined') return;
-        $('.pop-up-menu').addClass('hidden').css('display', '');
-        $('[data-popup-target][aria-expanded="true"], [data-popup-toggle][aria-expanded="true"]')
-            .attr('aria-expanded', 'false');
-        $(document).off('click', hidePopUp);
+        document.querySelectorAll('.pop-up-menu').forEach(function (menu) {
+            menu.classList.add('hidden');
+            menu.style.display = '';
+        });
+        document.querySelectorAll('[data-popup-target][aria-expanded="true"], [data-popup-toggle][aria-expanded="true"]').forEach(function (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+        });
+        documentClicks = documentClicks.filter(function (fn) { return fn !== hidePopUp; });
     }
 
-    if (typeof $ !== 'undefined') {
-        $(document).on('keydown', function(e) {
-            if (e.key === 'Escape') {
-                hidePopUp();
-            }
-        });
-
-        $(document).on('click', '.pop-up-menu', function(event) {
+    {{-- Who hears a click, in the order jQuery used to call them, because what a menu does depends
+         on it. First the rules below, element by element from the one clicked outwards (each
+         element's matching rules in the order listed), then what is bound to the document itself
+         (hidePopUp, while a menu is open). The walk ends as soon as anything stops the event's
+         propagation: that is how a click inside a menu, or on a toggle, never closes it. --}}
+    var documentClicks = [];
+    var documentClickRules = [
+        ['.pop-up-menu', function (event) {
             event.stopPropagation();
-        });
+        }],
+        ['.popup-toggle[data-popup-target]', function (event, element) {
+            onPopUpClick(element.getAttribute('data-popup-target'), event, element);
+        }],
+        ['div[data-popup-target]', function (event, element) {
+            onPopUpClick(element.getAttribute('data-popup-target'), event, element);
+        }],
+    ];
 
-        $(document).on('click', '.popup-toggle[data-popup-target]', function(e) {
-            onPopUpClick($(this).attr('data-popup-target'), e);
-        });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            hidePopUp();
+        }
+    });
 
-        $(document).on('click', 'div[data-popup-target]', function(e) {
-            onPopUpClick($(this).attr('data-popup-target'), e);
-        });
-    }
+    document.addEventListener('click', function (e) {
+        var stopped = false;
+        var stoppedNow = false;
+        e.stopPropagation = function () {
+            stopped = true;
+            Event.prototype.stopPropagation.call(e);
+        };
+        e.stopImmediatePropagation = function () {
+            stopped = stoppedNow = true;
+            Event.prototype.stopImmediatePropagation.call(e);
+        };
+
+        var queue = [];
+        {{-- Not for a middle or right click, and a disabled element has no rules, as with jQuery. --}}
+        if (!(e.button >= 1)) {
+            for (var element = e.target; element && element !== document; element = element.parentNode || document) {
+                if (element.nodeType !== 1 || element.disabled === true) {
+                    continue;
+                }
+                var matched = documentClickRules.filter(function (rule) { return element.matches(rule[0]); });
+                if (matched.length) {
+                    queue.push([element, matched.map(function (rule) { return rule[1]; })]);
+                }
+            }
+        }
+        if (documentClicks.length) {
+            queue.push([document, documentClicks.slice()]);
+        }
+
+        for (var i = 0; i < queue.length && !stopped; i++) {
+            for (var j = 0; j < queue[i][1].length && !stoppedNow; j++) {
+                queue[i][1][j](e, queue[i][0]);
+            }
+        }
+    });
     </script>
 
     <script {!! nonce_attr() !!}>
@@ -589,7 +805,7 @@
     </style>
 
     <script {!! nonce_attr() !!}>
-        if (typeof $ !== 'undefined') $(document).ready(function() {
+        esReady(function() {
 
             {{-- JSON_HEX_TAG: these messages can carry a schedule's name, and a "<!--<script"
                  inside a script block would otherwise swallow the rest of it.

@@ -52,7 +52,7 @@ class AvailabilityTest extends DuskTestCase
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
             $this->assertFalse($isDisabled[0], 'Save button should be enabled after toggling a date');
 
-            // Save (JS click triggers the jQuery save handler; a native Selenium click can
+            // Save (JS click triggers the page's save handler; a native Selenium click can
             // miss the button under the sticky calendar header, leaving the reload to never fire)
             $browser->waitForReload(function (Browser $browser) {
                 $browser->script("document.getElementById('saveButton').click();");

@@ -56,8 +56,8 @@ class StaffFacingMarkupTest extends TestCase
         // Written as JSON from a bare variable (double quotes, every backslash doubled), never
         // inside a single-quoted string that Blade's escaping cannot close safely.
         foreach (['background', 'background_colors', 'font_family', 'language_code'] as $id) {
-            $this->assertStringContainsString("$('#".$id."').val(\"", $html, $id);
-            $this->assertStringNotContainsString("$('#".$id."').val('", $html, $id);
+            $this->assertStringContainsString("esSetVal(document.getElementById('".$id."'), \"", $html, $id);
+            $this->assertStringNotContainsString("esSetVal(document.getElementById('".$id."'), '", $html, $id);
         }
         $this->assertStringNotContainsString("var storedBgColors = '", $html);
         // The custom domain editor is plain script now: its tag carries no expression at all, and

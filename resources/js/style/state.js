@@ -11,7 +11,7 @@
 //    the row's line and reaches the page's own handlers. It is never called while starting up:
 //    the save bar takes any such event inside the form as a change.
 //  - state is read AFTER the page's inline script has put back what a refused save had typed
-//    (it sets the font and the gradient with jQuery's val(), which fires no event), and again
+//    (it sets the font and the gradient with esSetVal(), which fires no event), and again
 //    whenever the page says `style:sync`.
 
 import { reactive } from 'vue';

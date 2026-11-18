@@ -92,7 +92,10 @@ class EventFormBasicsMarkupTest extends TestCase
         foreach (['view_map_button' => 'viewVenueMap', 'validate_button' => 'validateVenueAddress', 'accept_button' => 'acceptVenueAddress'] as $id => $method) {
             $this->assertSame(1, preg_match('/<button[^>]*id="'.$id.'"[^>]*>/', $html, $tag), "{$id} is rendered");
             $this->assertStringContainsString('@click="'.$method.'"', $tag[0]);
-            $this->assertStringNotContainsString("getElementById('{$id}')", $html, "{$id} is not also bound by id");
+            // Looking a button up only to show or hide it (Accept, after Validate) is not binding
+            // it, so those calls are taken out first; any other lookup by its id is a binding.
+            $rest = preg_replace("/es(?:Show|Hide)\\(document\\.getElementById\\('{$id}'\\)\\)/", '', $html);
+            $this->assertStringNotContainsString("getElementById('{$id}')", $rest, "{$id} is not also bound by id");
         }
 
         Http::assertNothingSent();

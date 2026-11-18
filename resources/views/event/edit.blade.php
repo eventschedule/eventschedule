@@ -1786,7 +1786,7 @@
         if (typeof window.vueApp === 'undefined' || !window.vueApp.event) {
             return;
         }
-        var value = $('input[name="schedule_type"]:checked').val();
+        var value = esVal(document.querySelector('input[name="schedule_type"]:checked'));
         if (value == 'one_time') {
             window.vueApp.isRecurring = false;
         } else {
@@ -1811,49 +1811,58 @@
         var freq = window.vueApp.event.recurring_frequency || 'weekly';
         var showDays = window.vueApp.isRecurring && (freq === 'weekly' || freq === 'every_n_weeks');
         if (showDays) {
-            $('#days_of_week_div').show();
+            esShow(document.getElementById('days_of_week_div'));
         } else {
-            $('#days_of_week_div').hide();
+            esHide(document.getElementById('days_of_week_div'));
         }
     }
 
+    {{-- The answer line keeps what Validate found on the element itself (esValidatedAddress), where
+         Accept reads it. A text of undefined is left unwritten, as .text(undefined) was a read. --}}
     function onValidateClick() {
-        $('#address_response').text(@json(__('messages.searching')) + '...').show();
-        $('#accept_button').hide();
+        var answer = document.getElementById('address_response');
+        if (answer) {
+            answer.textContent = @json(__('messages.searching')) + '...';
+        }
+        esShow(answer);
+        esHide(document.getElementById('accept_button'));
         var ci = window.getCountryInput('venue_country_code');
         var country = ci ? ci.getSelectedCountryData() : null;
-        $.post({
-            url: '{{ route('validate_address') }}',
-            data: {
-                _token: '{{ csrf_token() }}',
-                address1: $('#venue_address1').val(),
-                city: $('#venue_city').val(),
-                state: $('#venue_state').val(),
-                postal_code: $('#venue_postal_code').val(),
-                country_code: country ? country.iso2 : '',
-            },
-            success: function(response) {
-                if (response) {
-                    var address = response['data']['formatted_address'];
-                    $('#address_response').text(address);
-                    $('#accept_button').show();
-                    $('#address_response').data('validated_address', response['data']);
-                } else {
-                    $('#address_response').text(@json(__('messages.address_not_found')));
+        esPost('{{ route('validate_address') }}', {
+            _token: '{{ csrf_token() }}',
+            address1: esVal(document.getElementById('venue_address1')),
+            city: esVal(document.getElementById('venue_city')),
+            state: esVal(document.getElementById('venue_state')),
+            postal_code: esVal(document.getElementById('venue_postal_code')),
+            country_code: country ? country.iso2 : '',
+        }, function(response) {
+            var answer = document.getElementById('address_response');
+            if (response) {
+                var address = response['data']['formatted_address'];
+                if (answer && address !== undefined) {
+                    answer.textContent = address;
                 }
-            },
-            error: function(xhr, status, error) {
-                $('#address_response').text(@json(__('messages.an_error_occurred')) + ': ' + error);
+                esShow(document.getElementById('accept_button'));
+                if (answer) {
+                    answer.esValidatedAddress = response['data'];
+                }
+            } else if (answer) {
+                answer.textContent = @json(__('messages.address_not_found'));
+            }
+        }, function(xhr, status, error) {
+            var answer = document.getElementById('address_response');
+            if (answer) {
+                answer.textContent = @json(__('messages.an_error_occurred')) + ': ' + error;
             }
         });
     }
 
     function viewMap() {
         var address = [
-            $('#venue_address1').val(),
-            $('#venue_city').val(),
-            $('#venue_state').val(),
-            $('#venue_postal_code').val(),
+            esVal(document.getElementById('venue_address1')),
+            esVal(document.getElementById('venue_city')),
+            esVal(document.getElementById('venue_state')),
+            esVal(document.getElementById('venue_postal_code')),
             (window.getCountryInput('venue_country_code') ? window.getCountryInput('venue_country_code').getSelectedCountryData().name : '')
         ].filter(Boolean).join(', ');
 
@@ -1867,7 +1876,8 @@
 
     function acceptAddress(event) {
         event.preventDefault();
-        var validatedAddress = $('#address_response').data('validated_address');
+        var answer = document.getElementById('address_response');
+        var validatedAddress = answer ? answer.esValidatedAddress : undefined;
         if (validatedAddress) {
             // Into Vue, not into the inputs: they are v-model fields, so a value written to the
             // DOM alone is not what the hidden venue_* inputs post, and the next re-render puts
@@ -1880,8 +1890,8 @@
             }
 
             // Hide the address response and accept button after accepting
-            $('#address_response').hide();
-            $('#accept_button').hide();
+            esHide(answer);
+            esHide(document.getElementById('accept_button'));
         }
     }
 

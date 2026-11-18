@@ -15,7 +15,7 @@
         @include('partials.web-app-manifest', ['platformApp' => true])
 
         <script {!! nonce_attr() !!}>
-            $(document).ready(function() {
+            esReady(function() {
                 const sidebar = document.getElementById('sidebar');
                 const openButton = document.getElementById('open-sidebar');
                 const closeButton = document.getElementById('close-sidebar');
@@ -25,7 +25,7 @@
                     if (sidebar.getAttribute('data-state') !== 'open') {
                         return;
                     }
-                    $('#sidebar').hide();
+                    esHide(sidebar);
                     sidebar.setAttribute('data-state', 'closed');
                     document.removeEventListener('keydown', onEscapeClose);
                     if (lastFocusBeforeOpen && typeof lastFocusBeforeOpen.focus === 'function') {
@@ -37,7 +37,7 @@
 
                 function openMenu() {
                     lastFocusBeforeOpen = document.activeElement;
-                    $('#sidebar').show();
+                    esShow(sidebar);
                     sidebar.setAttribute('data-state', 'open');
                     document.addEventListener('keydown', onEscapeClose);
                     requestAnimationFrame(function() {

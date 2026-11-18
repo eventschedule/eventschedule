@@ -142,9 +142,9 @@ class EventFormBasicsTest extends DuskTestCase
                 set("venue_city", "new york");
 
                 // What a successful Validate leaves behind, without asking Google.
-                window.jQuery("#address_response").data("validated_address", {
+                document.getElementById("address_response").esValidatedAddress = {
                     address1: "131 W 3rd St", city: "New York", state: "NY", postal_code: "10012",
-                });
+                };
                 window.acceptAddress({ preventDefault: function () {} });
             ');
 
