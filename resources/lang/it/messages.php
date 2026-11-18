@@ -1819,6 +1819,7 @@ return [
     'subscription_already_active' => 'Hai gia un abbonamento attivo.',
     'no_active_subscription' => 'Nessun abbonamento attivo trovato.',
     'subscription_error' => 'Si e verificato un errore durante l\'elaborazione del tuo abbonamento. Riprova o contatta il supporto.',
+    'subscription_card_code_unverified' => 'Non siamo riusciti a confermare il codice di sicurezza della tua carta, quindi la prova gratuita non è iniziata. Controlla il codice e riprova.',
     'subscription_not_resumable' => 'Questo abbonamento non puo essere ripreso.',
     'subscribe_to_pro' => 'Abbonati a Pro',
     'select_plan' => 'Seleziona un Piano',

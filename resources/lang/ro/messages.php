@@ -1817,6 +1817,7 @@ return [
     'subscription_already_active' => 'Aveți deja un abonament activ.',
     'no_active_subscription' => 'Niciun abonament activ găsit.',
     'subscription_error' => 'Ceva nu a funcționat la procesarea abonamentului. Vă rugăm încercați din nou sau contactați suportul.',
+    'subscription_card_code_unverified' => 'Nu am putut confirma codul de securitate al cardului, așa că perioada de probă gratuită nu a început. Verifică codul și încearcă din nou.',
     'subscription_not_resumable' => 'Acest abonament nu poate fi reluat.',
     'subscribe_to_pro' => 'Abonează-te la Pro',
     'select_plan' => 'Selectează un Plan',

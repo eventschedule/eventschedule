@@ -15,6 +15,7 @@ use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Laravel\Cashier\Cashier;
 use Laravel\Cashier\Exceptions\IncompletePayment;
 
 class SubscriptionController extends Controller
@@ -137,6 +138,27 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Whether Stripe matched the security code of the card checkout just saved (its cvc_check is
+     * "pass"). Failed, unchecked and unavailable are all no, as is a card Stripe cannot find.
+     */
+    private function securityCodeMatched(mixed $paymentMethod): bool
+    {
+        if (! is_string($paymentMethod) || $paymentMethod === '') {
+            return false;
+        }
+
+        try {
+            $method = Cashier::stripe()->paymentMethods->retrieve($paymentMethod);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return false;
+        }
+
+        return ($method->card->checks->cvc_check ?? null) === 'pass';
+    }
+
+    /**
      * Whether this schedule's own history is why checkout charges today: a plan it had (a
      * subscription, a hand-granted or legacy plan, a comped runway). Then the page says so about
      * this schedule rather than naming another one or blaming the login.
@@ -238,6 +260,15 @@ class SubscriptionController extends Controller
         try {
             // The same answer the checkout page printed (RoleBillable::checkoutTrialEnd()).
             $trialEnd = $role->checkoutTrialEnd();
+
+            // A trial charges nothing until it ends, so starting one checks the card only as far
+            // as Stripe's checks when it was saved. Its security code has to have matched: on
+            // 2026-11-18 five trials started in a day, three of them on one card whose code had
+            // failed and two on another, each on an account of its own. A checkout that charges
+            // today is left to Stripe's own screening, which declines a failed code.
+            if ($trialEnd && ! $this->securityCodeMatched($request->payment_method)) {
+                return redirect()->back()->with('error', __('messages.subscription_card_code_unverified'));
+            }
 
             // Create the subscription
             $subscriptionBuilder = $role->newSubscription('default', $priceId);

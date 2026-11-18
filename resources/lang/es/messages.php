@@ -1817,6 +1817,7 @@ return [
     'subscription_already_active' => 'Ya tienes una suscripción activa.',
     'no_active_subscription' => 'No se encontro una suscripción activa.',
     'subscription_error' => 'Algo salió mal al procesar tu suscripción. Por favor, inténtalo de nuevo o contacta a soporte.',
+    'subscription_card_code_unverified' => 'No pudimos confirmar el código de seguridad de tu tarjeta, así que la prueba gratuita no ha comenzado. Revisa el código e inténtalo de nuevo.',
     'subscription_not_resumable' => 'Esta suscripción no se puede reanudar.',
     'subscribe_to_pro' => 'Suscribirse a Pro',
     'select_plan' => 'Selecciona un Plan',

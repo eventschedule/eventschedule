@@ -1811,6 +1811,7 @@ return [
     'subscription_already_active' => 'Teil on juba aktiivne tellimus.',
     'no_active_subscription' => 'Aktiivset tellimust ei leitud.',
     'subscription_error' => 'Tellimuse töötlemisel läks midagi valesti. Palun proovige uuesti või võtke ühendust toega.',
+    'subscription_card_code_unverified' => 'Me ei saanud sinu kaardi turvakoodi kinnitada, seega tasuta prooviperiood ei alanud. Kontrolli koodi ja proovi uuesti.',
     'subscription_not_resumable' => 'Seda tellimust ei saa jätkata.',
     'subscribe_to_pro' => 'Telli Pro',
     'select_plan' => 'Valige plaan',

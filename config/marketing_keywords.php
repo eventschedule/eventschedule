@@ -127,7 +127,7 @@ return [
     '/for-live-qa-sessions' => ['keyword' => 'live Q&A sessions'],
     '/for-magicians' => ['keyword' => 'event schedule for magicians'],
     '/for-music-venues' => ['keyword' => 'music venue calendar'],
-    '/for-musicians' => ['keyword' => 'band tour dates page', 'match' => ['tour dates page']],
+    '/for-musicians' => ['keyword' => 'tour dates page'],
     '/for-nightclubs' => ['keyword' => 'nightclub ticket sales'],
     '/for-online-classes' => ['keyword' => 'event schedule for online classes'],
     '/for-restaurants' => ['keyword' => 'restaurant event ticketing'],

@@ -1817,6 +1817,7 @@ return [
     'subscription_already_active' => 'Sie haben bereits ein aktives Abonnement.',
     'no_active_subscription' => 'Kein aktives Abonnement gefunden.',
     'subscription_error' => 'Beim Verarbeiten Ihres Abonnements ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.',
+    'subscription_card_code_unverified' => 'Wir konnten den Sicherheitscode deiner Karte nicht bestätigen, daher wurde der kostenlose Testzeitraum nicht gestartet. Prüfe den Code und versuche es erneut.',
     'subscription_not_resumable' => 'Dieses Abonnement kann nicht fortgesetzt werden.',
     'subscribe_to_pro' => 'Pro abonnieren',
     'select_plan' => 'Plan auswählen',

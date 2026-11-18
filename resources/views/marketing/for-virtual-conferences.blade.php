@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Virtual Conference Agenda & Ticketing Software</x-slot>
-    <x-slot name="description">Put a virtual conference online: one event per day with a timed agenda inside it, one join link, free registration or tickets, and zero platform fees.</x-slot>
+    <x-slot name="title">Virtual Conference Agenda: How to Build and Publish One</x-slot>
+    <x-slot name="description">How to build a virtual conference agenda: timed sessions, tracks, speakers, time zones and the join link, published free with Event Schedule.</x-slot>
     <x-slot name="breadcrumbTitle">For Virtual Conferences</x-slot>
 
     <x-slot name="headMeta">
@@ -10,35 +10,40 @@
 
     <x-slot name="structuredData">
     <x-seo.webpage
-        name="Event Schedule for Virtual Conferences"
-        description="Run a virtual conference day as one event with its running order inside it: every session is a part with its own start and end time, published on one link with one join link and zero platform fees."
+        name="Virtual Conference Agenda"
+        description="How to build and publish a virtual conference agenda: sessions with start and end times, tracks as sub-schedules, speakers, time zones, calendar links and the join link delivered with registration."
         audience="Virtual Conference Organizers"
-        keywords="virtual conference platform, online conference scheduling, conference agenda, virtual summit, conference ticketing" />
-    <!-- HowTo Schema for Rich Snippets -->
+        keywords="virtual conference agenda, virtual event agenda, virtual conference schedule, online conference agenda, conference agenda software" />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "HowTo",
-        "name": "How to put a virtual conference agenda online with Event Schedule",
-        "description": "A conference day is one event. The running order goes inside it.",
+        "name": "How to build and publish a virtual conference agenda with Event Schedule",
+        "description": "Each conference day is an event, and each session is a timed part of its agenda.",
         "step": [
             {
                 "@type": "HowToStep",
                 "position": 1,
                 "name": "Create the day",
-                "text": "One event per conference day: its date, its start time, how long it runs, and the link people join."
+                "text": "Create one event per conference day, tick Online and paste the link people join. Tick In-person as well for a hybrid day."
             },
             {
                 "@type": "HowToStep",
                 "position": 2,
-                "name": "Type the running order",
-                "text": "Add each session as a part of the agenda with a name, a start time and an end time, then move the parts into order."
+                "name": "Add the sessions",
+                "text": "On the Agenda tab, add each session as a part with a name, a start time, an end time and an optional description, then put the parts in order."
             },
             {
                 "@type": "HowToStep",
                 "position": 3,
-                "name": "Open the doors",
-                "text": "Free registration with a capacity limit on any plan, or named ticket types with prices on Pro. Share one link for the whole programme."
+                "name": "File the tracks",
+                "text": "For parallel tracks or rooms, make one event per track on the same date and file each under its own sub-schedule."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 4,
+                "name": "Open registration",
+                "text": "Turn on free registration with a capacity limit, or sell priced ticket types on Pro. Everyone who registers gets the full join link on their ticket page."
             }
         ]
     }
@@ -59,10 +64,10 @@
            a conference makes for itself in the week before it opens: one
            spectacular object, the badge, and one useful one, the agenda.
 
-           The product has no tracks and no rooms (the page says so), so
-           the agenda's columns are DAYS: one event per date, its parts
+           A track is an event of its own filed under a sub-schedule, so
+           the agenda's columns are TRACKS on one date, each event's parts
            placed on a shared time grid by named lines (t0900 ... t1600).
-           The day chips work with :has() and no script, and a container
+           The track chips work with :has() and no script, and a container
            query re-lays the grid as a list on a narrow screen.
 
            The hologram is four colours and no more: cyan, green, yellow,
@@ -577,45 +582,11 @@
         .vc-badge-no { color: var(--bd-ink-2); }
         .vc-hang-cap { max-width: 22rem; margin: 3.25rem auto 0; font-size: 0.88rem; line-height: 1.5; color: var(--vc-ink-3); text-align: center; }
 
-        /* The ticker: every kind of conference, set like a sponsor strip. */
-        .vc-ticker { position: relative; border-top: 1px solid var(--vc-line); padding-block: 0.95rem; }
-        .vc-ticker .es-marquee-track { gap: 0; padding-right: 0; align-items: center; }
-        .vc-tick {
-            display: inline-flex;
-            align-items: center;
-            font-family: var(--vc-mono);
-            font-size: 0.82rem;
-            font-weight: 700;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            white-space: nowrap;
-            color: var(--vc-ink-2);
-        }
-        .vc-tick::after { content: "/"; margin-inline: 1.5rem; color: var(--vc-c4); }
-
         /* ---------------------------------------------------------------
-           01 The unit
+           01 What goes on an agenda
            --------------------------------------------------------------- */
         .vc-duo { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
         @media (min-width: 900px) { .vc-duo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3.5rem; } }
-        .vc-duo-arrow { display: none; }
-        @media (min-width: 900px) {
-            .vc-duo-arrow {
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                z-index: 2;
-                display: grid;
-                place-items: center;
-                width: 2.6rem;
-                aspect-ratio: 1;
-                translate: -50% -50%;
-                border-radius: 50%;
-                background: var(--vc-ink);
-                color: var(--vc-bg);
-            }
-            .vc-duo-arrow svg { width: 1.15rem; height: 1.15rem; }
-        }
         .vc-fields { margin-top: 1.1rem; border-top: 1px solid var(--vc-line); }
         .vc-fields > div {
             display: grid;
@@ -640,74 +611,9 @@
         .vc-read small { font-family: var(--vc-mono); font-size: 0.78rem; font-weight: 600; color: var(--vc-ink-3); }
         .vc-read span { font-weight: 700; }
         .vc-read .is-gap span { font-weight: 400; color: var(--vc-ink-3); }
-        .vc-stats { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: clamp(2.5rem, 5vw, 4rem); border-block: 1px solid var(--vc-line-2); }
-        @media (min-width: 760px) { .vc-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        .vc-stat { padding: 1.75rem 0 1.9rem; }
-        .vc-stat + .vc-stat { border-top: 1px solid var(--vc-line); }
-        @media (min-width: 760px) {
-            .vc-stat { padding-inline: 1.75rem; }
-            .vc-stat:first-child { padding-inline-start: 0; }
-            .vc-stat + .vc-stat { border-top: 0; border-inline-start: 1px solid var(--vc-line); }
-        }
-        .vc-stat h3 { font-family: var(--vc-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--vc-ink-2); }
-        .vc-stat-n { display: inline-block; margin-block: 0.4rem 0.6rem; padding-inline-end: 0.08em; font-size: clamp(4.5rem, 9vw, 7.5rem); font-weight: 700; letter-spacing: -0.06em; line-height: 0.85; }
-        .vc-stat p:last-child { max-width: 22rem; color: var(--vc-ink-2); font-size: 1rem; }
-
-        /* Four clocks at one minute. Day faces are lit, night faces are not. */
-        .vc-clocks {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.75rem 1rem;
-            margin-top: 2.75rem;
-            align-items: start;
-        }
-        @media (min-width: 760px) { .vc-clocks { grid-template-columns: minmax(0, 1.3fr) repeat(4, minmax(0, 1fr)); gap: 1.5rem; align-items: center; } }
-        .vc-clocks-k { grid-column: 1 / -1; font-family: var(--vc-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.5; color: var(--vc-ink-2); }
-        @media (min-width: 760px) { .vc-clocks-k { grid-column: auto; } }
-        /* Five columns need about 980px: under that a city had 35px to be named in, and
-           "Bengaluru" ran on under the next clock. Until then the caption keeps its own row. */
-        @media (min-width: 760px) and (max-width: 979px) {
-            #vc .vc-clocks { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-            #vc .vc-clocks-k { grid-column: 1 / -1; }
-        }
-        /* And on the narrowest phones the face gives the name the few pixels it was short of. */
-        @media (max-width: 374px) {
-            #vc .vc-clock { gap: 0.55rem; }
-            #vc .vc-clock-face { width: 4.1rem; }
-        }
-        .vc-clock { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.85rem; }
-        .vc-clock-face {
-            --face: #ffffff;
-            --hand: #0e0f12;
-            position: relative;
-            width: 4.4rem;
-            aspect-ratio: 1;
-            border-radius: 50%;
-            background: var(--face);
-            box-shadow: 0 0 0 1.5px var(--vc-line-2), 0 10px 22px -14px rgba(0, 0, 0, 0.5);
-        }
-        .vc-clock.is-night .vc-clock-face { --face: #15171c; --hand: #f4f3ee; }
-        .vc-clock-face::before {
-            content: "";
-            position: absolute;
-            inset: 7%;
-            border-radius: 50%;
-            background: repeating-conic-gradient(from -1.5deg, var(--hand) 0 3deg, transparent 3deg 30deg);
-            -webkit-mask: radial-gradient(circle, transparent 0 60%, #000 61%);
-            mask: radial-gradient(circle, transparent 0 60%, #000 61%);
-            opacity: 0.6;
-        }
-        .vc-clock-face::after { content: ""; position: absolute; inset: 46%; border-radius: 50%; background: var(--hand); }
-        .vc-clock-face i { position: absolute; left: 50%; bottom: 50%; border-radius: 3px; background: var(--hand); transform-origin: 50% 100%; }
-        .vc-clock-face i:nth-child(1) { width: 3px; height: 25%; margin-left: -1.5px; rotate: var(--h); }
-        .vc-clock-face i:nth-child(2) { width: 2px; height: 37%; margin-left: -1px; rotate: var(--m); }
-        .vc-clock-face i:nth-child(3) { width: 1px; height: 40%; margin-left: -0.5px; background: #fb923c; animation: vc-second 60s steps(60) infinite; }
-        @keyframes vc-second { to { rotate: 360deg; } }
-        .vc-clock b { display: block; font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
-        .vc-clock small { display: block; font-family: var(--vc-mono); font-size: 0.78rem; font-weight: 600; color: var(--vc-ink-3); }
 
         /* ---------------------------------------------------------------
-           02 Setting the running order: a part, opened
+           02 Building it: a part, opened
            --------------------------------------------------------------- */
         .vc-set { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem 3.5rem; align-items: start; }
         @media (min-width: 980px) { .vc-set { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); } }
@@ -770,35 +676,11 @@
         .vc-scan-out li i { height: 0.3rem; border-radius: 1rem; background: var(--vc-line-2); }
 
         /* ---------------------------------------------------------------
-           03 The programme: the strip, then the agenda itself
+           03 Tracks: three events on one date, on one time grid
            --------------------------------------------------------------- */
         .vc-day-1 { --s: #22d3ee; --sd: var(--vc-c1); }
         .vc-day-2 { --s: #fb923c; --sd: var(--vc-c4); }
         .vc-day-3 { --s: #4ade80; --sd: var(--vc-c2); }
-
-        .vc-prog-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.4rem 1.5rem; margin-bottom: 1rem; }
-        .vc-prog-top p { font-family: var(--vc-mono); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-        .vc-prog-top p + p { color: var(--vc-ink-2); letter-spacing: 0.08em; }
-        .vc-strip { width: 100%; border-collapse: collapse; text-align: start; }
-        .vc-strip th,
-        .vc-strip td { padding: 0; text-align: start; }
-        .vc-strip thead th { padding-bottom: 0.6rem; font-family: var(--vc-mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--vc-ink-3); }
-        .vc-strip .vc-strip-n { text-align: end; }
-        .vc-strip-day th,
-        .vc-strip-day td { padding-top: 0.85rem; border-top: 1px solid var(--vc-line); vertical-align: baseline; }
-        .vc-strip-day th { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; padding-inline-end: 1rem; white-space: nowrap; }
-        .vc-strip-day td { font-family: var(--vc-mono); font-size: 0.8rem; font-weight: 600; color: var(--vc-ink-2); padding-inline-end: 1rem; white-space: nowrap; }
-        @media (max-width: 480px) {
-            .vc-strip-day th { font-size: 1rem; padding-inline-end: 0.5rem; }
-            .vc-strip-day td { font-size: 0.68rem; padding-inline-end: 0.5rem; }
-        }
-        .vc-strip-day td.vc-strip-n { padding-inline-end: 0; font-size: 1.05rem; font-weight: 700; color: var(--vc-ink); }
-        .vc-strip-ticks td { padding-block: 0.6rem 0.9rem; }
-        .vc-ruler { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); padding-bottom: 0.3rem; font-family: var(--vc-mono); font-size: 0.66rem; font-weight: 600; color: var(--vc-ink-3); }
-        .vc-ruler span { border-inline-start: 1px solid var(--vc-line-2); padding-inline-start: 0.3rem; line-height: 1.5; }
-        .vc-track { position: relative; height: 1.15rem; border-radius: 0.2rem; background: repeating-linear-gradient(90deg, var(--vc-line) 0 1px, transparent 1px 11.111%) var(--vc-bg-2); }
-        .vc-tickmark { position: absolute; top: 0; bottom: 0; border-radius: 0.14rem; background: var(--s); box-shadow: inset 0 0 0 1px rgba(14, 15, 18, 0.35); }
-        .vc-tickmark.is-gap { background: transparent; box-shadow: inset 0 0 0 1.5px var(--vc-line-2); }
 
         .vc-ag { container: vc-ag / inline-size; position: relative; margin-top: 2.25rem; padding-top: 1.75rem; border-top: 1px dashed var(--vc-line-2); }
         .vc-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; }
@@ -955,7 +837,7 @@
         .vc-strand-note { max-width: 46rem; margin: clamp(2rem, 4vw, 3rem) auto 0; color: var(--vc-ink-2); }
 
         /* ---------------------------------------------------------------
-           04 In session: seven parts, one link (a band that stays dark)
+           04 Joining: one link per event (a band that stays dark)
            --------------------------------------------------------------- */
         .vc-band-glow {
             position: absolute;
@@ -1015,7 +897,7 @@
         .vc-band-foot svg { width: 1rem; height: 1rem; }
 
         /* ---------------------------------------------------------------
-           05 The takings: the run-up, and the price board
+           07 Registration or tickets: the rail, and the board
            --------------------------------------------------------------- */
         .vc-take { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem 4rem; align-items: start; }
         @media (min-width: 1000px) {
@@ -1043,67 +925,7 @@
         .vc-fee b { font-size: clamp(3rem, 6vw, 4.5rem); font-weight: 700; letter-spacing: -0.05em; line-height: 0.9; }
 
         /* ---------------------------------------------------------------
-           06 Afterwards: six cells on hairlines
-           --------------------------------------------------------------- */
-        .vc-after { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; border: 1px solid var(--vc-line); border-radius: 0.5rem; background: var(--vc-line); overflow: hidden; counter-reset: vc-after; }
-        @media (min-width: 760px) { .vc-after { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (min-width: 1100px) { .vc-after { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        .vc-after > article { position: relative; counter-increment: vc-after; padding: 1.5rem 1.5rem 1.8rem; background: var(--vc-card); }
-        .vc-after > article::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, #22d3ee, #4ade80, #fde047, #fb923c); scale: 0 1; transform-origin: 0 50%; transition: scale 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
-        .vc-after > article:hover::before { scale: 1 1; }
-        .vc-after-no { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.6rem; font-family: var(--vc-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: var(--vc-ink-3); }
-        .vc-after-no::before { content: "A." counter(vc-after, decimal-leading-zero); }
-        .vc-after p { margin-top: 0.85rem; color: var(--vc-ink-2); font-size: 1rem; }
-        .vc-after p + p { font-size: 0.9rem; color: var(--vc-ink-3); }
-
-        /* ---------------------------------------------------------------
-           07 Perfect for: six badges on one rail
-           --------------------------------------------------------------- */
-        .vc-wall { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem 1.5rem; }
-        @media (min-width: 700px) { .vc-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (min-width: 1060px) { .vc-wall { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3rem 2rem; } }
-        .vc-mini-wrap { position: relative; min-width: 0; padding-top: 1.75rem; }
-        .vc-mini-wrap::before { content: ""; position: absolute; left: 50%; top: 0; width: 4.5rem; height: 4px; margin-left: -2.25rem; border-radius: 4px; background: var(--vc-ink); }
-        .vc-mini {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            border-radius: 0.9rem;
-            background: var(--vc-card);
-            box-shadow: 0 0 0 1px var(--vc-line), 0 22px 44px -30px rgba(0, 0, 0, 0.55);
-            rotate: var(--r, 0deg);
-            transform-origin: 50% -1.75rem;
-            transition: rotate 0.45s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.3s ease;
-        }
-        .vc-mini:hover { rotate: 0deg; box-shadow: 0 0 0 1px var(--vc-line-2), 0 30px 50px -30px rgba(0, 0, 0, 0.6); }
-        .vc-mini::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 0.9rem; height: 1.75rem; margin-left: -0.45rem; background: var(--vc-ink); }
-        .vc-mini-slot { display: block; width: 2.6rem; height: 0.6rem; margin: 0.7rem auto 0.6rem; border-radius: 1rem; background: var(--vc-bg); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--vc-line); }
-        .vc-mini-foil { display: flex; justify-content: space-between; gap: 1rem; padding: 0.7rem 1.1rem 0.6rem; font-family: var(--vc-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.3; }
-        .vc-mini-foil::before { transition: background-position 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
-        .vc-mini:hover .vc-mini-foil::before { background-position: 92% 8%; }
-        .vc-mini-body { display: flex; flex-direction: column; flex: 1; padding: 1.2rem 1.1rem 1.3rem; }
-        .vc-mini h3 { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.035em; line-height: 1.05; }
-        .vc-mini p { margin-top: 0.75rem; color: var(--vc-ink-2); font-size: 1rem; }
-        .vc-mini a { align-self: flex-start; margin-top: auto; padding-top: 1.1rem; }
-        .vc-mini a span { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; border-bottom: 2px solid var(--vc-c4); transition: gap 0.2s ease; }
-        .vc-mini a:hover span { gap: 0.7rem; }
-        .vc-mini a svg { width: 1rem; height: 1rem; }
-        .vc-mini-bars { height: 1.5rem; margin: 0 1.1rem 1.1rem; background: repeating-linear-gradient(90deg, var(--vc-ink) 0 2px, transparent 2px 5px, var(--vc-ink) 5px 6px, transparent 6px 10px, var(--vc-ink) 10px 13px, transparent 13px 15px); opacity: 0.8; }
-
-        /* ---------------------------------------------------------------
-           08 Three steps
-           --------------------------------------------------------------- */
-        .vc-steps { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem 2.5rem; padding-top: 2rem; }
-        @media (min-width: 860px) { .vc-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        .vc-steps::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; border-radius: 3px; background: linear-gradient(90deg, #22d3ee, #4ade80, #fde047, #fb923c); transform-origin: 0 50%; transition: scale 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s; }
-        html.es-anim #vc .vc-steps:not(.is-revealed)::before { scale: 0 1; }
-        .vc-step-no { display: block; font-size: clamp(4.5rem, 9vw, 7rem); font-weight: 700; letter-spacing: -0.06em; line-height: 0.85; color: transparent; -webkit-text-stroke: 1.5px var(--vc-ink); }
-        .vc-steps h3 { margin-top: 1rem; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
-        .vc-steps p { margin-top: 0.7rem; max-width: 24rem; color: var(--vc-ink-2); }
-
-        /* ---------------------------------------------------------------
-           09 Key features, and the pages next door
+           08 Read more
            --------------------------------------------------------------- */
         .vc-kf { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem 4rem; align-items: start; }
         @media (min-width: 960px) { .vc-kf { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); } }
@@ -1116,32 +938,7 @@
         .vc-kf-row small { display: block; margin-top: 0.3rem; font-size: 0.98rem; color: var(--vc-ink-2); }
         .vc-kf-row svg { width: 1.4rem; height: 1.4rem; transition: translate 0.25s ease; }
         .vc-kf-row:hover svg { translate: 0.3rem 0; }
-        .vc-also-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1.25rem; margin-bottom: 2.25rem; }
-        .vc-also { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
-        @media (min-width: 900px) { .vc-also { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; } }
-        .vc-also a { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 2.5rem; min-height: 9.5rem; padding: 1.1rem 1.1rem 1rem; border: 1px solid var(--vc-line-2); border-radius: 0.5rem; background: var(--vc-card); transition: translate 0.25s ease, border-color 0.25s ease; }
-        .vc-also a:hover { translate: 0 -4px; border-color: var(--vc-ink); }
-        .vc-also strong { font-size: clamp(1.15rem, 2vw, 1.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
-        .vc-also small { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--vc-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vc-ink-2); }
-        .vc-also svg { width: 0.9rem; height: 0.9rem; transition: translate 0.2s ease; }
-        .vc-also a:hover svg { translate: 3px 0; }
 
-        /* The plan band and the closing strip are shared partials: their words and prices stay. */
-        #vc .vc-nudge > section { background: var(--vc-bg); border-top: 1px solid var(--vc-line); }
-        #vc .vc-nudge h2 { font-family: var(--vc-sans); font-weight: 700; letter-spacing: -0.045em; line-height: 1; font-size: clamp(2rem, 4.4vw, 3.4rem); color: var(--vc-ink); }
-        #vc .vc-nudge h2 + p { color: var(--vc-ink-2); font-size: 1.0625rem; }
-        #vc .vc-nudge .grid > div { background: var(--vc-card); border: 1px solid var(--vc-line); border-radius: 0.5rem; box-shadow: none; color: var(--vc-ink); }
-        #vc .vc-nudge .grid > div[class*="border-blue"] { border-color: var(--vc-ink); }
-        #vc .vc-nudge .grid > div:hover { box-shadow: 0 22px 44px -28px rgba(0, 0, 0, 0.45); }
-        #vc .vc-nudge .grid > div span,
-        #vc .vc-nudge .grid > div p,
-        #vc .vc-nudge .grid > div li { color: var(--vc-ink-2); }
-        #vc .vc-nudge .grid > div .text-3xl { font-weight: 700; letter-spacing: -0.045em; font-size: 2.7rem; color: var(--vc-ink); }
-        #vc .vc-nudge .grid > div .uppercase { font-family: var(--vc-mono); color: var(--vc-ink); }
-        #vc .vc-nudge .grid > div .rounded-full { background: #fde047; color: #0e0f12; font-family: var(--vc-mono); }
-        #vc .vc-nudge .grid > div svg { color: var(--vc-c2); }
-        #vc .vc-nudge a.font-medium { color: var(--vc-ink); border-bottom: 2px solid var(--vc-c4); }
-        #vc .vc-nudge a.rounded-2xl { background: var(--vc-btn); color: var(--vc-on-btn); border-radius: 999px; box-shadow: none; font-weight: 700; }
 
         #vc .vc-keep > section { background: var(--vc-bg-2); border-top: 1px solid var(--vc-line); }
         #vc .vc-keep h2 { font-weight: 700; letter-spacing: -0.045em; font-size: clamp(1.9rem, 3.6vw, 2.8rem); line-height: 1; color: var(--vc-ink); }
@@ -1155,7 +952,7 @@
         #vc .vc-keep a.self-start { color: var(--vc-c1); }
 
         /* ---------------------------------------------------------------
-           10 Questions
+           09 Questions
            --------------------------------------------------------------- */
         .vc-faq { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.25rem 4rem; align-items: start; }
         @media (min-width: 1000px) {
@@ -1178,7 +975,7 @@
         @media (max-width: 560px) { .vc-qa details p { padding-inline-start: 0; } }
 
         /* ---------------------------------------------------------------
-           11 Close: your name on the badge
+           10 Close: your name on the badge
            --------------------------------------------------------------- */
         .vc-close { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem 4rem; align-items: center; }
         @media (min-width: 980px) { .vc-close { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); } }
@@ -1276,26 +1073,20 @@
             .vc-rig,
             .vc-run-now,
             .vc-scan-sheet b,
-            .vc-btn-holo::before,
-            .vc-clock-face i:nth-child(3) { animation: none; }
+            .vc-btn-holo::before { animation: none; }
             .vc-badge,
             .vc-grid,
-            .vc-mini,
             .vc-btn,
-            .vc-also a,
-            .vc-kf-row,
-            .vc-steps::before,
-            .vc-after > article::before,
-            .vc-mini-foil::before { transition: none; }
+            .vc-kf-row { transition: none; }
         }
     </style>
 
     @php
         // ------------------------------------------------------------------
-        // Day one's running order. The product shape: ONE Event, plus ordered
-        // EventPart rows carrying name / description / start_time / end_time.
-        // A block's height IS its duration, so 0.085rem per minute turns the
-        // list into a proportional timetable rather than a stack of equals.
+        // The main stage's running order, printed on the hero badge. The product
+        // shape: ONE Event, plus ordered EventPart rows carrying name /
+        // description / start_time / end_time. A block's height IS its duration,
+        // so 0.085rem per minute turns the list into a proportional timetable.
         // ------------------------------------------------------------------
         $minuteRem = 0.085;
         $run = [
@@ -1310,82 +1101,52 @@
         // A break is a part too, which the hero says out loud, so the count is all rows.
         $runParts = count($run);
 
-        // The three-day programme. Each day is its own event on its own date,
-        // with its own running order and its own join link. Offsets are
-        // minutes from 09:00 across a 09:00-18:00 window (540 minutes), and
-        // the third value marks a break, which is a part like any other and
-        // so gets a tick - hollow, exactly as in the hero. Ticks are drawn
-        // 3px short of their true width so that abutting parts stay
-        // countable instead of fusing into one bar.
-        $window = 540;
-        $programme = [
-            ['Day 1', 'Tue 3 Mar', '09:00 to 13:00', 7, [[0, 25, false], [25, 50, false], [75, 15, true], [90, 45, false], [135, 60, false], [195, 15, true], [210, 30, false]]],
-            ['Day 2', 'Wed 4 Mar', '10:00 to 16:00', 9, [[60, 30, false], [90, 45, false], [135, 15, true], [150, 60, false], [210, 45, false], [255, 45, false], [300, 15, true], [315, 60, false], [375, 45, false]]],
-            ['Day 3', 'Thu 5 Mar', '09:30 to 13:00', 5, [[30, 45, false], [75, 15, true], [90, 60, false], [150, 45, false], [195, 45, false]]],
-        ];
-
-        // The event itself: the fields you fill in once for the whole day.
-        $dayFields = [
-            ['Event', 'Cloud Summit, day 1'],
-            ['Date', 'Tue 3 Mar 2026'],
-            ['Starts', '09:00'],
-            ['Runs for', '4 hours'],
-            ['Online', 'yes, one join link'],
-            ['Sub-schedule', 'Main programme'],
+        // Three parallel tracks on one date. Each track is its own event, filed under
+        // a sub-schedule, with its own running order and its own join link. Offsets
+        // are minutes from 09:00, and the third value marks a break, which is a part
+        // like any other.
+        $vcTracks = [
+            ['Main stage', 'main-stage', '09:00 to 13:00', 7, [[0, 25, false], [25, 50, false], [75, 15, true], [90, 45, false], [135, 60, false], [195, 15, true], [210, 30, false]]],
+            ['Workshops', 'workshops', '10:00 to 16:00', 9, [[60, 30, false], [90, 45, false], [135, 15, true], [150, 60, false], [210, 45, false], [255, 45, false], [300, 15, true], [315, 60, false], [375, 45, false]]],
+            ['Community', 'community', '09:30 to 13:00', 5, [[30, 45, false], [75, 15, true], [90, 60, false], [150, 45, false], [195, 45, false]]],
         ];
 
         $faqs = [
             [
-                'q' => 'Can I schedule a multi-day virtual conference?',
-                'a' => 'Yes. Each conference day is one event on its own date, with its own join link, and the day\'s sessions go inside it as parts of the agenda. Every part has a name, an optional description and its own start and end time, so attendees read the whole running order on one link. Sub-schedules can file the days under a strand and give that strand a color.',
-            ],
-            [
-                'q' => 'Does each session get its own streaming link?',
-                'a' => 'One join link per event. A day is one event, so the day has one link and every part of its running order sits behind that link. If two sessions genuinely need two different links, make them two events on the same date. Any platform works, because all Event Schedule stores is the URL: Zoom, Microsoft Teams, Google Meet, YouTube Live, or anything else that gives you one.',
-            ],
-            [
-                'q' => 'What about tracks and rooms?',
-                'a' => 'There are none, and it is better to say so before you move a programme across. Event Schedule has one running order per event. Parallel sessions are separate events on the same date, and a sub-schedule can keep a strand together and color it, which is organizing and color-coding rather than access control. There is no room inventory and nothing is hidden by a sub-schedule.',
-            ],
-            [
                 'q' => 'What should a virtual conference agenda include?',
-                'a' => 'For every session: a title that says what it is, the speaker\'s name, a start and an end time, and a one or two sentence description for anything longer than a short talk. For the day: its date, the time zone printed beside every time, the breaks named as breaks, and how people join. Publish it as a page rather than a PDF, so it reads on a phone and can be corrected when a speaker swaps slots. In Event Schedule each session is a part of the day\'s agenda with its own name, times and description, and the time zone comes from the schedule.',
+                'a' => 'For every session: a title that says what it is, the speaker, a start and an end time, and a short description for anything longer than a short talk. For the day: its date, the time zone beside every time, the breaks, and how people join. Publish it as a web page rather than a PDF, so it reads on a phone and can be corrected when a slot moves.',
             ],
             [
                 'q' => 'How long should a virtual conference day be?',
-                'a' => 'Three to five hours of live programme works for most online audiences, with a 10 to 15 minute break every 60 to 90 minutes and five minutes between speakers for the changeover. Talks of 20 to 30 minutes and keynotes of 30 to 45 hold attention better on a screen than the hour-long slots of a venue. If the content needs more time, add a day rather than stretch one: three half days are easier to fit around a working week than one long day.',
+                'a' => 'Three to five hours of live programme suits most online audiences, with a 10 to 15 minute break every 60 to 90 minutes and five minutes between speakers. If the content needs more time, add a day rather than stretch one.',
             ],
             [
                 'q' => 'How do I schedule a virtual conference across time zones?',
-                'a' => 'Find the two regions most of your attendees are in and pick the four hours they share. 13:00 to 17:00 UTC suits the Americas and Europe, 08:00 to 12:00 UTC suits Europe and Asia-Pacific, and 22:00 to 02:00 UTC suits the Americas and Asia-Pacific. Reach the region you left out by repeating the keynote as a second event in its window, rotating the window from day to day, or sending the recording. Set your schedule\'s timezone before you add events: the event page prints its abbreviation beside the time, and the calendar invite places the day at each attendee\'s own local hour.',
+                'a' => 'Pick the two regions most of your attendees are in and find the four hours they share: 13:00 to 17:00 UTC suits the Americas and Europe, 08:00 to 12:00 UTC suits Europe and Asia-Pacific, and 22:00 to 02:00 UTC suits the Americas and Asia-Pacific. In Event Schedule, set the schedule\'s timezone before you add events: the event page names the zone beside the start, and calendar entries land at each attendee\'s own local hour.',
             ],
             [
                 'q' => 'How do attendees get the link to join?',
-                'a' => 'They register or buy a ticket. The public event page shows only the domain of the join link, such as zoom.us, never the link itself. Everyone who registers gets a ticket page with the full link on it, and the reminder email sent before the start, 3 hours or 1, 2 or 3 days ahead as you choose, carries the link as well. If the link changes after people have registered, saving the event asks whether to email them about it; on eventschedule.com that email goes to registered attendees once your schedule has its own email settings.',
+                'a' => 'They register or buy a ticket. The public event page shows only the domain of the join link, such as zoom.us. Everyone who registers gets a ticket page with the full link, and the reminder email before the start carries it too when reminders are on. If the link changes, saving the event asks whether to email the people registered.',
+            ],
+            [
+                'q' => 'Can I run parallel tracks or rooms?',
+                'a' => 'Yes. Make each track its own event on the same date, with its own agenda, join link and registration limit, and file each track\'s events under a sub-schedule, which has a color and an address of its own and can filter the calendar. It sorts events; it does not hide them.',
+            ],
+            [
+                'q' => 'Does each session get its own join link?',
+                'a' => 'A link belongs to an event. If a day is one event with its sessions as agenda parts, the whole day shares one link, which suits a single stream. If sessions need separate links, separate registration or separate calendar entries, make each session an event of its own.',
+            ],
+            [
+                'q' => 'Can a hybrid conference use the same agenda?',
+                'a' => 'Yes. Tick both In-person and Online on the event: the page shows the venue and the online option together, and the agenda is the same for both audiences.',
             ],
             [
                 'q' => 'Is the agenda free?',
-                'a' => 'Yes. Adding parts, naming them, giving them start and end times, writing a description for each one, moving them into order and publishing the running order are all free forever, along with the join link, calendar sync and the embeddable calendar. Agenda scanning, which reads a printed or emailed programme and fills the parts in for you, is on the Enterprise plan. Typing them costs nothing.',
-            ],
-            [
-                'q' => 'Can I sell different ticket types for my conference?',
-                'a' => 'Yes, on Pro. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window. Pro at '.plan_price($proMonthly).' a month is what opens paid checkout, and it adds discount codes, add-ons and individual tickets, which give every attendee their own confirmation email and QR code; custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: attendees pay through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, and your processor\'s fee is the only cut. For a free conference, registration with a capacity limit is unlimited on the free plan.',
-            ],
-            [
-                'q' => 'Can I announce the conference before tickets go on sale?',
-                'a' => 'Yes. Publish the day with its running order and open ticket sales later. Until they open, and with the free "Notify me" card switched on, the event page offers "Tell me when tickets go on sale": a visitor leaves an email address, nothing else, and gets one email the moment tickets are on sale, a reminder shortly before the day starts, a notice if it is cancelled, and any change notice you choose to send. The event editor shows you how many people are waiting. It is free on every plan, it is not a subscription to your schedule, and it does not draw on your newsletter allowance.',
-            ],
-            [
-                'q' => 'Can I refund an attendee who cannot make it?',
-                'a' => 'Yes, from the Sales page, on Pro. A Stripe, PayPal or Razorpay payment goes back through the provider, in full or for part of the amount, and the sale only changes once the money has moved. A partial refund leaves the ticket valid; a full refund puts the place back on sale for somebody else. A sale taken through Invoice Ninja, Payfast, a payment link or cash is marked as refunded for your records, and you return that money yourself.',
-            ],
-            [
-                'q' => 'How do attendees hear about the next edition?',
-                'a' => 'Two ways. Somebody who left an email address on your page and confirmed it is sent a digest on its own when you publish new conference days, batched rather than one message per event and never more than one every three days. Somebody who pressed Follow from their own account is reached only by a newsletter you write, which is what you want when the programme is set and there is something to say about it: 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted one per recipient. Followers also show up with their name and email on your followers tab, so the audience is yours rather than a platform\'s.',
+                'a' => 'Yes. Adding parts, giving them names, times and descriptions, reordering them and publishing them are free on every plan, along with the join link, free registration and calendar links. Importing an existing agenda from pasted text or a photo with AI is on the Enterprise plan. Selling priced tickets is Pro.',
             ],
         ];
 
-        // The worked half day in the agenda guide: 205 minutes of programme and 35 of breaks.
+        // The worked half day: 205 minutes of programme and 35 of breaks.
         $vcSample = [
             ['13:00', 'Welcome, and how today works', 10, false],
             ['13:10', 'Opening keynote', 35, false],
@@ -1401,28 +1162,25 @@
         ];
 
         // Three four-hour windows on Tue 3 Mar 2026. Offsets that day: Los Angeles UTC-8,
-        // New York UTC-5, São Paulo UTC-3, London UTC+0, Berlin UTC+1, Bengaluru UTC+5:30,
-        // Singapore UTC+8, Tokyo UTC+9, Sydney UTC+11 (daylight time until 5 April).
+        // New York UTC-5, London UTC+0, Berlin UTC+1, Bengaluru UTC+5:30, Singapore UTC+8,
+        // Tokyo UTC+9, Sydney UTC+11 (daylight time until 5 April).
         $vcWindows = [
-            ['Americas and Europe', '13:00 to 17:00 UTC', 'The window for a North American and European crowd. The west coast starts early and Asia-Pacific is asleep.', [['New York', '08:00 to 12:00'], ['São Paulo', '10:00 to 14:00'], ['London', '13:00 to 17:00'], ['Berlin', '14:00 to 18:00'], ['Bengaluru', '18:30 to 22:30'], ['Los Angeles', '05:00 to 09:00']]],
-            ['Europe and Asia-Pacific', '08:00 to 12:00 UTC', 'Morning in Europe, afternoon and evening across Asia and Australia. The Americas are the ones left out.', [['London', '08:00 to 12:00'], ['Berlin', '09:00 to 13:00'], ['Bengaluru', '13:30 to 17:30'], ['Singapore', '16:00 to 20:00'], ['Sydney', '19:00 to 23:00'], ['New York', '03:00 to 07:00']]],
-            ['Americas and Asia-Pacific', '22:00 to 02:00 UTC', 'An American afternoon is the next morning in Tokyo and Sydney, so the Pacific shares one window and Europe sits this one out.', [['Los Angeles', '14:00 to 18:00'], ['New York', '17:00 to 21:00'], ['São Paulo', '19:00 to 23:00'], ['Tokyo', '07:00 to 11:00, Wed'], ['Sydney', '09:00 to 13:00, Wed'], ['London', '22:00 to 02:00']]],
+            ['Americas and Europe', '13:00 to 17:00 UTC', 'The west coast starts early and Asia-Pacific is asleep.', [['New York', '08:00 to 12:00'], ['London', '13:00 to 17:00'], ['Berlin', '14:00 to 18:00'], ['Los Angeles', '05:00 to 09:00']]],
+            ['Europe and Asia-Pacific', '08:00 to 12:00 UTC', 'Morning in Europe, afternoon and evening in Asia and Australia.', [['London', '08:00 to 12:00'], ['Bengaluru', '13:30 to 17:30'], ['Singapore', '16:00 to 20:00'], ['Sydney', '19:00 to 23:00']]],
+            ['Americas and Asia-Pacific', '22:00 to 02:00 UTC', 'An American afternoon is the next morning in Tokyo and Sydney.', [['Los Angeles', '14:00 to 18:00'], ['New York', '17:00 to 21:00'], ['Tokyo', '07:00 to 11:00, Wed'], ['Sydney', '09:00 to 13:00, Wed']]],
         ];
 
         $dotSections = [
-            ['top', 'The running order'],
-            ['unit', 'One event'],
-            ['run', 'Setting it'],
-            ['programme', 'The programme'],
-            ['guide', 'Building it'],
+            ['top', 'The agenda'],
+            ['what', 'What goes on it'],
+            ['build', 'Building it'],
+            ['tracks', 'Tracks'],
+            ['join', 'Joining'],
             ['zones', 'Time zones'],
-            ['session', 'In session'],
-            ['whole', 'Tracks and links'],
-            ['tickets', 'The takings'],
-            ['after', 'Afterwards'],
-            ['who', 'Perfect for'],
+            ['changes', 'Changes'],
+            ['tickets', 'Registration'],
             ['faq', 'Questions'],
-            ['claim', 'Close'],
+            ['claim', 'Start'],
         ];
     @endphp
 
@@ -1433,25 +1191,19 @@
         $vcArrow = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>';
         $vcDown = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>';
 
-        // The page's data gives days two and three a start, a length and a break flag for each
-        // part (the ticks) and nothing else, so the names below are sample set dressing. Day one's
-        // are the running order's own.
+        // Session names for each track. The main stage's are the badge's own.
         $vcNames = [
             array_column($run, 1),
-            ['Welcome back, and the day in brief', 'Workshop: tracing a slow request', 'Break', 'Workshop: shipping without a freeze', 'Open floor: ask the maintainers', 'Workshop: budgets, alerts and sleep', 'Break', 'Clinic: bring your own dashboard', 'Show and tell'],
-            ['Keynote: what we got wrong', 'Break', 'Panel: the next five years of on-call', 'Community lightning round', 'Closing notes, and next year'],
+            ['Workshops open: setup and accounts', 'Workshop: tracing a slow request', 'Break', 'Workshop: shipping without a freeze', 'Open floor: ask the maintainers', 'Workshop: budgets, alerts and sleep', 'Break', 'Clinic: bring your own dashboard', 'Show and tell'],
+            ['Community welcome', 'Break', 'Panel: the next five years of on-call', 'Community lightning round', 'Meet the maintainers'],
         ];
-        // A part can carry a description. A few sample ones, keyed day-part.
+        // A part can carry a description. A few sample ones, keyed track-part.
         $vcAbstracts = [
             '0-1' => 'Where the platform goes next, and what it cost to get here.',
             '0-4' => 'Bring a laptop. We add three traces to a real service.',
-            '1-3' => 'Release trains, flags, and what to do on a Friday.',
-            '1-7' => 'Ten-minute slots. First come, first looked at.',
             '2-2' => 'Four people who carry the pager, and one who never has.',
         ];
-        $vcKeys = ['0-1', '2-0'];
-        // The strand each day is filed under: a sub-schedule, which is a name and a color.
-        $vcStrands = ['Main programme', 'Workshop day', 'Community day'];
+        $vcKeys = ['0-1', '2-2'];
 
         // The agenda's rows: a named grid line every five minutes from 09:00 to 16:00, so a part
         // is placed by the clock (grid-row: t0925 / t1015) rather than by counting rows.
@@ -1507,9 +1259,7 @@
             </ol>
         </nav>
 
-        <!-- ============================================================ -->
-        <!-- Hero: the headline, and the badge on its lanyard             -->
-        <!-- ============================================================ -->
+        {{-- Hero: the answer first, and the badge on its lanyard --}}
         <section class="vc-hero" id="top">
             <div class="vc-hero-dots" aria-hidden="true"></div>
             <div class="vc-hero-glow" aria-hidden="true"></div>
@@ -1518,19 +1268,19 @@
                 <div class="vc-hero-copy">
                     <h1 class="vc-h1">
                         <x-marketing.hero-eyebrow class="vc-eyebrow es-fade-up es-d-1">
-                            Virtual conference agenda for online summit organizers
+                            How to build a virtual conference agenda
                         </x-marketing.hero-eyebrow>
-                        <span class="es-mask"><span class="es-mask-line">A conference day is one event.</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">The <span class="vc-holo-text">agenda</span> goes inside it.</span></span>
+                        <span class="es-mask"><span class="es-mask-line">Every session on the clock.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">The <span class="vc-holo-text">join link</span> with the ticket.</span></span>
                     </h1>
 
                     <p class="vc-lede es-fade-up es-d-2">
-                        Enter each session as a part of the day, with its own name and its own start and end time. Your virtual conference agenda publishes as one running order, on one link, with one link to join, and it is free on every plan.
+                        A virtual conference agenda gives every session a title, a speaker, a start and an end time in a named time zone, and tells people how to join. Publish it as a page, not a PDF, so it reads on a phone and stays right when a slot moves. In Event Schedule each conference day is an event and each session a timed part of its agenda, free on every plan.
                     </p>
 
                     <div class="vc-cta es-fade-up es-d-3">
-                        <a href="#run" class="vc-btn vc-btn-ghost">
-                            See how a day is built
+                        <a href="#what" class="vc-btn vc-btn-ghost">
+                            What goes on the agenda
                             {!! $vcDown !!}
                         </a>
                         <a href="{{ app_url('/sign_up?type=talent') }}" class="vc-btn vc-btn-holo">
@@ -1540,7 +1290,7 @@
                     </div>
                 </div>
 
-                <!-- The badge. The day's running order is printed on it: one event, its parts inside. -->
+                {{-- The badge. The main stage's running order is printed on it: one event, its parts inside. --}}
                 <figure class="vc-hang es-fade-up es-d-2">
                     <div class="vc-rig" aria-hidden="true">
                         <span class="vc-strap"><i>{{ $vcStrap }}</i></span>
@@ -1575,7 +1325,7 @@
                                 <span class="vc-qr"><i style="box-shadow: {{ $vcCode('cloud-summit') }};"></i></span>
                                 <div>
                                     <b>Organizer</b>
-                                    <small>Main programme</small>
+                                    <small>Main stage</small>
                                 </div>
                                 <span class="vc-badge-no">No. 0001</span>
                             </div>
@@ -1586,134 +1336,89 @@
                     </figcaption>
                 </figure>
             </div>
-
-            <!-- Conference-type ticker -->
-            <div class="vc-ticker es-fade-up es-d-4">
-                <div class="es-marquee" data-marquee="1">
-                    <div class="es-marquee-track">
-                        @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
-                            @foreach (['Tech Summits', 'Industry Conferences', 'Company Retreats', 'Professional Summits', 'Annual Meetings', 'Panel Events', 'Developer Cons', 'Hybrid Events'] as $chip)
-                                <span @if ($chipCopy === 1) aria-hidden="true" @endif class="vc-tick">{{ $chip }}</span>
-                            @endforeach
-                        @endfor
-                    </div>
-                </div>
-            </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 01 The unit: what you enter, what they read                  -->
-        <!-- ============================================================ -->
-        <section id="unit" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
+        {{-- 01 What goes on a virtual conference agenda, in any tool --}}
+        <section id="what" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap">
                 <header class="vc-head">
                     <div>
-                        <p class="vc-kick" data-reveal><b>01</b><i></i>The unit</p>
+                        <p class="vc-kick" data-reveal><b>01</b><i></i>What goes on a virtual conference agenda</p>
                         <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            Seven parts. <span class="vc-holo-text">One event.</span>
+                            Shorter days, <span class="vc-holo-text">named breaks.</span>
                         </h2>
                     </div>
                     <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        Most calendars would have you enter that morning as seven separate events. Here you fill the day in once and type the running order underneath it, so the date, the join link and the tickets are stated once and cannot disagree with each other.
-                    </p>
-                </header>
-
-                <div class="vc-duo" data-reveal-group="110">
-                    <span class="vc-duo-arrow" aria-hidden="true">{!! $vcArrow !!}</span>
-
-                    <!-- What you enter -->
-                    <article class="vc-panel vc-marks" data-reveal="panel">
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">What you enter</h3>
-                            <span class="vc-tier">Free</span>
-                        </div>
-                        <p class="vc-note" style="margin-top: 0.6rem;">The event: one date, one start, one duration, one link.</p>
-                        <dl class="vc-fields">
-                            @foreach ($dayFields as [$fieldKey, $fieldVal])
-                                <div>
-                                    <dt>{{ $fieldKey }}</dt>
-                                    <dd>{{ $fieldVal }}</dd>
-                                </div>
-                            @endforeach
-                        </dl>
-                        <p class="vc-note">Move the date here and the whole running order moves with it, because the parts live inside the event. The clock times on the parts are the ones you typed, so those you edit yourself.</p>
-                    </article>
-
-                    <!-- What they read -->
-                    <article class="vc-panel vc-marks" data-reveal="panel">
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">What they read</h3>
-                            <span class="vc-tier">Free</span>
-                        </div>
-                        <p class="vc-note" style="margin-top: 0.6rem;">The parts: the running order, in order, with times.</p>
-                        <ol class="vc-read">
-                            @foreach ($run as $runIndex => [$partTime, $partName, $partMins, $partIsGap])
-                                <li class="@if ($partIsGap) is-gap @endif">
-                                    <time>{{ $partTime }}</time>
-                                    <span>{{ $partName }}</span>
-                                    <small>{{ $partMins }}m</small>
-                                </li>
-                            @endforeach
-                        </ol>
-                        <p class="vc-note">The first few parts show on the schedule page with their times, and the rest sit behind a "more" line so a long day does not swamp the calendar.</p>
-                    </article>
-                </div>
-
-                <div class="vc-stats" data-reveal-group="90">
-                    <div class="vc-stat" data-reveal>
-                        <h3>Events to enter</h3>
-                        <p class="vc-stat-n vc-holo-text"><span data-count-to="1">1</span></p>
-                        <p>One date, one start time, one duration. Not seven chances to mistype a time zone.</p>
-                    </div>
-                    <div class="vc-stat" data-reveal>
-                        <h3>Parts inside it</h3>
-                        <p class="vc-stat-n vc-holo-text"><span data-count-to="7">7</span></p>
-                        <p>As many as the day has. Each one carries a name, a description, a start and an end.</p>
-                    </div>
-                    <div class="vc-stat" data-reveal>
-                        <h3>Links to share</h3>
-                        <p class="vc-stat-n vc-holo-text"><span data-count-to="1">1</span></p>
-                        <p>The programme, the sign-up and the way in are the same page.</p>
-                    </div>
-                </div>
-
-                <!-- The same minute on four clocks: 09:00 on Tue 3 Mar, as it falls elsewhere -->
-                <div class="vc-clocks" aria-hidden="true" data-reveal>
-                    <p class="vc-clocks-k">One start time, 09:00 on Tue 3 Mar<br>The same minute on four clocks</p>
-                    @foreach ([['Lisbon', '09:00', 9, 0, false], ['New York', '04:00', 4, 0, true], ['Bengaluru', '14:30', 14, 30, false], ['Sydney', '20:00', 20, 0, true]] as [$cityName, $cityTime, $cityHour, $cityMin, $cityNight])
-                        <div class="vc-clock @if ($cityNight) is-night @endif">
-                            <span class="vc-clock-face" style="--h: {{ (($cityHour % 12) + $cityMin / 60) * 30 }}deg; --m: {{ $cityMin * 6 }}deg;"><i></i><i></i><i></i></span>
-                            <span>
-                                <b>{{ $cityName }}</b>
-                                <small>{{ $cityTime }}</small>
-                            </span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 02 Setting the running order: a part, opened                 -->
-        <!-- ============================================================ -->
-        <section id="run" class="vc-sec" style="scroll-margin-top: 4rem;">
-            <div class="vc-wrap">
-                <header class="vc-head">
-                    <div>
-                        <p class="vc-kick" data-reveal><b>02</b><i></i>Setting the running order</p>
-                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            Name it, time it, <span class="vc-holo-text">move it into place.</span>
-                        </h2>
-                    </div>
-                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        Three things make a session, and all three are on the free plan.
+                        An online programme is not a venue programme moved to a screen: every changeover happens live, and half the audience has their own work open beside the stream. Whatever tool you use, an agenda people can follow has five parts.
                     </p>
                 </header>
 
                 <div class="vc-set">
-                    <!-- One part of the agenda, open in the editor -->
+                    <article class="vc-panel vc-marks" data-reveal="panel">
+                        <h3 class="vc-h3">A four-hour day that works</h3>
+                        <p class="vc-note" style="margin-top: 0.6rem;">13:00 to 17:00 UTC, one track, eleven parts.</p>
+                        <ol class="vc-read">
+                            @foreach ($vcSample as [$sampleTime, $sampleName, $sampleMins, $sampleIsGap])
+                                <li class="@if ($sampleIsGap) is-gap @endif">
+                                    <time>{{ $sampleTime }}</time>
+                                    <span>{{ $sampleName }}</span>
+                                    <small>{{ $sampleMins }}m</small>
+                                </li>
+                            @endforeach
+                        </ol>
+                        <p class="vc-note">240 minutes: 205 of programme and 35 of breaks. The longest run without a pause is 70 minutes, and each talk is booked 5 minutes short of its slot, which is the changeover.</p>
+                    </article>
+
+                    <div class="vc-three" data-reveal-group="100">
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #22d3ee;" aria-hidden="true">1</span>
+                            <h3 class="vc-h3">A title that says what it is</h3>
+                            <p>"Panel: shipping in the open" tells people more than "Session 3". Put the speaker in the title or the description, and add a sentence or two of abstract for anything longer than a short talk.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #4ade80;" aria-hidden="true">2</span>
+                            <h3 class="vc-h3">A start and an end</h3>
+                            <p>Print both, so somebody can plan an afternoon around the one session they came for. Keynotes of 30 to 45 minutes, talks of 20 to 30 and workshops of 45 to 90 suit a screen better than venue-length slots.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #fde047;" aria-hidden="true">3</span>
+                            <h3 class="vc-h3">The time zone beside every time</h3>
+                            <p>"Starts at 9" means nothing to a global audience. Name the zone, and give people a calendar entry that lands at their own local hour.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #fb923c;" aria-hidden="true">4</span>
+                            <h3 class="vc-h3">Breaks, on the agenda</h3>
+                            <p>Ten to fifteen minutes every 60 to 90 minutes, named so people trust they exist. Leave five minutes in each slot for the changeover, or one overrun makes everything after it late.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #22d3ee;" aria-hidden="true">5</span>
+                            <h3 class="vc-h3">How to join</h3>
+                            <p>Say where the stream is and how people get the link. Handing it out with registration, rather than posting it, tells you how many to expect and keeps it off the open web.</p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- 02 Building it in Event Schedule: a part, opened --}}
+        <section id="build" class="vc-sec" style="scroll-margin-top: 4rem;">
+            <div class="vc-wrap">
+                <header class="vc-head">
+                    <div>
+                        <p class="vc-kick" data-reveal><b>02</b><i></i>Building it in Event Schedule</p>
+                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            One event per day. <span class="vc-holo-text">Sessions inside it.</span>
+                        </h2>
+                    </div>
+                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
+                        Create the conference day as an event and tick Online (tick In-person too for a hybrid day, and the venue sits beside the link). Then open its Agenda tab: each session is a part.
+                    </p>
+                </header>
+
+                <div class="vc-set">
+                    {{-- One part of the agenda, open in the editor --}}
                     <div class="vc-editor" aria-hidden="true" data-reveal>
-                        <div class="vc-editor-bar"><span>Agenda &middot; Cloud Summit, day 1</span><span class="vc-sw">Times</span><span class="vc-sw">Descriptions</span></div>
+                        <div class="vc-editor-bar"><span>Agenda &middot; Cloud Summit, day 1</span><span class="vc-sw">Show times</span></div>
                         <div class="vc-pcard is-dim"><time>10:15</time><b>Break</b></div>
                         <div class="vc-pcard is-open">
                             <div class="vc-pcard-head">
@@ -1738,34 +1443,31 @@
                         <div class="vc-pcard is-dim"><time>11:15</time><b>Workshop: instrumenting your stack</b></div>
                     </div>
 
-                    <div>
-                        <div class="vc-three" data-reveal-group="100">
-                            <article data-reveal>
-                                <span class="vc-pin" style="--pin: #22d3ee;" aria-hidden="true">1</span>
-                                <div class="vc-titled">
-                                    <h3 class="vc-h3">A name, and not much else</h3>
-                                    <span class="vc-tier">Free</span>
-                                </div>
-                                <p>The name is the only thing a part needs. Add a description in markdown when the session deserves an abstract, and leave it empty when the title says it all.</p>
-                            </article>
-                            <article data-reveal>
-                                <span class="vc-pin" style="--pin: #4ade80;" aria-hidden="true">2</span>
-                                <div class="vc-titled">
-                                    <h3 class="vc-h3">A start and an end</h3>
-                                    <span class="vc-tier">Free</span>
-                                </div>
-                                <p>Each part takes its own start time and its own end time, and both are optional. Two switches in the agenda editor, remembered for the whole schedule, decide whether it asks you for times and descriptions at all, so a programme that is still only titles stays a list of titles.</p>
-                            </article>
-                            <article data-reveal>
-                                <span class="vc-pin" style="--pin: #fb923c;" aria-hidden="true">3</span>
-                                <div class="vc-titled">
-                                    <h3 class="vc-h3">An order you can change</h3>
-                                    <span class="vc-tier">Free</span>
-                                </div>
-                                <p>Every part card has an up and a down button, so a session moves one row at a time. Switch times and descriptions off and the editor collapses to a drag-and-drop list of titles. When a speaker swaps slot the morning is a click away from correct, not a re-typed agenda.</p>
-                            </article>
-                        </div>
-
+                    <div class="vc-three" data-reveal-group="100">
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #22d3ee;" aria-hidden="true">1</span>
+                            <div class="vc-titled">
+                                <h3 class="vc-h3">A name, and a description if it helps</h3>
+                                <span class="vc-tier">Free</span>
+                            </div>
+                            <p>The name is the only thing a part needs. "+ Add Description" opens a box for the abstract or the speaker's line, written in Markdown.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #4ade80;" aria-hidden="true">2</span>
+                            <div class="vc-titled">
+                                <h3 class="vc-h3">A start and an end</h3>
+                                <span class="vc-tier">Free</span>
+                            </div>
+                            <p>Each part takes its own start and end time, both optional. The Show times switch hides them while the programme is still only titles, and the choice is remembered for the schedule's next event.</p>
+                        </article>
+                        <article data-reveal>
+                            <span class="vc-pin" style="--pin: #fb923c;" aria-hidden="true">3</span>
+                            <div class="vc-titled">
+                                <h3 class="vc-h3">An order you can change</h3>
+                                <span class="vc-tier">Free</span>
+                            </div>
+                            <p>Drag a part by its handle or use its up and down arrows. The order on the form is the order on the event page, which draws the agenda as a timeline with each part's times.</p>
+                        </article>
                     </div>
                 </div>
 
@@ -1782,91 +1484,42 @@
                     </div>
                     <div>
                         <div class="vc-titled">
-                            <h3 class="vc-h3">Already have the programme written somewhere</h3>
+                            <h3 class="vc-h3">Already have the programme in a document</h3>
                             <span class="vc-tier vc-tier-ent">Enterprise</span>
                         </div>
                         <p>
-                            Agenda scanning reads a programme from a photo or from pasted text and fills the parts in for you, times and all. Being straight about the tier: that one is on the Enterprise plan, and there is a daily limit on it. Typing the parts yourself is free and always will be, which is why the rest of this page does not depend on it.
+                            Paste the agenda as text, or choose a photo of a printed one, and AI import fills the parts in, times and all. That is on the Enterprise plan, with a daily limit. Typing the parts yourself is free on every plan. See the <x-link href="{{ marketing_url('/docs/creating-events') }}#agenda">agenda guide</x-link>.
                         </p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 03 The programme: three days, three events                   -->
-        <!-- ============================================================ -->
-        <section id="programme" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
+        {{-- 03 Tracks and rooms: three events on one date, one sub-schedule each --}}
+        <section id="tracks" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap">
                 <header class="vc-head">
                     <div>
-                        <p class="vc-kick" data-reveal><b>03</b><i></i>The programme</p>
+                        <p class="vc-kick" data-reveal><b>03</b><i></i>Tracks, rooms and speakers</p>
                         <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            Three days is three events, <span class="vc-holo-text">stacked.</span>
+                            A track is <span class="vc-holo-text">a sub-schedule.</span>
                         </h2>
                     </div>
                     <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        One event per date, each with its own running order and its own way in. Read down the strip and you are reading the whole conference at once.
+                        Parallel sessions are separate events on the same date, one per track or room, each with its own agenda, join link and registration count. File each track's events under a sub-schedule and visitors can read one track or all of them.
                     </p>
                 </header>
 
                 <div class="vc-panel vc-marks" data-reveal="panel">
-                    <div class="vc-prog-top">
-                        <p>Cloud Summit 2026</p>
-                        <p>21 parts across 3 days</p>
-                    </div>
-
-                    <table class="vc-strip">
-                        <caption class="sr-only">Cloud Summit 2026: each conference day with its date, the hours it runs and the number of agenda parts inside it</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">Day</th>
-                                <th scope="col">Date</th>
-                                <th scope="col">Runs</th>
-                                <th scope="col" class="vc-strip-n">Parts</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr aria-hidden="true">
-                                <td colspan="4">
-                                    <div class="vc-ruler">
-                                        @foreach (range(9, 17) as $hour)
-                                            <span>{{ str_pad($hour, 2, '0', STR_PAD_LEFT) }}</span>
-                                        @endforeach
-                                    </div>
-                                </td>
-                            </tr>
-                            @foreach ($programme as $dayIndex => [$dayName, $dayDate, $dayHours, $dayParts, $dayTicks])
-                                <tr class="vc-strip-day">
-                                    <th scope="row">{{ $dayName }}</th>
-                                    <td>{{ $dayDate }}</td>
-                                    <td>{{ $dayHours }}</td>
-                                    <td class="vc-strip-n">{{ $dayParts }}</td>
-                                </tr>
-                                <tr class="vc-strip-ticks vc-day-{{ $dayIndex + 1 }}" aria-hidden="true">
-                                    <td colspan="4">
-                                        <div class="vc-track">
-                                            @foreach ($dayTicks as [$tickAt, $tickFor, $tickIsGap])
-                                                <span class="vc-tickmark @if ($tickIsGap) is-gap @endif" style="inset-inline-start: {{ round($tickAt / $window * 100, 2) }}%; width: calc({{ round($tickFor / $window * 100, 2) }}% - 3px);"></span>
-                                            @endforeach
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    <p class="vc-note">Each mark is one part of that day's running order, as wide as the part is long, drawn where it falls between 09:00 and 18:00. The hollow ones are the breaks. Count them and you get the number in the Parts column.</p>
-
-                    <!-- The same three days, opened: one column per event, its parts on the clock -->
-                    <div class="vc-ag">
+                    <div class="vc-ag" style="margin-top: 0; padding-top: 0; border-top: 0;">
                         <fieldset class="vc-filter">
-                            <legend class="sr-only">Show days</legend>
-                            <span class="vc-filter-k" aria-hidden="true">Open</span>
+                            <legend class="sr-only">Show tracks</legend>
+                            <span class="vc-filter-k" aria-hidden="true">Tue 3 Mar</span>
                             <input type="radio" name="vc-day" id="vc-f0" class="vc-f" checked>
-                            <label for="vc-f0">All three days</label>
-                            @foreach ($programme as $dayIndex => [$dayName])
-                                <input type="radio" name="vc-day" id="vc-f{{ $dayIndex + 1 }}" class="vc-f">
-                                <label for="vc-f{{ $dayIndex + 1 }}" class="vc-day-{{ $dayIndex + 1 }}"><i aria-hidden="true"></i>{{ $dayName }}</label>
+                            <label for="vc-f0">All tracks</label>
+                            @foreach ($vcTracks as $trackIndex => [$trackName])
+                                <input type="radio" name="vc-day" id="vc-f{{ $trackIndex + 1 }}" class="vc-f">
+                                <label for="vc-f{{ $trackIndex + 1 }}" class="vc-day-{{ $trackIndex + 1 }}"><i aria-hidden="true"></i>{{ $trackName }}</label>
                             @endforeach
                         </fieldset>
 
@@ -1879,34 +1532,34 @@
                             <div class="vc-lines" aria-hidden="true"></div>
                             <div class="vc-now" aria-hidden="true"><div class="vc-now-line"><span class="vc-now-tag">Now <b>10:42</b></span></div></div>
 
-                            @foreach ($programme as $dayIndex => [$dayName, $dayDate, $dayHours, $dayParts, $dayTicks])
-                                <section class="vc-day vc-day-{{ $dayIndex + 1 }}" aria-labelledby="vc-day-{{ $dayIndex + 1 }}-h">
-                                    <label for="vc-f{{ $dayIndex + 1 }}" class="vc-day-pick" aria-hidden="true"></label>
+                            @foreach ($vcTracks as $trackIndex => [$trackName, $trackSlug, $trackHours, $trackParts, $trackTicks])
+                                <section class="vc-day vc-day-{{ $trackIndex + 1 }}" aria-labelledby="vc-day-{{ $trackIndex + 1 }}-h">
+                                    <label for="vc-f{{ $trackIndex + 1 }}" class="vc-day-pick" aria-hidden="true"></label>
                                     <header class="vc-day-head">
                                         <span class="vc-day-bar" aria-hidden="true"></span>
-                                        <h3 id="vc-day-{{ $dayIndex + 1 }}-h">{{ $dayName }}</h3>
-                                        <p class="vc-day-date">{{ $dayDate }}</p>
-                                        <p class="vc-day-meta"><span>{{ $vcStrands[$dayIndex] }}</span><span>{{ $dayHours }}</span><span>{{ $dayParts }} parts</span></p>
-                                        <span class="vc-day-short" aria-hidden="true">D{{ $dayIndex + 1 }}</span>
+                                        <h3 id="vc-day-{{ $trackIndex + 1 }}-h">{{ $trackName }}</h3>
+                                        <p class="vc-day-date">Tue 3 Mar</p>
+                                        <p class="vc-day-meta"><span>/{{ $trackSlug }}</span><span>{{ $trackHours }}</span><span>{{ $trackParts }} parts</span></p>
+                                        <span class="vc-day-short" aria-hidden="true">T{{ $trackIndex + 1 }}</span>
                                     </header>
                                     <ol class="vc-day-parts">
-                                        @foreach ($dayTicks as $tickIndex => [$tickAt, $tickFor, $tickIsGap])
-                                            <li class="vc-part @if ($tickIsGap) is-break @endif @if (in_array($dayIndex.'-'.$tickIndex, $vcKeys, true)) is-key @endif" style="grid-row: {{ $vcLine($tickAt) }} / {{ $vcLine($tickAt + $tickFor) }};">
+                                        @foreach ($trackTicks as $tickIndex => [$tickAt, $tickFor, $tickIsGap])
+                                            <li class="vc-part @if ($tickIsGap) is-break @endif @if (in_array($trackIndex.'-'.$tickIndex, $vcKeys, true)) is-key @endif" style="grid-row: {{ $vcLine($tickAt) }} / {{ $vcLine($tickAt + $tickFor) }};">
                                                 <span class="vc-part-t">{{ $vcClock($tickAt) }}</span>
                                                 @if ($tickIsGap)
-                                                    <span class="vc-part-n">{{ $vcNames[$dayIndex][$tickIndex] }}</span>
+                                                    <span class="vc-part-n">{{ $vcNames[$trackIndex][$tickIndex] }}</span>
                                                     <span class="vc-part-d">{{ $tickFor }} min</span>
                                                 @else
                                                     <span class="vc-part-d">{{ $tickFor }} min</span>
-                                                    <span class="vc-part-n">{{ $vcNames[$dayIndex][$tickIndex] }}</span>
-                                                    @isset($vcAbstracts[$dayIndex.'-'.$tickIndex])
-                                                        <span class="vc-part-a">{{ $vcAbstracts[$dayIndex.'-'.$tickIndex] }}</span>
+                                                    <span class="vc-part-n">{{ $vcNames[$trackIndex][$tickIndex] }}</span>
+                                                    @isset($vcAbstracts[$trackIndex.'-'.$tickIndex])
+                                                        <span class="vc-part-a">{{ $vcAbstracts[$trackIndex.'-'.$tickIndex] }}</span>
                                                     @endisset
                                                 @endif
                                             </li>
                                         @endforeach
-                                        @php $vcDayEnd = end($dayTicks)[0] + end($dayTicks)[1]; @endphp
-                                        <li class="vc-day-end" aria-hidden="true" style="top: calc(var(--vc-min) * {{ $vcDayEnd }});"><span>{{ $vcClock($vcDayEnd) }}</span>end of day</li>
+                                        @php $vcTrackEnd = end($trackTicks)[0] + end($trackTicks)[1]; @endphp
+                                        <li class="vc-day-end" aria-hidden="true" style="top: calc(var(--vc-min) * {{ $vcTrackEnd }});"><span>{{ $vcClock($vcTrackEnd) }}</span>end of track</li>
                                     </ol>
                                 </section>
                             @endforeach
@@ -1914,172 +1567,49 @@
                     </div>
                 </div>
 
+                <div class="vc-cells" data-reveal>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">A sub-schedule per track</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <p>Create Main stage, Workshops and Community as sub-schedules. Each gets a color and an address of its own, such as /workshops, to hand to the people who only want that track, and visitors can filter the calendar by it. A sub-schedule sorts events; it does not hide them.</p>
+                    </article>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">Or one event per session</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <p>When every session needs its own link, its own capacity or its own calendar entry, make each session an event instead of a part. People then register for exactly the sessions they want.</p>
+                    </article>
+                    <article>
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">Speakers</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <p>Name speakers on the event's Participants tab. They appear on the event page, linked to their own schedule if they have one. Participants belong to the event, not to one part, so on a day of many sessions write each speaker into their part as well.</p>
+                    </article>
+                </div>
+
                 <p class="vc-strand-note" data-reveal>
-                    Sub-schedules keep a strand of the programme together and give it a color, which is useful for a workshop day or a members-only strand you want to point people at. Worth saying plainly: a sub-schedule organizes and colors, it does not restrict who can see what, and there are no rooms and no tracks. To hide a day until you announce it, leave it as a draft.
+                    More in the guides to <x-link href="{{ marketing_url('/docs/creating-schedules') }}#customize-subschedules">sub-schedules</x-link> and <x-link href="{{ marketing_url('/docs/creating-events') }}#participants">participants</x-link>.
                 </p>
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 04 Building the agenda: a field guide that holds in any tool -->
-        <!-- ============================================================ -->
-        <section id="guide" class="vc-sec" style="scroll-margin-top: 4rem;">
-            <div class="vc-wrap">
-                <header class="vc-head">
-                    <div>
-                        <p class="vc-kick" data-reveal><b>04</b><i></i>How to build a virtual conference agenda</p>
-                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            Shorter days, <span class="vc-holo-text">more breaks.</span>
-                        </h2>
-                    </div>
-                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        An online programme is not a venue programme moved to a screen. Nobody has a corridor to stretch their legs in, every speaker changeover happens live, and half your audience is at a desk with their own work open beside the stream. These are the rules of thumb that shape a day people stay for.
-                    </p>
-                </header>
-
-                <div class="vc-set">
-                    <!-- A worked half day, with its arithmetic -->
-                    <article class="vc-panel vc-marks" data-reveal="panel">
-                        <h3 class="vc-h3">A four-hour day that works</h3>
-                        <p class="vc-note" style="margin-top: 0.6rem;">13:00 to 17:00 UTC, one track, eleven parts.</p>
-                        <ol class="vc-read">
-                            @foreach ($vcSample as [$sampleTime, $sampleName, $sampleMins, $sampleIsGap])
-                                <li class="@if ($sampleIsGap) is-gap @endif">
-                                    <time>{{ $sampleTime }}</time>
-                                    <span>{{ $sampleName }}</span>
-                                    <small>{{ $sampleMins }}m</small>
-                                </li>
-                            @endforeach
-                        </ol>
-                        <p class="vc-note">The arithmetic: 240 minutes, of which 205 are programme and 35 are breaks. The longest run without a pause is 70 minutes, at the end, where the workshop is followed by short talks that ask little of a tired room. Each talk is booked 5 minutes short of its slot, which is the changeover.</p>
-                    </article>
-
-                    <div class="vc-three" data-reveal-group="100">
-                        <article data-reveal>
-                            <span class="vc-pin" style="--pin: #22d3ee;" aria-hidden="true">1</span>
-                            <h3 class="vc-h3">Three to five hours of live programme a day</h3>
-                            <p>A full eight-hour conference day online loses people by mid-afternoon. If the content needs more hours, add a day rather than stretch one. Three half days across a week also gives speakers in awkward time zones one slot that suits them.</p>
-                        </article>
-                        <article data-reveal>
-                            <span class="vc-pin" style="--pin: #4ade80;" aria-hidden="true">2</span>
-                            <h3 class="vc-h3">Lengths that suit a screen</h3>
-                            <p>Keynotes of 30 to 45 minutes, talks of 20 to 30, panels of 40 to 45 with four voices at most, and workshops of 45 to 90 with a break inside the longer ones. Put the end time on every part as well as the start, so somebody can plan an afternoon around the one session they came for.</p>
-                        </article>
-                        <article data-reveal>
-                            <span class="vc-pin" style="--pin: #fde047;" aria-hidden="true">3</span>
-                            <h3 class="vc-h3">A break every 60 to 90 minutes</h3>
-                            <p>Ten to fifteen minutes each, and name them on the agenda so people trust that they exist. Attendees who know a break is at 14:45 stay through the talk before it instead of leaving early to make coffee.</p>
-                        </article>
-                        <article data-reveal>
-                            <span class="vc-pin" style="--pin: #fb923c;" aria-hidden="true">4</span>
-                            <h3 class="vc-h3">Changeovers belong in the timing</h3>
-                            <p>The next speaker has to join, share a screen and say "can you see this?". Build five minutes into each slot, or give the changeover its own short part. Without it, one overrun in the morning pushes every session after it late.</p>
-                        </article>
-                        <article data-reveal>
-                            <span class="vc-pin" style="--pin: #22d3ee;" aria-hidden="true">5</span>
-                            <h3 class="vc-h3">The headline goes where the most people overlap</h3>
-                            <p>Put your best-known speaker in the hour that most registrants share across their time zones, not first thing in your own morning. The next section shows how to find that hour.</p>
-                        </article>
-                    </div>
-                </div>
-
-                <div class="vc-panel vc-marks" style="margin-top: clamp(2.5rem, 5vw, 4rem);" data-reveal="panel">
-                    <h3 class="vc-h3">Five mistakes that cost a virtual conference its audience</h3>
-                    <div class="vc-rail">
-                        <p class="vc-phase">The mistake<span>and what to do instead</span></p>
-                        <ul>
-                            <li><b>The agenda is only a PDF.</b> It cannot be read comfortably on a phone, search engines barely see it, and the moment a speaker swaps slots the copy in everyone's inbox is wrong. Publish the agenda as a page and send people the link.</li>
-                            <li><b>Times with no zone.</b> "Starts at 9" means nothing to a global audience. Every published time needs its zone beside it, and a calendar file that puts the session at each attendee's own hour.</li>
-                            <li><b>Too many tracks for the crowd.</b> Three parallel tracks split an audience of 150 into rooms of about 50, and a quiet room makes a speaker look unpopular. Run one track until the audience is large enough that each room still feels busy.</li>
-                            <li><b>Moving a session without saying so.</b> In Event Schedule, changing the day's date or start time (on a one-off event) or its join link asks on save whether to email the people registered; on eventschedule.com that email reaches them once the schedule sends through its own email settings. Moving one session inside the day does not ask, so tell people yourself when a headline slot moves.</li>
-                            <li><b>No rehearsal slot.</b> Book every speaker for a short technical check a day or two before, on the same platform and link type they will use live. Most live failures are a microphone, a screen share permission or a browser that blocks the camera.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 05 Time zones: three windows on one date                     -->
-        <!-- ============================================================ -->
-        <section id="zones" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
-            <div class="vc-wrap">
-                <header class="vc-head">
-                    <div>
-                        <p class="vc-kick" data-reveal><b>05</b><i></i>Scheduling across time zones</p>
-                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            No hour suits everyone. <span class="vc-holo-text">Pick two regions.</span>
-                        </h2>
-                    </div>
-                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        Look at where your registrants or last year's attendees are, choose the two regions with the most people, and find the four hours they share. Here are the three windows that come up most, worked out for Tue 3 Mar 2026.
-                    </p>
-                </header>
-
-                <div class="vc-cells" data-reveal>
-                    @foreach ($vcWindows as [$windowName, $windowUtc, $windowFor, $windowCities])
-                        <article>
-                            <h3 class="vc-h3">{{ $windowName }}</h3>
-                            <p class="vc-note" style="margin-top: 0.4rem;">{{ $windowUtc }}</p>
-                            <p>{{ $windowFor }}</p>
-                            <dl class="vc-fields">
-                                @foreach ($windowCities as [$cityName, $cityHours])
-                                    <div>
-                                        <dt>{{ $cityName }}</dt>
-                                        <dd>{{ $cityHours }}</dd>
-                                    </div>
-                                @endforeach
-                            </dl>
-                        </article>
-                    @endforeach
-                </div>
-
-                <div class="vc-duo" style="margin-top: clamp(2.5rem, 5vw, 4rem);" data-reveal-group="110">
-                    <article class="vc-panel vc-marks" data-reveal="panel">
-                        <h3 class="vc-h3">Three ways to reach the region you left out</h3>
-                        <div class="vc-rail">
-                            <ul>
-                                <li><b>Repeat the keynote.</b> Run it a second time in the other window as its own event, with its own join link and its own registration count, so the two audiences never compete for one cap.</li>
-                                <li><b>Rotate the window by day.</b> Day one in the Americas and Europe window, day two in Europe and Asia-Pacific. Each region gets one comfortable day and nobody gets three bad ones.</li>
-                                <li><b>Send the recording.</b> For everyone who registered and could not be awake, the recording the next morning is the conference. Plan who sends it and when before the day, not after.</li>
-                            </ul>
-                        </div>
-                        <p class="vc-note">Watch the clocks in March and late October. In 2026 the United States moves its clocks on 8 March and Europe on 29 March, so for three weeks New York is four hours behind London instead of five. In autumn Europe moves back first, on 25 October, and the United States on 1 November, so for one week the gap is four hours again. Sydney's clocks move on 5 April and 4 October.</p>
-                    </article>
-
-                    <article class="vc-panel vc-marks" data-reveal="panel">
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">What Event Schedule does with the zone</h3>
-                            <span class="vc-tier">Free</span>
-                        </div>
-                        <div class="vc-rail">
-                            <ul>
-                                <li>Set the schedule's timezone first, in Edit Schedule under Details, Language and time. Every event time is entered and shown in that zone, and the agenda's part times are the clock times you typed, read in it too.</li>
-                                <li>The event page prints the start with the zone's abbreviation next to it, so "13:00 UTC" never reads as somebody's local 1 PM.</li>
-                                <li>The calendar invite in the confirmation email, and the .ics download, carry the exact moment, so each attendee's calendar shows the day at their own local hour.</li>
-                                <li>The reminder email goes out 3 hours, or 1, 2 or 3 days, before the start. A day-based reminder lands at the same moment for everyone, which is the middle of the night somewhere, so for a global audience the 3 hour option is the one that arrives close to the start for all of them.</li>
-                            </ul>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 06 In session: seven parts, one link (a band that stays dark) -->
-        <!-- ============================================================ -->
-        <section id="session" class="vc-sec vc-band" style="scroll-margin-top: 4rem;">
+        {{-- 04 Joining: the link, the zone and the calendar (a band that stays dark) --}}
+        <section id="join" class="vc-sec vc-band" style="scroll-margin-top: 4rem;">
             <div class="vc-band-glow" aria-hidden="true"></div>
             <div class="vc-wrap" style="position: relative;">
                 <header class="vc-head">
                     <div>
-                        <p class="vc-kick" data-reveal><b>06</b><i></i>In session</p>
+                        <p class="vc-kick" data-reveal><b>04</b><i></i>Join link, time zones, calendars</p>
                         <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            One link. <span class="vc-holo-text">Wherever you stream.</span>
+                            One link per event. <span class="vc-holo-text">Sent with the ticket.</span>
                         </h2>
                     </div>
                     <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        Mark the day as an online event and paste the URL. Event Schedule stores a link, not an integration, so it has no opinion about where the conference actually happens.
+                        Paste the stream's URL into the event. Event Schedule stores a link, not an integration, so Zoom, Microsoft Teams, Google Meet, YouTube Live or your own player all work.
                     </p>
                 </header>
 
@@ -2099,33 +1629,33 @@
 
                 <div class="vc-cells" data-reveal>
                     <article>
-                        <div class="vc-cell-art" aria-hidden="true"><span>Zoom</span><span>Teams</span><span>Meet</span><span>YouTube Live</span></div>
+                        <div class="vc-cell-art" aria-hidden="true"><span>zoom.us</span><span>ticket page</span><span>reminder</span></div>
                         <div class="vc-titled">
-                            <h3 class="vc-h3">Any platform</h3>
+                            <h3 class="vc-h3">The link comes with registration</h3>
                             <span class="vc-tier">Free</span>
                         </div>
-                        <p>Zoom, Microsoft Teams, Google Meet, YouTube Live, a webinar tool, your own player. Anything that hands you a URL works, because the URL is the whole integration.</p>
+                        <p>The public event page shows only the link's domain, such as zoom.us. Everyone who registers or buys gets a ticket page with the full link, and the reminder email carries it too. Reminders go 3 hours or 1, 2 or 3 days ahead, and are on by default on Pro and Enterprise.</p>
                     </article>
                     <article>
-                        <div class="vc-cell-art" aria-hidden="true"><span class="is-ics">day-1.ics</span><span>Google</span><span>Outlook</span><span>CalDAV</span></div>
+                        <div class="vc-cell-art" aria-hidden="true"><span>13:00 UTC</span><span>08:00 New York</span><span>21:00 Singapore</span></div>
                         <div class="vc-titled">
-                            <h3 class="vc-h3">It lands in their calendar</h3>
+                            <h3 class="vc-h3">The zone, named and converted</h3>
                             <span class="vc-tier">Free</span>
                         </div>
-                        <p>Attendees download an .ics for the day, or subscribe to your schedule's live calendar feed, which updates itself when a date moves. Your own side syncs two ways with Google, Outlook and CalDAV.</p>
+                        <p>Set the schedule's timezone before you add events. The event page prints the start with the zone beside it, and the part times are the clock times you typed, in that zone. Calendar entries carry the exact moment, so each attendee sees the day at their own local hour.</p>
                     </article>
                     <article>
-                        <div class="vc-cell-art" aria-hidden="true"><span>Day 1 &middot; 118 left</span><span class="is-full">Day 2 &middot; full</span><span>Day 3 &middot; 64 left</span></div>
+                        <div class="vc-cell-art" aria-hidden="true"><span class="is-ics">day-1.ics</span><span>Google</span><span>Outlook</span><span>Feed</span></div>
                         <div class="vc-titled">
-                            <h3 class="vc-h3">Cap the room</h3>
+                            <h3 class="vc-h3">Add to calendar</h3>
                             <span class="vc-tier">Free</span>
                         </div>
-                        <p>Free registration with a capacity limit, and the number of places left is counted for each date separately, so day two filling up says nothing about day three.</p>
+                        <p>The event page offers Google Calendar, Outlook and an .ics file, and the confirmation email carries a calendar invite. Attendees can also subscribe to your schedule's live calendar feed, which updates itself when a date moves.</p>
                     </article>
                 </div>
 
                 <p class="vc-band-foot" data-reveal>
-                    One join link belongs to one event, so it covers the whole running order.
+                    A join link belongs to one event, so it covers that event's whole agenda.
                     <a href="{{ marketing_url('/features/online-events') }}">
                         How online events work
                         {!! $vcArrow !!}
@@ -2134,279 +1664,155 @@
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 07 The whole conference: tracks, speakers, sponsors, links   -->
-        <!-- ============================================================ -->
-        <section id="whole" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
+        {{-- 05 Time zones: three windows on one date --}}
+        <section id="zones" class="vc-sec" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap">
                 <header class="vc-head">
                     <div>
-                        <p class="vc-kick" data-reveal><b>07</b><i></i>Tracks, speakers, sponsors, recordings</p>
+                        <p class="vc-kick" data-reveal><b>05</b><i></i>Scheduling across time zones</p>
                         <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            Where each piece of <span class="vc-holo-text">the conference lives.</span>
+                            No hour suits everyone. <span class="vc-holo-text">Pick two regions.</span>
                         </h2>
                     </div>
                     <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        Moving a programme across goes faster once you know which thing belongs on the day, which on the session, and which on the schedule as a whole. Six decisions, each with the answer.
+                        Look at where your registrants are, choose the two regions with the most people, and put the live programme in the four hours they share. These are the three windows that come up most, worked out for Tue 3 Mar 2026.
                     </p>
                 </header>
 
                 <div class="vc-cells" style="margin-top: 0;" data-reveal>
-                    <article>
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">Parallel tracks</h3>
-                            <span class="vc-tier">Free</span>
-                        </div>
-                        <p>A track is one event per day: "Day 1, Main stage" and "Day 1, Workshops" on the same date, each with its own running order, join link and registration limit. File every track's events under a sub-schedule of their own. Each sub-schedule gets a color and an address of its own, such as /workshops, which you can hand to the people who only care about that track, and visitors can filter the calendar by it.</p>
-                    </article>
-                    <article>
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">Speakers</h3>
-                            <span class="vc-tier">Free</span>
-                        </div>
-                        <p>Name them on the event's Participants tab. Each appears on the event page, linked to their own schedule if they have one, and somebody new gets a page they can claim. Participants belong to the event, not to one part of it, so on a one-event day every speaker is listed together: write the name into the part as well ("Keynote: Ana Ruiz") so each slot says who is on.</p>
-                    </article>
-                    <article>
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">Sponsors</h3>
-                            <span class="vc-tier vc-tier-pro">Pro</span>
-                        </div>
-                        <p>Sponsors set on the schedule appear as a band of logos on its pages, each with an optional name, website and a Gold, Silver or Bronze tier. One event can show the same sponsors, none, or its own list, which is how a workshop track carries the company that paid for it. A newsletter has a Sponsors block too, for the thank-you email.</p>
-                    </article>
-                    <article>
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">Who gets the join link</h3>
-                            <span class="vc-tier">Free</span>
-                        </div>
-                        <p>The public event page never prints the link, only its domain, such as zoom.us. The full link is on the ticket page of everyone who registers or buys, and in the reminder email before the start. So give even a free conference free registration: it is the step that hands people the way in, and it tells you how many to expect.</p>
-                    </article>
-                    <article>
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">An all-days ticket</h3>
-                            <span class="vc-tier vc-tier-pro">Pro</span>
-                        </div>
-                        <p>Each day sells or registers on its own, because each has its own link. With priced tickets, the cart lets a buyer add several days or tracks and pay once, and every event in the order keeps its own ticket page with its own link on it. A multi-event pass is built for a door, not a stream: its page carries the link of the event it is sold on and names the other days without theirs.</p>
-                    </article>
-                    <article>
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">Recordings</h3>
-                            <span class="vc-tier">Free</span>
-                        </div>
-                        <p>Event Schedule does not host video. Upload the recording to YouTube, Vimeo or your own site, then send the link in a newsletter to the Ticket Buyers segment narrowed to that day; a Video block shows the YouTube thumbnail and links out. That segment includes orders later cancelled or refunded. For a public recording, add the link to the session's description so the agenda becomes the archive.</p>
-                    </article>
+                    @foreach ($vcWindows as [$windowName, $windowUtc, $windowFor, $windowCities])
+                        <article>
+                            <h3 class="vc-h3">{{ $windowName }}</h3>
+                            <p class="vc-note" style="margin-top: 0.4rem;">{{ $windowUtc }}</p>
+                            <p>{{ $windowFor }}</p>
+                            <dl class="vc-fields">
+                                @foreach ($windowCities as [$cityName, $cityHours])
+                                    <div>
+                                        <dt>{{ $cityName }}</dt>
+                                        <dd>{{ $cityHours }}</dd>
+                                    </div>
+                                @endforeach
+                            </dl>
+                        </article>
+                    @endforeach
                 </div>
 
                 <p class="vc-strand-note" data-reveal>
-                    The newsletter allowance counts every recipient: 10 a month on Free, 100 on Pro and 1,000 on Enterprise, or unlimited once the schedule sends through its own email settings. On eventschedule.com a send to more than 50 people also needs a verified phone number or those email settings, so set them up before the day if you plan to mail the recording to a full house. More in the guides to <x-link href="{{ marketing_url('/docs/creating-events') }}#participants">participants</x-link>, <x-link href="{{ marketing_url('/docs/creating-events') }}#sponsors">event sponsors</x-link> and <x-link href="{{ marketing_url('/docs/newsletters') }}#recipients">newsletter recipients</x-link>.
+                    Reach the region you left out by repeating the keynote as a second event in its window, rotating the window by day, or sending the recording. In 2026 the United States changes its clocks on 8 March and Europe on 29 March, so check the weeks between. For an audience that reads another language, a schedule can offer a second one, and its events and their agenda items are translated automatically on every plan.
                 </p>
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 08 The takings: registration and ticket types. Deliberately
-             NOT called "at the door": there is no door on a virtual
-             conference.                                                   -->
-        <!-- ============================================================ -->
+        {{-- 06 When the agenda changes --}}
+        <section id="changes" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
+            <div class="vc-wrap">
+                <header class="vc-head">
+                    <div>
+                        <p class="vc-kick" data-reveal><b>06</b><i></i>When the agenda changes</p>
+                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
+                            Fix it once. <span class="vc-holo-text">Everyone reads the fix.</span>
+                        </h2>
+                    </div>
+                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
+                        A published agenda page is correct for everyone the moment you save. What is left is telling the people who already registered.
+                    </p>
+                </header>
+
+                <div class="vc-duo" data-reveal-group="110">
+                    <article class="vc-panel vc-marks" data-reveal="panel">
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">What updates by itself</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <div class="vc-rail">
+                            <ul>
+                                <li>The event page shows the saved agenda the moment you save, and your schedule's page and the calendar embedded on your conference site lead to it.</li>
+                                <li>People subscribed to your calendar feed get a moved date or time without doing anything.</li>
+                            </ul>
+                        </div>
+                    </article>
+
+                    <article class="vc-panel vc-marks" data-reveal="panel">
+                        <div class="vc-titled">
+                            <h3 class="vc-h3">What you tell people</h3>
+                            <span class="vc-tier">Free</span>
+                        </div>
+                        <div class="vc-rail">
+                            <ul>
+                                <li>Change a one-time event's date or start, or its join link, and saving asks "Notify attendees of this change?" Add a note, preview the email and send it. The email moves the entry in their calendar too.</li>
+                                <li>On eventschedule.com, registered attendees are emailed once your schedule has its own email settings; a selfhosted install only needs a working mailer.</li>
+                                <li>Moving a session inside the day does not ask, because the day's own time has not changed. When a headline slot moves, tell people yourself: a newsletter can go to everyone registered for that one event.</li>
+                            </ul>
+                        </div>
+                    </article>
+                </div>
+
+                <p class="vc-strand-note" data-reveal>
+                    The detail is in <x-link href="{{ marketing_url('/docs/creating-events') }}#notify-attendees">notifying attendees of changes</x-link>.
+                </p>
+            </div>
+        </section>
+
+        {{-- 07 Registration or tickets --}}
         <section id="tickets" class="vc-sec" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap vc-take">
                 <div>
-                    <p class="vc-kick" data-reveal><b>08</b><i></i>The takings</p>
+                    <p class="vc-kick" data-reveal><b>07</b><i></i>Registration or tickets</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        Name your prices. <span class="vc-holo-text">Keep the money.</span>
+                        Free to register. <span class="vc-holo-text">Pro to charge.</span>
                     </h2>
                     <p class="vc-take-lede" data-reveal style="--reveal-delay: 0.15s;">
-                        A free conference needs nothing but registration and a capacity, and that is on the free plan, however many people come. Charging for one is Pro at {{ plan_price($proMonthly) }}: named ticket types, each with its own price, quantity and sales window, plus individual tickets, discount codes and add-ons. Event Schedule takes nothing from either.
+                        A free conference needs registration with a capacity limit, which is on every plan with no cap on sign-ups. Charging is Pro at {{ plan_price($proMonthly) }} a month: named ticket types with their own prices and quantities, paid into your own Stripe or PayPal account. Event Schedule takes no platform fee on either.
                     </p>
 
-                    <!-- The run-up, in the order it happens -->
                     <div class="vc-rail" data-reveal>
-                        <p class="vc-phase" aria-hidden="true">T minus 6 weeks<span>before sales open</span></p>
                         <ul>
-                            <li>Announce before you sell. Switch on the "Notify me" card and, until tickets open, the event page offers "Tell me when tickets go on sale": a visitor leaves an email address and hears the moment sales start, and the event editor shows you how many are waiting.</li>
-                        </ul>
-                        <p class="vc-phase" aria-hidden="true">T minus 4 weeks<span>on sale</span></p>
-                        <ul>
-                            <li>Zero platform fees at every plan level. Attendees pay through your own Stripe or PayPal account, or you take payment through Invoice Ninja, a payment link or cash, and the processor's own fee is the only cut anybody takes.</li>
-                            <li>Individual tickets give everyone in a company's group booking their own confirmation email and their own QR code, instead of one person holding twelve.</li>
-                            <li>Questions collect what the conference actually needs: a job title, an accessibility requirement, which workshop somebody picked. A question attached to a ticket type is free; event-wide questions on the checkout form, and an answer from every guest on a group booking, are Pro.</li>
-                            <li>Quantities are counted for each date on its own, and on Pro a waitlist catches the people who arrive after a day has sold out.</li>
-                        </ul>
-                        <p class="vc-phase" aria-hidden="true">T plus 1 day<span>afterwards</span></p>
-                        <ul>
-                            <li>Refunds come off the Sales page. A Stripe, PayPal or Razorpay payment goes back through the provider, in full or in part, and a full refund puts the place back on sale.</li>
+                            <li>Places are counted per event, so a full workshop track or a full day does not close the others.</li>
+                            <li>On Pro, the cart lets a buyer add several days or tracks and pay once, and each event keeps its own ticket page with its own join link.</li>
                         </ul>
                     </div>
 
                     <p class="vc-take-foot" data-reveal>
-                        See the detail on the <a href="{{ marketing_url('/features/ticketing') }}" class="vc-link">ticketing page</a>.
+                        See <a href="{{ marketing_url('/features/registration') }}" class="vc-link">free registration</a> and <a href="{{ marketing_url('/features/ticketing') }}" class="vc-link">ticketing</a>.
                     </p>
                 </div>
 
                 <div class="vc-board" data-reveal="panel">
                     <div class="vc-panel vc-marks">
-                        <div class="vc-titled">
-                            <h3 class="vc-h3">Ticket types</h3>
-                            <span class="vc-tier">Free</span>
-                        </div>
+                        <h3 class="vc-h3">Two ways in</h3>
                         <div class="vc-tiers">
-                            @foreach ([['Full pass', 'all three days', '$149'], ['Single day', 'any one day', '$59'], ['Early bird', 'sales window closes 31 Jan', '$99'], ['Community rate', 'limited quantity', '$25'], ['Student place', 'limited quantity', '$0']] as [$tierName, $tierScope, $tierPrice])
-                                <div>
-                                    <b>{{ $tierName }}</b>
-                                    <small>{{ $tierScope }}</small>
-                                    <span>{{ $tierPrice }}</span>
-                                </div>
-                            @endforeach
+                            <div>
+                                <b>Free registration</b>
+                                <small>with a capacity limit</small>
+                                <span>Free</span>
+                            </div>
+                            <div>
+                                <b>Priced ticket types</b>
+                                <small>own price and quantity</small>
+                                <span>Pro</span>
+                            </div>
+                            <div>
+                                <b>Discount codes and add-ons</b>
+                                <small>on priced tickets</small>
+                                <span>Pro</span>
+                            </div>
                         </div>
                         <div class="vc-fee">
                             <span>Platform fee</span>
                             <b class="vc-holo-text">{{ plan_price(0) }}</b>
                         </div>
-                        <p class="vc-note">
-                            The $0 row runs on the free plan and always will; the priced rows are what Pro is for. A conference with nothing to charge for turns the event over to free registration instead. These are counts, not seats: an online room has nowhere to sit, and the seating plans Enterprise adds are for venues with actual rows in them.
-                        </p>
+                        <p class="vc-note">Your payment processor's own fee is the only cut.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 09 Afterwards                                                -->
-        <!-- ============================================================ -->
-        <section id="after" class="vc-sec vc-alt" style="scroll-margin-top: 4rem;">
-            <div class="vc-wrap">
-                <header class="vc-head vc-head-solo">
-                    <p class="vc-kick" data-reveal><b>09</b><i></i>Afterwards</p>
-                    <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        When the stream stops.
-                    </h2>
-                </header>
-
-                <div class="vc-after" data-reveal>
-                    <article>
-                        <div class="vc-after-no"><span class="vc-tier">Free</span></div>
-                        <h3 class="vc-h3">Feedback that knows which session it is about</h3>
-                        <p>Attendees add a photo, a video or a comment and pick the part of the running order it belongs to, so the note about the workshop is filed under the workshop rather than under a four hour day. Nothing appears until you approve it.</p>
-                        <p>The free plan covers 25 photos per schedule; Pro lifts the cap and lets you download the lot as a zip. Star ratings collected after the event are a Pro feature.</p>
-                    </article>
-                    <article>
-                        <div class="vc-after-no"><span class="vc-tier">Free</span></div>
-                        <h3 class="vc-h3">Write to the people who came</h3>
-                        <p>A confirmed email subscriber hears about the new conference days you publish without you doing anything. The newsletter is the one you write when next year's programme is set, sent to your followers or to the Ticket Buyers of this year's days: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted one per recipient.</p>
-                    </article>
-                    <article>
-                        <div class="vc-after-no"><span class="vc-tier">Free</span></div>
-                        <h3 class="vc-h3">What the programme page did</h3>
-                        <p>Built-in analytics show page views, the devices people read on, which countries they read from and where the traffic came from, right down to the referrer and the campaign tag. Enough to tell whether the programme page did its job.</p>
-                    </article>
-                    <article>
-                        <div class="vc-after-no"><span class="vc-tier">Free</span></div>
-                        <h3 class="vc-h3">On the conference site you already built</h3>
-                        <p>Embed the calendar in a page of your own so the programme lives where sponsors and speakers link to it, and switch the schedule to its list layout when a conference reads better as a list than as a month.</p>
-                        <p>The ticket form embeds too, on Pro, so people can register without leaving your site.</p>
-                    </article>
-                    <article>
-                        <div class="vc-after-no"><span class="vc-tier">Free</span></div>
-                        <h3 class="vc-h3">Announce when you are ready</h3>
-                        <p>A day you have not announced sits on your calendar as a draft and never appears publicly until you say so. Internal and unlisted visibility, including a password on the link, are Enterprise.</p>
-                    </article>
-                    <article>
-                        <div class="vc-after-no"><span class="vc-tier">Free</span></div>
-                        <h3 class="vc-h3">Next year, from this year</h3>
-                        <p>Clone a day and you get its running order with it, which is most of the work of the next edition already done. On Pro you can also save a day as a reusable template. On any plan you can generate a share graphic that lays your next dates out from their flyer images, with the date printed on each if you switch that on.</p>
-                        <p>A programme committee that needs more than one login is on Enterprise, which allows up to five team members. The free plan is a single member, so plan the handover if a colleague has to post the schedule.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 10 Perfect for: six badges on one rail                       -->
-        <!-- ============================================================ -->
-        <section id="who" class="vc-sec" style="scroll-margin-top: 4rem;">
-            <div class="vc-wrap">
-                <header class="vc-head">
-                    <div>
-                        <p class="vc-kick" data-reveal><b>10</b><i></i>Perfect for</p>
-                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                            Every kind of <span class="vc-holo-text">virtual conference</span>
-                        </h2>
-                    </div>
-                    <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        A tech summit or an annual meeting, a half day or a whole week. Also see Event Schedule for <a href="{{ marketing_url('/for-webinars') }}" class="vc-link">webinars</a>.
-                    </p>
-                </header>
-
-                @php
-                    $vcWho = [
-                        ['Tech Companies', 'Product launches, developer conferences, hackathons. One event per day, the talks inside it, and a link that works wherever you stream.', 'for-tech-company-conferences', '-1.6deg'],
-                        ['Professional Associations', 'Annual meetings, certification events, member summits. Publish the running order with times so members can plan the day around one session.', 'for-professional-association-conferences', '1.1deg'],
-                        ['Nonprofits & NGOs', 'Fundraising events, awareness conferences, volunteer summits. Reach supporters anywhere, and Event Schedule takes no cut of what the tickets raise.', 'for-nonprofit-conferences', '-0.7deg'],
-                        ['Corporate Teams', 'All-hands meetings, training summits, leadership offsites. One link your whole team follows, with the agenda for the day printed on it.', 'for-corporate-team-conferences', '1.4deg'],
-                        ['Academic Institutions', 'Research symposiums, faculty conferences, student events. Every paper gets its own slot, with an abstract underneath it.', 'for-academic-conferences', '-1.2deg'],
-                        ['Industry Groups', 'Trade shows, networking events, expert panels. Build a following, then write to them when the next programme is set.', 'for-industry-group-conferences', '0.8deg'],
-                    ];
-                @endphp
-
-                <div class="vc-wall" data-reveal-group="80">
-                    @foreach ($vcWho as $vcWhoIndex => [$vcWhoName, $vcWhoText, $vcWhoSlug, $vcWhoTilt])
-                        @php $vcWhoPost = get_sub_audience_blog($vcWhoSlug); @endphp
-                        <div class="vc-mini-wrap" data-reveal>
-                            <article class="vc-mini" style="--r: {{ $vcWhoTilt }};">
-                                <span class="vc-mini-slot" aria-hidden="true"></span>
-                                <div class="vc-foil vc-mini-foil" style="--vc-tx: {{ ($vcWhoIndex % 3 - 1) * 0.7 }}; --vc-ty: {{ $vcWhoIndex < 3 ? -0.4 : 0.5 }};" aria-hidden="true"><span>Organizer</span><span>No. {{ str_pad($vcWhoIndex + 1, 2, '0', STR_PAD_LEFT) }}</span></div>
-                                <div class="vc-mini-body">
-                                    <h3>{{ $vcWhoName }}</h3>
-                                    <p>{{ $vcWhoText }}</p>
-                                    @if ($vcWhoPost)
-                                        <a href="{{ blog_url('/' . $vcWhoPost->slug) }}" aria-label="Learn more about Event Schedule for {{ $vcWhoName }}">
-                                            <span>Learn more {!! $vcArrow !!}</span>
-                                        </a>
-                                    @endif
-                                </div>
-                                <div class="vc-mini-bars" aria-hidden="true"></div>
-                            </article>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 11 Three steps                                               -->
-        <!-- ============================================================ -->
+        {{-- 08 Where to read more --}}
         <section class="vc-sec vc-alt">
-            <div class="vc-wrap">
-                <header class="vc-head vc-head-solo">
-                    <p class="vc-kick" data-reveal><b>11</b><i></i>Three steps</p>
-                    <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        From blank to published.
-                    </h2>
-                </header>
-
-                <ol class="vc-steps" data-reveal>
-                    @foreach ([
-                        ['01', 'Create the day', 'One event per conference day: its date, its start time, how long it runs, and the link people join.'],
-                        ['02', 'Type the running order', 'Add each session as a part with a name, a start and an end. Move the parts into order, and write an abstract where one helps.'],
-                        ['03', 'Open the doors', 'Free registration with a capacity limit on any plan, or named ticket types with prices on Pro. Share one link for the whole programme.'],
-                    ] as [$stepNum, $stepTitle, $stepBody])
-                        <li>
-                            <span class="vc-step-no" aria-hidden="true">{{ $stepNum }}</span>
-                            <h3>{{ $stepTitle }}</h3>
-                            <p>{{ $stepBody }}</p>
-                        </li>
-                    @endforeach
-                </ol>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 12 Key features                                              -->
-        <!-- ============================================================ -->
-        <section class="vc-sec">
             <div class="vc-wrap vc-kf">
                 <div>
-                    <p class="vc-kick" data-reveal><b>12</b><i></i>Key features</p>
-                    <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s; font-size: clamp(2.1rem, 4.2vw, 3.4rem);">What a conference actually leans on</h2>
+                    <p class="vc-kick" data-reveal><b>08</b><i></i>Read more</p>
+                    <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s; font-size: clamp(2.1rem, 4.2vw, 3.4rem);">The details, step by step</h2>
                     <p class="vc-kf-more" data-reveal style="--reveal-delay: 0.15s;">
                         <a href="{{ marketing_url('/features') }}" class="vc-more">
                             See all features
@@ -2417,10 +1823,10 @@
 
                 @php
                     $vcFeatures = [
-                        ['Online Events', 'One join link per event, on any platform that gives you a URL', marketing_url('/features/online-events')],
-                        ['Ticketing', 'Named ticket types, QR codes, and zero platform fees', marketing_url('/features/ticketing')],
-                        ['Analytics', 'Track page views, devices, and traffic sources', marketing_url('/features/analytics')],
-                        ['Newsletters', 'Write to the people who follow your schedule', marketing_url('/features/newsletters')],
+                        ['The agenda tab', 'Parts, times, descriptions and order, in the user guide', marketing_url('/docs/creating-events').'#agenda'],
+                        ['Online events', 'One join link per event, on any platform that gives you a URL', marketing_url('/features/online-events')],
+                        ['Sub-schedules', 'One per track or room, each with a color and an address', marketing_url('/features/sub-schedules')],
+                        ['Notifying attendees', 'What is emailed when a date, a time or a link changes', marketing_url('/docs/creating-events').'#notify-attendees'],
                     ];
                 @endphp
                 <div class="vc-kf-list" data-reveal-group="70">
@@ -2438,53 +1844,18 @@
             </div>
         </section>
 
-        <div class="vc-nudge">
-            @include('marketing.partials.pricing-nudge')
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- Related pages                                                -->
-        <!-- ============================================================ -->
-        <section class="vc-sec vc-alt">
-            <div class="vc-wrap">
-                <div class="vc-also-head">
-                    <div>
-                        <p class="vc-kick" data-reveal><b>13</b><i></i>Also online</p>
-                        <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s; font-size: clamp(2.1rem, 4.2vw, 3.4rem);">Related pages</h2>
-                    </div>
-                    <a href="{{ marketing_url('/use-cases') }}" class="vc-more" data-reveal>
-                        See all use cases
-                        {!! $vcArrow !!}
-                    </a>
-                </div>
-                <div class="vc-also" data-reveal-group="70">
-                    @foreach ([['/for-webinars', 'Webinars'], ['/for-online-classes', 'Online Classes'], ['/for-live-qa-sessions', 'Live Q&A Sessions'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
-                        <a href="{{ marketing_url($relHref) }}" data-reveal>
-                            <strong>For {{ $relName }}</strong>
-                            <small>
-                                Read more
-                                {!! $vcArrow !!}
-                            </small>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 14 Questions                                                 -->
-        <!-- ============================================================ -->
+        {{-- 09 Questions --}}
         <x-seo.faq-schema :items="$faqs" />
 
         <section id="faq" class="vc-sec" style="scroll-margin-top: 4rem;">
             <div class="vc-wrap vc-faq">
                 <div class="vc-faq-head">
-                    <p class="vc-kick" data-reveal><b>14</b><i></i>Questions</p>
+                    <p class="vc-kick" data-reveal><b>09</b><i></i>Questions</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
                         Frequently asked questions
                     </h2>
                     <p class="vc-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        What conference organizers ask before they move a programme across.
+                        What organizers ask before they put a programme online.
                     </p>
                 </div>
 
@@ -2502,19 +1873,17 @@
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 15 Close: your name on the badge                             -->
-        <!-- ============================================================ -->
+        {{-- 10 Close: your name on the badge --}}
         <section id="claim" class="vc-sec vc-band" style="scroll-margin-top: 4rem;">
             <div class="vc-band-glow" aria-hidden="true"></div>
             <div class="vc-wrap vc-close" style="position: relative;">
                 <div>
-                    <p class="vc-kick" data-reveal><b>15</b><i></i>Close</p>
+                    <p class="vc-kick" data-reveal><b>10</b><i></i>Start</p>
                     <h2 class="vc-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        One event. <span class="vc-holo-text">The whole day inside it.</span>
+                        Publish the agenda. <span class="vc-holo-text">Keep one link.</span>
                     </h2>
                     <p class="vc-close-sub" data-reveal style="--reveal-delay: 0.15s;">
-                        Publishing the running order, the join link and the calendar sync is free forever, and so is registration. Charging for a seat is {{ plan_price($proMonthly) }} a month. Event Schedule takes nothing out of what you sell either way.
+                        The agenda, the join link, free registration and the calendar links are free on every plan. Charging for a place is {{ plan_price($proMonthly) }} a month, and Event Schedule takes nothing from what you sell.
                     </p>
 
                     <div class="vc-close-form" data-reveal style="--reveal-delay: 0.22s;">
@@ -2532,7 +1901,7 @@
                     <p class="vc-close-note" data-reveal>No credit card required</p>
                 </div>
 
-                <!-- The second badge takes whatever name is typed -->
+                {{-- The second badge takes whatever name is typed --}}
                 <div class="vc-pass-rig" aria-hidden="true" data-reveal="zoom" id="vc-pass">
                     <span class="vc-strap"><i>{{ str_repeat('Event Schedule · ', 6) }}</i></span>
                     <span class="vc-strap"><i>{{ str_repeat('Event Schedule · ', 6) }}</i></span>

@@ -2154,6 +2154,7 @@ return [
     'subscription_already_active' => 'You already have an active subscription.',
     'no_active_subscription' => 'No active subscription found.',
     'subscription_error' => 'Something went wrong while processing your subscription. Please try again or contact support.',
+    'subscription_card_code_unverified' => 'We could not confirm your card\'s security code, so the free trial has not started. Check the code and try again.',
     'subscription_not_resumable' => 'This subscription cannot be resumed.',
     'subscribe_to_pro' => 'Subscribe to Pro',
     'select_plan' => 'Select a Plan',

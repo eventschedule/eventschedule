@@ -1819,6 +1819,7 @@ return [
     'subscription_already_active' => 'U heeft al een actief abonnement.',
     'no_active_subscription' => 'Geen actief abonnement gevonden.',
     'subscription_error' => 'Er is iets misgegaan bij het verwerken van uw abonnement. Probeer het opnieuw of neem contact op met support.',
+    'subscription_card_code_unverified' => 'We konden de beveiligingscode van je kaart niet bevestigen, dus de gratis proefperiode is niet gestart. Controleer de code en probeer het opnieuw.',
     'subscription_not_resumable' => 'Dit abonnement kan niet worden hervat.',
     'subscribe_to_pro' => 'Abonneren op Pro',
     'select_plan' => 'Selecteer een Plan',

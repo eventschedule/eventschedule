@@ -1819,6 +1819,7 @@ return [
     'subscription_already_active' => 'Você já possui uma assinatura ativa.',
     'no_active_subscription' => 'Nenhuma assinatura ativa encontrada.',
     'subscription_error' => 'Algo deu errado ao processar sua assinatura. Por favor, tente novamente ou entre em contato com o suporte.',
+    'subscription_card_code_unverified' => 'Não foi possível confirmar o código de segurança do cartão, por isso o teste gratuito não começou. Verifique o código e tente novamente.',
     'subscription_not_resumable' => 'Esta assinatura não pode ser retomada.',
     'subscribe_to_pro' => 'Assinar o Pro',
     'select_plan' => 'Selecione um Plano',

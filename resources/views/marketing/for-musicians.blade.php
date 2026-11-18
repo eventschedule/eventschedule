@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Band Tour Dates Page, Free | For Musicians and Solo Artists</x-slot>
-    <x-slot name="description">Build a band tour dates page fans can trust: every date, venue, support act and ticket link on one link that stays current. Free, with zero platform fees.</x-slot>
+    <x-slot name="title">Tour Dates Page for Your Band Website, Free to Embed</x-slot>
+    <x-slot name="description">Add tour dates to your band website with a free embed that updates itself. Sync from Google Calendar, link tickets, and email fans new shows.</x-slot>
     <x-slot name="breadcrumbTitle">For Musicians</x-slot>
 
     <x-slot name="headMeta">
@@ -12,35 +12,34 @@
 
     <x-slot name="structuredData">
     <x-seo.webpage
-        name="Event Schedule for Musicians"
-        description="Build a band tour dates page fans can trust: every date, venue, support act and ticket link on one link that stays current. Free, with zero platform fees."
+        name="Tour dates page for bands and solo artists"
+        description="Add tour dates to your band website with a free embed that updates itself. Sync from Google Calendar, link tickets, and email fans new shows."
         audience="Musicians"
-        keywords="musician schedule, band tour dates, share gig schedule, musician event calendar, band booking platform, free musician scheduling, band website with tour dates, residency schedule" />
-    <!-- HowTo Schema for Rich Snippets -->
+        keywords="tour dates page, add tour dates to website, tour dates widget, upcoming shows page, band website tour dates, gig calendar for musicians, embed tour dates" />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "HowTo",
-        "name": "How musicians share their gig schedule with Event Schedule",
-        "description": "Three steps from your first listed gig to a growing fanbase.",
+        "name": "How to add tour dates to your band website",
+        "description": "Three steps from your first show to a tour dates page embedded on your own website.",
         "step": [
             {
                 "@type": "HowToStep",
                 "position": 1,
-                "name": "Add your gigs",
-                "text": "Import from Google Calendar or add tour dates manually. Set up ticket sales if you want."
+                "name": "Add your shows",
+                "text": "Sign up as a performer and add each show with its date, venue and ticket link, or connect the Google Calendar you book gigs in."
             },
             {
                 "@type": "HowToStep",
                 "position": 2,
-                "name": "Share your link",
-                "text": "Add it to your Spotify bio, Bandcamp, EPK, or anywhere fans find you."
+                "name": "Paste the embed",
+                "text": "Choose Embed Schedule from your schedule's Actions menu, pick the List or Calendar layout, and paste the code into your website."
             },
             {
                 "@type": "HowToStep",
                 "position": 3,
-                "name": "Grow your fanbase",
-                "text": "Fans leave an email address, hear when you announce new dates, and share videos and comments after your gigs, all approved by you before they go live."
+                "name": "Share one link",
+                "text": "Put your schedule link in your bios, your EPK and your email signature. New dates appear on the page, the embed and the link when you publish them."
             }
         ]
     }
@@ -59,8 +58,8 @@
         /* ==============================================================
            For-musicians "Side A" styles. The page is a long-player: a
            sleeve with a record half out of it, tour dates as the track
-           list, features as the six tracks of two sides, a career as a
-           discography, and a test pressing to sign at the end.
+           list, the three steps as labels, the jobs as the tracks of
+           side A, and a test pressing to sign at the end.
 
            Everything is scoped under #mu and drawn with the page's own
            tokens, so nothing here leaks into the shared chrome. The
@@ -221,7 +220,7 @@
                 pointer-events: auto;
             }
             /* The rail is printed for the paper. The full-bleed ink and red bands pass over it. */
-            .mu-ticker, .mu-flip, .mu-press { z-index: 41; }
+            .mu-ticker, .mu-press { z-index: 41; }
             .mu-index a {
                 position: relative;
                 display: flex;
@@ -513,56 +512,7 @@
         }
 
         /* ---------------------------------------------------------------
-           The problem: the inner sleeve, black in both modes
-           --------------------------------------------------------------- */
-        .mu-flip {
-            position: relative;
-            overflow: clip;
-            background-color: #0d0c0b;
-            background-image: repeating-radial-gradient(circle at 50% 135%, transparent 0 26px, rgba(242, 234, 217, 0.05) 26px 27px);
-            color: #f2ead9;
-        }
-        .mu-flip-head { text-align: center; }
-        .mu-flip .mu-tag { color: #f0bd4a; }
-        .mu-flip-h2 { margin-top: 1.5rem; font-size: clamp(3rem, 10.5vw, 9.5rem); line-height: 0.88; text-wrap: balance; }
-        .mu-hollow { color: transparent; -webkit-text-stroke: 2px #f2ead9; }
-        .mu-flip-sub { margin: 1.6rem auto 0; max-width: 34rem; color: #cdc3b0; font-size: 1.2rem; }
-        .mu-stats { display: grid; margin-top: clamp(3rem, 6vw, 5rem); border-block: 2px solid #f2ead9; }
-        @media (min-width: 820px) { .mu-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        .mu-stat { padding: 2.25rem 1.5rem 2rem; text-align: center; }
-        .mu-stat + .mu-stat { border-top: 1px solid rgba(242, 234, 217, 0.22); }
-        @media (min-width: 820px) {
-            .mu-stat + .mu-stat { border-top: 0; border-inline-start: 1px solid rgba(242, 234, 217, 0.22); }
-        }
-        .mu-stat-big { font-size: clamp(3rem, 6.4vw, 5.4rem); color: var(--c); }
-        .mu-stat-big.es-od { justify-content: center; }
-        #mu .mu-stat .es-od-strip span { background: none; -webkit-text-fill-color: currentColor; color: var(--c); }
-        .mu-stat p { margin: 1rem auto 0; max-width: 17rem; color: #cdc3b0; }
-        .mu-stamp {
-            display: inline-block;
-            margin-top: 1.25rem;
-            padding: 0.3rem 0.6rem 0.2rem;
-            border: 2px solid var(--c);
-            color: var(--c);
-            rotate: var(--r, -2deg);
-        }
-        .mu-flip-foot { margin-top: 2.5rem; text-align: center; color: #cdc3b0; }
-        .mu-flip-foot a {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            margin-inline-start: 0.4rem;
-            color: #f2ead9;
-            font-weight: 700;
-            border-bottom: 2px solid #ff5433;
-            transition: gap 0.2s ease;
-        }
-        .mu-flip-foot a:hover { gap: 0.7rem; }
-        .mu-flip-foot svg { width: 1rem; height: 1rem; }
-        #mu .mu-flip a:focus-visible { outline-color: #f0bd4a; }
-
-        /* ---------------------------------------------------------------
-           Side A and Side B: the six tracks
+           Side A: the tracks
            --------------------------------------------------------------- */
         .mu-side-head {
             display: grid;
@@ -599,8 +549,9 @@
         .mu-track-kind { color: var(--mu-ink-3); }
         .mu-track h3 { margin-top: 0.7rem; font-size: clamp(2.1rem, 3.9vw, 3.3rem); text-wrap: balance; }
         .mu-track p { margin-top: 1rem; max-width: 34rem; color: var(--mu-ink-2); }
-        .mu-track p a, .mu-notes p a { color: var(--mu-ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--mu-hot); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
-        .mu-track p a:hover { color: var(--mu-hot-ink); }
+        /* The id outranks the colours the x-link component brings, so its links print in the sleeve's inks. */
+        #mu .mu-track p a, #mu .mu-notes p a { color: var(--mu-ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--mu-hot); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
+        #mu .mu-track p a:hover { color: var(--mu-hot-ink); }
         .mu-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.4rem; }
         .mu-chip { padding: 0.35rem 0.6rem 0.25rem; border: 1.5px solid var(--mu-line); color: var(--mu-ink-2); font-size: 0.72rem; }
         @supports (animation-timeline: view()) {
@@ -614,24 +565,6 @@
             from { color: transparent; -webkit-text-stroke-color: var(--mu-ink); }
             to { color: var(--mu-hot); -webkit-text-stroke-color: var(--mu-hot); }
         }
-        .mu-turn {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            padding-block: 1.4rem 1.2rem;
-            border-top: 2px solid var(--mu-ink);
-            color: var(--mu-ink-3);
-        }
-        .mu-turn::after { content: ""; flex: 1; height: 2px; background: repeating-linear-gradient(90deg, var(--mu-ink) 0 10px, transparent 10px 18px); opacity: 0.5; }
-        .mu-turn i {
-            flex: none;
-            width: 2.6rem;
-            aspect-ratio: 1;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--mu-paper-2) 0 9%, var(--mu-hot) 9.5% 34%, #0d0c0b 35%);
-            animation: mu-spin 3.2s linear infinite;
-        }
-
         /* Props: the things on the merch table, one per track. */
         .mu-prop { position: relative; min-width: 0; }
         .mu-cardboard {
@@ -650,7 +583,7 @@
             rotate: var(--r, -7deg);
         }
 
-        /* A1: the mailer */
+        /* A3: the mailer */
         .mu-mail { max-width: 27rem; margin-inline: auto; rotate: 1.2deg; }
         .mu-mail-from { display: flex; align-items: center; gap: 0.8rem; padding: 1rem 1.1rem; border-bottom: 2px solid var(--mu-ink); }
         .mu-mail-av { flex: none; display: grid; place-items: center; width: 2.6rem; aspect-ratio: 1; border-radius: 50%; background: var(--mu-ink); color: var(--mu-paper); font-family: var(--mu-display); font-size: 1rem; }
@@ -689,26 +622,7 @@
         .mu-stub-keep small { color: var(--mu-ink-3); }
         .mu-stub-tear .mu-d { font-size: 1.5rem; writing-mode: vertical-rl; rotate: 180deg; color: var(--mu-hot-ink); }
 
-        /* A3: one address, four places it goes */
-        .mu-link { max-width: 27rem; margin-inline: auto; }
-        .mu-link-bar { display: flex; align-items: center; gap: 0.7rem; padding: 1rem 1.1rem 0.9rem; font-family: var(--mu-mono); font-weight: 700; font-size: clamp(0.85rem, 2.6vw, 1.05rem); }
-        .mu-link-bar i { flex: none; width: 0.7rem; aspect-ratio: 1; border-radius: 50%; background: var(--mu-hot); }
-        .mu-link-bar span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .mu-link-fan { display: grid; grid-template-columns: repeat(4, 1fr); height: 2.1rem; }
-        .mu-link-fan i { border-inline-start: 2px solid var(--mu-ink); margin-inline-start: calc(50% - 1px); }
-        .mu-link-to { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
-        .mu-link-to span {
-            padding: 0.7rem 0.2rem 0.55rem;
-            text-align: center;
-            border: 2px solid var(--mu-ink);
-            background: var(--mu-card);
-            font-size: clamp(0.62rem, 1.9vw, 0.76rem);
-            letter-spacing: 0.08em;
-            rotate: var(--r, 0deg);
-        }
-        .mu-link-to span:nth-child(odd) { background: var(--mu-ink); color: var(--mu-paper); }
-
-        /* B1: two bills, one booking */
+        /* A1: two bills, one booking */
         .mu-bills { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 0.75rem; max-width: 29rem; margin-inline: auto; }
         .mu-bill { padding: 1rem 0.9rem 1.1rem; }
         .mu-bill:first-child { rotate: -2deg; }
@@ -721,111 +635,11 @@
         .mu-bill:last-child b { background: #15120f; color: #f2ead9; }
         .mu-bills > svg { width: 2.2rem; height: 2.2rem; color: var(--mu-hot); }
 
-        /* B2: the road book */
-        .mu-road { max-width: 26rem; margin-inline: auto; rotate: 1deg; }
-        .mu-road-row { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); align-items: center; border-bottom: 2px solid var(--mu-ink); }
-        .mu-road-row .mu-d { padding: 0.95rem 0.75rem 0.8rem; font-size: 1.7rem; background: var(--mu-ink); color: var(--mu-paper); text-align: center; }
-        .mu-road-row:nth-child(1) .mu-d { background: var(--mu-hot); color: var(--mu-on-hot); }
-        .mu-road-row span:last-child { padding-inline: 1rem; font-weight: 700; }
-        .mu-road-foot { padding: 0.8rem 1rem 0.7rem; color: var(--mu-ink-3); font-size: 0.72rem; }
-
-        /* B3: the street team */
-        .mu-crew { max-width: 26rem; margin-inline: auto; padding: 1.5rem 1.25rem 1.3rem; text-align: center; rotate: -1.3deg; }
-        .mu-crew-faces { display: flex; justify-content: center; }
-        .mu-crew-faces span {
-            display: grid;
-            place-items: center;
-            width: 3.2rem;
-            aspect-ratio: 1;
-            border-radius: 50%;
-            border: 2px solid var(--mu-ink);
-            background: var(--bg, var(--mu-paper-2));
-            color: var(--fg, var(--mu-ink));
-            font-family: var(--mu-display);
-            font-size: 1.1rem;
-        }
-        .mu-crew-faces span + span { margin-inline-start: -0.7rem; }
-        .mu-crew .mu-d { display: block; margin-top: 1rem; font-size: 3.6rem; }
-        .mu-crew small { display: block; margin-top: 0.35rem; color: var(--mu-ink-3); }
-
-        /* ---------------------------------------------------------------
-           The discography: a career, one release at a time
-           --------------------------------------------------------------- */
+        /* Section heads: a tag, a heading and a line under it. */
         .mu-disco-head { display: grid; gap: 1.25rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
-        .mu-crate { display: grid; gap: 2.75rem 2rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        @media (min-width: 900px) { .mu-crate { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.5rem 2.5rem; } }
-        .mu-rel { min-width: 0; }
-        .mu-cover {
-            position: relative;
-            aspect-ratio: 1;
-            container-type: inline-size;
-        }
-        .mu-cover-disc {
-            position: absolute;
-            inset: 4%;
-            border-radius: 50%;
-            background:
-                radial-gradient(circle, var(--mu-paper) 0 3%, var(--lab, var(--mu-hot)) 3.4% 17%, transparent 17.4%),
-                repeating-radial-gradient(circle, #1b1a18 0 1px, #070706 1px 3px);
-            transition: translate 0.6s cubic-bezier(0.22, 1, 0.36, 1), rotate 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .mu-rel:hover .mu-cover-disc { translate: 30% 0; rotate: 120deg; }
-        .mu-cover-face {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 6.5cqi;
-            background: var(--bg);
-            color: var(--fg);
-            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 1.2rem 2rem -1.1rem rgba(21, 18, 15, 0.7);
-        }
-        .dark .mu-cover-face { box-shadow: 0 0 0 1px rgba(242, 234, 217, 0.2), 0 1.2rem 2rem -1.1rem #000; }
-        .mu-cover-face::before { content: ""; position: absolute; inset: 0; background: var(--art); }
-        .mu-cover-face::after { content: ""; position: absolute; inset: 0; background-image: var(--mu-grain); mix-blend-mode: soft-light; pointer-events: none; }
-        .mu-cover-face > * { position: relative; z-index: 1; }
-        .mu-cover-meta { display: flex; justify-content: space-between; gap: 0.5rem; font-size: clamp(0.6rem, 4.2cqi, 0.8rem); }
-        /* Each mark sits on a chip of the sleeve's own stock, as on the hero sleeve, so the art never runs through it. */
-        .mu-cover-meta span { margin: -0.3em -0.55em -0.15em; padding: 0.3em 0.55em 0.15em; background: var(--bg); }
-        .mu-cover-title { font-size: clamp(1.25rem, 13cqi, 3.4rem); text-wrap: balance; }
-        .mu-rel p { margin-top: 1.1rem; color: var(--mu-ink-2); font-size: 1rem; }
-        .mu-rel-flag { display: inline-block; margin-top: 0.9rem; padding: 0.3rem 0.55rem 0.2rem; background: var(--mu-hot); color: var(--mu-on-hot); rotate: -2deg; }
 
-        /* ---------------------------------------------------------------
-           Filed under: the bin dividers
-           --------------------------------------------------------------- */
+        /* A centred section head, for the steps. */
         .mu-bins-head { text-align: center; display: grid; justify-items: center; gap: 1.1rem; margin-bottom: clamp(3.5rem, 6vw, 5rem); }
-        .mu-bins { display: grid; gap: 3.25rem 1.75rem; }
-        @media (min-width: 700px) { .mu-bins { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (min-width: 1040px) { .mu-bins { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        .mu-bin {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            padding: 1.75rem 1.5rem 1.5rem;
-            background: var(--mu-card);
-            border: 2px solid var(--mu-ink);
-            transition: translate 0.35s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.35s ease;
-        }
-        .mu-bin:hover { translate: 0 -0.7rem; box-shadow: 0 0.7rem 0 var(--mu-hot); }
-        .mu-bin-tab {
-            position: absolute;
-            bottom: 100%;
-            left: var(--x, 8%);
-            padding: 0.5rem 0.9rem 0.3rem;
-            background: var(--mu-ink);
-            color: var(--mu-paper);
-            border: 2px solid var(--mu-ink);
-            border-bottom: 0;
-        }
-        .mu-bin h3 { font-size: 2rem; }
-        .mu-bin p { margin-top: 0.75rem; color: var(--mu-ink-2); font-size: 1rem; }
-        .mu-bin a { margin-top: auto; padding-top: 1.25rem; align-self: flex-start; }
-        .mu-bin a span { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; border-bottom: 2px solid var(--mu-hot); transition: gap 0.2s ease; }
-        .mu-bin a:hover span { gap: 0.7rem; }
-        .mu-bin a svg { width: 1rem; height: 1rem; }
 
         /* ---------------------------------------------------------------
            Three steps: three labels, each a quarter turn on
@@ -917,33 +731,6 @@
         #mu .mu-keep .grid > a p { color: var(--mu-ink-2); }
         #mu .mu-keep .grid > a > span:last-child,
         #mu .mu-keep a.self-start { color: var(--mu-hot-ink); }
-
-        /* ---------------------------------------------------------------
-           You might also dig: four more sleeves
-           --------------------------------------------------------------- */
-        .mu-also-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1.25rem; margin-bottom: 2.5rem; }
-        .mu-also { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
-        @media (min-width: 900px) { .mu-also { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.75rem; } }
-        .mu-also a {
-            position: relative;
-            aspect-ratio: 1;
-            container-type: inline-size;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: clamp(0.9rem, 1.6vw, 1.5rem);
-            overflow: hidden;
-            background: var(--bg);
-            color: var(--fg);
-            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
-            transition: translate 0.3s cubic-bezier(0.34, 1.4, 0.64, 1), rotate 0.3s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.3s ease;
-        }
-        .dark .mu-also a { box-shadow: 0 0 0 1px rgba(242, 234, 217, 0.22); }
-        .mu-also a:hover { translate: 0 -0.5rem; rotate: -1.5deg; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 1.5rem 2rem -1rem rgba(21, 18, 15, 0.75); }
-        .mu-also a::before { content: ""; position: absolute; inset: 0; background: var(--art); }
-        .mu-also a > * { position: relative; }
-        .mu-also small { align-self: flex-start; margin: -0.3em -0.55em -0.15em; padding: 0.3em 0.55em 0.15em; background: var(--bg); font-size: clamp(0.62rem, 5.4cqi, 0.8rem); }
-        .mu-also strong { font-family: var(--mu-display); font-weight: 400; font-size: clamp(1.4rem, 17cqi, 3.2rem); text-transform: uppercase; line-height: 0.92; text-wrap: balance; }
 
         /* ---------------------------------------------------------------
            Liner notes: the questions
@@ -1068,10 +855,10 @@
         .mu-white-foot { margin-top: 1.1rem; padding-top: 0.9rem; border-top: 2px dashed rgba(21, 18, 15, 0.35); color: #473f35; font-size: 0.7rem; }
 
         /* ---------------------------------------------------------------
-           The track listing, the pressings and the release plan: the
-           field guide to a tour dates page, set as the back of the sleeve
-           (credits), the pressing plant's run sheet and the label's
-           release schedule. Tokens only, so dark mode follows.
+           The track listing and the pressings: what each line of a tour
+           dates page says, set as the back of the sleeve (credits), and
+           where every copy of a date comes from, set as the pressing
+           plant's run sheet. Tokens only, so dark mode follows.
            --------------------------------------------------------------- */
         .mu-credits { border-top: 2px solid var(--mu-ink); }
         .mu-credit {
@@ -1115,42 +902,19 @@
         .mu-run-row small { display: block; margin-bottom: 0.35rem; color: var(--mu-hot-ink); }
         .mu-run-auto { color: var(--mu-teal); }
 
-        .mu-plan { display: grid; gap: 1.25rem; max-width: 62rem; }
-        .mu-plan-row { display: grid; background: var(--mu-card); border: 2px solid var(--mu-ink); box-shadow: 6px 6px 0 var(--mu-ink); }
-        @media (min-width: 760px) { .mu-plan-row { grid-template-columns: 11rem minmax(0, 1fr); } }
-        .mu-plan-when {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 0.35rem;
-            padding: 1.1rem 1.1rem 0.9rem;
-            background: var(--mu-ink);
-            color: var(--mu-paper);
-        }
-        .mu-plan-when .mu-d { font-size: 1.9rem; }
-        .mu-plan-body { padding: 1.2rem 1.25rem 1.1rem; }
-        .mu-plan-body h3 { font-size: 1.6rem; }
-        .mu-plan-body ul { margin-top: 0.7rem; display: grid; gap: 0.45rem; color: var(--mu-ink-2); font-size: 1rem; }
-        .mu-plan-body li { position: relative; padding-inline-start: 1.25rem; }
-        .mu-plan-body li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.6em; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--mu-hot); }
-
         @media (prefers-reduced-motion: reduce) {
-            .mu-label,
-            .mu-turn i { animation: none; }
-            .mu-btn, .mu-slide, .mu-cover-disc, .mu-bin, .mu-sticker, .mu-also a, .mu-cat-row { transition: none; }
+            .mu-label { animation: none; }
+            .mu-btn, .mu-slide, .mu-sticker, .mu-cat-row { transition: none; }
         }
     </style>
 
     @php
         $muTracks = [
             ['top', 'Cover'],
+            ['how', 'Three steps'],
+            ['each-line', 'Each line'],
             ['features', 'Side A'],
-            ['side-b', 'Side B'],
-            ['tour-dates', 'Track listing'],
             ['upkeep', 'Pressings'],
-            ['discography', 'Discography'],
-            ['filed-under', 'Filed under'],
-            ['run-of-show', 'Run of show'],
             ['faq', 'Liner notes'],
             ['claim', 'Test pressing'],
         ];
@@ -1158,6 +922,24 @@
         $muArrow = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>';
         $muDown = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>';
     @endphp
+
+    {{-- Claims on this page, checked against docs/FEATURES.md and the code on 2026-11-18:
+         - Embed: "Embed calendar on website" is a Free feature; Actions > Embed Schedule, List or
+           Calendar layout, Light/Dark (docs/sharing#embed). Free hosted snippets carry a
+           "Powered by Event Schedule" line; removing branding is Pro.
+         - Google Calendar sync: Free, To / From / Bidirectional (docs/creating-schedules#integrations-google).
+         - A venue adding a talent sends a request, because a Talent schedule always requires
+           approval; accepted, it is one event on both schedules (docs/managing-schedules#requests).
+           The talent Booking Form ("Request to Book", /request) is free on every plan.
+         - Claiming a page created for you: FEATURES.md "Claim a page created for you".
+         - Digest to CONFIRMED email subscribers of public events the schedule created itself, at
+           most 25 per email (SendEventAnnouncements::MAX_EVENTS_PER_DIGEST), floored at 72 hours,
+           outside the newsletter allowance; account followers get newsletters only. On hosted an
+           owner without a verified phone or the schedule's own mail settings reaches 50.
+         - Newsletter allowance per month: 10 / 100 / 1,000 recipient emails (Role::newsletterLimit()).
+         - Tickets elsewhere and free registration: every plan. A priced ticket: Pro
+           (Event::canSellPaidTickets()), no platform fee. Door scanning has no plan check.
+         - Hide Past Events (Style > Events) has no plan gate. --}}
 
     <div id="mu">
 
@@ -1169,9 +951,7 @@
             </ol>
         </nav>
 
-        <!-- ============================================================ -->
-        <!-- 1. Hero: the sleeve                                          -->
-        <!-- ============================================================ -->
+        {{-- 1. Hero: the sleeve, and the answer --}}
         <section class="mu-hero" id="top">
             <p class="mu-spine mu-m" aria-hidden="true">Event Schedule presents &middot; Side A &middot; Stereo &middot; 33&#8531; RPM</p>
 
@@ -1179,33 +959,33 @@
                 <div class="mu-copy">
                     <h1 class="mu-d mu-h1">
                         <x-marketing.hero-eyebrow class="mu-eyebrow es-fade-up es-d-1">
-                            Tour dates page for musicians, bands &amp; solo artists
+                            Tour dates page for bands &amp; solo artists
                         </x-marketing.hero-eyebrow>
-                        <span class="es-mask"><span class="es-mask-line">Your gigs.</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">Your fans.</span></span>
-                        <span class="es-mask mu-mask-3"><span class="es-mask-line"><span class="mu-hot">No middleman.</span></span></span>
+                        <span class="es-mask"><span class="es-mask-line">Every show.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">One page.</span></span>
+                        <span class="es-mask mu-mask-3"><span class="es-mask-line"><span class="mu-hot">Up to date.</span></span></span>
                     </h1>
 
                     <p class="mu-lede es-fade-up es-d-2">
-                        One link for every show you play. Fans hear it from you, not from an algorithm. And when you sell tickets, the platform fee is zero.
+                        A tour dates page lists your upcoming shows, each with its date, city, venue and a way in. Event Schedule gives you one free, at your own link, with an embed for your band website and a sync from Google Calendar, so a date you add once shows up everywhere.
                     </p>
 
                     <div class="mu-cta es-fade-up es-d-3">
                         <a href="{{ app_url('/sign_up?type=talent') }}" class="mu-btn">
-                            Create your schedule
+                            Make your tour page
                             {!! $muArrow !!}
                         </a>
-                        <a href="#features" class="mu-btn mu-btn-ghost">
-                            See the bill
+                        <a href="#how" class="mu-btn mu-btn-ghost">
+                            How it works
                             {!! $muDown !!}
                         </a>
                     </div>
                     <x-marketing.example-link subdomain="battleofthebands" ink="var(--mu-ink-2)" class="es-fade-up es-d-3">See an example act: Battle of the Bands</x-marketing.example-link>
 
                     <ul class="mu-stickers es-fade-up es-d-4">
-                        <li class="mu-sticker mu-sticker-hot" style="--r: -4deg;">Free forever</li>
-                        <li class="mu-sticker mu-sticker-line" style="--r: 2deg;">No platform fees</li>
-                        <li class="mu-sticker mu-sticker-ink" style="--r: -2deg;">All ages</li>
+                        <li class="mu-sticker mu-sticker-hot" style="--r: -4deg;">Free embed</li>
+                        <li class="mu-sticker mu-sticker-line" style="--r: 2deg;">Google Calendar sync</li>
+                        <li class="mu-sticker mu-sticker-ink" style="--r: -2deg;">No platform fees</li>
                     </ul>
                 </div>
 
@@ -1230,7 +1010,7 @@
                 </div>
             </div>
 
-            <!-- The track list: three dates, set like the back of the sleeve -->
+            {{-- The track list: three dates, set like the back of the sleeve --}}
             <div class="mu-wrap es-fade-up es-d-4" aria-hidden="true">
                 <div class="mu-dates" dir="ltr">
                     <div class="mu-date">
@@ -1254,7 +1034,7 @@
                 </div>
             </div>
 
-            <!-- Genre ticker -->
+            {{-- Genre ticker --}}
             <div class="mu-ticker es-fade-up es-d-5">
                 <div class="es-marquee" data-marquee="1">
                     <div class="es-marquee-track">
@@ -1268,162 +1048,127 @@
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 2. The problem: great show, empty room                       -->
-        <!-- ============================================================ -->
-        <section class="mu-flip mu-section">
+        {{-- 2. Three steps: how to add tour dates to your website --}}
+        <section id="how" class="mu-section mu-alt" style="scroll-margin-top: 5rem;">
             <div class="mu-wrap">
-                <div class="mu-flip-head">
-                    <span class="mu-m mu-tag" data-reveal>The problem</span>
-                    <h2 class="mu-d mu-flip-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        Great show. <span class="mu-hollow">Empty room.</span>
+                <div class="mu-bins-head" style="margin-bottom: 0;">
+                    <span class="mu-m mu-tag" data-reveal>Run of show</span>
+                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Add tour dates to your website in three steps
                     </h2>
-                    <p class="mu-flip-sub" data-reveal style="--reveal-delay: 0.16s;">
-                        You played your heart out. Your fans found out on Monday.
+                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        No plugin, and no copy of your dates to keep up by hand on the site.
                     </p>
                 </div>
 
-                <div class="mu-stats" data-reveal-group="120">
-                    <div class="mu-stat" data-reveal style="--c: #ff5433;">
-                        <div class="mu-d mu-stat-big">Most</div>
-                        <p>of your social media followers never see your posts about shows</p>
-                        <span class="mu-m mu-stamp" style="--r: -3deg;">Buried by the feed</span>
+                <div class="mu-steps" data-reveal-group="140">
+                    <div class="mu-step" data-reveal>
+                        <div class="mu-step-disc" style="--bg: #e8472c; --fg: #15120f;" aria-hidden="true">
+                            <svg viewBox="0 0 200 200"><defs><path id="mu-step-1" d="M100,100 m-49,0 a49,49 0 1,1 98,0 a49,49 0 1,1 -98,0" /></defs><text><textPath href="#mu-step-1">Doors &#183; Doors &#183; Doors &#183; Doors &#183; Doors &#183;</textPath></text></svg>
+                            <b>01</b>
+                        </div>
+                        <h3 class="mu-d">Add your shows</h3>
+                        <p>Sign up as a performer and name your schedule. Add each show with its date, venue and ticket link, or connect the Google Calendar you book gigs in and let them come in by themselves.</p>
                     </div>
-                    <div class="mu-stat" data-reveal style="--c: #f2ead9;">
-                        <div class="mu-d mu-stat-big">Too late</div>
-                        <p>fans only hear about your shows after they've happened</p>
-                        <span class="mu-m mu-stamp" style="--r: 2deg;">Missed it</span>
+                    <div class="mu-step" data-reveal>
+                        <div class="mu-step-disc" style="--bg: #e9b23a; --fg: #15120f;" aria-hidden="true">
+                            <svg viewBox="0 0 200 200"><defs><path id="mu-step-2" d="M100,100 m-49,0 a49,49 0 1,1 98,0 a49,49 0 1,1 -98,0" /></defs><text><textPath href="#mu-step-2">Soundcheck &#183; Soundcheck &#183; Soundcheck &#183;</textPath></text></svg>
+                            <b>02</b>
+                        </div>
+                        <h3 class="mu-d">Paste the embed</h3>
+                        <p>Choose Embed Schedule from your schedule's Actions menu, pick the List or Calendar layout and a light or dark theme, and paste the code into any site that takes an HTML block. Free on every plan.</p>
                     </div>
-                    <div class="mu-stat" data-reveal style="--c: #f0bd4a;">
-                        <div class="es-od mu-d mu-stat-big" data-odometer="10-20%">10-20%</div>
-                        <p>of a $15 to $50 ticket goes to Eventbrite's fees when you absorb them (3.7% + $1.79 a ticket, plus 2.9% processing). Event Schedule takes no platform fee.</p>
-                        <span class="mu-m mu-stamp" style="--r: -2deg;">Gone</span>
+                    <div class="mu-step" data-reveal>
+                        <div class="mu-step-disc" style="--bg: #f2ead9; --fg: #15120f;" aria-hidden="true">
+                            <svg viewBox="0 0 200 200"><defs><path id="mu-step-3" d="M100,100 m-49,0 a49,49 0 1,1 98,0 a49,49 0 1,1 -98,0" /></defs><text><textPath href="#mu-step-3">Showtime &#183; Showtime &#183; Showtime &#183;</textPath></text></svg>
+                            <b>03</b>
+                        </div>
+                        <h3 class="mu-d">Share one link</h3>
+                        <p>Put your-band.eventschedule.com in your Instagram and Bandcamp bios, your EPK and your email signature. A new date appears on the page, the embed and the link the moment you publish it.</p>
                     </div>
                 </div>
 
-                <p class="mu-flip-foot" data-reveal>
-                    Your fans deserve a better flyer.
-                    <a href="#features">
-                        Here is the fix
-                        {!! $muDown !!}
-                    </a>
+                <p class="mu-sub mu-inline" style="margin: 2.5rem auto 0; text-align: center; font-size: 1rem;" data-reveal>
+                    The user guide covers <x-link href="{{ marketing_url('/docs/sharing#embed') }}">getting the embed code</x-link> and <x-link href="{{ marketing_url('/docs/creating-schedules#integrations-google') }}">connecting Google Calendar</x-link>.
                 </p>
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 3. Side A and Side B: the six tracks                         -->
-        <!-- ============================================================ -->
-        <section id="features" class="mu-section" style="scroll-margin-top: 5rem;">
+        {{-- 3. The track listing: what each line of the page says --}}
+        <section id="each-line" class="mu-section" style="scroll-margin-top: 5rem;">
+            <div class="mu-wrap">
+                <div class="mu-disco-head">
+                    <div><span class="mu-m mu-tag" data-reveal>The track listing</span></div>
+                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        What an upcoming shows page has to say
+                    </h2>
+                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        A fan opens your page looking for one city. Each line has to tell them when, where, who else is playing, how to get in, and whether there is still room.
+                    </p>
+                </div>
+
+                <ol class="mu-credits" data-reveal-group="70">
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">01</span>
+                        <h3 class="mu-d">Date, doors and set times</h3>
+                        <div>
+                            <p>The date and start time go on the event. Doors, support and your set go on its Agenda tab as parts, free on every plan, and show on the event page in that order. A weekly residency is one recurring event, with the weeks you skip left out.</p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">02</span>
+                        <h3 class="mu-d">City and venue</h3>
+                        <div>
+                            <p>Pick the venue, or type a new one with its address. Each show gets its own page at its own address, so you can send Glasgow the Glasgow link and its preview uses that night's flyer.</p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">03</span>
+                        <h3 class="mu-d">The way in</h3>
+                        <div>
+                            <p>On the event's Tickets tab, choose Tickets elsewhere to link to the venue's or promoter's ticket page with the price beside it, take free registrations, or sell your own tickets. <x-link href="{{ marketing_url('/docs/tickets#external') }}">How Tickets elsewhere works</x-link></p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">04</span>
+                        <h3 class="mu-d">Every act on the bill</h3>
+                        <div>
+                            <p>The opener's name sells tickets in the opener's town. Add every act on the Participants tab: each one with a schedule here is linked, and one that is not gets a page it can claim. <x-link href="{{ marketing_url('/features/lineup') }}">More on lineups</x-link></p>
+                        </div>
+                    </li>
+                    <li class="mu-credit" data-reveal>
+                        <span class="mu-m" aria-hidden="true">05</span>
+                        <h3 class="mu-d">Sold out, cancelled, over</h3>
+                        <div>
+                            <p>Sell through Event Schedule with a quantity on each ticket type and the show says Sold Out by itself. Cancel a show from its Actions menu rather than deleting it, so the page says so. Switch on <x-link href="{{ marketing_url('/docs/schedule-styling#hide-past-events') }}">Hide Past Events</x-link> and last month's shows leave the public page on their own.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        {{-- 4. Side A: venues, tickets and fans --}}
+        <section id="features" class="mu-section mu-alt" style="scroll-margin-top: 5rem;">
             <div class="mu-wrap">
                 <div class="mu-side-head">
                     <div>
                         <span class="mu-m mu-tag" data-reveal>On the bill</span>
                         <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s; margin-top: 1.25rem;">
-                            Everything a working musician needs
+                            The page fills itself in
                         </h2>
                     </div>
                     <div class="mu-d mu-side-mark" aria-hidden="true" data-reveal="right">Side <b>A</b></div>
                 </div>
 
-                <!-- A1. Newsletters -->
+                {{-- A1. Venues and promoters --}}
                 <article class="mu-track">
                     <div class="mu-d mu-track-no" aria-hidden="true">A1</div>
                     <div data-reveal>
-                        <div class="mu-m mu-track-kind">Newsletters</div>
-                        <h3 class="mu-d">Direct to the fans</h3>
-                        <p>New tour on sale? Say it straight to the inbox. Fans who sign up by email also get a digest of your new dates, batched so a run of shows arrives as one message, and every plan can generate social-ready show art from your upcoming gigs.</p>
-                        <div class="mu-chips">
-                            <span class="mu-m mu-chip">Tour announcements</span>
-                            <span class="mu-m mu-chip">Album releases</span>
-                            <span class="mu-m mu-chip">Show reminders</span>
-                        </div>
-                    </div>
-                    <div class="mu-prop" aria-hidden="true" data-reveal="zoom">
-                        <div class="mu-cardboard mu-mail">
-                            <span class="mu-m mu-prop-stamp">No algorithm</span>
-                            <div class="mu-mail-from">
-                                <span class="mu-mail-av">MH</span>
-                                <div>
-                                    <strong>The Midnight Hour</strong>
-                                    <small>Summer tour on sale now</small>
-                                </div>
-                            </div>
-                            <div class="mu-mail-body">
-                                <span class="mu-m">This Saturday</span>
-                                <div class="mu-d">Live at The Roxy</div>
-                                <p>Doors 7 PM &middot; $25</p>
-                            </div>
-                            <div class="mu-mail-stats">
-                                <div><span class="mu-d"><span data-count-to="72">72</span>%</span><small class="mu-m">opened</small></div>
-                                <div><span class="mu-d"><span data-count-to="31">31</span>%</span><small class="mu-m">clicked</small></div>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- A2. Zero-fee tickets -->
-                <article class="mu-track">
-                    <div class="mu-d mu-track-no" aria-hidden="true">A2</div>
-                    <div data-reveal>
-                        <div class="mu-m mu-track-kind">Ticketing</div>
-                        <h3 class="mu-d">Zero-fee tickets</h3>
-                        <p>Free shows take registrations with QR tickets on every plan. On Pro, connect Stripe or <a href="{{ marketing_url('/paypal') }}">PayPal</a>, or take cash on the night, and sell priced pre-sales or door tickets, with promo codes for the fan club and waitlists for the sellouts. Scanning at the door is free either way.</p>
-                    </div>
-                    <div class="mu-prop" aria-hidden="true" data-reveal="zoom">
-                        <div class="mu-stub" dir="ltr">
-                            <div class="mu-stub-main">
-                                <div class="mu-stub-row"><span>GA TICKET x2</span><span>$50.00</span></div>
-                                <div class="mu-stub-row"><span>PLATFORM FEE</span><span>{{ plan_price(0) }}</span></div>
-                                <div class="mu-stub-keep">
-                                    <small class="mu-m">You keep</small>
-                                    <span class="mu-d">100%</span>
-                                    <small class="mu-m">of ticket sales</small>
-                                </div>
-                            </div>
-                            <div class="mu-stub-tear"><span class="mu-d">No fees ever</span></div>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- A3. One link for everything -->
-                <article class="mu-track">
-                    <div class="mu-d mu-track-no" aria-hidden="true">A3</div>
-                    <div data-reveal>
-                        <div class="mu-m mu-track-kind">Share link</div>
-                        <h3 class="mu-d">One link. Every show.</h3>
-                        <p>Put it in your Spotify bio, Bandcamp page, and EPK. You can embed the calendar on your own website too.</p>
-                    </div>
-                    <div class="mu-prop" aria-hidden="true" data-reveal="zoom">
-                        <div class="mu-link" dir="ltr">
-                            <div class="mu-cardboard mu-link-bar"><i></i><span>yourband.eventschedule.com</span></div>
-                            <div class="mu-link-fan"><i></i><i></i><i></i><i></i></div>
-                            <div class="mu-link-to mu-m">
-                                <span style="--r: -3deg;">Spotify</span>
-                                <span style="--r: 2deg;">Bandcamp</span>
-                                <span style="--r: -1deg;">EPK</span>
-                                <span style="--r: 3deg;">Your site</span>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <div class="mu-turn mu-m" id="side-b" style="scroll-margin-top: 5rem;" aria-hidden="true"><i></i>Turn over for side B</div>
-
-                <!-- B1. Venue bookings, team, AI -->
-                <article class="mu-track" style="border-top: 0;">
-                    <div class="mu-d mu-track-no" aria-hidden="true">B1</div>
-                    <div data-reveal>
-                        <div class="mu-m mu-track-kind">Venue bookings &middot; Team</div>
-                        <h3 class="mu-d">Booked once. Printed twice.</h3>
-                        <p>When a venue puts you on its bill on Event Schedule, the gig comes to you as a request. Accept it and it lands on your poster too. One booking, both schedules.</p>
-                        <p>Not signed up yet? The venue's listing makes a page with your name on it, each date credited to whoever added it, and kept out of search engines until you <a href="{{ marketing_url('/docs/creating-events#claim') }}">claim it</a> with the email address they entered.</p>
-                        <p>On Enterprise, your band, manager, and booking agent get their own logins. And when a booking email lands, paste it in and AI turns it into a listed gig.</p>
-                        <div class="mu-chips">
-                            <span class="mu-m mu-chip">Lead</span>
-                            <span class="mu-m mu-chip">Manager</span>
-                            <span class="mu-m mu-chip">Agent</span>
-                        </div>
+                        <div class="mu-m mu-track-kind">Venues &middot; Promoters</div>
+                        <h3 class="mu-d">Booked once. Listed twice.</h3>
+                        <p>When a venue on Event Schedule adds you to its event, the date arrives on your <x-link href="{{ marketing_url('/docs/managing-schedules#requests') }}">Requests tab</x-link>. Accept it and the show is on your page too. It is one event on both schedules, so a changed set time changes on both.</p>
+                        <p>A promoter who is not on Event Schedule can press Request to Book on your page and send you a date. The <x-link href="{{ marketing_url('/booking-requests') }}">booking form</x-link> is free, and nothing goes up until you accept it.</p>
+                        <p>Did a venue list you before you joined? It made a page with your name and those dates. <x-link href="{{ marketing_url('/docs/creating-events#claim') }}">Claim it</x-link> with the email address the venue entered and it becomes your schedule, with the venues that list you still listing you.</p>
                     </div>
                     <div class="mu-prop" aria-hidden="true" data-reveal="zoom">
                         <div class="mu-bills">
@@ -1434,171 +1179,83 @@
                             </div>
                             {!! $muArrow !!}
                             <div class="mu-cardboard mu-bill">
-                                <span class="mu-m">Your poster</span>
+                                <span class="mu-m">Your page</span>
                                 <i></i><i></i><i></i>
-                                <b>New gig!</b>
+                                <b>New date</b>
                             </div>
                         </div>
                     </div>
                 </article>
 
-                <!-- B2. Calendar sync and residencies -->
+                {{-- A2. Tickets --}}
                 <article class="mu-track">
-                    <div class="mu-d mu-track-no" aria-hidden="true">B2</div>
+                    <div class="mu-d mu-track-no" aria-hidden="true">A2</div>
                     <div data-reveal>
-                        <div class="mu-m mu-track-kind">Calendar sync</div>
-                        <h3 class="mu-d">The road book</h3>
-                        <p>Two-way sync with Google Calendar, Outlook, or CalDAV. Weekly residency? Set the pattern once and it repeats, minus the weeks you skip.</p>
+                        <div class="mu-m mu-track-kind">Tickets</div>
+                        <h3 class="mu-d">Your tickets or the venue's</h3>
+                        <p>Most club shows are sold by the venue, so link to its ticket page: free on every plan. For a show of your own, sell tickets here. A ticket with a price needs Pro, the money goes to your own Stripe or PayPal account, and the platform fee is zero. Free shows take unlimited registrations on any plan.</p>
+                        <p>Every ticket carries a QR code that any phone on the team scans at the door, on any plan. Selling here, but not on sale yet? Switch on the Notify me card and fans leave an email address to hear the moment it is. <x-link href="{{ marketing_url('/features/ticketing') }}">Ticketing</x-link></p>
                     </div>
                     <div class="mu-prop" aria-hidden="true" data-reveal="zoom">
-                        <div class="mu-cardboard mu-road">
-                            <div class="mu-road-row"><span class="mu-d">Thu</span><span>Gig &middot; Doors 8 PM</span></div>
-                            <div class="mu-road-row"><span class="mu-d">Fri</span><span>Rehearsal</span></div>
-                            <div class="mu-road-row"><span class="mu-d">Sun</span><span>Studio session</span></div>
-                            <div class="mu-m mu-road-foot">Google &middot; Outlook &middot; CalDAV</div>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- B3. Followers and fan content -->
-                <article class="mu-track" style="border-bottom: 2px solid var(--mu-ink);">
-                    <div class="mu-d mu-track-no" aria-hidden="true">B3</div>
-                    <div data-reveal>
-                        <div class="mu-m mu-track-kind">Followers</div>
-                        <h3 class="mu-d">The street team</h3>
-                        <p>Fans sign up with their email and hear automatically when you add a date. Rather not hand over an address? They can <a href="{{ marketing_url('/docs/sharing#calendar-feeds') }}">subscribe to your calendar</a> instead, and a moved date updates itself. After the show they post clips, photos, and comments, and nothing goes live until you approve it.</p>
-                    </div>
-                    <div class="mu-prop" aria-hidden="true" data-reveal="zoom">
-                        <div class="mu-cardboard mu-crew">
-                            <div class="mu-crew-faces">
-                                <span style="--bg: var(--mu-hot); --fg: var(--mu-on-hot);">A</span>
-                                <span style="--bg: var(--mu-gold); --fg: #15120f;">B</span>
-                                <span style="--bg: var(--mu-ink); --fg: var(--mu-paper);">C</span>
-                                <span>+127</span>
+                        <div class="mu-stub" dir="ltr">
+                            <div class="mu-stub-main">
+                                <div class="mu-stub-row"><span>GA TICKET x2</span><span>$50.00</span></div>
+                                <div class="mu-stub-row"><span>PLATFORM FEE</span><span>{{ plan_price(0) }}</span></div>
+                                <div class="mu-stub-keep">
+                                    <small class="mu-m">Platform fee</small>
+                                    <span class="mu-d">0%</span>
+                                    <small class="mu-m">on every plan</small>
+                                </div>
                             </div>
-                            <span class="mu-d"><span data-count-to="130">130</span> fans following</span>
-                            <small class="mu-m">Emailed when you add dates</small>
+                            <div class="mu-stub-tear"><span class="mu-d">Admit one</span></div>
+                        </div>
+                    </div>
+                </article>
+
+                {{-- A3. Fans and the mailing list --}}
+                <article class="mu-track" style="border-bottom: 2px solid var(--mu-ink);">
+                    <div class="mu-d mu-track-no" aria-hidden="true">A3</div>
+                    <div data-reveal>
+                        <div class="mu-m mu-track-kind">Mailing list</div>
+                        <h3 class="mu-d">New dates reach the inbox</h3>
+                        <p>Fans sign up with their email address on your page, on a form you embed on your site, or from the QR code on your Followers tab printed for the merch table. Once they confirm, each batch of new shows you add and publish yourself reaches them as one email, with nothing for you to send: up to 25 dates in it, and never more than one every 72 hours.</p>
+                        <p>That email does not count against your newsletter allowance. For the big news, write a newsletter yourself: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, each recipient counting as one. Fans who would rather not give an address can <x-link href="{{ marketing_url('/docs/sharing#calendar-feeds') }}">subscribe to your calendar</x-link> instead. <x-link href="{{ marketing_url('/docs/sharing#followers') }}">Building your list</x-link></p>
+                    </div>
+                    <div class="mu-prop" aria-hidden="true" data-reveal="zoom">
+                        <div class="mu-cardboard mu-mail">
+                            <span class="mu-m mu-prop-stamp">No algorithm</span>
+                            <div class="mu-mail-from">
+                                <span class="mu-mail-av">MH</span>
+                                <div>
+                                    <strong>The Midnight Hour</strong>
+                                    <small>3 new dates</small>
+                                </div>
+                            </div>
+                            <div class="mu-mail-body">
+                                <span class="mu-m">Just announced</span>
+                                <div class="mu-d">Leeds &middot; Glasgow &middot; Bristol</div>
+                                <p>Tickets on each show's page</p>
+                            </div>
+                            <div class="mu-mail-stats">
+                                <div><span class="mu-d">25</span><small class="mu-m">dates per email</small></div>
+                                <div><span class="mu-d">72h</span><small class="mu-m">between emails</small></div>
+                            </div>
                         </div>
                     </div>
                 </article>
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 3b. The track listing: what every tour date needs            -->
-        <!-- ============================================================ -->
-        <section id="tour-dates" class="mu-section mu-alt" style="scroll-margin-top: 5rem;">
-            <div class="mu-wrap">
-                <div class="mu-disco-head">
-                    <div><span class="mu-m mu-tag" data-reveal>The track listing</span></div>
-                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        What every line of a tour dates page needs
-                    </h2>
-                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
-                        A fan opens your tour page looking for one city. Each line has to answer five questions before they scroll past it: when, where, with whom, how to get in, and whether there is still room.
-                    </p>
-                </div>
-
-                <ol class="mu-credits" data-reveal-group="70">
-                    <li class="mu-credit" data-reveal>
-                        <span class="mu-m" aria-hidden="true">01</span>
-                        <h3 class="mu-d">Date, doors and stage time</h3>
-                        <div>
-                            <p>The date and start time go in the event's Date &amp; Time. Doors and set times are what people actually plan their evening around, so add them as parts on the event's Agenda tab: doors 7:00, support 7:45, your set 9:00. Agenda parts are free on every plan and show on the event page in the order you set.</p>
-                        </div>
-                    </li>
-                    <li class="mu-credit" data-reveal>
-                        <span class="mu-m" aria-hidden="true">02</span>
-                        <h3 class="mu-d">City and venue</h3>
-                        <div>
-                            <p>Somebody in Leeds is scanning for Leeds, so the city belongs on the line, not one click away. In the event's Location, pick the venue from your list or choose New Venue and type its name, street address and city. A venue already on Event Schedule brings its own address, and the date can appear on its schedule too; a venue that is not gets a page of its own.</p>
-                        </div>
-                    </li>
-                    <li class="mu-credit" data-reveal>
-                        <span class="mu-m" aria-hidden="true">03</span>
-                        <h3 class="mu-d">The way in</h3>
-                        <div>
-                            <p>Choose one on the event's Tickets tab. When the venue or a promoter sells the tickets, choose Tickets elsewhere, paste their link and add the price, so nobody has to click through to find it. That works on every plan. When you sell your own, choose Sell tickets. A ticket with a price needs Pro, and the money goes straight into your Stripe or PayPal account with no platform fee. A zero-price ticket needs no paid plan at all.</p>
-                            <p>Never leave a date with no way in. If tickets are not on sale yet, say when they will be. With tickets sold here, switch on the &ldquo;Notify me&rdquo; card and a fan can leave an email address to be told when they go on sale. <x-link href="{{ marketing_url('/docs/tickets#external') }}">How Tickets elsewhere works</x-link></p>
-                        </div>
-                    </li>
-                    <li class="mu-credit" data-reveal>
-                        <span class="mu-m" aria-hidden="true">04</span>
-                        <h3 class="mu-d">Every act on the bill</h3>
-                        <div>
-                            <p>The opener's name sells tickets in the opener's town, so list every act. Add them on the event's Participants tab: the whole bill shows on the event page, each act with a schedule of its own is linked to it, and an act that is not on Event Schedule yet gets a page it can claim with the email address you enter. <x-link href="{{ marketing_url('/features/lineup') }}">More on lineups</x-link></p>
-                        </div>
-                    </li>
-                    <li class="mu-credit" data-reveal>
-                        <span class="mu-m" aria-hidden="true">05</span>
-                        <h3 class="mu-d">Sold out, few left, cancelled</h3>
-                        <div>
-                            <p>A sold-out show that still says Tickets costs a fan a wasted trip and you a pile of messages. Sell through Event Schedule with a quantity on each ticket type and the show says Sold Out on your list by itself, and Few left as it gets close. A link to another seller's page cannot be read from here, so when that show sells out, say so in the event's Short Description the same day.</p>
-                            <p>If a show is off, choose Cancel event from the Actions menu rather than deleting it. The event page then says it is cancelled, and when there is somebody to tell, the button reads Cancel and notify and the notice goes to all of them.</p>
-                        </div>
-                    </li>
-                    <li class="mu-credit" data-reveal>
-                        <span class="mu-m" aria-hidden="true">06</span>
-                        <h3 class="mu-d">Age policy</h3>
-                        <div>
-                            <p>All ages, 18+ or 21+ decides who can come, and a parent looks for it before buying. Put it in the Short Description, which shows on the event page and on your list. On Pro, make it a custom field called Age policy and tick On event page, and it shows in a row under the venue on every show you fill it in for.</p>
-                        </div>
-                    </li>
-                    <li class="mu-credit" data-reveal>
-                        <span class="mu-m" aria-hidden="true">07</span>
-                        <h3 class="mu-d">One page per date</h3>
-                        <div>
-                            <p>Each show is its own event at its own address. Send Glasgow the Glasgow link: it opens on that night, and when it is shared the preview card uses that show's flyer.</p>
-                        </div>
-                    </li>
-                    <li class="mu-credit" data-reveal>
-                        <span class="mu-m" aria-hidden="true">08</span>
-                        <h3 class="mu-d">A name a fan would say</h3>
-                        <div>
-                            <p>&ldquo;The Midnight Hour, Seattle&rdquo; reads at a glance. &ldquo;Summer Tour Leg 2, Night 9&rdquo; means something only to your tour manager. Keep the tour's name in the description, or give the run a sub-schedule of its own so fans can filter your page down to it.</p>
-                        </div>
-                    </li>
-                </ol>
-
-                <div class="mu-bins-head" style="margin-top: clamp(4rem, 8vw, 6rem);">
-                    <span class="mu-m mu-tag" data-reveal>Skips</span>
-                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        Three mistakes that empty a room
-                    </h2>
-                </div>
-
-                <div class="mu-bins" data-reveal-group="80">
-                    <article class="mu-bin" data-reveal>
-                        <span class="mu-m mu-bin-tab" style="--x: 8%;" aria-hidden="true">Skip 01</span>
-                        <h3 class="mu-d">Last year's tour on top</h3>
-                        <p>Nothing says a band has stopped playing like a page of dates that have passed. Switch on Hide Past Events in the Events row of your schedule's Style settings, free on every plan, and past shows leave the public page by themselves while staying in your own records.</p>
-                    </article>
-                    <article class="mu-bin" data-reveal>
-                        <span class="mu-m mu-bin-tab" style="--x: 36%;" aria-hidden="true">Skip 02</span>
-                        <h3 class="mu-d">Beating the venue to it</h3>
-                        <p>A venue or promoter usually picks the announce day, and often runs a pre-sale before it. Post a date early and you can upset the room that is paying you. Keep each date as a Draft on its Listing tab, seen only by your schedule's team, until the agreed morning.</p>
-                    </article>
-                    <article class="mu-bin" data-reveal>
-                        <span class="mu-m mu-bin-tab" style="--x: 58%;" aria-hidden="true">Skip 03</span>
-                        <h3 class="mu-d">A link per show in the bio</h3>
-                        <p>Ten ticket links in a link-in-bio page go stale one by one, the night after each gig. One link to your schedule stays right: a date you add is on it at once, and each line leads to that show's own page.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 3c. The pressings: one master copy, and the release plan     -->
-        <!-- ============================================================ -->
+        {{-- 5. The pressings: one master copy --}}
         <section id="upkeep" class="mu-section" style="scroll-margin-top: 5rem;">
             <div class="mu-wrap">
                 <div class="mu-disco-head">
                     <div><span class="mu-m mu-tag" data-reveal>The pressings</span></div>
                     <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        One master copy. Every other listing reads from it.
+                        Enter each date once
                     </h2>
                     <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
-                        Your dates live on your page, your website, fans' phones, your mailing list, your socials, Bandsintown, Songkick and the venue's own calendar. Typed into each by hand, one of them is always wrong. Enter each date once, here, and make every other copy either read from it or point back to it.
+                        Your dates live in several places. Typed into each by hand, one of them is always wrong. Here is which copies keep themselves current, and which still need you.
                     </p>
                 </div>
 
@@ -1606,14 +1263,12 @@
                     @php
                         // [where, kept current by itself?, how it stays current, your job]
                         $muRun = [
-                            ['Your schedule page', false, 'The master. Every new date, change and cancellation is made here, once.', 'Put its link in every bio: Spotify, Bandcamp, Instagram, your EPK.'],
-                            ['Your band website', true, 'Embed the calendar with the code from the Embed dialog, on every plan, and the site shows whatever the schedule shows.', 'Paste the code into the site once.'],
-                            ['Fans\' phone calendars', true, 'A fan who subscribes to your calendar feed sees a new date appear and a moved one move, without giving you an email address.', 'Tell people the feed exists when you post a tour.'],
-                            ['Your mailing list', true, 'When you publish new dates of your own, confirmed subscribers get one short digest of them: up to 25 in one email, never more than one every 72 hours, on every plan, and outside your newsletter allowance. On eventschedule.com, reaching more than 50 subscribers needs a verified phone number or the schedule\'s own email settings.', 'Write a newsletter yourself only for the big news.'],
-                            ['Your own calendar', true, 'Two-way sync with Google Calendar, Outlook or CalDAV, free on every plan, keeps the calendar you plan the year in and your public dates in step.', 'Keep rehearsals and holds in a calendar you do not sync.'],
-                            ['Instagram, Facebook, TikTok', false, 'Nothing posts for you. Events graphic, in your schedule\'s Actions menu, draws an image of your next dates with a caption to paste, free on every plan. Only shows that have a flyer are drawn; the caption lists them all.', 'Post it each week, with the schedule link rather than one show\'s.'],
-                            ['Bandsintown and Songkick', false, 'Event Schedule has no connection to them or to streaming apps, so dates are not passed either way.', 'Enter each date there too, and where a listing takes a ticket link, give it the event page\'s address so fans land on your page.'],
-                            ['The venue\'s calendar', true, 'When a venue on Event Schedule adds you to its bill, it is one event on both pages, so a changed time changes on both.', 'Accept the request when it reaches your Requests tab.'],
+                            ['Your schedule page', false, 'The master copy. Every new date, change and cancellation is made here.', 'Put its link in every bio.'],
+                            ['Your band website', true, 'The embed shows whatever the schedule shows. On the Free plan the copied code adds a small Powered by Event Schedule line under it; Pro removes it.', 'Paste the code into the site once.'],
+                            ['Your Google Calendar', true, 'Sync to Google, from it, or both ways, free on every plan. Outlook and CalDAV calendars sync too.', 'Keep gigs in a calendar of their own, not with rehearsals.'],
+                            ['The venue\'s calendar', true, 'A show a venue added you to is one event on both pages.', 'Accept the request.'],
+                            ['Fans\' inboxes and phones', true, 'Confirmed subscribers get new dates by email, and a calendar feed moves a changed date by itself.', 'Tell fans the sign-up exists when you post a tour.'],
+                            ['Bandsintown and Songkick', false, 'Event Schedule has no connection to them, so dates are not passed either way.', 'Enter dates there too, and give them your event page as the ticket link.'],
                         ];
                     @endphp
                     @foreach ($muRun as $muRunIndex => [$muRunWhere, $muRunAuto, $muRunHow, $muRunJob])
@@ -1634,220 +1289,17 @@
                     @endforeach
                 </div>
                 <p class="mu-sub mu-inline" style="margin-top: 1.5rem; font-size: 1rem;" data-reveal>
-                    Already listed on one of them? See how a schedule here sits beside <x-link href="{{ marketing_url('/bandsintown-alternative') }}">Bandsintown</x-link> and <x-link href="{{ marketing_url('/songkick-alternative') }}">Songkick</x-link>, and how the <x-link href="{{ marketing_url('/docs/sharing#calendar-feeds') }}">calendar feed</x-link> works.
+                    Already listed on one of them? See how a schedule here sits beside <x-link href="{{ marketing_url('/bandsintown-alternative') }}">Bandsintown</x-link> and <x-link href="{{ marketing_url('/songkick-alternative') }}">Songkick</x-link>.
                 </p>
-
-                <div id="release-plan" class="mu-disco-head" style="margin-top: clamp(4rem, 8vw, 6rem); scroll-margin-top: 5rem;">
-                    <div><span class="mu-m mu-tag" data-reveal>The release plan</span></div>
-                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        Announcing a tour, and the routine after
-                    </h2>
-                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
-                        A tour is announced once and sold for weeks. Most of the selling happens in small, regular posts, so put them on a calendar of their own.
-                    </p>
-                </div>
-
-                <div class="mu-plan" data-reveal-group="80">
-                    @php
-                        $muPlan = [
-                            ['Before', 'The week ahead', 'Load the run as drafts', [
-                                'Add each date with Add Event and choose Draft on its Listing tab, or first set Default visibility for new events to Draft in your schedule\'s settings. Then add the venue, the support acts, the ticket link and a flyer while nobody outside the team can see it.',
-                                'Import Events (paste the routing, or a photo of the tour poster) publishes what it adds at once, so keep it for announce morning. It is free on every plan, within a daily allowance.',
-                            ]],
-                            ['Day one', 'Announce day', 'Publish the whole run at once', [
-                                'Switch every date to Public in one sitting, so they all go into the same digest (up to 25 dates). A date published after that digest waits for the next one, at least 72 hours later.',
-                                'Post the Events graphic of the run, and put the schedule link, not one show\'s, in every bio.',
-                            ]],
-                            ['Mondays', 'Fifteen minutes', 'Walk the road book', [
-                                'Open each date in the next month: does the ticket link still open, is every act named, is the flyer there?',
-                                'Add Sold out to the Short Description of any show that sold out at another seller.',
-                                'Post a fresh Events graphic of what is coming up.',
-                            ]],
-                            ['Show week', 'One city at a time', 'Sell the night, not the tour', [
-                                'Post that city\'s event link in local stories and groups. A fan near Leeds wants the Leeds page, not a list of twenty dates.',
-                                'If you switched on the "Notify me" card, the fans who left an address for that show get a reminder in the two days before it starts, with nothing for you to send.',
-                            ]],
-                            ['The night', 'Door and merch', 'Scan in, sign up', [
-                                'Tickets sold here are scanned on any phone at the door, free on every plan.',
-                                'Print the QR code from your schedule\'s Followers tab for the merch table: a scan opens your page with the sign-up form ready.',
-                            ]],
-                            ['After', 'The next morning', 'Let the fans post the show', [
-                                'With fan content on, the default in your schedule\'s Engagement settings, fans\' clips and photos wait for your approval before they appear on the event.',
-                                'Each social link on your schedule has a short address, like your-band.eventschedule.com/instagram, that counts its clicks, so you can see which post sent people.',
-                                'If a later date moves, change it on the event. For a one-time show, saving asks whether to tell the people who bought or asked to hear about it.',
-                            ]],
-                        ];
-                    @endphp
-                    @foreach ($muPlan as [$muPlanWhen, $muPlanSmall, $muPlanTitle, $muPlanItems])
-                        <div class="mu-plan-row" data-reveal>
-                            <div class="mu-plan-when">
-                                <span class="mu-d">{{ $muPlanWhen }}</span>
-                                <small class="mu-m">{{ $muPlanSmall }}</small>
-                            </div>
-                            <div class="mu-plan-body">
-                                <h3 class="mu-d">{{ $muPlanTitle }}</h3>
-                                <ul>
-                                    @foreach ($muPlanItems as $muPlanItem)
-                                        <li>{{ $muPlanItem }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 4. The discography: a career, one release at a time          -->
-        <!-- ============================================================ -->
-        <section id="discography" class="mu-section mu-alt" style="scroll-margin-top: 5rem;">
-            <div class="mu-wrap">
-                <div class="mu-disco-head">
-                    <div><span class="mu-m mu-tag" data-reveal>The routing</span></div>
-                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        From open mics to festival stages
-                    </h2>
-                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
-                        One schedule that grows with your career.
-                    </p>
-                </div>
-
-                @php
-                    $tourStops = [
-                        ['title' => 'Open mic nights', 'desc' => 'Coffee shops and local bars. Track your spots and let friends know where to catch you.'],
-                        ['title' => 'Local gigging', 'desc' => 'Regular slots at venues around your city. Build a local following and start selling your own tickets.'],
-                        ['title' => 'Regional tours', 'desc' => 'Weekend runs and opening slots. Fans in nearby cities follow along and know when you\'re coming through.'],
-                        ['title' => 'Headlining', 'desc' => 'Your name at the top of the bill. Email your fans directly and sell out your own shows.'],
-                        ['title' => 'National tours', 'desc' => 'Multi-city runs across the country. One link tells fans everywhere when you\'re hitting their town.'],
-                        ['title' => 'Festivals & special events', 'desc' => 'Festival slots, album release shows, and one-off specials, all on one professional schedule.'],
-                    ];
-                    // One sleeve per stop: format, ground, type colour, label colour, and the art.
-                    $muCovers = [
-                        ['7" single', '#f2ead9', '#15120f', '#e8472c', 'radial-gradient(circle at 74% 34%, #e8472c 0 13%, transparent 13.4%), linear-gradient(#15120f, #15120f) 8% 58% / 46% 2px no-repeat'],
-                        ['EP', '#15120f', '#f2ead9', '#e9b23a', 'repeating-linear-gradient(180deg, transparent 0 9%, rgba(242, 234, 217, 0.16) 9% 12%), linear-gradient(90deg, transparent 62%, #e9b23a 62% 70%, transparent 70%) 0 0 / 100% 72% no-repeat'],
-                        ['LP', '#e9b23a', '#15120f', '#15120f', 'repeating-linear-gradient(135deg, transparent 0 7%, rgba(21, 18, 15, 0.9) 7% 9.5%) 0 0 / 100% 46% no-repeat'],
-                        ['LP', '#e8472c', '#15120f', '#f2ead9', 'radial-gradient(circle at 78% 22%, #15120f 0 34%, transparent 34.4%), radial-gradient(circle at 78% 22%, transparent 0 40%, rgba(21, 18, 15, 0.9) 40% 42%, transparent 42.4%)'],
-                        ['2xLP', '#0e5a6b', '#f2ead9', '#e9b23a', 'linear-gradient(#0e5a6b, #0e5a6b) 0 100% / 100% 42% no-repeat, radial-gradient(circle, rgba(242, 234, 217, 0.9) 0 16%, transparent 17%) 0 0 / 12.5% 12.5%'],
-                        ['Live', '#f2ead9', '#15120f', '#e8472c', 'linear-gradient(#f2ead9, #f2ead9) 0 100% / 100% 40% no-repeat, repeating-radial-gradient(circle at 100% 0%, #e8472c 0 6%, #f2ead9 6% 9%, #e9b23a 9% 15%, #15120f 15% 18%, #f2ead9 18% 21%)'],
-                    ];
-                @endphp
-
-                <div class="mu-crate" data-reveal-group="90">
-                    @foreach ($tourStops as $stopIndex => $stop)
-                        @php [$muFormat, $muBg, $muFg, $muLab, $muArt] = $muCovers[$stopIndex]; @endphp
-                        <article class="mu-rel" data-reveal>
-                            <div class="mu-cover" aria-hidden="true">
-                                <div class="mu-cover-disc" style="--lab: {{ $muLab }};"></div>
-                                <div class="mu-cover-face" style="--bg: {{ $muBg }}; --fg: {{ $muFg }}; --art: {{ $muArt }};">
-                                    <div class="mu-m mu-cover-meta"><span>Stop {{ str_pad($stopIndex + 1, 2, '0', STR_PAD_LEFT) }}</span><span>{{ $muFormat }}</span></div>
-                                    <div class="mu-d mu-cover-title">{{ $stop['title'] }}</div>
-                                </div>
-                            </div>
-                            <h3 class="sr-only">{{ $stop['title'] }}</h3>
-                            <p>{{ $stop['desc'] }}</p>
-                            @if ($stopIndex === count($tourStops) - 1)
-                                <span class="mu-m mu-rel-flag">Headliner</span>
-                            @endif
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 5. Filed under: every kind of musician                       -->
-        <!-- ============================================================ -->
-        <section id="filed-under" class="mu-section" style="scroll-margin-top: 5rem;">
-            <div class="mu-wrap">
-                <div class="mu-bins-head">
-                    <span class="mu-m mu-tag" data-reveal>Filed under</span>
-                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        Perfect for every kind of musician
-                    </h2>
-                    <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
-                        Whether you're a solo artist or a touring band, Event Schedule works for you.
-                    </p>
-                </div>
-
-                @php
-                    $muBins = [
-                        ['Solo', 'Solo Artists', 'Share your acoustic nights, open mics, and solo performances with your growing fanbase.', 'for-solo-artists', '8%'],
-                        ['Rock / Pop', 'Rock & Pop Bands', 'Coordinate your tour dates across the whole band and let fans follow along.', 'for-rock-pop-bands', '36%'],
-                        ['Jazz', 'Jazz Musicians', 'List your residencies, jam sessions, and special performances at clubs and festivals.', 'for-jazz-musicians', '66%'],
-                        ['Covers', 'Cover Bands', 'Show your weekly bar gigs and private events all in one professional calendar.', 'for-cover-bands', '58%'],
-                        ['Tribute', 'Tribute Acts', 'Build a dedicated fanbase for your tribute shows and special themed events.', 'for-tribute-acts', '10%'],
-                        ['Session', 'Session Musicians', 'Show your availability and let bands know when you\'re free for gigs and recording sessions.', 'for-session-musicians', '40%'],
-                    ];
-                @endphp
-
-                <div class="mu-bins" data-reveal-group="80">
-                    @foreach ($muBins as [$muTab, $muName, $muDesc, $muSlug, $muX])
-                        @php $muPost = get_sub_audience_blog($muSlug); @endphp
-                        <article class="mu-bin" data-reveal>
-                            <span class="mu-m mu-bin-tab" style="--x: {{ $muX }};" aria-hidden="true">{{ $muTab }}</span>
-                            <h3 class="mu-d">{{ $muName }}</h3>
-                            <p>{{ $muDesc }}</p>
-                            @if ($muPost)
-                                <a href="{{ blog_url('/' . $muPost->slug) }}" aria-label="Learn more about Event Schedule for {{ $muName }}">
-                                    <span>Learn more {!! $muArrow !!}</span>
-                                </a>
-                            @endif
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 6. Run of show: how it works                                 -->
-        <!-- ============================================================ -->
-        <section id="run-of-show" class="mu-section mu-alt" style="scroll-margin-top: 5rem;">
-            <div class="mu-wrap">
-                <div class="mu-bins-head" style="margin-bottom: 0;">
-                    <span class="mu-m mu-tag" data-reveal>Run of show</span>
-                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        Three steps to showtime
-                    </h2>
-                </div>
-
-                <div class="mu-steps" data-reveal-group="140">
-                    <div class="mu-step" data-reveal>
-                        <div class="mu-step-disc" style="--bg: #e8472c; --fg: #15120f;" aria-hidden="true">
-                            <svg viewBox="0 0 200 200"><defs><path id="mu-step-1" d="M100,100 m-49,0 a49,49 0 1,1 98,0 a49,49 0 1,1 -98,0" /></defs><text><textPath href="#mu-step-1">Doors &#183; Doors &#183; Doors &#183; Doors &#183; Doors &#183;</textPath></text></svg>
-                            <b>01</b>
-                        </div>
-                        <h3 class="mu-d">Add your gigs</h3>
-                        <p>Import from Google Calendar or add tour dates manually. Set up ticket sales if you want.</p>
-                    </div>
-                    <div class="mu-step" data-reveal>
-                        <div class="mu-step-disc" style="--bg: #e9b23a; --fg: #15120f;" aria-hidden="true">
-                            <svg viewBox="0 0 200 200"><defs><path id="mu-step-2" d="M100,100 m-49,0 a49,49 0 1,1 98,0 a49,49 0 1,1 -98,0" /></defs><text><textPath href="#mu-step-2">Soundcheck &#183; Soundcheck &#183; Soundcheck &#183;</textPath></text></svg>
-                            <b>02</b>
-                        </div>
-                        <h3 class="mu-d">Share your link</h3>
-                        <p>Add it to your Spotify bio, Bandcamp, EPK, or anywhere fans find you.</p>
-                    </div>
-                    <div class="mu-step" data-reveal>
-                        <div class="mu-step-disc" style="--bg: #f2ead9; --fg: #15120f;" aria-hidden="true">
-                            <svg viewBox="0 0 200 200"><defs><path id="mu-step-3" d="M100,100 m-49,0 a49,49 0 1,1 98,0 a49,49 0 1,1 -98,0" /></defs><text><textPath href="#mu-step-3">Showtime &#183; Showtime &#183; Showtime &#183;</textPath></text></svg>
-                            <b>03</b>
-                        </div>
-                        <h3 class="mu-d">Grow your fanbase</h3>
-                        <p>Fans leave an email address, hear when you announce new dates, and share videos and comments after your gigs, all approved by you before they go live. Build your audience on your terms.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 7. The back catalogue: key features                          -->
-        <!-- ============================================================ -->
-        <section class="mu-section">
+        {{-- 6. The back catalogue: the feature pages behind each job --}}
+        <section class="mu-section mu-alt">
             <div class="mu-wrap mu-cat-grid">
                 <div>
                     <span class="mu-m mu-tag" data-reveal>Also on the bill</span>
-                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s; margin-top: 1.25rem;">Key features</h2>
+                    <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s; margin-top: 1.25rem;">The parts, in detail</h2>
                     <p class="mu-cat-more" data-reveal style="--reveal-delay: 0.16s;">
                         <a href="{{ marketing_url('/features') }}" class="mu-more-link mu-m">
                             See all features
@@ -1858,10 +1310,11 @@
 
                 @php
                     $muCatalogue = [
-                        ['ES-101', 'Ticketing', 'Sell tickets with QR check-in and zero platform fees', marketing_url('/features/ticketing')],
-                        ['ES-102', 'Newsletters', 'Send event updates directly to followers\' inboxes', marketing_url('/features/newsletters')],
-                        ['ES-103', 'Calendar Sync', 'Two-way sync with Google, Outlook and CalDAV', marketing_url('/features/calendar-sync')],
-                        ['ES-104', 'Boost', 'Promote events with Facebook and Instagram ads', marketing_url('/features/boost')],
+                        ['ES-101', 'Embed calendar', 'Your dates on your own website, free', marketing_url('/features/embed-calendar')],
+                        ['ES-102', 'Google Calendar sync', 'Gigs in, dates out, or both ways', marketing_url('/google-calendar')],
+                        ['ES-103', 'Booking requests', 'Promoters ask you for a date', marketing_url('/booking-requests')],
+                        ['ES-104', 'Newsletters', 'Write to your list for the big news', marketing_url('/features/newsletters')],
+                        ['ES-105', 'Ticketing', 'Sell your own shows with zero platform fees', marketing_url('/features/ticketing')],
                     ];
                 @endphp
                 <div class="mu-cat-list" data-reveal-group="70">
@@ -1883,47 +1336,8 @@
             @include('marketing.partials.pricing-nudge')
         </div>
 
-        <!-- ============================================================ -->
-        <!-- 8. Related pages: four more sleeves                          -->
-        <!-- ============================================================ -->
-        <section class="mu-section mu-alt">
-            <div class="mu-wrap">
-                <div class="mu-also-head">
-                    <div>
-                        <span class="mu-m mu-tag" data-reveal>Other stages</span>
-                        <h2 class="mu-d mu-h2" data-reveal style="--reveal-delay: 0.08s; margin-top: 1.25rem;">Related pages</h2>
-                    </div>
-                    <a href="{{ marketing_url('/use-cases') }}" class="mu-more-link mu-m" data-reveal>
-                        See all use cases
-                        {!! $muArrow !!}
-                    </a>
-                </div>
-
-                <div class="mu-also" data-reveal-group="80">
-                    <a href="{{ marketing_url('/for-comedians') }}" data-reveal style="--bg: #e9b23a; --fg: #15120f; --art: radial-gradient(circle at 100% 0%, #15120f 0 42%, transparent 42.4%);">
-                        <small class="mu-m">Event Schedule for</small>
-                        <strong>Comedians</strong>
-                    </a>
-                    <a href="{{ marketing_url('/for-djs') }}" data-reveal style="--bg: #15120f; --fg: #f2ead9; --art: repeating-radial-gradient(circle at 100% 0%, transparent 0 7%, #e8472c 7% 9.4%) 100% 0 / 100% 62% no-repeat;">
-                        <small class="mu-m">Event Schedule for</small>
-                        <strong>DJs</strong>
-                    </a>
-                    <a href="{{ marketing_url('/for-spoken-word') }}" data-reveal style="--bg: #f2ead9; --fg: #15120f; --art: linear-gradient(#e8472c, #e8472c) 0 0 / 100% 36% no-repeat;">
-                        <small class="mu-m">Event Schedule for</small>
-                        <strong>Spoken Word Artists</strong>
-                    </a>
-                    <a href="{{ marketing_url('/for-dance-groups') }}" data-reveal style="--bg: #0e5a6b; --fg: #f2ead9; --art: repeating-linear-gradient(115deg, transparent 0 11%, #e9b23a 11% 14.5%) 100% 0 / 52% 56% no-repeat;">
-                        <small class="mu-m">Event Schedule for</small>
-                        <strong>Dance Groups</strong>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================ -->
-        <!-- 9. Liner notes: the questions                                -->
-        <!-- ============================================================ -->
-        <section id="faq" class="mu-section mu-notes" style="scroll-margin-top: 5rem;">
+        {{-- 7. Liner notes: the questions --}}
+        <section id="faq" class="mu-section mu-alt mu-notes" style="scroll-margin-top: 5rem;">
             <div class="mu-wrap mu-notes-grid">
                 <div class="mu-notes-head">
                     <span class="mu-m mu-tag" data-reveal>The fine print</span>
@@ -1931,25 +1345,20 @@
                         Frequently asked questions
                     </h2>
                     <p class="mu-sub" data-reveal style="--reveal-delay: 0.16s;">
-                        Everything musicians ask about Event Schedule.
+                        What musicians ask before they put their dates here.
                     </p>
                 </div>
 
                 <div class="mu-qa" data-reveal>
                     @php
                         $faqs = [
-                            ['q' => 'What should a band\'s tour dates page include?', 'a' => 'For every show: the date, the doors and stage times, the city and venue, every act on the bill, a way in (a ticket link, your own tickets, or free entry), the age policy, and whether it has sold out. Put the city on the line itself, give each show its own page you can send to that city, and keep past dates off the page. Event Schedule has a place for each: Date & Time and Location on the Event tab, the Agenda and Participants tabs, the Tickets tab, and the Short Description.'],
-                            ['q' => 'Is Event Schedule free for musicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also takes unlimited free registrations and sends 10 newsletter emails a month, counted per recipient. Scanning tickets at the door is free too. Selling a ticket with a price is where Pro starts, and it brings the rest of the door kit with it: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.'],
-                            ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'A fan who leaves an email address on your page and confirms it gets a digest when you announce new shows, batched so a run of dates is one message rather than six, and never more than once every few days. Beyond that you write the newsletter yourself. Fans who would rather not give an address can subscribe to your calendar feed instead, which updates itself when a date moves. Your schedule link also goes anywhere a link goes: Spotify, Bandcamp, your EPK, any social profile.'],
-                            ['q' => 'Can I sell tickets to my own shows?', 'a' => 'Yes. Free tickets and registrations work on every plan; tickets with a price need Pro. Connect your own Stripe or PayPal account, or take cash or a payment link, and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay your payment provider\'s own processing fee. Refunds are built in too: from the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider.'],
-                            ['q' => 'Can fans get told when tickets go on sale?', 'a' => 'Yes, when you sell the tickets here. Switch on the "Notify me" card in Edit schedule > Engagement > Mailing list (free on every plan, off until you do) and, on a public event page, a fan can leave just an email address, with no account. They get one email when your tickets go on sale here, one if the show is cancelled, and a reminder in the two days before it starts, plus any change notice you choose to send. Nothing else, and every one has a one-click unsubscribe. The event\'s Tickets panel shows you how many people are waiting.'],
-                            ['q' => 'Does Event Schedule send my dates to Bandsintown, Songkick or Spotify?', 'a' => 'No. Event Schedule has no connection to Bandsintown, Songkick or streaming apps, so dates are not passed either way. What it publishes is your own page, an embed for your website and a calendar feed, all kept current from one place. If you keep listings on those services for their fan alerts, enter each date there too and, where a listing takes a ticket link, use your event page\'s address, so fans who find you there land on your own page.'],
-                            ['q' => 'How do I show that a gig has sold out?', 'a' => 'If you sell the tickets on Event Schedule with a quantity on each ticket type, the show says Sold Out on your list by itself, and Few left as it gets close. On Pro, a waitlist lets fans sign up for any tickets that come back and tells them when they do. If the tickets are sold somewhere else, Event Schedule cannot see that seller\'s stock, so add Sold out to the event\'s Short Description the day it happens.'],
-                            ['q' => 'How far ahead should a band announce tour dates?', 'a' => 'There is no fixed rule, and the venue or promoter usually sets the announce day and any pre-sale, so ask them first. Many club runs are announced around two months out, and bigger rooms further ahead. What matters as much is announcing the run in one go: load the dates as Drafts, switch them all to Public in one sitting on the agreed morning, and they go into one digest (up to 25 dates) instead of one email per date. A date published after that digest waits at least 72 hours for the next.'],
-                            ['q' => 'What happens when a venue books me for a show?', 'a' => 'When a venue adds you to its event on Event Schedule, the date arrives as a request on your schedule. Accept it and the gig shows on your page too, so you never enter the same show twice, and because both schedules share one event, a changed time shows on both. The event page lists the whole bill, whether or not every act on it has signed up.'],
-                            ['q' => 'A venue listed me before I joined. Is that page mine?', 'a' => 'It can be. When a venue or promoter names an act who is not on Event Schedule, a page is created for them so the name can appear on the event. It says who created it and that the act has not claimed it, credits each date to the schedule that added it, and stays out of search engines. Press Claim this page and sign in with the email address it carries, and it becomes your schedule, with the venues that already list you still listing you. If it is not you, press This is not me.'],
-                            ['q' => 'Can I list a weekly residency or recurring gigs?', 'a' => 'Yes. Recurring events are free. Set the day-of-week pattern once, like every Thursday at the same club, and Event Schedule fills in the dates. You can exclude the weeks you skip, and fans always see the next upcoming show.'],
-                            ['q' => 'Can I use Event Schedule as my band website?', 'a' => 'Many musicians do. Your schedule lives at your own link, like your-band.eventschedule.com, with your bio, photos, and streaming links, and each of those links also answers at a short address of its own, like your-band.eventschedule.com/instagram, with every click counted in your analytics. You can also embed the calendar on an existing website, and the Enterprise plan supports a fully custom domain.'],
+                            ['q' => 'How do I add tour dates to my band website?', 'a' => 'Make a free schedule, add your shows (or connect Google Calendar), then choose Embed Schedule from the schedule\'s Actions menu and copy the iframe code into your site. WordPress, Squarespace, Wix and most site builders take it in an HTML or embed block. The embed loads live, so a date you add, move or cancel changes on your site with no further edits.'],
+                            ['q' => 'Is the tour dates page free?', 'a' => 'Yes. The page, the embed, Google Calendar sync, booking requests, free registration, door scanning and the new-date emails to your subscribers are free on every plan, along with 10 newsletter emails a month. Selling a ticket with a price needs Pro, at '.plan_price($proMonthly).' a month, which also raises newsletters to 100 a month and removes the Powered by Event Schedule line from the embed. There are no platform fees on any plan.'],
+                            ['q' => 'Can it sync with my Google Calendar?', 'a' => 'Yes, on every plan. In Edit Schedule, open Integrations and the Google Calendar row, pick a calendar and choose a direction: to Google, from Google, or both ways. A calendar kept for gigs alone works best, so rehearsals and holds stay private. Outlook and CalDAV calendars can be synced the same way.'],
+                            ['q' => 'How do fans hear about new shows?', 'a' => 'A fan who leaves an email address on your page or your embedded sign-up form and confirms it gets one email when you publish new public shows of your own: up to 25 dates in it, and no more than one every 72 hours. It does not use your newsletter allowance. Fans who press Follow while signed in get only the newsletters you send. On eventschedule.com, reaching more than 50 people at once needs a verified phone number on your account or the schedule\'s own email settings.'],
+                            ['q' => 'What happens when a venue adds me to its event?', 'a' => 'The date arrives as a request on your Requests tab, because a performer\'s schedule always reviews dates first. Accept it and the show appears on your page; it is one event on both schedules, so a change the venue makes shows on yours too. A venue you have already approved can add you without the wait.'],
+                            ['q' => 'A venue listed me before I joined. Is that page mine?', 'a' => 'It can be. Naming an act who is not on Event Schedule creates a page so the name can appear on the event. It says who created it, credits each date to the schedule that added it, and stays out of search engines. Press Claim this page and sign in with the email address it carries, and it becomes your schedule. If it is not you, press This is not me.'],
+                            ['q' => 'Does Event Schedule send my dates to Bandsintown, Songkick or Spotify?', 'a' => 'No. There is no connection to Bandsintown, Songkick or streaming apps, so dates are not passed either way. What it publishes is your own page, the embed and a calendar feed. If you keep listings there for their fan alerts, enter each date there too and use your event page as the ticket link, so fans land on your page.'],
                         ];
                     @endphp
                     @foreach ($faqs as ['q' => $q, 'a' => $a])
@@ -1967,18 +1376,16 @@
 
         <x-seo.faq-schema :items="$faqs" />
 
-        <!-- ============================================================ -->
-        <!-- 10. The test pressing: sign the label                        -->
-        <!-- ============================================================ -->
+        {{-- 8. The test pressing: sign the label --}}
         <section id="claim" class="mu-press" style="scroll-margin-top: 4rem;">
             <div class="mu-press-disc" aria-hidden="true"></div>
             <div class="mu-wrap mu-press-in">
                 <span class="mu-m mu-tag" data-reveal>Encore</span>
                 <h2 class="mu-d mu-press-h2" data-reveal style="--reveal-delay: 0.08s;">
-                    Your name on the poster.
+                    Your dates, on your site tonight.
                 </h2>
                 <p class="mu-press-sub" data-reveal style="--reveal-delay: 0.16s;">
-                    Stop posting into the void. Put every show on one link and fill the room. Free forever.
+                    Pick your link, add your next show, paste the embed. Free forever.
                 </p>
 
                 <div class="mu-white" data-reveal="panel" id="mu-white">

@@ -1820,6 +1820,7 @@ return [
     'subscription_already_active' => 'Vous avez déjà un abonnement actif.',
     'no_active_subscription' => 'Aucun abonnement actif trouvé.',
     'subscription_error' => 'Un problème est survenu lors du traitement de votre abonnement. Veuillez réessayer ou contacter le support.',
+    'subscription_card_code_unverified' => 'Nous n\'avons pas pu confirmer le code de sécurité de votre carte, l\'essai gratuit n\'a donc pas commencé. Vérifiez le code et réessayez.',
     'subscription_not_resumable' => 'Cet abonnement ne peut pas être repris.',
     'subscribe_to_pro' => 'S\'abonner au plan Pro',
     'select_plan' => 'Sélectionner un plan',

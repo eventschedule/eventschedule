@@ -1876,6 +1876,7 @@ return [
     'subscription_already_active' => 'כבר יש לך מנוי פעיל.',
     'no_active_subscription' => 'לא נמצא מנוי פעיל.',
     'subscription_error' => 'משהו השתבש בעיבוד המנוי שלך. אנא נסה שוב או פנה לתמיכה.',
+    'subscription_card_code_unverified' => 'לא הצלחנו לאמת את קוד האבטחה של הכרטיס, ולכן תקופת הניסיון החינמית לא התחילה. בדקו את הקוד ונסו שוב.',
     'subscription_not_resumable' => 'לא ניתן לחדש מנוי זה.',
     'subscribe_to_pro' => 'הירשם ל-Pro',
     'select_plan' => 'בחר תוכנית',

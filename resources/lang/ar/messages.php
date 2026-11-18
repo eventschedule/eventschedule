@@ -1879,6 +1879,7 @@ return [
     'subscription_already_active' => 'لديك اشتراك نشط بالفعل.',
     'no_active_subscription' => 'لم يتم العثور على اشتراك نشط.',
     'subscription_error' => 'حدث خطأ أثناء معالجة اشتراكك. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.',
+    'subscription_card_code_unverified' => 'تعذّر علينا تأكيد رمز الأمان لبطاقتك، لذلك لم تبدأ الفترة التجريبية المجانية. تحقّق من الرمز وحاول مرة أخرى.',
     'subscription_not_resumable' => 'لا يمكن استئناف هذا الاشتراك.',
     'subscribe_to_pro' => 'الاشتراك في Pro',
     'select_plan' => 'اختر خطة',
