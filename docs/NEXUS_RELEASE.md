@@ -300,40 +300,21 @@ on an older install (the enum value is missing). Update first.
 
 No migration, no env var.
 
-## Unreleased: a light homepage, tested against today's (2026-11-16)
+## Unreleased: whole-page rounds for the homepage test, not running (2026-11-16, 2026-11-18)
 
 **What ships:**
-- **Two homepages at `/`, half of visitors each.** The headline test's next round
-  (`App\Utils\HeroExperiment`) has two variants with the same headline: `home_full`, today's page,
-  and `home_light`, a page about a quarter the length (the same hero and closing panel; between
-  them who it is for, the poster and ticket beside Plan / Promote / Sell, and the three figures
-  with the price sentence). Both are in one document and the browser shows one, so the address,
-  the title, the description and the edge cache are as they were. `promote_sell` is retired.
-- **Nothing ends it by itself.** The split stays even. The card on `/admin/growth` ("Homepage
-  test") shows each page's visitors, clicks, signups and how many of those saved a schedule and
-  an event, the chance the light page is the better one, and three look dates (4, 7 and 10 weeks
-  from the first day counted). At the first two, 97% either way with 400 visitors a page ends it;
-  the third ends it whatever it says.
-- Needs `npm run build` (one line in `marketing-home.js` keeps the hidden film from downloading).
+- **The machinery for testing two whole homepages, switched off.** `App\Utils\HeroExperiment` can
+  run a round whose variants name a page: both pages in one document, the browser showing one, an
+  even split that nothing ends by itself, and a "Homepage test" card on `/admin/growth` with each
+  page's visitors, clicks, signups and how many saved a schedule and an event. It was built for a
+  light copy of today's page, which never went live: before it shipped, that round was replaced by
+  a round against a completely new homepage, still being designed.
+- **What runs:** `promote_sell` alone, as since 2026-10-22, on today's page. The light page's
+  partial is in the file and printed by no variant; `/?home=light` shows nothing different.
+- Needs `npm run build` (one line in `marketing-home.js` keeps a hidden film from downloading).
   No migration, no env var.
 
-**After the deploy:**
-1. After the edge copy of `/` has turned over (about 20 minutes, up to 2 hours,
-   `docs/CACHING.md`; or purge `/`), open `/?home=light` and `/?home=full` signed out. Each shows
-   that page to whoever asks and counts nothing.
-2. No reset is needed: both keys are new and start at zero. The card's "Counting since" is the
-   first day either was counted, and the look dates are counted from it.
-3. **To take the light page off at once:** `/admin/growth`, "End: keep today's page". The server
-   stops printing the light page at the next request; visitors get it as the edge copy turns
-   over, or immediately after a Cloudflare purge of `/`. A picker that fails already falls back
-   to today's page by itself.
-4. **When a look date arrives,** pull the growth data and read `hero_test` (`docs/GROWTH_DATA.md`,
-   "Reading a page round"), then end the round on the page to keep, or leave it running to the
-   next date. Ending on the light page takes today's middle, its FAQ and the FAQ's structured
-   data out of the HTML: check Search Console for `/` before that, and consider a short FAQ on
-   the light page first.
-5. Once it has ended, a follow-up change deletes the page that lost (its markup, styles and
-   tests) and leaves one variant.
+**After the deploy:** nothing. The new homepage round gets its own entry when it is approved.
 
 ## Unreleased: homepage pass, one headline (2026-10-22)
 

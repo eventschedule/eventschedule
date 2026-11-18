@@ -133,10 +133,28 @@ class GrowthDataEndpointTest extends TestCase
     {
         Cache::flush();
 
-        // The site runs a page round since 2026-11 (one headline on two homepages, see
-        // HeroExperiment::VARIANTS); the counts here go to its control, today's page. Splitting
-        // between variants is HeroExperimentTest's.
-        $variant = HeroExperiment::DEFAULT;
+        // A page round (one headline on two homepages), so the per-page fields are read; the counts
+        // go to its control, today's page. Splitting between variants is HeroExperimentTest's.
+        $copy = [
+            'line1' => 'Promote and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours.',
+        ];
+        HeroExperiment::useVariants([
+            'home_full' => $copy,
+            'home_light' => $copy + ['page' => HeroExperiment::PAGE_LIGHT],
+        ]);
+
+        try {
+            $this->assertPageRoundTravels();
+        } finally {
+            HeroExperiment::useVariants(null);
+        }
+    }
+
+    private function assertPageRoundTravels(): void
+    {
+        $variant = 'home_full';
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'click');
@@ -151,7 +169,7 @@ class GrowthDataEndpointTest extends TestCase
 
         $this->assertNotNull($payload['hero_test'], 'the pull has no headline test in it');
         $rows = collect($payload['hero_test']['rows'])->keyBy('key');
-        $this->assertEqualsCanonicalizing(array_keys(HeroExperiment::VARIANTS), $rows->keys()->all());
+        $this->assertEqualsCanonicalizing(['home_full', 'home_light'], $rows->keys()->all());
         $this->assertSame(2, $rows[$variant]['visitors']);
         $this->assertSame(1, $rows[$variant]['clicks']);
         $this->assertSame(1, $rows[$variant]['signups']);

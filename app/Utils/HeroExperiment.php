@@ -72,7 +72,7 @@ final class HeroExperiment
     public const EXPERIMENT = 'home_hero';
 
     /** Rendered by the server while the test runs, and to visitors without JS. */
-    public const DEFAULT = 'home_full';
+    public const DEFAULT = 'promote_sell';
 
     /** The homepage a variant shows: today's, or the light one (marketing/partials/home-light). */
     public const PAGE_FULL = 'full';
@@ -93,22 +93,18 @@ final class HeroExperiment
      * A variant may also carry 'page' => PAGE_LIGHT (see the class docblock).
      */
     public const VARIANTS = [
-        // The page round of 2026-11: one headline on two homepages, split evenly. Both keys are
-        // new, so that a visitor still holding 'promote_sell' from before it (in es_attribution or
-        // in a session) is picked again rather than carried into one arm.
-        'home_full' => [
+        // The only arm again (a baseline), as from 2026-10-22. The light page round of 2026-11
+        // ('home_full' against 'home_light': today's page against a lighter copy of it) never
+        // went live. Before it shipped it was replaced by a round of today's page against a
+        // completely new homepage, which brings new keys of its own, so that nobody is carried
+        // into one of its arms from this baseline. The light page's partial is still in the file
+        // and no variant prints it.
+        'promote_sell' => [
             'line1' => 'Promote and sell',
             'line2' => 'from your event calendar',
             'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
         ],
-        'home_light' => [
-            'line1' => 'Promote and sell',
-            'line2' => 'from your event calendar',
-            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
-            'page' => self::PAGE_LIGHT,
-        ],
-        // Retired 2026-11 when the page round began: 'promote_sell', the same headline and
-        // subtitle on today's page, the only arm (a baseline) from 2026-10-22. "Promote and sell"
+        // 'promote_sell' says "Promote and sell"
         // rather than the round-three control's "Plan, promote, and sell", so the money verb is
         // one of two, not lost in a list of three. Picked by hand on 2026-10-22, before the test's
         // own lock rules were met.

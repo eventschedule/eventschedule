@@ -719,8 +719,19 @@ class HeroExperimentTest extends TestCase
         $this->assertSame(1, MarketingExperimentStat::count());
     }
 
-    /** One headline alone, as the site ran from 2026-10-22 until the page round of 2026-11. */
+    /** One headline alone, as the site ran from 2026-10-22 and runs again now. */
     private const ONE_ARM = ['promote_sell' => self::ROUND_THREE['promote_sell']];
+
+    /**
+     * A page round: one headline on two homepages, today's and the light one. The round that was
+     * written for the light page never went live, but the machinery it built (both pages in one
+     * document, an even split, ended by hand) is what the next whole-page round runs on, so it is
+     * held here with a set of its own.
+     */
+    private const PAGE_ROUND = [
+        'home_full' => self::ROUND_THREE['promote_sell'],
+        'home_light' => self::ROUND_THREE['promote_sell'] + ['page' => HeroExperiment::PAGE_LIGHT],
+    ];
 
     /**
      * One headline: served by the server and still put through the picker, so its visitors,
@@ -802,12 +813,28 @@ class HeroExperimentTest extends TestCase
      */
 
     /** The two arms differ in their page and in nothing a visitor reads above the fold. */
-    public function test_the_site_runs_one_headline_on_two_pages(): void
+    /**
+     * The site runs one headline on today's page, a baseline: the light page round was replaced
+     * before it went live, so nothing prints the light page and nothing is split.
+     */
+    public function test_the_site_runs_one_headline_on_todays_page(): void
     {
         HeroExperiment::useVariants(null);
 
-        $this->assertSame(['home_full', 'home_light'], array_keys(HeroExperiment::VARIANTS));
-        $this->assertSame('home_full', HeroExperiment::DEFAULT);
+        $this->assertSame(['promote_sell'], array_keys(HeroExperiment::VARIANTS));
+        $this->assertSame('promote_sell', HeroExperiment::DEFAULT);
+        $this->assertSame(['promote_sell' => 'full'], HeroExperiment::forPage()['pages']);
+        $this->assertFalse(HeroExperiment::isFixed());
+
+        $html = $this->get('/')->assertOk()->getContent();
+        $this->assertStringNotContainsString('class="hp-lite"', $html);
+        $this->assertStringNotContainsString('.hp-lite', $html);
+    }
+
+    public function test_a_page_round_runs_one_headline_on_two_pages(): void
+    {
+        HeroExperiment::useVariants(self::PAGE_ROUND);
+
         $this->assertSame(HeroExperiment::copyOf('home_full'), HeroExperiment::copyOf('home_light'));
         $this->assertSame(['home_full' => 'full', 'home_light' => 'light'], HeroExperiment::forPage()['pages']);
         $this->assertTrue(HeroExperiment::isFixed());
@@ -819,7 +846,7 @@ class HeroExperimentTest extends TestCase
      */
     public function test_a_running_page_round_prints_both_pages_with_todays_on_show(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
 
         $response = $this->get('/')->assertOk();
         $html = $response->getContent();
@@ -859,7 +886,7 @@ class HeroExperimentTest extends TestCase
     /** ?home= shows a page to whoever asks, and is out of the way before anything is counted. */
     public function test_the_preview_parameter_comes_before_the_pick_and_the_beacon(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
 
         $html = $this->get('/')->assertOk()->getContent();
 
@@ -872,7 +899,7 @@ class HeroExperimentTest extends TestCase
     /** An even split, whatever the counts say, and nothing the code locks. */
     public function test_a_page_round_is_split_evenly_and_never_locks_itself(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
 
         $this->travelTo('2026-11-01 12:00:00');
         MarketingExperimentStat::create(['experiment' => HeroExperiment::EXPERIMENT, 'variant' => 'home_light', 'date' => '2026-10-20', 'visitors' => HeroExperiment::WIN_MIN_VISITORS * 5, 'clicks' => 900]);
@@ -905,7 +932,7 @@ class HeroExperimentTest extends TestCase
     /** What each page's signups went on to save, counted over the accounts the signups are. */
     public function test_a_page_round_reports_what_its_signups_went_on_to_save(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
 
         [$saver, $maker] = User::factory()->count(2)->create(['hero_variant' => 'home_light']);
         User::factory()->create(['hero_variant' => 'home_light']);
@@ -947,7 +974,7 @@ class HeroExperimentTest extends TestCase
      */
     public function test_ending_on_todays_page_takes_the_light_page_out_at_once(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
         $this->get('/')->assertOk()->assertSee('class="hp-lite"', false);
 
         $this->endAsAdmin(['variant' => 'home_full'])->assertRedirect()->assertSessionHas('message', __('messages.hero_test_ended_done'));
@@ -970,7 +997,7 @@ class HeroExperimentTest extends TestCase
     /** Ended on the light page: it is the homepage, and today's middle and the film are not sent. */
     public function test_ending_on_the_light_page_makes_it_the_homepage(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
         $this->assertTrue(HeroExperiment::end('home_light'));
 
         $response = $this->get('/')->assertOk();
@@ -993,10 +1020,10 @@ class HeroExperimentTest extends TestCase
     /** An End outlives a change of copy: it is a bare key, not a fingerprint of the set. */
     public function test_an_ended_round_is_not_restarted_by_an_edit_to_the_copy(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
         HeroExperiment::end('home_full');
 
-        $edited = HeroExperiment::VARIANTS;
+        $edited = self::PAGE_ROUND;
         $edited['home_full']['subtitle'] .= ' Free to start.';
         $edited['home_light']['subtitle'] .= ' Free to start.';
         HeroExperiment::useVariants($edited, 'home_full');
@@ -1008,7 +1035,7 @@ class HeroExperimentTest extends TestCase
     /** Reset starts the round over, both pages again. */
     public function test_a_reset_starts_an_ended_round_over(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
         HeroExperiment::end('home_light');
 
         HeroExperiment::reset();
@@ -1020,7 +1047,7 @@ class HeroExperimentTest extends TestCase
     /** Only an admin ends it, only on a variant of the round, and a round of headlines cannot be. */
     public function test_only_an_admin_ends_a_round_and_only_on_one_of_its_pages(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
 
         $user = User::factory()->create(['email_verified_at' => now()]);
         $this->actingAs($user)->post('/admin/growth/hero-test/end', ['variant' => 'home_light']);
@@ -1036,7 +1063,7 @@ class HeroExperimentTest extends TestCase
 
     public function test_the_growth_page_shows_a_page_round(): void
     {
-        HeroExperiment::useVariants(null);
+        HeroExperiment::useVariants(self::PAGE_ROUND);
         config(['app.hosted' => true]);
 
         $admin = User::factory()->create(['email_verified_at' => now()]);
