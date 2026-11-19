@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Role;
 use App\Utils\PlanPriceUtils;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -42,6 +43,14 @@ class RecurringRevenue
 {
     /** Stripe statuses that bill (or are mid-retry), in addition to the trial reported beside them. */
     private const BILLING_STATUSES = ['active', 'past_due'];
+
+    /**
+     * A trial that ends further out than this many days was not started at checkout (which gives
+     * seven): an admin set it by hand, for a partner or a pilot. It will not convert this month,
+     * so it is counted as a trial but kept out of what the trials would add (trial_mrr). One that
+     * read "+$15 in trial" on the dashboard from March 2026 had its end set to November 2027.
+     */
+    public const PIPELINE_TRIAL_DAYS = 31;
 
     /** The rows of breakdown(), tier then term. Term is PlanPriceUtils::termFor()'s month|year. */
     public const PLANS = ['pro_month', 'pro_year', 'enterprise_month', 'enterprise_year'];
@@ -103,6 +112,8 @@ class RecurringRevenue
             ->groupBy('subscription_id');
 
         $plans = array_fill_keys(self::PLANS, ['billing_count' => 0, 'cents' => 0, 'trialing_count' => 0, 'trial_cents' => 0]);
+        $pipelineEnd = now()->addDays(self::PIPELINE_TRIAL_DAYS)->getTimestamp();
+        $trialsSetAside = 0;
         $unrecognized = ['billing_count' => 0, 'trialing_count' => 0];
         $pastDue = 0;
         $cancelling = 0;
@@ -126,12 +137,25 @@ class RecurringRevenue
             [$plan, $cents] = self::place($prices);
 
             if ($trial) {
+                // What the trials would add counts only a trial that can turn into a charge on its
+                // own: a card on file (Cashier's pm_type, which checkout always sets) and an end
+                // within PIPELINE_TRIAL_DAYS. The rest are still trials, counted in
+                // trialing_count, and said beside the figure as trials_set_aside.
+                $pipeline = $row->pm_type !== null
+                    && $row->trial_ends_at !== null
+                    && strtotime((string) $row->trial_ends_at) <= $pipelineEnd;
+
                 if ($plan === null) {
                     $unrecognized['trialing_count']++;
                 } else {
                     $plans[$plan]['trialing_count']++;
-                    $plans[$plan]['trial_cents'] += $cents;
+
+                    if ($pipeline) {
+                        $plans[$plan]['trial_cents'] += $cents;
+                    }
                 }
+
+                $trialsSetAside += (int) (! $pipeline);
 
                 continue;
             }
@@ -185,7 +209,11 @@ class RecurringRevenue
                 // Billing only, as it has always been: a trial on an unrecognized price is counted
                 // in trialing_count and nowhere else.
                 'unrecognized_count' => $unrecognized['billing_count'],
+                // What the trials would add a month if every one converted: the pipeline only,
+                // never a trial set by hand for months or one with no card (see trials_set_aside).
                 'trial_mrr' => round($trialCents / 1200, 2),
+                // Trials in trialing_count that are left out of trial_mrr and trial_arr.
+                'trials_set_aside' => $trialsSetAside,
                 // What the trials would add a year if every one converted, from the same yearly
                 // cents ARR is: never trial_mrr * 12, which carries its rounding twelve times.
                 'trial_arr' => round($trialCents / 100, 2),
@@ -283,8 +311,9 @@ class RecurringRevenue
 
     /**
      * MRR a week apart over the last $weeks weeks (13 is three months), and now, oldest first,
-     * for the dashboard's chart. Nothing records MRR as it happens, so the past is REBUILT from each
-     * subscription's own dates: it bills from its start (after its trial, if it had one) until it
+     * for the dashboard's chart. A day with a row in mrr_snapshots (recordSnapshot(), hourly from
+     * 2026-11-19) is read from it, as it was counted at the time, and the point is `exact`. A day
+     * before that is REBUILT from each subscription's own dates: it bills from its start (after its trial, if it had one) until it
      * ended, at the price it is on today. A price change, or a renewal Stripe gave up on before
      * the subscription was cancelled, is not in it, so the past is an estimate and the page says
      * so. The last point is breakdown()'s MRR ($current, when the caller has just read it), so the
@@ -294,7 +323,7 @@ class RecurringRevenue
      * time it billed when it was cancelled (a deleted schedule with a LIVE subscription is the
      * orphan liveRows() leaves out, and stays out). Statuses that never billed are left out.
      *
-     * @return list<array{at: Carbon, mrr: float}>
+     * @return list<array{at: Carbon, mrr: float, exact: bool}>
      */
     public static function history(int $weeks = 13, ?Carbon $now = null, ?float $current = null): array
     {
@@ -333,9 +362,18 @@ class RecurringRevenue
             }
         }
 
+        $snapshots = self::snapshots($now->copy()->subWeeks($weeks)->toDateString(), $now->toDateString());
+
         $points = [];
         for ($back = $weeks; $back >= 1; $back--) {
             $at = $now->copy()->subWeeks($back);
+
+            if (isset($snapshots[$at->toDateString()])) {
+                $points[] = ['at' => $at, 'mrr' => $snapshots[$at->toDateString()], 'exact' => true];
+
+                continue;
+            }
+
             $time = $at->getTimestamp();
             $cents = 0;
 
@@ -345,13 +383,59 @@ class RecurringRevenue
                 }
             }
 
-            $points[] = ['at' => $at, 'mrr' => round($cents / 1200, 2)];
+            $points[] = ['at' => $at, 'mrr' => round($cents / 1200, 2), 'exact' => false];
         }
 
         // The figure the caller already has, or read again.
-        $points[] = ['at' => $now->copy(), 'mrr' => $current ?? self::breakdown()['totals']['mrr']];
+        $points[] = ['at' => $now->copy(), 'mrr' => $current ?? self::breakdown()['totals']['mrr'], 'exact' => true];
 
         return $points;
+    }
+
+    /**
+     * Today's figures into mrr_snapshots, one row a day that each run overwrites, so a day's row
+     * holds the last count taken on it. Run hourly by app:record-mrr on both cron rails: a daily
+     * run that the HTTP rail missed would leave a hole the chart has to rebuild. It is the
+     * dashboard's own breakdown(), so the chart reads exactly what the card printed that day,
+     * price changes and failed renewals included, which a rebuild cannot know.
+     */
+    public static function recordSnapshot(?Carbon $now = null): void
+    {
+        $now ??= now();
+        $totals = self::breakdown()['totals'];
+
+        DB::table('mrr_snapshots')->updateOrInsert(
+            ['day' => $now->toDateString()],
+            [
+                'mrr' => $totals['mrr'],
+                'arr' => $totals['arr'],
+                'billing_count' => $totals['billing_count'],
+                'trialing_count' => $totals['trialing_count'],
+                'trial_mrr' => $totals['trial_mrr'],
+                'recorded_at' => $now,
+            ]
+        );
+    }
+
+    /**
+     * Recorded MRR by day between two dates. Empty when the table is not there yet (a deploy
+     * whose migration has not run): the chart then rebuilds every week, as it did before.
+     *
+     * @return array<string, float> Y-m-d => mrr
+     */
+    private static function snapshots(string $from, string $until): array
+    {
+        try {
+            return DB::table('mrr_snapshots')
+                ->whereBetween('day', [$from, $until])
+                ->pluck('mrr', 'day')
+                ->mapWithKeys(fn ($mrr, $day) => [substr((string) $day, 0, 10) => round((float) $mrr, 2)])
+                ->all();
+        } catch (QueryException $e) {
+            report($e);
+
+            return [];
+        }
     }
 
     private static function liveRows(): Collection
@@ -372,6 +456,7 @@ class RecurringRevenue
             // no contact email - see Role::constrainDemoContent().
             ->whereNot(fn ($q) => Role::constrainDemoContent($q))
             ->get(['subscriptions.id', 'subscriptions.role_id', 'subscriptions.stripe_status',
-                'subscriptions.stripe_price', 'subscriptions.ends_at']);
+                'subscriptions.stripe_price', 'subscriptions.ends_at', 'subscriptions.trial_ends_at',
+                'roles.pm_type']);
     }
 }

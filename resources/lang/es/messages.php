@@ -1812,6 +1812,7 @@ return [
     'cancel_subscription_first' => 'Por favor, cancele su suscripción antes de cambiar de plan.',
     'resume_subscription' => 'Reanudar Suscripción',
     'subscription_cancelled' => 'Suscripción cancelada. Tendrás acceso hasta el final de tu período de facturación.',
+    'subscription_trial_cancelled' => 'Tu prueba está cancelada y no se te cobrará nada. El plan sigue activo hasta el :date y puedes reanudarlo desde esta página hasta entonces.',
     'subscription_resumed' => '¡Suscripción reanudada exitosamente!',
     'subscription_updated' => '¡Suscripción actualizada exitosamente!',
     'subscription_already_active' => 'Ya tienes una suscripción activa.',
@@ -3115,6 +3116,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'Antes de que termine tu prueba: ":event" tiene entradas de pago a la venta, pero no hay ningún método de pago conectado, así que los compradores no pueden pagar en línea. Conectar Stripe lleva un par de minutos:',
     'subscription_trial_ending_tip_no_orders' => 'Antes de que termine tu prueba: ":event" todavía no tiene pedidos. La mayoría de las primeras ventas llegan al compartir su enlace donde tu público ya te sigue:',
     'subscription_trial_ending_manage' => 'Administrar tu plan',
+    'subscription_trial_cancelled_ending_body' => 'Cancelaste tu prueba gratuita del calendario ":schedule" (plan :plan), así que termina el :date y no se te cobrará nada.',
+    'subscription_trial_cancelled_ending_continue' => '¿Cambiaste de opinión? Reanúdala desde la configuración de tu plan antes de esa fecha para conservar el plan :plan. Se cobrará :amount a tu tarjeta registrada cuando termine la prueba.',
+    'subscription_trial_cancelled_ending_manage' => 'Conservar :plan',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'Acción requerida: tu prueba gratuita en la agenda ":schedule" termina mañana',
@@ -6752,6 +6756,7 @@ return [
     'admin_dash_home_page' => 'Página de inicio',
     'admin_dash_consent_note' => 'La primera visita a una página de marketing solo se guarda con consentimiento de cookies.',
     'admin_dash_in_trial' => 'En prueba',
+    'admin_dash_trials_set_aside' => 'No contadas: :count (sin tarjeta o con una prueba de más de un mes)',
     'admin_dash_if_convert' => 'MRR si todos se quedan',
     'admin_dash_at_risk' => 'En riesgo',
     'admin_dash_of_mrr' => ':amount del MRR',
@@ -8111,7 +8116,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'Este plan cubre solo la agenda ":name". Cada una de tus otras agendas tiene su propio plan.',
-    'subscribe_trial_charge_line' => 'Gratis hasta el :date, después :amount. Si cancelas antes, no pagas nada.',
+    'subscribe_trial_charge_line' => 'Gratis hasta el :date, después :amount. Te enviamos un correo el día anterior, y si cancelas antes, no pagas nada.',
     'subscribe_trial_used_on' => 'Ya usaste tu prueba gratuita en la agenda ":name", así que hoy pagas :amount.',
     'subscribe_trial_used' => 'Esta cuenta ya usó su prueba gratuita, así que hoy pagas :amount.',
     'subscribe_trial_used_here' => 'La agenda ":name" ya tuvo un plan, así que hoy pagas :amount.',

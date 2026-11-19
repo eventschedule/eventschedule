@@ -459,6 +459,11 @@ class SubscriptionController extends Controller
             'comment' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        // Read before cancelling. A trial cancelled here keeps its plan to the trial's end and is
+        // never charged, and the Plan tab offers Resume until then: the message says so, because
+        // "until the end of your billing period" told someone on a free week nothing.
+        $trialEndsAt = $subscription->onTrial() ? $subscription->trial_ends_at : null;
+
         try {
             $subscription->cancel();
         } catch (\Exception $e) {
@@ -483,7 +488,9 @@ class SubscriptionController extends Controller
 
         return redirect()
             ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
-            ->with('message', __('messages.subscription_cancelled'));
+            ->with('message', $trialEndsAt
+                ? __('messages.subscription_trial_cancelled', ['date' => $trialEndsAt->translatedFormat('F j, Y')])
+                : __('messages.subscription_cancelled'));
     }
 
     /**

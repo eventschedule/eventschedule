@@ -1812,6 +1812,7 @@ return [
     'cancel_subscription_first' => 'Vă rugăm anulați abonamentul înainte de a schimba planul.',
     'resume_subscription' => 'Reia Abonamentul',
     'subscription_cancelled' => 'Abonament anulat. Veți păstra accesul până la sfârșitul perioadei de facturare.',
+    'subscription_trial_cancelled' => 'Perioada de probă a fost anulată și nu vei fi taxat. Planul rămâne activ până la :date, iar până atunci îl poți relua din această pagină.',
     'subscription_resumed' => 'Abonament reluat cu succes!',
     'subscription_updated' => 'Abonament actualizat cu succes!',
     'subscription_already_active' => 'Aveți deja un abonament activ.',
@@ -3125,6 +3126,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'Înainte să se încheie perioada de probă: ":event" are bilete plătite la vânzare, dar nu este conectată nicio metodă de plată, așa că cumpărătorii nu pot plăti online. Conectarea Stripe durează câteva minute:',
     'subscription_trial_ending_tip_no_orders' => 'Înainte să se încheie perioada de probă: ":event" nu are încă nicio comandă. Majoritatea primelor vânzări vin din distribuirea linkului acolo unde publicul vă urmărește deja:',
     'subscription_trial_ending_manage' => 'Administrează Planul',
+    'subscription_trial_cancelled_ending_body' => 'Ai anulat perioada de probă gratuită pentru programul ":schedule" (planul :plan), așa că se termină pe :date și nu vei fi taxat.',
+    'subscription_trial_cancelled_ending_continue' => 'Te-ai răzgândit? Reia-o din setările planului înainte de această dată pentru a păstra planul :plan. Cardul salvat va fi taxat :amount la sfârșitul perioadei de probă.',
+    'subscription_trial_cancelled_ending_manage' => 'Păstrează :plan',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'Acțiune necesară: perioada ta de probă gratuită pentru programul ":schedule" se termină mâine',
@@ -6772,6 +6776,7 @@ return [
     'admin_dash_home_page' => 'Pagina principală',
     'admin_dash_consent_note' => 'Prima vizită pe o pagină de marketing este salvată doar cu acordul pentru cookie-uri.',
     'admin_dash_in_trial' => 'În perioada de probă',
+    'admin_dash_trials_set_aside' => 'Neincluse: :count (fără card sau cu o perioadă de probă mai lungă de o lună)',
     'admin_dash_if_convert' => 'MRR dacă rămân toți',
     'admin_dash_at_risk' => 'În pericol',
     'admin_dash_of_mrr' => ':amount din MRR',
@@ -8131,7 +8136,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'Acest plan acoperă doar programul ":name". Fiecare dintre celelalte programe ale tale are propriul plan.',
-    'subscribe_trial_charge_line' => 'Gratuit până la :date, apoi :amount. Anulează înainte și nu plătești nimic.',
+    'subscribe_trial_charge_line' => 'Gratuit până la :date, apoi :amount. Îți trimitem un e-mail cu o zi înainte, iar dacă anulezi înainte nu plătești nimic.',
     'subscribe_trial_used_on' => 'Ai folosit deja perioada de probă gratuită pentru programul ":name", așa că astăzi plătești :amount.',
     'subscribe_trial_used' => 'Acest cont și-a folosit deja perioada de probă gratuită, așa că astăzi plătești :amount.',
     'subscribe_trial_used_here' => 'Programul ":name" a avut deja un plan, așa că astăzi plătești :amount.',

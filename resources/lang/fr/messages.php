@@ -1815,6 +1815,7 @@ return [
     'cancel_subscription_first' => 'Veuillez annuler votre abonnement avant de changer de plan.',
     'resume_subscription' => 'Reprendre l\'abonnement',
     'subscription_cancelled' => 'Abonnement annulé. Vous conserverez l\'accès jusqu\'à la fin de votre période de facturation.',
+    'subscription_trial_cancelled' => 'Votre essai est annulé et vous ne serez pas débité. Le plan reste actif jusqu\'au :date, et vous pouvez le reprendre depuis cette page d\'ici là.',
     'subscription_resumed' => 'Abonnement repris avec succès !',
     'subscription_updated' => 'Abonnement mis à jour avec succès !',
     'subscription_already_active' => 'Vous avez déjà un abonnement actif.',
@@ -3116,6 +3117,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'Avant la fin de votre essai : « :event » a des billets payants en vente, mais aucun moyen de paiement n\'est connecté : les acheteurs ne peuvent donc pas payer en ligne. Connecter Stripe prend quelques minutes :',
     'subscription_trial_ending_tip_no_orders' => 'Avant la fin de votre essai : « :event » n\'a encore aucune commande. La plupart des premières ventes viennent du partage de son lien là où votre public vous suit déjà :',
     'subscription_trial_ending_manage' => 'Gérer votre plan',
+    'subscription_trial_cancelled_ending_body' => 'Vous avez annulé votre essai gratuit pour le calendrier « :schedule » (plan :plan) : il se termine donc le :date et vous ne serez pas débité.',
+    'subscription_trial_cancelled_ending_continue' => 'Vous avez changé d\'avis ? Reprenez-le depuis les paramètres de votre plan avant cette date pour garder le plan :plan. Votre carte enregistrée sera débitée de :amount à la fin de l\'essai.',
+    'subscription_trial_cancelled_ending_manage' => 'Garder :plan',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'Action requise : votre essai gratuit sur l\'agenda « :schedule » se termine demain',
@@ -6757,6 +6761,7 @@ return [
     'admin_dash_home_page' => 'Page d\'accueil',
     'admin_dash_consent_note' => 'Une première visite sur une page marketing n\'est enregistrée qu\'avec le consentement aux cookies.',
     'admin_dash_in_trial' => 'En essai',
+    'admin_dash_trials_set_aside' => 'Non comptés : :count (sans carte, ou essai fixé à plus d\'un mois)',
     'admin_dash_if_convert' => 'MRR si tous restent',
     'admin_dash_at_risk' => 'À risque',
     'admin_dash_of_mrr' => ':amount du MRR',
@@ -8116,7 +8121,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'Ce forfait ne couvre que l\'agenda « :name ». Vos autres agendas ont chacun leur propre forfait.',
-    'subscribe_trial_charge_line' => 'Gratuit jusqu\'au :date, puis :amount. Annulez avant et vous ne payez rien.',
+    'subscribe_trial_charge_line' => 'Gratuit jusqu\'au :date, puis :amount. Nous vous écrivons la veille, et si vous annulez avant, vous ne payez rien.',
     'subscribe_trial_used_on' => 'Vous avez déjà utilisé votre essai gratuit sur l\'agenda « :name », vous payez donc :amount aujourd\'hui.',
     'subscribe_trial_used' => 'Ce compte a déjà utilisé son essai gratuit, vous payez donc :amount aujourd\'hui.',
     'subscribe_trial_used_here' => 'L\'agenda « :name » a déjà eu un forfait, vous payez donc :amount aujourd\'hui.',

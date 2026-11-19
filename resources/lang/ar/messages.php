@@ -1874,6 +1874,7 @@ return [
     'cancel_subscription_first' => 'يرجى إلغاء اشتراكك قبل تغيير الخطة.',
     'resume_subscription' => 'استئناف الاشتراك',
     'subscription_cancelled' => 'تم إلغاء الاشتراك. ستحتفظ بالوصول حتى نهاية فترة الفوترة.',
+    'subscription_trial_cancelled' => 'تم إلغاء فترتك التجريبية ولن يتم خصم أي مبلغ. تبقى الخطة مفعّلة حتى :date، ويمكنك استئنافها من هذه الصفحة حتى ذلك الحين.',
     'subscription_resumed' => 'تم استئناف الاشتراك بنجاح!',
     'subscription_updated' => 'تم تحديث الاشتراك بنجاح!',
     'subscription_already_active' => 'لديك اشتراك نشط بالفعل.',
@@ -3177,6 +3178,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'قبل انتهاء تجربتك: لدى ":event" تذاكر مدفوعة معروضة للبيع، لكن لا توجد وسيلة دفع مربوطة، فلا يستطيع المشترون الدفع عبر الإنترنت. ربط Stripe يستغرق دقائق قليلة:',
     'subscription_trial_ending_tip_no_orders' => 'قبل انتهاء تجربتك: لا توجد طلبات بعد على ":event". تأتي معظم المبيعات الأولى من مشاركة رابطها حيث يتابعك جمهورك بالفعل:',
     'subscription_trial_ending_manage' => 'إدارة خطتك',
+    'subscription_trial_cancelled_ending_body' => 'لقد ألغيت فترتك التجريبية المجانية للجدول ":schedule" (خطة :plan)، لذا تنتهي في :date ولن يتم خصم أي مبلغ.',
+    'subscription_trial_cancelled_ending_continue' => 'غيّرت رأيك؟ استأنفها من إعدادات خطتك قبل ذلك للاحتفاظ بخطة :plan. سيتم خصم :amount من بطاقتك المسجلة عند انتهاء الفترة التجريبية.',
+    'subscription_trial_cancelled_ending_manage' => 'الاحتفاظ بخطة :plan',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'إجراء مطلوب: تنتهي تجربتك المجانية على الجدول ":schedule" غدًا',
@@ -6752,6 +6756,7 @@ return [
     'admin_dash_home_page' => 'الصفحة الرئيسية',
     'admin_dash_consent_note' => 'لا تُحفظ الزيارة الأولى لصفحة تسويقية إلا بموافقة على ملفات تعريف الارتباط.',
     'admin_dash_in_trial' => 'في الفترة التجريبية',
+    'admin_dash_trials_set_aside' => 'غير محتسبة: :count (بلا بطاقة، أو فترة تجريبية محددة لأكثر من شهر)',
     'admin_dash_if_convert' => 'MRR إذا اشتركوا جميعًا',
     'admin_dash_at_risk' => 'معرّض للخطر',
     'admin_dash_of_mrr' => ':amount من MRR',
@@ -8111,7 +8116,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'تغطي هذه الباقة الجدول ":name" فقط. لكل جدول من جداولك الأخرى باقته الخاصة.',
-    'subscribe_trial_charge_line' => 'مجاني حتى :date، ثم :amount. ألغِ قبل ذلك ولن تدفع شيئًا.',
+    'subscribe_trial_charge_line' => 'مجاني حتى :date، ثم :amount. نرسل لك بريدًا إلكترونيًا في اليوم السابق، وإذا ألغيت قبل ذلك فلن تدفع شيئًا.',
     'subscribe_trial_used_on' => 'لقد استخدمت تجربتك المجانية بالفعل على الجدول ":name"، لذا ستدفع :amount اليوم.',
     'subscribe_trial_used' => 'استخدم هذا الحساب تجربته المجانية بالفعل، لذا ستدفع :amount اليوم.',
     'subscribe_trial_used_here' => 'كانت للجدول ":name" باقة من قبل، لذا ستدفع :amount اليوم.',

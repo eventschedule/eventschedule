@@ -2149,6 +2149,7 @@ return [
     'cancel_subscription_first' => 'Please cancel your subscription before changing plans.',
     'resume_subscription' => 'Resume Subscription',
     'subscription_cancelled' => 'Subscription cancelled. You will retain access until the end of your billing period.',
+    'subscription_trial_cancelled' => 'Your trial is cancelled and you will not be charged. The plan stays on until :date, and you can resume it from this page until then.',
     'subscription_resumed' => 'Subscription resumed successfully!',
     'subscription_updated' => 'Subscription updated successfully!',
     'subscription_already_active' => 'You already have an active subscription.',
@@ -3463,6 +3464,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'Before your trial ends: ":event" has paid tickets on sale, but no payment method is connected, so buyers cannot pay online. Connecting Stripe takes a couple of minutes:',
     'subscription_trial_ending_tip_no_orders' => 'Before your trial ends: ":event" has no orders yet. Most first sales come from sharing its link where your audience already follows you:',
     'subscription_trial_ending_manage' => 'Manage Your Plan',
+    'subscription_trial_cancelled_ending_body' => 'You cancelled your free trial for the ":schedule" schedule (:plan plan), so it ends on :date and you will not be charged.',
+    'subscription_trial_cancelled_ending_continue' => 'Changed your mind? Resume it from your plan settings before then to keep the :plan plan. Your card on file is charged :amount when the trial ends.',
+    'subscription_trial_cancelled_ending_manage' => 'Keep :plan',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'Action required: your free trial on the ":schedule" schedule ends tomorrow',
@@ -6824,6 +6828,7 @@ return [
     'admin_dash_home_page' => 'Home page',
     'admin_dash_consent_note' => 'A first visit to a marketing page is stored only with cookie consent.',
     'admin_dash_in_trial' => 'In trial',
+    'admin_dash_trials_set_aside' => 'Not counted: :count (no card, or a trial set for longer than a month)',
     'admin_dash_if_convert' => 'MRR if they all convert',
     'admin_dash_at_risk' => 'At risk',
     'admin_dash_of_mrr' => ':amount of MRR',
@@ -8183,7 +8188,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'This plan covers the ":name" schedule only. Your other schedules each have their own plan.',
-    'subscribe_trial_charge_line' => 'Free until :date, then :amount. Cancel before then and you pay nothing.',
+    'subscribe_trial_charge_line' => 'Free until :date, then :amount. We email you the day before, and if you cancel before then you pay nothing.',
     'subscribe_trial_used_on' => 'You already used your free trial on the ":name" schedule, so you pay :amount today.',
     'subscribe_trial_used' => 'This login has already used its free trial, so you pay :amount today.',
     'subscribe_trial_used_here' => 'The ":name" schedule has already had a plan, so you pay :amount today.',

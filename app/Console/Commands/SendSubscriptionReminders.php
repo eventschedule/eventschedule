@@ -11,6 +11,7 @@ use App\Services\OneSignalService;
 use App\Utils\MoneyUtils;
 use App\Utils\OwnerLocalTime;
 use App\Utils\PlanPriceUtils;
+use App\Utils\PlatformPricing;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -102,7 +103,7 @@ class SendSubscriptionReminders extends Command
 
                 try {
                     $isEnterprise = $role->plan_type === 'enterprise';
-                    $amount = \App\Utils\PlatformPricing::amount($isEnterprise ? 'enterprise' : 'pro', 'monthly');
+                    $amount = PlatformPricing::amount($isEnterprise ? 'enterprise' : 'pro', 'monthly');
 
                     // Queued, and in the recipient's own language. Inline Mail::to()->send()
                     // was two separate problems: on hosted this command runs inside a web
@@ -271,7 +272,17 @@ class SendSubscriptionReminders extends Command
                 continue;
             }
 
-            if ($subscription->canceled()) {
+            // A trial cancelled at its end (Cashier's cancel(), status still trialing) is told once
+            // more the day before it ends that it can still be kept: Resume on the Plan tab undoes
+            // the cancel, and the card on file is charged when the trial ends. Only with a card,
+            // which resuming needs, and never for a schedule that is gone or an account that is
+            // blocked (a deletion or a block cancels at once, so those are not trialing anyway).
+            // Of fifteen checkout trials in October and November 2026, every one left running
+            // converted, and two were cancelled at their end on the day they started.
+            $cancelled = $subscription->canceled();
+            $hasCard = $role->hasDefaultPaymentMethod();
+
+            if ($cancelled && (! $subscription->onGracePeriod() || ! $hasCard || $role->is_deleted || $role->user->blocked_at)) {
                 $this->info("Skipping {$role->subdomain}: subscription already cancelled.");
                 $skipped++;
 
@@ -283,10 +294,8 @@ class SendSubscriptionReminders extends Command
                 $amount = $this->getAmountForSubscription($subscription);
                 $trialEndDate = Carbon::parse($subscription->trial_ends_at)->format('F j, Y');
 
-                $hasCard = $role->hasDefaultPaymentMethod();
-
                 Mail::to($role->user->email)->send(
-                    new SubscriptionTrialEnding($role, $amount, $planLabel, $trialEndDate, $hasCard)
+                    new SubscriptionTrialEnding($role, $amount, $planLabel, $trialEndDate, $hasCard, cancelled: $cancelled)
                 );
 
                 OneSignalService::pushToUser($role->user, [

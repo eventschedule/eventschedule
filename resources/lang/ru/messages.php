@@ -1867,6 +1867,7 @@ return [
     'cancel_subscription_first' => 'Пожалуйста, отмените подписку перед сменой плана.',
     'resume_subscription' => 'Возобновить подписку',
     'subscription_cancelled' => 'Подписка отменена. Вы сохраните доступ до конца расчетного периода.',
+    'subscription_trial_cancelled' => 'Пробный период отменён, и с вас ничего не спишут. План действует до :date, и до этой даты его можно возобновить на этой странице.',
     'subscription_resumed' => 'Подписка успешно возобновлена!',
     'subscription_updated' => 'Подписка успешно обновлена!',
     'subscription_already_active' => 'У вас уже есть активная подписка.',
@@ -3175,6 +3176,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'Пока не закончился пробный период: на ":event" продаются платные билеты, но способ оплаты не подключён, поэтому покупатели не могут заплатить онлайн. Подключение Stripe занимает пару минут:',
     'subscription_trial_ending_tip_no_orders' => 'Пока не закончился пробный период: на ":event" пока нет заказов. Большинство первых продаж приходит, когда ссылкой делятся там, где на вас уже подписана аудитория:',
     'subscription_trial_ending_manage' => 'Управление планом',
+    'subscription_trial_cancelled_ending_body' => 'Вы отменили бесплатный пробный период для расписания ":schedule" (план :plan), поэтому он заканчивается :date, и с вас ничего не спишут.',
+    'subscription_trial_cancelled_ending_continue' => 'Передумали? Возобновите его в настройках плана до этой даты, чтобы сохранить план :plan. При окончании пробного периода с вашей сохранённой карты будет списано :amount.',
+    'subscription_trial_cancelled_ending_manage' => 'Сохранить :plan',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'Требуются действия: ваш бесплатный пробный период для расписания ":schedule" заканчивается завтра',
@@ -6754,6 +6758,7 @@ return [
     'admin_dash_home_page' => 'Главная страница',
     'admin_dash_consent_note' => 'Первое посещение маркетинговой страницы сохраняется только при согласии на файлы cookie.',
     'admin_dash_in_trial' => 'На пробном периоде',
+    'admin_dash_trials_set_aside' => 'Не учтено: :count (без карты или пробный период дольше месяца)',
     'admin_dash_if_convert' => 'MRR, если все останутся',
     'admin_dash_at_risk' => 'Под угрозой',
     'admin_dash_of_mrr' => ':amount от MRR',
@@ -8113,7 +8118,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'Этот тариф действует только для расписания ":name". У каждого из ваших других расписаний свой тариф.',
-    'subscribe_trial_charge_line' => 'Бесплатно до :date, затем :amount. Отмените до этой даты, и вы ничего не заплатите.',
+    'subscribe_trial_charge_line' => 'Бесплатно до :date, затем :amount. Мы напишем вам за день до этого, и если вы отмените до этой даты, вы ничего не заплатите.',
     'subscribe_trial_used_on' => 'Вы уже использовали бесплатный пробный период для расписания ":name", поэтому сегодня вы платите :amount.',
     'subscribe_trial_used' => 'Этот аккаунт уже использовал бесплатный пробный период, поэтому сегодня вы платите :amount.',
     'subscribe_trial_used_here' => 'У расписания ":name" уже был тариф, поэтому сегодня вы платите :amount.',

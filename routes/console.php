@@ -370,6 +370,15 @@ Schedule::call(function () {
     Artisan::call('app:send-carpool-reminders');
 })->hourly()->name('app-send-carpool-reminders')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Hosted only: today's MRR into mrr_snapshots for the dashboard's chart (RecurringRevenue). Hourly,
+// overwriting the day's row, so a missed run leaves no hole. Keep in sync with
+// AppController::translateData().
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:record-mrr');
+    }
+})->hourly()->name('app-record-mrr')->withoutOverlapping(10)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Laravel's database cache never deletes an expired row unless the same key is read again, and the
 // per-visitor daily counters and throttle keys never are, so on CACHE_STORE=database the `cache`
 // table grew without bound. Ungated (a no-op on any other store), registered after the hourly mail

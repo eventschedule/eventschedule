@@ -2,13 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Mail\SubscriptionTrialEnding;
 use App\Models\Role;
 use App\Models\SubscriptionCancellation;
 use App\Services\GrowthExportService;
+use App\Services\ScheduleTransferService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Stripe\StripeClient;
+use Stripe\Subscription;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -42,7 +47,7 @@ class SubscriptionCancellationTest extends TestCase
             {
                 $this->updates[] = [$id, $params];
 
-                return \Stripe\Subscription::constructFrom([
+                return Subscription::constructFrom([
                     'id' => $id,
                     'status' => 'active',
                     'cancel_at_period_end' => (bool) ($params['cancel_at_period_end'] ?? false),
@@ -52,7 +57,7 @@ class SubscriptionCancellationTest extends TestCase
 
             public function cancel($id, $params = null, $opts = null)
             {
-                return \Stripe\Subscription::constructFrom(['id' => $id, 'status' => 'canceled']);
+                return Subscription::constructFrom(['id' => $id, 'status' => 'canceled']);
             }
         };
 
@@ -272,7 +277,7 @@ class SubscriptionCancellationTest extends TestCase
     {
         [, $role, $stripeId] = $this->subscriber();
 
-        $service = app(\App\Services\ScheduleTransferService::class);
+        $service = app(ScheduleTransferService::class);
         $cancel = new \ReflectionMethod($service, 'cancelSubscription');
         $cancel->setAccessible(true);
         $this->assertTrue($cancel->invoke($service, $role->fresh()));
@@ -388,5 +393,66 @@ class SubscriptionCancellationTest extends TestCase
         $this->assertSame(1, $export['churn']['with_reason']);
         $this->assertEquals(['too_expensive' => 1, 'none' => 1], collect($export['churn']['by_reason'])->all());
         $this->assertStringNotContainsString('private words', json_encode($export));
+    }
+
+    /** A subscriber on a Stripe trial that ends on $trialEnd, with a card on file unless told otherwise. */
+    private function trialSubscriber(Carbon $trialEnd, bool $card = true): array
+    {
+        [$owner, $role, $stripeId] = $this->subscriber();
+        DB::table('subscriptions')->where('stripe_id', $stripeId)->update(['stripe_status' => 'trialing', 'trial_ends_at' => $trialEnd]);
+        DB::table('roles')->where('id', $role->id)->update(['pm_type' => $card ? 'card' : null, 'pm_last_four' => $card ? '4242' : null]);
+
+        return [$owner, $role->fresh(), $stripeId];
+    }
+
+    /**
+     * Cancelling on a trial keeps the plan to the trial's end and charges nothing; the message
+     * says that and that Resume is here, not "until the end of your billing period".
+     * Mutation: read the trial's end after cancel(), or always use subscription_cancelled.
+     */
+    public function test_cancelling_a_trial_says_it_runs_to_its_end_and_can_be_resumed(): void
+    {
+        $end = now()->addDays(6)->startOfMinute();
+        [$owner, $role] = $this->trialSubscriber($end);
+
+        $this->cancelInApp($owner, $role)
+            ->assertSessionHas('message', __('messages.subscription_trial_cancelled', ['date' => $end->translatedFormat('F j, Y')]));
+
+        $this->assertTrue($role->subscription('default')->fresh()->onGracePeriod());
+    }
+
+    /**
+     * The day before a cancelled trial ends, its owner is told once that it can still be kept:
+     * no charge, Resume on the Plan tab. Not without a card (resuming needs one), and the
+     * running trial's mail is unchanged. Mutation: skip every cancelled trial again, or drop
+     * the card condition.
+     */
+    public function test_a_cancelled_trial_is_offered_a_way_back_the_day_before_it_ends(): void
+    {
+        Mail::fake();
+        $tomorrow = now()->addDay()->setTime(15, 0);
+
+        [$keptOwner] = $this->trialSubscriber($tomorrow);
+        [$cancelledOwner, $cancelled, $cancelledId] = $this->trialSubscriber($tomorrow);
+        [$noCardOwner, , $noCardId] = $this->trialSubscriber($tomorrow, card: false);
+        DB::table('subscriptions')->whereIn('stripe_id', [$cancelledId, $noCardId])->update(['ends_at' => $tomorrow]);
+
+        $this->artisan('app:send-subscription-reminders')->assertSuccessful();
+
+        Mail::assertSent(SubscriptionTrialEnding::class, 2);
+        Mail::assertSent(SubscriptionTrialEnding::class, function ($mail) use ($cancelledOwner) {
+            if (! $mail->hasTo($cancelledOwner->email)) {
+                return false;
+            }
+            $html = $mail->render();
+
+            return str_contains($html, e(__('messages.subscription_trial_cancelled_ending_manage', ['plan' => 'Pro'])))
+                && ! str_contains($html, e(__('messages.subscription_trial_ending_continue', ['plan' => 'Pro'])));
+        });
+        Mail::assertSent(SubscriptionTrialEnding::class, fn ($mail) => $mail->hasTo($keptOwner->email)
+            && str_contains($mail->render(), e(__('messages.subscription_trial_ending_continue', ['plan' => 'Pro']))));
+        Mail::assertNotSent(SubscriptionTrialEnding::class, fn ($mail) => $mail->hasTo($noCardOwner->email));
+
+        $this->assertNotNull($cancelled->fresh()->trial_reminder_sent_at);
     }
 }

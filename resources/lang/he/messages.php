@@ -1871,6 +1871,7 @@ return [
     'cancel_subscription_first' => 'אנא בטל את המנוי שלך לפני שינוי תוכנית.',
     'resume_subscription' => 'חדש מנוי',
     'subscription_cancelled' => 'המנוי בוטל. תוכל להמשיך להשתמש בשירות עד סוף תקופת החיוב.',
+    'subscription_trial_cancelled' => 'תקופת הניסיון בוטלה ולא תחויבו. התוכנית נשארת פעילה עד :date, ועד אז אפשר לחדש אותה מהדף הזה.',
     'subscription_resumed' => 'המנוי חודש בהצלחה!',
     'subscription_updated' => 'המנוי עודכן בהצלחה!',
     'subscription_already_active' => 'כבר יש לך מנוי פעיל.',
@@ -3172,6 +3173,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'לפני שתקופת הניסיון מסתיימת: ל־":event" יש כרטיסים בתשלום במכירה, אבל לא חובר אמצעי תשלום, כך שקונים לא יכולים לשלם אונליין. חיבור Stripe לוקח כמה דקות:',
     'subscription_trial_ending_tip_no_orders' => 'לפני שתקופת הניסיון מסתיימת: ל־":event" עדיין אין הזמנות. רוב המכירות הראשונות מגיעות משיתוף הקישור במקום שבו הקהל שלכם כבר עוקב אחריכם:',
     'subscription_trial_ending_manage' => 'נהל את התוכנית שלך',
+    'subscription_trial_cancelled_ending_body' => 'ביטלתם את תקופת הניסיון החינמית של לוח הזמנים ":schedule" (תוכנית :plan), ולכן היא מסתיימת ב-:date ולא תחויבו.',
+    'subscription_trial_cancelled_ending_continue' => 'שיניתם את דעתכם? חדשו אותה מהגדרות התוכנית לפני כן כדי לשמור על תוכנית :plan. הכרטיס השמור יחויב בסך :amount בסיום תקופת הניסיון.',
+    'subscription_trial_cancelled_ending_manage' => 'שמירה על :plan',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'נדרשת פעולה: תקופת הניסיון החינמית שלכם בלוח הזמנים ":schedule" מסתיימת מחר',
@@ -6751,6 +6755,7 @@ return [
     'admin_dash_home_page' => 'דף הבית',
     'admin_dash_consent_note' => 'ביקור ראשון בדף שיווקי נשמר רק בהסכמה לעוגיות.',
     'admin_dash_in_trial' => 'בתקופת ניסיון',
+    'admin_dash_trials_set_aside' => 'לא נספרו: :count (ללא כרטיס, או תקופת ניסיון שנקבעה ליותר מחודש)',
     'admin_dash_if_convert' => 'MRR אם כולם יישארו',
     'admin_dash_at_risk' => 'בסיכון',
     'admin_dash_of_mrr' => ':amount מתוך ה-MRR',
@@ -8110,7 +8115,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'התוכנית הזו חלה רק על לוח הזמנים ":name". לכל אחד מלוחות הזמנים האחרים שלכם יש תוכנית משלו.',
-    'subscribe_trial_charge_line' => 'חינם עד :date, ולאחר מכן :amount. בטלו לפני כן ולא תשלמו דבר.',
+    'subscribe_trial_charge_line' => 'חינם עד :date, ולאחר מכן :amount. נשלח לכם אימייל יום לפני, ואם תבטלו לפני כן לא תשלמו דבר.',
     'subscribe_trial_used_on' => 'כבר השתמשתם בתקופת הניסיון החינמית בלוח הזמנים ":name", לכן תשלמו היום :amount.',
     'subscribe_trial_used' => 'החשבון הזה כבר השתמש בתקופת הניסיון החינמית שלו, לכן תשלמו היום :amount.',
     'subscribe_trial_used_here' => 'ללוח הזמנים ":name" כבר הייתה תוכנית, לכן תשלמו היום :amount.',

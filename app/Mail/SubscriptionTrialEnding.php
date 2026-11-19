@@ -32,8 +32,15 @@ class SubscriptionTrialEnding extends Mailable
      */
     protected bool $windDown;
 
-    public function __construct(Role $role, string $amount, string $planLabel, string $trialEndDate, bool $hasCard = true, bool $windDown = false)
+    /**
+     * True for a Stripe trial its owner cancelled: it ends tomorrow and nothing is charged, and
+     * the mail says it can still be kept (Resume on the Plan tab) rather than that it continues.
+     */
+    protected bool $cancelled;
+
+    public function __construct(Role $role, string $amount, string $planLabel, string $trialEndDate, bool $hasCard = true, bool $windDown = false, bool $cancelled = false)
     {
+        $this->cancelled = $cancelled && ! $windDown;
         $this->role = $role;
         $this->amount = $amount;
         $this->planLabel = $planLabel;
@@ -120,7 +127,8 @@ class SubscriptionTrialEnding extends Mailable
                 'portalUrl' => $portalUrl,
                 'hasCard' => $this->hasCard && ! $this->windDown,
                 'windDown' => $this->windDown,
-                'sellingTip' => $this->windDown ? null : $this->sellingTip(),
+                'cancelled' => $this->cancelled,
+                'sellingTip' => $this->windDown || $this->cancelled ? null : $this->sellingTip(),
             ]
         );
     }

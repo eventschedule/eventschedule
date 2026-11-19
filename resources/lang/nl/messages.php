@@ -1814,6 +1814,7 @@ return [
     'cancel_subscription_first' => 'Annuleer uw abonnement voordat u van plan verandert.',
     'resume_subscription' => 'Abonnement Hervatten',
     'subscription_cancelled' => 'Abonnement opgezegd. U behoudt toegang tot het einde van uw factureringsperiode.',
+    'subscription_trial_cancelled' => 'Je proefperiode is opgezegd en er wordt niets afgeschreven. Het abonnement blijft actief tot :date, en tot dan kun je het op deze pagina hervatten.',
     'subscription_resumed' => 'Abonnement succesvol hervat!',
     'subscription_updated' => 'Abonnement succesvol bijgewerkt!',
     'subscription_already_active' => 'U heeft al een actief abonnement.',
@@ -3115,6 +3116,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'Voordat je proefperiode afloopt: ":event" heeft betaalde tickets te koop, maar er is geen betaalmethode gekoppeld, dus kopers kunnen niet online betalen. Stripe koppelen kost een paar minuten:',
     'subscription_trial_ending_tip_no_orders' => 'Voordat je proefperiode afloopt: ":event" heeft nog geen bestellingen. De meeste eerste verkopen komen van het delen van de link waar je publiek je al volgt:',
     'subscription_trial_ending_manage' => 'Abonnement beheren',
+    'subscription_trial_cancelled_ending_body' => 'Je hebt je gratis proefperiode voor het schema ":schedule" (:plan-abonnement) opgezegd, dus die eindigt op :date en er wordt niets afgeschreven.',
+    'subscription_trial_cancelled_ending_continue' => 'Toch van gedachten veranderd? Hervat het vóór die tijd in je abonnementsinstellingen om het :plan-abonnement te houden. Aan het einde van de proefperiode wordt :amount afgeschreven van je opgeslagen kaart.',
+    'subscription_trial_cancelled_ending_manage' => ':plan houden',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'Actie vereist: je gratis proefperiode voor het schema ":schedule" eindigt morgen',
@@ -6754,6 +6758,7 @@ return [
     'admin_dash_home_page' => 'Startpagina',
     'admin_dash_consent_note' => 'Een eerste bezoek aan een marketingpagina wordt alleen met cookietoestemming opgeslagen.',
     'admin_dash_in_trial' => 'In proefperiode',
+    'admin_dash_trials_set_aside' => 'Niet meegeteld: :count (zonder kaart, of een proefperiode van meer dan een maand)',
     'admin_dash_if_convert' => 'MRR als ze allemaal blijven',
     'admin_dash_at_risk' => 'Risico',
     'admin_dash_of_mrr' => ':amount van de MRR',
@@ -8113,7 +8118,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'Dit abonnement geldt alleen voor het schema ":name". Je andere schema\'s hebben elk hun eigen abonnement.',
-    'subscribe_trial_charge_line' => 'Gratis tot :date, daarna :amount. Zeg je eerder op, dan betaal je niets.',
+    'subscribe_trial_charge_line' => 'Gratis tot :date, daarna :amount. We mailen je de dag ervoor, en zeg je eerder op, dan betaal je niets.',
     'subscribe_trial_used_on' => 'Je hebt je gratis proefperiode al gebruikt voor het schema ":name", dus je betaalt vandaag :amount.',
     'subscribe_trial_used' => 'Dit account heeft zijn gratis proefperiode al gebruikt, dus je betaalt vandaag :amount.',
     'subscribe_trial_used_here' => 'Het schema ":name" heeft al een abonnement gehad, dus je betaalt vandaag :amount.',

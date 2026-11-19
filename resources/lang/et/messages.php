@@ -1806,6 +1806,7 @@ return [
     'cancel_subscription_first' => 'Palun tühistage oma tellimus enne plaani muutmist.',
     'resume_subscription' => 'Jätka tellimust',
     'subscription_cancelled' => 'Tellimus tühistati. Juurdepääs säilib kuni arveldusperioodi lõpuni.',
+    'subscription_trial_cancelled' => 'Teie prooviperiood on tühistatud ja teilt tasu ei võeta. Plaan kehtib kuni :date ja kuni selle ajani saate seda sellelt lehelt jätkata.',
     'subscription_resumed' => 'Tellimus jätkus edukalt!',
     'subscription_updated' => 'Tellimuse värskendamine õnnestus!',
     'subscription_already_active' => 'Teil on juba aktiivne tellimus.',
@@ -3112,6 +3113,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'Enne prooviperioodi lõppu: üritusel ":event" on tasulised piletid müügil, kuid ühtegi makseviisi pole ühendatud, nii et ostjad ei saa veebis maksta. Stripe\'i ühendamine võtab paar minutit:',
     'subscription_trial_ending_tip_no_orders' => 'Enne prooviperioodi lõppu: üritusel ":event" pole veel tellimusi. Enamik esimesi müüke tuleb lingi jagamisest seal, kus teie publik teid juba jälgib:',
     'subscription_trial_ending_manage' => 'Halda oma plaani',
+    'subscription_trial_cancelled_ending_body' => 'Tühistasite ajakava ":schedule" tasuta prooviperioodi (:plan plaan), seega lõpeb see kuupäeval :date ja teilt tasu ei võeta.',
+    'subscription_trial_cancelled_ending_continue' => 'Mõtlesite ümber? Jätkake seda enne seda oma plaani seadetes, et :plan plaan alles jääks. Prooviperioodi lõppedes võetakse teie salvestatud kaardilt tasu :amount.',
+    'subscription_trial_cancelled_ending_manage' => 'Jäta :plan alles',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'Vajalik tegevus: teie tasuta prooviperiood ajakaval ":schedule" lõpeb homme',
@@ -6753,6 +6757,7 @@ return [
     'admin_dash_home_page' => 'Avaleht',
     'admin_dash_consent_note' => 'Esimene külastus turunduslehele salvestatakse ainult küpsiste nõusoleku korral.',
     'admin_dash_in_trial' => 'Prooviperioodil',
+    'admin_dash_trials_set_aside' => 'Arvestamata: :count (kaardita või üle kuu pikkune prooviperiood)',
     'admin_dash_if_convert' => 'MRR, kui kõik jäävad',
     'admin_dash_at_risk' => 'Ohus',
     'admin_dash_of_mrr' => ':amount MRR-ist',
@@ -8112,7 +8117,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'See pakett kehtib ainult ajakavale ":name". Teie teistel ajakavadel on igaühel oma pakett.',
-    'subscribe_trial_charge_line' => 'Tasuta kuni :date, seejärel :amount. Kui tühistate enne seda, ei maksa te midagi.',
+    'subscribe_trial_charge_line' => 'Tasuta kuni :date, seejärel :amount. Saadame teile päev varem e-kirja ja kui tühistate enne seda, ei maksa te midagi.',
     'subscribe_trial_used_on' => 'Olete oma tasuta prooviperioodi juba kasutanud ajakaval ":name", seega maksate täna :amount.',
     'subscribe_trial_used' => 'See konto on oma tasuta prooviperioodi juba kasutanud, seega maksate täna :amount.',
     'subscribe_trial_used_here' => 'Ajakaval ":name" on juba pakett olnud, seega maksate täna :amount.',

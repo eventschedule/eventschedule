@@ -37,7 +37,7 @@
                 </p>
             </div>
             <div class="rounded-xl px-3 py-2.5" style="background: var(--ap-tint-sunken)">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">@{{ msg.inTrial }} <span class="text-gray-900 dark:text-white tabular-nums">@{{ fmt(revenue.trialing_count) }}</span></p>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">@{{ msg.inTrial }} <span class="text-gray-900 dark:text-white tabular-nums">@{{ fmt(revenue.trial_pipeline_count ?? revenue.trialing_count) }}</span></p>
                 <p class="mt-1 dashboard-stat-value text-2xl font-bold leading-7 text-gray-900 dark:text-white"><span dir="ltr">+@{{ revenue.trial_mrr }}</span></p>
                 {{-- The same pair as the paying box beside it: what the trials would add a month,
                      and a year. --}}
@@ -48,6 +48,9 @@
                         <span class="whitespace-nowrap">ARR <span dir="ltr">+@{{ revenue.trial_arr }}</span></span>
                     </template>
                 </p>
+                {{-- A trial an admin set for months, or one with no card, is not counted above: it
+                     will not turn into a charge on its own (RecurringRevenue::PIPELINE_TRIAL_DAYS). --}}
+                <p v-if="revenue.trials_set_aside > 0" class="mt-1 text-[11px] leading-snug text-gray-500 dark:text-gray-400">@{{ revenue.trials_set_aside_line }}</p>
             </div>
         </div>
 
@@ -71,7 +74,7 @@
         <div class="relative flex-1 mt-2" style="min-height: 6rem">
             <div class="absolute inset-0"><canvas ref="mrrChart" role="img" :aria-label="mrrSummary"></canvas></div>
         </div>
-        <p class="mt-2 text-[11px] leading-snug text-gray-500 dark:text-gray-400">@{{ msg.mrrRebuilt }}</p>
+        <p v-if="revenue.mrr_history.rebuilt" class="mt-2 text-[11px] leading-snug text-gray-500 dark:text-gray-400">@{{ msg.mrrRebuilt }}</p>
     </div>
 
 </section>

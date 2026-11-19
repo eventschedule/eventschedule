@@ -469,6 +469,15 @@ class AppController extends Controller
                     }
                 }
 
+                if (config('app.hosted')) {
+                    try {
+                        \Artisan::call('app:record-mrr');
+                    } catch (\Throwable $e) {
+                        \Log::error('Scheduled command app:record-mrr failed: '.$e->getMessage());
+                        report($e);
+                    }
+                }
+
                 // After the mail and money commands, so its 20-second budget never pushes them
                 // toward the request timeout; see routes/console.php for why it exists.
                 try {

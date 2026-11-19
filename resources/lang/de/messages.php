@@ -1812,6 +1812,7 @@ return [
     'cancel_subscription_first' => 'Bitte kündigen Sie Ihr Abonnement, bevor Sie den Plan ändern.',
     'resume_subscription' => 'Abonnement fortsetzen',
     'subscription_cancelled' => 'Abonnement gekündigt. Sie behalten den Zugang bis zum Ende Ihres Abrechnungszeitraums.',
+    'subscription_trial_cancelled' => 'Ihre Testphase ist gekündigt, und Ihnen wird nichts berechnet. Der Tarif bleibt bis :date aktiv, und bis dahin können Sie ihn auf dieser Seite fortsetzen.',
     'subscription_resumed' => 'Abonnement erfolgreich fortgesetzt!',
     'subscription_updated' => 'Abonnement erfolgreich aktualisiert!',
     'subscription_already_active' => 'Sie haben bereits ein aktives Abonnement.',
@@ -3115,6 +3116,9 @@ return [
     'subscription_trial_ending_tip_no_gateway' => 'Bevor Ihre Testphase endet: ":event" hat bezahlte Tickets im Verkauf, aber es ist keine Zahlungsmethode verbunden, also können Käufer online nicht bezahlen. Stripe zu verbinden dauert ein paar Minuten:',
     'subscription_trial_ending_tip_no_orders' => 'Bevor Ihre Testphase endet: ":event" hat noch keine Bestellungen. Die meisten ersten Verkäufe kommen daher, dass der Link dort geteilt wird, wo Ihr Publikum Ihnen schon folgt:',
     'subscription_trial_ending_manage' => 'Tarif verwalten',
+    'subscription_trial_cancelled_ending_body' => 'Sie haben Ihre kostenlose Testphase für den Zeitplan ":schedule" (:plan-Tarif) gekündigt. Sie endet daher am :date, und Ihnen wird nichts berechnet.',
+    'subscription_trial_cancelled_ending_continue' => 'Doch anders entschieden? Setzen Sie sie vorher in Ihren Tarifeinstellungen fort, um den :plan-Tarif zu behalten. Ihre hinterlegte Karte wird bei Ende der Testphase mit :amount belastet.',
+    'subscription_trial_cancelled_ending_manage' => ':plan behalten',
 
     // Subscription trial ending email (no card on file)
     'subscription_trial_ending_subject_no_card' => 'Handlungsbedarf: Ihre kostenlose Testphase für den Zeitplan ":schedule" endet morgen',
@@ -6752,6 +6756,7 @@ return [
     'admin_dash_home_page' => 'Startseite',
     'admin_dash_consent_note' => 'Ein erster Besuch auf einer Marketingseite wird nur mit Cookie-Einwilligung gespeichert.',
     'admin_dash_in_trial' => 'In der Testphase',
+    'admin_dash_trials_set_aside' => 'Nicht mitgezählt: :count (ohne Karte oder eine Testphase von mehr als einem Monat)',
     'admin_dash_if_convert' => 'MRR, wenn alle bleiben',
     'admin_dash_at_risk' => 'Gefährdet',
     'admin_dash_of_mrr' => ':amount des MRR',
@@ -8111,7 +8116,7 @@ return [
 
     // One trial per login, what a plan covers, payouts (2026-10-20)
     'subscribe_covers_one_schedule' => 'Dieser Tarif gilt nur für den Zeitplan ":name". Ihre anderen Zeitpläne haben jeweils einen eigenen Tarif.',
-    'subscribe_trial_charge_line' => 'Kostenlos bis :date, danach :amount. Wenn Sie vorher kündigen, zahlen Sie nichts.',
+    'subscribe_trial_charge_line' => 'Kostenlos bis :date, danach :amount. Wir schreiben Ihnen am Tag davor, und wenn Sie vorher kündigen, zahlen Sie nichts.',
     'subscribe_trial_used_on' => 'Sie haben Ihre kostenlose Testphase bereits für den Zeitplan ":name" genutzt, daher zahlen Sie heute :amount.',
     'subscribe_trial_used' => 'Dieses Konto hat seine kostenlose Testphase bereits genutzt, daher zahlen Sie heute :amount.',
     'subscribe_trial_used_here' => 'Der Zeitplan ":name" hatte bereits einen Tarif, daher zahlen Sie heute :amount.',
