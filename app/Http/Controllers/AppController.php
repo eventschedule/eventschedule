@@ -829,6 +829,23 @@ class AppController extends Controller
     ];
 
     /**
+     * Crawl paths on a schedule's own host that hold nothing an index wants and that crawlers
+     * walked without end, on a web container with four PHP workers:
+     *  - /{slug}/{id}/ical and /{slug}/{id}/{date}/ical: an event's calendar file, one per date.
+     *    Two segments before it, so the subscription feed (/feed/ical) stays open to calendar apps.
+     *  - ?month= on any page: the calendar's month arrows. Each month is a page whose canonical is
+     *    the schedule's own, and each lists that month's dates of every series, so a crawler
+     *    following "next month" reached occurrence pages in 2099 and 2120.
+     *  - .../POLL_HASH: the placeholder the event page's poll script fills in before it posts.
+     *    Crawlers read it out of the script and asked for it, 490 times in those two hours, and
+     *    the POST-only routes answered 405.
+     * In a two-hour runtime log of 2026-11-19, these and the demo schedules (below) were about
+     * 3,000 of 19,400 dynamic requests, nearly all from Meta's and Amazon's crawlers, and Search
+     * Console was reporting 5xx on such URLs while the container was saturated.
+     */
+    private const ROBOTS_TENANT_CRAWL_TRAPS = ['/*/*/ical$', '/*?month=', '/*&month=', '/*/POLL_HASH$'];
+
+    /**
      * robots.txt, which differs by host.
      *
      * A tenant host (hosted: a custom domain, or a schedule's subdomain) blocks only its checkout,
@@ -858,9 +875,19 @@ class AppController extends Controller
                 || ($label !== null && ! in_array($label, ['www', 'app', 'blog'], true)));
 
         if ($isTenantHost) {
+            // A schedule whose pages all answer noindex (Role::isIndexableHost(): a demo, one with
+            // no verified contact, a deleted one) is closed to crawlers but for its home page,
+            // where they can still read that noindex. The demo schedules, re-seeded every hour,
+            // were the largest single share of crawler traffic. A subdomain that names no
+            // schedule keeps the ordinary body.
+            $role = $label !== null ? Role::where('subdomain', $label)->first() : null;
+            $closed = $role !== null && ! $role->isIndexableHost();
+
             $content = "User-agent: *\n"
+                .($closed ? "Allow: /$\nDisallow: /\n" : '')
                 .collect(self::ROBOTS_TENANT_RETURN_PATHS)
                     ->merge(self::ROBOTS_SECRET_PATHS)
+                    ->merge(self::ROBOTS_TENANT_CRAWL_TRAPS)
                     ->map(fn ($path) => 'Disallow: '.$path."\n")
                     ->implode('')
                 ."\nSitemap: ".sitemap_url()."\n";

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Services\DemoService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +54,9 @@ class RobotsTxtTest extends TestCase
      * "feedback", and the other two never reach their pages.
      */
     private const APP_SECRET_PATHS = ['/feedback/', '/schedule-transfer/', '/user/unsubscribe'];
+
+    /** A schedule's own host: event calendar files and the calendar's month arrows. */
+    private const CRAWL_TRAPS = ['/*/*/ical$', '/*?month=', '/*&month=', '/*/POLL_HASH$'];
 
     /** A selfhost schedule's promo clicks and return pages, one segment under its name. */
     private const SELFHOST_SCHEDULE_PATHS = [
@@ -310,6 +314,7 @@ class RobotsTxtTest extends TestCase
             '/gift-cards/cancel/',
             '/gift-cards/payment/',
             ...self::SECRET_PATHS,
+            ...self::CRAWL_TRAPS,
         ], $disallows);
 
         // The return prefixes, never the words alone: an event slugged "checkout" before such
@@ -474,5 +479,58 @@ class RobotsTxtTest extends TestCase
         // Without these the loop can pass by reading nothing.
         $this->assertGreaterThanOrEqual(15, $secret, 'fixture: the secret-bearing routes were found');
         $this->assertGreaterThanOrEqual(6, $appointment, 'fixture: the /appointment/ routes were found');
+    }
+
+    /**
+     * The crawl traps on a schedule's host: an event's calendar file (one per date) and the
+     * month arrows, which led crawlers to occurrence pages in 2120. The subscription feed, the
+     * schedule's own page, its event pages and their dates stay open. Mutation: drop a rule, or
+     * write the ical rule with one segment, which would close /feed/ical to calendar apps.
+     */
+    public function test_a_tenant_host_closes_its_crawl_traps_and_nothing_a_page_needs(): void
+    {
+        config(['app.hosted' => true]);
+
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $disallows = $this->disallows($this->robots('https://'.$role->subdomain.'.eventschedule.test/robots.txt')->getContent());
+
+        foreach (['/the-show/aBc1/ical', '/the-show/aBc1/2026-12-24/ical', '/?month=4&year=2027', '/?year=2027&month=4', '/?embed=1&month=4&year=2027', '/vote-poll/aBc1/POLL_HASH', '/suggest-poll-option/aBc1/POLL_HASH'] as $path) {
+            $this->assertTrue($this->blocks($disallows, $path), $path);
+        }
+
+        foreach (['/', '/feed/ical', '/the-show/aBc1', '/the-show/aBc1/2026-12-24', '/ical/aBc1', '/the-show/aBc1?lang=he', '/?lang=he'] as $path) {
+            $this->assertFalse($this->blocks($disallows, $path), $path);
+        }
+
+        foreach ($this->eventPaths($role) as $slug => $path) {
+            $this->assertFalse($this->blocks($disallows, $this->onScheduleHost($role, $path)), "the event slugged {$slug}");
+        }
+    }
+
+    /**
+     * A schedule whose every page answers noindex (a demo, an unverified one) is closed but for
+     * its home page, where crawlers can still read the noindex. An indexable schedule, and a
+     * subdomain that names none, are not. Mutation: close every tenant host, or none.
+     */
+    public function test_a_schedule_that_is_never_indexed_is_closed_but_for_its_home_page(): void
+    {
+        config(['app.hosted' => true]);
+
+        $demo = $this->createRole($this->createOwner(), 'venue', ['email' => DemoService::DEMO_EMAIL]);
+        $unverified = $this->createRole($this->createOwner(), 'venue', ['email_verified_at' => null]);
+        $open = $this->createRole($this->createOwner(), 'venue');
+
+        foreach ([$demo, $unverified] as $role) {
+            $body = $this->robots('https://'.$role->subdomain.'.eventschedule.test/robots.txt')->getContent();
+            $this->assertStringContainsString("User-agent: *\nAllow: /$\nDisallow: /\n", $body, $role->subdomain);
+            // The secret paths are still listed for a crawler that reads only Disallow lines.
+            $this->assertContains('/ticket/view/', $this->disallows($body));
+        }
+
+        foreach ([$open->subdomain, 'nosuchschedule'] as $label) {
+            $body = $this->robots('https://'.$label.'.eventschedule.test/robots.txt')->getContent();
+            $this->assertStringNotContainsString('Allow:', $body, $label);
+            $this->assertNotContains('/', $this->disallows($body), $label);
+        }
     }
 }
