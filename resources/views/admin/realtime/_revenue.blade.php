@@ -48,9 +48,6 @@
                         <span class="whitespace-nowrap">ARR <span dir="ltr">+@{{ revenue.trial_arr }}</span></span>
                     </template>
                 </p>
-                {{-- A trial an admin set for months, or one with no card, is not counted above: it
-                     will not turn into a charge on its own (RecurringRevenue::PIPELINE_TRIAL_DAYS). --}}
-                <p v-if="revenue.trials_set_aside > 0" class="mt-1 text-[11px] leading-snug text-gray-500 dark:text-gray-400">@{{ revenue.trials_set_aside_line }}</p>
             </div>
         </div>
 

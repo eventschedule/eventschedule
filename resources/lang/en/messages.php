@@ -6828,7 +6828,6 @@ return [
     'admin_dash_home_page' => 'Home page',
     'admin_dash_consent_note' => 'A first visit to a marketing page is stored only with cookie consent.',
     'admin_dash_in_trial' => 'In trial',
-    'admin_dash_trials_set_aside' => 'Not counted: :count (no card, or a trial set for longer than a month)',
     'admin_dash_if_convert' => 'MRR if they all convert',
     'admin_dash_at_risk' => 'At risk',
     'admin_dash_of_mrr' => ':amount of MRR',

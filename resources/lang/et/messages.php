@@ -6757,7 +6757,6 @@ return [
     'admin_dash_home_page' => 'Avaleht',
     'admin_dash_consent_note' => 'Esimene külastus turunduslehele salvestatakse ainult küpsiste nõusoleku korral.',
     'admin_dash_in_trial' => 'Prooviperioodil',
-    'admin_dash_trials_set_aside' => 'Arvestamata: :count (kaardita või üle kuu pikkune prooviperiood)',
     'admin_dash_if_convert' => 'MRR, kui kõik jäävad',
     'admin_dash_at_risk' => 'Ohus',
     'admin_dash_of_mrr' => ':amount MRR-ist',

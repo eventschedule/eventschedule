@@ -6756,7 +6756,6 @@ return [
     'admin_dash_home_page' => 'الصفحة الرئيسية',
     'admin_dash_consent_note' => 'لا تُحفظ الزيارة الأولى لصفحة تسويقية إلا بموافقة على ملفات تعريف الارتباط.',
     'admin_dash_in_trial' => 'في الفترة التجريبية',
-    'admin_dash_trials_set_aside' => 'غير محتسبة: :count (بلا بطاقة، أو فترة تجريبية محددة لأكثر من شهر)',
     'admin_dash_if_convert' => 'MRR إذا اشتركوا جميعًا',
     'admin_dash_at_risk' => 'معرّض للخطر',
     'admin_dash_of_mrr' => ':amount من MRR',

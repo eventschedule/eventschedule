@@ -6756,7 +6756,6 @@ return [
     'admin_dash_home_page' => 'Startseite',
     'admin_dash_consent_note' => 'Ein erster Besuch auf einer Marketingseite wird nur mit Cookie-Einwilligung gespeichert.',
     'admin_dash_in_trial' => 'In der Testphase',
-    'admin_dash_trials_set_aside' => 'Nicht mitgezählt: :count (ohne Karte oder eine Testphase von mehr als einem Monat)',
     'admin_dash_if_convert' => 'MRR, wenn alle bleiben',
     'admin_dash_at_risk' => 'Gefährdet',
     'admin_dash_of_mrr' => ':amount des MRR',

@@ -6758,7 +6758,6 @@ return [
     'admin_dash_home_page' => 'Главная страница',
     'admin_dash_consent_note' => 'Первое посещение маркетинговой страницы сохраняется только при согласии на файлы cookie.',
     'admin_dash_in_trial' => 'На пробном периоде',
-    'admin_dash_trials_set_aside' => 'Не учтено: :count (без карты или пробный период дольше месяца)',
     'admin_dash_if_convert' => 'MRR, если все останутся',
     'admin_dash_at_risk' => 'Под угрозой',
     'admin_dash_of_mrr' => ':amount от MRR',

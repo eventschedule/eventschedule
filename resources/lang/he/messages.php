@@ -6755,7 +6755,6 @@ return [
     'admin_dash_home_page' => 'דף הבית',
     'admin_dash_consent_note' => 'ביקור ראשון בדף שיווקי נשמר רק בהסכמה לעוגיות.',
     'admin_dash_in_trial' => 'בתקופת ניסיון',
-    'admin_dash_trials_set_aside' => 'לא נספרו: :count (ללא כרטיס, או תקופת ניסיון שנקבעה ליותר מחודש)',
     'admin_dash_if_convert' => 'MRR אם כולם יישארו',
     'admin_dash_at_risk' => 'בסיכון',
     'admin_dash_of_mrr' => ':amount מתוך ה-MRR',

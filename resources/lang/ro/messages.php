@@ -6776,7 +6776,6 @@ return [
     'admin_dash_home_page' => 'Pagina principală',
     'admin_dash_consent_note' => 'Prima vizită pe o pagină de marketing este salvată doar cu acordul pentru cookie-uri.',
     'admin_dash_in_trial' => 'În perioada de probă',
-    'admin_dash_trials_set_aside' => 'Neincluse: :count (fără card sau cu o perioadă de probă mai lungă de o lună)',
     'admin_dash_if_convert' => 'MRR dacă rămân toți',
     'admin_dash_at_risk' => 'În pericol',
     'admin_dash_of_mrr' => ':amount din MRR',

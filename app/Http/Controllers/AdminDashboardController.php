@@ -100,8 +100,6 @@ class AdminDashboardController extends Controller
             // with no card, which will not turn into a charge on its own (RecurringRevenue).
             'trial_pipeline_count' => (int) $totals['trialing_count'] - (int) ($totals['trials_set_aside'] ?? 0),
             'trials_set_aside' => (int) ($totals['trials_set_aside'] ?? 0),
-            // Worded with no plural ("Not counted: 2 (...)"); the page prints it only when there is one.
-            'trials_set_aside_line' => __('messages.admin_dash_trials_set_aside', ['count' => number_format((int) ($totals['trials_set_aside'] ?? 0))]),
             'at_risk_count' => (int) $totals['at_risk_count'],
             'past_due_count' => (int) $totals['past_due_count'],
             'cancelling_count' => (int) $totals['cancelling_count'],

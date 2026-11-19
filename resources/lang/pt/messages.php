@@ -6757,7 +6757,6 @@ return [
     'admin_dash_home_page' => 'Página inicial',
     'admin_dash_consent_note' => 'A primeira visita a uma página de marketing só é guardada com consentimento de cookies.',
     'admin_dash_in_trial' => 'Em teste',
-    'admin_dash_trials_set_aside' => 'Não contados: :count (sem cartão ou com teste de mais de um mês)',
     'admin_dash_if_convert' => 'MRR se todos ficarem',
     'admin_dash_at_risk' => 'Em risco',
     'admin_dash_of_mrr' => ':amount do MRR',

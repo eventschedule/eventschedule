@@ -403,8 +403,7 @@ class RecurringRevenueTest extends TestCase
             ->assertOk()
             ->assertJsonPath('trialing_count', 3)
             ->assertJsonPath('trial_pipeline_count', 1)
-            ->assertJsonPath('trials_set_aside', 2)
-            ->assertJsonPath('trials_set_aside_line', __('messages.admin_dash_trials_set_aside', ['count' => 2]));
+            ->assertJsonPath('trials_set_aside', 2);
     }
 
     /**

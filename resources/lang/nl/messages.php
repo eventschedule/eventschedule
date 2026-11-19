@@ -6758,7 +6758,6 @@ return [
     'admin_dash_home_page' => 'Startpagina',
     'admin_dash_consent_note' => 'Een eerste bezoek aan een marketingpagina wordt alleen met cookietoestemming opgeslagen.',
     'admin_dash_in_trial' => 'In proefperiode',
-    'admin_dash_trials_set_aside' => 'Niet meegeteld: :count (zonder kaart, of een proefperiode van meer dan een maand)',
     'admin_dash_if_convert' => 'MRR als ze allemaal blijven',
     'admin_dash_at_risk' => 'Risico',
     'admin_dash_of_mrr' => ':amount van de MRR',
