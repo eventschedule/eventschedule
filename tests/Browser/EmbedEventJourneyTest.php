@@ -26,8 +26,12 @@ use Tests\DuskTestCase;
  *  - plain: embed.js beside the frame. A click opens the event in the overlay, Escape inside it
  *    closes it, the focus comes back to the calendar, and Get tickets opens the event's page in a
  *    new tab with the form open.
- *  - wrapped: the code inside a frame of the builder's own, as Wix does. The script stands down,
- *    the event opens inside the calendar's frame, and Back returns to the calendar.
+ *  - wrapped: the code inside a frame of the builder's own on ANOTHER origin, as Wix does. The
+ *    script stands down, the event opens inside the calendar's frame, and Back returns to it.
+ *  - reached: the code inside a srcdoc frame of the builder's own, on the site's origin. The
+ *    script draws the overlay on the page above.
+ *  - header: the builder's frame is on another origin and the site's header code carries the
+ *    script too: the overlay opens over the whole page from the calendar it cannot see into.
  */
 class EmbedEventJourneyTest extends DuskTestCase
 {
@@ -226,8 +230,9 @@ class EmbedEventJourneyTest extends DuskTestCase
     {
         [$role] = $this->schedule();
 
-        // What a builder that wraps pasted code does: the code, script and all, in a frame of its own.
-        $inner = $this->hostPage('wrapped-inner', '<!doctype html><html><head><meta charset="utf-8"></head><body>'.$this->calendarCode($role).'</body></html>');
+        // What a builder that wraps pasted code does: the code, script and all, in a frame of its
+        // own, on another origin than the page (here the app's name for the same server).
+        $inner = str_replace($this->host(), $this->app(), $this->hostPage('wrapped-inner', '<!doctype html><html><head><meta charset="utf-8"></head><body>'.$this->calendarCode($role).'</body></html>'));
         $host = $this->hostPage('wrapped', '<!doctype html><html><head><meta charset="utf-8"><title>Host</title></head><body>'
             .'<iframe id="builder" src="'.$inner.'" width="100%" height="900" style="border:0"></iframe>'
             .'</body></html>');
@@ -253,6 +258,88 @@ class EmbedEventJourneyTest extends DuskTestCase
             });
 
             $browser->assertMissing('dialog[data-eventschedule-overlay]');
+        });
+    }
+
+    /** The overlay over the host page, opened from the calendar, closed with its own button. */
+    private function opensOverTheWholePage(Browser $browser, callable $clickInCalendar): void
+    {
+        $clickInCalendar($browser);
+
+        $browser->waitFor('dialog[data-eventschedule-overlay]', 15)
+            ->assertScript('location.hash.indexOf("#es-event=") === 0')
+            ->assertScript('document.documentElement.style.overflow === "hidden"');
+
+        $browser->withinFrame('dialog[data-eventschedule-overlay] iframe', function (Browser $event) {
+            $event->waitFor('[data-embed-heading]', 15)
+                ->assertSee('Lantern Night')
+                ->assertSee('Balcony');
+            $event->keys('[data-embed-heading]', '{escape}');
+        });
+
+        $browser->waitUntilMissing('dialog[data-eventschedule-overlay]', 10)
+            ->assertScript('location.hash === ""')
+            ->assertScript('document.documentElement.style.overflow === ""');
+    }
+
+    public function test_inside_a_builders_frame_on_the_sites_origin_the_event_opens_over_the_page(): void
+    {
+        [$role] = $this->schedule();
+
+        // A srcdoc frame, as a builder that isolates pasted code that way draws it: same origin
+        // as the page, so the script reaches the page above.
+        $host = $this->hostPage('reached', '<!doctype html><html><head><meta charset="utf-8"><title>Host</title></head><body>'
+            .'<h1>Our website</h1>'
+            .'<iframe id="builder" srcdoc="'.e('<!doctype html><html><head><meta charset="utf-8"></head><body>'.$this->calendarCode($role).'</body></html>').'" width="420" height="900" style="border:0"></iframe>'
+            .'</body></html>');
+
+        $this->browse(function (Browser $browser) use ($host) {
+            $browser->visit($host)->waitFor('#builder');
+            $browser->waitUntil('window.EventScheduleEmbed && window.EventScheduleEmbed.reached === true', 15);
+
+            $this->opensOverTheWholePage($browser, function (Browser $browser) {
+                $browser->withinFrame('#builder', function (Browser $builder) {
+                    $builder->withinFrame('#cal', function (Browser $frame) {
+                        $frame->waitForText('Lantern Night', 15)->clickLink('Lantern Night');
+                    });
+                });
+            });
+
+            // The calendar did not navigate: it is still the list.
+            $browser->withinFrame('#builder', function (Browser $builder) {
+                $builder->withinFrame('#cal', function (Browser $frame) {
+                    $frame->assertScript('location.search.indexOf("view=event") === -1');
+                });
+            });
+        });
+    }
+
+    public function test_with_the_script_in_the_sites_header_the_event_opens_over_the_page_from_a_builders_frame(): void
+    {
+        [$role] = $this->schedule();
+
+        // The builder's frame is on another origin (the app's name for the server); the site's
+        // header code carries the script.
+        $inner = str_replace($this->host(), $this->app(), $this->hostPage('header-inner', '<!doctype html><html><head><meta charset="utf-8"></head><body>'.$this->calendarCode($role).'</body></html>'));
+        $host = $this->hostPage('header', '<!doctype html><html><head><meta charset="utf-8"><title>Host</title>'
+            .'<script src="'.$this->app().'/embed.js" async></script></head><body>'
+            .'<h1>Our website</h1>'
+            .'<iframe id="builder" src="'.$inner.'" width="420" height="900" style="border:0"></iframe>'
+            .'</body></html>');
+
+        $this->browse(function (Browser $browser) use ($host) {
+            $browser->visit($host)->waitFor('#builder');
+
+            $this->opensOverTheWholePage($browser, function (Browser $browser) {
+                $browser->withinFrame('#builder', function (Browser $builder) {
+                    $builder->waitFor('#cal')
+                        ->assertScript('window.EventScheduleEmbed && window.EventScheduleEmbed.wrapped === true && window.EventScheduleEmbed.reached === false');
+                    $builder->withinFrame('#cal', function (Browser $frame) {
+                        $frame->waitUntil('window.esEmbedFrame && window.esEmbedFrame.greeted', 15)
+                            ->waitForText('Lantern Night', 15)->clickLink('Lantern Night');
+                    });
+                });
+            });
         });
     }
 }

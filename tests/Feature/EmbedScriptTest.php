@@ -44,7 +44,7 @@ class EmbedScriptTest extends TestCase
 
         // The window's own resize event, to size the overlay, is the one "resize" in it.
         $this->assertSame(1, substr_count($script, 'resize'), 'never the old message type');
-        $this->assertStringContainsString("window.addEventListener('resize', size);", $script);
+        $this->assertStringContainsString("host.addEventListener('resize', size);", $script);
         $this->assertStringContainsString('data.type.indexOf(PREFIX) !== 0', $script);
         $this->assertStringContainsString('e.source === overlay.iframe.contentWindow', $script);
         $this->assertStringContainsString('var iframe = frameFor(e.source);', $script);
@@ -99,6 +99,15 @@ class EmbedScriptTest extends TestCase
                 f.setAttribute('src', src);
                 return f;
             });
+            // A builder's frame: an iframe whose document this page can read (same origin), or not.
+            (opts.builderFrames || []).forEach(function (inner) {
+                var f = makeEl('iframe');
+                f.setAttribute('srcdoc', '');
+                if (inner) {
+                    f.contentDocument = inner;
+                }
+                iframes.push(f);
+            });
 
             var location = {
                 href: 'https://organizer.example/events',
@@ -117,7 +126,9 @@ class EmbedScriptTest extends TestCase
                 getElementsByTagName: function (t) { return t === 'iframe' ? iframes : []; },
                 createElement: makeEl,
                 addEventListener: function () {},
+                currentScript: opts.script ? { src: opts.script } : null,
             };
+            iframes.forEach(function (f) { f.ownerDocument = doc; });
 
             var win = {
                 location: location,
@@ -131,11 +142,18 @@ class EmbedScriptTest extends TestCase
                 matchMedia: function () { return { matches: false }; },
             };
             win.self = win;
+            win.document = doc;
             win.top = opts.wrapped ? {} : win;
+            if (opts.parent) {
+                win.parent = opts.parent;
+                win.top = opts.parent.top;
+            }
 
             function CE(type, init) { this.type = type; this.detail = init && init.detail; }
 
-            new Function('window', 'document', 'CustomEvent', src)(win, doc, CE);
+            if (!opts.noScript) {
+                new Function('window', 'document', 'CustomEvent', src)(win, doc, CE);
+            }
 
             return {
                 win: win,
@@ -273,9 +291,83 @@ class EmbedScriptTest extends TestCase
         p2.fire({ type: 'eventschedule:ready', v: 1 }, SELF, p2.iframes[0].contentWindow);
         out.deepLinkOwnPath = p2.dialog() ? p2.dialog().children[0].getAttribute('src') : null;
 
-        // Pasted into a builder's own frame: it leaves the calendars to themselves.
+        // Pasted into a builder's own frame on another origin: it leaves the calendars to themselves.
         var w = env({ wrapped: true, iframes: [CAL + '/sub?embed=true&events=onsite'] });
         out.wrapped = { flag: w.win.EventScheduleEmbed.wrapped, listening: !!(w.listeners.message || []).length, greeted: w.posted.length };
+
+        // Pasted into a builder's frame on the site's own origin (a srcdoc frame, as Hostinger's
+        // can be): the overlay is drawn on the page above, and the calendar inside is found.
+        var top = env({ noScript: true });
+        var inner = env({ noScript: true, iframes: [CAL + '/sub?embed=true&events=onsite'] });
+        top.iframes.push((function () { var f = { tagName: 'IFRAME', attrs: { srcdoc: '' }, getAttribute: function (k) { return this.attrs[k] || null; }, contentDocument: inner.doc, contentWindow: inner.win }; return f; })());
+        inner.win.parent = top.win;
+        inner.win.top = top.win;
+        new Function('window', 'document', 'CustomEvent', src)(inner.win, inner.doc, function (type, init) { this.type = type; this.detail = init && init.detail; });
+        var calWin = inner.iframes[0].contentWindow;
+        out.reached = {
+            flag: inner.win.EventScheduleEmbed.reached,
+            onTop: top.win.EventScheduleEmbed === inner.win.EventScheduleEmbed,
+            listeningAbove: !!(top.listeners.message || []).length,
+            greetedOnLoad: inner.posted.length,
+        };
+        inner.posted.length = 0;
+        top.fire({ type: 'eventschedule:ready', v: 1 }, CAL, calWin);
+        out.reached.helloOnReady = inner.posted.map(function (p) { return [p.message.type, p.origin]; });
+        top.fire({ type: 'eventschedule:height', height: 1500 }, CAL, calWin);
+        out.reached.height = inner.iframes[0].style.height || null;
+        // The calendar answers the window whose script greeted it: this frame, not the page.
+        out.reached.listeningInside = !!(inner.listeners.message || []).length;
+        inner.fire({ type: 'eventschedule:open', path: GOOD, name: 'Lantern Night' }, CAL, calWin);
+        out.reached.dialogAbove = top.dialog() ? top.dialog().children[0].getAttribute('src') : null;
+        out.reached.dialogInside = !!inner.dialog();
+        out.reached.hash = top.win.location.hash;
+
+        // The script in the site's header, with the calendar inside a builder's frame on another
+        // origin that it cannot look into: the calendar is a window with no element, trusted only
+        // from this install's origin (app.example.com serves the script, sub.example.com the
+        // calendar), never sized.
+        var nest = env({ script: 'https://app.example.com/embed.js', builderFrames: [null] });
+        var nestedCal = { postMessage: function (message, origin) { nest.posted.push({ message: message, origin: origin }); } };
+        var strangerWin = { postMessage: function (message, origin) { nest.posted.push({ message: message, origin: origin }); } };
+        nest.fire({ type: 'eventschedule:ready', v: 1, path: '/sub' }, 'https://evil.example', strangerWin);
+        nest.fire({ type: 'eventschedule:open', path: '/x?embed=true&view=event' }, 'https://evil.example', strangerWin);
+        out.nested = { strangerGreeted: nest.posted.length, strangerDialog: !!nest.dialog() };
+        nest.fire({ type: 'eventschedule:open', path: GOOD }, CAL, nestedCal);
+        out.nested.beforeReady = !!nest.dialog();
+        nest.fire({ type: 'eventschedule:ready', v: 1, path: '/sub' }, CAL, nestedCal);
+        out.nested.hello = nest.posted.map(function (p) { return [p.message.type, p.origin]; });
+        nest.fire({ type: 'eventschedule:open', path: GOOD, name: 'Lantern Night' }, CAL, nestedCal);
+        out.nested.dialog = nest.dialog() ? nest.dialog().children[0].getAttribute('src') : null;
+        nest.posted.length = 0;
+        nest.fire({ type: 'eventschedule:close' }, CAL, nest.dialog().children[0].contentWindow);
+        out.nested.closedTold = nest.posted.map(function (p) { return [p.message.type, p.origin]; });
+        // A deep link waits for the nested calendar, and is held to the path it said it is at.
+        var nh = env({ script: 'https://app.example.com/embed.js', builderFrames: [null], hash: '#es-event=' + encodeURIComponent(GOOD) });
+        out.nested.deepLinkBefore = !!nh.dialog();
+        nh.fire({ type: 'eventschedule:ready', v: 1, path: '/sub' }, CAL, { postMessage: function () {} });
+        out.nested.deepLink = nh.dialog() ? nh.dialog().children[0].getAttribute('src') : null;
+        var no = env({ script: 'https://app.example.com/embed.js', builderFrames: [null], hash: '#es-event=' + encodeURIComponent(GOOD) });
+        no.fire({ type: 'eventschedule:ready', v: 1, path: '/other' }, CAL, { postMessage: function () {} });
+        out.nested.deepLinkOtherPath = !!no.dialog();
+        // With no script address (an inline copy), nothing it cannot see is trusted.
+        var bare = env({ builderFrames: [null] });
+        bare.fire({ type: 'eventschedule:ready', v: 1 }, CAL, { postMessage: function () {} });
+        out.nested.noScriptAddress = bare.posted.length;
+
+        var O = env({ script: 'https://app.example.com/embed.js' }).win.EventScheduleEmbed.isOwnOrigin;
+        var S = env({ script: 'https://events.example.org/embed.js' }).win.EventScheduleEmbed.isOwnOrigin;
+        out.ownOrigin = {
+            subdomain: O('https://sub.example.com'),
+            apex: O('https://example.com'),
+            itself: O('https://app.example.com'),
+            lookalike: O('https://sub.evilexample.com'),
+            suffix: O('https://example.com.evil.example'),
+            otherScheme: O('http://sub.example.com'),
+            otherPort: O('https://sub.example.com:8443'),
+            selfhostItself: S('https://events.example.org'),
+            selfhostSibling: S('https://shop.example.org'),
+            nullOrigin: O('null'),
+        };
 
         process.stdout.write(JSON.stringify(out));
         JS;
@@ -352,5 +444,44 @@ class EmbedScriptTest extends TestCase
         $this->assertFalse($out['deepLinkElsewhere']);
 
         $this->assertSame(['flag' => true, 'listening' => false, 'greeted' => 0], $out['wrapped']);
+
+        $this->assertSame([
+            'flag' => true,
+            'onTop' => true,
+            'listeningAbove' => true,
+            'greetedOnLoad' => 1,
+            'helloOnReady' => [['eventschedule:hello', 'https://sub.example.com']],
+            'height' => null,
+            'listeningInside' => true,
+            'dialogAbove' => $good,
+            'dialogInside' => false,
+            'hash' => '#es-event='.rawurlencode('/sub/lantern-night/abc?embed=true&view=event&events=onsite'),
+        ], $out['reached'], 'a builder frame on the site\'s origin: the overlay is drawn on the page');
+
+        $this->assertSame([
+            'strangerGreeted' => 0,
+            'strangerDialog' => false,
+            'beforeReady' => false,
+            'hello' => [['eventschedule:hello', 'https://sub.example.com']],
+            'dialog' => $good,
+            'closedTold' => [['eventschedule:closed', 'https://sub.example.com']],
+            'deepLinkBefore' => false,
+            'deepLink' => $good,
+            'deepLinkOtherPath' => false,
+            'noScriptAddress' => 0,
+        ], $out['nested'], 'a calendar inside a builder frame on another origin, with the script in the site header');
+
+        $this->assertSame([
+            'subdomain' => true,
+            'apex' => true,
+            'itself' => true,
+            'lookalike' => false,
+            'suffix' => false,
+            'otherScheme' => false,
+            'otherPort' => false,
+            'selfhostItself' => true,
+            'selfhostSibling' => false,
+            'nullOrigin' => false,
+        ], $out['ownOrigin']);
     }
 }

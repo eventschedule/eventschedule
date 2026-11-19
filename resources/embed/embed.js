@@ -6,6 +6,11 @@
  * fitted to the calendar's height. Without it the calendar still works: it shows the event inside
  * its own frame.
  *
+ * A site builder that puts pasted code in a frame of its own: where that frame is on the site's
+ * own origin, this script draws on the page above it. Where it is not, add this script to the
+ * site's header code as well (the builder's "custom code" setting), and it opens the events of the
+ * calendars inside that frame over the whole page.
+ *
  * It listens for messages from the calendars on this page and does nothing else. Every address it
  * opens is a path on the calendar's own site, checked before use; it reads nothing of this page
  * and sends nothing anywhere but to those calendars.
@@ -27,6 +32,16 @@
 
     var api = { version: VERSION };
     window.EventScheduleEmbed = api;
+
+    // Where this script came from, read while it runs: a calendar the script cannot see the frame
+    // of (inside a builder's frame from another origin) is trusted only from this install.
+    var ownOrigin = null;
+    try {
+        var me = document.currentScript;
+        if (me && me.src) {
+            ownOrigin = new URL(me.src, window.location.href).origin;
+        }
+    } catch (e) {}
 
     function isHttpOrigin(origin) {
         return typeof origin === 'string' && /^https?:\/\/[^\/?#\s\\@]+$/i.test(origin);
@@ -63,18 +78,107 @@
 
     api.resolve = resolve;
 
-    // Pasted into a builder that puts the code inside a frame of its own (Wix, and others): an
-    // overlay could only fill that small frame, so the calendars are left to show events inside
-    // themselves, which they do when nobody greets them.
+    // An origin of this install: the script's own, and on an install whose script is served from
+    // app.<domain> (eventschedule.com), that domain and its subdomains, where the calendars are.
+    function isOwnOrigin(origin) {
+        if (!ownOrigin || !isHttpOrigin(origin)) {
+            return false;
+        }
+        if (origin === ownOrigin) {
+            return true;
+        }
+        var a;
+        var b;
+        try {
+            a = new URL(origin);
+            b = new URL(ownOrigin);
+        } catch (e) {
+            return false;
+        }
+        if (a.protocol !== b.protocol || a.port !== b.port || b.hostname.indexOf('app.') !== 0) {
+            return false;
+        }
+        var base = b.hostname.slice(4);
+
+        return base.indexOf('.') !== -1 && (a.hostname === base || a.hostname.slice(-(base.length + 1)) === '.' + base);
+    }
+
+    api.isOwnOrigin = isOwnOrigin;
+
+    // The window the overlay is drawn in: the highest one on this page's own origin. That is
+    // this window, or, when a builder put the code in a frame of its own on the site's origin
+    // (a srcdoc frame), the site's page above it.
+    function reachableTop() {
+        var win = window;
+        try {
+            while (win !== win.top) {
+                var up = win.parent;
+                // Throws for a window on another origin.
+                if (!up || !up.document) {
+                    break;
+                }
+                win = up;
+            }
+        } catch (e) {}
+
+        return win;
+    }
+
     var wrapped;
     try {
         wrapped = window.self !== window.top;
     } catch (e) {
         wrapped = true;
     }
+    var host = reachableTop();
+    var hostIsTop;
+    try {
+        hostIsTop = host === window.top;
+    } catch (e) {
+        hostIsTop = false;
+    }
     api.wrapped = wrapped;
-    if (wrapped) {
+    api.reached = wrapped && hostIsTop;
+
+    // Inside a builder's frame on another origin (Wix, and others): an overlay could only fill
+    // that small frame, so the calendars are left to show events inside themselves, which they do
+    // when nobody greets them, unless this script is also on the page above (in its header code).
+    if (!hostIsTop) {
         return;
+    }
+    if (host !== window) {
+        // The page above has its own copy: that one opens the events.
+        if (host.EventScheduleEmbed && host.EventScheduleEmbed.version) {
+            return;
+        }
+        host.EventScheduleEmbed = api;
+    }
+    var hostDoc = host.document;
+
+    // A message's source is the window whose script sent it. Drawn on the page above a builder's
+    // frame, what this script sends would come from that frame, which the overlay (a frame of
+    // the page) does not answer to; sent through a function made in the page's own realm, it
+    // comes from the page. Where the page forbids making one (a strict policy), it is sent as it
+    // is: the overlay still opens and its close button works, and the calendar answers this frame,
+    // which listens too (below).
+    var hostPost = null;
+    if (host !== window) {
+        try {
+            hostPost = new host.Function('w', 'm', 'o', 'w.postMessage(m, o);');
+        } catch (e) {
+            hostPost = null;
+        }
+    }
+
+    function send(win, message, origin) {
+        if (hostPost) {
+            try {
+                hostPost(win, message, origin);
+
+                return;
+            } catch (e) {}
+        }
+        win.postMessage(message, origin);
     }
 
     function text(value, max) {
@@ -83,10 +187,35 @@
 
     function srcOf(iframe) {
         try {
-            return new URL(iframe.getAttribute('src') || '', window.location.href);
+            var base = (iframe.ownerDocument && iframe.ownerDocument.baseURI) || host.location.href;
+
+            return new URL(iframe.getAttribute('src') || '', base);
         } catch (e) {
             return null;
         }
+    }
+
+    // Every frame on the page, and inside the frames on this page's own origin (a builder's
+    // srcdoc frame), a few levels down.
+    function allFrames(doc, depth, out) {
+        doc = doc || hostDoc;
+        depth = depth || 0;
+        out = out || [];
+        var list = doc.getElementsByTagName('iframe');
+        for (var i = 0; i < list.length; i++) {
+            out.push(list[i]);
+            if (depth < 3) {
+                var inner = null;
+                try {
+                    inner = list[i].contentDocument;
+                } catch (e) {}
+                if (inner && inner.getElementsByTagName) {
+                    allFrames(inner, depth + 1, out);
+                }
+            }
+        }
+
+        return out;
     }
 
     // A calendar (or an event widget) of ours: an embed address. Never the signup form, whose own
@@ -105,6 +234,10 @@
     // the very origin its src names. An embed address alone proves nothing (other services put
     // embed=true in theirs too), and a message's origin must be the frame's own, so a frame that
     // has wandered elsewhere, or anything else on the page, is never acted on.
+    //
+    // A calendar whose frame this page cannot see (inside a builder's frame on another origin) is
+    // a window with no element: trusted only from this install's own origin (isOwnOrigin()), and
+    // never sized, since the builder's frame around it has a size of its own.
     var trusted = [];
 
     function originOf(iframe) {
@@ -113,15 +246,21 @@
         return src ? src.origin : null;
     }
 
-    function isTrusted(iframe, origin) {
-        return trusted.indexOf(iframe) !== -1 && origin === originOf(iframe);
+    function trustedEntry(win, origin) {
+        for (var i = 0; i < trusted.length; i++) {
+            if (trusted[i].win === win && trusted[i].origin === origin) {
+                return trusted[i];
+            }
+        }
+
+        return null;
     }
 
     function frameFor(source) {
         if (!source) {
             return null;
         }
-        var frames = document.getElementsByTagName('iframe');
+        var frames = allFrames();
         for (var i = 0; i < frames.length; i++) {
             if (frames[i].contentWindow === source) {
                 return frames[i];
@@ -144,19 +283,20 @@
             }
         }
         try {
-            win.postMessage(message, origin);
+            send(win, message, origin);
         } catch (e) {}
     }
 
     function emit(name, detail) {
         var event;
+        var Ctor = host.CustomEvent || CustomEvent;
         try {
-            event = new CustomEvent(name, { detail: detail });
+            event = new Ctor(name, { detail: detail });
         } catch (e) {
-            event = document.createEvent('CustomEvent');
+            event = hostDoc.createEvent('CustomEvent');
             event.initCustomEvent(name, false, false, detail);
         }
-        window.dispatchEvent(event);
+        host.dispatchEvent(event);
     }
 
     function css(el, styles) {
@@ -175,9 +315,9 @@
         }
         backdropAdded = true;
         try {
-            var style = document.createElement('style');
+            var style = hostDoc.createElement('style');
             style.textContent = 'dialog[data-eventschedule-overlay]::backdrop{background:rgba(15,23,42,.6)}';
-            (document.head || document.documentElement).appendChild(style);
+            (hostDoc.head || hostDoc.documentElement).appendChild(style);
         } catch (e) {}
     }
 
@@ -185,8 +325,8 @@
     var savedOverflow = null;
 
     function lockScroll() {
-        var html = document.documentElement;
-        var body = document.body;
+        var html = hostDoc.documentElement;
+        var body = hostDoc.body;
         savedOverflow = [html.style.overflow, body ? body.style.overflow : ''];
         html.style.overflow = 'hidden';
         if (body) {
@@ -198,9 +338,9 @@
         if (!savedOverflow) {
             return;
         }
-        document.documentElement.style.overflow = savedOverflow[0];
-        if (document.body) {
-            document.body.style.overflow = savedOverflow[1];
+        hostDoc.documentElement.style.overflow = savedOverflow[0];
+        if (hostDoc.body) {
+            hostDoc.body.style.overflow = savedOverflow[1];
         }
         savedOverflow = null;
     }
@@ -211,7 +351,7 @@
         if (!overlay) {
             return;
         }
-        var phone = window.matchMedia && window.matchMedia('(max-width: 639px)').matches;
+        var phone = host.matchMedia && host.matchMedia('(max-width: 639px)').matches;
         var d = overlay.dialog;
         if (phone) {
             css(d, { width: '100vw', 'max-width': '100vw', height: '100vh', 'max-height': '100vh', margin: '0', 'border-radius': '0' });
@@ -225,13 +365,13 @@
     }
 
     function ourHash() {
-        var hash = window.location.hash || '';
+        var hash = host.location.hash || '';
 
         return hash.indexOf(HASH) === 0 ? hash.slice(HASH.length) : null;
     }
 
     function shareUrl(path) {
-        return window.location.href.split('#')[0] + HASH + encodeURIComponent(path);
+        return host.location.href.split('#')[0] + HASH + encodeURIComponent(path);
     }
 
     function label(dialog, closeButton, frame, meta) {
@@ -257,6 +397,8 @@
         }
     }
 
+    // opener: the calendar it was opened from, { iframe, win } (iframe null for one this page
+    // cannot see), or null.
     function open(url, meta, opener, openerOrigin, fromHash) {
         if (overlay) {
             close(true);
@@ -267,16 +409,16 @@
         var path = target.pathname + target.search;
         var dark = meta.theme === 'dark';
 
-        var dialog = document.createElement('dialog');
+        var dialog = hostDoc.createElement('dialog');
         dialog.setAttribute('data-eventschedule-overlay', '');
         css(dialog, { padding: '0', border: '0', overflow: 'hidden', background: dark ? '#111827' : '#ffffff', 'box-shadow': '0 25px 50px -12px rgba(0,0,0,.45)', 'box-sizing': 'border-box', 'z-index': '2147483647' });
 
-        var frame = document.createElement('iframe');
+        var frame = hostDoc.createElement('iframe');
         frame.setAttribute('allow', 'clipboard-write; web-share; fullscreen');
         css(frame, { border: '0', width: '100%', height: '100%', display: 'block' });
 
         // On the host's side of the frame, so it is there and works whatever the event page does.
-        var closeButton = document.createElement('button');
+        var closeButton = hostDoc.createElement('button');
         closeButton.type = 'button';
         closeButton.setAttribute('aria-label', 'Close');
         closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
@@ -328,7 +470,7 @@
             greet(frame.contentWindow, overlay.origin, { overlay: true, share: overlay.share });
         });
 
-        (document.body || document.documentElement).appendChild(dialog);
+        (hostDoc.body || hostDoc.documentElement).appendChild(dialog);
         size();
         lockScroll();
         frame.setAttribute('src', url);
@@ -348,7 +490,7 @@
         // and the browser's Back closes the overlay.
         if (!fromHash) {
             overlay.pushedHash = true;
-            window.location.hash = HASH.slice(1) + encodeURIComponent(path);
+            host.location.hash = HASH.slice(1) + encodeURIComponent(path);
         }
 
         emit(PREFIX + 'event-opened', { url: url, name: text(meta.name, 200) });
@@ -370,21 +512,23 @@
 
         if (!fromHistory && ourHash() !== null) {
             if (was.pushedHash) {
-                window.history.back();
+                host.history.back();
             } else {
                 try {
-                    window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+                    host.history.replaceState(host.history.state, '', host.location.pathname + host.location.search);
                 } catch (e) {}
             }
         }
 
         if (was.opener) {
-            try {
-                was.opener.focus();
-            } catch (e) {}
-            if (was.opener.contentWindow && was.openerOrigin) {
+            if (was.opener.iframe) {
                 try {
-                    was.opener.contentWindow.postMessage({ type: PREFIX + 'closed', v: VERSION }, was.openerOrigin);
+                    was.opener.iframe.focus();
+                } catch (e) {}
+            }
+            if (was.opener.win && was.openerOrigin) {
+                try {
+                    send(was.opener.win, { type: PREFIX + 'closed', v: VERSION }, was.openerOrigin);
                 } catch (e) {}
             }
         }
@@ -408,7 +552,7 @@
         }
     }
 
-    window.addEventListener('message', function (e) {
+    function onMessage(e) {
         var data = e.data;
         if (!data || typeof data !== 'object' || typeof data.type !== 'string' || data.type.indexOf(PREFIX) !== 0) {
             return;
@@ -435,14 +579,21 @@
             return;
         }
 
-        // A calendar on this page, from its own origin.
+        // A calendar on this page, from its own origin; or one inside a builder's frame this page
+        // cannot look into, from this install's origin.
         var iframe = frameFor(e.source);
-        if (!iframe || !isCalendarFrame(iframe) || e.origin !== originOf(iframe)) {
+        if (iframe) {
+            if (!isCalendarFrame(iframe) || e.origin !== originOf(iframe)) {
+                return;
+            }
+        } else if (!e.source || !isOwnOrigin(e.origin)) {
             return;
         }
         if (type === 'ready') {
-            if (trusted.indexOf(iframe) === -1) {
-                trusted.push(iframe);
+            if (!trustedEntry(e.source, e.origin)) {
+                var src = iframe ? srcOf(iframe) : null;
+                var path = src ? src.pathname : (typeof data.path === 'string' && data.path.charAt(0) === '/' ? data.path : null);
+                trusted.push({ iframe: iframe, win: e.source, origin: e.origin, path: path });
             }
             greet(e.source, e.origin);
             // A link to this page with an event open waits for a calendar it can trust.
@@ -450,23 +601,34 @@
 
             return;
         }
-        if (!isTrusted(iframe, e.origin)) {
+        var entry = trustedEntry(e.source, e.origin);
+        if (!entry) {
             return;
         }
         if (type === 'height') {
+            // Only a frame on this page itself: one inside a builder's frame keeps the size it was
+            // given, and the builder's frame around it keeps its own.
             var height = Number(data.height);
-            if (isFinite(height) && height >= 50 && height <= 50000) {
+            if (iframe && (!iframe.ownerDocument || iframe.ownerDocument === hostDoc) && isFinite(height) && height >= 50 && height <= 50000) {
                 iframe.style.height = Math.ceil(height) + 'px';
             }
         } else if (type === 'open') {
             var url = resolve(data.path, e.origin);
             if (url) {
-                open(url, data, iframe, e.origin, false);
+                open(url, data, { iframe: iframe, win: e.source }, e.origin, false);
             }
         } else if (type === 'checkout') {
             emit(PREFIX + 'checkout', { url: checkoutUrl(data, e.origin), form: data.form === 'rsvp' ? 'rsvp' : 'tickets' });
         }
-    });
+    }
+
+    // Heard on the page the overlay is drawn on, and, when that is the page above a builder's
+    // frame, in this frame too: a message's source is the window whose script SENT it, so a
+    // calendar greeted by this script takes this frame for its host and answers it here.
+    host.addEventListener('message', onMessage);
+    if (host !== window) {
+        window.addEventListener('message', onMessage);
+    }
 
     function openFromHash() {
         var raw = ourHash();
@@ -483,25 +645,27 @@
         // a path (example.com/{schedule}), only an event under that schedule's path: the address
         // is anybody's to write.
         for (var i = 0; i < trusted.length; i++) {
-            var frame = trusted[i];
-            var src = srcOf(frame);
-            if (!src || !isCalendarFrame(frame)) {
+            var entry = trusted[i];
+            if (entry.iframe && (!isCalendarFrame(entry.iframe) || originOf(entry.iframe) !== entry.origin)) {
                 continue;
             }
-            var base = src.pathname.replace(/\/+$/, '');
+            if (typeof entry.path !== 'string') {
+                continue;
+            }
+            var base = entry.path.replace(/\/+$/, '');
             if (base !== '' && path.indexOf(base + '/') !== 0) {
                 continue;
             }
-            var url = resolve(path, src.origin);
+            var url = resolve(path, entry.origin);
             if (url) {
-                open(url, {}, frame, src.origin, true);
+                open(url, {}, { iframe: entry.iframe, win: entry.win }, entry.origin, true);
 
                 return;
             }
         }
     }
 
-    window.addEventListener('hashchange', function () {
+    host.addEventListener('hashchange', function () {
         if (overlay) {
             // Back, past the address the overlay added: the overlay goes with it.
             if (ourHash() === null) {
@@ -513,10 +677,10 @@
         openFromHash();
     });
 
-    window.addEventListener('resize', size);
+    host.addEventListener('resize', size);
 
     function init() {
-        var frames = document.getElementsByTagName('iframe');
+        var frames = allFrames();
         for (var i = 0; i < frames.length; i++) {
             if (isCalendarFrame(frames[i])) {
                 greet(frames[i].contentWindow, srcOf(frames[i]).origin);

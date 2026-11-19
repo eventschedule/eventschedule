@@ -418,7 +418,7 @@ class EmbedEventViewTest extends TestCase
 
         // Once greeted, the frame says who it is again, to the host now known: embed.js trusts a
         // frame only after that, from its own origin (EmbedScriptTest).
-        $this->assertStringContainsString('window.parent.postMessage(readyMessage(), frame.host);', $frame);
+        $this->assertStringContainsString('hostWindow.postMessage(readyMessage(), frame.host);', $frame);
     }
 
     /**
@@ -447,14 +447,22 @@ class EmbedEventViewTest extends TestCase
         $this->assertStringContainsString('data-embed-root', $widget);
     }
 
-    /** The frame's half of the protocol listens to the window that framed it, and only then talks. */
+    /**
+     * The frame's half of the protocol listens to the window that framed it, or the top page above
+     * a builder's frame (Hostinger, Wix), and only then talks, to the one that greeted it.
+     */
     public function test_the_frame_script_hears_only_its_parent_and_answers_only_its_host(): void
     {
         $frame = File::get(resource_path('views/partials/embed-frame.blade.php'));
 
         $this->assertStringContainsString('if (window.parent === window) {', $frame, 'inert outside a frame');
-        $this->assertStringContainsString('e.source !== window.parent', $frame);
-        $this->assertStringContainsString('window.parent.postMessage(message, frame.host);', $frame);
+        $this->assertStringContainsString('(e.source !== window.parent && e.source !== window.top)', $frame);
+        $this->assertStringContainsString('hostWindow = e.source;', $frame);
+        $this->assertStringContainsString('hostWindow.postMessage(message, frame.host);', $frame);
+        $this->assertStringContainsString('e.source === hostWindow && e.origin === frame.host', $frame, 'closed is heard only from the host');
+        // Announced to the top page too when a builder's frame is in between, until greeted.
+        $this->assertStringContainsString("window.top.postMessage(readyMessage(), '*');", $frame);
+        $this->assertStringContainsString('if (frame.greeted) {', $frame);
         $this->assertStringContainsString("frame.share = (typeof e.data.share === 'string'", $frame);
         $this->assertStringContainsString('/^https?:\\/\\//i.test(e.data.share)', $frame);
         // Nothing it sends is the old type the signup form's code resizes ANY frame on.

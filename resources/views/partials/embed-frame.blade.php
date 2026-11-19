@@ -17,7 +17,13 @@
        host -> frame   eventschedule:closed    the overlay this calendar opened was closed
 
      Once greeted, everything goes to that host's origin and nowhere else, and only messages from
-     the window that framed us, from that origin, are heard. The host's share address is used for
+     the window that greeted us, from that origin, are heard.
+
+     The host is the window that framed us, or the TOP page when a site builder wraps the pasted
+     code in a frame of its own (Hostinger, Wix): there embed.js runs in the top page, from the
+     site's own header code or reached from inside the builder's frame, so ready is said to the
+     top page too, and said again for a few seconds, because the top page's script may arrive
+     after this frame has loaded. The host's share address is used for
      one thing, the overlay's Share button, and only as an http(s) address. --}}
 <script {!! nonce_attr() !!}>
 (function () {
@@ -26,6 +32,9 @@
     }
 
     var frame = window.esEmbedFrame = { greeted: false, overlay: false, host: null, share: null };
+    // The window that greeted us: the parent, or the top page above a builder's frame.
+    var hostWindow = null;
+    var nested = window.top !== window.parent;
     var waiting = [];
 
     // What the host may label its overlay with when it opened one from its own address (#es-event=)
@@ -38,6 +47,9 @@
             v: 1,
             lang: document.documentElement.getAttribute('lang') || '',
             dir: document.documentElement.getAttribute('dir') === 'rtl' ? 'rtl' : 'ltr',
+            // Where this calendar is: a top page that cannot see our iframe element (a builder's
+            // frame from another origin is in between) checks a deep link's path against it.
+            path: window.location.pathname,
             name: heading ? heading.textContent.replace(/\s+/g, ' ').trim().slice(0, 200) : '',
             close: @json(__('messages.close')),
         };
@@ -63,7 +75,7 @@
             }
         }
         try {
-            window.parent.postMessage(message, frame.host);
+            hostWindow.postMessage(message, frame.host);
             return true;
         } catch (e) {
             return false;
@@ -71,7 +83,7 @@
     };
 
     window.addEventListener('message', function (e) {
-        if (e.source !== window.parent || !e.data || typeof e.data !== 'object') {
+        if ((e.source !== window.parent && e.source !== window.top) || !e.data || typeof e.data !== 'object') {
             return;
         }
         if (typeof e.origin !== 'string' || !/^https?:\/\/[^\/]+$/i.test(e.origin)) {
@@ -82,6 +94,7 @@
                 return;
             }
             frame.host = e.origin;
+            hostWindow = e.source;
             frame.overlay = e.data.overlay === true;
             frame.share = (typeof e.data.share === 'string' && e.data.share.length < 4096 && /^https?:\/\//i.test(e.data.share)) ? e.data.share : null;
             frame.greeted = true;
@@ -89,13 +102,13 @@
             // Said again, to the host now known, and before anything else: embed.js acts only on
             // a frame that announced itself from its own origin, and a host whose script loaded
             // after this page's first announcement greeted it without having heard it.
-            try { window.parent.postMessage(readyMessage(), frame.host); } catch (err) {}
+            try { hostWindow.postMessage(readyMessage(), frame.host); } catch (err) {}
             var queued = waiting;
             waiting = [];
             queued.forEach(function (fn) {
                 try { fn(); } catch (err) {}
             });
-        } else if (e.data.type === 'eventschedule:closed' && frame.greeted && e.origin === frame.host) {
+        } else if (e.data.type === 'eventschedule:closed' && frame.greeted && e.source === hostWindow && e.origin === frame.host) {
             document.dispatchEvent(new CustomEvent('es-embed:closed'));
         }
     });
@@ -239,8 +252,22 @@
         }
     });
 
-    try {
-        window.parent.postMessage(readyMessage(), '*');
-    } catch (e) {}
+    function announce() {
+        if (frame.greeted) {
+            return;
+        }
+        try {
+            window.parent.postMessage(readyMessage(), '*');
+        } catch (e) {}
+        if (nested) {
+            try {
+                window.top.postMessage(readyMessage(), '*');
+            } catch (e) {}
+        }
+    }
+    announce();
+    if (nested) {
+        [1000, 3000, 8000].forEach(function (ms) { setTimeout(announce, ms); });
+    }
 })();
 </script>
