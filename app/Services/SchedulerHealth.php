@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ScheduledTaskRun;
+use Illuminate\Console\Scheduling\Event;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -49,6 +50,7 @@ class SchedulerHealth
         'app-setup-demo' => 'hosted',
         'app-sync-domain-statuses' => 'hosted',
         'app-send-subscription-reminders' => 'hosted',
+        'app-record-mrr' => 'hosted',
         'send-onboarding-nudges' => 'hosted',
         'app-send-activation-nudges' => 'hosted',
         'app-send-owner-digests' => 'hosted',
@@ -345,7 +347,7 @@ class SchedulerHealth
      * closures are not invoked, appendOutputTo only stores a string, and the one invokable entry
      * has no constructor.
      *
-     * @return \Illuminate\Console\Scheduling\Event[]
+     * @return Event[]
      */
     public static function events(): array
     {

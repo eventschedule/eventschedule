@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Services\DemoService;
+use App\Utils\MoneyUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -103,9 +104,9 @@ class AdminRevenueTest extends TestCase
         $html = $response->getContent();
         $this->assertStringContainsString(e(plan_price(35)), $html);
         $this->assertStringNotContainsString(e(plan_price(175)), $html);
-        $this->assertSame(1, substr_count($html, e(\App\Utils\MoneyUtils::format(40, 'EUR'))), 'euros named once, beside the total');
-        $this->assertSame(1, substr_count($html, e(\App\Utils\MoneyUtils::format(100, 'ILS'))));
-        $this->assertSame(1, substr_count($html, e(\App\Utils\MoneyUtils::format(15, 'EUR'))), 'and the unpaid euros beside what is pending');
+        $this->assertSame(1, substr_count($html, e(MoneyUtils::format(40, 'EUR'))), 'euros named once, beside the total');
+        $this->assertSame(1, substr_count($html, e(MoneyUtils::format(100, 'ILS'))));
+        $this->assertSame(1, substr_count($html, e(MoneyUtils::format(15, 'EUR'))), 'and the unpaid euros beside what is pending');
     }
 
     /**
@@ -122,8 +123,10 @@ class AdminRevenueTest extends TestCase
             'services.stripe_platform.enterprise_price_monthly_amount' => '21',
         ]);
 
+        // A card on file, as checkout always leaves: a trial without one is not counted in what the
+        // trials would add (RecurringRevenue::breakdown()).
         $subscribe = function (string $price, string $status, array $attrs = []) {
-            $role = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'free', 'plan_expires' => null, 'plan_source' => null]);
+            $role = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'free', 'plan_expires' => null, 'plan_source' => null, 'pm_type' => 'card']);
             $role->subscriptions()->create(array_merge([
                 'type' => 'default', 'stripe_id' => 'sub_'.Str::random(14), 'stripe_status' => $status,
                 'stripe_price' => $price, 'quantity' => 1,

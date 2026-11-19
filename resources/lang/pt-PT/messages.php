@@ -974,7 +974,6 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'subscription_trial_ending_manage' => 'Gerir o seu plano',
     'subscription_trial_cancelled_ending_body' => 'Cancelou o seu teste gratuito da agenda ":schedule" (plano :plan), por isso termina a :date e não lhe será cobrado nada.',
     'subscription_trial_cancelled_ending_continue' => 'Mudou de ideias? Retome-o nas definições do seu plano antes dessa data para manter o plano :plan. Será cobrado :amount no seu cartão registado quando o teste terminar.',
-    'subscription_trial_cancelled_ending_manage' => 'Manter :plan',
     'subscription_trial_ending_body_no_card' => 'O seu teste gratuito da agenda ":schedule" (plano :plan) termina a :date. Para continuar no plano :plan, adicione um método de pagamento antes do fim do teste.',
     'subscription_trial_ending_continue_no_card' => 'Sem um método de pagamento registado, a sua agenda passará para o plano gratuito quando o teste terminar.',
     'subscription_trial_ending_cancel_no_card' => 'Adicione um método de pagamento nas definições do seu plano para manter as suas funcionalidades :plan.',
