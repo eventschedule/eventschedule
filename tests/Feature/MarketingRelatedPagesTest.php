@@ -44,6 +44,10 @@ class MarketingRelatedPagesTest extends TestCase
     {
         parent::setUp();
 
+        // With an Azure app, so /outlook-calendar is a page (it redirects without one) and the
+        // strips keep their Outlook cards (components/marketing/related-pages).
+        config(['services.microsoft.client_id' => 'test-client', 'services.microsoft.client_secret' => 'test-secret']);
+
         LegalDocument::create([
             'type' => LegalDocument::COOKIES,
             'content' => 'We use cookies to keep you signed in.',

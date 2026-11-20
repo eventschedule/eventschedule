@@ -24,6 +24,17 @@ class MarketingKeywordMapTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * With an Azure app set (outlook_sync_enabled()), so every Outlook surface is on the page:
+     * without one the install shows none, which OutlookPanelsHiddenTest and the
+     * UnconfiguredFeatureClaims tests hold.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.microsoft.client_id' => 'test-client', 'services.microsoft.client_secret' => 'test-secret']);
+    }
+
     /** Listed pages that deliberately have no keyword, with the reason. */
     private const NOT_MAPPED = [
         '/blog' => 'lives on its own host, and every post targets its own query',

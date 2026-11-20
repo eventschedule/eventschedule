@@ -30,6 +30,17 @@ class HomepageTest extends TestCase
 {
     use CreatesScheduleData, RefreshDatabase;
 
+    /**
+     * With an Azure app set (outlook_sync_enabled()), so every Outlook surface is on the page:
+     * without one the install shows none, which OutlookPanelsHiddenTest and the
+     * UnconfiguredFeatureClaims tests hold.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.microsoft.client_id' => 'test-client', 'services.microsoft.client_secret' => 'test-secret']);
+    }
+
     private function html(): string
     {
         return $this->get('/')->assertOk()->getContent();
