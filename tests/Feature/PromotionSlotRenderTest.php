@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Services\PromotionBillingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -120,7 +121,7 @@ class PromotionSlotRenderTest extends TestCase
     /**
      * Checkout, booking and submission pages share the guest layout but must never carry ads.
      */
-    #[\PHPUnit\Framework\Attributes\DataProvider('nonMonetizedRouteProvider')]
+    #[DataProvider('nonMonetizedRouteProvider')]
     public function test_transactional_guest_pages_never_carry_the_slot(string $routeName): void
     {
         $this->hosted();

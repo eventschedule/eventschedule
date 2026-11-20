@@ -89,7 +89,7 @@ class AppGuestLayout extends Component
          * meta description. Null on every page that did not look them up, which then keeps the
          * bare schedule name as its title.
          *
-         * @var \Illuminate\Support\Collection<int, array{event: Event, date: string}>|null
+         * @var Collection<int, array{event: Event, date: string}>|null
          */
         public ?Collection $upcoming = null,
         /**

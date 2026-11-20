@@ -5,8 +5,11 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\Newsletter;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\NewsletterService;
+use App\Utils\GuestTheme;
 use App\Utils\MoneyUtils;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -178,7 +181,7 @@ class MonthGridTest extends TestCase
         $this->assertTrue($rows->has('Sent To Another Schedule'), 'what the person made is still on their dashboard');
         $this->assertFalse($rows['Sent To Another Schedule']['can_edit'], 'but nothing offers to edit it from there');
         $this->assertNull($rows['Sent To Another Schedule']['edit_url']);
-        $this->get(route('event.edit_admin', ['hash' => \App\Utils\UrlUtils::encodeId($sent->id)]))->assertForbidden();
+        $this->get(route('event.edit_admin', ['hash' => UrlUtils::encodeId($sent->id)]))->assertForbidden();
     }
 
     /**
@@ -446,7 +449,7 @@ class MonthGridTest extends TestCase
         $longAgo = now()->subYears(2)->format('Y-m-d');
         $swallows = 'Dana <b>Bold</b> <!--<script';
         foreach ([$swallows, 'Sam Rivers', 'Sam Rivers'] as $name) {
-            $member = \App\Models\User::factory()->create(['name' => $name, 'email_verified_at' => now()]);
+            $member = User::factory()->create(['name' => $name, 'email_verified_at' => now()]);
             $this->role->users()->attach($member->id, ['level' => 'admin', 'dates_unavailable' => json_encode([$longAgo, $day])]);
         }
 
@@ -467,7 +470,7 @@ class MonthGridTest extends TestCase
 
         // A plus on a day for whoever may add an event; a viewer may not.
         $this->assertSame(1, preg_match('/const CAN = \{.*"add":"[^"]*add-event\?date=MONTH-DATE"\};/', $schedule));
-        $viewer = \App\Models\User::factory()->create(['email_verified_at' => now()]);
+        $viewer = User::factory()->create(['email_verified_at' => now()]);
         $this->role->users()->attach($viewer->id, ['level' => 'viewer']);
         $asViewer = $this->actingAs($viewer)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
         $this->assertSame(1, preg_match('/const CAN = \{.*"add":null\};/', $asViewer));
@@ -530,7 +533,7 @@ class MonthGridTest extends TestCase
         // And the page does carry the theme's tokens on body, with a grey moved to ink.
         $this->role->forceFill(['accent_color' => '#888888'])->saveQuietly();
         $html = $this->get('/'.$this->role->subdomain.'?layout=calendar')->assertOk()->getContent();
-        $theme = \App\Utils\GuestTheme::fromAccent('#888888');
+        $theme = GuestTheme::fromAccent('#888888');
         $this->assertNotSame('#888888', strtolower($theme->fill), 'the theme does not fill with a mid grey');
         $this->assertStringContainsString('body { --es-accent: '.$theme->fill.';', $html);
         $this->assertStringContainsString('style="--es-accent: #888888;', $html, 'the wrapper still carries the accent as typed');
@@ -632,7 +635,7 @@ class MonthGridTest extends TestCase
         // A viewer marks their own days (CLAUDE.md: a viewer "marks their own days"), so the script,
         // the form and the Save button are given to one, and every day is a button that says its
         // state, their own marks drawn.
-        $viewer = \App\Models\User::factory()->create(['email_verified_at' => now()]);
+        $viewer = User::factory()->create(['email_verified_at' => now()]);
         $this->role->users()->attach($viewer->id, ['level' => 'viewer', 'dates_unavailable' => json_encode([now()->format('Y-m-d')])]);
         $asViewer = $this->actingAs($viewer)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent();
         $this->assertSame(1, substr_count($asViewer, 'data-availability-grid'));
