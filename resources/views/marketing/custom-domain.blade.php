@@ -566,7 +566,10 @@
             ],
             [
                 'q' => 'Are ads ever shown on my custom domain?',
-                'a' => 'No. Paid plans never carry ads at all, and requests that arrive on a custom domain are excluded from ads regardless of plan, so a lapsed subscription cannot put someone else\'s advert on a domain you own.',
+                // The plan split is said only where the install runs ads (config('ads.enabled'), env only).
+                'a' => config('ads.enabled')
+                    ? 'No. Paid plans never carry ads at all, and requests that arrive on a custom domain are excluded from ads regardless of plan, so a lapsed subscription cannot put someone else\'s advert on a domain you own.'
+                    : 'No. Nothing is advertised on your custom domain, or on any other schedule page here, so nobody else\'s advert can appear on a domain you own.',
             ],
             [
                 'q' => 'Should I use a subdomain or my root domain for my events page?',
@@ -1299,7 +1302,7 @@
                     <div class="es-tilt-inner es-plate-card relative flex h-full flex-col overflow-hidden p-7">
                         <p class="es-plate-tag mb-4">No ads</p>
                         <h3 class="es-plate-ink mb-3 text-xl font-bold">Nobody else advertises here</h3>
-                        <p class="es-plate-muted mb-6 leading-relaxed">Paid plans carry no ads at all, and a request on a custom domain is excluded from ads whatever the plan says.</p>
+                        <p class="es-plate-muted mb-6 leading-relaxed">{{ config('ads.enabled') ? 'Paid plans carry no ads at all, and a request on a custom domain is excluded from ads whatever the plan says.' : 'Your domain shows your schedule and nothing else: no ads, and no promotions for anybody else\'s events.' }}</p>
                         <div class="mt-auto flex flex-wrap gap-2">
                             <span class="es-plate-chip">No AdSense</span>
                             <span class="es-plate-chip">No promotions</span>

@@ -1327,7 +1327,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for bars and pubs?',
-                'a' => 'Yes. Sharing your calendar, running recurring weekly nights, splitting them into sub-schedules, taking free registrations, and syncing with Google, Outlook or CalDAV are all free forever. Newsletters are free too, at 10 emails a month, counted per recipient rather than per send. Free registration has no monthly ceiling on it, and a ticket is scanned at the door on any plan. Putting a price on a ticket is what the Pro plan is for at '.plan_price($proMonthly).' a month, along with the live check-in dashboard and the higher 100-a-month newsletter limit.',
+                'a' => 'Yes. Sharing your calendar, running recurring weekly nights, splitting them into sub-schedules, taking free registrations, and syncing with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').' are all free forever. Newsletters are free too, at 10 emails a month, counted per recipient rather than per send. Free registration has no monthly ceiling on it, and a ticket is scanned at the door on any plan. Putting a price on a ticket is what the Pro plan is for at '.plan_price($proMonthly).' a month, along with the live check-in dashboard and the higher 100-a-month newsletter limit.',
             ],
             [
                 'q' => 'Can I set up a night that repeats every week?',
@@ -1599,7 +1599,7 @@
                     </div>
 
                     <p class="ba-menu-small">
-                        Free also covers unlimited events, two-way Google, Outlook and CalDAV sync, an embeddable calendar for the site you already have, and a calendar feed regulars can subscribe to, so the week sits in their own phone and a moved night updates itself.
+                        Free also covers unlimited events, two-way {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} sync, an embeddable calendar for the site you already have, and a calendar feed regulars can subscribe to, so the week sits in their own phone and a moved night updates itself.
                     </p>
                 </div>
             </div>
@@ -1868,7 +1868,7 @@
                                 Choose Events graphic from your schedule's Actions menu and it builds one image from the flyers of the nights coming up, with a caption listing them, rather than you rebuilding the same quiz-night square every week. A night with no flyer is left out of the image.
                             </p>
                             <p>
-                                Every night also syncs two ways with Google, Outlook and CalDAV, so what is on the wall and what is in your phone cannot drift apart.
+                                Every night also syncs two ways with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}, so what is on the wall and what is in your phone cannot drift apart.
                             </p>
                         </div>
 

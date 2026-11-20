@@ -150,7 +150,7 @@
                 'price' => plan_price(0),
                 'note' => 'forever',
                 'lede' => 'Everything you need to get the room listed, taking requests and filling its first nights.',
-                'items' => ['Public event calendar', 'Booking request inbox', 'Unlimited free RSVPs, QR scanning included', 'Sub-schedules for each room', 'Recurring nights', 'Google, Outlook and CalDAV sync', 'Analytics'],
+                'items' => ['Public event calendar', 'Booking request inbox', 'Unlimited free RSVPs, QR scanning included', 'Sub-schedules for each room', 'Recurring nights', outlook_sync_enabled() ? 'Google, Outlook and CalDAV sync' : 'Google and CalDAV sync', 'Analytics'],
                 'featured' => false,
             ],
             [
@@ -823,7 +823,7 @@
         $behindTheScenes = [
             [
                 'title' => 'Two-way calendar sync',
-                'desc' => 'Google, Outlook and CalDAV. Change it anywhere, it changes everywhere.',
+                'desc' => (outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').'. Change it anywhere, it changes everywhere.',
                 'href' => marketing_url('/features/calendar-sync'),
                 'text' => 'text-sky-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />',
@@ -1077,7 +1077,7 @@
                     </div>
                     <div data-reveal="panel" class="flex-1 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-500/30 dark:bg-emerald-500/10 lg:p-7">
                         <h3 class="mb-2 text-lg font-bold text-emerald-800 dark:text-emerald-300">Where times do close by themselves</h3>
-                        <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">On the private-hire booking page. A bookable time disappears when anything on your schedule overlaps it: your events, recurring nights included, events synced in from Google, Outlook or CalDAV, other bookings, and requests still waiting for your answer. It works across the whole schedule rather than room by room, so a show in the main room also closes the back room's hire times. An all-day entry with no start time does not close anything, so save a closure as a timed event.</p>
+                        <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">On the private-hire booking page. A bookable time disappears when anything on your schedule overlaps it: your events, recurring nights included, events synced in from {{ outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV' }}, other bookings, and requests still waiting for your answer. It works across the whole schedule rather than room by room, so a show in the main room also closes the back room's hire times. An all-day entry with no start time does not close anything, so save a closure as a timed event.</p>
                         <p class="mt-3 text-sm"><x-link href="{{ marketing_url('/docs/appointments') }}#weekly-hours">What blocks a bookable time</x-link></p>
                     </div>
                 </div>

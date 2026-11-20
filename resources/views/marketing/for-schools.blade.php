@@ -618,7 +618,7 @@
                 <div class="mt-4 grid gap-6 md:grid-cols-2">
                     <p class="es-chalk-muted text-sm">
                         <span class="es-chalk-ink font-semibold">The office's own calendar shows a club once.</span>
-                        When the schedule syncs to the school's Google or Outlook calendar, a recurring
+                        When the schedule syncs to the school's {{ outlook_sync_enabled() ? 'Google or Outlook calendar' : 'Google calendar' }}, a recurring
                         club arrives there as a single entry on its first date, not as a weekly
                         appointment. That is fine for the office. Families who want every date should
                         subscribe to the live feed instead, which lists each date for the next 90 days.
@@ -661,7 +661,7 @@
                 @foreach ([
                     ['Subscribe once', 'Families add the school\'s live calendar feed from the Stay up to date panel on its page, or from the Add to Calendar menu of any event that takes no sign-ups. New and moved dates then arrive on their own, and it costs them no email address.'],
                     ['On the school website', 'Paste one embed code into the page you already have, and the calendar there is always the current one. No web team needed for a date change.'],
-                    ['In the office calendar', 'Two-way sync with Google Calendar, Outlook and CalDAV, so the calendar staff already use and the public one stay the same.'],
+                    ['In the office calendar', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google Calendar, Outlook and CalDAV' : 'Google Calendar and CalDAV').', so the calendar staff already use and the public one stay the same.'],
                     ['In the family\'s language', 'Nominate one other language and event names and descriptions are translated for you, with a switch on the public page.'],
                 ] as [$t, $d])
                     <div class="es-chalk-card es-chalk-hover flex flex-col p-6" data-reveal>

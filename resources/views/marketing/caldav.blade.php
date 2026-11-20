@@ -581,13 +581,20 @@
             ['Anything conformant', 'PROPFIND /', 'Radicale, or any other server that answers the standard requests. There is no vendor-specific code here to wait for, which is why this list is not a list of partners.', false],
         ];
 
+        // Outlook / Microsoft 365 sync is described only where the install has an Azure app
+        // (outlook_sync_enabled(), env only, so safe in edge-cached HTML). That Outlook is not a
+        // CalDAV server is a fact about Outlook and stays either way.
+        $outlookLive = outlook_sync_enabled();
+
         // Terminology: the four ways an event reaches a calendar, because the
         // searcher usually arrives unsure which of them they need.
         $ways = [
             ['A download', '.ics file', 'One event, copied once. Change the event afterwards and the copy in the calendar stays as it was. This is what an Add to Calendar button hands over.', false],
             ['A subscription', 'iCal feed', 'An address the calendar app re-reads on its own timetable, which in some apps means every few hours. Read-only for the reader, and no password changes hands. Made for an audience.', false],
             ['A shared calendar', 'CalDAV', 'Read and write, signed in with a username and password, on a server you or your provider runs. Every app connected to it sees the same copy. Made for your own calendar.', true],
-            ['A vendor API', 'Google, Microsoft', 'Google Calendar and Microsoft 365 have interfaces of their own, signed in through the provider. Event Schedule reaches them on separate Google Calendar and Outlook Calendar rows.', false],
+            $outlookLive
+                ? ['A vendor API', 'Google, Microsoft', 'Google Calendar and Microsoft 365 have interfaces of their own, signed in through the provider. Event Schedule reaches them on separate Google Calendar and Outlook Calendar rows.', false]
+                : ['A vendor API', 'Google', 'Google Calendar has an interface of its own, signed in through Google. Event Schedule reaches it on a separate Google Calendar row.', false],
         ];
 
         // Which apps speak CalDAV. General, well-known facts about each app, and
@@ -598,7 +605,7 @@
             ['Android', 'Not built in. The DAVx5 app syncs a CalDAV account into the phone\'s own calendar.', 'Point DAVx5 and Event Schedule at the same server. The events appear in whichever calendar app the phone uses.'],
             ['Fastmail, Nextcloud, Radicale, Baïkal', 'Yes. These are servers: they hold the calendar.', 'Connect to them directly, with the address and password from the table below.'],
             ['Google Calendar', 'It has a CalDAV interface, but it signs in through Google\'s own OAuth, not with a password.', 'Use the Google Calendar row instead. It is free on every plan as well.'],
-            ['Outlook and Microsoft 365', 'No. Microsoft\'s calendars are reached through Microsoft Graph.', 'Use the Outlook Calendar row instead. Also free on every plan.'],
+            ['Outlook and Microsoft 365', 'No. Microsoft\'s calendars are reached through Microsoft Graph.', $outlookLive ? 'Use the Outlook Calendar row instead. Also free on every plan.' : 'Outlook can still subscribe to your schedule\'s calendar feed, read-only.'],
         ];
 
         // Connecting: what each provider wants in the three fields.
@@ -715,7 +722,10 @@
         $related = [
             ['/features/calendar-sync', 'Calendar sync', 'The whole two-way story, across every provider.'],
             ['/google-calendar', 'Google Calendar', 'The same idea on a proprietary API, with webhooks.'],
-            ['/outlook-calendar', 'Outlook Calendar', 'Microsoft 365 and Teams, through Graph.'],
+            // The Outlook card where the install syncs with it; otherwise another true neighbour keeps the row of four.
+            $outlookLive
+                ? ['/outlook-calendar', 'Outlook Calendar', 'Microsoft 365 and Teams, through Graph.']
+                : ['/features/embed-calendar', 'Embed calendar', 'The same schedule, inside your own website.'],
             ['/open-source', 'Open source', 'Read the client that speaks all of this.'],
         ];
 
@@ -742,7 +752,7 @@
             ],
             [
                 'q' => 'What happens if I delete an event in my calendar app?',
-                'a' => 'Nothing here. Reading from a calendar adds and updates events; it does not remove them. Deleting an event in Event Schedule does remove it from your calendar, and so does turning it back into a draft, but a deletion made in your calendar client leaves the event on your schedule for you to deal with. Google Calendar and Outlook sync do offer a policy for that; CalDAV does not.',
+                'a' => 'Nothing here. Reading from a calendar adds and updates events; it does not remove them. Deleting an event in Event Schedule does remove it from your calendar, and so does turning it back into a draft, but a deletion made in your calendar client leaves the event on your schedule for you to deal with. '.($outlookLive ? 'Google Calendar and Outlook sync do offer a policy for that' : 'Google Calendar sync does offer a policy for that').'; CalDAV does not.',
             ],
             [
                 'q' => 'Do recurring events send every date to my calendar?',
@@ -766,7 +776,7 @@
             ],
             [
                 'q' => 'Can I use CalDAV with Google Calendar or Outlook?',
-                'a' => 'Not usefully. Google Calendar does have a CalDAV interface, but it signs in through Google\'s OAuth rather than a password, and Outlook and Microsoft 365 calendars are not CalDAV servers at all. Event Schedule connects to both through their own APIs instead, on the Google Calendar and Outlook Calendar rows under Integrations, and both are free on every plan.',
+                'a' => 'Not usefully. Google Calendar does have a CalDAV interface, but it signs in through Google\'s OAuth rather than a password, and Outlook and Microsoft 365 calendars are not CalDAV servers at all. '.($outlookLive ? 'Event Schedule connects to both through their own APIs instead, on the Google Calendar and Outlook Calendar rows under Integrations, and both are free on every plan.' : 'Event Schedule connects to Google Calendar through its own API instead, on the Google Calendar row under Integrations, free on every plan.'),
             ],
             [
                 'q' => 'How do I see CalDAV events on an Android phone?',
@@ -1238,7 +1248,7 @@
 
             <div class="es-proto-caution mt-6 p-6" data-reveal="panel">
                 <p class="es-proto-tag mb-3">Worth knowing</p>
-                <p class="es-proto-muted text-sm leading-relaxed">Fifteen minutes is the interval for reading, not for writing. If you need a change on your public page the second you make it, make it here: outbound is part of the save. And if you want near-instant traffic in the other direction, Google Calendar and Outlook can push to us, because their APIs have somewhere to push to.</p>
+                <p class="es-proto-muted text-sm leading-relaxed">Fifteen minutes is the interval for reading, not for writing. If you need a change on your public page the second you make it, make it here: outbound is part of the save. And if you want near-instant traffic in the other direction, {{ $outlookLive ? 'Google Calendar and Outlook can push to us, because their APIs have somewhere to push to.' : 'Google Calendar can push to us, because its API has somewhere to push to.' }}</p>
             </div>
         </div>
     </section>
@@ -1414,7 +1424,7 @@
             <ul class="es-proto-list es-proto-muted mx-auto mt-8 max-w-3xl space-y-2 text-sm" data-reveal>
                 <li>Everything on this page is on the free plan. Zero platform fees on ticket sales is a separate promise, and also true.</li>
                 <li>Your audience does not need CalDAV or an account: your pages offer Subscribe to all events from your schedule, a live iCal feed Apple Calendar or any other calendar app can subscribe to, and every event has its own iCal download, per date. <a href="{{ marketing_url('/docs/sharing#calendar-feeds') }}" class="es-proto-link font-medium hover:underline">How calendar subscriptions work</a></li>
-                <li>CalDAV, Google Calendar and Outlook are independent connections. Running one does not rule out the others.</li>
+                <li>{{ $outlookLive ? 'CalDAV, Google Calendar and Outlook are independent connections. Running one does not rule out the others.' : 'CalDAV and Google Calendar are independent connections. Running one does not rule out the other.' }}</li>
             </ul>
         </div>
     </section>

@@ -968,7 +968,7 @@
             ]] : []),
             [
                 'q' => 'How long does it take to set up?',
-                'a' => 'Signing up, naming the schedule and publishing a first event takes a few minutes, and none of it needs technical skill. Add events by hand, or paste the details and let AI pull out the date, time and venue: AI parsing is on the free plan too, with a daily cap. If your events are already in Google Calendar, Outlook or any CalDAV calendar, connect it and they sync both ways instead of being retyped.',
+                'a' => 'Signing up, naming the schedule and publishing a first event takes a few minutes, and none of it needs technical skill. Add events by hand, or paste the details and let AI pull out the date, time and venue: AI parsing is on the free plan too, with a daily cap. If your events are already in '.(outlook_sync_enabled() ? 'Google Calendar, Outlook or any CalDAV calendar' : 'Google Calendar or any CalDAV calendar').', connect it and they sync both ways instead of being retyped.',
             ],
             [
                 'q' => 'Can I see how one of these looks on a bigger screen?',

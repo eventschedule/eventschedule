@@ -1192,7 +1192,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for hotels and resorts?',
-                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity and a waitlist when they fill, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Putting a price on an experience is where Pro starts, at '.plan_price($proMonthly).' a month, and it brings the rest of the desk kit with it: promo codes, passes, a waitlist for sold-out tickets, add-ons and the live check-in dashboard. Event Schedule charges zero platform fees on sales, on every plan.',
+                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity and a waitlist when they fill, the embeddable calendar, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Putting a price on an experience is where Pro starts, at '.plan_price($proMonthly).' a month, and it brings the rest of the desk kit with it: promo codes, passes, a waitlist for sold-out tickets, add-ons and the live check-in dashboard. Event Schedule charges zero platform fees on sales, on every plan.',
             ],
             [
                 'q' => 'How do guests find out what is on during their stay?',
@@ -1220,7 +1220,7 @@
             ],
             [
                 'q' => 'Can more than one person keep the card up to date?',
-                'a' => 'The free plan is one team member, and multiple team members are an Enterprise feature capped at five. In between, calendar sync does a lot of the work: the schedule syncs two ways with Google, Outlook or CalDAV, so whoever runs the programme can work in the calendar they already have and the public page follows. Booking requests are free as well, so an act or a planner can ask about a date and it waits for you to accept it before it appears anywhere. On Enterprise, a viewer login is read-only and sees no sales, but can scan tickets at the door. And before whoever set the schedule up moves on, they can hand it to a colleague, on any plan.',
+                'a' => 'The free plan is one team member, and multiple team members are an Enterprise feature capped at five. In between, calendar sync does a lot of the work: the schedule syncs two ways with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').', so whoever runs the programme can work in the calendar they already have and the public page follows. Booking requests are free as well, so an act or a planner can ask about a date and it waits for you to accept it before it appears anywhere. On Enterprise, a viewer login is read-only and sees no sales, but can scan tickets at the door. And before whoever set the schedule up moves on, they can hand it to a colleague, on any plan.',
             ],
             [
                 'q' => 'What should a hotel guest activity calendar include?',
@@ -1228,7 +1228,7 @@
             ],
             [
                 'q' => 'How do we show the activity programme on in-room TVs or a lobby screen?',
-                'a' => 'If the screen or your TV system can show a web page, point it at your schedule\'s address with ?embed=true&layout=list on the end, adding &dark=true for a dark screen. That shows the coming activities as a list starting from today, with no header, footer or ads. The page is current each time it loads, so set the player to reload it every few minutes. There is no app to install on the screen, and the same address can carry &lang= for a second language channel.',
+                'a' => 'If the screen or your TV system can show a web page, point it at your schedule\'s address with ?embed=true&layout=list on the end, adding &dark=true for a dark screen. That shows the coming activities as a list starting from today, with no header'.(config('ads.enabled') ? ', footer or ads' : ' or footer').'. The page is current each time it loads, so set the player to reload it every few minutes. There is no app to install on the screen, and the same address can carry &lang= for a second language channel.',
             ],
             [
                 'q' => 'Can guests book spa treatments with it?',
@@ -1638,7 +1638,7 @@
                         </thead>
                         <tbody role="rowgroup">
                             @foreach ([
-                                ['Lobby screen or a TV channel', 'Many signage players and hotel TV systems can show a web page', 'Your schedule\'s address with ?embed=true&layout=list on the end, and &dark=true for a dark screen. The list starts from today and carries no header, footer or ads.', 'The page is current each time it loads, so set the player to reload it every few minutes. Nothing on our side refreshes a screen that is left open.'],
+                                ['Lobby screen or a TV channel', 'Many signage players and hotel TV systems can show a web page', 'Your schedule\'s address with ?embed=true&layout=list on the end, and &dark=true for a dark screen. The list starts from today and carries no header'.(config('ads.enabled') ? ', footer or ads' : ' or footer').'.', 'The page is current each time it loads, so set the player to reload it every few minutes. Nothing on our side refreshes a screen that is left open.'],
                                 ['The "What\'s on" page of your website', 'Free on every plan', 'The Iframe Code from Actions, then Embed Schedule. A family page can show only the family strand by embedding that sub-schedule\'s own address.', 'The month grid needs a frame about 768 pixels wide; narrower, it becomes a day-by-day list. The Free plan adds a small "Powered by Event Schedule" line under the frame, which Pro removes.'],
                                 ['The pre-arrival email', 'From your booking system, not from us', 'The plain schedule link, or the strand that suits the booking: the family strand for a room with children, wellness for a spa break.', 'Send it far enough ahead for the bookable things. A guest who reads about the cellar dinner on the day it sells out reads it too late.'],
                                 ['A guest who reads French or German', 'Free on every plan', 'Under Details, Language and time, turn on Offer a second language to visitors and pick the language. Event names and descriptions are translated automatically, and the page gets a button to switch.', 'One second language per schedule, from the thirteen supported. Allow up to an hour for translations to appear, and have a native speaker on the team read them before the season starts. For an embed, add &lang= with that language\'s code.'],
@@ -1955,7 +1955,7 @@
                                         ['An enquiry waiting on you', 'Free', 'Booking requests arrive through the page and wait until you accept one, and the schedule can email you when a new one is sitting there. Nothing appears publicly first.', ''],
                                         ['Who is waiting for the dinner', 'Free', 'Publish the New Year dinner before tickets open, switch on the "Notify me" card, and guests can ask to be told when they do. How many asked shows on the event\'s Tickets panel, and nowhere public.', 'dinner'],
                                         ['A date taken out', 'Free', 'The exception for the Wednesday the pool is drained. It removes the date rather than annotating it.', 'date'],
-                                        ['Your own calendar', 'Free', 'Two-way sync with Google, Outlook or CalDAV, so whoever runs the programme works where they already work.', 'calendar'],
+                                        ['Your own calendar', 'Free', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').', so whoever runs the programme works where they already work.', 'calendar'],
                                         ['Tonight\'s running count', 'Pro', 'A scan at the door reads the ticket and marks it used on every plan. The live count and the breakdown by ticket type are the Pro half, and staff-side only.', ''],
                                     ] as [$dTitle, $dPlan, $dDesc, $dKey])
                                         <li @if ($dKey) data-k="{{ $dKey }}" @endif>

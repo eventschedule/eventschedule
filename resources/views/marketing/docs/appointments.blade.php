@@ -197,7 +197,7 @@
         <h3 class="doc-subheading">What else blocks a slot</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Open times also respect what is already on your schedule. Anything that overlaps a slot removes it:</p>
         <ul class="doc-list mb-6">
-            <li>Ordinary events on your schedule, including recurring ones, and events synced in from <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Google Calendar, Outlook or CalDAV</a>.</li>
+            <li>Ordinary events on your schedule, including recurring ones, and events synced in from <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">{{ outlook_sync_offered() ? 'Google Calendar, Outlook or CalDAV' : 'Google Calendar or CalDAV' }}</a>.</li>
             <li>Bookings for your other appointment types, plus their buffers.</li>
             <li>Requests still waiting on your approval. A pending request holds its time until you accept or decline it.</li>
         </ul>
@@ -536,7 +536,7 @@
             </div>
             <div class="doc-field">
                 <h4>A booking is not a ticket</h4>
-                <p>It carries no QR code and offers no Add to Google Wallet button. The confirmation email, its calendar invite and the private link are what the guest keeps.</p>
+                <p>It carries no QR code and offers no wallet button. The confirmation email, its calendar invite and the private link are what the guest keeps.</p>
             </div>
             <div class="doc-field">
                 <h4>You can email past guests</h4>

@@ -3401,7 +3401,7 @@
                                         <span class="hp-ico bg-sky-100 dark:bg-sky-500/20"><svg class="text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['calendar'] !!}</svg></span>
                                         <div>
                                             <h5>Calendar Sync</h5>
-                                            <p>Two-way sync with Google Calendar, Microsoft 365 and any CalDAV server. Edit an event in either place and the other follows.</p>
+                                            <p>Two-way sync with Google Calendar{{ outlook_sync_enabled() ? ', Microsoft 365' : '' }} and any CalDAV server. Edit an event in either place and the other follows.</p>
                                             <a href="{{ marketing_url('/features/calendar-sync') }}" class="hp-more">More about calendar sync {!! $hpArrow !!}</a>
                                         </div>
                                     </div>
@@ -4237,13 +4237,15 @@
         // The names and links in the two groups the sentence beside them speaks of: the calendars,
         // and where the money goes. PayPal joined Stripe on 2026-10-22: the sentence named both and
         // the diagram showed one.
+        // Outlook is on the calendar side only where this install can sync with it
+        // (outlook_sync_enabled(): an Azure app is set up). An odd count spans its last tile.
         $hpPlugs = [
-            'in' => [
+            'in' => array_values(array_filter([
                 ['name' => 'google', 'label' => 'Google Calendar', 'href' => marketing_url('/google-calendar')],
-                ['name' => 'outlook', 'label' => 'Outlook', 'href' => marketing_url('/features/calendar-sync')],
+                outlook_sync_enabled() ? ['name' => 'outlook', 'label' => 'Outlook', 'href' => marketing_url('/features/calendar-sync')] : null,
                 ['name' => 'apple', 'label' => 'Apple Calendar', 'href' => marketing_url('/features/calendar-sync')],
                 ['name' => 'caldav', 'label' => 'CalDAV', 'href' => marketing_url('/caldav')],
-            ],
+            ])),
             'out' => [
                 ['name' => 'stripe', 'label' => 'Stripe', 'href' => marketing_url('/stripe')],
                 ['name' => 'paypal', 'label' => 'PayPal', 'href' => route('marketing.paypal')],
@@ -4346,7 +4348,7 @@
             // Eventbrite's own fee here: the calculator above prints it from TicketFees.
             ['q' => 'How is Event Schedule different from Eventbrite?', 'a' => 'Eventbrite adds its own fee to every paid ticket. Event Schedule takes no platform fee, and payments go straight to your own Stripe or PayPal account. Your events live on a calendar of your own that people can follow, with newsletters and appointment booking built in, and the code is open source, so you can run it on your own server. On Pro you can bring your events over from Eventbrite with the built-in import.'],
             ['q' => 'Can I refund a ticket?', 'a' => 'Yes, in full or in part, from the Sales page. Refunds come with paid ticketing on Pro, because that is where the money is taken in the first place. Refund a Stripe, PayPal or Razorpay sale and the money goes back to the buyer through that provider. A partial refund leaves the tickets valid, and a full refund puts them back on sale. A sale paid any other way, cash included, can be marked as refunded so your records match.'],
-            ['q' => 'Does Event Schedule sync with my calendar?', 'a' => 'Yes. Google Calendar and Microsoft 365 both sync two ways, with webhook updates so a change made in either place shows up in the other, and you choose whether an event deleted there is kept, marked cancelled or deleted here. Any CalDAV server works as well. Guests can add a single event to Apple, Google or Outlook from the event page, or subscribe to your whole schedule as a live calendar feed that updates itself when a date changes.'],
+            ['q' => 'Does Event Schedule sync with my calendar?', 'a' => 'Yes. '.(outlook_sync_enabled() ? 'Google Calendar and Microsoft 365 both sync' : 'Google Calendar syncs').' two ways, with webhook updates so a change made in either place shows up in the other, and you choose whether an event deleted there is kept, marked cancelled or deleted here. Any CalDAV server works as well. Guests can add a single event to Apple, Google or Outlook from the event page, or subscribe to your whole schedule as a live calendar feed that updates itself when a date changes.'],
             ['q' => 'Can I use my own domain?', 'a' => 'Yes. Every schedule gets a free subdomain such as yourname.eventschedule.com, and Enterprise schedules can serve the whole guest portal from a domain you own, with the certificate issued automatically. Selfhosted installs run on your own domain from day one.'],
             // Backup & restore is on every plan; the sales CSV is Pro (docs/FEATURES.md).
             ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. Selfhost it on your own server for full control over your data and every paid feature is included, or use the hosted platform at eventschedule.com. Either way your data stays yours: back up a schedule with its events and images on any plan, and restore it on another install.'],

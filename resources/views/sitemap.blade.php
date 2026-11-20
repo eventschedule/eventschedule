@@ -304,10 +304,12 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         <loc>{{ url('/google-calendar') }}</loc>
         {!! $lastmodTag('/google-calendar') !!}
     </url>
+    @if (outlook_sync_enabled())
     <url>
         <loc>{{ url('/outlook-calendar') }}</loc>
         {!! $lastmodTag('/outlook-calendar') !!}
     </url>
+    @endif
     <url>
         <loc>{{ url('/caldav') }}</loc>
         {!! $lastmodTag('/caldav') !!}

@@ -481,7 +481,7 @@
 
         // Free-plan tools that come with a schedule of your own.
         $freeTools = [
-            'Google, Outlook and CalDAV sync',
+            outlook_sync_enabled() ? 'Google, Outlook and CalDAV sync' : 'Google and CalDAV sync',
             'Built-in analytics',
             'Embeddable calendar',
             'Sub-schedules',

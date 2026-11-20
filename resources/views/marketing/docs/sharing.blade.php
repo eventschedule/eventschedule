@@ -236,7 +236,9 @@
             <li><strong class="text-gray-900 dark:text-white">Your events, live.</strong> The frame loads from your schedule on every page view, so a date you move this afternoon is already right on your site. You never re-paste the tag.</li>
             <li><strong class="text-gray-900 dark:text-white">Your look.</strong> Background, colour scheme and font come from your <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Style</a> settings. Custom CSS, on Pro, applies inside the frame too.</li>
             <li><strong class="text-gray-900 dark:text-white">Nothing else.</strong> No header, no footer, no banner, no language switcher, which is why the language is <a href="#embed-multilingual" class="doc-link">set in the URL</a> instead.</li>
+            @if (config('ads.enabled') || ! config('app.hosted'))
             <li><strong class="text-gray-900 dark:text-white">No ads, ever.</strong> A Free schedule's own public pages can carry ads. An embed never does.</li>
+            @endif
             <li><strong class="text-gray-900 dark:text-white">No search-engine competition.</strong> The embed URL is served <code class="doc-inline-code">noindex, nofollow</code>, so the page that ranks is yours, not the frame inside it.</li>
         </ul>
 

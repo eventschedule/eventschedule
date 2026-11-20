@@ -23,6 +23,16 @@ class MarketingMetaLengthTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * With an Azure app set, so /outlook-calendar answers as a page: without one it redirects to
+     * the calendar sync page (MarketingController::outlookCalendar(), OutlookPanelsHiddenTest).
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.microsoft.client_id' => 'test-client', 'services.microsoft.client_secret' => 'test-secret']);
+    }
+
     private const MAX_TITLE = 65;
 
     private const MIN_DESCRIPTION = 80;

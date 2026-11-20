@@ -682,7 +682,7 @@
                             ['Any rhythm a club keeps', 'Weekly on chosen days, every other week, the second Saturday of the month or once a year for the club dinner.'],
                             ['Closed pitch, one click', 'Take a single date out for a waterlogged ground or a school holiday and the rest of the pattern stays exactly as it was.'],
                             ['An extra session', 'Add a one-off date to the pattern before a cup game without creating a separate event for it.'],
-                            ['On the coach\'s own calendar', 'Two-way sync with Google, Outlook or any CalDAV calendar, so the sessions sit next to the rest of their week.'],
+                            ['On the coach\'s own calendar', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook or any CalDAV calendar' : 'Google or any CalDAV calendar').', so the sessions sit next to the rest of their week.'],
                         ] as [$t, $d])
                             <div class="es-league-card es-league-hover p-4" data-reveal>
                                 <p class="es-league-ink text-sm font-bold">{{ $t }}</p>
@@ -1338,7 +1338,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way Google, Outlook and CalDAV sync for the coaches" :url="marketing_url('/features/calendar-sync')" icon-color="teal">
+                    <x-feature-link-card name="Calendar Sync" :description="outlook_sync_enabled() ? 'Two-way Google, Outlook and CalDAV sync for the coaches' : 'Two-way Google and CalDAV sync for the coaches'" :url="marketing_url('/features/calendar-sync')" icon-color="teal">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>

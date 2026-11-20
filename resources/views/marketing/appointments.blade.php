@@ -219,7 +219,7 @@
             ],
             [
                 'q' => 'Can I be booked twice at the same time?',
-                'a' => 'No. Open times respect your weekly hours, your buffers and your minimum notice, and any time already taken on your schedule is removed. That includes events synced in from Google Calendar, Outlook or CalDAV, bookings for your other appointment types, and requests still waiting on your approval.',
+                'a' => 'No. Open times respect your weekly hours, your buffers and your minimum notice, and any time already taken on your schedule is removed. That includes events synced in from '.(outlook_sync_enabled() ? 'Google Calendar, Outlook or CalDAV' : 'Google Calendar or CalDAV').', bookings for your other appointment types, and requests still waiting on your approval.',
             ],
             [
                 'q' => 'Can I charge for appointments?',
@@ -259,7 +259,7 @@
             ],
             [
                 'q' => 'How do I block out holidays and days off?',
-                'a' => 'Add a date override to the type and leave it marked Unavailable, or set shorter hours for just that date. Overrides belong to one type, so for a week away add them to every active type. Overrides are part of Pro; on the Free plan, switch your type off while you are away and on again when you are back, and bookings already made keep their time. For a type with no host, a timed event on your schedule, or a timed entry synced from Google Calendar, Outlook or CalDAV, also takes its time off the page. An all-day entry with no start time does not block anything.',
+                'a' => 'Add a date override to the type and leave it marked Unavailable, or set shorter hours for just that date. Overrides belong to one type, so for a week away add them to every active type. Overrides are part of Pro; on the Free plan, switch your type off while you are away and on again when you are back, and bookings already made keep their time. For a type with no host, a timed event on your schedule, or a timed entry synced from '.(outlook_sync_enabled() ? 'Google Calendar, Outlook or CalDAV' : 'Google Calendar or CalDAV').', also takes its time off the page. An all-day entry with no start time does not block anything.',
             ],
             [
                 'q' => 'Can clients book a recurring weekly appointment?',
@@ -1260,7 +1260,7 @@
                         <p class="es-book-muted text-sm">
                             Open times are worked out against everything already on the schedule: your own
                             events, bookings on your other appointment types, and events synced in from
-                            Google Calendar, Outlook or CalDAV. A request still waiting on you holds its
+                            {{ outlook_sync_enabled() ? 'Google Calendar, Outlook or CalDAV' : 'Google Calendar or CalDAV' }}. A request still waiting on you holds its
                             line too. An entry with no length on it blocks two hours rather than nothing,
                             and an all-day entry with no time at all takes no line.
                         </p>
@@ -1383,7 +1383,7 @@
         $launchChecks = [
             ['Set the schedule\'s timezone', 'Hours are kept in it, and guests see times converted from it. Edit Schedule, Details, Language and time.'],
             ['Make sure email goes out', 'On eventschedule.com, booking mail is sent through the schedule\'s own email settings. Until they are set, nobody gets a confirmation, a reminder or a booking notice.'],
-            ['Connect your calendar', 'Google, Outlook or CalDAV, so meetings you already have take their time off the page. An all-day entry with no start time blocks nothing; use a timed one.'],
+            ['Connect your calendar', (outlook_sync_enabled() ? 'Google, Outlook or CalDAV, so' : 'Google or CalDAV, so').' meetings you already have take their time off the page. An all-day entry with no start time blocks nothing; use a timed one.'],
             ['Connect a way to be paid', 'A priced type stays off the page until the method it uses is connected. Invoice Ninja is the one method appointments do not offer.'],
             ['Book yourself once', 'From a private window, on a phone: the page, the confirmation, the invite and the reminder, as a guest has them. Then cancel it from your own link.'],
             ['Put the link where people ask', 'Your page is /book on your schedule, each type has its own address under it, and a Book a Time button appears on your public schedule.'],
@@ -1863,8 +1863,8 @@
                     and that type has weekly hours, a booking page and every guest email.
                     Pro adds more types, a price, and the scheduling rules: overrides, buffers, notice and approvals.
                     A selfhosted deployment has no cap and no gate.
-                    Everything the book leans on is free too: your public schedule, two-way Google, Outlook
-                    and CalDAV calendar sync, and the calendar you can embed on your own site.
+                    Everything the book leans on is free too: your public schedule, two-way {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}
+                    calendar sync, and the calendar you can embed on your own site.
                 </p>
             </div>
         </div>
@@ -1891,7 +1891,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google, Outlook and CalDAV, so busy stays busy." :url="marketing_url('/features/calendar-sync')" iconColor="blue">
+                    <x-feature-link-card name="Calendar Sync" :description="outlook_sync_enabled() ? 'Two-way sync with Google, Outlook and CalDAV, so busy stays busy.' : 'Two-way sync with Google and CalDAV, so busy stays busy.'" :url="marketing_url('/features/calendar-sync')" iconColor="blue">
                         <x-slot:icon>
                             <svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                         </x-slot:icon>

@@ -1,3 +1,13 @@
+{{-- Wallet passes and web push are described only where they can be used: on hosted, only what the
+     operator has set up; a selfhost operator reads about each, as each can be set up there. --}}
+@php
+    $guideGoogleWallet = \App\Services\Wallet\GoogleWalletService::isConfigured() || ! config('app.hosted');
+    $guideAppleWallet = \App\Services\Wallet\AppleWalletService::isConfigured() || ! config('app.hosted');
+    $guideWallets = $guideGoogleWallet || $guideAppleWallet;
+    $guideBothWallets = $guideGoogleWallet && $guideAppleWallet;
+    $guidePush = \App\Services\OneSignalService::isConfigured() || ! config('app.hosted');
+    $guideWalletNames = $guideBothWallets ? 'Google Wallet or Apple Wallet' : ($guideGoogleWallet ? 'Google Wallet' : 'Apple Wallet');
+@endphp
 <x-docs-page
     key="tickets"
     title="Sell Tickets: Payments, Refunds, Check-In - Event Schedule"
@@ -38,7 +48,9 @@
         </x-doc-nav-group>
         <x-doc-nav-group label="Check-in at the Door" href="#check-in">
             <x-doc-nav-link href="#checkin-dashboard">Check-in Dashboard</x-doc-nav-link>
+            @if ($guideWallets)
             <x-doc-nav-link href="#wallet-passes">Wallet Passes</x-doc-nav-link>
+            @endif
         </x-doc-nav-group>
         <x-doc-nav-link href="#waitlist">Waitlist</x-doc-nav-link>
         <x-doc-nav-link href="#interest-list">Interest List</x-doc-nav-link>
@@ -515,7 +527,11 @@
         <h3 class="doc-subheading">Buying Several Events at Once</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">A visitor browsing your schedule can collect tickets to more than one event and pay for the lot in a single checkout. On any event with tickets they choose their quantities and select <strong class="text-gray-900 dark:text-white">Add to cart</strong> instead of Checkout, then carry on browsing. A cart button appears in the corner with a running count; opening it lists everything gathered so far with a running total, and one Checkout pays for all of it. A gift card can be applied to the whole order.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Afterwards the buyer lands on a page listing every event they bought, each linking to its own ticket. There is no combined ticket: every event is scanned with its own code, because each door only knows about its own event. The confirmation emails arrive one per event for the same reason, and where <a href="#wallet-passes" class="doc-link">wallet passes</a> are enabled each live event on that page gets its own Add to Google Wallet button.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Afterwards the buyer lands on a page listing every event they bought, each linking to its own ticket. There is no combined ticket: every event is scanned with its own code, because each door only knows about its own event. The confirmation emails arrive one per event for the same reason.
+            @if ($guideWallets)
+            Where <a href="#wallet-passes" class="doc-link">wallet passes</a> are enabled, each live event on that page gets its own {{ $guideBothWallets ? 'Add to Google Wallet and Add to Apple Wallet buttons' : 'Add to '.$guideWalletNames.' button' }}.
+            @endif
+        </p>
 
         <h4 id="cart-rules" class="text-base font-semibold text-gray-900 dark:text-white mb-4">What can share a cart</h4>
         <ul class="doc-list mb-6">
@@ -1277,11 +1293,15 @@
         </ul>
 
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">How to Enable</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong>, choose the <strong class="text-gray-900 dark:text-white">Settings</strong> tab, open its <strong class="text-gray-900 dark:text-white">Notifications</strong> row and turn on <strong class="text-gray-900 dark:text-white">New ticket sale</strong>. Each owner and admin of the schedule opts in separately. If <a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">push notifications</a> are enabled, the same alert is mirrored to the browser.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong>, choose the <strong class="text-gray-900 dark:text-white">Settings</strong> tab, open its <strong class="text-gray-900 dark:text-white">Notifications</strong> row and turn on <strong class="text-gray-900 dark:text-white">New ticket sale</strong>. Each owner and admin of the schedule opts in separately.
+            @if ($guidePush)
+            If <a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">push notifications</a> are enabled, the same alert is mirrored to the browser.
+            @endif
+        </p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Ongoing sale notifications are a Pro feature, but the <strong class="text-gray-900 dark:text-white">first paid sale on each event</strong> notifies you on every plan, including Free, as long as the toggle is on.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">On eventschedule.com, sale notification emails go out only once the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, and they are sent from that address. Until then the <strong class="text-gray-900 dark:text-white">New ticket sale</strong> toggle stays greyed out, unless the schedule is on Pro and push notifications are set up: the push goes out without email settings, so the toggle stays usable for it. A selfhosted install only needs a working mailer. Every notification email includes an unsubscribe link.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On eventschedule.com, sale notification emails go out only once the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, and they are sent from that address. Until then the <strong class="text-gray-900 dark:text-white">New ticket sale</strong> toggle stays greyed out{{ $guidePush ? ', unless the schedule is on Pro and push notifications are set up: the push goes out without email settings, so the toggle stays usable for it' : '' }}. A selfhosted install only needs a working mailer. Every notification email includes an unsubscribe link.</p>
     </section>
 
     <!-- Export -->
@@ -1477,16 +1497,27 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Counts are keyed to the venue's own calendar date, so an evening event west of UTC reports correctly rather than rolling over at the wrong midnight. Only redemptions count as checked in: a pass holder who booked a seat in advance appears in the reserved count until they actually arrive. The figures refresh every 10 seconds while the tab is in the foreground, so a phone in a pocket is not drained.</p>
     </section>
 
+    @if ($guideWallets)
     <!-- Wallet Passes -->
     <section id="wallet-passes" class="doc-section">
         <h3 class="doc-subheading">Wallet Passes</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Ticket buyers can save their ticket into Google Wallet or Apple Wallet from the ticket page (the buttons sit under the QR code, Apple's first on an iPhone, iPad or Mac), from the order page of a multi-event purchase, or from the confirmation and reminder emails. Each wallet is switched on by whoever runs the install, so a button appears only for the wallets that are set up. The pass carries the same QR code the ticket page shows, so it scans at the door exactly like any other ticket, and it works offline once saved.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Ticket buyers can save their ticket into {{ $guideWalletNames }} from the ticket page ({{ $guideBothWallets ? 'the buttons sit under the QR code, Apple\'s first on an iPhone, iPad or Mac' : 'the button sits under the QR code' }}), from the order page of a multi-event purchase, or from the confirmation and reminder emails.
+            @if ($guideBothWallets)
+            Each wallet is switched on by whoever runs the install, so a button appears only for the wallets that are set up.
+            @endif
+            The pass carries the same QR code the ticket page shows, so it scans at the door exactly like any other ticket, and it works offline once saved.</p>
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Event details on the pass</strong> - name, venue, date and time, attendee name, ticket type and seat</li>
+            @if ($guideBothWallets)
             <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has map coordinates, Google can notify the attendee as they arrive nearby; Apple Wallet raises the pass on the lock screen around the event's start</li>
+            @elseif ($guideGoogleWallet)
+            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has map coordinates, Google can notify the attendee as they arrive nearby</li>
+            @else
+            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - Apple Wallet raises the pass on the lock screen around the event's start</li>
+            @endif
             <li><strong class="text-gray-900 dark:text-white">One pass per event</strong> - a multi-event order gets a separate pass for each event, since each is scanned with its own code. A single order for several people is one pass showing the number it admits, unless the event issues individual tickets</li>
-            <li><strong class="text-gray-900 dark:text-white">Passes and registrations too</strong> - a <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass or subscription</a> of any type saves as one undated pass rather than one per date, and shows how many people it admits at each event when that is more than one. If the pass has an expiry, Google Wallet archives it and Apple Wallet greys it out once that date passes. Free registrations get a wallet pass on the same terms as a paid ticket</li>
+            <li><strong class="text-gray-900 dark:text-white">Passes and registrations too</strong> - a <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass or subscription</a> of any type saves as one undated pass rather than one per date, and shows how many people it admits at each event when that is more than one. If the pass has an expiry, {{ $guideBothWallets ? 'Google Wallet archives it and Apple Wallet greys it out' : ($guideGoogleWallet ? 'Google Wallet archives it' : 'Apple Wallet greys it out') }} once that date passes. Free registrations get a wallet pass on the same terms as a paid ticket</li>
             <li><strong class="text-gray-900 dark:text-white">Not for every order</strong> - there is no wallet button for an appointment booking, on an event you have cancelled, or while an <a href="#installments" class="doc-link">installment plan</a> is behind on its payments</li>
         </ul>
 
@@ -1496,9 +1527,14 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Turned on by the operator</div>
+            @if ($guideBothWallets)
             <p>Each wallet is switched on by the person running the installation: Google Wallet needs a Google Wallet issuer account, Apple Wallet an Apple Developer Program membership. On a selfhosted install each is a one-time setup step (<a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a>, <a href="{{ route('marketing.docs.selfhost.apple_wallet') }}" class="doc-link">Apple Wallet</a>); with nothing configured, no button is shown and nothing is sent anywhere. It is free on every plan. There is no per-schedule setting: if you are unsure whether it is on, open a paid ticket and look under the QR code.</p>
+            @else
+            <p>{{ $guideWalletNames }} passes are switched on by the person running the installation. They are free on every plan, and there is no per-schedule setting.</p>
+            @endif
         </div>
     </section>
+    @endif
 
     <!-- Waitlist -->
     <section id="waitlist" class="doc-section">

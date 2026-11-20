@@ -123,7 +123,7 @@
             'Refunds from the Sales page on Pro, in full or in part, that send the money back through Stripe, PayPal or Razorpay',
             'One checkout for tickets to several of your events, and an interest list that emails people when tickets go on sale',
             'Passes, gift cards and installment payments on Pro, and allocated seating for venues on Enterprise',
-            'Two-way Google, Outlook and CalDAV sync, free, so the public listing and your own diary cannot disagree',
+            'Two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, free, so the public listing and your own diary cannot disagree',
             'Open source under the Attribution Assurance License, and selfhostable, which resolves to Enterprise',
         ];
 

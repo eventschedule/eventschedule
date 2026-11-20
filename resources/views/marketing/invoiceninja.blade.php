@@ -1491,7 +1491,7 @@
                     </div>
                     <h3 class="es-ledg-ink mb-2 text-xl font-bold">The other integrations</h3>
                     <p class="es-ledg-muted mb-5 text-sm">
-                        Stripe, Google, Outlook and CalDAV calendar sync, webhooks and the REST API.
+                        Stripe, {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} calendar sync, webhooks and the REST API.
                         Invoicing is one entry in a longer list.
                     </p>
                     <span class="es-ledg-accent mt-auto inline-flex items-center gap-2 text-sm font-semibold transition-all group-hover:gap-3">

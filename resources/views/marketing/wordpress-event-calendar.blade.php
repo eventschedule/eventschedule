@@ -297,7 +297,7 @@
 
                 @php
                     $wpSteps = [
-                        ['Create your schedule and add events', 'Sign up and create a schedule for your venue, group or organization. Add events by hand, set weekly or monthly ones to repeat, or paste an announcement or drop a flyer into the AI importer and check what it fills in. If your events already live in Google Calendar or Outlook, two-way sync brings them across.'],
+                        ['Create your schedule and add events', 'Sign up and create a schedule for your venue, group or organization. Add events by hand, set weekly or monthly ones to repeat, or paste an announcement or drop a flyer into the AI importer and check what it fills in. If your events already live in Google Calendar'.(outlook_sync_enabled() ? ' or Outlook' : '').', two-way sync brings them across.'],
                         ['Copy the embed code', 'In the admin panel, open the Actions menu and choose Embed Schedule. Pick a layout: leave it on your schedule\'s default, or pin this frame to the month Calendar or the List. The preview reloads as you choose. Then press the copy button beside Iframe Code.'],
                         ['Paste it into a Custom HTML block', 'In WordPress, edit the page that should show your events, such as Events or What\'s On. Press the plus button, search for Custom HTML, add the block and paste the code into it. In the classic editor, switch to the Text tab first, because the Visual tab escapes the code instead of running it.'],
                         ['Preview, then publish', 'Switch the block to Preview, or preview the page, to see your calendar in place. If the frame shows a scrollbar, raise the height number in the code, for example to 1000. Then press Update or Publish. From now on, you edit events on Event Schedule and never touch this block again.'],
@@ -491,7 +491,7 @@
                     <div class="es-wp-panel flex flex-col p-6" data-reveal="panel">
                         <h3 class="es-wp-ink text-base font-bold">More than a list of dates</h3>
                         <p class="es-wp-muted mt-2 text-sm leading-relaxed">
-                            The same schedule takes registrations, sells tickets on Pro, scans QR codes at the door, syncs both ways with Google Calendar and Outlook, and emails a digest of new events to people who sign up. None of it needs an add-on.
+                            The same schedule takes registrations, sells tickets on Pro, scans QR codes at the door, syncs both ways with Google Calendar{{ outlook_sync_enabled() ? ' and Outlook' : '' }}, and emails a digest of new events to people who sign up. None of it needs an add-on.
                         </p>
                     </div>
                     <div class="es-wp-panel flex flex-col p-6" data-reveal="panel">

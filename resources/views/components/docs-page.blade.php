@@ -120,6 +120,9 @@
                         <div class="doc-prose">
                             {{ $slot }}
                         </div>
+                        {{-- Where the page's own text ends: BlogGuide renders the page and quotes only
+                             what comes before this, so a post sees the guide as this install shows it. --}}
+                        <span data-doc-prose-end hidden></span>
 
                         {{-- How current the page is, and where to fix it. The date
                              is the one the JSON-LD already publishes, so the two

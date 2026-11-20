@@ -460,7 +460,7 @@
                     <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
                         <h3 class="es-cc-ink text-base font-bold">In their own calendars</h3>
                         <p class="es-cc-muted mt-2 text-sm leading-relaxed">
-                            Any reader can subscribe to the whole calendar as a live feed, so a moved date updates in their phone's calendar by itself. If your office already keeps events in Google Calendar or Outlook, two-way <x-link href="{{ marketing_url('/features/calendar-sync') }}">calendar sync</x-link> keeps both in step.
+                            Any reader can subscribe to the whole calendar as a live feed, so a moved date updates in their phone's calendar by itself. If your office already keeps events {{ outlook_sync_enabled() ? 'in Google Calendar or Outlook,' : 'in Google Calendar,' }} two-way <x-link href="{{ marketing_url('/features/calendar-sync') }}">calendar sync</x-link> keeps both in step.
                         </p>
                     </div>
                 </div>

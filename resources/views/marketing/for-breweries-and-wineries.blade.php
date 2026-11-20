@@ -1444,7 +1444,7 @@
                         ['The weekly nights', 'Every repeating night is one recurring event, with the weeks you are shut taken out. Set it up once in January.'],
                         ['A free tour with a limit', 'Registration with a capacity, counted for each date on its own. Limited does not have to mean paid.'],
                         ['Its own link per strand', 'Sub-schedules keep music, tours and private hire apart, and each can be shared as a filtered link.'],
-                        ['On the site you have', 'Embed the calendar in your own page, and sync both ways with Google, Outlook or CalDAV.'],
+                        ['On the site you have', 'Embed the calendar in your own page, and sync both ways with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').'.'],
                     ] as $bwIdx => [$t, $d])
                         <div class="bw-back-wrap" data-reveal style="--r: {{ [-1.4, 1.1, -0.8, 1.5][$bwIdx] }}deg;">
                             <article @class(['bw-back', 'bw-back-can' => $bwIdx % 2 === 0, 'bw-back-btl' => $bwIdx % 2 === 1])>

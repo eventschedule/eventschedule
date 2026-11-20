@@ -1,6 +1,31 @@
 @php
     $path = trim(request()->path(), '/');
     $related = config('marketing_related.' . $path, []);
+    // With no Azure app on this install, no card sells Outlook sync (outlook_sync_enabled()):
+    // the blurbs drop it, and the Outlook page's card (which only redirects then) gives its place
+    // to another calendar page, so the strip keeps its four or six.
+    if (! outlook_sync_enabled() && $related) {
+        $taken = array_merge(['/'.$path], array_column($related, 'path'));
+        $standIns = array_values(array_filter([
+            ['title' => 'CalDAV', 'path' => '/caldav', 'blurb' => 'Two-way sync with any CalDAV server: Nextcloud, Fastmail, iCloud and more.'],
+            ['title' => 'Google Calendar', 'path' => '/google-calendar', 'blurb' => 'Two-way sync with Google Calendar, changes both ways.'],
+            ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google Calendar and any CalDAV server.'],
+            ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Put your schedule on your own website.'],
+        ], fn ($card) => ! in_array($card['path'], $taken, true)));
+        $related = array_map(function ($card) use (&$standIns) {
+            if ($card['path'] === '/outlook-calendar') {
+                return array_shift($standIns) ?? $card;
+            }
+            $card['blurb'] = str_replace(
+                ['Google, Outlook and CalDAV', 'Google Calendar, Outlook and any CalDAV server', 'Google Calendar, Outlook, CalDAV'],
+                ['Google and CalDAV', 'Google Calendar and any CalDAV server', 'Google Calendar, CalDAV'],
+                $card['blurb']
+            );
+
+            return $card;
+        }, $related);
+        $related = array_values(array_filter($related, fn ($card) => $card['path'] !== '/outlook-calendar'));
+    }
     // The docs page for this one: an audience page's entry in config/marketing_guides.php, or
     // the guide whose manifest `feature` names this page. Beside the heading rather than as a
     // fifth card, so the grid below stays a complete row of four.

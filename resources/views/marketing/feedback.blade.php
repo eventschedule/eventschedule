@@ -922,7 +922,7 @@
                     </div>
 
                     <p class="es-comment-muted mt-auto pt-6 text-sm">
-                        If that event also collects photos, video or comments from attendees, the same email carries a second link inviting them to add theirs. And if they have allowed web push on your schedule, a notification goes out alongside it.
+                        If that event also collects photos, video or comments from attendees, the same email carries a second link inviting them to add theirs.{{ \App\Services\OneSignalService::isConfigured() ? ' And if they have allowed web push on your schedule, a notification goes out alongside it.' : '' }}
                     </p>
                 </div>
 
@@ -1163,7 +1163,14 @@
                     </h2>
                 </div>
 
+                {{-- Web push only where the install can send it (OneSignalService::isConfigured(), env
+                     only). Without it three cards are left, so the last one runs the full width and
+                     the grid still ends on a full row. --}}
+                @php
+                    $feedbackPushLive = \App\Services\OneSignalService::isConfigured();
+                @endphp
                 <div class="grid gap-6 md:grid-cols-2" data-reveal-group="100">
+                    @if ($feedbackPushLive)
                     <div class="es-comment-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="es-comment-band-ink text-lg font-bold">A push, straight away</h3>
@@ -1171,6 +1178,7 @@
                         </div>
                         <p class="es-comment-band-muted text-sm">If web push is switched on for your schedule and you have allowed notifications on a device, a new card arrives as a notification the moment it is submitted. That channel does not wait on email being configured.</p>
                     </div>
+                    @endif
                     <div class="es-comment-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="es-comment-band-ink text-lg font-bold">An email, if you asked for one</h3>
@@ -1185,7 +1193,7 @@
                         </div>
                         <p class="es-comment-band-muted text-sm">Subscribe to feedback.submitted and every card is posted to your endpoint as it lands, carrying the event, the date, the attendee's name and email, the rating and the comment.</p>
                     </div>
-                    <div class="es-comment-card p-6" data-reveal="panel">
+                    <div class="es-comment-card p-6{{ $feedbackPushLive ? '' : ' md:col-span-2' }}" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="es-comment-band-ink text-lg font-bold">Or read it back on demand</h3>
                             <span class="es-comment-plan">Pro</span>

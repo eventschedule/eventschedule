@@ -498,7 +498,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Hiding a panel is not the same as turning a feature off</div>
-            <p>A <code class="doc-inline-code">display: none</code> rule removes a panel from the page. It does not disable what sits behind it. People who already signed up to be notified are still notified, a hidden subscribe panel still accepts a submission posted to its address, and a hidden reviews panel does not delete the reviews. Where a real on/off setting exists, use that instead: videos, fan photos, fan comments, feedback, carpooling, accommodation and the &ldquo;Notify me&rdquo; card each have their own switch on the schedule edit page, and so does the sponsor grid (<strong>Show sponsors</strong>), which hides it without deleting a sponsor. The <strong>Show Sign-Up Panel</strong> switch is the exception: like this rule, it only hides the panel, and sign-ups through your follow link, and on eventschedule.com the Follow button, still arrive.</p>
+            <p>A <code class="doc-inline-code">display: none</code> rule removes a panel from the page. It does not disable what sits behind it. People who already signed up to be notified are still notified, a hidden subscribe panel still accepts a submission posted to its address, and a hidden reviews panel does not delete the reviews. Where a real on/off setting exists, use that instead: videos, fan photos, fan comments, feedback, carpooling{{ \App\Services\Stay22Service::isEnabled() || ! config('app.hosted') ? ', accommodation' : '' }} and the &ldquo;Notify me&rdquo; card each have their own switch on the schedule edit page, and so does the sponsor grid (<strong>Show sponsors</strong>), which hides it without deleting a sponsor. The <strong>Show Sign-Up Panel</strong> switch is the exception: like this rule, it only hides the panel, and sign-ups through your follow link, and on eventschedule.com the Follow button, still arrive.</p>
         </div>
 
         <h3 class="doc-subheading">Schedule page sections</h3>
@@ -551,7 +551,9 @@
                     <tr><td><code class="doc-inline-code">#gp-venue</code></td><td>The venue card</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-venue-socials</code></td><td>The venue's social links</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-venue-map</code></td><td>The map at the foot of the venue card</td></tr>
+                    @if (\App\Services\Stay22Service::isEnabled() || ! config('app.hosted'))
                     <tr><td><code class="doc-inline-code">#gp-accommodation</code></td><td>The places-to-stay map</td></tr>
+                    @endif
                     <tr><td><code class="doc-inline-code">#gp-create-your-own</code></td><td>The &ldquo;create your own schedule&rdquo; card</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-upcoming-events</code></td><td>The schedule's other upcoming events, down the left column</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-details</code></td><td>The main card: title, date, venue, price and buttons</td></tr>
@@ -660,7 +662,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">What a paid plan removes</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Five surfaces at once: the corner chip, the "create your own" card on your event pages, the credit line printed under your embed snippets, the same line inside a ticket or RSVP embed, and the footer of your newsletter emails. Ads, where a platform runs them on free schedules, follow the same tier. Embeds of your calendar never carry any of it, on any plan.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Five surfaces at once: the corner chip, the "create your own" card on your event pages, the credit line printed under your embed snippets, the same line inside a ticket or RSVP embed, and the footer of your newsletter emails.{{ config('ads.enabled') || ! config('app.hosted') ? ' Ads, where a platform runs them on free schedules, follow the same tier.' : '' }} Embeds of your calendar never carry any of it, on any plan.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">White-label your schedule</h4>

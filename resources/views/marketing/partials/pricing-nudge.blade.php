@@ -31,7 +31,7 @@
                     'Everything you need to publish a schedule and fill the room, for as long as you like.',
                     [
                         'Unlimited events, sub-schedules and recurring dates',
-                        'Two-way Google, Outlook and CalDAV sync',
+                        outlook_sync_enabled() ? 'Two-way Google, Outlook and CalDAV sync' : 'Two-way Google and CalDAV sync',
                         'Unlimited free registration and RSVPs, scanned at the door',
                     ],
                     false,

@@ -26,7 +26,13 @@ class SettingsPageTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['app.hosted' => true]);
+        // With an Azure app, so every Integrations row is on the page: without one, hosted shows
+        // no Outlook panel at all (outlook_sync_offered(), held by OutlookPanelsHiddenTest).
+        config([
+            'app.hosted' => true,
+            'services.microsoft.client_id' => 'test-client',
+            'services.microsoft.client_secret' => 'test-secret',
+        ]);
     }
 
     private function page(User $user, array $session = []): string

@@ -102,6 +102,36 @@ class BlogGuide
     }
 
     /**
+     * The page's own text as this install renders it: what is inside `.doc-prose`, up to the
+     * marker docs-page puts after it.
+     *
+     * Rendered, not read from the source, because the guide now says what a feature does only
+     * where the install has it (`@if (outlook_sync_offered())`, `{{ $guideWallet ? ... : ... }}`):
+     * stripping the source kept both branches of every `@if` and dropped every inline choice, so
+     * a post was told about Outlook sync on an install without it, in sentences missing words.
+     * Null when it cannot be rendered, and the source is stripped as before.
+     */
+    private static function renderedText(string $page): ?string
+    {
+        try {
+            $html = view('marketing.docs.'.basename($page))->render();
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+
+        $start = strpos($html, 'class="doc-prose"');
+        $end = strpos($html, '<span data-doc-prose-end');
+
+        if ($start === false || $end === false || $end < $start) {
+            return null;
+        }
+
+        return substr($html, $start, $end - $start);
+    }
+
+    /**
      * A guide page as its h2 sections of plain text.
      *
      * @return list<array{title: string, text: string, words: int}>
@@ -112,7 +142,7 @@ class BlogGuide
             return [];
         }
 
-        $source = (string) file_get_contents(self::path($page));
+        $source = self::renderedText($page) ?? (string) file_get_contents(self::path($page));
 
         $strip = [
             '~\{\{--.*?--\}\}~s' => '',

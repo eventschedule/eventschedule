@@ -205,6 +205,11 @@
         if (! facebook_login_enabled()) {
             unset($settingsSections['section-facebook']);
         }
+        // Hosted with no Azure app: no Outlook panel, rather than a "not configured" notice a
+        // customer cannot act on. Kept for an account that is somehow still connected.
+        if (! outlook_sync_offered() && ! $user->microsoft_token) {
+            unset($settingsSections['section-microsoft-calendar']);
+        }
         // The Boosts tab is a boost partner's alone (hosted only: forUser() answers null off it).
         $boostPartner = \App\Models\BoostPartner::forUser($user);
         if (! $boostPartner) {

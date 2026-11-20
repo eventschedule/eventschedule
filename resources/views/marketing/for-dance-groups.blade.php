@@ -1627,7 +1627,7 @@
                             <span class="dg-tier">Free</span>
                         </div>
                         <p>
-                            Two-way sync with Google, Outlook and CalDAV, so a rehearsal moved on your phone moves
+                            Two-way sync with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}, so a rehearsal moved on your phone moves
                             on the schedule too.
                         </p>
                     </article>

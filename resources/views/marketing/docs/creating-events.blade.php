@@ -1,3 +1,8 @@
+{{-- Outlook sync is described only where it can be used: on hosted it is hidden while the
+     operator has not set it up; a selfhost operator reads about it either way. --}}
+@php
+    $guideOutlook = outlook_sync_offered();
+@endphp
 <x-docs-page
     key="creating-events"
     title="Creating Events: Tickets, Repeats, Privacy - Event Schedule"
@@ -111,7 +116,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Listing</span></td>
-                        <td>Visibility, the event's link, its category, the other schedules it appears on, and <strong>Calendar sync</strong> on a saved event whose schedule sends its events to a connected Google or Outlook calendar</td>
+                        <td>Visibility, the event's link, its category, the other schedules it appears on, and <strong>Calendar sync</strong> on a saved event whose schedule sends its events to a connected {{ $guideOutlook ? 'Google or Outlook calendar' : 'Google calendar' }}</td>
                         <td>Always</td>
                     </tr>
                     <tr>
@@ -192,7 +197,7 @@
             <li><strong class="text-gray-900 dark:text-white">Import.</strong> Bring events in from a link, pasted text, a flyer image or a Google calendar. See <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">A copy or a template.</strong> <strong class="text-gray-900 dark:text-white">Clone Event</strong> starts a new event from an existing one, and a saved <a href="{{ route('marketing.docs.managing_schedules') }}#templates" class="doc-link">template</a> <x-doc-badge plan="pro" /> does the same for a format you repeat.</li>
             <li><strong class="text-gray-900 dark:text-white">Event requests.</strong> If your schedule <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">accepts event requests</a> with <strong class="text-gray-900 dark:text-white">Require Approval</strong> enabled, events submitted by other people wait for your review. Approve or reject them on the <strong class="text-gray-900 dark:text-white">Requests</strong> tab of your schedule's admin page, which only appears while there is something waiting.</li>
-            <li><strong class="text-gray-900 dark:text-white">Calendar sync.</strong> A schedule that reads a connected Google, Outlook or CalDAV calendar adds its entries as <a href="#draft" class="doc-link">drafts</a>, unless you chose to publish them as they arrive. See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-sync" class="doc-link">Calendar sync</a>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Calendar sync.</strong> A schedule that reads a connected {{ $guideOutlook ? 'Google, Outlook or CalDAV' : 'Google or CalDAV' }} calendar adds its entries as <a href="#draft" class="doc-link">drafts</a>, unless you chose to publish them as they arrive. See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-sync" class="doc-link">Calendar sync</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">Feeds</strong> <x-doc-badge plan="enterprise" />. Somebody else's calendar, RSS feed or events page, read about once an hour. See <a href="{{ route('marketing.docs.managing_schedules') }}#feeds" class="doc-link">Feeds</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">Event sources.</strong> A Curator schedule lists everything the talent and venue schedules it names as sources publish, as it goes live. See <a href="{{ route('marketing.docs.creating_schedules') }}#event-sources" class="doc-link">Event Sources</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">WhatsApp</strong> <x-doc-badge plan="enterprise" />. Send the details or a photo of a flyer in a message. See <a href="#whatsapp" class="doc-link">Creating Events via WhatsApp</a>.</li>
@@ -207,7 +212,7 @@
             <li>Nothing is sent for a draft. A change to a one-time event whose start time has already passed notifies nobody, and on a recurring event only people with a date still to come are told.</li>
             <li>A buyer's confirmation email carries a calendar invite. The change email moves that entry in their calendar and the cancellation email takes it off, in mail apps that read invites (Gmail, Outlook and Apple Mail among them).</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling keeps the event's tickets and refund records, stops any boost campaign and any installment plan still charging for it, takes it off connected Google, Outlook and CalDAV calendars (except an event the sync read in from your own calendar, whose original entry stays; see <a href="#google-calendar" class="doc-link">Calendar Sync</a>), and shows guests a notice that it has been cancelled. You can restore the event later. It does not refund anyone: refund each sale from the <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Sales page</a>, where a Stripe, PayPal or Razorpay payment goes back through the provider and any other method is marked as refunded.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling keeps the event's tickets and refund records, stops any boost campaign and any installment plan still charging for it, takes it off connected {{ $guideOutlook ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} calendars (except an event the sync read in from your own calendar, whose original entry stays; see <a href="#google-calendar" class="doc-link">Calendar Sync</a>), and shows guests a notice that it has been cancelled. You can restore the event later. It does not refund anyone: refund each sale from the <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Sales page</a>, where a Stripe, PayPal or Razorpay payment goes back through the provider and any other method is marked as refunded.</p>
     </section>
 
     <!-- Details -->
@@ -331,7 +336,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Recurring events in calendars</div>
-            <p>A recurring event is pushed to a connected <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Google, Outlook, or CalDAV calendar</a> as a single entry on the series start date, not as a repeating appointment. Guests who want every date can subscribe to your schedule's <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="doc-link">live calendar feed</a>, offered as <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule on your event and schedule pages, which lists each occurrence in the next 90 days individually.</p>
+            <p>A recurring event is pushed to a connected <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">{{ $guideOutlook ? 'Google, Outlook, or CalDAV calendar' : 'Google or CalDAV calendar' }}</a> as a single entry on the series start date, not as a repeating appointment. Guests who want every date can subscribe to your schedule's <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="doc-link">live calendar feed</a>, offered as <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule on your event and schedule pages, which lists each occurrence in the next 90 days individually.</p>
         </div>
     </section>
 
@@ -786,7 +791,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Calendar sync</span></td>
-                        <td>On a saved event whose schedule sends its events to a connected Google or Outlook calendar: whether this event is in each calendar, with <strong>Sync Now</strong> and <strong>Remove</strong>. See <a href="#google-calendar" class="doc-link">Calendar Sync</a> below.</td>
+                        <td>On a saved event whose schedule sends its events to a connected {{ $guideOutlook ? 'Google or Outlook calendar' : 'Google calendar' }}: whether this event is in each calendar, with <strong>Sync Now</strong> and <strong>Remove</strong>. See <a href="#google-calendar" class="doc-link">Calendar Sync</a> below.</td>
                     </tr>
                 </tbody>
             </table>
@@ -927,9 +932,19 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A published event is copied to your connected calendar each time you save it. <strong class="text-gray-900 dark:text-white">Calendar sync</strong>, at the end of the <a href="#listing" class="doc-link">Listing</a> tab, is where you see that for one event and step in by hand. It appears on a saved event only, and only when the schedule is connected to a calendar and set to send its events there.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">It has a line per calendar: <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, or both. Each line reads <strong class="text-gray-900 dark:text-white">Synced</strong> or <strong class="text-gray-900 dark:text-white">Not synced</strong>, with <strong class="text-gray-900 dark:text-white">Sync Now</strong> to copy the event at once or <strong class="text-gray-900 dark:text-white">Remove</strong> to take it off the calendar. Both act immediately, not with Save (with unsaved changes on the form they ask you to save first), and anything that goes wrong is said on the calendar's own line. After either one the page comes back on Calendar sync. An event that is not synced says why: a Draft or Internal event is not copied because only an event guests can see is, a cancelled event is not copied while it is cancelled, and any other event is copied the next time you save it. A Draft, Internal or cancelled event is not offered <strong class="text-gray-900 dark:text-white">Sync Now</strong>. The Listing tab's summary names a calendar the event should be in and is not, as in "Public &middot; Google: Not synced".</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            @if ($guideOutlook)
+            It has a line per calendar: <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, or both.
+            @else
+            It has a line for <strong class="text-gray-900 dark:text-white">Google Calendar</strong>.
+            @endif
+            Each line reads <strong class="text-gray-900 dark:text-white">Synced</strong> or <strong class="text-gray-900 dark:text-white">Not synced</strong>, with <strong class="text-gray-900 dark:text-white">Sync Now</strong> to copy the event at once or <strong class="text-gray-900 dark:text-white">Remove</strong> to take it off the calendar. Both act immediately, not with Save (with unsaved changes on the form they ask you to save first), and anything that goes wrong is said on the calendar's own line. After either one the page comes back on Calendar sync. An event that is not synced says why: a Draft or Internal event is not copied because only an event guests can see is, a cancelled event is not copied while it is cancelled, and any other event is copied the next time you save it. A Draft, Internal or cancelled event is not offered <strong class="text-gray-900 dark:text-white">Sync Now</strong>. The Listing tab's summary names a calendar the event should be in and is not, as in "Public &middot; Google: Not synced".</p>
 
+        @if ($guideOutlook)
         <p class="text-gray-600 dark:text-gray-300 mb-6">For connecting a calendar and choosing the direction of the sync, see <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-google" class="doc-link">Google Calendar</a> and <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="doc-link">Outlook Calendar</a>.</p>
+        @else
+        <p class="text-gray-600 dark:text-gray-300 mb-6">For connecting a calendar and choosing the direction of the sync, see <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-google" class="doc-link">Google Calendar</a>.</p>
+        @endif
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">What gets synced</div>
@@ -1133,7 +1148,7 @@
             <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> - Add tickets or free registration to your events</li>
             <li><a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> - Create promotional images</li>
             <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a> - Share, embed, and subscribe to your events</li>
-            <li><a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Calendar Integrations</a> - Set up Google Calendar, Outlook, and CalDAV sync</li>
+            <li><a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Calendar Integrations</a> - Set up {{ $guideOutlook ? 'Google Calendar, Outlook, and CalDAV' : 'Google Calendar and CalDAV' }} sync</li>
             <li><a href="{{ route('marketing.docs.managing_schedules') }}" class="doc-link">Managing Schedules</a> - Templates, cloning, and day-to-day upkeep</li>
         </ul>
     </section>

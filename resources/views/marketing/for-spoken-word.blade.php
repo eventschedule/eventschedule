@@ -840,7 +840,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for open mics and readings?',
-                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, turning your nights\' flyers into a shareable events graphic, and syncing with Google, Outlook, or CalDAV are all free forever, and no ceiling sits on the sign-ups. Charging at the door is the Pro plan at '.plan_price($proMonthly).' a month, which also adds custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
+                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, turning your nights\' flyers into a shareable events graphic, and syncing with '.(outlook_sync_enabled() ? 'Google, Outlook, or CalDAV' : 'Google or CalDAV').' are all free forever, and no ceiling sits on the sign-ups. Charging at the door is the Pro plan at '.plan_price($proMonthly).' a month, which also adds custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
             ],
             [
                 'q' => 'Can poets sign up for a slot themselves?',
@@ -1117,7 +1117,7 @@
                         </li>
                     </ol>
                     <p class="sw-foot">
-                        Free also covers unlimited events, two-way Google, Outlook, and CalDAV sync, an embeddable calendar, online and hybrid readings, a waitlist for a full night, and a calendar feed anyone can subscribe to, so a moved night updates itself.
+                        Free also covers unlimited events, two-way {{ outlook_sync_enabled() ? 'Google, Outlook, and CalDAV' : 'Google and CalDAV' }} sync, an embeddable calendar, online and hybrid readings, a waitlist for a full night, and a calendar feed anyone can subscribe to, so a moved night updates itself.
                     </p>
                     <span class="sw-folio" aria-hidden="true">5</span>
                 </div>
@@ -1238,7 +1238,7 @@
                         <div class="sw-item">
                             <span class="sw-item-pil" aria-hidden="true">&para;</span>
                             <h3>It is in their calendar, not just yours</h3>
-                            <p>Two-way sync with Google, Outlook, and CalDAV on your side. On theirs, an .ics download for any one date, or a live feed of the whole series that updates itself when a night moves.</p>
+                            <p>Two-way sync with {{ outlook_sync_enabled() ? 'Google, Outlook, and CalDAV' : 'Google and CalDAV' }} on your side. On theirs, an .ics download for any one date, or a live feed of the whole series that updates itself when a night moves.</p>
                         </div>
                         <div class="sw-item">
                             <span class="sw-item-pil" aria-hidden="true">&para;</span>

@@ -803,7 +803,7 @@
         $teacherEs = [
             'Lesson types with your weekly hours, date overrides for the weeks you are away, and buffers between students.',
             'A booking page of your own. A student picks an open time and gets a calendar invite, a reminder about a day before, and a private link to move or cancel it.',
-            'Sync with Google Calendar or Outlook, so a gig or an appointment there takes its time off the page.',
+            'Sync with Google Calendar'.(outlook_sync_enabled() ? ' or Outlook' : '').', so a gig or an appointment there takes its time off the page.',
             'Put a price on a lesson and take it through Stripe, PayPal, Payfast or a payment link, with no platform fee.',
         ];
         $teacherSa = [

@@ -39,7 +39,7 @@
             ['q' => 'What is a gig calendar?', 'a' => 'A gig calendar is a public list of your upcoming performances: the date, the time you go on, the venue and town, who else is on the bill and how to get in. Fans use it to find your next show, bookers use it to see whether you are working and where, and festivals use it to check you are active. It works best as one link that you keep current and put everywhere, rather than dates copied by hand into a website, a bio and a press kit.'],
             ['q' => 'Should I put private gigs on my public calendar?', 'a' => 'No. Weddings, corporate events and house parties are bookings, not shows, and the client rarely wants the address public. Keep them for your own planning instead: an event saved as a Draft is seen only by your schedule\'s members, on every plan. On Enterprise, Internal keeps an event members-only for good, and Unlisted gives it a link that is not shown on your page, with an optional password.'],
             ['q' => 'Can a venue add me to their event without asking me?', 'a' => 'They can name you on their event, but once you run your own schedule the date does not appear on it until you accept, unless that schedule had already listed you before you claimed your page. It waits on your Requests tab, and if you decline it never reaches your page. Before you have a schedule, naming you creates a page in your name that says it has not been claimed, credits each date to the schedule that added it and stays out of search engines. Claim it with the email address they entered, or press This is not me.'],
-            ['q' => 'Can I sync my gig calendar with Google Calendar?', 'a' => 'Yes, free on every plan, and Outlook and CalDAV calendars work the same way. Choose a calendar and a direction: send your gigs to it, read events in from it, or both. Events read in wait as drafts until you publish them, unless you switch on publishing them automatically, and entries your calendar marks private, invitations you declined and out-of-office blocks are never read in. One thing to know: a recurring event goes to the calendar as a single entry on its first date, so fans who want every night of a residency should subscribe to your iCal feed instead.'],
+            ['q' => 'Can I sync my gig calendar with Google Calendar?', 'a' => 'Yes, free on every plan, and '.(outlook_sync_enabled() ? 'Outlook and CalDAV calendars work' : 'CalDAV calendars work').' the same way. Choose a calendar and a direction: send your gigs to it, read events in from it, or both. Events read in wait as drafts until you publish them, unless you switch on publishing them automatically, and entries your calendar marks private, invitations you declined and out-of-office blocks are never read in. One thing to know: a recurring event goes to the calendar as a single entry on its first date, so fans who want every night of a residency should subscribe to your iCal feed instead.'],
             ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Your dates are public the moment you add them, on your schedule page and in your iCal and RSS feeds, and a fan can subscribe to your calendar from the sign-up panel on your page so a moved date updates itself. Switch on the "Notify me" card and, on a show that is not on sale yet, a fan can leave an email address to hear when tickets go on sale. A fan who signs up on your page and confirms their address gets a digest automatically when you announce new shows, at most one every few days, and it does not draw on your newsletter allowance. Beyond that you write the newsletter yourself: 10 newsletter emails a month on the free plan and 100 on Pro, counted per recipient. Any plan can also generate a shareable graphic of your upcoming shows, and Pro lets you boost events with Meta Ads.'],
         ];
     @endphp
@@ -274,7 +274,7 @@
         badge="Announce it once"
         heading="Add the date once. It shows up everywhere."
         lede="Your schedule page, your own website, and the calendar of every fan who subscribes from your page. Add a show in one place and every one of them updates, including the calendar you already live in."
-        :chips="['Website embed', 'Google, Outlook, CalDAV', 'iCal and RSS feeds', 'Free']"
+        :chips="['Website embed', outlook_sync_enabled() ? 'Google, Outlook, CalDAV' : 'Google, CalDAV', 'iCal and RSS feeds', 'Free']"
         :flip="true"
         ground="gray"
         frame="browser"
@@ -294,7 +294,7 @@
                 @endforeach
             </div>
             <div class="mt-3 flex flex-wrap gap-1.5">
-                @foreach (['Google', 'Outlook', 'CalDAV', 'iCal', 'RSS'] as $sync)
+                @foreach (array_filter(['Google', outlook_sync_enabled() ? 'Outlook' : null, 'CalDAV', 'iCal', 'RSS']) as $sync)
                     <span class="rounded-md border border-gray-200 px-1.5 py-0.5 text-[9px] font-medium text-gray-500 dark:border-white/10 dark:text-gray-400">{{ $sync }}</span>
                 @endforeach
             </div>
@@ -492,7 +492,7 @@
                     </div>
                     <div>
                         <p class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-300">Your calendar sends it</p>
-                        <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">Connect Google Calendar, Outlook or CalDAV, free. Events read in from your calendar wait as drafts until you publish them, unless you choose to publish them automatically, and entries marked private, declined invitations and out-of-office blocks are never read in.</p>
+                        <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">Connect {{ outlook_sync_enabled() ? 'Google Calendar, Outlook or CalDAV' : 'Google Calendar or CalDAV' }}, free. Events read in from your calendar wait as drafts until you publish them, unless you choose to publish them automatically, and entries marked private, declined invitations and out-of-office blocks are never read in.</p>
                     </div>
                 </div>
             </div>
@@ -626,7 +626,7 @@
                         @endforeach
                     </ol>
                     <p class="mt-auto pt-5 text-sm text-gray-600 dark:text-gray-400">
-                        A recurring event goes to a connected Google, Outlook or CalDAV calendar as one entry on its first date, so send fans the feed, not your own calendar. More on <x-link href="{{ marketing_url('/features/recurring-events') }}" class="text-blue-700 dark:text-blue-300">recurring events</x-link> and how they reach calendars.
+                        A recurring event goes to a connected {{ outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV' }} calendar as one entry on its first date, so send fans the feed, not your own calendar. More on <x-link href="{{ marketing_url('/features/recurring-events') }}" class="text-blue-700 dark:text-blue-300">recurring events</x-link> and how they reach calendars.
                     </p>
                 </div>
 
@@ -724,7 +724,7 @@
                         @foreach ([
                             'Unlimited events on your own schedule URL',
                             'Booking requests from venues and curators',
-                            '<a href="' . marketing_url('/features/calendar-sync') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Google Calendar, Outlook and CalDAV sync</a>',
+                            '<a href="' . marketing_url('/features/calendar-sync') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">' . (outlook_sync_enabled() ? 'Google Calendar, Outlook and CalDAV sync' : 'Google Calendar and CalDAV sync') . '</a>',
                             'Website embed, iCal and RSS feeds',
                             '<a href="' . marketing_url('/features/online-events') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Online and hybrid shows</a> with a link to wherever it happens',
                             'Free registration with a capacity, no monthly ceiling, and QR scanning at the door',

@@ -1643,7 +1643,7 @@
         <!-- ============================================================ -->
         @php
             $djFeeds = [
-                ['From your calendar', 'Gigs already in Google Calendar', 'Keep one calendar just for gigs, connect it under Integrations and choose From Google Calendar. New entries wait as drafts for you to publish, or switch on Publish new events automatically. Private entries and declined invitations stay off your page. Outlook and CalDAV work the same way, free on every plan.'],
+                ['From your calendar', 'Gigs already in Google Calendar', 'Keep one calendar just for gigs, connect it under Integrations and choose From Google Calendar. New entries wait as drafts for you to publish, or switch on Publish new events automatically. Private entries and declined invitations stay off your page. '.(outlook_sync_enabled() ? 'Outlook and CalDAV work the same way' : 'CalDAV works the same way').', free on every plan.'],
                 ['From a flyer or an email', 'The booking, read for you', 'Open Actions, Import Events and drop in the flyer the club sent, or paste the booking email. The name, date, time and venue are read out for you to check before anything is saved. Free, up to 50 reads a day.'],
                 ['From a club\'s website', 'Their listings page', 'Paste the address of a club\'s events page. A page that carries structured event data is read directly, and others are read by AI. Facebook and Instagram cannot be read from a link, so use a screenshot of those.'],
             ];
@@ -1794,7 +1794,7 @@
                         ['Ticketing', 'Sell tickets with QR check-in and zero platform fees', marketing_url('/features/ticketing')],
                         ['Event Graphics', 'Auto-generate set-time flyers sized for your socials', marketing_url('/features/event-graphics')],
                         ['Newsletters', 'Send event updates directly to followers\' inboxes', marketing_url('/features/newsletters')],
-                        ['Calendar Sync', 'Two-way sync with Google, Outlook and CalDAV', marketing_url('/features/calendar-sync')],
+                        ['Calendar Sync', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV'), marketing_url('/features/calendar-sync')],
                     ];
                 @endphp
                 <div class="dj-sends" data-reveal>

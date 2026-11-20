@@ -511,7 +511,7 @@
             ],
             [
                 'q' => 'Where exactly does a hidden event disappear from?',
-                'a' => 'Your public schedule page and its calendar, the public iCal feed (the live calendar guests can subscribe to from an event\'s Add to Calendar menu) and the RSS feed, the XML sitemap, the discovery search on eventschedule.com, the automatic digest of new events your email subscribers get, the upcoming-events block in a newsletter, and the generated event graphics. A hidden event also cannot be put behind an on-network promotion, and the "Tell me when tickets go on sale" sign-up is not offered on it. The one door left open is the direct link, and only for Unlisted.',
+                'a' => 'Your public schedule page and its calendar, the public iCal feed (the live calendar guests can subscribe to from an event\'s Add to Calendar menu) and the RSS feed, the XML sitemap, the discovery search on eventschedule.com, the automatic digest of new events your email subscribers get, the upcoming-events block in a newsletter, and the generated event graphics.'.(config('ads.enabled') && config('ads.native_enabled') ? ' A hidden event also cannot be put behind an on-network promotion, and the "Tell me when tickets go on sale" sign-up is not offered on it.' : ' The "Tell me when tickets go on sale" sign-up is not offered on it either.').' The one door left open is the direct link, and only for Unlisted.',
             ],
             [
                 'q' => 'Who can see an unlisted event?',
@@ -519,7 +519,7 @@
             ],
             [
                 'q' => 'Does a private event still sync to my own calendar?',
-                'a' => 'Draft and Internal events are never pushed to a connected calendar at all. An Unlisted event is pushed, and it is written as private: private visibility on Google, private sensitivity on Outlook, and CLASS:PRIVATE on CalDAV. The public iCal and RSS feeds your visitors subscribe to leave all three out.',
+                'a' => 'Draft and Internal events are never pushed to a connected calendar at all. An Unlisted event is pushed, and it is written as private: private visibility on Google, '.(outlook_sync_enabled() ? 'private sensitivity on Outlook, and ' : 'and ').'CLASS:PRIVATE on CalDAV. The public iCal and RSS feeds your visitors subscribe to leave all three out.',
             ],
             [
                 'q' => 'Can I sell tickets to an unlisted event?',
@@ -886,7 +886,9 @@
                             </div>
                             <p class="es-vault-muted mt-4 text-sm">Of the fan content only the counts survive, never a photo, a video or a line of a comment.</p>
                             <p class="es-vault-muted mt-3 text-sm">The locked page is also marked noindex and nofollow, and its social preview tags carry the password notice in place of the event: no name, no description and no flyer. The only picture is your schedule's own logo, or none at all if the schedule has no logo. Pasting the link into a chat gives nothing away.</p>
-                            <p class="es-vault-muted mt-3 text-sm">And if your schedule is on the free plan and shows ads, none are ever rendered in front of a password prompt.</p>
+                            @if (config('ads.enabled'))
+                                <p class="es-vault-muted mt-3 text-sm">And if your schedule is on the free plan and shows ads, none are ever rendered in front of a password prompt.</p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1017,6 +1019,10 @@
                 </p>
             </div>
 
+            {{-- Card 4 (promotions and ads) is there only where this install runs the promotions
+                 network (ads.enabled and ads.native_enabled). Without it, card 3 widens to close the
+                 second row and card 6 runs the full third row, so the grid has no hole either way. --}}
+            @php($promoLive = config('ads.enabled') && config('ads.native_enabled'))
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
                 <!-- 1 -->
                 <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
@@ -1050,7 +1056,7 @@
                 </div>
 
                 <!-- 3 -->
-                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                <div class="es-bento group relative{{ $promoLive ? '' : ' lg:col-span-2' }}" data-reveal="panel" data-tilt="5">
                     <div class="es-tilt-inner es-vault-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
@@ -1064,6 +1070,7 @@
                     </div>
                 </div>
 
+                @if ($promoLive)
                 <!-- 4 -->
                 <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner es-vault-card relative flex h-full flex-col overflow-hidden p-7">
@@ -1081,6 +1088,8 @@
                     </div>
                 </div>
 
+                @endif
+
                 <!-- 5 -->
                 <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
                     <div class="es-tilt-inner es-vault-card relative flex h-full flex-col overflow-hidden p-7">
@@ -1097,14 +1106,14 @@
                 </div>
 
                 <!-- 6 -->
-                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                <div class="es-bento group relative {{ $promoLive ? 'lg:col-span-2' : 'lg:col-span-3' }}" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner es-vault-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-vault-ink text-xl font-bold">Sync to your own calendar</h3>
                                 <span class="es-vault-plan es-vault-plan-free">Free</span>
                             </div>
-                            <p class="es-vault-muted mb-4">Draft and Internal events are never pushed to a connected calendar. An Unlisted event is pushed, and it is written as private: private visibility on Google, private sensitivity on Outlook, and CLASS:PRIVATE on CalDAV.</p>
+                            <p class="es-vault-muted mb-4">Draft and Internal events are never pushed to a connected calendar. An Unlisted event is pushed, and it is written as private: private visibility on Google, {{ outlook_sync_enabled() ? 'private sensitivity on Outlook, and' : 'and' }} CLASS:PRIVATE on CalDAV.</p>
                             <p class="es-vault-muted text-sm">
                                 That is the distinction that matters. Your own calendar is not a public surface, so an unlisted event belongs on it, marked for what it is.
                                 <a href="{{ marketing_url('/features/calendar-sync') }}" class="es-vault-link font-medium hover:underline">How calendar sync works</a>

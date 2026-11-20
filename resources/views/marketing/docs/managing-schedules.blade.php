@@ -990,6 +990,8 @@
             Below the plan, a <strong class="text-gray-900 dark:text-white">Referral Program</strong> card links to your referral dashboard, where referring other organizers earns free months. See <a href="{{ route('marketing.docs.referral_program') }}" class="doc-link">Referral Program</a>.
         </p>
 
+        {{-- Only where the install runs ads at all (ADS_ENABLED): this branch is hosted only. --}}
+        @if (config('ads.enabled'))
         <h3 id="plan-ads" class="doc-subheading">Ads on free schedules</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Some Event Schedule sites cover their costs by showing ads at the bottom of free schedules' public pages. Where that is switched on, upgrading to Pro removes them, in the same way it removes the "Powered by Event Schedule" credit, and a notice at the top of the Plan tab says so while your pages are showing them. Paid schedules never carry ads.
@@ -1004,6 +1006,7 @@
             <div class="doc-callout-title">Not enabled on eventschedule.com</div>
             <p>This is a per-site choice made by whoever runs the Event Schedule installation you are on, and it is off unless they turn it on. eventschedule.com does not show ads on free schedules, so if that is where your schedule lives, none of this applies to you.</p>
         </div>
+        @endif
         @else
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             The <strong class="text-gray-900 dark:text-white">Plan</strong> tab is part of the hosted version of Event Schedule (eventschedule.com), where it shows your subscription, your usage allowances and your billing. A selfhosted install has no subscription: every schedule already has the full Enterprise feature set, with no newsletter or photo caps.

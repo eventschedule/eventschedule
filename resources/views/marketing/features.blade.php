@@ -83,7 +83,7 @@
             ['seating', 'sell', 'Reserved seating', 'ent', 'Draw the room once and buyers pick their own seats off the map.', null, '/features/allocated-seating', 'seat map allocated assigned box office seats', 'tickets'],
 
             ['recurring', 'schedule', 'Recurring events', 'free', 'Daily, weekly, every few weeks, monthly or yearly, with single dates added or skipped.', null, '/features/recurring-events', 'repeat repeating weekly monthly series', null],
-            ['sync', 'schedule', 'Calendar sync', 'free', 'Two-way sync with Google Calendar, Outlook and any CalDAV server.', null, '/features/calendar-sync', 'google outlook caldav ical apple microsoft 365 feed', null],
+            ['sync', 'schedule', 'Calendar sync', 'free', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google Calendar, Outlook and any CalDAV server' : 'Google Calendar and any CalDAV server').'.', null, '/features/calendar-sync', (outlook_sync_enabled() ? 'google outlook caldav ical apple microsoft 365 feed' : 'google caldav ical apple feed'), null],
             ['import', 'schedule', 'AI import', 'free', 'Paste text, a link or a flyer and the details are read into an event.', 'Daily limits apply.', '/features/ai', 'flyer parse paste poster link', null],
             ['subs', 'schedule', 'Sub-schedules', 'free', 'Sort events by stage, series or room. Each one gets a colour, a visitor filter and its own URL.', null, '/features/sub-schedules', 'stage room category filter', null],
             ['online', 'schedule', 'Online events', 'free', 'Tick Online and paste the link people join on: Zoom, YouTube, Teams or your own page.', null, '/features/online-events', 'virtual zoom stream webinar teams youtube', null],
@@ -1379,7 +1379,7 @@
                     <div class="fb-with" data-reveal>
                         <h3>Works with what you already use</h3>
                         <ul>
-                            @foreach ([['google', 'Google Calendar', '/google-calendar'], ['outlook', 'Outlook', '/outlook-calendar'], ['caldav', 'CalDAV', '/caldav'], ['stripe', 'Stripe', '/stripe'], ['invoiceninja', 'Invoice Ninja', '/invoiceninja']] as [$fbLogo, $fbLogoName, $fbLogoPath])
+                            @foreach ([['google', 'Google Calendar', '/google-calendar'], ...(outlook_sync_enabled() ? [['outlook', 'Outlook', '/outlook-calendar']] : []), ['caldav', 'CalDAV', '/caldav'], ['stripe', 'Stripe', '/stripe'], ['invoiceninja', 'Invoice Ninja', '/invoiceninja']] as [$fbLogo, $fbLogoName, $fbLogoPath])
                                 <li>
                                     <a href="{{ marketing_url($fbLogoPath) }}">
                                         @include('marketing.partials.integration-logo', ['name' => $fbLogo, 'class' => 'fb-with-logo'])
@@ -1428,12 +1428,18 @@
             ['Individual tickets', 'Every guest on an order gets their own email and their own QR code', 'Pro', '/features/ticketing#individual-tickets'],
             ['Refunds, full or partial', 'Money goes back through Stripe, PayPal or Razorpay, straight from the Sales page', 'Pro', '/features/ticketing#refunds'],
             ['Interest list', 'A "tell me when tickets go on sale" option that asks only for an email', 'Free', '/features/ticketing#interest-list'],
-            // Apple named only where it is configured (env only, so safe in edge-cached HTML).
-            [\App\Services\Wallet\AppleWalletService::isConfigured() ? 'Google and Apple Wallet' : 'Add to Google Wallet', 'Buyers save the ticket, QR and all, once the site operator switches it on', 'Free', '/features/integrations#google-wallet'],
+            // A feature this install has not switched on is not listed (eventschedule.com runs without
+            // some): its row gives its place to another true one, so the grid keeps its full rows.
+            // Apple is named only where it is configured. All env only, so safe in edge-cached HTML.
+            \App\Services\Wallet\GoogleWalletService::isConfigured()
+                ? [\App\Services\Wallet\AppleWalletService::isConfigured() ? 'Google and Apple Wallet' : 'Add to Google Wallet', 'Buyers save the ticket, QR and all, to the wallet on their phone', 'Free', '/features/integrations#google-wallet']
+                : ['Short links', 'A short address on your schedule\'s domain for each of its social links, with clicks counted', 'Free', '/features/analytics'],
             ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro', '/features/ticketing#attendee-import'],
             ['Sales CSV export', 'Every sale across every schedule you own, custom fields included', 'Pro', '/features/ticketing#sales-export'],
             ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the type and the amount', 'Pro', '/features/ticketing#sale-notifications'],
-            ['Push notifications', 'Browser and mobile web push mirroring your email alerts', 'Pro', '/features/integrations#web-push'],
+            \App\Services\OneSignalService::isConfigured()
+                ? ['Push notifications', 'Browser and mobile web push mirroring your email alerts', 'Pro', '/features/integrations#web-push']
+                : ['Automatic translation', 'A second language for your schedule and its events, with a glossary for your own names', 'Free', '/features/ai'],
             ['Eventbrite import', 'Bring an existing run of events across in one go', 'Pro', '/features/integrations#eventbrite'],
             ['Import from a link', 'Paste your events page or a calendar address and up to 100 events come across', 'Free', '/features/ai#link-import'],
             ['Feeds from other sites', 'A calendar, an RSS feed or an events page your schedule re-reads about once an hour', 'Enterprise', '/features/ai#feeds'],
@@ -1451,7 +1457,9 @@
             ['Event sources for curators', 'Follow venue and act schedules and everything they publish lands on your guide', 'Free', '/features/lineup#sources'],
             ['Venue logo wall', 'A header of the venues you play, or the acts you host, from your approved events', 'Free', '/features/lineup#wall'],
             ['Announcement banner', 'A banner of your own across the top of your schedule\'s public pages', 'Pro', '/features/white-label#banner'],
-            ['Nearby accommodation map', 'Lodging near the venue on your event pages, once the site operator switches it on', 'Free', '/features/integrations#accommodation-map'],
+            \App\Services\Stay22Service::isEnabled()
+                ? ['Nearby accommodation map', 'Lodging near the venue on your event pages', 'Free', '/features/integrations#accommodation-map']
+                : ['Import from Google Calendar', 'Bring the events of a Google calendar onto your schedule in one pass', 'Free', '/features/calendar-sync'],
         ];
         // A plan's rows are only the part of it that has no section above, so pressing a plan
         // used to answer "what is on Enterprise?" with two rows. These are the rest of each

@@ -29,7 +29,8 @@ class PlanRateCard
             ['What it costs', plan_price(0).', permanently', plan_price($proMonthly).' / month or '.plan_price($proYearly).' / year', plan_price($entMonthly).' / month or '.plan_price($entYearly).' / year'],
             ['Events on your schedule', 'Unlimited', 'Unlimited', 'Unlimited'],
             ['Public page, embed and QR code', 'Yes', 'Yes', 'Yes'],
-            ['Two-way Google, Outlook and CalDAV sync', 'Yes', 'Yes', 'Yes'],
+            // Outlook is named only where an Azure app is set (outlook_sync_enabled()).
+            [outlook_sync_enabled() ? 'Two-way Google, Outlook and CalDAV sync' : 'Two-way Google and CalDAV sync', 'Yes', 'Yes', 'Yes'],
             ['Built-in analytics', 'Yes', 'Yes', 'Yes'],
             ['Free registration with a capacity limit', 'Yes', 'Yes', 'Yes'],
             ['Newsletter emails a month (each recipient counts as one)', '10', '100', '1,000'],

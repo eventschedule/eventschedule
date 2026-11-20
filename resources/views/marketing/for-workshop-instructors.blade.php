@@ -1333,7 +1333,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for workshop instructors?',
-                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever, with no limit on how many students sign up. So is scanning the QR at the door, on every plan. Putting a price on a spot is the Pro plan at '.plan_price($proMonthly).' a month, along with multi-class cards, your own questions on a free registration form or once per order, and the live check-in screen (questions on a ticket type, even one at no charge, are free), and Event Schedule charges zero platform fees on what you sell.',
+                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').' are all free forever, with no limit on how many students sign up. So is scanning the QR at the door, on every plan. Putting a price on a spot is the Pro plan at '.plan_price($proMonthly).' a month, along with multi-class cards, your own questions on a free registration form or once per order, and the live check-in screen (questions on a ticket type, even one at no charge, are free), and Event Schedule charges zero platform fees on what you sell.',
             ],
             [
                 'q' => 'Can I run different kinds of workshops on one schedule?',
@@ -2330,7 +2330,7 @@
                             <h3 class="wi-h3">On the studio site you already have</h3>
                             <span class="wi-tier">Free</span>
                         </div>
-                        <p class="wi-p">Embed the calendar on your own site so the term lives where people look you up, and sync two ways with Google, Outlook and CalDAV. A recurring class crosses as a single entry rather than ten, so the term itself stays here where the seats are counted.</p>
+                        <p class="wi-p">Embed the calendar on your own site so the term lives where people look you up, and sync two ways with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}. A recurring class crosses as a single entry rather than ten, so the term itself stays here where the seats are counted.</p>
                         <p class="wi-p">Built-in analytics show page views, the devices people are on and where the traffic came from. That is what they measure, and nothing more.</p>
                         <div class="wi-prop" aria-hidden="true">
                             <div class="wi-embed">
@@ -2466,7 +2466,7 @@
                         ['Recurring Events', 'One class, a weekly pattern, ending after a set number of sessions', marketing_url('/features/recurring-events')],
                         ['Ticketing', 'Named ticket types, class cards, QR check-in and zero platform fees', marketing_url('/features/ticketing')],
                         ['Newsletters', 'Email the students who follow you, with open and click rates', marketing_url('/features/newsletters')],
-                        ['Calendar Sync', 'Two-way sync with Google, Outlook and CalDAV', marketing_url('/features/calendar-sync')],
+                        ['Calendar Sync', outlook_sync_enabled() ? 'Two-way sync with Google, Outlook and CalDAV' : 'Two-way sync with Google and CalDAV', marketing_url('/features/calendar-sync')],
                     ];
                 @endphp
                 <div class="wi-drawers" data-reveal-group="70">

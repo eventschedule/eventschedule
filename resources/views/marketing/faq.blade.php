@@ -606,7 +606,7 @@
                     ],
                     [
                         'q' => 'Is Event Schedule really free?',
-                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and 10 newsletter emails a month (each recipient counts as one) all cost nothing, permanently. Registration stays free however many people sign up, and so does a ticket type priced at zero. Charging for a ticket is what moves you to Pro, along with a short list of other things, and the rate card above sets out exactly which.',
+                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and 10 newsletter emails a month (each recipient counts as one) all cost nothing, permanently. Registration stays free however many people sign up, and so does a ticket type priced at zero. Charging for a ticket is what moves you to Pro, along with a short list of other things, and the rate card above sets out exactly which.',
                         'links' => [['Pricing', marketing_url('/pricing')]],
                     ],
                     [
@@ -746,7 +746,7 @@
                 'items' => [
                     [
                         'q' => 'Does Event Schedule sync with Google Calendar?',
-                        'a' => 'Yes, both ways, on the free plan. Events you create here appear in the Google Calendar you connect, and events you add there come back here. Google pushes changes over a webhook rather than waiting for a nightly job. Outlook and Microsoft 365 sync the same way, and CalDAV covers the rest. You also choose, per schedule, what should happen locally when an event is deleted in the external calendar: keep it, mark it cancelled, or delete it too.',
+                        'a' => 'Yes, both ways, on the free plan. Events you create here appear in the Google Calendar you connect, and events you add there come back here. Google pushes changes over a webhook rather than waiting for a nightly job. '.(outlook_sync_enabled() ? 'Outlook and Microsoft 365 sync the same way, and CalDAV covers the rest.' : 'CalDAV covers the rest.').' You also choose, per schedule, what should happen locally when an event is deleted in the external calendar: keep it, mark it cancelled, or delete it too.',
                         'links' => [['Google Calendar sync', marketing_url('/google-calendar')], ['All calendar sync', marketing_url('/features/calendar-sync')]],
                     ],
                     [

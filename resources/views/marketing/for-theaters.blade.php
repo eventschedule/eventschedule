@@ -1077,7 +1077,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theaters?',
-                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, as is free registration however many seats go out, and scanning tickets at the door is free on every plan. Putting a price on a seat is what the Pro plan at '.plan_price($proMonthly).' a month opens, and it adds the live check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
+                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').' are all free forever, as is free registration however many seats go out, and scanning tickets at the door is free on every plan. Putting a price on a seat is what the Pro plan at '.plan_price($proMonthly).' a month opens, and it adds the live check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
             ],
             [
                 'q' => 'How do I set up a multi-week run?',
@@ -1878,7 +1878,7 @@
                             <h3 class="th-d">On the site you already have</h3>
                             <span class="th-caps th-tier">Free</span>
                         </div>
-                        <p>Embed the calendar on your own site so the season lives where people look you up, and sync two ways with Google, Outlook and CalDAV.</p>
+                        <p>Embed the calendar on your own site so the season lives where people look you up, and sync two ways with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}.</p>
                         <p class="th-fine">Built-in analytics show page views, the devices people are on and where the traffic came from, and for each production how many tickets sold and how many people came through the door.</p>
                     </article>
 

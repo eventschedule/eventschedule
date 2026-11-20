@@ -1549,7 +1549,7 @@
                         ['Ticketing', 'Sell tickets with QR check-in and zero platform fees', marketing_url('/features/ticketing')],
                         ['Event Graphics', 'Show posters generated from your events, on every plan', marketing_url('/features/event-graphics')],
                         ['Newsletters', 'Write your own updates and send them to your followers', marketing_url('/features/newsletters')],
-                        ['Calendar Sync', 'Two-way sync with Google, Outlook and CalDAV', marketing_url('/features/calendar-sync')],
+                        ['Calendar Sync', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV'), marketing_url('/features/calendar-sync')],
                     ];
                 @endphp
                 <div class="ci-table" data-reveal>

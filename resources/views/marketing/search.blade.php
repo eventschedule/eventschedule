@@ -1078,7 +1078,7 @@
                                 <h3 class="es-look-ink text-xl font-bold">Sync both ways</h3>
                                 <span class="es-look-plan">Free</span>
                             </div>
-                            <p class="es-look-muted">Two-way sync with Google Calendar, Outlook and CalDAV, so the calendar you already keep stays the one you keep.</p>
+                            <p class="es-look-muted">Two-way sync with {{ outlook_sync_enabled() ? 'Google Calendar, Outlook and CalDAV' : 'Google Calendar and CalDAV' }}, so the calendar you already keep stays the one you keep.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

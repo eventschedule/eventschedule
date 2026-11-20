@@ -1053,7 +1053,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for farmers markets?',
-                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way Google, Outlook and CalDAV sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Charging a pitch fee is the one part that needs Pro at '.plan_price($proMonthly).' a month, and there are zero platform fees on what you take whatever the plan.',
+                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Charging a pitch fee is the one part that needs Pro at '.plan_price($proMonthly).' a month, and there are zero platform fees on what you take whatever the plan.',
             ],
             [
                 'q' => 'How do I set up a whole market season at once?',

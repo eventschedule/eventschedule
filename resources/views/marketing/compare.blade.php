@@ -912,7 +912,7 @@
                 <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
                         <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Two-way calendar sync</h3>
-                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">Google Calendar, Outlook and any CalDAV server, syncing both directions, included free on every plan.</p>
+                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">{{ outlook_sync_enabled() ? 'Google Calendar, Outlook and any CalDAV server' : 'Google Calendar and any CalDAV server' }}, syncing both directions, included free on every plan.</p>
                         <div class="mt-auto rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-black/20" aria-hidden="true">
                             <div class="flex items-center justify-between gap-2">
                                 <div class="w-[38%] rounded-xl border border-blue-200 bg-blue-50 px-2 py-2.5 text-center dark:border-blue-500/30 dark:bg-blue-500/10">

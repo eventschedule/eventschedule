@@ -990,7 +990,7 @@
         $faqs = [
             [
                 'q' => 'What video platforms does Event Schedule work with?',
-                'a' => 'Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, Webex, YouTube Live, Twitch, Vimeo, something you host yourself. An online event carries one Event URL field, and Event Schedule stores whatever you paste into it. To be plain about what that means: there is no account connected to a platform, nothing signs in on your behalf and no meeting is started for you, so there is also nothing to reconnect and nothing that breaks when a platform changes its API. The one exception runs the other way: if you sync a Microsoft 365 calendar you can ask it to create a Teams meeting for online events, and the join link it returns is written back into the field for you.',
+                'a' => 'Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, Webex, YouTube Live, Twitch, Vimeo, something you host yourself. An online event carries one Event URL field, and Event Schedule stores whatever you paste into it. To be plain about what that means: there is no account connected to a platform, nothing signs in on your behalf and no meeting is started for you, so there is also nothing to reconnect and nothing that breaks when a platform changes its API.'.(outlook_sync_enabled() ? ' The one exception runs the other way: if you sync a Microsoft 365 calendar you can ask it to create a Teams meeting for online events, and the join link it returns is written back into the field for you.' : ''),
             ],
             [
                 'q' => 'Is the join link visible to the public?',
@@ -1319,6 +1319,7 @@
                             </div>
                             <p>No sign-in, no token, no account linked to your meeting provider. Event Schedule stores the string you paste and hands it to the people who registered, which means a platform changing its API cannot break your schedule.</p>
                         </div>
+                        @if (outlook_sync_enabled())
                         <div class="wb-tb-row" data-reveal>
                             <span class="wb-key wb-key-cyan" aria-hidden="true">Teams</span>
                             <div class="wb-tb-head">
@@ -1327,6 +1328,7 @@
                             </div>
                             <p>Sync a Microsoft 365 calendar and you can ask it to create a Teams meeting for your online sessions. The join link it returns is written back into the Event URL field for you, so you never copy it by hand.</p>
                         </div>
+                        @endif
                         <div class="wb-tb-row" data-reveal>
                             <span class="wb-key wb-key-amber" aria-hidden="true">Hybrid</span>
                             <div class="wb-tb-head">
@@ -1767,7 +1769,7 @@
                                 <h3>In the calendar you live in</h3>
                                 <span class="wb-tier">Free</span>
                             </div>
-                            <p>Two-way sync with Google, Outlook and CalDAV. Move a session in either place and the other one follows. A recurring series syncs across as one entry; the subscribe feed is what unrolls the individual dates. Your audience can subscribe to that feed from your schedule's public pages, with no email address, and it carries each session's public page, never the join link.</p>
+                            <p>Two-way sync with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}. Move a session in either place and the other one follows. A recurring series syncs across as one entry; the subscribe feed is what unrolls the individual dates. Your audience can subscribe to that feed from your schedule's public pages, with no email address, and it carries each session's public page, never the join link.</p>
                         </div>
                         <!-- 4 -->
                         <div class="wb-item" data-reveal>

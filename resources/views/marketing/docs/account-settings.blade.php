@@ -1,3 +1,11 @@
+{{-- A feature an operator switches on with credentials is described only where it can be used:
+     on hosted its section is hidden while it is off, so its passage is too. A selfhost operator reads
+     about it either way. --}}
+@php
+    $guideOutlook = outlook_sync_offered();
+    $guideFacebook = facebook_login_enabled() || ! config('app.hosted');
+    $guidePromotions = config('ads.enabled') || ! config('app.hosted');
+@endphp
 <x-docs-page
     key="account-settings"
     title="Account Settings: Payments, API, Calendars - Event Schedule"
@@ -28,8 +36,12 @@
         </x-doc-nav-group>
         <x-doc-nav-group label="Integrations">
             <x-doc-nav-link href="#google">Google Settings</x-doc-nav-link>
+            @if ($guideOutlook)
             <x-doc-nav-link href="#microsoft">Outlook Calendar</x-doc-nav-link>
+            @endif
+            @if ($guideFacebook)
             <x-doc-nav-link href="#facebook">Facebook Settings</x-doc-nav-link>
+            @endif
         </x-doc-nav-group>
         <x-doc-nav-group label="Boosts">
             <x-doc-nav-link href="#boosts">Boosts</x-doc-nav-link>
@@ -91,7 +103,15 @@
                     </tr>
                     <tr>
                         <td>Integrations</td>
+                        @if ($guideOutlook && $guideFacebook)
                         <td><a href="#google" class="doc-link">Google Settings</a>, <a href="#microsoft" class="doc-link">Outlook Calendar</a> and, where Facebook login is enabled, <a href="#facebook" class="doc-link">Facebook Settings</a></td>
+                        @elseif ($guideOutlook)
+                        <td><a href="#google" class="doc-link">Google Settings</a>, then <a href="#microsoft" class="doc-link">Outlook Calendar</a></td>
+                        @elseif ($guideFacebook)
+                        <td><a href="#google" class="doc-link">Google Settings</a> and, where Facebook login is enabled, <a href="#facebook" class="doc-link">Facebook Settings</a></td>
+                        @else
+                        <td><a href="#google" class="doc-link">Google Settings</a></td>
+                        @endif
                     </tr>
                     <tr>
                         <td><a href="#boosts" class="doc-link">Boosts</a></td>
@@ -140,7 +160,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Phone Number</span></td>
-                        <td>Optional, in international format. On the hosted platform you can verify it by SMS. A verified number is required before you can buy <a href="{{ route('marketing.docs.boost') }}" class="doc-link">ad campaigns</a> and on-network promotions, and it lets a schedule without its own email settings send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> and automatic new-event emails to more than 50 people at once. If one of your schedules uses the same number, that schedule's number counts as verified too.</td>
+                        <td>Optional, in international format. On the hosted platform you can verify it by SMS. A verified number is required before you can buy <a href="{{ route('marketing.docs.boost') }}" class="doc-link">ad campaigns</a>{{ $guidePromotions ? ' and on-network promotions' : '' }}, and it lets a schedule without its own email settings send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> and automatic new-event emails to more than 50 people at once. If one of your schedules uses the same number, that schedule's number counts as verified too.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Default schedule</span></td>
@@ -458,7 +478,12 @@
 
         <x-doc-screenshot id="account-settings--security" alt="The Security tab of Settings: Update Password first, then Two-Factor Authentication" />
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            If your account was created by signing in with Google or Facebook it has no password yet, and the section is titled <strong class="text-gray-900 dark:text-white">Set Password</strong> instead. It first asks you to confirm who you are with that account, through <strong class="text-gray-900 dark:text-white">Verify with Google</strong> or <strong class="text-gray-900 dark:text-white">Verify with Facebook</strong>; after that you have five minutes to choose a password, and only the new password field is shown.
+        @if ($guideFacebook)
+            If your account was created by signing in with Google or Facebook it has no password yet, and the section is titled <strong class="text-gray-900 dark:text-white">Set Password</strong> instead. It first asks you to confirm who you are with that account, through <strong class="text-gray-900 dark:text-white">Verify with Google</strong> or <strong class="text-gray-900 dark:text-white">Verify with Facebook</strong>;
+        @else
+            If your account was created by signing in with Google it has no password yet, and the section is titled <strong class="text-gray-900 dark:text-white">Set Password</strong> instead. It first asks you to confirm who you are with that account, through <strong class="text-gray-900 dark:text-white">Verify with Google</strong>;
+        @endif
+            after that you have five minutes to choose a password, and only the new password field is shown.
         </p>
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
@@ -478,12 +503,12 @@
             The second section of the <strong class="text-gray-900 dark:text-white">Security</strong> entry. Two-factor authentication (2FA) adds a second step when you sign in with your password: a 6-digit code from an authenticator app such as Google Authenticator, Authy or 1Password.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The code belongs to the password sign-in only. Signing in with Google or Facebook does not ask for it, and the section says so wherever that is a way into your account. The section shows <strong class="text-gray-900 dark:text-white">Disabled</strong> while two-factor is off, and the line under Security in the list says the same.
+            The code belongs to the password sign-in only. Signing in with Google{{ $guideFacebook ? ' or Facebook' : '' }} does not ask for it, and the section says so wherever that is a way into your account. The section shows <strong class="text-gray-900 dark:text-white">Disabled</strong> while two-factor is off, and the line under Security in the list says the same.
         </p>
 
         <h3 class="doc-subheading">Turning it on</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>While two-factor is off, the section says so and lists what switching it on involves. Enter your current password and click <strong class="text-gray-900 dark:text-white">Enable Two-Factor Authentication</strong>. Accounts with no password, created by signing in with Google or Facebook, are not asked for one.</li>
+            <li>While two-factor is off, the section says so and lists what switching it on involves. Enter your current password and click <strong class="text-gray-900 dark:text-white">Enable Two-Factor Authentication</strong>. Accounts with no password, created by signing in with Google{{ $guideFacebook ? ' or Facebook' : '' }}, are not asked for one.</li>
             <li>Scan the QR code with your authenticator app. If you cannot scan, type the key printed under the code into the app by hand.</li>
             <li>Save the recovery codes shown on the same screen, somewhere other than the device holding the authenticator app.</li>
             <li>Type the 6-digit code from the app and click <strong class="text-gray-900 dark:text-white">Confirm</strong>. Two-factor authentication is not active until this step succeeds.</li>
@@ -507,7 +532,7 @@
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Keep your recovery codes safe</div>
-            <p>Store your recovery codes securely. If you lose the authenticator app and no longer have the codes, you will not be able to sign in with your password. A connected Google or Facebook account still gets you in, because that sign-in does not ask for the code.</p>
+            <p>Store your recovery codes securely. If you lose the authenticator app and no longer have the codes, you will not be able to sign in with your password. A connected Google{{ $guideFacebook ? ' or Facebook' : '' }} account still gets you in, because that sign-in does not ask for the code.</p>
         </div>
     </section>
 
@@ -526,7 +551,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Google Account</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Links your Google identity so you can sign in with Google. <strong class="text-gray-900 dark:text-white">Disconnect</strong> is only available while you have another way to log in (a password, or a connected Facebook account), otherwise you would lock yourself out; set a password first under <a href="#password" class="doc-link">Update Password</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Links your Google identity so you can sign in with Google. <strong class="text-gray-900 dark:text-white">Disconnect</strong> is only available while you have another way to log in (a password{{ $guideFacebook ? ', or a connected Facebook account' : '' }}), otherwise you would lock yourself out; set a password first under <a href="#password" class="doc-link">Update Password</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
@@ -540,6 +565,7 @@
         </div>
     </section>
 
+    @if ($guideOutlook)
     <!-- Outlook Calendar -->
     <section id="microsoft" class="doc-section">
         <h2 class="doc-heading">
@@ -568,7 +594,9 @@
             <p>Turn on <strong>Create Teams meetings for online events</strong> in a schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="doc-link">Outlook Calendar settings</a> to have a Microsoft Teams meeting created, and its join link saved to the event, when an online event syncs to Outlook.</p>
         </div>
     </section>
+    @endif
 
+    @if ($guideFacebook)
     <!-- Facebook Settings -->
     <section id="facebook" class="doc-section">
         <h2 class="doc-heading">
@@ -596,6 +624,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Boosts (boost partners only) -->
     <section id="boosts" class="doc-section">
@@ -606,7 +635,7 @@
             Boosts
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Shown only to an account set up as a boost partner: a network whose schedules boost under its own Facebook Page and Meta ad account. It is separate from the Facebook sign-in under Integrations. How the boosts themselves work is in <x-link href="{{ route('marketing.docs.boost') }}#partners">Boosting under your own Page</x-link>.
+            Shown only to an account set up as a boost partner: a network whose schedules boost under its own Facebook Page and Meta ad account.{{ $guideFacebook ? ' It is separate from the Facebook sign-in under Integrations.' : '' }} How the boosts themselves work is in <x-link href="{{ route('marketing.docs.boost') }}#partners">Boosting under your own Page</x-link>.
         </p>
 
         <div class="doc-fields">
@@ -774,7 +803,7 @@
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Deletion cannot be undone</div>
-            <p>Deletion is permanent. If your account has a password you are asked to type it in the dialog to confirm; accounts that only sign in with Google or Facebook confirm without one.</p>
+            <p>Deletion is permanent. If your account has a password you are asked to type it in the dialog to confirm; accounts that only sign in with Google{{ $guideFacebook ? ' or Facebook' : '' }} confirm without one.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">

@@ -597,7 +597,7 @@
                 @foreach ([
                     ['On your own website', 'Paste one embed code into the museum site and the calendar there is always the current one, with no web team in the loop.'],
                     ['In their own calendar', 'Visitors subscribe to the live calendar feed once, and a moved lecture moves in their phone too.'],
-                    ['Synced both ways', 'Two-way sync with Google, Outlook or CalDAV, so the learning team\'s shared calendar and the public one agree.'],
+                    ['Synced both ways', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').', so the learning team\'s shared calendar and the public one agree.'],
                 ] as [$t, $d])
                     <div class="es-muse-card flex flex-col p-5" data-reveal>
                         <p class="es-muse-ink text-sm font-bold">{{ $t }}</p>

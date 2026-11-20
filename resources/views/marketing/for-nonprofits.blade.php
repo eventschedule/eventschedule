@@ -901,7 +901,7 @@
                         @foreach ([
                             'A sub-schedule for each program, chapter or campaign, each with its own link to share.',
                             'The whole calendar embedded on the site you already run, so the events page is never a month out of date.',
-                            'Two-way sync with Google, Outlook or CalDAV, so the staff calendar and the public one agree.',
+                            'Two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').', so the staff calendar and the public one agree.',
                             'Draft events that stay members-only until the date is confirmed with the venue.',
                         ] as $point)
                             <li class="flex items-start gap-3">

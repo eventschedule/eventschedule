@@ -500,7 +500,8 @@
         $staysBehind = [
             ['Your schedule\'s header and footer', 'The frame is the calendar and nothing else. No banner, no navigation, no page chrome.'],
             ['The "Powered by Event Schedule" footer', 'Never inside the frame. Free schedules get it as a small credit line in the copied code, under the frame, and white-label on Pro removes it.'],
-            ['Ads', 'A free schedule\'s own public pages can carry them. An embed never does, by design.'],
+            // Only where the install runs ads at all (config('ads.enabled'), env only).
+            ...(config('ads.enabled') ? [['Ads', 'A free schedule\'s own public pages can carry them. An embed never does, by design.']] : []),
             ['The language switcher', 'Hidden inside a frame, which is why the language is set in the URL instead.'],
             ['Sign-up and the calendar feed', 'No email sign-up, no "tell me when tickets go on sale" box and no link to subscribe to your whole calendar inside the frame. An event opened on your site has Add to Calendar for its date; the rest is on the event\'s own page, one click away (the box only where you have switched on the "Notify me" card).'],
             ['Search engines', 'The embed URL is served noindex, nofollow, so the page that ranks is yours, not the frame inside it.'],
@@ -998,7 +999,7 @@
                 </a>
                 <div class="es-paste-card flex flex-col p-6 md:col-span-2" data-reveal>
                     <h3 class="es-paste-ink mb-1 text-base font-bold">Everything else on the free plan</h3>
-                    <p class="es-paste-muted text-sm leading-relaxed">The calendar itself, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, sub-schedules, built-in analytics, 10 newsletter emails a month (each recipient counts as one) and unlimited free registration are all free. Pro adds paid ticket sales, the check-in dashboard, the ticket purchase widget and custom fields. Event Schedule takes zero platform fees on ticket sales, on every plan.</p>
+                    <p class="es-paste-muted text-sm leading-relaxed">The calendar itself, two-way {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} sync, RSVP with a capacity per date, sub-schedules, built-in analytics, 10 newsletter emails a month (each recipient counts as one) and unlimited free registration are all free. Pro adds paid ticket sales, the check-in dashboard, the ticket purchase widget and custom fields. Event Schedule takes zero platform fees on ticket sales, on every plan.</p>
                     <div class="mt-auto pt-4">
                         <x-link href="{{ marketing_url('/pricing') }}">See pricing</x-link>
                     </div>
@@ -1017,7 +1018,7 @@
                 <div data-reveal>
                     <x-feature-link-card
                         name="Calendar Sync"
-                        description="Two-way sync with Google, Outlook and CalDAV"
+                        :description="outlook_sync_enabled() ? 'Two-way sync with Google, Outlook and CalDAV' : 'Two-way sync with Google and CalDAV'"
                         :url="marketing_url('/features/calendar-sync')"
                         icon-color="blue"
                     >

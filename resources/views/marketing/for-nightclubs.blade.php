@@ -1128,7 +1128,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for nightclubs?',
-                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with Google, Outlook or CalDAV are all free forever, with no ceiling on the names you take. Scanning the QR on a ticket at the door costs nothing on any plan. Charging cover is Pro at '.plan_price($proMonthly).' a month, which brings the live check-in dashboard for the door and passes with it. Event Schedule charges zero platform fees on tickets either way.',
+                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').' are all free forever, with no ceiling on the names you take. Scanning the QR on a ticket at the door costs nothing on any plan. Charging cover is Pro at '.plan_price($proMonthly).' a month, which brings the live check-in dashboard for the door and passes with it. Event Schedule charges zero platform fees on tickets either way.',
             ],
             [
                 'q' => 'Can people sign up for a free night without paying?',
@@ -1760,7 +1760,7 @@
                         <div class="nc-clip-top"><span class="nc-m" aria-hidden="true">No. 06</span><span class="nc-tier">Free</span></div>
                         <h3 class="nc-d">On the site you already have</h3>
                         <p>
-                            Embed the calendar on your own site so tonight is wherever people already look you up, and every night syncs two ways with Google, Outlook and CalDAV.
+                            Embed the calendar on your own site so tonight is wherever people already look you up, and every night syncs two ways with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}.
                         </p>
                     </article>
                 </div>

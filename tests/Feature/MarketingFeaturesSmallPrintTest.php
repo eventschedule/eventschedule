@@ -90,7 +90,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Ticket-type custom fields' => [self::LEFT_OUT, 'the free corner of custom fields, which its own page states; the banner is the Pro feature'],
         'Appointment booking (1 free appointment type)' => [self::ABOVE, '/features/appointments'],
         'QR code scanning at the door' => [self::ABOVE, '/features/check-in'],
-        'Add to Google Wallet' => [self::ROW, 'Add to Google Wallet'],
+        'Add to Google Wallet' => [self::LEFT_OUT, 'a row only where the operator has configured it (GoogleWalletService::isConfigured()); otherwise its place goes to Short links. Its row, when shown, is in the list of rows below'],
         'Add to Apple Wallet' => [self::LEFT_OUT, 'off until the operator switches it on; the wallet row says "Google and Apple Wallet" on an install where Apple is configured'],
         "Subscribe to a schedule's calendar" => [self::ROW, 'Live calendar and RSS feeds'],
         'iCal download' => [self::ROW, 'Live calendar and RSS feeds'],
@@ -129,7 +129,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Check-in dashboard' => [self::ABOVE, '/features/check-in'],
         'Ticket waitlist' => [self::ABOVE, '/features/waitlist'],
         'Sale notification emails' => [self::ROW, 'Sale notification emails'],
-        'Push notifications' => [self::ROW, 'Push notifications'],
+        'Push notifications' => [self::LEFT_OUT, 'a row only where OneSignal is configured; otherwise its place goes to Automatic translation. Its row, when shown, is in the list of rows below'],
         'Sales CSV export' => [self::ROW, 'Sales CSV export'],
         'Post-event feedback' => [self::ABOVE, '/features/feedback'],
         'Carpool matching' => [self::ABOVE, '/features/carpool'],
@@ -345,6 +345,14 @@ class MarketingFeaturesSmallPrintTest extends TestCase
             'PayPal checkout' => 'one of the payment gateways, with a page of its own',
             'Audit log' => 'on every plan, described on the team scheduling page',
             'Nearby accommodation map' => 'the Accommodation Affiliate table, operator-enabled and free',
+            // Rows that are there only where the install has switched the feature on, and the
+            // true rows that take their places where it has not (resources/views/marketing/features).
+            'Add to Google Wallet' => 'Add to Google Wallet, where GoogleWalletService::isConfigured()',
+            'Google and Apple Wallet' => 'Add to Google Wallet and Add to Apple Wallet, where both are configured',
+            'Push notifications' => 'Push notifications (Pro), where OneSignal is configured',
+            'Short links' => 'Short links, in the wallet row\'s place where no wallet is configured',
+            'Automatic translation' => 'Automatic translation and glossary, in the push row\'s place where OneSignal is not configured',
+            'Import from Google Calendar' => 'Import from Google Calendar, in the accommodation row\'s place where Stay22 is off',
         ];
 
         $accountedRows = [];

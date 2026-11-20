@@ -466,13 +466,19 @@
     </style>
 
     @php
+        // On-network promotions are described only where the install runs the promotions
+        // network: the env master switch for monetization and the engine's own env default
+        // (config/ads.php; env only, so safe in edge-cached HTML). Without it the page is
+        // about the Meta channel alone.
+        $promotionsLive = config('ads.enabled') && config('ads.native_enabled');
+
         // The pre-launch clearance card. Everything here is a real gate in
         // BoostController::create(): the Pro check, the hosted phone check, the
         // draft check, and the trust-based budget ceiling.
         $clearance = [
             ['Schedule on Pro', 'Boost is a Pro feature. Publishing the event it advertises is free.', true],
             ['Phone verified', 'A verified phone number on the account, on eventschedule.com. It is a spend gate, not a marketing list.', true],
-            ['Event published', 'A draft cannot be boosted: the ad needs somewhere real to land. An on-network promotion needs the event to be fully public, so unlisted is out too.', true],
+            ['Event published', 'A draft cannot be boosted: the ad needs somewhere real to land.'.($promotionsLive ? ' An on-network promotion needs the event to be fully public, so unlisted is out too.' : ''), true],
             ['Budget inside your ceiling', 'Every schedule has a per-campaign ceiling. A brand new one starts at $10.', false],
             ['Card or boost credit', 'One prepayment covers the whole campaign. Nothing is billed later.', false],
         ];
@@ -504,7 +510,7 @@
         $faqs = [
             [
                 'q' => 'Does Boost guarantee ticket sales or attendance?',
-                'a' => 'No. Boost buys distribution: it puts your event in front of people who are not looking for it, on Facebook and Instagram or on other schedules\' pages. What happens next depends on the event, the image, the copy, the audience and the budget. Anyone promising a number is guessing.',
+                'a' => 'No. Boost buys distribution: it puts your event in front of people who are not looking for it, on Facebook and Instagram'.($promotionsLive ? ' or on other schedules\' pages' : '').'. What happens next depends on the event, the image, the copy, the audience and the budget. Anyone promising a number is guessing.',
             ],
             [
                 'q' => 'Do I need a paid plan to boost an event?',
@@ -516,7 +522,7 @@
             ],
             [
                 'q' => 'Which platforms do Boost ads run on?',
-                'a' => 'Facebook and Instagram, and you can restrict a campaign to just one of them. Which surface it appears on inside a platform, whether that is the feed, Stories or Reels, is Meta\'s delivery decision rather than a setting here. Separately, where the Event Schedule site you are on runs a promotions network, your event can also run as a promoted card on other schedules\' pages on that same site.',
+                'a' => 'Facebook and Instagram, and you can restrict a campaign to just one of them. Which surface it appears on inside a platform, whether that is the feed, Stories or Reels, is Meta\'s delivery decision rather than a setting here.'.($promotionsLive ? ' Separately, where the Event Schedule site you are on runs a promotions network, your event can also run as a promoted card on other schedules\' pages on that same site.' : ''),
             ],
             [
                 'q' => 'How does targeting work?',
@@ -538,14 +544,13 @@
                 'q' => 'Do I need a Meta Ads account?',
                 'a' => 'No. Event Schedule holds the ad account, builds the creative from your event and handles delivery. You never touch Ads Manager, and you do not connect a Facebook Page of your own.',
             ],
-            [
+            ...($promotionsLive ? [[
                 'q' => 'What are on-network promotions?',
                 'a' => 'A second channel that does not involve Meta at all: your event runs as a promoted card on the public pages of that site\'s free-plan schedules. You prepay a budget and pick CPM, where you pay per thousand times it is shown, or CPC, where impressions are free and you pay per click. Targeting by visitor country and by schedule type is optional. Reporting is by type of schedule, never by naming the pages you ran on.',
-            ],
-            [
+            ], [
                 'q' => 'Will other schedules\' promotions appear on my pages?',
                 'a' => 'Only while your schedule is on the Free plan, and only on a site whose operator runs a promotions network. Pro and Enterprise pages carry nothing at all. If you are on Free and would rather stay clear, "Do not show other schedules\' promotions" lives in your schedule\'s Advanced settings, it is free, and turning it on does not stop you buying promotions later. The same toggle covers ads if the site runs those too.',
-            ],
+            ]] : []),
             [
                 'q' => 'How much should I spend on Facebook and Instagram ads for an event?',
                 'a' => 'Work backwards from the tickets the ad has to sell. Multiply them by what you keep from each ticket, and on eventschedule.com divide by 1.2, because a 20% service fee is added on top of the ad budget: twelve $20 tickets bring in $240, which covers a $200 budget and its $40 fee. That is the most the campaign can cost and still break even, so spend less while you learn how your events respond. On eventschedule.com the first campaign is capped at $10 anyway, the cap rises to $25 once one has completed and up to $1,000 with a longer record, and whatever a campaign does not spend is refunded.',
@@ -563,7 +568,7 @@
         $dotSections = [
             ['top', 'The launch'],
             ['audience', 'Who it reaches'],
-            ['pads', 'Two channels'],
+            ['pads', $promotionsLive ? 'Two channels' : 'The channel'],
             ['plan', 'Budget and timing'],
             ['creative', 'The ad itself'],
             ['window', 'The window'],
@@ -606,7 +611,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-launch-muted mb-8 max-w-xl text-lg sm:text-xl">
-                        Take an event you have already published and put money behind it: a Facebook and Instagram campaign through Meta, or a promoted card on other schedules' pages where the site runs a promotions network. You prepay a fixed budget, you can stop it at any point, and whatever it never spends is returned.
+                        Take an event you have already published and put money behind it: a Facebook and Instagram campaign through Meta{{ $promotionsLive ? ', or a promoted card on other schedules\' pages where the site runs a promotions network' : '' }}. You prepay a fixed budget, you can stop it at any point, and whatever it never spends is returned.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -660,7 +665,7 @@
                     <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
                             @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
-                                @foreach (['Facebook', 'Instagram', 'Feeds', 'Stories', 'Reels', 'On-network cards', 'CPM', 'CPC', 'Radius targeting', 'Interests', 'Pixel conversions'] as $chip)
+                                @foreach (['Facebook', 'Instagram', 'Feeds', 'Stories', 'Reels', ...($promotionsLive ? ['On-network cards'] : []), 'CPM', 'CPC', 'Radius targeting', 'Interests', 'Pixel conversions'] as $chip)
                                     <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-launch-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
@@ -711,13 +716,13 @@
                         <span class="es-launch-plan">Pro</span>
                     </div>
                     <p class="es-launch-muted mb-4">
-                        No relationship, no list, no reason to be looking. Reaching them means buying attention: an ad in a Facebook or Instagram feed, or a promoted card on a schedule page somebody else built an audience for.
+                        No relationship, no list, no reason to be looking. Reaching them means buying attention: an ad in a Facebook or Instagram feed{{ $promotionsLive ? ', or a promoted card on a schedule page somebody else built an audience for' : '' }}.
                     </p>
                     <p class="es-launch-muted mb-4 text-sm">
                         That is the whole job of this page. A first campaign is small on purpose, and the money you do not use comes back, so the honest way to find out whether it works for your event is to spend $10 finding out.
                     </p>
                     <a href="#pads" class="es-launch-link mt-auto inline-flex items-center gap-1 text-sm font-semibold">
-                        See both channels
+                        {{ $promotionsLive ? 'See both channels' : 'See the channel' }}
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                     </a>
                 </div>
@@ -738,6 +743,7 @@
             <div class="relative z-10 mx-auto max-w-6xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
                     <div class="es-launch-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    @if ($promotionsLive)
                     <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Ad channels: Meta and on-network</p>
                     <h2 class="es-balance es-launch-onband text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Off the platform, or <span class="es-launch-lit">across it.</span>
@@ -745,12 +751,25 @@
                     <p class="es-launch-onband-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                         Same campaign screen, same wallet, two completely different rooms. One rents space from Meta. The other rents space from other people's schedules on the site you are already on.
                     </p>
+                    @else
+                    <p class="es-launch-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Ad channel: Meta</p>
+                    <h2 class="es-balance es-launch-onband text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Bought here, <span class="es-launch-lit">run by Meta.</span>
+                    </h2>
+                    <p class="es-launch-onband-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        One campaign screen and one prepayment. The ad runs on Facebook and Instagram through Event Schedule's own ad account, so there is nothing of yours to set up.
+                    </p>
+                    @endif
                 </div>
 
-                <div class="grid gap-6 lg:grid-cols-2" data-reveal-group="120">
+                {{-- Without the promotions network the Meta card stands alone, centred, rather than
+                     beside an empty column. --}}
+                <div class="{{ $promotionsLive ? 'grid gap-6 lg:grid-cols-2' : 'mx-auto max-w-3xl' }}" data-reveal-group="120">
                     <div class="es-launch-card flex flex-col p-7 sm:p-8" data-reveal="panel">
                         <div class="mb-5 flex flex-wrap items-center gap-2">
+                            @if ($promotionsLive)
                             <p class="es-launch-tag">Channel A</p>
+                            @endif
                             <span class="es-launch-plan">Pro</span>
                         </div>
                         <h3 class="es-launch-onband mb-2 text-2xl font-bold">Meta ads</h3>
@@ -783,6 +802,7 @@
                         </a>
                     </div>
 
+                    @if ($promotionsLive)
                     <div class="es-launch-card flex flex-col p-7 sm:p-8" data-reveal="panel">
                         <div class="mb-5 flex flex-wrap items-center gap-2">
                             <p class="es-launch-tag">Channel B</p>
@@ -817,11 +837,14 @@
                             <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                         </a>
                     </div>
+                    @endif
                 </div>
 
+                @if ($promotionsLive)
                 <p class="es-launch-onband-muted mx-auto mt-10 max-w-3xl text-center text-sm" data-reveal>
                     Worth knowing which side of that you are on. Only free-plan pages carry promotions, and Boost needs Pro, so a schedule big enough to buy one is never hosting anyone else's. A free schedule that would rather stay clear has one toggle in its Advanced settings, free on every plan, and switching it on does not stop it buying promotions later. The same toggle covers ads where the site runs those too.
                 </p>
+                @endif
             </div>
         </div>
     </section>
@@ -1197,7 +1220,7 @@
                     </table>
                 </div>
                 <p class="es-launch-muted es-launch-hr mt-5 pt-4 text-sm">
-                    These are the hosted numbers, and only completed Meta campaigns move a schedule down the table. The same per-campaign ceiling caps an on-network promotion too, but promotions carry their own concurrency limit and never ratchet the ceiling up, so a run of cheap network buys cannot unlock a bigger Facebook spend. A selfhosted install uses whatever limits its operator configured instead.
+                    These are the hosted numbers, and only completed Meta campaigns move a schedule down the table.{{ $promotionsLive ? ' The same per-campaign ceiling caps an on-network promotion too, but promotions carry their own concurrency limit and never ratchet the ceiling up, so a run of cheap network buys cannot unlock a bigger Facebook spend.' : '' }} A selfhosted install uses whatever limits its operator configured instead.
                 </p>
             </div>
         </div>
@@ -1236,9 +1259,11 @@
                                 </div>
                             @endforeach
                         </div>
+                        @if ($promotionsLive)
                         <p class="es-launch-onband-muted es-launch-hr mt-5 pt-4 text-sm">
                             An on-network promotion reports impressions, clicks, CTR, the countries it reached, the types of schedule it ran on and the ticket sales attributed to it. Individual host pages are never named.
                         </p>
+                        @endif
                     </div>
 
                     <div class="es-launch-card flex flex-col p-6 sm:p-7" data-reveal="panel">

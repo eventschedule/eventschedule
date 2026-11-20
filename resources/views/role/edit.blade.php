@@ -6099,6 +6099,9 @@
                             @endif
                         </div>
 
+                        {{-- Hosted with no Azure app: no Outlook row at all (outlook_sync_offered()), unless this
+                             schedule somehow still syncs, which keeps the way to stop it. --}}
+                        @if (outlook_sync_offered() || $role->microsoft_sync_direction)
                         <!-- Tab Content: Outlook / Microsoft Calendar -->
                         <x-form-row group="integration" tab="microsoft" :title="__('messages.microsoft_calendar')" class="integration-tab" />
                         <div id="integration-tab-microsoft" class="event-subrow-body integration-tab-content {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}" hidden>
@@ -6204,6 +6207,7 @@
                             </x-secondary-link>
                             @endif
                         </div>
+                        @endif
 
                         <!-- Tab Content: CalDAV -->
                         <x-form-row group="integration" tab="caldav" :title="__('messages.caldav_calendar')" class="integration-tab" />

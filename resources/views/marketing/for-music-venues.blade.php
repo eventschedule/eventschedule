@@ -1230,7 +1230,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for music venues?',
-                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with Google, Outlook or CalDAV are all free forever, and so is free registration for a door that charges nothing. Scanning the QR on a ticket costs nothing on any plan either. Putting a price on a ticket is Pro at '.plan_price($proMonthly).' a month, which brings the live check-in dashboard for a busy door and passes with it.',
+                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').' are all free forever, and so is free registration for a door that charges nothing. Scanning the QR on a ticket costs nothing on any plan either. Putting a price on a ticket is Pro at '.plan_price($proMonthly).' a month, which brings the live check-in dashboard for a busy door and passes with it.',
             ],
             [
                 'q' => 'Can I publish set times for each band on the bill?',
@@ -1270,7 +1270,7 @@
             ],
             [
                 'q' => 'How do I keep a hold off the public calendar?',
-                'a' => 'Save the show as a Draft. A draft is seen only by your schedule\'s team, and it is left out of the public page, the calendar feed and any Google or Outlook calendar you sync to. When the date is confirmed, press Publish. If your booker keeps holds in Google Calendar, a schedule that reads from that calendar brings new entries in as drafts unless you chose to publish them on arrival, so a hold does not go public by itself.',
+                'a' => 'Save the show as a Draft. A draft is seen only by your schedule\'s team, and it is left out of the public page, the calendar feed and '.(outlook_sync_enabled() ? 'any Google or Outlook calendar' : 'any Google calendar').' you sync to. When the date is confirmed, press Publish. If your booker keeps holds in Google Calendar, a schedule that reads from that calendar brings new entries in as drafts unless you chose to publish them on arrival, so a hold does not go public by itself.',
             ],
             [
                 'q' => 'Can a promoter who hires the room list the show on my calendar?',
@@ -1605,7 +1605,7 @@
                             <span>Embed the calendar on the site you already have, so the listings live where people look you up.</span>
                         </li>
                         <li>
-                            <span>Two-way sync with Google, Outlook and CalDAV keeps what is on the wall and what is in your phone from drifting apart.</span>
+                            <span>Two-way sync with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} keeps what is on the wall and what is in your phone from drifting apart.</span>
                         </li>
                     </ul>
                 </div>

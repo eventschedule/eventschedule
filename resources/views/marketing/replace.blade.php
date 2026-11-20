@@ -604,7 +604,7 @@
             ],
             [
                 'q' => 'Is one platform really cheaper than five?',
-                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date and no monthly ceiling on it, scanning at the door, one appointment type, event graphics, built-in analytics, the embeddable calendar and ten newsletter emails a month, each recipient counting as one. Pro is '.plan_price($proMonthly).' a month and is what lets a ticket carry a price, then adds the live check-in dashboard, polls, post-event feedback, more appointment types with paid bookings and the API. Enterprise is '.plan_price($entMonthly).'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus your payment provider\'s processing fee.',
+                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, RSVP with a capacity per date and no monthly ceiling on it, scanning at the door, one appointment type, event graphics, built-in analytics, the embeddable calendar and ten newsletter emails a month, each recipient counting as one. Pro is '.plan_price($proMonthly).' a month and is what lets a ticket carry a price, then adds the live check-in dashboard, polls, post-event feedback, more appointment types with paid bookings and the API. Enterprise is '.plan_price($entMonthly).'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus your payment provider\'s processing fee.',
             ],
             [
                 'q' => 'Can it take PayPal, and refund a buyer from the same place?',
@@ -1027,7 +1027,7 @@
                     <h3 class="es-belt-ink mb-3 text-lg font-bold">Publish, fill the room, be found</h3>
                     <ul class="es-belt-muted es-belt-small space-y-2">
                         <li>The schedule page and unlimited events</li>
-                        <li>Two-way Google, Outlook and CalDAV sync</li>
+                        <li>Two-way {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} sync</li>
                         <li>Free RSVP with a capacity per date, and no monthly ceiling</li>
                         <li>No platform fee on ticket sales, on any plan</li>
                         <li>Scanning tickets at the door, and a QR code for the schedule page</li>
@@ -1124,7 +1124,7 @@
                         <div class="relative z-10">
                             <span class="es-belt-tier es-belt-tier-free mb-3 inline-flex">Free</span>
                             <h3 class="es-belt-ink mb-2 text-xl font-bold">Two-way calendar sync</h3>
-                            <p class="es-belt-muted es-belt-small">Google, Outlook and CalDAV, both directions, on the free plan. The dates keep arriving in the calendar your team already reads.</p>
+                            <p class="es-belt-muted es-belt-small">{{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}, both directions, on the free plan. The dates keep arriving in the calendar your team already reads.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

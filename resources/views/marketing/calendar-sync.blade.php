@@ -1,12 +1,16 @@
 <x-marketing-layout :hp="true">
-    <x-slot name="title">{{ __('marketing.calendar_sync_title') }}</x-slot>
-    <x-slot name="description">{{ __('marketing.calendar_sync_description') }}</x-slot>
+    {{-- Outlook is named only where the install can sync with it (outlook_sync_enabled(), env
+         only, so safe in edge-cached HTML); the lang strings name it, so the other branch is here. --}}
+    <x-slot name="title">{{ outlook_sync_enabled() ? __('marketing.calendar_sync_title') : 'Two-Way Calendar Sync for Google & CalDAV' }}</x-slot>
+    <x-slot name="description">{{ outlook_sync_enabled() ? __('marketing.calendar_sync_description') : 'Two-way sync with Google Calendar and any CalDAV server, free on every plan. Guests can add one event or subscribe to your live calendar feed.' }}</x-slot>
     <x-slot name="breadcrumbTitle">Calendar Sync</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Calendar Sync"
-        description="Two-way calendar sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server. Events leave when you save them, and edits made in your calendar app come back. Free on every plan." />
+        :description="outlook_sync_enabled()
+            ? 'Two-way calendar sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server. Events leave when you save them, and edits made in your calendar app come back. Free on every plan.'
+            : 'Two-way calendar sync with Google Calendar or any CalDAV server. Events leave when you save them, and edits made in your calendar app come back. Free on every plan.'" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -515,6 +519,11 @@
     </style>
 
     @php
+        // Outlook / Microsoft 365 is a carrier only where the install has an Azure app
+        // (outlook_sync_enabled(), env only). Without it the page is about Google and CalDAV:
+        // no Outlook column, card, chip or sentence.
+        $outlookLive = outlook_sync_enabled();
+
         // The carriers table. One row per question somebody actually asks before
         // connecting, three columns for the three carriers the product supports.
         $carrierRows = [
@@ -580,7 +589,7 @@
             ],
             [
                 'q' => 'What is two-way calendar sync?',
-                'a' => 'Two-way sync keeps two calendars in step in both directions. An event you create or change on your schedule is written to your Google, Outlook or CalDAV calendar, and an event you create or change in that calendar is read back onto your schedule. One-way sync does only half of that: it either publishes your schedule into a calendar or reads a calendar into your schedule. A subscribed iCal feed is one-way too, and read-only for the person subscribing.',
+                'a' => 'Two-way sync keeps two calendars in step in both directions. An event you create or change on your schedule is '.($outlookLive ? 'written to your Google, Outlook or CalDAV calendar' : 'written to your Google or CalDAV calendar').', and an event you create or change in that calendar is read back onto your schedule. One-way sync does only half of that: it either publishes your schedule into a calendar or reads a calendar into your schedule. A subscribed iCal feed is one-way too, and read-only for the person subscribing.',
             ],
             [
                 'q' => 'Should I use one-way or two-way sync?',
@@ -588,11 +597,11 @@
             ],
             [
                 'q' => 'How often does the calendar sync?',
-                'a' => 'Google and Outlook push a notification the moment something changes on their side, so the return leg usually runs within a minute or two. A sweep also runs every fifteen minutes as a backstop, and only re-reads what actually changed. CalDAV has no push, so it is polled on that same fifteen-minute schedule and skipped entirely when the calendar tag has not moved.',
+                'a' => ($outlookLive ? 'Google and Outlook push a notification' : 'Google pushes a notification').' the moment something changes on their side, so the return leg usually runs within a minute or two. A sweep also runs every fifteen minutes as a backstop, and only re-reads what actually changed. CalDAV has no push, so it is polled on that same fifteen-minute schedule and skipped entirely when the calendar tag has not moved.',
             ],
             [
                 'q' => 'Is the sync two-way?',
-                'a' => 'Yes, and you choose. Out sends events to your calendar. Back brings events from your calendar onto your schedule, as drafts until you publish them or choose to publish them as they arrive. Both runs the round trip. Events you create, edit or delete here go out when you save, and events created or edited in your calendar app come back on the return leg. Deletions come back from Google and Outlook, where you decide what they should mean; CalDAV brings back new and changed events only. A change that arrives on the return leg is never echoed straight back out again.',
+                'a' => 'Yes, and you choose. Out sends events to your calendar. Back brings events from your calendar onto your schedule, as drafts until you publish them or choose to publish them as they arrive. Both runs the round trip. Events you create, edit or delete here go out when you save, and events created or edited in your calendar app come back on the return leg. '.($outlookLive ? 'Deletions come back from Google and Outlook, where' : 'Deletions come back from Google, where').' you decide what they should mean; CalDAV brings back new and changed events only. A change that arrives on the return leg is never echoed straight back out again.',
             ],
             [
                 'q' => 'Can attendees add events to their personal calendars?',
@@ -600,7 +609,7 @@
             ],
             [
                 'q' => 'What is the difference between calendar sync and a calendar feed?',
-                'a' => 'Sync is for you: it connects your own Google, Outlook or CalDAV calendar to your schedule, in one direction or both. The feed is for your audience: a read-only iCal address anybody can subscribe to without an account or an email address. It carries your public upcoming events, with a weekly night expanded into one entry per date for the next ninety days, and nothing ever comes back from it. It is not instant either. The feed is cached for an hour, and a subscribed calendar re-reads it on its own timetable, which for Google Calendar can take several hours.',
+                'a' => 'Sync is for you: it connects '.($outlookLive ? 'your own Google, Outlook or CalDAV calendar to your schedule' : 'your own Google or CalDAV calendar to your schedule').', in one direction or both. The feed is for your audience: a read-only iCal address anybody can subscribe to without an account or an email address. It carries your public upcoming events, with a weekly night expanded into one entry per date for the next ninety days, and nothing ever comes back from it. It is not instant either. The feed is cached for an hour, and a subscribed calendar re-reads it on its own timetable, which for Google Calendar can take several hours.',
             ],
             [
                 'q' => 'What happens if I delete an event in my calendar app?',
@@ -608,11 +617,11 @@
             ],
             [
                 'q' => 'What happens if an event is changed in both places at once?',
-                'a' => 'The most recent change wins. Two-way sync here does not merge field by field: a save on your schedule writes the whole entry to the calendar, and a change read back from the calendar rewrites the event\'s name, times and description on your schedule. So if the time is moved in Outlook and the description is edited on the schedule a moment later, before the Outlook change has come back, the save sends the old time out again. Make one change, let it arrive, then make the next.',
+                'a' => 'The most recent change wins. Two-way sync here does not merge field by field: a save on your schedule writes the whole entry to the calendar, and a change read back from the calendar rewrites the event\'s name, times and description on your schedule. '.($outlookLive ? 'So if the time is moved in Outlook and the description is edited on the schedule a moment later, before the Outlook change has come back,' : 'So if the time is moved in Google Calendar and the description is edited on the schedule a moment later, before the Google change has come back,').' the save sends the old time out again. Make one change, let it arrive, then make the next.',
             ],
             [
                 'q' => 'Why is my synced event not showing up in my calendar?',
-                'a' => 'Check five things in order. Drafts and Internal events are never copied out. A cancelled event is taken off the calendar. A schedule set to From only reads. The entry goes to the calendar chosen for that schedule, which may not be your main one, so make sure it is switched on in your calendar app. And an event saved before you connected is written the next time you save it. On Google and Outlook, the Calendar sync line at the end of the event\'s Listing tab says Synced or Not synced and why.',
+                'a' => 'Check five things in order. Drafts and Internal events are never copied out. A cancelled event is taken off the calendar. A schedule set to From only reads. The entry goes to the calendar chosen for that schedule, which may not be your main one, so make sure it is switched on in your calendar app. And an event saved before you connected is written the next time you save it. '.($outlookLive ? 'On Google and Outlook, the Calendar sync line' : 'On Google, the Calendar sync line').' at the end of the event\'s Listing tab says Synced or Not synced and why.',
             ],
             [
                 'q' => 'Will connecting a calendar put my private appointments on my public page?',
@@ -620,7 +629,7 @@
             ],
             [
                 'q' => 'Does calendar sync cost anything?',
-                'a' => 'No. Google Calendar, Outlook and CalDAV sync are all on the free plan, in both directions, and selfhosted installs get them too. The paid plans are about selling without a monthly cap, the extras around a ticket and your branding, not about your calendar.',
+                'a' => 'No. '.($outlookLive ? 'Google Calendar, Outlook and CalDAV sync are all on the free plan' : 'Google Calendar and CalDAV sync are both on the free plan').', in both directions, and selfhosted installs get them too. The paid plans are about selling without a monthly cap, the extras around a ticket and your branding, not about your calendar.',
             ],
         ];
 
@@ -667,7 +676,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-trip-muted mb-8 max-w-xl text-lg sm:text-xl">
-                        Your events leave for Google Calendar, Outlook or any CalDAV server the moment you save them. Then the edits you make over there come home again. Two legs, one connection, nothing to pay.
+                        Your events leave for {{ $outlookLive ? 'Google Calendar, Outlook or any CalDAV server the moment' : 'Google Calendar or any CalDAV server the moment' }} you save them. Then the edits you make over there come home again. Two legs, one connection, nothing to pay.
                     </p>
 
                     <div class="es-fade-up es-d-2 mb-10 max-w-md" aria-hidden="true">
@@ -733,7 +742,7 @@
                             </div>
                             <div>
                                 <dt class="es-trip-stub-tag">Carriers</dt>
-                                <dd class="es-trip-stub-code mt-1 text-xs font-semibold">Google &middot; Outlook &middot; CalDAV</dd>
+                                <dd class="es-trip-stub-code mt-1 text-xs font-semibold">Google{!! $outlookLive ? ' &middot; Outlook' : '' !!} &middot; CalDAV</dd>
                             </div>
                             <div>
                                 <dt class="es-trip-stub-tag">If deleted there</dt>
@@ -754,7 +763,9 @@
                     <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
                             @php
-                                $marqueeChips = ['Google Calendar', 'Outlook', 'Microsoft 365', 'CalDAV', 'Apple Calendar', 'Nextcloud', 'Fastmail', 'iCal feed', 'Webhooks', 'Teams meetings'];
+                                $marqueeChips = $outlookLive
+                                    ? ['Google Calendar', 'Outlook', 'Microsoft 365', 'CalDAV', 'Apple Calendar', 'Nextcloud', 'Fastmail', 'iCal feed', 'Webhooks', 'Teams meetings']
+                                    : ['Google Calendar', 'CalDAV', 'Apple Calendar', 'Nextcloud', 'Fastmail', 'iCal feed', 'Webhooks'];
                             @endphp
                             @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
                                 @foreach ($marqueeChips as $chip)
@@ -803,11 +814,20 @@
                         <h3 class="mb-2 text-lg font-bold text-white">Say it your way</h3>
                         <p class="es-trip-muted text-sm">A calendar description template decides what the entry says, using the same variables as event graphics: name, date, time, venue, city, link. Leave it empty and the event description travels as-is.</p>
                     </div>
+                    @if ($outlookLive)
                     <div class="es-trip-card p-6" data-reveal="panel">
                         <p class="es-trip-tag mb-3">Online events</p>
                         <h3 class="mb-2 text-lg font-bold text-white">A meeting, not just a slot</h3>
                         <p class="es-trip-muted text-sm">Switch it on and an online event with no venue leaves Outlook as a Microsoft Teams meeting. The join link is written back onto the event when it does not already have one, so the calendar entry is the thing people click.</p>
                     </div>
+                    @else
+                    {{-- The Teams card is Outlook's; its place in the row of three goes to what never leaves. --}}
+                    <div class="es-trip-card p-6" data-reveal="panel">
+                        <p class="es-trip-tag mb-3">What stays</p>
+                        <h3 class="mb-2 text-lg font-bold text-white">Drafts stay home</h3>
+                        <p class="es-trip-muted text-sm">Drafts and Internal events are never copied out, and cancelling an event takes its entry off the calendar, so the calendar only ever holds what is really on.</p>
+                    </div>
+                    @endif
                 </div>
 
                 <p class="es-trip-muted mx-auto mt-10 max-w-2xl text-center text-sm" data-reveal>
@@ -867,7 +887,7 @@
                         <h3 class="es-trip-ink text-lg font-bold">A push, not a wait</h3>
                         <span class="es-trip-plan">Free</span>
                     </div>
-                    <p class="es-trip-muted text-sm">Google and Microsoft both notify us the moment something changes on their side, so the return leg normally runs within a minute or two of you closing the dialog.</p>
+                    <p class="es-trip-muted text-sm">{{ $outlookLive ? 'Google and Microsoft both notify us' : 'Google notifies us' }} the moment something changes on their side, so the return leg normally runs within a minute or two of you closing the dialog.</p>
                 </div>
                 <div class="es-trip-card p-6" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -881,7 +901,7 @@
                         <h3 class="es-trip-ink text-lg font-bold">A sweep behind it</h3>
                         <span class="es-trip-plan">Free</span>
                     </div>
-                    <p class="es-trip-muted text-sm">A scheduled sweep runs every fifteen minutes for all three carriers, so a notification that never arrives costs you a quarter of an hour, not a missed show.</p>
+                    <p class="es-trip-muted text-sm">A scheduled sweep runs every fifteen minutes for {{ $outlookLive ? 'all three carriers' : 'both carriers' }}, so a notification that never arrives costs you a quarter of an hour, not a missed show.</p>
                 </div>
             </div>
         </div>
@@ -896,16 +916,16 @@
         $directionChoices = [
             [
                 'tag' => 'One-way out',
-                'setting' => 'To Google Calendar, To Outlook Calendar, To CalDAV',
+                'setting' => ($outlookLive ? 'To Google Calendar, To Outlook Calendar, To CalDAV' : 'To Google Calendar, To CalDAV'),
                 'title' => 'Pick it when your schedule is the record',
-                'who' => 'A venue whose events are entered on its schedule, and a bar manager who wants them in the Outlook calendar already open on the office PC.',
+                'who' => 'A venue whose events are entered on its schedule, and a bar manager who '.($outlookLive ? 'wants them in the Outlook calendar already open' : 'wants them in the calendar already open').' on the office PC.',
                 'gets' => 'Every published event lands in the calendar the moment it is saved. Nothing typed in the calendar can move a public listing.',
                 'watch' => 'An edit made in the calendar is not read back, and the next save here writes the whole entry again over it. Tell everyone who shares that calendar to change events on the schedule, not in the calendar.',
                 'leg' => 'out',
             ],
             [
                 'tag' => 'One-way in',
-                'setting' => 'From Google Calendar, From Outlook Calendar, From CalDAV',
+                'setting' => ($outlookLive ? 'From Google Calendar, From Outlook Calendar, From CalDAV' : 'From Google Calendar, From CalDAV'),
                 'title' => 'Pick it when you already plan in a calendar',
                 'who' => 'A musician who has kept every gig in Google Calendar for years and wants a public page built from it without typing anything twice.',
                 'gets' => 'New entries arrive on your schedule as drafts. You publish them from the Review list, or switch on Publish new events automatically once you trust the calendar.',
@@ -917,7 +937,7 @@
                 'setting' => 'Bidirectional Sync',
                 'title' => 'Pick it when changes happen on both sides',
                 'who' => 'A small theatre where the producer builds the season on the schedule and the stage manager drags rehearsal times around in the calendar.',
-                'gets' => 'The round trip: saves here go out at once, and edits there come back, usually within a minute or two on Google and Outlook.',
+                'gets' => 'The round trip: saves here go out at once, and edits there come back, '.($outlookLive ? 'usually within a minute or two on Google and Outlook.' : 'usually within a minute or two on Google.'),
                 'watch' => 'Two-way sync does not merge. Each side writes the whole entry, so the most recent change wins. Let one edit arrive before you make the next one on the other side.',
                 'leg' => 'both',
             ],
@@ -935,8 +955,8 @@
         // How long a change takes to reach the other side, by route.
         $directionTiming = [
             ['Saved on your schedule', 'Your connected calendar (any carrier)', 'When you save. The copy is written as part of the save, not by a nightly job.'],
-            ['Changed in Google Calendar or Outlook', 'Your schedule', 'Usually within a minute or two, on a push notification. A sweep every fifteen minutes catches one that never arrived.'],
-            ['Changed in a CalDAV calendar', 'Your schedule', 'On the next fifteen-minute poll. CalDAV has no push, so this is the slowest of the three.'],
+            [($outlookLive ? 'Changed in Google Calendar or Outlook' : 'Changed in Google Calendar'), 'Your schedule', 'Usually within a minute or two, on a push notification. A sweep every fifteen minutes catches one that never arrived.'],
+            ['Changed in a CalDAV calendar', 'Your schedule', 'On the next fifteen-minute poll. CalDAV has no push, '.($outlookLive ? 'so this is the slowest of the three.' : 'so this is the slower of the two.')],
             ['Saved on your schedule', 'A calendar subscribed to your feed', 'Up to an hour for the feed, then whenever that calendar app next refreshes its subscriptions. Google Calendar can take several hours.'],
         ];
     @endphp
@@ -1004,7 +1024,7 @@
             </div>
 
             <p class="es-trip-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
-                You are not locked into one answer. Direction is set per schedule and per carrier, so a venue can send its public nights one way to Outlook for the staff and still pull a booking calendar in from Google on another schedule. The settings and their exact names are in the
+                You are not locked into one answer. Direction is set per schedule and per carrier, so a venue can {{ $outlookLive ? 'send its public nights one way to Outlook for the staff' : 'send its public nights one way to a CalDAV calendar for the staff' }} and still pull a booking calendar in from Google on another schedule. The settings and their exact names are in the
                 <x-link :href="route('marketing.docs.creating_schedules').'#calendar-sync'" class="es-trip-link font-semibold">calendar sync guide</x-link>.
             </p>
         </div>
@@ -1018,7 +1038,7 @@
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <div class="es-trip-leg mb-6" data-reveal><span>Choose a carrier</span></div>
                 <h2 class="es-balance es-trip-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Three carriers. <span class="es-trip-out">Both legs on all of them.</span>
+                    {{ $outlookLive ? 'Three carriers.' : 'Two carriers.' }} <span class="es-trip-out">{{ $outlookLive ? 'Both legs on all of them.' : 'Both legs on each.' }}</span>
                 </h2>
                 <p class="es-trip-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
                     Every column below runs the round trip. The differences are how you sign in, how fast the return leg is, and how much you have to set up if you selfhost.
@@ -1027,7 +1047,7 @@
 
             <div class="es-trip-card overflow-x-auto p-2 sm:p-4" data-reveal="panel">
                 <table class="es-trip-table text-sm">
-                    <caption class="sr-only">Google Calendar, Outlook and CalDAV compared on how you connect, how fast the return leg runs, and what setup a selfhosted install needs</caption>
+                    <caption class="sr-only">{{ $outlookLive ? 'Google Calendar, Outlook and CalDAV compared on' : 'Google Calendar and CalDAV compared on' }} how you connect, how fast the return leg runs, and what setup a selfhosted install needs</caption>
                     <thead>
                         <tr>
                             <th scope="col" class="es-trip-tag">Feature</th>
@@ -1037,12 +1057,14 @@
                                     Google Calendar
                                 </span>
                             </th>
+                            @if ($outlookLive)
                             <th scope="col">
                                 <span class="es-trip-carrier">
                                     <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 23 23"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>
                                     Outlook / Microsoft 365
                                 </span>
                             </th>
+                            @endif
                             <th scope="col">
                                 <span class="es-trip-carrier">
                                     <svg aria-hidden="true" class="es-trip-back h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -1056,7 +1078,9 @@
                             <tr>
                                 <th scope="row" class="es-trip-ink font-bold">{{ $row['label'] }}</th>
                                 <td class="es-trip-muted">{{ $row['google'] }}</td>
+                                @if ($outlookLive)
                                 <td class="es-trip-muted">{{ $row['microsoft'] }}</td>
+                                @endif
                                 <td class="es-trip-muted">{{ $row['caldav'] }}</td>
                             </tr>
                         @endforeach
@@ -1064,7 +1088,7 @@
                 </table>
             </div>
 
-            <div class="mt-8 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+            <div class="mt-8 grid gap-4 {{ $outlookLive ? 'md:grid-cols-3' : 'md:grid-cols-2' }}" data-reveal-group="90">
                 <a href="{{ marketing_url('/google-calendar') }}" class="es-trip-hover es-trip-card group flex flex-col p-6 transition-all duration-200 hover:shadow-md" data-reveal>
                     <span class="es-trip-hover-title es-trip-ink mb-2 font-bold transition-colors">Google Calendar sync</span>
                     <span class="es-trip-muted mb-4 text-sm">One-click sign-in, push notifications, and a per-member calendar setting.</span>
@@ -1073,6 +1097,7 @@
                         <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                     </span>
                 </a>
+                @if ($outlookLive)
                 <a href="{{ marketing_url('/outlook-calendar') }}" class="es-trip-hover es-trip-card group flex flex-col p-6 transition-all duration-200 hover:shadow-md" data-reveal>
                     <span class="es-trip-hover-title es-trip-ink mb-2 font-bold transition-colors">Outlook calendar sync</span>
                     <span class="es-trip-muted mb-4 text-sm">Microsoft 365 over the Graph API, with optional Teams meetings for online events.</span>
@@ -1081,6 +1106,7 @@
                         <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                     </span>
                 </a>
+                @endif
                 <a href="{{ marketing_url('/caldav') }}" class="es-trip-hover es-trip-card group flex flex-col p-6 transition-all duration-200 hover:shadow-md" data-reveal>
                     <span class="es-trip-hover-title es-trip-ink mb-2 font-bold transition-colors">CalDAV sync</span>
                     <span class="es-trip-muted mb-4 text-sm">The open standard. Point it at your own server: Nextcloud, Fastmail, anything that speaks CalDAV.</span>
@@ -1313,14 +1339,14 @@
     <!-- ============================================================ -->
     @php
         $syncRules = [
-            ['Give the schedule a calendar of its own', 'Make a new calendar in Google, Outlook or on your CalDAV server for these events alone, and pick it for the schedule. Public nights stay apart from private appointments, the calendar can be shared or hidden as one unit, and if you ever stop syncing you can delete that whole calendar instead of picking entries out one by one.'],
+            ['Give the schedule a calendar of its own', ($outlookLive ? 'Make a new calendar in Google, Outlook or on your CalDAV server' : 'Make a new calendar in Google or on your CalDAV server').' for these events alone, and pick it for the schedule. Public nights stay apart from private appointments, the calendar can be shared or hidden as one unit, and if you ever stop syncing you can delete that whole calendar instead of picking entries out one by one.'],
             ['Set the time zone before the first event', 'Times you type are read in the schedule\'s time zone, and every entry goes out carrying it. A schedule left on the wrong zone puts every entry at the wrong hour in every calendar it reaches, so check it under Edit Schedule before you connect anything.'],
             ['Connect as the owner', 'The schedule-wide sync runs on the owner\'s account, so the owner is the one who sets it. On Google, each admin can still send the schedule\'s events to a calendar of their own with Sync to My Calendar. Team members are part of the Enterprise plan.'],
             ['Start the return leg on drafts', 'Leave Publish new events automatically off for the first week. Read what arrives in the Review list, publish what belongs and keep the rest hidden. Switch it on once the calendar has shown you that it only holds public events.'],
             ['Decide what a deletion means before tickets sell', 'Keep it here is the default and the safest. Mark as cancelled hides the event and can be undone. Delete it here is permanent, although an event with a ticket sale or ad spend on record is hidden instead.'],
-            ['Edit in one place at a time', 'There is no merge. Each side writes the whole entry, so the most recent change wins. Change the time in Outlook, wait the minute or two it takes to come back, and only then edit the description on the schedule.'],
+            ['Edit in one place at a time', 'There is no merge. Each side writes the whole entry, so the most recent change wins. '.($outlookLive ? 'Change the time in Outlook, wait' : 'Change the time in Google Calendar, wait').' the minute or two it takes to come back, and only then edit the description on the schedule.'],
             ['Keep meeting details out of public calendars', 'A meeting link or a dial-in in the location never becomes a venue, and an entry that shows a passcode or a dial-in code waits for you even with publishing switched on. Safer still: keep internal meetings in a calendar the schedule does not read.'],
-            ['Expect repeats to travel differently each way', 'A weekly event on your schedule goes out as one entry on its start date, not as a repeating series. A repeating entry in Google or Outlook comes in as one event per date. If people need every date of your series in their calendar, give them the feed, which lists each date for the next 90 days.'],
+            ['Expect repeats to travel differently each way', 'A weekly event on your schedule goes out as one entry on its start date, not as a repeating series. '.($outlookLive ? 'A repeating entry in Google or Outlook comes in' : 'A repeating entry in Google comes in').' as one event per date. If people need every date of your series in their calendar, give them the feed, which lists each date for the next 90 days.'],
         ];
     @endphp
     <section id="rules" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
@@ -1394,7 +1420,7 @@
                 'checks' => [
                     ['Every entry is out by the same hours', 'The schedule\'s time zone is wrong. Every entry carries it, so fix it there rather than event by event.'],
                     ['Copies on a calendar you no longer use', 'Resync to Google Calendar removes the copies it can find on the old calendar, but some may be left behind to delete by hand.'],
-                    ['Two of everything after reconnecting', 'On Google, or after pressing Disconnect on Outlook, the app forgets which entry belongs to which event, so after you connect again the next save of each event writes a new entry beside the old one. Delete the old entries first, or choose a fresh calendar.'],
+                    ['Two of everything after reconnecting', ($outlookLive ? 'On Google, or after pressing Disconnect on Outlook, the app forgets' : 'On Google the app forgets').' which entry belongs to which event, so after you connect again the next save of each event writes a new entry beside the old one. Delete the old entries first, or choose a fresh calendar.'],
                     ['A weekly night shows once', 'That is by design: a series goes out as one entry on its start date. The feed lists each date for the next 90 days.'],
                 ],
             ],
@@ -1433,7 +1459,7 @@
             <div class="es-trip-card mt-8 p-6 sm:p-7" data-reveal="panel">
                 <h3 class="es-trip-ink text-lg font-bold">Ask the event itself</h3>
                 <p class="es-trip-muted mt-2 text-sm leading-relaxed">
-                    On a schedule that sends its events to Google Calendar or Outlook, every saved event has a Calendar sync line at the end of its Listing tab. It reads Synced or Not synced for each connected calendar, says why when the answer is no, and offers Sync Now to copy the event at once or Remove to take it off. It is the quickest way to tell a setting from a fault. More in the guide to
+                    On a schedule that {{ $outlookLive ? 'sends its events to Google Calendar or Outlook, every saved event' : 'sends its events to Google Calendar, every saved event' }} has a Calendar sync line at the end of its Listing tab. It reads Synced or Not synced for each connected calendar, says why when the answer is no, and offers Sync Now to copy the event at once or Remove to take it off. It is the quickest way to tell a setting from a fault. More in the guide to
                     <x-link :href="route('marketing.docs.creating_events').'#google-calendar'" class="es-trip-link font-semibold">calendar sync on an event</x-link>.
                 </p>
             </div>
@@ -1468,9 +1494,9 @@
 
             @php
                 $steps = [
-                    ['01', 'Connect the account', 'Sign in to Google or Microsoft once from Account Settings, or type a CalDAV server URL, username and password.'],
+                    ['01', 'Connect the account', ($outlookLive ? 'Sign in to Google or Microsoft once' : 'Sign in to Google once').' from Account Settings, or type a CalDAV server URL, username and password.'],
                     ['02', 'Pick the calendar and the direction', 'Choose which calendar this schedule uses, then out, back or both. Different schedules can make different choices.'],
-                    ['03', 'Decide about deletions', 'On Google and Outlook, say what a deletion in the connected calendar should mean here: keep it, mark it cancelled, or delete it. Then stop thinking about sync.'],
+                    ['03', 'Decide about deletions', ($outlookLive ? 'On Google and Outlook, say what a deletion' : 'On Google, say what a deletion').' in the connected calendar should mean here: keep it, mark it cancelled, or delete it. Then stop thinking about sync.'],
                 ];
             @endphp
 
@@ -1619,7 +1645,7 @@
                         Book the round trip. <span class="es-trip-lit-back">Both legs included.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-                        Connect Google Calendar, Outlook or any CalDAV server, choose your direction, and stop keeping two calendars in your head.
+                        {{ $outlookLive ? 'Connect Google Calendar, Outlook or any CalDAV server, choose' : 'Connect Google Calendar or any CalDAV server, choose' }} your direction, and stop keeping two calendars in your head.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

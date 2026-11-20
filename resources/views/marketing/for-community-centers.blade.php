@@ -871,7 +871,7 @@
             ],
             [
                 'On the calendar they already check',
-                'The sign-up panel, and the Add to Calendar menu of any program that is not taking sign-ups or selling places, offer the center\'s live calendar feed. Subscribe once and the next ninety days of every weekly program land in the phone\'s own calendar, and move when you move them. Two-way Google, Outlook and CalDAV sync is for your own calendar, one entry per program.',
+                'The sign-up panel, and the Add to Calendar menu of any program that is not taking sign-ups or selling places, offer the center\'s live calendar feed. Subscribe once and the next ninety days of every weekly program land in the phone\'s own calendar, and move when you move them. Two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync is for your own calendar, one entry per program.',
                 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
             ],
             [
@@ -894,7 +894,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for community centers?',
-                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, a live calendar feed, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Charging for a class is the part that needs Pro at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on the sale whatever plan you are on.',
+                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, a live calendar feed, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Charging for a class is the part that needs Pro at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on the sale whatever plan you are on.',
             ],
             [
                 'q' => 'How do I set up a community center calendar?',
@@ -906,7 +906,7 @@
             ],
             [
                 'q' => 'How do community members stay informed about programs?',
-                'a' => 'Through as many doors as you care to open. People who leave an email address and confirm it hear about the new dates you put up, on their own, as one digest rather than a message per program; the newsletter is the one you compose and press send on, for when there is something to say beyond the listing. The calendar embeds into the website you already have. Anyone can subscribe to the center\'s live calendar feed from the sign-up panel, or from the Add to Calendar menu of a program that is not taking sign-ups or selling places, and it carries the next ninety days of every weekly program, moving a date when you move it. Your own calendar syncs both ways with Google, Outlook and CalDAV, one entry per event. And your schedule has a QR code you can download and print for the board in the lobby.',
+                'a' => 'Through as many doors as you care to open. People who leave an email address and confirm it hear about the new dates you put up, on their own, as one digest rather than a message per program; the newsletter is the one you compose and press send on, for when there is something to say beyond the listing. The calendar embeds into the website you already have. Anyone can subscribe to the center\'s live calendar feed from the sign-up panel, or from the Add to Calendar menu of a program that is not taking sign-ups or selling places, and it carries the next ninety days of every weekly program, moving a date when you move it. Your own calendar syncs both ways with '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').', one entry per event. And your schedule has a QR code you can download and print for the board in the lobby.',
             ],
             [
                 'q' => 'Can we handle event registration and payments?',

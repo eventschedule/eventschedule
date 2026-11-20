@@ -9105,11 +9105,10 @@ class RoleController extends Controller
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
-
-        if (! $role->isCurator()) {
-            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
-        }
+        // Any schedule type: the import page offers a video for each performer it reads on a
+        // venue's or a talent's import too, and a curator-only guard answered those with a 403
+        // that the page showed as "Error searching for videos." (the guest endpoint never had it).
+        Role::subdomain($subdomain)->firstOrFail();
 
         $query = $request->get('q');
 

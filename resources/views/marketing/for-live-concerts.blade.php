@@ -1443,7 +1443,7 @@
             ],
             [
                 'q' => 'Is Event Schedule really free for streaming concerts?',
-                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit and no monthly ceiling, built-in analytics, ten newsletter emails a month (each recipient counts as one) and scanning a ticket at the door are all free forever. Selling a ticket that carries a price is '.plan_price($proMonthly).' a month on Pro, along with passes and the live check-in dashboard. There are zero platform fees on ticket sales at every tier, whether a date sells through your own Stripe or PayPal account, Invoice Ninja, a payment link or cash, so past the provider\'s own fee the money is yours.',
+                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, the embeddable calendar, free registration with a capacity limit and no monthly ceiling, built-in analytics, ten newsletter emails a month (each recipient counts as one) and scanning a ticket at the door are all free forever. Selling a ticket that carries a price is '.plan_price($proMonthly).' a month on Pro, along with passes and the live check-in dashboard. There are zero platform fees on ticket sales at every tier, whether a date sells through your own Stripe or PayPal account, Invoice Ninja, a payment link or cash, so past the provider\'s own fee the money is yours.',
             ],
             [
                 'q' => 'What happens when a date moves or gets pulled?',
@@ -2164,7 +2164,7 @@
                             <span class="lc-tier">Free</span>
                             <span class="lc-case-no" aria-hidden="true">Case 1 of 6</span>
                         </div>
-                        <p>Embed the calendar in your own site so the routing lives where people look you up, and sync two ways with Google, Outlook and CalDAV so the dates land in the calendar the crew actually reads.</p>
+                        <p>Embed the calendar in your own site so the routing lives where people look you up, and sync two ways with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} so the dates land in the calendar the crew actually reads.</p>
                         <p class="lc-fine">Any single date downloads as an .ics file, and a residency's individual dates do too, which is what a promoter forwards to a room's production manager. A residency syncs across as one entry, though: the subscribe feed is what unrolls every night of it, and fans can subscribe to it from your schedule page, with no email address, so a date that moves updates itself in their calendar.</p>
                     </div>
                 </div>
@@ -2350,7 +2350,7 @@
                     ['Ticketing', 'Named ticket types, QR check-in and zero platform fees', marketing_url('/features/ticketing')],
                     ['Recurring Events', 'Residencies with a day-of-week pattern and date exceptions', marketing_url('/features/recurring-events')],
                     ['Newsletters', 'Email the people who follow you, with open and click rates', marketing_url('/features/newsletters')],
-                    ['Calendar Sync', 'Two-way sync with Google, Outlook and CalDAV', marketing_url('/features/calendar-sync')],
+                    ['Calendar Sync', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV'), marketing_url('/features/calendar-sync')],
                 ];
             @endphp
             <div class="lc-chs" data-reveal-group="70">

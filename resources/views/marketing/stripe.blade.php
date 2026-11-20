@@ -1536,7 +1536,7 @@
                     <p class="es-payout-tag mb-3">Payments and beyond</p>
                     <h3 class="es-payout-ink mb-2 text-xl font-bold">Explore more integrations</h3>
                     <p class="es-payout-muted mb-5 text-sm">
-                        PayPal, Invoice Ninja, Google and Outlook calendars, CalDAV, outgoing webhooks and
+                        PayPal, Invoice Ninja, {{ outlook_sync_enabled() ? 'Google and Outlook calendars' : 'Google Calendar' }}, CalDAV, outgoing webhooks and
                         the REST API. Everything Event Schedule connects to.
                     </p>
                     <span class="es-payout-accent mt-auto inline-flex items-center gap-2 text-sm font-semibold">

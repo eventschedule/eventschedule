@@ -1239,11 +1239,6 @@
                         
 
 
-                        <!-- JSON preview with border matching textarea -->
-                        <div v-if="showAllFields && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
-                            <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
-                        </div>
-                        
 
                     </div>
                     

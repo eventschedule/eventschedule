@@ -195,7 +195,9 @@ class SeoUtils
                 'Full and partial refunds through Stripe, PayPal and Razorpay (Pro)',
                 "Email sign-up for when an event's tickets go on sale",
                 'Newsletters, and automatic new-event digests for confirmed subscribers',
-                'Two-way calendar sync with Google Calendar, Microsoft 365 and CalDAV',
+                outlook_sync_enabled()
+                    ? 'Two-way calendar sync with Google Calendar, Microsoft 365 and CalDAV'
+                    : 'Two-way calendar sync with Google Calendar and CalDAV',
                 'A live calendar feed guests can subscribe to',
                 'Appointment booking, free with one appointment type',
                 'Passes and gift cards (Pro)',

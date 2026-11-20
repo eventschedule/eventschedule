@@ -45,6 +45,10 @@ class SitemapCoverageTest extends TestCase
     {
         parent::setUp();
 
+        // /outlook-calendar is listed only where an Azure app is set (outlook_sync_enabled());
+        // setting one here puts that branch under the checks too.
+        config(['services.microsoft.client_id' => 'test-client', 'services.microsoft.client_secret' => 'test-secret']);
+
         LegalDocument::create([
             'type' => LegalDocument::COOKIES,
             'content' => 'We use cookies to keep you signed in.',

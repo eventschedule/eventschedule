@@ -1412,7 +1412,7 @@
                             <h3 class="tp-cue">Calendar sync</h3>
                             <p class="tp-paren">Free</p>
                             <p class="tp-dia">
-                                Two-way sync with Google, Outlook and CalDAV, so a call moved on your phone
+                                Two-way sync with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }}, so a call moved on your phone
                                 moves on the schedule too.
                             </p>
                         </div>
@@ -1496,7 +1496,7 @@
 
                     <p class="tp-note">
                         <span class="tp-tag">Free</span>
-                        <span>Drafts and sub-schedules are on every plan. If your schedule reads from Google Calendar or Outlook, mark audition entries private there: an entry your calendar marks private is never pulled in, and the rest arrive as drafts until you publish them, unless you switch on Publish new events automatically. <x-link href="{{ marketing_url('/docs/creating-schedules#calendar-privacy') }}">What stays off your page</x-link></span>
+                        <span>Drafts and sub-schedules are on every plan. If your schedule reads from Google Calendar{{ outlook_sync_enabled() ? ' or Outlook' : '' }}, mark audition entries private there: an entry your calendar marks private is never pulled in, and the rest arrive as drafts until you publish them, unless you switch on Publish new events automatically. <x-link href="{{ marketing_url('/docs/creating-schedules#calendar-privacy') }}">What stays off your page</x-link></span>
                     </p>
 
                     <p class="tp-cont" aria-hidden="true">(CONTINUED)</p>

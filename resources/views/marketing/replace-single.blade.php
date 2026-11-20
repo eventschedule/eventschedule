@@ -865,7 +865,7 @@
                             <span class="es-swap-plan">{{ plan_price(0) }}</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Unlimited events and schedules. Public event pages and a shareable calendar. Two-way Google, Outlook and CalDAV sync. Free RSVP with a capacity limit and no monthly ceiling, scanned at the door. Event graphics, embeddable calendar, built-in analytics, AI event parsing, and 10 newsletter emails a month, each recipient counting as one.
+                            Unlimited events and schedules. Public event pages and a shareable calendar. Two-way {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} sync. Free RSVP with a capacity limit and no monthly ceiling, scanned at the door. Event graphics, embeddable calendar, built-in analytics, AI event parsing, and 10 newsletter emails a month, each recipient counting as one.
                         </p>
                     </div>
                     <div class="es-swap-card p-6" data-reveal="panel">

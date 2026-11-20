@@ -1106,6 +1106,8 @@
                         </p>
                     </div>
 
+                    {{-- Only where this install can sync with Outlook (outlook_sync_enabled()), which is what the Teams toggle rides on. --}}
+                    @if (outlook_sync_enabled())
                     <div class="es-golive-card p-7" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-golive-ink text-lg font-bold">The one exception</h3>
@@ -1119,6 +1121,7 @@
                             <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                         </a>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>

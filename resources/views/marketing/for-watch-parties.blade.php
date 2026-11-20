@@ -1483,7 +1483,7 @@
             ],
             [
                 'q' => 'Can I schedule recurring watch parties?',
-                'a' => 'Yes, and it is one event rather than fifty. Pick the days of the week, add date exceptions for the weeks you are skipping, and end the series on a date or after a set number of screenings. Registration caps and ticket inventory are counted per occurrence. Two-way sync with Google Calendar, Outlook and CalDAV puts the series in your own calendar as a single entry on the date it starts; the subscribable iCal feed is the one that carries every date of the run, 90 days ahead.',
+                'a' => 'Yes, and it is one event rather than fifty. Pick the days of the week, add date exceptions for the weeks you are skipping, and end the series on a date or after a set number of screenings. Registration caps and ticket inventory are counted per occurrence. Two-way sync with '.(outlook_sync_enabled() ? 'Google Calendar, Outlook and CalDAV' : 'Google Calendar and CalDAV').' puts the series in your own calendar as a single entry on the date it starts; the subscribable iCal feed is the one that carries every date of the run, 90 days ahead.',
             ],
             [
                 'q' => 'Do my followers get emailed when I add a screening?',
@@ -2433,9 +2433,9 @@
                             <p class="wp-kick">Calendar sync</p>
                             <span class="wp-tag">Free</span>
                         </div>
-                        <h3>Both directions, three calendars</h3>
+                        <h3>Both directions, {{ outlook_sync_enabled() ? 'three calendars' : 'two calendars' }}</h3>
                         <p>
-                            Google, Outlook or Microsoft 365, and anything speaking CalDAV. Move a screening in your own calendar and it moves here; you choose what happens locally when something is deleted over there. See <a href="{{ marketing_url('/features/calendar-sync') }}">calendar sync</a>.
+                            {{ outlook_sync_enabled() ? 'Google, Outlook or Microsoft 365' : 'Google' }}, and anything speaking CalDAV. Move a screening in your own calendar and it moves here; you choose what happens locally when something is deleted over there. See <a href="{{ marketing_url('/features/calendar-sync') }}">calendar sync</a>.
                         </p>
                         <div class="wp-mini">
                             <div class="wp-sync" aria-hidden="true">
@@ -2443,7 +2443,7 @@
                                     <span>Your schedule</span>
                                     <span>two-way</span>
                                 </div>
-                                @foreach (['Google Calendar', 'Outlook / M365', 'CalDAV'] as $ci => $cName)
+                                @foreach (array_values(array_filter(['Google Calendar', outlook_sync_enabled() ? 'Outlook / M365' : null, 'CalDAV'])) as $ci => $cName)
                                     <div class="wp-sync-row">
                                         {!! $wpSync !!}
                                         <span>{{ $cName }}</span>

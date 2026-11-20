@@ -990,7 +990,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for fitness and yoga instructors?',
-                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and 10 newsletter emails a month (each recipient counts as one) are all free forever, however many students sign up. Scanning a QR code at the door is free on every plan too. Charging for a drop-in is the Pro half, along with class passes and the live check-in dashboard, on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
+                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, the embeddable timetable, built-in analytics and 10 newsletter emails a month (each recipient counts as one) are all free forever, however many students sign up. Scanning a QR code at the door is free on every plan too. Charging for a drop-in is the Pro half, along with class passes and the live check-in dashboard, on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
             ],
             [
                 'q' => 'Can I schedule recurring weekly classes?',
@@ -1849,7 +1849,7 @@
                             <h3>On the site you already have, and the calendar you already use</h3>
                             <span class="fy-tag">Free</span>
                         </div>
-                        <p>Embed the timetable on your own site so the week lives where people look you up, and sync two ways with Google, Outlook or CalDAV so your teaching hours and your life are one calendar. Worth knowing: a recurring class syncs across as a single entry, not as a repeating one. To see every class date in your calendar app, subscribe to the schedule's feed instead, which unrolls the next 90 days one date at a time. Students can take the same feed from your schedule page, so the timetable sits in their calendar and keeps up when a class moves. Any single class date also downloads as an .ics file.</p>
+                        <p>Embed the timetable on your own site so the week lives where people look you up, and sync two ways with {{ outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV' }} so your teaching hours and your life are one calendar. Worth knowing: a recurring class syncs across as a single entry, not as a repeating one. To see every class date in your calendar app, subscribe to the schedule's feed instead, which unrolls the next 90 days one date at a time. Students can take the same feed from your schedule page, so the timetable sits in their calendar and keeps up when a class moves. Any single class date also downloads as an .ics file.</p>
                         <p>
                             Teaching online as well? Mark the class as an online event and paste the link to wherever you are streaming it.
                             <a href="{{ marketing_url('/features/online-events') }}">How online events work</a>
@@ -1973,7 +1973,7 @@
                         ['Ticketing', 'Drop-ins, class passes, QR check-in, zero platform fees', marketing_url('/features/ticketing')],
                         ['Appointments', 'Bookable one-to-ones on your own public booking page', marketing_url('/features/appointments')],
                         ['Newsletters', 'Email the students who follow you, with open rates', marketing_url('/features/newsletters')],
-                        ['Calendar Sync', 'Two-way sync with Google, Outlook and CalDAV', marketing_url('/features/calendar-sync')],
+                        ['Calendar Sync', 'Two-way sync with '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV'), marketing_url('/features/calendar-sync')],
                     ];
                 @endphp
                 <div class="fy-card fy-list" data-reveal>

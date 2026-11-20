@@ -1337,7 +1337,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for libraries?',
-                'a' => 'Yes. Publishing your program calendar, setting programs up as recurring, organising them into sub-schedules, taking free registrations with a place limit, embedding the calendar on your library site, syncing two ways with Google, Outlook or CalDAV, and the built-in analytics are all free forever. Newsletters are free too, with 10 emails a month counted per recipient; Pro raises that to 100 and Enterprise to 1,000. Free registration has no ceiling on any plan. Charging for a program is the Pro plan at '.plan_price($proMonthly).' a month, which also adds the live check-in count at the door. Event Schedule charges zero platform fees on ticket sales, on every plan.',
+                'a' => 'Yes. Publishing your program calendar, setting programs up as recurring, organising them into sub-schedules, taking free registrations with a place limit, embedding the calendar on your library site, syncing two ways with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').', and the built-in analytics are all free forever. Newsletters are free too, with 10 emails a month counted per recipient; Pro raises that to 100 and Enterprise to 1,000. Free registration has no ceiling on any plan. Charging for a program is the Pro plan at '.plan_price($proMonthly).' a month, which also adds the live check-in count at the door. Event Schedule charges zero platform fees on ticket sales, on every plan.',
             ],
             [
                 'q' => 'Can I manage story times, author events, and workshops together?',
@@ -2079,7 +2079,7 @@
                                 <h3>On the library website</h3>
                                 <span class="lb-stamp" style="--r: 3deg;">Free</span>
                             </div>
-                            <p>Embed the calendar in the site you already have, and sync two ways with Google, Outlook or CalDAV. Worth knowing: a recurring program crosses to those calendars as a single entry, so it is the iCal feed, not the sync, that unrolls every Tuesday.</p>
+                            <p>Embed the calendar in the site you already have, and sync two ways with {{ outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV' }}. Worth knowing: a recurring program crosses to those calendars as a single entry, so it is the iCal feed, not the sync, that unrolls every Tuesday.</p>
                         </div>
                         <div class="lb-way" data-reveal>
                             <div class="lb-way-head">

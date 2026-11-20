@@ -1500,6 +1500,35 @@ if (! function_exists('facebook_login_enabled')) {
     }
 }
 
+if (! function_exists('outlook_sync_enabled')) {
+    /**
+     * Whether this install can sync with Outlook / Microsoft 365 (an Azure app's client id and
+     * secret are set).
+     *
+     * Env-only, so it is safe in edge-cached marketing HTML. Every claim of Outlook SYNC asks it:
+     * the marketing pages, the user guide and the Settings and schedule form panels. The "Add to
+     * Outlook" links beside an event are not the integration (a link to Outlook's own compose page,
+     * or the .ics) and never ask it.
+     */
+    function outlook_sync_enabled(): bool
+    {
+        return filled(config('services.microsoft.client_id'))
+            && filled(config('services.microsoft.client_secret'));
+    }
+}
+
+if (! function_exists('outlook_sync_offered')) {
+    /**
+     * Whether the admin portal shows the Outlook panels: when the install can sync, and on a
+     * selfhost install, where the panel says how to set it up. On hosted with no Azure app the
+     * panels are hidden: a "not configured on this server" notice is nothing a customer can act on.
+     */
+    function outlook_sync_offered(): bool
+    {
+        return outlook_sync_enabled() || ! config('app.hosted');
+    }
+}
+
 if (! function_exists('selfhost_needs_setup')) {
     /**
      * Whether a selfhosted install still needs the first-run setup wizard.

@@ -351,6 +351,13 @@ class MarketingController extends Controller
      */
     public function outlookCalendar()
     {
+        // The page is the integration's own pitch: with no Azure app on this install there is
+        // nothing to sell, so it sends the visitor to the calendar sync page (a 302, not a 301:
+        // the page comes back the day the keys are set). The sitemap leaves it out the same way.
+        if (! outlook_sync_enabled()) {
+            return redirect(url('/features/calendar-sync'));
+        }
+
         return view('marketing.outlook-calendar');
     }
 
@@ -1088,7 +1095,7 @@ class MarketingController extends Controller
      */
     public function compareEventbrite()
     {
-        return view('marketing.compare-single', $this->getComparisonData('eventbrite'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('eventbrite')));
     }
 
     /**
@@ -1096,7 +1103,7 @@ class MarketingController extends Controller
      */
     public function compareLuma()
     {
-        return view('marketing.compare-single', $this->getComparisonData('luma'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('luma')));
     }
 
     /**
@@ -1104,7 +1111,7 @@ class MarketingController extends Controller
      */
     public function compareTicketTailor()
     {
-        return view('marketing.compare-single', $this->getComparisonData('ticket-tailor'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('ticket-tailor')));
     }
 
     /**
@@ -1112,7 +1119,7 @@ class MarketingController extends Controller
      */
     public function compareGoogleCalendar()
     {
-        return view('marketing.compare-single', $this->getComparisonData('google-calendar'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('google-calendar')));
     }
 
     /**
@@ -1120,7 +1127,7 @@ class MarketingController extends Controller
      */
     public function compareMeetup()
     {
-        return view('marketing.compare-single', $this->getComparisonData('meetup'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('meetup')));
     }
 
     /**
@@ -1128,7 +1135,7 @@ class MarketingController extends Controller
      */
     public function compareDice()
     {
-        return view('marketing.compare-single', $this->getComparisonData('dice'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('dice')));
     }
 
     /**
@@ -1136,7 +1143,7 @@ class MarketingController extends Controller
      */
     public function compareBrownPaperTickets()
     {
-        return view('marketing.compare-single', $this->getComparisonData('brown-paper-tickets'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('brown-paper-tickets')));
     }
 
     /**
@@ -1144,7 +1151,7 @@ class MarketingController extends Controller
      */
     public function compareSplash()
     {
-        return view('marketing.compare-single', $this->getComparisonData('splash'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('splash')));
     }
 
     /**
@@ -1152,7 +1159,7 @@ class MarketingController extends Controller
      */
     public function compareSched()
     {
-        return view('marketing.compare-single', $this->getComparisonData('sched'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('sched')));
     }
 
     /**
@@ -1160,7 +1167,7 @@ class MarketingController extends Controller
      */
     public function compareWhova()
     {
-        return view('marketing.compare-single', $this->getComparisonData('whova'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('whova')));
     }
 
     /**
@@ -1168,7 +1175,7 @@ class MarketingController extends Controller
      */
     public function compareAccelevents()
     {
-        return view('marketing.compare-single', $this->getComparisonData('accelevents'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('accelevents')));
     }
 
     /**
@@ -1176,7 +1183,7 @@ class MarketingController extends Controller
      */
     public function compareTito()
     {
-        return view('marketing.compare-single', $this->getComparisonData('tito'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('tito')));
     }
 
     /**
@@ -1184,7 +1191,7 @@ class MarketingController extends Controller
      */
     public function compareAddEvent()
     {
-        return view('marketing.compare-single', $this->getComparisonData('addevent'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('addevent')));
     }
 
     /**
@@ -1192,7 +1199,7 @@ class MarketingController extends Controller
      */
     public function comparePretix()
     {
-        return view('marketing.compare-single', $this->getComparisonData('pretix'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('pretix')));
     }
 
     /**
@@ -1200,7 +1207,7 @@ class MarketingController extends Controller
      */
     public function compareHumanitix()
     {
-        return view('marketing.compare-single', $this->getComparisonData('humanitix'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('humanitix')));
     }
 
     /**
@@ -1208,7 +1215,7 @@ class MarketingController extends Controller
      */
     public function compareEventzilla()
     {
-        return view('marketing.compare-single', $this->getComparisonData('eventzilla'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('eventzilla')));
     }
 
     /**
@@ -1216,7 +1223,7 @@ class MarketingController extends Controller
      */
     public function compareTimely()
     {
-        return view('marketing.compare-single', $this->getComparisonData('timely'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('timely')));
     }
 
     /**
@@ -1224,7 +1231,7 @@ class MarketingController extends Controller
      */
     public function compareTheEventsCalendar()
     {
-        return view('marketing.compare-single', $this->getComparisonData('the-events-calendar'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('the-events-calendar')));
     }
 
     /**
@@ -1232,7 +1239,7 @@ class MarketingController extends Controller
      */
     public function compareBandsintown()
     {
-        return view('marketing.compare-single', $this->getComparisonData('bandsintown'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('bandsintown')));
     }
 
     /**
@@ -1240,7 +1247,7 @@ class MarketingController extends Controller
      */
     public function comparePosh()
     {
-        return view('marketing.compare-single', $this->getComparisonData('posh'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('posh')));
     }
 
     /**
@@ -1248,7 +1255,7 @@ class MarketingController extends Controller
      */
     public function comparePartiful()
     {
-        return view('marketing.compare-single', $this->getComparisonData('partiful'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('partiful')));
     }
 
     /**
@@ -1256,7 +1263,7 @@ class MarketingController extends Controller
      */
     public function compareFacebookEvents()
     {
-        return view('marketing.compare-single', $this->getComparisonData('facebook-events'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('facebook-events')));
     }
 
     /**
@@ -1264,7 +1271,7 @@ class MarketingController extends Controller
      */
     public function compareZeffy()
     {
-        return view('marketing.compare-single', $this->getComparisonData('zeffy'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('zeffy')));
     }
 
     /**
@@ -1272,7 +1279,7 @@ class MarketingController extends Controller
      */
     public function compareTockify()
     {
-        return view('marketing.compare-single', $this->getComparisonData('tockify'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('tockify')));
     }
 
     /**
@@ -1280,7 +1287,7 @@ class MarketingController extends Controller
      */
     public function compareHiEvents()
     {
-        return view('marketing.compare-single', $this->getComparisonData('hi-events'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('hi-events')));
     }
 
     /**
@@ -1288,7 +1295,7 @@ class MarketingController extends Controller
      */
     public function compareMobilizon()
     {
-        return view('marketing.compare-single', $this->getComparisonData('mobilizon'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('mobilizon')));
     }
 
     /**
@@ -1296,7 +1303,7 @@ class MarketingController extends Controller
      */
     public function compareTicketLeap()
     {
-        return view('marketing.compare-single', $this->getComparisonData('ticketleap'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('ticketleap')));
     }
 
     /**
@@ -1304,7 +1311,7 @@ class MarketingController extends Controller
      */
     public function compareSongkick()
     {
-        return view('marketing.compare-single', $this->getComparisonData('songkick'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('songkick')));
     }
 
     /**
@@ -1312,7 +1319,7 @@ class MarketingController extends Controller
      */
     public function compareAllEvents()
     {
-        return view('marketing.compare-single', $this->getComparisonData('allevents'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('allevents')));
     }
 
     /**
@@ -1320,7 +1327,7 @@ class MarketingController extends Controller
      */
     public function compareUniverse()
     {
-        return view('marketing.compare-single', $this->getComparisonData('universe'));
+        return view('marketing.compare-single', $this->shownMarketingData($this->getComparisonData('universe')));
     }
 
     /**
@@ -1336,7 +1343,7 @@ class MarketingController extends Controller
      */
     public function replaceGoogleForms()
     {
-        return view('marketing.replace-single', $this->getReplacementData('google-forms'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('google-forms')));
     }
 
     /**
@@ -1344,7 +1351,7 @@ class MarketingController extends Controller
      */
     public function replaceMailchimp()
     {
-        return view('marketing.replace-single', $this->getReplacementData('mailchimp'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('mailchimp')));
     }
 
     /**
@@ -1352,7 +1359,7 @@ class MarketingController extends Controller
      */
     public function replaceCanva()
     {
-        return view('marketing.replace-single', $this->getReplacementData('canva'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('canva')));
     }
 
     /**
@@ -1360,7 +1367,7 @@ class MarketingController extends Controller
      */
     public function replaceLinktree()
     {
-        return view('marketing.replace-single', $this->getReplacementData('linktree'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('linktree')));
     }
 
     /**
@@ -1368,7 +1375,7 @@ class MarketingController extends Controller
      */
     public function replaceGoogleSheets()
     {
-        return view('marketing.replace-single', $this->getReplacementData('google-sheets'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('google-sheets')));
     }
 
     /**
@@ -1376,7 +1383,7 @@ class MarketingController extends Controller
      */
     public function replaceCalendly()
     {
-        return view('marketing.replace-single', $this->getReplacementData('calendly'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('calendly')));
     }
 
     /**
@@ -1384,7 +1391,7 @@ class MarketingController extends Controller
      */
     public function replaceSurveymonkey()
     {
-        return view('marketing.replace-single', $this->getReplacementData('surveymonkey'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('surveymonkey')));
     }
 
     /**
@@ -1392,7 +1399,7 @@ class MarketingController extends Controller
      */
     public function replaceDoodle()
     {
-        return view('marketing.replace-single', $this->getReplacementData('doodle'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('doodle')));
     }
 
     /**
@@ -1400,7 +1407,7 @@ class MarketingController extends Controller
      */
     public function replaceQrCodeGenerators()
     {
-        return view('marketing.replace-single', $this->getReplacementData('qr-code-generators'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('qr-code-generators')));
     }
 
     /**
@@ -1408,7 +1415,7 @@ class MarketingController extends Controller
      */
     public function replaceSquarespace()
     {
-        return view('marketing.replace-single', $this->getReplacementData('squarespace'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('squarespace')));
     }
 
     /**
@@ -1416,7 +1423,7 @@ class MarketingController extends Controller
      */
     public function replaceNotion()
     {
-        return view('marketing.replace-single', $this->getReplacementData('notion'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('notion')));
     }
 
     /**
@@ -1424,7 +1431,7 @@ class MarketingController extends Controller
      */
     public function replaceTrello()
     {
-        return view('marketing.replace-single', $this->getReplacementData('trello'));
+        return view('marketing.replace-single', $this->shownMarketingData($this->getReplacementData('trello')));
     }
 
     /**
@@ -1514,7 +1521,9 @@ class MarketingController extends Controller
     public function docsSearchIndex()
     {
         $index = Cache::remember(
-            'docs.search-index.'.app()->getLocale(),
+            // Keyed by which optional features are set up, so switching one on or off is
+            // picked up at once rather than after a day (getDocSearchIndex() leaves them out).
+            'docs.search-index.'.app()->getLocale().'.'.substr(md5(json_encode($this->docFeaturesOffered())), 0, 8),
             now()->addDay(),
             function () {
                 // Attach the manifest's icon key to each row so the results can
@@ -2137,6 +2146,41 @@ class MarketingController extends Controller
     /**
      * Get comparison data for individual competitor pages
      */
+    /**
+     * Comparison and replacement data as this install can stand behind it. The data itself is
+     * pinned by golden fixtures (MarketingDataCharacterizationTest), so what the install does not
+     * have is taken out here, on its way to the page: with no Azure app (outlook_sync_enabled())
+     * no row, FAQ or summary sells Outlook sync or the Teams links that come with it.
+     */
+    private function shownMarketingData(array $data): array
+    {
+        if (outlook_sync_enabled()) {
+            return $data;
+        }
+
+        $patterns = [
+            // A clause about the Teams meetings the Outlook sync creates goes with it.
+            '~,? and (?:the Outlook sync|with Outlook connected|a schedule synced with Outlook)[^.]*\.~' => '.',
+            '~, and Outlook offers the same choices~' => '',
+            '~, or an Outlook one,~' => '',
+            '~Google Calendar, Outlook and (any )?CalDAV~' => 'Google Calendar and $1CalDAV',
+            '~Google Calendar, Outlook or (a )?CalDAV~' => 'Google Calendar or $1CalDAV',
+            '~Google, Outlook and CalDAV~' => 'Google and CalDAV',
+            '~Google, Outlook or CalDAV~' => 'Google or CalDAV',
+            '~Google, Outlook, CalDAV~' => 'Google, CalDAV',
+            '~Google or Outlook~' => 'Google',
+            '~Outlook and CalDAV~' => 'CalDAV',
+        ];
+
+        array_walk_recursive($data, function (&$value) use ($patterns) {
+            if (is_string($value) && str_contains($value, 'Outlook')) {
+                $value = preg_replace(array_keys($patterns), array_values($patterns), $value) ?? $value;
+            }
+        });
+
+        return $data;
+    }
+
     private function getComparisonData(string $competitor): array
     {
         $competitors = [
@@ -9013,6 +9057,8 @@ class MarketingController extends Controller
      */
     protected function getDocSearchIndex(): array
     {
+        $offered = $this->docFeaturesOffered();
+
         $r = [
             'getting_started' => route('marketing.docs.getting_started'),
             'creating_schedules' => route('marketing.docs.creating_schedules'),
@@ -9059,7 +9105,7 @@ class MarketingController extends Controller
             'referral_program' => route('marketing.docs.referral_program'),
         ];
 
-        return [
+        $index = [
             // ===== USER GUIDE =====
 
             // Getting Started
@@ -9088,7 +9134,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Address', 'description' => 'Configure location settings for your schedule.', 'url' => $r['creating_schedules'].'#address', 'category' => 'User Guide', 'keywords' => 'location map'],
             ['page' => 'Creating Schedules', 'section' => 'Merging Duplicates', 'description' => 'Merge a duplicate venue schedule into another, or bulk-merge look-alike venues from Following or a curator schedule, and look-alike participants from Following.', 'url' => $r['creating_schedules'].'#merge', 'category' => 'User Guide', 'keywords' => 'merge duplicate venue venues participant participants talent performer team combine consolidate merge into not duplicates unclaimed following listed twice someone new'],
             ['page' => 'Creating Schedules', 'section' => 'Style', 'description' => 'Visual styling options for your schedule.', 'url' => $r['creating_schedules'].'#style', 'category' => 'User Guide', 'keywords' => 'design theme appearance'],
-            ['page' => 'Creating Schedules', 'section' => 'Page Content', 'description' => 'What your schedule page shows besides its events: social links, videos, a gallery, sponsors, a venue map and nearby accommodation.', 'url' => $r['creating_schedules'].'#page-content', 'category' => 'User Guide', 'keywords' => 'page content public page social links videos gallery sponsors venue map accommodation videos & links'],
+            ['page' => 'Creating Schedules', 'section' => 'Page Content', 'description' => 'What your schedule page shows besides its events: social links, videos, a gallery, sponsors'.($offered['stay22'] ? ', a venue map and nearby accommodation.' : ' and a venue map.'), 'url' => $r['creating_schedules'].'#page-content', 'category' => 'User Guide', 'keywords' => 'page content public page social links videos gallery sponsors venue map'.($offered['stay22'] ? ' accommodation' : '').' videos & links'],
             ['page' => 'Creating Schedules', 'section' => 'Social Links', 'description' => 'Add your social links to your schedule page, each with a short link on your own schedule URL that counts its clicks.', 'url' => $r['creating_schedules'].'#social-links', 'category' => 'User Guide', 'keywords' => 'social links instagram facebook spotify short link vanity url custom slug forwarding redirect videos & links videos and links'],
             ['page' => 'Creating Schedules', 'section' => 'Videos', 'description' => 'Show YouTube videos on your schedule page, and hide the strip of your performers\' videos.', 'url' => $r['creating_schedules'].'#videos', 'category' => 'User Guide', 'keywords' => 'youtube videos video panel hide performers videos hide videos videos & links'],
             ['page' => 'Creating Schedules', 'section' => 'Gallery', 'description' => 'Show a gallery of photos of your venue, past events or team on your schedule page.', 'url' => $r['creating_schedules'].'#gallery', 'category' => 'User Guide', 'keywords' => 'gallery photos images pictures slideshow lightbox album upload'],
@@ -9118,12 +9164,12 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Notifications', 'description' => 'Choose your own email notifications for a schedule, and whether its email subscribers get a digest of new events.', 'url' => $r['creating_schedules'].'#settings-notifications', 'category' => 'User Guide', 'keywords' => 'notifications email alerts new event requests ticket sale feedback poll installment payments digest announce new events subscribers shared mailbox'],
             ['page' => 'Creating Schedules', 'section' => 'Shared Notification Address', 'description' => 'Send a copy of a schedule\'s notifications, such as new event requests, to a shared mailbox your team works from.', 'url' => $r['creating_schedules'].'#notification-email', 'category' => 'User Guide', 'keywords' => 'shared mailbox team inbox notification address copy send notifications to another email confirm stop unsubscribe'],
             ['page' => 'Creating Schedules', 'section' => 'Push Notifications', 'description' => 'Get schedule notifications in your browser and on your phone, in addition to email.', 'url' => $r['creating_schedules'].'#notifications-push', 'category' => 'User Guide', 'keywords' => 'push notifications browser mobile device test onesignal enable push ios home screen'],
-            ['page' => 'Creating Schedules', 'section' => 'Advanced Settings', 'description' => 'The accessibility widget, declining other schedules\' promotions, and listing the schedule on the network.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'advanced options accessibility widget font size contrast motion promotions opt out network federation'],
+            ['page' => 'Creating Schedules', 'section' => 'Advanced Settings', 'description' => $offered['promotions'] ? 'The accessibility widget, declining other schedules\' promotions, and listing the schedule on the network.' : 'The accessibility widget, and listing the schedule on the network.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'advanced options accessibility widget font size contrast motion'.($offered['promotions'] ? ' promotions opt out' : '').' network federation'],
             ['page' => 'Creating Schedules', 'section' => 'Do Not Show Other Schedules\' Promotions', 'description' => 'Decline to carry other schedules\' paid promotions, and any ads, on your public pages.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'ads adsense advertising promotions opt out opt-out decline hide ads no ads free plan'],
             ['page' => 'Creating Schedules', 'section' => 'List This Schedule on the Network', 'description' => 'List a schedule on the Event Schedule network to share its public events with the eventschedule.com listings, or keep it off.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'federation network list schedule share events eventschedule.com listings opt in opt out discovery list on the network prompt dashboard listed badge'],
             ['page' => 'Creating Schedules', 'section' => 'Integrations', 'description' => 'Connect with calendar and third-party services.', 'url' => $r['creating_schedules'].'#integrations', 'category' => 'User Guide', 'keywords' => 'connect sync third-party'],
             ['page' => 'Creating Schedules', 'section' => 'Email Settings', 'description' => 'Configure email delivery for your schedule.', 'url' => $r['creating_schedules'].'#integrations-email', 'category' => 'User Guide', 'keywords' => 'email smtp sender notifications permission denied authentication failed test email error unverified sender app password troubleshooting'],
-            ['page' => 'Creating Schedules', 'section' => 'Calendar Sync', 'description' => 'Sync direction and what the Google, Outlook and CalDAV rows share.', 'url' => $r['creating_schedules'].'#calendar-sync', 'category' => 'User Guide', 'keywords' => 'calendar sync direction google outlook caldav'],
+            ['page' => 'Creating Schedules', 'section' => 'Calendar Sync', 'description' => 'Sync direction and what the '.($offered['outlook'] ? 'Google, Outlook and CalDAV rows share.' : 'Google and CalDAV rows share.'), 'url' => $r['creating_schedules'].'#calendar-sync', 'category' => 'User Guide', 'keywords' => 'calendar sync direction google'.($offered['outlook'] ? ' outlook' : '').' caldav'],
             ['page' => 'Creating Schedules', 'section' => 'Publish New Events Automatically', 'description' => 'Events pulled in from a calendar arrive as drafts unless you turn on publishing them as they arrive, for the calendar you chose.', 'url' => $r['creating_schedules'].'#publish-on-arrival', 'category' => 'User Guide', 'keywords' => 'publish automatically drafts arrive calendar sync google outlook caldav main calendar'],
             ['page' => 'Creating Schedules', 'section' => 'What Stays Off Your Page', 'description' => 'Private, declined and cancelled entries, and ones with meeting passcodes or an email thread, stay off your public page; meeting links never become venues.', 'url' => $r['creating_schedules'].'#calendar-privacy', 'category' => 'User Guide', 'keywords' => 'private calendar passcode zoom teams dial-in meeting link email thread declined hidden'],
             ['page' => 'Creating Schedules', 'section' => 'Events From Your Calendar', 'description' => 'The list of events a calendar sync is keeping off your page: publish them, keep them hidden, or publish all.', 'url' => $r['creating_schedules'].'#calendar-review', 'category' => 'User Guide', 'keywords' => 'review drafts waiting taken off publish all keep hidden calendar sync'],
@@ -9199,7 +9245,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Events', 'section' => 'Agenda', 'description' => 'Create agenda items and event parts.', 'url' => $r['creating_events'].'#agenda', 'category' => 'User Guide', 'keywords' => 'parts itinerary lineup schedule'],
             ['page' => 'Creating Events', 'section' => 'Listing', 'description' => 'Set an event\'s visibility, link, category, the other schedules it appears on and the calendars it is copied to.', 'url' => $r['creating_events'].'#listing', 'category' => 'User Guide', 'keywords' => 'visibility slug url category draft public also list on calendar sync'],
             ['page' => 'Creating Events', 'section' => 'Also List On', 'description' => 'Show the event on your other schedules and on schedules you follow that take requests.', 'url' => $r['creating_events'].'#schedules', 'category' => 'User Guide', 'keywords' => 'cross-list curator appearances'],
-            ['page' => 'Creating Events', 'section' => 'Calendar Sync', 'description' => 'At the end of the Listing tab: see whether one event is on your Google or Outlook calendar, sync it now or remove it.', 'url' => $r['creating_events'].'#google-calendar', 'category' => 'User Guide', 'keywords' => 'google calendar sync outlook tab listing'],
+            ['page' => 'Creating Events', 'section' => 'Calendar Sync', 'description' => 'At the end of the Listing tab: see whether one event is on your '.($offered['outlook'] ? 'Google or Outlook calendar' : 'Google calendar').', sync it now or remove it.', 'url' => $r['creating_events'].'#google-calendar', 'category' => 'User Guide', 'keywords' => 'google calendar sync'.($offered['outlook'] ? ' outlook' : '').' tab listing'],
             ['page' => 'Creating Events', 'section' => 'WhatsApp Integration', 'description' => 'Create an event by sending a WhatsApp message or a photo of a flyer (Enterprise).', 'url' => $r['creating_events'].'#whatsapp', 'category' => 'User Guide', 'keywords' => 'whatsapp chat message flyer photo phone twilio'],
             ['page' => 'Creating Events', 'section' => 'Ticket Configuration', 'description' => 'Free registration, Sell tickets or Tickets elsewhere, and what each opens.', 'url' => $r['creating_events'].'#tickets', 'category' => 'User Guide', 'keywords' => 'tickets pricing sell payment method stripe paypal registration'],
             ['page' => 'Creating Events', 'section' => 'Custom Fields', 'description' => 'Add custom information fields to events.', 'url' => $r['creating_events'].'#custom-fields', 'category' => 'User Guide', 'keywords' => 'custom fields metadata'],
@@ -9316,7 +9362,7 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'Check-In System', 'description' => 'QR code-based check-in for attendees.', 'url' => $r['tickets'].'#check-in', 'category' => 'User Guide', 'keywords' => 'check-in qr code scan attendee camera door'],
             ['page' => 'Selling Tickets', 'section' => 'Check-In Dashboard', 'description' => 'Dashboard for managing event check-ins.', 'url' => $r['tickets'].'#checkin-dashboard', 'category' => 'User Guide', 'keywords' => 'dashboard check-in manage'],
             ['page' => 'Selling Tickets', 'section' => 'Donations and Pay What You Want', 'description' => 'Let buyers add a donation at checkout, or pay what they want for a free ticket.', 'url' => $r['tickets'].'#donations', 'category' => 'User Guide', 'keywords' => 'donation donations pay what you want pwyw tip suggested amount fundraising sliding scale'],
-            ['page' => 'Selling Tickets', 'section' => 'Wallet Passes', 'description' => 'Let buyers save their ticket to Google Wallet or Apple Wallet and scan it at the door.', 'url' => $r['tickets'].'#wallet-passes', 'category' => 'User Guide', 'keywords' => 'google wallet pass phone add to wallet apple passbook qr'],
+            ['page' => 'Selling Tickets', 'section' => 'Wallet Passes', 'description' => 'Let buyers save their ticket to '.implode(' or ', array_keys(array_filter(['Google Wallet' => $offered['google_wallet'], 'Apple Wallet' => $offered['apple_wallet']]))).' and scan it at the door.', 'url' => $r['tickets'].'#wallet-passes', 'category' => 'User Guide', 'keywords' => ($offered['google_wallet'] ? 'google ' : '').'wallet pass phone add to wallet'.($offered['apple_wallet'] ? ' apple passbook' : '').' qr'],
             ['page' => 'Selling Tickets', 'section' => 'Waitlist', 'description' => 'Manage waitlists for sold-out events.', 'url' => $r['tickets'].'#waitlist', 'category' => 'User Guide', 'keywords' => 'waitlist waiting list sold out'],
             ['page' => 'Selling Tickets', 'section' => 'Interest List', 'description' => 'Switch on the "Notify me" card so visitors can leave an email to hear when an event\'s tickets go on sale, if it is cancelled, and shortly before it starts.', 'url' => $r['tickets'].'#interest-list', 'category' => 'User Guide', 'keywords' => 'interest notify me tell me when tickets go on sale tell me if anything changes remind reminder cancelled change notice email capture waiting turn on enable show notify me card'],
             ['page' => 'Selling Tickets', 'section' => 'Post-Event Feedback', 'description' => 'Collect star ratings and comments from attendees after events.', 'url' => $r['tickets'].'#feedback', 'category' => 'User Guide', 'keywords' => 'feedback rating stars review comment post-event'],
@@ -9816,6 +9862,45 @@ class MarketingController extends Controller
             ['page' => 'Referral Program', 'section' => 'Referral Statuses', 'description' => 'Signed up, Subscribed, Earned, Applied and Expired statuses.', 'url' => $r['referral_program'].'#statuses', 'category' => 'User Guide', 'keywords' => 'referral status signed up subscribed earned applied expired pending qualified credited'],
             ['page' => 'Referral Program', 'section' => 'Referral History', 'description' => 'Every referral, its status and what comes next.', 'url' => $r['referral_program'].'#history', 'category' => 'User Guide', 'keywords' => 'referral history table list credit due expired'],
             ['page' => 'Referral Program', 'section' => 'Your Referrals', 'description' => 'How many of your referrals are at each of the four steps.', 'url' => $r['referral_program'].'#dashboard', 'category' => 'User Guide', 'keywords' => 'referrals dashboard steps signed up subscribed earned applied next credit due'],
+        ];
+
+        // A passage the guide leaves out (a feature this hosted install has not set up) is not
+        // offered by its search either, or a result would open a section that is not there.
+        $hidden = array_keys(array_filter([
+            'Creating Schedules|Accommodation' => ! $offered['stay22'],
+            'Creating Schedules|Push Notifications' => ! $offered['push'],
+            'Creating Schedules|Do Not Show Other Schedules\' Promotions' => ! $offered['promotions'],
+            'Creating Schedules|Outlook Calendar' => ! $offered['outlook'],
+            // The Plan tab's ads passage is in its hosted branch: a selfhost guide has no such section.
+            'Managing Schedules|Ads on Free Schedules' => ! (config('app.hosted') && config('ads.enabled')),
+            'Selling Tickets|Wallet Passes' => ! $offered['google_wallet'] && ! $offered['apple_wallet'],
+            'Account Settings|Outlook Calendar' => ! $offered['outlook'],
+            'Account Settings|Facebook Settings' => ! $offered['facebook'],
+            'Boost|On-Network Promotions' => ! $offered['promotions'],
+            'Boost|Hosting Other Schedules\' Promotions' => ! $offered['promotions'],
+        ]));
+
+        return array_values(array_filter($index, fn ($entry) => ! in_array($entry['page'].'|'.$entry['section'], $hidden, true)));
+    }
+
+    /**
+     * Which of the features an operator switches on with credentials the user guide describes.
+     * On hosted, only those that are set up: the admin portal hides the panel of one that is
+     * not, so the guide and its search leave it out too. A selfhost operator reads about each
+     * either way, because the admin portal there says how to set it up.
+     */
+    protected function docFeaturesOffered(): array
+    {
+        $selfhost = ! config('app.hosted');
+
+        return [
+            'outlook' => outlook_sync_offered(),
+            'facebook' => facebook_login_enabled() || $selfhost,
+            'push' => \App\Services\OneSignalService::isConfigured() || $selfhost,
+            'stay22' => \App\Services\Stay22Service::isEnabled() || $selfhost,
+            'promotions' => (bool) config('ads.enabled') || $selfhost,
+            'google_wallet' => \App\Services\Wallet\GoogleWalletService::isConfigured() || $selfhost,
+            'apple_wallet' => \App\Services\Wallet\AppleWalletService::isConfigured() || $selfhost,
         ];
     }
 }

@@ -618,7 +618,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule really free?',
-                'a' => 'Yes, and not as a trial. Unlimited events and schedules, recurring events with date exceptions, sub-schedules, free registration with a capacity limit and no monthly ceiling, two-way Google, Outlook and CalDAV sync, the embeddable calendar, built-in analytics and scanning a ticket at the door are all on the free plan, with no credit card and no expiry. Selling a ticket that carries a price, and the check-in dashboard, are on the Pro plan at '.plan_price($proMonthly).' a month, multiple team members are on Enterprise at '.plan_price($entMonthly).', and the free plan is one team member.',
+                'a' => 'Yes, and not as a trial. Unlimited events and schedules, recurring events with date exceptions, sub-schedules, free registration with a capacity limit and no monthly ceiling, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, the embeddable calendar, built-in analytics and scanning a ticket at the door are all on the free plan, with no credit card and no expiry. Selling a ticket that carries a price, and the check-in dashboard, are on the Pro plan at '.plan_price($proMonthly).' a month, multiple team members are on Enterprise at '.plan_price($entMonthly).', and the free plan is one team member.',
             ],
             [
                 'q' => 'What license is it under, and where is the source?',

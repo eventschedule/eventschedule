@@ -1205,7 +1205,7 @@
                             </div>
                             <p class="es-sort-muted mb-4">Embed your calendar on the site you already run and the same filter comes with it, dividers, counts and colour dots included. The embed renders the same calendar as your public page, so the sorting is never set up twice. Point it at a sub-schedule's address instead and it opens already filtered to that section, so the workshops page on your site leads with workshops.</p>
                             <p class="es-sort-muted text-sm">
-                                The embed, the built-in analytics and two-way sync with Google, Outlook and CalDAV are all free.
+                                The embed, the built-in analytics and two-way sync with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} are all free.
                                 <a href="{{ marketing_url('/features/embed-calendar') }}" class="es-sort-link font-medium hover:underline">How the embed works</a>
                             </p>
                         </div>

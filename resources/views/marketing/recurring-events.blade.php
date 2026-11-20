@@ -650,7 +650,7 @@
             ],
             [
                 'q' => 'How do recurring events reach other calendars?',
-                'a' => 'Two-way sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server is free on every plan, and it carries the event record itself across. What it does not do is hand the connected calendar a repeat rule, so do not expect the series to appear there as a repeating entry. The place a loop is expanded date by date is your schedule\'s iCal feed: it writes one entry per date for the next 90 days, each linking to that date\'s own page. Every event page also offers a download for the single date somebody is looking at, sharing its identifier with the feed so a calendar app updates the entry it already has.',
+                'a' => 'Two-way sync with Google Calendar'.(outlook_sync_enabled() ? ', Outlook and Microsoft 365' : '').', or any CalDAV server is free on every plan, and it carries the event record itself across. What it does not do is hand the connected calendar a repeat rule, so do not expect the series to appear there as a repeating entry. The place a loop is expanded date by date is your schedule\'s iCal feed: it writes one entry per date for the next 90 days, each linking to that date\'s own page. Every event page also offers a download for the single date somebody is looking at, sharing its identifier with the feed so a calendar app updates the entry it already has.',
             ],
             [
                 'q' => 'Can guests subscribe to a recurring event in their own calendar?',
@@ -1363,7 +1363,7 @@
                             <h3 class="es-loop-ink text-lg font-bold">Your own calendar</h3>
                             <span class="es-loop-plan">Free</span>
                         </div>
-                        <p class="es-loop-muted text-sm">Two-way sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server, on every plan. It syncs the event record itself and brings edits back. It does not hand the connected calendar a repeat rule, so the feed above is the one that unrolls the dates.</p>
+                        <p class="es-loop-muted text-sm">Two-way sync with Google Calendar{{ outlook_sync_enabled() ? ', Outlook and Microsoft 365' : '' }}, or any CalDAV server, on every plan. It syncs the event record itself and brings edits back. It does not hand the connected calendar a repeat rule, so the feed above is the one that unrolls the dates.</p>
                     </div>
                 </div>
 
@@ -1594,7 +1594,7 @@
                 <div data-reveal>
                     <x-feature-link-card
                         name="Calendar Sync"
-                        description="Two-way sync with Google Calendar, Outlook and CalDAV"
+                        :description="outlook_sync_enabled() ? 'Two-way sync with Google Calendar, Outlook and CalDAV' : 'Two-way sync with Google Calendar and CalDAV'"
                         :url="marketing_url('/features/calendar-sync')"
                         icon-color="blue"
                     >

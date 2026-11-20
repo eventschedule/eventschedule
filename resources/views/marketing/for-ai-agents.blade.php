@@ -1236,7 +1236,7 @@ HTML,
 <pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['hero_res'], 12) !!}</pre>
                             </div>
                             <p class="ax-prose es-fade-up es-d-5">
-                                That one call also writes the event to Google, Outlook or CalDAV if the schedule is connected to one, and fires an <span class="ax-s">event.created</span> webhook.
+                                That one call also writes the event to {{ outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV' }} if the schedule is connected to one, and fires an <span class="ax-s">event.created</span> webhook.
                             </p>
                         </div>
                     </div>
@@ -1879,7 +1879,7 @@ HTML,
                         @php
                             $axFeatures = [
                                 ['Ticketing', 'Ticket types, QR check-in and zero platform fees', marketing_url('/features/ticketing')],
-                                ['Calendar Sync', 'Two-way Google, Outlook and CalDAV sync on every plan', marketing_url('/features/calendar-sync')],
+                                ['Calendar Sync', 'Two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync on every plan', marketing_url('/features/calendar-sync')],
                                 ['Integrations', 'Every port in and out, with the plan each one needs', marketing_url('/features/integrations')],
                                 ['Embed Calendar', 'Put the schedule on the site you already run', marketing_url('/features/embed-calendar')],
                                 ['Analytics', 'Page views, devices and traffic sources, free on every plan', marketing_url('/features/analytics')],

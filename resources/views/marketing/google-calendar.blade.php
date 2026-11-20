@@ -1069,7 +1069,7 @@
                 </div>
 
                 <p class="mt-10 text-center es-invite-band-muted" data-reveal>
-                    The setting costs nothing, but a team is an Enterprise feature on eventschedule.com, capped at five members; a selfhosted install has it. Followers do not get a copy this way: a follower who wants your events in their calendar subscribes to the feed. Outlook and CalDAV connect at the schedule level only, so this part is a Google thing.
+                    The setting costs nothing, but a team is an Enterprise feature on eventschedule.com, capped at five members; a selfhosted install has it. Followers do not get a copy this way: a follower who wants your events in their calendar subscribes to the feed. {{ outlook_sync_enabled() ? 'Outlook and CalDAV connect' : 'CalDAV connects' }} at the schedule level only, so this part is a Google thing.
                 </p>
             </div>
         </div>
@@ -1366,7 +1366,7 @@
             <h2 class="es-invite-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="The same two-way sync for Outlook, Microsoft 365 and any CalDAV server" :url="marketing_url('/features/calendar-sync')" icon-color="sky">
+                    <x-feature-link-card name="Calendar Sync" :description="outlook_sync_enabled() ? 'The same two-way sync for Outlook, Microsoft 365 and any CalDAV server' : 'The same two-way sync for any CalDAV server'" :url="marketing_url('/features/calendar-sync')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>

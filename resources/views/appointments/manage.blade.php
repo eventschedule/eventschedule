@@ -78,7 +78,9 @@
             </div>
         @endif
 
-        @if (request()->boolean('new') && in_array($state, ['confirmed', 'pending']))
+        {{-- Only when the mail really leaves: on hosted that needs the schedule's own mail settings
+             (EmailService::appointmentCanSend()), and the Appointments tab warns the owner when not. --}}
+        @if (request()->boolean('new') && in_array($state, ['confirmed', 'pending']) && app(\App\Services\EmailService::class)->appointmentGuestMailGoesOut($sale))
             <div class="mb-4 flex items-start gap-3 rounded-lg border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 p-4 text-green-800 dark:text-green-200">
                 <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

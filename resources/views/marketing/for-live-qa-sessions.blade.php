@@ -985,7 +985,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting Q&A sessions?',
-                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, the embeddable registration widget, two-way Google, Outlook and CalDAV sync, built-in analytics and newsletters are all free forever, and there is no ceiling on how many people register. Polls, custom questions on the registration form and charging for a seat are on the Pro plan at '.plan_price($proMonthly).' a month. There are zero platform fees on ticket sales on every plan.',
+                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, the embeddable registration widget, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, built-in analytics and newsletters are all free forever, and there is no ceiling on how many people register. Polls, custom questions on the registration form and charging for a seat are on the Pro plan at '.plan_price($proMonthly).' a month. There are zero platform fees on ticket sales on every plan.',
             ],
             [
                 'q' => 'Do my followers get an email when I schedule a new session?',
@@ -1555,7 +1555,7 @@
                                 <h3>In their calendar too</h3>
                                 <span class="qa-tier">Free</span>
                             </div>
-                            <p>Anyone can download a single date as a calendar file, and your own Google, Outlook or CalDAV calendar syncs both ways.</p>
+                            <p>Anyone can download a single date as a calendar file, and your own {{ outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV' }} calendar syncs both ways.</p>
                         </div>
                     </div>
                 </div>
@@ -1931,7 +1931,7 @@
                             <h3>On the site you already have</h3>
                             <span class="qa-tier">Free</span>
                         </div>
-                        <p>Embed the calendar so your sessions sit where people look you up, and sync two ways with Google, Outlook and CalDAV so your own week stays honest.</p>
+                        <p>Embed the calendar so your sessions sit where people look you up, and sync two ways with {{ outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV' }} so your own week stays honest.</p>
                         <p>Built-in <a href="{{ marketing_url('/features/analytics') }}" class="qa-a">analytics</a> show page views, the devices people are on and where the traffic came from. That is what they measure, and nothing more. Embedding the registration form itself on another site is free too; it is the ticket purchase widget that is a Pro feature.</p>
                     </div>
 

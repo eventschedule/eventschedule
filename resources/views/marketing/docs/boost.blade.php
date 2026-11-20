@@ -1,16 +1,25 @@
+{{-- The promotions network ("On this site") and web push are described only where they can be
+     used: on hosted each is hidden while the operator has not switched it on; a selfhost operator
+     reads about both either way. --}}
+@php
+    $guidePromotions = config('ads.enabled') || ! config('app.hosted');
+    $guidePush = \App\Services\OneSignalService::isConfigured() || ! config('app.hosted');
+@endphp
 <x-docs-page
     key="boost"
     title="Boost Setup Guide: Meta Ads and Promotions - Event Schedule"
     plan="pro"
-    description="Learn how to promote your events with Boost: Facebook and Instagram ad campaigns, and promoted cards on other schedules on the same site."
-    lede="Promote your events two ways from one page: Facebook and Instagram ads bought through Meta, and promoted cards shown on other schedules on the same site."
+    :description="$guidePromotions ? 'Learn how to promote your events with Boost: Facebook and Instagram ad campaigns, and promoted cards on other schedules on the same site.' : 'Learn how to promote your events with Boost: Facebook and Instagram ad campaigns, built from the event and managed for you.'"
+    :lede="$guidePromotions ? 'Promote your events two ways from one page: Facebook and Instagram ads bought through Meta, and promoted cards shown on other schedules on the same site.' : 'Promote your events with Facebook and Instagram ads bought through Meta, built from the event and managed for you.'"
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
+        @if ($guidePromotions)
         <x-doc-nav-link href="#on-network">On-Network Promotions</x-doc-nav-link>
         <x-doc-nav-link href="#on-network-pricing" sub>Choosing How You Pay</x-doc-nav-link>
         <x-doc-nav-link href="#on-network-review" sub>Review</x-doc-nav-link>
         <x-doc-nav-link href="#on-network-hosting" sub>Hosting Other Schedules' Promotions</x-doc-nav-link>
+        @endif
         <x-doc-nav-link href="#quick-mode">Quick Mode</x-doc-nav-link>
         <x-doc-nav-link href="#boost-from-event" sub>The Boost Event Button on an Event</x-doc-nav-link>
         <x-doc-nav-link href="#advanced-mode">Advanced Mode</x-doc-nav-link>
@@ -36,7 +45,12 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Boost turns an event you have already published into a paid promotion, without needing ad manager experience. It lives under <strong class="text-gray-900 dark:text-white">Boost</strong> in the sidebar, an entry that is there only when the site has at least one of the two channels below set up. It sells two different things from the same page, and each one is set up, priced and reported separately.
+            Boost turns an event you have already published into a paid promotion, without needing ad manager experience. It lives under <strong class="text-gray-900 dark:text-white">Boost</strong> in the sidebar,
+            @if ($guidePromotions)
+            an entry that is there only when the site has at least one of the two channels below set up. It sells two different things from the same page, and each one is set up, priced and reported separately.
+            @else
+            an entry that is there only when the site has Facebook and Instagram ads set up.
+            @endif
         </p>
 
         <x-doc-screenshot id="boost--page" alt="The Boost Event form for Facebook and Instagram: the event summary, the ad budget slider and the ad preview" loading="eager" />
@@ -56,18 +70,26 @@
                         <td>A real Meta ad campaign, created and managed for you on Facebook and Instagram</td>
                         <td>Your ad budget, plus a service fee on hosted sites</td>
                     </tr>
+                    @if ($guidePromotions)
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">On this site</span></td>
                         <td>A promoted card on other schedules' public pages on the same Event Schedule site</td>
                         <td>Per 1,000 views or per click, with no service fee</td>
                     </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
 
+        @if ($guidePromotions)
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Both are bought the same way: open <strong class="text-gray-900 dark:text-white">Boost</strong>, press <strong class="text-gray-900 dark:text-white">Boost Event</strong> at the end of the title row, pick one of your upcoming events in the dialog, then press the channel's button: <strong class="text-gray-900 dark:text-white">On this site</strong> or <strong class="text-gray-900 dark:text-white">Facebook &amp; Instagram</strong>. A channel's button appears only if the site has that channel set up, so you may see one or both. If the schedule you have picked is on the Free plan, or all of your schedules are, the page shows a Pro plan notice and no Boost Event button.
         </p>
+        @else
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            To buy one, open <strong class="text-gray-900 dark:text-white">Boost</strong>, press <strong class="text-gray-900 dark:text-white">Boost Event</strong> at the end of the title row, pick one of your upcoming events in the dialog, then press <strong class="text-gray-900 dark:text-white">Facebook &amp; Instagram</strong>. If the schedule you have picked is on the Free plan, or all of your schedules are, the page shows a Pro plan notice and no Boost Event button.
+        </p>
+        @endif
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             With Boost you can:
@@ -92,13 +114,17 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300">
-            The Facebook and Instagram channel offers two modes: <strong class="text-gray-900 dark:text-white">Quick Mode</strong>, which fills everything in for you, and <strong class="text-gray-900 dark:text-white">Advanced Mode</strong>, which exposes the budget type, schedule, audience and creative. On-network promotions have a single form and no advanced mode.
+            The Facebook and Instagram channel offers two modes: <strong class="text-gray-900 dark:text-white">Quick Mode</strong>, which fills everything in for you, and <strong class="text-gray-900 dark:text-white">Advanced Mode</strong>, which exposes the budget type, schedule, audience and creative.
+            @if ($guidePromotions)
+            On-network promotions have a single form and no advanced mode.
+            @endif
         </p>
         <p class="text-gray-600 dark:text-gray-300 mt-4">
             Amounts on this page are the defaults, in US dollars. A site can set its own minimums and its own currency for each channel, and the forms always show the figures that apply.
         </p>
     </section>
 
+    @if ($guidePromotions)
     <!-- On-Network Promotions -->
     <section id="on-network" class="doc-section">
         <h2 class="doc-heading">
@@ -204,6 +230,7 @@
             The one toggle covers everything a site might place on your pages, so it also turns off <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">ads</a> if the site you are on runs those as well. Paid schedules never carry either, so the toggle only changes anything while you are on the Free plan.
         </p>
     </section>
+    @endif
 
     <!-- Quick Mode -->
     <section id="quick-mode" class="doc-section">
@@ -251,7 +278,7 @@
 
         <h3 id="boost-from-event" class="doc-subheading">The Boost Event Button on an Event</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Once an event has been saved, its edit page carries a <strong class="text-gray-900 dark:text-white">Boost Event</strong> button: beside <strong class="text-gray-900 dark:text-white">Actions</strong> at the top on a wide screen, and as the first entry of the Actions menu on a smaller one. A new event has no Boost button until it is saved. The button always opens the Facebook and Instagram form above; on-network promotions are started from the Boost page.
+            Once an event has been saved, its edit page carries a <strong class="text-gray-900 dark:text-white">Boost Event</strong> button: beside <strong class="text-gray-900 dark:text-white">Actions</strong> at the top on a wide screen, and as the first entry of the Actions menu on a smaller one. A new event has no Boost button until it is saved. The button always opens the Facebook and Instagram form above{{ $guidePromotions ? '; on-network promotions are started from the Boost page' : '' }}.
         </p>
         <ul class="doc-list mb-6">
             <li>If the event has no name or start date yet, or has already started, the button says so and goes no further.</li>
@@ -437,7 +464,7 @@
             Managing Campaigns
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Boost</strong> page lists the campaigns you started on both channels, active and past, newest first and 20 to a page. A campaign a teammate started is in their list, not yours. If you run more than one schedule, the picker at the end of the title row narrows the list to one.
+            The <strong class="text-gray-900 dark:text-white">Boost</strong> page lists the campaigns you started{{ $guidePromotions ? ' on both channels' : '' }}, active and past, newest first and 20 to a page. A campaign a teammate started is in their list, not yours. If you run more than one schedule, the picker at the end of the title row narrows the list to one.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Each row gives the event, with its schedule, its channel and the day the campaign was bought, then the status, impressions, clicks, spend and budget. While a campaign is active or paused a bar under the spend shows how much of the budget has gone. The event's name opens the campaign's own page, where <strong class="text-gray-900 dark:text-white">Pause</strong> or <strong class="text-gray-900 dark:text-white">Resume</strong> and <strong class="text-gray-900 dark:text-white">Cancel Campaign</strong> sit at the end of the title row and a link above the title leads back to Boost. Cancelling asks first.
@@ -457,17 +484,19 @@
                         <td><span class="font-semibold text-gray-900 dark:text-white">Pending Payment</span></td>
                         <td>The campaign was created but payment has not been confirmed yet. It resolves itself within about half an hour, either activating or failing</td>
                     </tr>
+                    @if ($guidePromotions)
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Awaiting review</span></td>
                         <td>On-network only. Paid for and waiting on the site operator to approve it</td>
                     </tr>
+                    @endif
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Active</span></td>
                         <td>The campaign is running and being delivered</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Paused</span></td>
-                        <td>Delivery is temporarily stopped. Resume at any time. On-network campaigns can also be paused automatically, see above</td>
+                        <td>Delivery is temporarily stopped. Resume at any time{{ $guidePromotions ? '. On-network campaigns can also be paused automatically, see above' : '' }}</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Completed</span></td>
@@ -479,7 +508,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Rejected</span></td>
-                        <td>Meta disapproved the ad, or the site operator rejected the on-network promotion. Either way a full refund is issued automatically and the reason is shown on the campaign page</td>
+                        <td>{{ $guidePromotions ? 'Meta disapproved the ad, or the site operator rejected the on-network promotion. Either way a' : 'Meta disapproved the ad. A' }} full refund is issued automatically and the reason is shown on the campaign page</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Failed</span></td>
@@ -491,7 +520,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">How many campaigns can run at once</div>
-            <p>On hosted sites, the number of concurrent Facebook and Instagram campaigns per schedule depends on your history: new schedules start with 1, rising to 2 after 3 completed campaigns and 3 after 10. On-network promotions are capped separately, at 2 by default, so one channel never uses up the other's slots. Selfhosted installations use a single fixed limit instead. While a schedule is at its Facebook and Instagram limit, the Quick Mode form is replaced by a notice saying so.</p>
+            <p>On hosted sites, the number of concurrent Facebook and Instagram campaigns per schedule depends on your history: new schedules start with 1, rising to 2 after 3 completed campaigns and 3 after 10.{{ $guidePromotions ? ' On-network promotions are capped separately, at 2 by default, so one channel never uses up the other\'s slots.' : '' }} Selfhosted installations use a single fixed limit instead. While a schedule is at its Facebook and Instagram limit, the Quick Mode form is replaced by a notice saying so.</p>
         </div>
     </section>
 
@@ -557,10 +586,10 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The limit is per schedule, and your current one is shown under the budget heading of both Facebook and Instagram forms. Only completed <strong class="text-gray-900 dark:text-white">Facebook and Instagram</strong> campaigns count towards it, and the increase lands when the campaign is settled, about a day after it finishes. On-network promotions are capped by the same ceiling but never raise it. The ladder only ever raises it, and one completed campaign is enough to move it from $10 to $25, so a small first campaign is the way to build a history.
+            The limit is per schedule, and your current one is shown under the budget heading of both Facebook and Instagram forms. Only completed <strong class="text-gray-900 dark:text-white">Facebook and Instagram</strong> campaigns count towards it, and the increase lands when the campaign is settled, about a day after it finishes.{{ $guidePromotions ? ' On-network promotions are capped by the same ceiling but never raise it.' : '' }} The ladder only ever raises it, and one completed campaign is enough to move it from $10 to $25, so a small first campaign is the way to build a history.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The top of the ladder is also the most the form accepts: a budget above the site's maximum, $1,000 by default, is refused on both channels however long your history is. A site administrator can also set a schedule's limit by hand, higher or lower, and that too stops at the same maximum.
+            The top of the ladder is also the most the form accepts: a budget above the site's maximum, $1,000 by default, is refused{{ $guidePromotions ? ' on both channels' : '' }} however long your history is. A site administrator can also set a schedule's limit by hand, higher or lower, and that too stops at the same maximum.
         </p>
 
         <div class="doc-callout doc-callout-info">
@@ -627,10 +656,14 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Once the campaign has run for more than a day, a <strong class="text-gray-900 dark:text-white">Daily Performance</strong> chart plots impressions against clicks, and <strong class="text-gray-900 dark:text-white">Ad Creative</strong> at the foot of the page shows the ad as it runs, with the state Meta gives it. On-network promotions report a different set of numbers, described under <a href="#on-network" class="doc-link">On-Network Promotions</a>.
+            Once the campaign has run for more than a day, a <strong class="text-gray-900 dark:text-white">Daily Performance</strong> chart plots impressions against clicks, and <strong class="text-gray-900 dark:text-white">Ad Creative</strong> at the foot of the page shows the ad as it runs, with the state Meta gives it. 
+            @if ($guidePromotions)
+            On-network promotions report a different set of numbers, described under <a href="#on-network" class="doc-link">On-Network Promotions</a>.
+            @endif
+
         </p>
         <p class="text-gray-600 dark:text-gray-300">
-            Every link in a boosted ad or promoted card is tagged, so traffic and ticket sales from a campaign are also visible in your own <a href="{{ route('marketing.docs.analytics') }}#revenue" class="doc-link">Analytics</a>, where boost views, attributed sales, cost per view and cost per sale are reported alongside the rest of your traffic.
+            Every link in a boosted ad{{ $guidePromotions ? ' or promoted card' : '' }} is tagged, so traffic and ticket sales from a campaign are also visible in your own <a href="{{ route('marketing.docs.analytics') }}#revenue" class="doc-link">Analytics</a>, where boost views, attributed sales, cost per view and cost per sale are reported alongside the rest of your traffic.
         </p>
     </section>
 
@@ -673,12 +706,17 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            On-network promotions carry <strong class="text-gray-900 dark:text-white">no service fee</strong>: there is no outside ad platform to buy from, so your whole budget is the price. Selfhosted installations add no fee to either channel, and their Facebook and Instagram form has no payment step: Meta bills the site's own ad account.
+            @if ($guidePromotions)
+            On-network promotions carry <strong class="text-gray-900 dark:text-white">no service fee</strong>: there is no outside ad platform to buy from, so your whole budget is the price. Selfhosted installations add no fee to either channel, and
+            @else
+            Selfhosted installations add no fee, and
+            @endif
+            their Facebook and Instagram form has no payment step: Meta bills the site's own ad account.
         </p>
 
         <h3 class="doc-subheading">How you pay</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Both channels are paid the same way:
+            {{ $guidePromotions ? 'Both channels are paid the same way:' : 'A boost is paid one of two ways:' }}
         </p>
         <ul class="doc-list mb-6">
             <li><strong>Card</strong> - paid through Stripe on the boost form. A card already saved on the schedule is offered so you do not have to re-enter it.</li>
@@ -689,7 +727,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Rejected</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Whether Meta disapproved the ad or the site operator rejected an on-network promotion, the entire amount is refunded, ad budget and service fee alike.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $guidePromotions ? 'Whether Meta disapproved the ad or the site operator rejected an on-network promotion, the' : 'When Meta disapproves the ad, the' }} entire amount is refunded, ad budget and service fee alike.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cancelled before any spend</h4>
@@ -711,11 +749,13 @@
 
         <h3 class="doc-subheading">Email Notifications</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            You are emailed at each stage of a campaign, and get a matching web push notification if you have those switched on:
+            You are emailed at each stage of a campaign{{ $guidePush ? ', and get a matching web push notification if you have those switched on' : '' }}:
         </p>
         <ul class="doc-list mb-6">
             <li><strong>Campaign created</strong> - confirmation that the ad is live on Meta</li>
+            @if ($guidePromotions)
             <li><strong>Promotion reviewed</strong> - for on-network promotions, when the operator approves or rejects it</li>
+            @endif
             <li><strong>75% budget alert</strong> - a heads-up that most of your budget has been spent</li>
             <li><strong>Ad rejected</strong> - sent with the rejection reason and confirmation of the refund</li>
             <li><strong>Campaign completed</strong> - final stats summary with impressions, reach, clicks, and any refund details</li>
@@ -773,13 +813,15 @@
             Tips
         </h2>
         <ul class="doc-list mb-6">
-            <li><strong>Add an image to the event</strong> - the event image becomes the ad image and the promoted card's picture. Without one Boost warns you, and the ad has nothing to show.</li>
+            <li><strong>Add an image to the event</strong> - the event image becomes the ad image{{ $guidePromotions ? ' and the promoted card\'s picture' : '' }}. Without one Boost warns you, and the ad has nothing to show.</li>
             <li><strong>Fill in the venue</strong> - the venue's coordinates are what produce a tight local audience. An event with neither a venue nor an online URL falls back to a very broad default.</li>
             <li><strong>Write your own headline for anything unusual</strong> - the generated copy is built from the event name, venue and city. If the appeal of your event is not in its name, say so yourself in Advanced Mode.</li>
             <li><strong>Boost 3 or more days before the event</strong> - campaigns run for between 3 and 14 days, and one that starts within 24 hours of the doors opening may not have time to deliver.</li>
             <li><strong>Boosting before tickets are on sale</strong> - an event with no tickets set up can still be boosted, and its ad carries a Learn More button. Clicks land on the event page. If you have switched on the <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-mailing-list" class="doc-link">&ldquo;Notify me&rdquo; card</a>, visitors can pick <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> from the Add to Calendar menu and leave an email address. They join the event's <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">interest list</a> and are emailed when tickets go on sale.</li>
             <li><strong>Start with a smaller budget</strong> - a new schedule is capped at $10 anyway, and completing that first campaign is what unlocks the next tier.</li>
+            @if ($guidePromotions)
             <li><strong>Pick the pricing model that matches your goal</strong> - for on-network promotions, per-click costs nothing until someone actually visits, while per-1,000-views buys reach whether or not anyone clicks.</li>
+            @endif
         </ul>
     </section>
 
@@ -796,7 +838,9 @@
             <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> - set up ticketing so a boosted event has something to convert</li>
             <li><a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">Newsletters</a> - reach the audience you already have, for free</li>
             <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a> - more ways to grow your audience</li>
+            @if ($guidePromotions)
             <li><a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Schedule Settings</a> - decline other schedules' promotions on your own pages</li>
+            @endif
         </ul>
     </section>
 
@@ -807,7 +851,7 @@
             "@context": "https://schema.org",
             "@type": "HowTo",
             "name": "How to Boost Events with Event Schedule",
-            "description": "Promote your events with Facebook and Instagram ad campaigns, or promoted cards on other schedules, using Event Schedule's Boost feature.",
+            "description": "Promote your events with Facebook and Instagram ad campaigns{{ $guidePromotions ? ', or promoted cards on other schedules,' : '' }} using Event Schedule's Boost feature.",
             "totalTime": "PT5M",
             "step": [
                 {
